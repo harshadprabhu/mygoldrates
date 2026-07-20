@@ -298,6 +298,16 @@ def try_html(html):
     """-> (found, counts, how) if it passes sanity, else (None, note)."""
     found, counts, how = extract(html)
     if not found:
+        if os.environ.get("DEBUG_RENDER") and html:
+            low = html.lower()
+            markers = [m for m in ("captcha", "cloudflare", "access denied",
+                                   "are you a human", "just a moment", "blocked",
+                                   "enable javascript", "px-captcha", "akamai")
+                       if m in low]
+            has_rupee = "₹" in html
+            has_karat = bool(PURITY_RE.search(html))
+            print(f"\n   [DEBUG] len={len(html)} rupee={has_rupee} "
+                  f"karat={has_karat} markers={markers or 'none'}", flush=True)
         return None, None, None, "no values"
     ok, why = ordering_sane(found)
     if not ok:
