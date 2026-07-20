@@ -1,0 +1,39 @@
+name: fetch-rates
+
+on:
+  schedule:
+    # Adaptive-ish window, all times UTC. IST = UTC+5:30.
+    # Morning discovery sweep: 09:00-11:30 IST, every 30 min.
+    - cron: "30 3,4,5,6 * * *"
+    # Afternoon revision checks: 14:00 and 17:00 IST.
+    - cron: "30 8,11 * * *"
+    # Late retry for anything still missing.
+    - cron: "30 14 * * *"
+  workflow_dispatch:        # lets you trigger a run by hand if you ever want to
+
+concurrency:
+  group: fetch-rates
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 supabase playwright
+          playwright install --with-deps chromium
+
+      - name: Fetch rates
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python scrape.py
