@@ -178,6 +178,32 @@ def basis_confirmed(found):
         else (False, "single purity")
 
 
+def derive_ladder(canonical_24k_pre_gst):
+    """One karat's rate anchors the whole ladder.
+
+    Gold of any purity is priced off the same pure-gold value scaled by its
+    fraction, so a single confirmed (purity, rate) pair is enough to compute
+    per-gram rates for every purity. Returns a pre-GST per-gram rate for each
+    purity, on the same basis as canonical_24k_pre_gst.
+    """
+    return {p: round(canonical_24k_pre_gst * frac, 2)
+            for p, frac in PURITY_FRACTION.items()}
+
+
+def upsert_rate(sb, row):
+    """Upsert a rate row. If the optional derived_rates column doesn't exist
+    in the DB yet, retry without it so the core rate is never lost."""
+    try:
+        sb.table("rates").upsert(row, on_conflict="brand_id,rate_date").execute()
+        return True
+    except Exception:
+        if "derived_rates" in row:
+            row.pop("derived_rates")
+            sb.table("rates").upsert(row, on_conflict="brand_id,rate_date").execute()
+            return False
+        raise
+
+
 # --------------------------------------------------------------- fetching
 
 def fetch(url, session, timeout):
@@ -309,23 +335,28 @@ def main():
         if b.get("includes_gst"):
             canonical /= 1.03
 
+        ladder = derive_ladder(round(canonical, 2))
         row = {
             "brand_id": b["id"], "rate_date": today,
             "canonical_24k_pre_gst": round(canonical, 2),
             "source_purity": purity, "source_value": found[purity],
             "purities_found": len(found), "basis_confirmed": ok,
             "basis_note": why, "method": method, "rate_url": url,
+            "derived_rates": ladder,
             "status": "published",
             "scraped_at": datetime.now(timezone.utc).isoformat(),
         }
         try:
-            sb.table("rates").upsert(row, on_conflict="brand_id,rate_date").execute()
+            persisted_ladder = upsert_rate(sb, row)
             if url != b.get("rate_url"):
                 sb.table("brands").update({"rate_url": url}).eq("id", b["id"]).execute()
             saved.append(row)
             detail = " ".join(f"{k}={found[k]:,.0f}x{counts[k]}" for k in sorted(found))
+            ladder_str = " ".join(f"{k}={ladder[k]:,.0f}" for k in sorted(ladder))
+            note = "" if persisted_ladder else "  (no derived_rates column)"
             print(f"24K {canonical:>9,.0f}  [{method}] "
-                  f"{'OK' if ok else 'unconfirmed'}  {detail}")
+                  f"{'OK' if ok else 'unconfirmed'}  src[{detail}]  "
+                  f"ladder[{ladder_str}]{note}")
         except Exception as e:
             print(f"save failed: {e}")
 
