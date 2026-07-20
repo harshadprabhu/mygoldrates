@@ -143,11 +143,22 @@ def extract_proximity(text):
     return buckets
 
 
+def _inline_input_values(soup):
+    """Surface numeric <input value> into the text stream so calculator-style
+    pages (rate shown in a field, not a table) become extractable. The purity
+    label sits next to the field; proximity/row binding then works normally."""
+    for inp in soup.find_all("input"):
+        v = (inp.get("value") or "").strip()
+        if v and re.search(r"\d{4,}", v):
+            inp.replace_with(soup.new_string(f" ₹{v} "))
+
+
 def extract(html):
     """-> (found, counts, how). Table first, proximity only if that fails."""
     soup = BeautifulSoup(html, "html.parser")
     for t in soup(["script", "style", "noscript"]):
         t.decompose()
+    _inline_input_values(soup)
 
     buckets, how = extract_rows(soup), "rows"
     if not buckets:
@@ -224,20 +235,58 @@ def fetch(url, session, timeout):
     return r.text, "ok"
 
 
+_STEALTH = (
+    "Object.defineProperty(navigator,'webdriver',{get:()=>undefined});"
+    "window.chrome={runtime:{}};"
+    "Object.defineProperty(navigator,'languages',{get:()=>['en-IN','en']});"
+    "Object.defineProperty(navigator,'plugins',{get:()=>[1,2,3,4,5]});"
+)
+
+
 def render(url):
+    """Headless fetch, hardened for bot-detection and JS-injected rates.
+
+    Beyond a plain load this: masks the common headless tells, scrolls to
+    trigger lazy content, waits for the network to settle, and reflects live
+    <input>/<select> values into attributes so rates that live only in a
+    calculator field survive DOM serialization.
+    """
     try:
         from playwright.sync_api import sync_playwright
         with sync_playwright() as p:
-            b = p.chromium.launch(args=["--no-sandbox"])
-            pg = b.new_page(user_agent=UA, locale="en-IN")
+            b = p.chromium.launch(args=[
+                "--no-sandbox",
+                "--disable-blink-features=AutomationControlled",
+            ])
+            ctx = b.new_context(
+                user_agent=UA, locale="en-IN",
+                viewport={"width": 1366, "height": 900},
+                extra_http_headers={"Accept-Language": "en-IN,en;q=0.9"},
+            )
+            ctx.add_init_script(_STEALTH)
+            pg = ctx.new_page()
             pg.goto(url, timeout=30_000, wait_until="domcontentloaded")
-            # Many jewellers load the rate table via XHR after first paint;
-            # wait for the network to settle before reading the DOM.
             try:
-                pg.wait_for_load_state("networkidle", timeout=8000)
+                pg.wait_for_load_state("networkidle", timeout=10_000)
+            except Exception:
+                pass
+            # Nudge lazy-loaded rate widgets, then let them settle.
+            try:
+                for frac in (0.3, 0.6, 1.0):
+                    pg.evaluate(f"window.scrollTo(0, document.body.scrollHeight*{frac})")
+                    pg.wait_for_timeout(700)
             except Exception:
                 pass
             pg.wait_for_timeout(3500)
+            # A live input value lives on the .value property, not the attribute,
+            # so page.content() would drop it. Copy it back onto the attribute.
+            try:
+                pg.evaluate(
+                    "document.querySelectorAll('input').forEach(e=>"
+                    "{if(e.value)e.setAttribute('value',e.value)});"
+                )
+            except Exception:
+                pass
             html = pg.content()
             b.close()
             return html
