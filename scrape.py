@@ -55,6 +55,8 @@ PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 CANDIDATE_PATHS = [
     "/gold-rate-today/", "/gold-rate-today", "/gold-rate", "/goldrate",
     "/goldprice", "/gold-rate.html", "/gold-price", "/todays-gold-rate",
+    "/gold-price-calculator", "/gold-price-today", "/gold-rate-calculator",
+    "/todays-gold-rate/", "/gold-rates", "/gold-price-in-india",
 ]
 
 GRAM_MIN, GRAM_MAX = 8_000, 22_000
@@ -229,7 +231,13 @@ def render(url):
             b = p.chromium.launch(args=["--no-sandbox"])
             pg = b.new_page(user_agent=UA, locale="en-IN")
             pg.goto(url, timeout=30_000, wait_until="domcontentloaded")
-            pg.wait_for_timeout(3000)
+            # Many jewellers load the rate table via XHR after first paint;
+            # wait for the network to settle before reading the DOM.
+            try:
+                pg.wait_for_load_state("networkidle", timeout=8000)
+            except Exception:
+                pass
+            pg.wait_for_timeout(3500)
             html = pg.content()
             b.close()
             return html
@@ -252,11 +260,17 @@ def scrape_brand(b, session):
     started = time.monotonic()
     tried, blocked = [], False
 
+    # Try the configured URL first, then fall back to path discovery on the
+    # same domain so a stale rate_url can recover itself automatically.
+    urls = []
     if b.get("rate_url"):
-        urls = [b["rate_url"]]
-    else:
+        urls.append(b["rate_url"])
+    if b.get("domain"):
         base = b["domain"] if b["domain"].startswith("http") else f"https://{b['domain']}"
-        urls = [urljoin(base, p) for p in CANDIDATE_PATHS]
+        for p in CANDIDATE_PATHS:
+            u = urljoin(base, p)
+            if u not in urls:
+                urls.append(u)
 
     for url in urls:
         if time.monotonic() - started > BRAND_BUDGET:
@@ -307,7 +321,15 @@ def main():
         "User-Agent": UA,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-IN,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
         "Upgrade-Insecure-Requests": "1",
+        "Sec-CH-UA": '"Chromium";v="126", "Not.A/Brand";v="24", "Google Chrome";v="126"',
+        "Sec-CH-UA-Mobile": "?0",
+        "Sec-CH-UA-Platform": '"Windows"',
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
     })
 
     brands = sb.table("brands").select("*").eq("active", True).execute().data
