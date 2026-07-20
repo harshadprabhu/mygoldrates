@@ -28,7 +28,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install requests beautifulsoup4 supabase playwright
+          pip install -r requirements.txt
           playwright install --with-deps chromium
 
       - name: Fetch rates
