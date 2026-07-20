@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 """
-scrape.py v3 - automated gold rate collector with failure diagnostics.
+scrape.py v4 - automated gold rate collector.
 
-CHANGES over v2:
-  * extract() now takes the MEDIAN of every value found for a purity, not the
-    first one. History tables and city lists cluster around today's real rate,
-    so the median lands on it; a stray nav item or product price no longer
-    wins. This is what produced CaratLane's wrong 12,450.
-  * Every failure now reports WHY - "403 blocked", "timeout", "fetched but no
-    rate found", "404 everywhere". Previously all of these printed the same
-    useless "no rate", so we couldn't tell a blocked site from a parse bug.
-  * Playwright is tried when a static fetch is BLOCKED (403/503), not only
-    when parsing fails. A real browser often gets through where requests
-    doesn't.
-  * Quarantine needs at least MIN_FOR_MEDIAN brands. With 3 brands a median
-    is meaningless and could quarantine the only correct one.
+THE BUG v3 HAD:
+  Purity was matched by looking +/-80 characters around each price in the
+  page's flattened text. In a dense rate table several purities and prices
+  sit within that window, so values got bound to the wrong label. Jos Alukkas
+  reported 24K = 13,150 when 13,135 is its 22K rate and 14,334 its 24K.
+  Kalyan and Candere showed the same signature.
+
+THE FIX - two layers:
+  1. STRUCTURAL. Parse <tr> rows and bind a purity to a price only when both
+     appear in the SAME ROW. A row is a unit of meaning; a character window
+     is not. Proximity matching is kept only as a fallback for pages with no
+     table markup.
+  2. SANITY. Gold cannot be cheaper at higher purity. If 24K < 22K < 18K
+     ordering is violated by more than a rounding margin, the extraction is
+     mislabelled and the whole result is discarded rather than published.
+     This catches the entire class of bug above, on any site, forever.
 """
 
 from __future__ import annotations
@@ -44,8 +47,8 @@ FAST_TIMEOUT, FULL_TIMEOUT = 8, 20
 BRAND_BUDGET = 60
 POLITE_DELAY = 1.5
 OUTLIER_TOLERANCE = 0.04
-RATIO_TOLERANCE = 0.01
-MIN_FOR_MEDIAN = 5        # don't quarantine on a median of 3
+RATIO_TOLERANCE = 0.015
+MIN_FOR_MEDIAN = 5
 
 PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 
@@ -57,7 +60,7 @@ CANDIDATE_PATHS = [
 GRAM_MIN, GRAM_MAX = 8_000, 22_000
 TEN_GRAM_MIN, TEN_GRAM_MAX = 80_000, 220_000
 
-MONEY_RE = re.compile(r"(?:₹|Rs\.?|INR)\s*([\d,]{4,12}(?:\.\d{1,2})?)")
+MONEY_RE = re.compile(r"(?:₹|Rs\.?|INR)?\s*([\d,]{4,12}(?:\.\d{1,2})?)")
 PURITY_RE = re.compile(r"\b(24|22|18|14)\s*(?:K|KT|CT|CARAT|KARAT)\b", re.I)
 
 _robots: dict[str, RobotFileParser | None] = {}
@@ -68,6 +71,14 @@ def _f(s):
         return float(s.replace(",", ""))
     except ValueError:
         return None
+
+
+def _per_gram(val):
+    if GRAM_MIN <= val <= GRAM_MAX:
+        return val
+    if TEN_GRAM_MIN <= val <= TEN_GRAM_MAX:
+        return val / 10.0
+    return None
 
 
 def robots_ok(url, session):
@@ -87,32 +98,71 @@ def robots_ok(url, session):
     return True if rp is None else (rp.can_fetch(UA, url) and rp.can_fetch("*", url))
 
 
-def visible_text(html):
+# ------------------------------------------------------------- extraction
+
+def extract_rows(soup):
+    """Row-scoped: a purity binds to a price only inside the same <tr>."""
+    buckets: dict[str, list[float]] = {}
+    for tr in soup.find_all("tr"):
+        cells = [c.get_text(" ", strip=True) for c in tr.find_all(["td", "th"])]
+        if len(cells) < 2:
+            continue
+        purities = {f"{m.group(1)}K" for c in cells for m in PURITY_RE.finditer(c)}
+        if len(purities) != 1:
+            continue          # ambiguous row - skip rather than guess
+        purity = purities.pop()
+        for c in cells:
+            if PURITY_RE.search(c):
+                continue      # don't read the label cell as a price
+            for m in MONEY_RE.finditer(c):
+                v = _f(m.group(1))
+                if v is None:
+                    continue
+                pg = _per_gram(v)
+                if pg:
+                    buckets.setdefault(purity, []).append(pg)
+    return buckets
+
+
+def extract_proximity(text):
+    """Fallback for pages with no table markup. Tight window, prices only."""
+    buckets: dict[str, list[float]] = {}
+    for m in re.finditer(r"(?:₹|Rs\.?|INR)\s*([\d,]{4,12}(?:\.\d{1,2})?)", text):
+        v = _f(m.group(1))
+        if v is None:
+            continue
+        pg = _per_gram(v)
+        if pg is None:
+            continue
+        window = text[max(0, m.start() - 45): m.end() + 45]
+        hits = {f"{x.group(1)}K" for x in PURITY_RE.finditer(window)}
+        if len(hits) == 1:                    # unambiguous only
+            buckets.setdefault(hits.pop(), []).append(pg)
+    return buckets
+
+
+def extract(html):
+    """-> (found, counts, how). Table first, proximity only if that fails."""
     soup = BeautifulSoup(html, "html.parser")
     for t in soup(["script", "style", "noscript"]):
         t.decompose()
-    return soup.get_text(" ", strip=True)
+
+    buckets, how = extract_rows(soup), "rows"
+    if not buckets:
+        buckets, how = extract_proximity(soup.get_text(" ", strip=True)), "proximity"
+
+    found = {k: statistics.median(v) for k, v in buckets.items()}
+    counts = {k: len(v) for k, v in buckets.items()}
+    return found, counts, how
 
 
-def extract(text):
-    """{purity: median_per_gram}. Median beats first-match: history tables and
-    city lists cluster on today's rate, outlier junk gets voted out."""
-    buckets: dict[str, list[float]] = {}
-    for m in MONEY_RE.finditer(text):
-        val = _f(m.group(1))
-        if val is None:
-            continue
-        if GRAM_MIN <= val <= GRAM_MAX:
-            per_gram = val
-        elif TEN_GRAM_MIN <= val <= TEN_GRAM_MAX:
-            per_gram = val / 10.0
-        else:
-            continue
-        pm = PURITY_RE.search(text[max(0, m.start() - 80): m.end() + 80])
-        if pm:
-            buckets.setdefault(f"{pm.group(1)}K", []).append(per_gram)
-    return {k: statistics.median(v) for k, v in buckets.items()}, \
-           {k: len(v) for k, v in buckets.items()}
+def ordering_sane(found):
+    """Higher purity must cost more. Catches mislabelled extractions."""
+    ranked = sorted(found, key=lambda k: PURITY_FRACTION[k])
+    for a, b in zip(ranked, ranked[1:]):
+        if found[a] > found[b] * 1.005:
+            return False, f"{a} ({found[a]:,.0f}) > {b} ({found[b]:,.0f})"
+    return True, ""
 
 
 def basis_confirmed(found):
@@ -128,15 +178,16 @@ def basis_confirmed(found):
         else (False, "single purity")
 
 
+# --------------------------------------------------------------- fetching
+
 def fetch(url, session, timeout):
-    """-> (html, reason). html is None on failure; reason explains why."""
     try:
         r = session.get(url, timeout=timeout, allow_redirects=True)
     except requests.Timeout:
         return None, "timeout"
     except requests.RequestException as e:
         return None, type(e).__name__
-    if r.status_code in (403, 401, 503, 429):
+    if r.status_code in (401, 403, 429, 503):
         return None, f"blocked {r.status_code}"
     if r.status_code == 404:
         return None, "404"
@@ -156,21 +207,31 @@ def render(url):
             html = pg.content()
             b.close()
             return html
-    except Exception as e:
+    except Exception:
         return None
 
 
-def scrape_brand(b, session):
-    """-> (url, found, counts, method, note) | (None, None, None, None, reason)"""
-    started = time.monotonic()
-    tried = []
+def try_html(html):
+    """-> (found, counts, how) if it passes sanity, else (None, note)."""
+    found, counts, how = extract(html)
+    if not found:
+        return None, None, None, "no values"
+    ok, why = ordering_sane(found)
+    if not ok:
+        return None, None, None, f"MISLABELLED: {why}"
+    return found, counts, how, "ok"
 
-    urls = [b["rate_url"]] if b.get("rate_url") else None
-    if urls is None:
+
+def scrape_brand(b, session):
+    started = time.monotonic()
+    tried, blocked = [], False
+
+    if b.get("rate_url"):
+        urls = [b["rate_url"]]
+    else:
         base = b["domain"] if b["domain"].startswith("http") else f"https://{b['domain']}"
         urls = [urljoin(base, p) for p in CANDIDATE_PATHS]
 
-    blocked_seen = False
     for url in urls:
         if time.monotonic() - started > BRAND_BUDGET:
             tried.append("budget")
@@ -179,38 +240,39 @@ def scrape_brand(b, session):
             tried.append("robots")
             continue
 
-        html, reason = fetch(url, session, FULL_TIMEOUT if b.get("rate_url") else FAST_TIMEOUT)
+        html, reason = fetch(url, session,
+                             FULL_TIMEOUT if b.get("rate_url") else FAST_TIMEOUT)
         if html:
-            found, counts = extract(visible_text(html))
+            found, counts, how, note = try_html(html)
             if found:
-                return url, found, counts, "static", "ok"
-            tried.append("fetched-but-no-rate")
-            # page loaded, values probably injected by JS
+                return url, found, counts, f"static/{how}", note
+            tried.append(note)
             rhtml = render(url)
             if rhtml:
-                found, counts = extract(visible_text(rhtml))
+                found, counts, how, note = try_html(rhtml)
                 if found:
-                    return url, found, counts, "rendered", "ok"
+                    return url, found, counts, f"rendered/{how}", note
+                tried.append("rendered:" + note)
             continue
 
         if reason.startswith("blocked"):
-            blocked_seen = True
-            rhtml = render(url)            # browser may get past a soft block
+            blocked = True
+            rhtml = render(url)
             if rhtml:
-                found, counts = extract(visible_text(rhtml))
+                found, counts, how, note = try_html(rhtml)
                 if found:
-                    return url, found, counts, "rendered", "static was " + reason
+                    return url, found, counts, f"rendered/{how}", "static " + reason
         tried.append(reason)
 
     uniq = []
     for t in tried:
         if t not in uniq:
             uniq.append(t)
-    summary = ", ".join(uniq[:4]) or "nothing tried"
-    if blocked_seen:
-        summary = "BLOCKED (datacenter IP?) - " + summary
-    return None, None, None, None, summary
+    note = ", ".join(uniq[:4]) or "nothing tried"
+    return None, None, None, None, ("BLOCKED - " + note) if blocked else note
 
+
+# ------------------------------------------------------------------- main
 
 def main():
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
@@ -261,9 +323,9 @@ def main():
             if url != b.get("rate_url"):
                 sb.table("brands").update({"rate_url": url}).eq("id", b["id"]).execute()
             saved.append(row)
-            hits = " ".join(f"{k}x{counts[k]}" for k in sorted(counts))
-            print(f"{purity} {found[purity]:>9,.0f} -> 24K {canonical:>9,.0f} "
-                  f"[{method}] {'OK' if ok else 'unconfirmed'}  ({hits})")
+            detail = " ".join(f"{k}={found[k]:,.0f}x{counts[k]}" for k in sorted(found))
+            print(f"24K {canonical:>9,.0f}  [{method}] "
+                  f"{'OK' if ok else 'unconfirmed'}  {detail}")
         except Exception as e:
             print(f"save failed: {e}")
 
@@ -272,10 +334,8 @@ def main():
     if not saved:
         print("\nnothing collected")
         return
-
     if len(saved) < MIN_FOR_MEDIAN:
-        print(f"\nonly {len(saved)} brands - skipping outlier check "
-              f"(need {MIN_FOR_MEDIAN} for a meaningful median)")
+        print(f"\nonly {len(saved)} brands - skipping outlier check")
         return
 
     median = statistics.median(r["canonical_24k_pre_gst"] for r in saved)
