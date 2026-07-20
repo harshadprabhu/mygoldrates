@@ -143,22 +143,11 @@ def extract_proximity(text):
     return buckets
 
 
-def _inline_input_values(soup):
-    """Surface numeric <input value> into the text stream so calculator-style
-    pages (rate shown in a field, not a table) become extractable. The purity
-    label sits next to the field; proximity/row binding then works normally."""
-    for inp in soup.find_all("input"):
-        v = (inp.get("value") or "").strip()
-        if v and re.search(r"\d{4,}", v):
-            inp.replace_with(soup.new_string(f" ₹{v} "))
-
-
 def extract(html):
     """-> (found, counts, how). Table first, proximity only if that fails."""
     soup = BeautifulSoup(html, "html.parser")
     for t in soup(["script", "style", "noscript"]):
         t.decompose()
-    _inline_input_values(soup)
 
     buckets, how = extract_rows(soup), "rows"
     if not buckets:
@@ -246,10 +235,10 @@ _STEALTH = (
 def render(url):
     """Headless fetch, hardened for bot-detection and JS-injected rates.
 
-    Beyond a plain load this: masks the common headless tells, scrolls to
-    trigger lazy content, waits for the network to settle, and reflects live
-    <input>/<select> values into attributes so rates that live only in a
-    calculator field survive DOM serialization.
+    Beyond a plain load this masks the common headless tells, scrolls to
+    trigger lazy-loaded content, and waits for the network to settle before
+    reading the DOM. (Datacenter-IP blocking by some CDNs is not something a
+    hardened client can defeat; those brands need a residential proxy.)
     """
     try:
         from playwright.sync_api import sync_playwright
@@ -278,15 +267,6 @@ def render(url):
             except Exception:
                 pass
             pg.wait_for_timeout(3500)
-            # A live input value lives on the .value property, not the attribute,
-            # so page.content() would drop it. Copy it back onto the attribute.
-            try:
-                pg.evaluate(
-                    "document.querySelectorAll('input').forEach(e=>"
-                    "{if(e.value)e.setAttribute('value',e.value)});"
-                )
-            except Exception:
-                pass
             html = pg.content()
             b.close()
             return html
@@ -298,16 +278,6 @@ def try_html(html):
     """-> (found, counts, how) if it passes sanity, else (None, note)."""
     found, counts, how = extract(html)
     if not found:
-        if os.environ.get("DEBUG_RENDER") and html:
-            low = html.lower()
-            markers = [m for m in ("captcha", "cloudflare", "access denied",
-                                   "are you a human", "just a moment", "blocked",
-                                   "enable javascript", "px-captcha", "akamai")
-                       if m in low]
-            has_rupee = "₹" in html
-            has_karat = bool(PURITY_RE.search(html))
-            print(f"\n   [DEBUG] len={len(html)} rupee={has_rupee} "
-                  f"karat={has_karat} markers={markers or 'none'}", flush=True)
         return None, None, None, "no values"
     ok, why = ordering_sane(found)
     if not ok:
