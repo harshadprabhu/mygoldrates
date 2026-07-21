@@ -97,14 +97,22 @@ def main():
     if ibja:
         r999, r916 = ibja
         premium_med = (median24 / r999 - 1) * 100
-        ibja_strip = (
-            '<div class="ibja" role="note">'
-            '<span class="ibja-k">IBJA reference</span>'
-            f'<span class="ibja-v">999 · {inr(r999)}/g</span>'
-            f'<span class="ibja-v">916 · {inr(r916)}/g</span>'
-            f'<span class="ibja-p">jeweller premium today {premium_med:+.1f}%</span>'
-            '<span class="ibja-src">India Bullion &amp; Jewellers Assn., pre-GST</span>'
-            '</div>')
+        ibja_tiles = f'''
+<section class="ibja-ref" aria-labelledby="ibjarefh">
+  <p class="eyebrow">Bullion Reference</p>
+  <h2 id="ibjarefh">IBJA Gold Rate Today</h2>
+  <p class="hint">The India Bullion &amp; Jewellers Association benchmark,
+  pre-GST - the wholesale rate jewellers price above.</p>
+  <div class="ref-tiles">
+    <div class="rtile"><div class="k">999 Fine · 24K</div>
+      <div class="v">{inr(r999)}</div><div class="u">per gram, pre-GST</div></div>
+    <div class="rtile"><div class="k">916 · 22K</div>
+      <div class="v">{inr(r916)}</div><div class="u">per gram, pre-GST</div></div>
+    <div class="rtile prem"><div class="k">Jeweller premium</div>
+      <div class="v">{premium_med:+.1f}%</div>
+      <div class="u">median vs bullion, today</div></div>
+  </div>
+</section>'''
         # Premium-over-bullion bars: IBJA 999 is the zero baseline.
         prem = []
         for r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):
@@ -144,7 +152,7 @@ def main():
             f"{premium_med:+.1f}% above the bullion reference today; the gap "
             "reflects each brand's sourcing and hallmarking premium.")
     else:
-        ibja_strip, ibja_section = "", ""
+        ibja_tiles, ibja_section = "", ""
         ibja_faq = ("The IBJA (India Bullion and Jewellers Association) "
                     "publishes India's twice-daily bullion reference rate. "
                     "Jeweller board rates typically sit slightly above it, "
@@ -242,7 +250,7 @@ def main():
         med24=inr(med["24K"]), med22=inr(med["22K"]), med18=inr(med["18K"]),
         low24=inr(ladder(lowest["canonical_24k_pre_gst"])["24K"]),
         low_brand=lowest["brands"]["name"],
-        ibja_strip=ibja_strip, ibja_section=ibja_section,
+        ibja_tiles=ibja_tiles, ibja_section=ibja_section,
         calc_brands=json.dumps(calc_brands),
         supabase_url=supabase_url, anon_key=anon_key,
         rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld, **common)
@@ -353,15 +361,21 @@ TEMPLATE = Template("""<!DOCTYPE html>
 <script type="application/ld+json">$jsonld</script>
 <style>
 $base_css
-/* IBJA ticker */
-.ibja{display:flex;flex-wrap:wrap;align-items:center;gap:8px 22px;
-  font-family:"IBM Plex Mono",monospace;font-size:12.5px;
-  padding:9px 0;border-bottom:1px solid var(--line);color:var(--ink-2)}
-.ibja-k{letter-spacing:.2em;text-transform:uppercase;color:var(--gold);
-  font-size:11px}
-.ibja-v{color:var(--ink)}
-.ibja-p{color:var(--emerald)}
-.ibja-src{margin-left:auto;font-size:10.5px;color:var(--ink-3)}
+/* IBJA reference tiles */
+.ibja-ref{margin-top:6px}
+.ref-tiles{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+.rtile{flex:1;min-width:150px;background:var(--card);
+  border:1px solid var(--line);border-radius:12px;padding:16px 20px;
+  position:relative;overflow:hidden}
+.rtile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--gold-foil)}
+.rtile .k{font:500 11.5px/1 "IBM Plex Mono",monospace;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3)}
+.rtile .v{font-family:"IBM Plex Mono",monospace;font-size:clamp(20px,3vw,26px);
+  margin:6px 0 3px;color:var(--gold)}
+.rtile .u{font-size:12px;color:var(--ink-3)}
+.rtile.prem::before{background:var(--emerald)}
+.rtile.prem .v{color:var(--emerald)}
 
 /* rate board hero */
 .board{background:
@@ -537,8 +551,6 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 <body>
 <div class="wrap">
 
-$ibja_strip
-
 <header class="top">
   <a class="brand" href="$site_url/">Gold<span class="karat">Rates</span></a>
   <div class="topright">
@@ -550,7 +562,7 @@ $ibja_strip
 <section class="board" aria-label="Today's gold rate summary">
   <h1>Gold Rate Today in India</h1>
   <p class="sub">Live 24K, 22K and 18K gold rates compared across $n_brands of
-  India's top jewellery brands - refreshed daily, with the IBJA bullion
+  India's top jewellery brands - updated daily, with the IBJA bullion
   reference for context.</p>
   <div class="board-rates">
     <div class="tile"><div class="k">24K Median</div>
@@ -564,8 +576,37 @@ $ibja_strip
   </div>
 </section>
 
+$ibja_tiles
+
 <p class="note">All rates are per gram of gold, before 3% GST and before
 making charges, so every brand is compared on the same basis.</p>
+
+<section aria-labelledby="cmp">
+  <p class="eyebrow">Today's Board</p>
+  <h2 id="cmp">Compare Gold Rates Across Jewellers</h2>
+  <div class="tablebar">
+    <p class="hint" style="margin:0">Sorted by today's effective 24K rate -
+    tap a column to re-sort.</p>
+    <button class="gst" id="gstbtn" aria-pressed="false">Show incl. 3% GST</button>
+  </div>
+  <div class="tablecard">
+  <table id="rates">
+    <thead><tr>
+      <th scope="col">Jeweller</th>
+      <th scope="col" aria-sort="ascending">24K / g</th>
+      <th scope="col">22K / g</th>
+      <th scope="col">18K / g</th>
+      <th scope="col">Δ vs median</th>
+    </tr></thead>
+    <tbody>
+$rows
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- AdSense: paste your ad unit snippet inside this div after approval -->
+<div class="adslot" aria-hidden="true">advertisement</div>
 
 <section aria-labelledby="calch">
   <p class="eyebrow">Price Calculator</p>
@@ -605,34 +646,7 @@ making charges, so every brand is compared on the same basis.</p>
   </div>
 </section>
 
-<!-- AdSense: paste your ad unit snippet inside this div after approval -->
-<div class="adslot" aria-hidden="true">advertisement</div>
-
 $ibja_section
-
-<section aria-labelledby="cmp">
-  <p class="eyebrow">Today's Board</p>
-  <h2 id="cmp">Compare Gold Rates Across Jewellers</h2>
-  <div class="tablebar">
-    <p class="hint" style="margin:0">Sorted by today's effective 24K rate -
-    tap a column to re-sort.</p>
-    <button class="gst" id="gstbtn" aria-pressed="false">Show incl. 3% GST</button>
-  </div>
-  <div class="tablecard">
-  <table id="rates">
-    <thead><tr>
-      <th scope="col">Jeweller</th>
-      <th scope="col" aria-sort="ascending">24K / g</th>
-      <th scope="col">22K / g</th>
-      <th scope="col">18K / g</th>
-      <th scope="col">Δ vs median</th>
-    </tr></thead>
-    <tbody>
-$rows
-    </tbody>
-  </table>
-  </div>
-</section>
 
 <div class="cta">
   <div>
@@ -821,8 +835,13 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   var mform=document.getElementById('m-form');
   var mok=document.getElementById('mm-ok'), merr=document.getElementById('mm-err');
   var mbtn=document.getElementById('m-btn');
-  function openModal(){overlay.classList.add('open');
-    document.getElementById('m-name').focus();}
+  function openModal(){
+    mform.reset();                 /* never show previously typed/submitted data */
+    mok.style.display='none'; merr.style.display='none';
+    mbtn.disabled=false; mbtn.textContent='Subscribe';
+    overlay.classList.add('open');
+    document.getElementById('m-name').focus();
+  }
   function closeModal(){overlay.classList.remove('open');
     try{sessionStorage.setItem('gr_dismissed','1');}catch(e){}}
   document.getElementById('m-close').addEventListener('click',closeModal);
