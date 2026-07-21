@@ -334,6 +334,11 @@ def fetch_via_zyte(url, session):
         r = session.post(
             ZYTE_ENDPOINT, auth=(key, ""),
             json={"url": url, "browserHtml": True, "geolocation": "IN"},
+            # The session mimics a browser (incl. Accept-Encoding: br) for
+            # scraping targets; Zyte is a plain JSON API, so use clean headers.
+            headers={"Accept": "application/json",
+                     "Accept-Encoding": "gzip, deflate",
+                     "User-Agent": "goldrates/1.0"},
             timeout=90,
         )
     except requests.RequestException as e:
