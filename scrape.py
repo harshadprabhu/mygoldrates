@@ -234,6 +234,36 @@ def extract_labeled_rates(text):
     return buckets
 
 
+# 'Gold' label (cells may join with no space, so no trailing boundary), then
+# the gold portion's weight and rupee value, e.g. 'Gold1.880 g RS 15,874'.
+_GOLD_VAL_RE = re.compile(
+    r"\bGold(?:\s*value)?\s*([\d.]+)\s*(?:g|gm|gram)\b\s*₹\s*([\d,]+(?:\.\d{1,2})?)",
+    re.I)
+_PURITY_LABEL_RE = re.compile(r"purity\D{0,12}(\d{2})\s*K", re.I)
+
+
+def extract_gold_value_breakup(text):
+    """Price breakups that give the gold portion's value and weight but no
+    per-gram rate (e.g. Kisna: 'Gold 1.880 g RS 15,874') let us back it out:
+    rate = gold_value / gold_weight, bound to the item's stated purity. The
+    gold line is already separated from the diamond/stone line, so stones do
+    not contaminate it."""
+    m = _GOLD_VAL_RE.search(text)
+    if not m:
+        return {}
+    weight, value = _f(m.group(1)), _f(m.group(2))
+    if not weight or not value:
+        return {}
+    pm = _PURITY_LABEL_RE.search(text) or PURITY_RE.search(text)
+    if not pm:
+        return {}
+    karat = f"{pm.group(1)}K"
+    if karat not in PURITY_FRACTION:
+        return {}
+    pg = _per_gram(value / weight)
+    return {karat: [pg]} if pg else {}
+
+
 def extract(html):
     """-> (found, counts, how). Table -> product -> headline -> proximity."""
     soup = BeautifulSoup(html, "html.parser")
@@ -246,6 +276,7 @@ def extract(html):
     if not buckets:
         text = soup.get_text(" ", strip=True)
         for fn, name in ((extract_labeled_rates, "labeled"),
+                         (extract_gold_value_breakup, "goldvalue"),
                          (extract_headline_rate, "headline"),
                          (extract_proximity, "proximity")):
             buckets = fn(text)
