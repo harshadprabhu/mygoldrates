@@ -52,11 +52,10 @@ MIN_FOR_MEDIAN = 5
 
 PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 
-# Brands only reachable through Zyte API (needs the ZYTE_API_KEY secret)
-# instead of a direct request; keyed by brand slug so no DB schema change is
-# needed. tanishq/malabar sit behind anti-bot walls; tbz's shop host serves a
-# broken TLS chain that plain requests/Playwright refuse but Zyte tolerates.
-NEEDS_PROXY = {"tanishq", "malabar", "tbz"}
+# Brands behind anti-bot walls only reachable through Zyte API (needs the
+# ZYTE_API_KEY secret) instead of a direct request; keyed by brand slug so no
+# DB schema change is needed.
+NEEDS_PROXY = {"tanishq", "malabar"}
 
 # Method tag for estimated rows: a brand with no live source gets the day's
 # market median so no brand is ever missing. Excluded from the median itself,
@@ -211,11 +210,12 @@ def extract_headline_rate(text):
     return {karat: [pg]} if pg else {}
 
 
-# Karat, then a short gap that may hold a fineness "(999)" and/or a word like
-# "Gold (", then the per-gram rate ending in /g. Covers header banners
-# ("24 KT (999) : RS 14,429/g") and price-breakup lines ("18KT Gold (RS 10,835 / g)").
+# Karat, then a short gap that may hold a fineness "(999)" and/or words like
+# "Gold (" or "Yellow Gold", then the per-gram rate ending in /g. Covers
+# banners ("24 KT (999) : RS 14,429/g"), breakup lines ("18KT Gold
+# (RS 10,835 / g)"), and CaratLane's "14 Kt Yellow Gold RS 8,463 / g".
 _LABELED_RE = re.compile(
-    r"(\d{2})\s*K(?:T|ARAT)?\b[^₹\d]{0,10}(?:\d{3}[^₹\d]{0,6})?"
+    r"(\d{2})\s*K(?:T|ARAT)?\b[^₹\d]{0,18}(?:\d{3}[^₹\d]{0,6})?"
     r"₹\s*([\d,]+(?:\.\d{1,2})?)\s*/\s*(?:g|gm|gram)\b", re.I)
 
 
@@ -241,12 +241,15 @@ def extract_labeled_rates(text):
 # (no letters) so 'Gold Color'/'Gold Purity' can't match; currency may be
 # the rupee sign or 'Rs.'/'INR'.
 _CUR = r"(?:₹|Rs\.?|INR)"
+# Optional karat right before 'Gold' (WHP: '18K Gold (5.24 Gms.) RS 60,244');
+# weight may be inline, parenthesised, and in g/gm/gms/gram(s).
 _GOLD_VAL_RE = re.compile(
-    r"\bGold(?:\s*(?:value|rate|amount))?[ \t:]{0,4}"
-    r"(?:([\d.]+)\s*(?:g|gm|gram)\b\s*)?"
+    r"(?:(\d{2})\s*K[tT]?\s+)?"
+    r"\bGold(?:\s*(?:value|rate|amount))?[ \t:(]{0,4}"
+    r"(?:([\d.]+)\s*(?:gms?|grams?|g)\b\.?\s*\)?\s*)?"
     + _CUR + r"\s*([\d,]+(?:\.\d{1,2})?)", re.I)
 # No trailing boundary after 'Weight' since the value can abut it ('Weight5.72 g').
-_WEIGHT_RE = re.compile(r"\bWeight[^\d]{0,8}([\d.]+)\s*(?:g|gm|gram)\b", re.I)
+_WEIGHT_RE = re.compile(r"\bWeight[^\d]{0,8}([\d.]+)\s*(?:gms?|grams?|g)\b", re.I)
 _PURITY_LABEL_RE = re.compile(r"(?:purity|type)\D{0,12}(\d{2})\s*K", re.I)
 _PURITY_ANY_RE = re.compile(r"(\d{2})\s*K(?:T|ARAT)?\b", re.I)
 
@@ -261,17 +264,21 @@ def extract_gold_value_breakup(text):
     m = _GOLD_VAL_RE.search(text)
     if not m:
         return {}
-    value = _f(m.group(2))
-    weight = _f(m.group(1)) if m.group(1) else None
+    value = _f(m.group(3))
+    weight = _f(m.group(2)) if m.group(2) else None
     if weight is None:
         wm = _WEIGHT_RE.search(text)
         weight = _f(wm.group(1)) if wm else None
     if not value or not weight:
         return {}
-    pm = _PURITY_LABEL_RE.search(text) or _PURITY_ANY_RE.search(text)
-    if not pm:
-        return {}
-    karat = f"{pm.group(1)}K"
+    # A karat stated on the gold line itself beats a page-wide label search.
+    karat_digits = m.group(1)
+    if not karat_digits:
+        pm = _PURITY_LABEL_RE.search(text) or _PURITY_ANY_RE.search(text)
+        if not pm:
+            return {}
+        karat_digits = pm.group(1)
+    karat = f"{karat_digits}K"
     if karat not in PURITY_FRACTION:
         return {}
     pg = _per_gram(value / weight)
