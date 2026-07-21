@@ -185,8 +185,28 @@ def extract_product_breakup(html):
     return {karat: [pg]}
 
 
+_HEADLINE_RE = re.compile(
+    r"(\d{2})\s*K[tT]?\s+Gold\s+Rate\b.{0,80}?\b1\s*G(?:ram)?\b\s*₹?\s*([\d,]{4,7})",
+    re.I | re.S)
+
+
+def extract_headline_rate(text):
+    """Grammage-style rate pages (e.g. Tanishq) show one purity's headline
+    per-gram rate as 'NNKt Gold Rate ... 1 G RS NNNNN', while the other
+    purities appear only as inert selector tabs that confuse window matching.
+    Bind the headline purity straight to its 1-gram rate."""
+    m = _HEADLINE_RE.search(text)
+    if not m:
+        return {}
+    karat = f"{m.group(1)}K"
+    if karat not in PURITY_FRACTION:
+        return {}
+    pg = _per_gram(_f(m.group(2)))
+    return {karat: [pg]} if pg else {}
+
+
 def extract(html):
-    """-> (found, counts, how). Table -> product breakup -> proximity."""
+    """-> (found, counts, how). Table -> product -> headline -> proximity."""
     soup = BeautifulSoup(html, "html.parser")
     for t in soup(["script", "style", "noscript"]):
         t.decompose()
@@ -196,7 +216,11 @@ def extract(html):
         buckets = extract_product_breakup(html)
         how = "product"
     if not buckets:
-        buckets, how = extract_proximity(soup.get_text(" ", strip=True)), "proximity"
+        text = soup.get_text(" ", strip=True)
+        buckets = extract_headline_rate(text)
+        how = "headline"
+        if not buckets:
+            buckets, how = extract_proximity(text), "proximity"
 
     found = {k: statistics.median(v) for k, v in buckets.items()}
     counts = {k: len(v) for k, v in buckets.items()}
