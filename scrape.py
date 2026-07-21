@@ -58,18 +58,9 @@ PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 # product price-breakup only to real browsers.
 NEEDS_PROXY = {"tanishq", "malabar", "caratlane"}
 
-# Browser actions Zyte runs before returning HTML, per slug. CaratLane only
-# injects its price-breakup lines after the PRICE BREAKUP tab is clicked.
-ZYTE_ACTIONS = {
-    "caratlane": [
-        {"action": "scrollBottom"},
-        {"action": "click", "selector": {
-            "type": "xpath",
-            "value": "//*[contains(translate(text(),'priceabku','PRICEABKU'),"
-                     "'PRICE BREAKUP')]"}},
-        {"action": "waitForTimeout", "timeout": 3},
-    ],
-}
+# Browser actions Zyte runs before returning HTML, per slug (none currently;
+# CaratLane reads from its digital-gold page, which needs no interaction).
+ZYTE_ACTIONS = {}
 
 # Method tag for estimated rows: a brand with no live source gets the day's
 # market median so no brand is ever missing. Excluded from the median itself,
@@ -204,6 +195,24 @@ def extract_product_breakup(html):
     return {karat: [pg]}
 
 
+# Digital-gold buy pages print the pre-GST 24K rate as 'RS N + 3% GST'
+# (e.g. CaratLane eGold: 'RS 15141.55/gram ( RS 14700.53 + 3% GST ) 24K
+# 99.99% Purity'). The pre-GST figure is exactly our canonical basis.
+_PREGST_RE = re.compile(
+    r"(?:₹|Rs\.?|INR)\s*([\d,]+(?:\.\d{1,2})?)\s*\+\s*3\s*%\s*GST", re.I)
+
+
+def extract_pregst_rate(text):
+    m = _PREGST_RE.search(text)
+    if not m:
+        return {}
+    # Digital gold is always 24K; still require the page to say so.
+    if not re.search(r"24\s*K|99\.9", text, re.I):
+        return {}
+    pg = _per_gram(_f(m.group(1)))
+    return {"24K": [pg]} if pg else {}
+
+
 _HEADLINE_RE = re.compile(
     r"(\d{2})\s*K[tT]?\s+Gold\s+Rate\b.{0,80}?\b1\s*G(?:ram)?\b\s*₹?\s*([\d,]{4,7})",
     re.I | re.S)
@@ -311,6 +320,7 @@ def extract(html):
     if not buckets:
         text = soup.get_text(" ", strip=True)
         for fn, name in ((extract_labeled_rates, "labeled"),
+                         (extract_pregst_rate, "pregst"),
                          (extract_gold_value_breakup, "goldvalue"),
                          (extract_headline_rate, "headline"),
                          (extract_proximity, "proximity")):
