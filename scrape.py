@@ -339,10 +339,15 @@ def fetch_via_zyte(url, session):
     except requests.RequestException as e:
         return None, f"zyte {type(e).__name__}"
     if r.status_code != 200:
+        if os.environ.get("DEBUG_RENDER"):
+            print(f"\n   [ZYTE {r.status_code}] {r.text[:400]}", flush=True)
         return None, f"zyte {r.status_code}"
     try:
         return r.json().get("browserHtml"), "ok"
     except ValueError:
+        if os.environ.get("DEBUG_RENDER"):
+            print(f"\n   [ZYTE badjson] ct={r.headers.get('content-type')} "
+                  f"{r.text[:400]}", flush=True)
         return None, "zyte badjson"
 
 

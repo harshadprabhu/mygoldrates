@@ -36,4 +36,5 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
+          DEBUG_RENDER: "1"
         run: python scrape.py
