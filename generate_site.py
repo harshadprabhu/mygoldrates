@@ -203,7 +203,7 @@ a{color:var(--emerald)}
 h1,h2,.brand{font-family:"Marcellus",serif;font-weight:400;letter-spacing:.02em}
 
 header.top{display:flex;justify-content:space-between;align-items:baseline;
-  padding:22px 0;border-bottom:1px solid var(--line)}
+  flex-wrap:wrap;gap:4px 18px;padding:22px 0;border-bottom:1px solid var(--line)}
 .brand{font-size:22px;letter-spacing:.14em;text-transform:uppercase}
 .brand .karat{color:var(--gold)}
 .updated{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-3)}
