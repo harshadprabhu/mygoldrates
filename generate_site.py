@@ -19,7 +19,8 @@ from string import Template
 import requests
 from supabase import create_client
 
-SITE_URL = "https://harshadprabhu.github.io/goldrates"
+SITE_URL = "https://mygoldrates.com"
+CUSTOM_DOMAIN = "mygoldrates.com"
 PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 IST = timezone(timedelta(hours=5, minutes=30))
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -269,6 +270,8 @@ def main():
                 "# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0\n")
     with open("docs/.nojekyll", "w", encoding="utf-8") as f:
         f.write("")
+    with open("docs/CNAME", "w", encoding="utf-8") as f:
+        f.write(CUSTOM_DOMAIN + "\n")
     print(f"site generated: {len(live)} brands, median 24K {inr(med['24K'])}, "
           f"IBJA {'ok' if ibja else 'unavailable'}, "
           f"inquiry form {'armed' if anon_key else 'DISABLED (no anon key)'}")
