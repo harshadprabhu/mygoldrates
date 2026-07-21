@@ -591,7 +591,7 @@ def main():
             "purities_found": 0, "basis_confirmed": False,
             "basis_note": "estimate: market median, no live source",
             "method": PLACEHOLDER_METHOD, "rate_url": b.get("rate_url"),
-            "derived_rates": ladder, "status": "published",
+            "derived_rates": ladder, "status": "estimated",
             "scraped_at": datetime.now(timezone.utc).isoformat(),
         }
         try:
