@@ -480,11 +480,20 @@ def main():
     })
 
     brands = sb.table("brands").select("*").eq("active", True).execute().data
-    print(f"{len(brands)} active brands\n")
     today = datetime.now(timezone.utc).date().isoformat()
+
+    # Idempotent: only fetch brands that don't already have today's rate, so a
+    # brand's site (and Zyte credits) isn't hit again once its rate is in.
+    # Successive scheduled runs pick up only what's still missing.
+    existing = sb.table("rates").select("brand_id, canonical_24k_pre_gst") \
+                 .eq("rate_date", today).execute().data
+    done_ids = {r["brand_id"] for r in existing}
+    pending = [b for b in brands if b["id"] not in done_ids]
+    print(f"{len(brands)} active brands - {len(done_ids)} already have today's "
+          f"rate, {len(pending)} to fetch\n")
     saved = []
 
-    for b in brands:
+    for b in pending:
         print(f"-> {b['name']:22s} ", end="", flush=True)
         try:
             url, found, counts, method, note = scrape_brand(b, session)
@@ -532,13 +541,20 @@ def main():
         time.sleep(POLITE_DELAY)
 
     if not saved:
-        print("\nnothing collected")
-        return
-    if len(saved) < MIN_FOR_MEDIAN:
-        print(f"\nonly {len(saved)} brands - skipping outlier check")
+        print("\nnothing new collected")
         return
 
-    median = statistics.median(r["canonical_24k_pre_gst"] for r in saved)
+    # Median over ALL of today's rates (already-stored + newly saved) so the
+    # outlier check is stable however the work was split across runs. Only the
+    # brands saved this run are (re)checked and patched.
+    all_vals = [r["canonical_24k_pre_gst"] for r in existing
+                if r.get("canonical_24k_pre_gst")]
+    all_vals += [r["canonical_24k_pre_gst"] for r in saved]
+    if len(all_vals) < MIN_FOR_MEDIAN:
+        print(f"\nonly {len(all_vals)} rates today - skipping outlier check")
+        return
+
+    median = statistics.median(all_vals)
     print(f"\nmedian canonical 24K pre-GST: {median:,.0f}")
     q = 0
     for r in saved:
@@ -552,7 +568,7 @@ def main():
         sb.table("rates").update(patch) \
           .eq("brand_id", r["brand_id"]).eq("rate_date", today).execute()
 
-    print(f"\n{len(saved)-q} published, {q} quarantined")
+    print(f"\n{len(saved)-q} newly published, {q} quarantined")
 
 
 if __name__ == "__main__":
