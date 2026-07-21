@@ -58,6 +58,19 @@ PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 # product price-breakup only to real browsers.
 NEEDS_PROXY = {"tanishq", "malabar", "caratlane"}
 
+# Browser actions Zyte runs before returning HTML, per slug. CaratLane only
+# injects its price-breakup lines after the PRICE BREAKUP tab is clicked.
+ZYTE_ACTIONS = {
+    "caratlane": [
+        {"action": "scrollBottom"},
+        {"action": "click", "selector": {
+            "type": "xpath",
+            "value": "//*[contains(translate(text(),'priceabku','PRICEABKU'),"
+                     "'PRICE BREAKUP')]"}},
+        {"action": "waitForTimeout", "timeout": 3},
+    ],
+}
+
 # Method tag for estimated rows: a brand with no live source gets the day's
 # market median so no brand is ever missing. Excluded from the median itself,
 # and re-tried every run so it upgrades to a real rate the moment one appears.
@@ -441,7 +454,7 @@ def render(url):
 ZYTE_ENDPOINT = "https://api.zyte.com/v1/extract"
 
 
-def fetch_via_zyte(url, session):
+def fetch_via_zyte(url, session, actions=None):
     """Fetch through Zyte API: an India residential IP that clears anti-bot
     walls (Cloudflare/Akamai) and returns fully rendered HTML. Used only for
     brands flagged needs_proxy, and only for their one configured rate_url so
@@ -449,12 +462,15 @@ def fetch_via_zyte(url, session):
     key = os.environ.get("ZYTE_API_KEY")
     if not key:
         return None, "no zyte key"
+    payload = {"url": url, "browserHtml": True, "geolocation": "IN"}
+    if actions:
+        payload["actions"] = actions
     r = None
     for attempt in (1, 2):     # slow sites can blow one render window
         try:
             r = session.post(
                 ZYTE_ENDPOINT, auth=(key, ""),
-                json={"url": url, "browserHtml": True, "geolocation": "IN"},
+                json=payload,
                 # The session mimics a browser (incl. Accept-Encoding: br) for
                 # scraping targets; Zyte is a plain JSON API - clean headers.
                 headers={"Accept": "application/json",
@@ -512,7 +528,8 @@ def scrape_brand(b, session):
             break
 
         if proxied:
-            zhtml, zreason = fetch_via_zyte(url, session)
+            zhtml, zreason = fetch_via_zyte(url, session,
+                                            ZYTE_ACTIONS.get(b.get("slug")))
             if zhtml:
                 found, counts, how, note = try_html(zhtml)
                 if found:
