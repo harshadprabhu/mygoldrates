@@ -441,19 +441,25 @@ def fetch_via_zyte(url, session):
     key = os.environ.get("ZYTE_API_KEY")
     if not key:
         return None, "no zyte key"
-    try:
-        r = session.post(
-            ZYTE_ENDPOINT, auth=(key, ""),
-            json={"url": url, "browserHtml": True, "geolocation": "IN"},
-            # The session mimics a browser (incl. Accept-Encoding: br) for
-            # scraping targets; Zyte is a plain JSON API, so use clean headers.
-            headers={"Accept": "application/json",
-                     "Accept-Encoding": "gzip, deflate",
-                     "User-Agent": "goldrates/1.0"},
-            timeout=90,
-        )
-    except requests.RequestException as e:
-        return None, f"zyte {type(e).__name__}"
+    r = None
+    for attempt in (1, 2):     # slow sites can blow one render window
+        try:
+            r = session.post(
+                ZYTE_ENDPOINT, auth=(key, ""),
+                json={"url": url, "browserHtml": True, "geolocation": "IN"},
+                # The session mimics a browser (incl. Accept-Encoding: br) for
+                # scraping targets; Zyte is a plain JSON API - clean headers.
+                headers={"Accept": "application/json",
+                         "Accept-Encoding": "gzip, deflate",
+                         "User-Agent": "goldrates/1.0"},
+                timeout=150,
+            )
+            break
+        except requests.Timeout:
+            if attempt == 2:
+                return None, "zyte ReadTimeout"
+        except requests.RequestException as e:
+            return None, f"zyte {type(e).__name__}"
     if r.status_code != 200:
         return None, f"zyte {r.status_code}"
     try:
