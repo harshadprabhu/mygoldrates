@@ -52,6 +52,11 @@ MIN_FOR_MEDIAN = 5
 
 PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 
+# Brands behind anti-bot walls that only a residential proxy can reach.
+# Fetched through Zyte API (needs the ZYTE_API_KEY secret) instead of a
+# direct request; keyed by brand slug so no DB schema change is needed.
+NEEDS_PROXY = {"tanishq", "malabar"}
+
 CANDIDATE_PATHS = [
     "/gold-rate-today/", "/gold-rate-today", "/gold-rate", "/goldrate",
     "/goldprice", "/gold-rate.html", "/gold-price", "/todays-gold-rate",
@@ -314,6 +319,33 @@ def render(url):
         return None
 
 
+ZYTE_ENDPOINT = "https://api.zyte.com/v1/extract"
+
+
+def fetch_via_zyte(url, session):
+    """Fetch through Zyte API: an India residential IP that clears anti-bot
+    walls (Cloudflare/Akamai) and returns fully rendered HTML. Used only for
+    brands flagged needs_proxy, and only for their one configured rate_url so
+    we don't burn credits on path discovery. -> (html, note)."""
+    key = os.environ.get("ZYTE_API_KEY")
+    if not key:
+        return None, "no zyte key"
+    try:
+        r = session.post(
+            ZYTE_ENDPOINT, auth=(key, ""),
+            json={"url": url, "browserHtml": True, "geolocation": "IN"},
+            timeout=90,
+        )
+    except requests.RequestException as e:
+        return None, f"zyte {type(e).__name__}"
+    if r.status_code != 200:
+        return None, f"zyte {r.status_code}"
+    try:
+        return r.json().get("browserHtml"), "ok"
+    except ValueError:
+        return None, "zyte badjson"
+
+
 def try_html(html):
     """-> (found, counts, how) if it passes sanity, else (None, note)."""
     found, counts, how = extract(html)
@@ -334,7 +366,10 @@ def scrape_brand(b, session):
     urls = []
     if b.get("rate_url"):
         urls.append(b["rate_url"])
-    if b.get("domain"):
+    # Proxy brands cost credits per request, so hit only their configured URL;
+    # everyone else also gets same-domain path discovery as a fallback.
+    proxied = b.get("slug") in NEEDS_PROXY
+    if b.get("domain") and not proxied:
         base = b["domain"] if b["domain"].startswith("http") else f"https://{b['domain']}"
         for p in CANDIDATE_PATHS:
             u = urljoin(base, p)
@@ -345,6 +380,20 @@ def scrape_brand(b, session):
         if time.monotonic() - started > BRAND_BUDGET:
             tried.append("budget")
             break
+
+        if proxied:
+            zhtml, zreason = fetch_via_zyte(url, session)
+            if zhtml:
+                found, counts, how, note = try_html(zhtml)
+                if found:
+                    return url, found, counts, f"zyte/{how}", note
+                tried.append("zyte:" + note)
+            else:
+                tried.append(zreason)
+                if zreason == "no zyte key":
+                    break
+            continue
+
         if not robots_ok(url, session):
             tried.append("robots")
             continue
