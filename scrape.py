@@ -143,13 +143,53 @@ def extract_proximity(text):
     return buckets
 
 
+_MP_RE = re.compile(r"metal_?price['\"\s:]{1,4}([\d.]+)", re.I)
+_NW_RE = re.compile(r"net_?weight['\"\s:]{1,4}\"?([\d.]+)", re.I)
+_STONE_RE = re.compile(r"(?:diamond|stone)_?(?:price|value)['\"\s:]{1,4}([\d.]+)", re.I)
+_OPT_PURITY_RE = re.compile(r"option1\"?\s*:\s*\"(\d{2})\s*K", re.I)
+
+
+def extract_product_breakup(html):
+    """Read a per-item gold breakup embedded in a product page.
+
+    Some jewellers (e.g. Shopify themes) render a stone-free item's pure-gold
+    value and net weight straight into the page HTML: metal_price / net_weight
+    is the per-gram rate for that item's purity. A high-purity anchor (a coin)
+    keeps the derived ladder accurate, since jewellers mark up lower karats
+    above their theoretical metal fraction. Skips items that contain stones,
+    where metal_price would not be gold alone.
+    """
+    mp, nw = _MP_RE.search(html), _NW_RE.search(html)
+    if not (mp and nw):
+        return {}
+    stone = _STONE_RE.search(html)
+    if stone and _f(stone.group(1)):
+        return {}
+    metal, weight = _f(mp.group(1)), _f(nw.group(1))
+    if not metal or not weight:
+        return {}
+    pg = _per_gram(metal / weight)
+    if pg is None:
+        return {}
+    pm = _OPT_PURITY_RE.search(html) or PURITY_RE.search(html)
+    if not pm:
+        return {}
+    karat = f"{pm.group(1)}K"
+    if karat not in PURITY_FRACTION:
+        return {}
+    return {karat: [pg]}
+
+
 def extract(html):
-    """-> (found, counts, how). Table first, proximity only if that fails."""
+    """-> (found, counts, how). Table -> product breakup -> proximity."""
     soup = BeautifulSoup(html, "html.parser")
     for t in soup(["script", "style", "noscript"]):
         t.decompose()
 
     buckets, how = extract_rows(soup), "rows"
+    if not buckets:
+        buckets = extract_product_breakup(html)
+        how = "product"
     if not buckets:
         buckets, how = extract_proximity(soup.get_text(" ", strip=True)), "proximity"
 
