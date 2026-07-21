@@ -210,6 +210,27 @@ def extract_headline_rate(text):
     return {karat: [pg]} if pg else {}
 
 
+_LABELED_RE = re.compile(
+    r"(\d{2})\s*K(?:T|ARAT)?\b\s*(?:\(\d{3}\))?\s*:?\s*"
+    r"₹\s*([\d,]+(?:\.\d{1,2})?)\s*/\s*(?:g|gm|gram)\b", re.I)
+
+
+def extract_labeled_rates(text):
+    """Direct 'NN KT ... RS NNNNN /g' displays (header rate banners, tickers)
+    bind each karat to its per-gram rate right next to it, so every purity is
+    captured unambiguously even when several sit side by side - which is
+    exactly where a proximity window fails."""
+    buckets = {}
+    for m in _LABELED_RE.finditer(text):
+        karat = f"{m.group(1)}K"
+        if karat not in PURITY_FRACTION:
+            continue
+        pg = _per_gram(_f(m.group(2)))
+        if pg:
+            buckets.setdefault(karat, []).append(pg)
+    return buckets
+
+
 def extract(html):
     """-> (found, counts, how). Table -> product -> headline -> proximity."""
     soup = BeautifulSoup(html, "html.parser")
@@ -218,14 +239,16 @@ def extract(html):
 
     buckets, how = extract_rows(soup), "rows"
     if not buckets:
-        buckets = extract_product_breakup(html)
-        how = "product"
+        buckets, how = extract_product_breakup(html), "product"
     if not buckets:
         text = soup.get_text(" ", strip=True)
-        buckets = extract_headline_rate(text)
-        how = "headline"
-        if not buckets:
-            buckets, how = extract_proximity(text), "proximity"
+        for fn, name in ((extract_labeled_rates, "labeled"),
+                         (extract_headline_rate, "headline"),
+                         (extract_proximity, "proximity")):
+            buckets = fn(text)
+            if buckets:
+                how = name
+                break
 
     found = {k: statistics.median(v) for k, v in buckets.items()}
     counts = {k: len(v) for k, v in buckets.items()}
