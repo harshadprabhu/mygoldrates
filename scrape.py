@@ -52,10 +52,11 @@ MIN_FOR_MEDIAN = 5
 
 PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 
-# Brands behind anti-bot walls that only a residential proxy can reach.
-# Fetched through Zyte API (needs the ZYTE_API_KEY secret) instead of a
-# direct request; keyed by brand slug so no DB schema change is needed.
-NEEDS_PROXY = {"tanishq", "malabar"}
+# Brands only reachable through Zyte API (needs the ZYTE_API_KEY secret)
+# instead of a direct request; keyed by brand slug so no DB schema change is
+# needed. tanishq/malabar sit behind anti-bot walls; tbz's shop host serves a
+# broken TLS chain that plain requests/Playwright refuse but Zyte tolerates.
+NEEDS_PROXY = {"tanishq", "malabar", "tbz"}
 
 # Method tag for estimated rows: a brand with no live source gets the day's
 # market median so no brand is ever missing. Excluded from the median itself,
