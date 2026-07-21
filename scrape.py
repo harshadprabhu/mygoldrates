@@ -57,6 +57,11 @@ PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 # direct request; keyed by brand slug so no DB schema change is needed.
 NEEDS_PROXY = {"tanishq", "malabar"}
 
+# Method tag for estimated rows: a brand with no live source gets the day's
+# market median so no brand is ever missing. Excluded from the median itself,
+# and re-tried every run so it upgrades to a real rate the moment one appears.
+PLACEHOLDER_METHOD = "reference-median"
+
 CANDIDATE_PATHS = [
     "/gold-rate-today/", "/gold-rate-today", "/gold-rate", "/goldrate",
     "/goldprice", "/gold-rate.html", "/gold-price", "/todays-gold-rate",
@@ -485,12 +490,15 @@ def main():
     # Idempotent: only fetch brands that don't already have today's rate, so a
     # brand's site (and Zyte credits) isn't hit again once its rate is in.
     # Successive scheduled runs pick up only what's still missing.
-    existing = sb.table("rates").select("brand_id, canonical_24k_pre_gst") \
+    existing = sb.table("rates").select("brand_id, canonical_24k_pre_gst, method") \
                  .eq("rate_date", today).execute().data
-    done_ids = {r["brand_id"] for r in existing}
-    pending = [b for b in brands if b["id"] not in done_ids]
-    print(f"{len(brands)} active brands - {len(done_ids)} already have today's "
-          f"rate, {len(pending)} to fetch\n")
+    # A brand is "done" only once it has a LIVE rate; placeholder-only brands
+    # keep retrying so they upgrade to a real rate as soon as one is available.
+    real_ids = {r["brand_id"] for r in existing
+                if r.get("method") != PLACEHOLDER_METHOD}
+    pending = [b for b in brands if b["id"] not in real_ids]
+    print(f"{len(brands)} active brands - {len(real_ids)} have a live rate today, "
+          f"{len(pending)} to (re)try\n")
     saved = []
 
     for b in pending:
@@ -540,35 +548,61 @@ def main():
 
         time.sleep(POLITE_DELAY)
 
-    if not saved:
-        print("\nnothing new collected")
+    # Median over LIVE rates only (already-stored real + newly saved), so the
+    # outlier check and placeholder estimate are anchored on real data.
+    live_vals = [r["canonical_24k_pre_gst"] for r in existing
+                 if r.get("method") != PLACEHOLDER_METHOD
+                 and r.get("canonical_24k_pre_gst")]
+    live_vals += [r["canonical_24k_pre_gst"] for r in saved]
+
+    if not live_vals:
+        print("\nno live rates yet - cannot estimate; leaving brands for next run")
         return
 
-    # Median over ALL of today's rates (already-stored + newly saved) so the
-    # outlier check is stable however the work was split across runs. Only the
-    # brands saved this run are (re)checked and patched.
-    all_vals = [r["canonical_24k_pre_gst"] for r in existing
-                if r.get("canonical_24k_pre_gst")]
-    all_vals += [r["canonical_24k_pre_gst"] for r in saved]
-    if len(all_vals) < MIN_FOR_MEDIAN:
-        print(f"\nonly {len(all_vals)} rates today - skipping outlier check")
-        return
+    median = statistics.median(live_vals)
+    print(f"\nmedian canonical 24K pre-GST: {median:,.0f}  ({len(live_vals)} live)")
 
-    median = statistics.median(all_vals)
-    print(f"\nmedian canonical 24K pre-GST: {median:,.0f}")
-    q = 0
-    for r in saved:
-        drift = abs(r["canonical_24k_pre_gst"] - median) / median
-        patch = {"drift_from_median": round(drift, 4)}
-        if drift > OUTLIER_TOLERANCE and not r["basis_confirmed"]:
-            patch["status"] = "quarantined"
-            patch["basis_note"] = r["basis_note"] + f" | {drift*100:.1f}% off median"
-            q += 1
-            print(f"   quarantined brand {r['brand_id']}: {drift*100:.1f}% off")
-        sb.table("rates").update(patch) \
-          .eq("brand_id", r["brand_id"]).eq("rate_date", today).execute()
+    # Outlier check on this run's live saves (needs enough live data to trust).
+    if saved and len(live_vals) >= MIN_FOR_MEDIAN:
+        for r in saved:
+            drift = abs(r["canonical_24k_pre_gst"] - median) / median
+            patch = {"drift_from_median": round(drift, 4)}
+            if drift > OUTLIER_TOLERANCE and not r["basis_confirmed"]:
+                patch["status"] = "quarantined"
+                patch["basis_note"] = r["basis_note"] + f" | {drift*100:.1f}% off median"
+                print(f"   quarantined brand {r['brand_id']}: {drift*100:.1f}% off")
+            sb.table("rates").update(patch) \
+              .eq("brand_id", r["brand_id"]).eq("rate_date", today).execute()
 
-    print(f"\n{len(saved)-q} newly published, {q} quarantined")
+    # Guarantee every active brand has today's rate: any brand still without a
+    # live one gets the market median, flagged as an estimate. Re-tried each
+    # run, so it flips to a real rate the moment a live source succeeds.
+    have_live = real_ids | {r["brand_id"] for r in saved}
+    canonical = round(median, 2)
+    ladder = derive_ladder(canonical)
+    filled = 0
+    for b in brands:
+        if b["id"] in have_live:
+            continue
+        row = {
+            "brand_id": b["id"], "rate_date": today,
+            "canonical_24k_pre_gst": canonical,
+            "source_purity": "24K", "source_value": ladder["24K"],
+            "purities_found": 0, "basis_confirmed": False,
+            "basis_note": "estimate: market median, no live source",
+            "method": PLACEHOLDER_METHOD, "rate_url": b.get("rate_url"),
+            "derived_rates": ladder, "status": "published",
+            "scraped_at": datetime.now(timezone.utc).isoformat(),
+        }
+        try:
+            upsert_rate(sb, row)
+            filled += 1
+            print(f"-> {b['name']:22s} estimate {canonical:>9,.0f}  [placeholder]")
+        except Exception as e:
+            print(f"placeholder failed {b['name']}: {e}")
+
+    print(f"\n{len(saved)} live saved, {filled} estimated, "
+          f"{len(have_live)}/{len(brands)} brands live")
 
 
 if __name__ == "__main__":
