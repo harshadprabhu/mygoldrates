@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Render the public gold-rate comparison site from today's scraped rates.
 
-Runs in CI right after scrape.py. Reads today's rates and the full rate
-history from Supabase, fetches the IBJA reference rate, and bakes everything
-into static HTML (crawlers index real numbers, no keys shipped) written to
-docs/ for GitHub Pages.
+Runs in CI right after scrape.py. Reads today's rates from Supabase, fetches
+the IBJA reference rate, and bakes everything into static HTML written to
+docs/ for GitHub Pages. The inquiry page posts to Supabase with the public
+anon key (insert-only table behind RLS); no privileged keys are shipped.
 """
 
 from __future__ import annotations
@@ -45,8 +45,8 @@ def inr(v, dec=0):
 
 
 def fetch_ibja():
-    """IBJA (India Bullion & Jewellers Association) daily reference rates,
-    per 10g pre-GST on their site -> per gram. Returns (r999, r916) or None."""
+    """IBJA daily reference rates, per 10g pre-GST -> per gram.
+    Returns (r999, r916) or None."""
     try:
         r = requests.get("https://ibjarates.com", headers={"User-Agent": UA},
                          timeout=20)
@@ -69,6 +69,8 @@ def fetch_ibja():
 
 def main():
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
+    anon_key = os.environ.get("SUPABASE_ANON_KEY", "")
+    supabase_url = os.environ["SUPABASE_URL"]
     today = datetime.now(timezone.utc).date().isoformat()
     rows = sb.table("rates").select("*, brands(name, slug)") \
              .eq("rate_date", today).execute().data
@@ -89,36 +91,53 @@ def main():
 
     med = ladder(median24)
 
-    # ------------------------------------------------------------ history
-    hist = sb.table("rates").select("rate_date, canonical_24k_pre_gst, status") \
-             .eq("status", "published").order("rate_date").execute().data
-    by_day: dict[str, list[float]] = {}
-    for r in hist:
-        if r.get("canonical_24k_pre_gst"):
-            by_day.setdefault(r["rate_date"], []).append(r["canonical_24k_pre_gst"])
-    trend = [[d, round(statistics.median(v), 2)] for d, v in sorted(by_day.items())]
-
     # --------------------------------------------------------------- IBJA
     ibja = fetch_ibja()
     if ibja:
         r999, r916 = ibja
-        premium = (median24 / r999 - 1) * 100
+        premium_med = (median24 / r999 - 1) * 100
         ibja_strip = (
             '<div class="ibja" role="note">'
             '<span class="ibja-k">IBJA reference</span>'
             f'<span class="ibja-v">999 · {inr(r999)}/g</span>'
             f'<span class="ibja-v">916 · {inr(r916)}/g</span>'
-            f'<span class="ibja-p">jeweller premium today {premium:+.1f}%</span>'
+            f'<span class="ibja-p">jeweller premium today {premium_med:+.1f}%</span>'
             '<span class="ibja-src">India Bullion &amp; Jewellers Assn., pre-GST</span>'
             '</div>')
+        # Premium-over-bullion bars: IBJA 999 is the zero baseline.
+        prem = []
+        for r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):
+            p = (r["canonical_24k_pre_gst"] / r999 - 1) * 100
+            prem.append((r["brands"]["name"], p,
+                         r["canonical_24k_pre_gst"] - r999))
+        pmax = max(max(p for _, p, _ in prem), 0.1)
+        bars = "\n".join(
+            f'<div class="pbar-row" title="{name}: {inr(diff)} above bullion '
+            f'per gram"><span class="pbar-name">{name}</span>'
+            f'<span class="pbar-track"><span class="pbar-fill" '
+            f'style="width:{max(min(p / pmax * 100, 100), 2):.1f}%"></span></span>'
+            f'<span class="pbar-val">{p:+.1f}%</span></div>'
+            for name, p, diff in prem)
+        ibja_section = f'''
+<section aria-labelledby="ibjah">
+  <p class="eyebrow">Bullion vs Board</p>
+  <h2 id="ibjah">Jeweller Premium Over the IBJA Rate</h2>
+  <p class="hint">IBJA's bullion reference today is <strong>{inr(r999)}/g</strong>
+  (999) and <strong>{inr(r916)}/g</strong> (916), pre-GST. Every jeweller
+  prices above bullion - this is each brand's premium per gram of pure gold,
+  smallest first. Hover a bar for the rupee difference.</p>
+  <div class="chartcard pbar-card">
+{bars}
+  </div>
+</section>'''
         ibja_faq = (
             f"The IBJA (India Bullion and Jewellers Association) reference rate "
             f"today is {inr(r999)} per gram for 999 gold and {inr(r916)} per "
             f"gram for 916 gold, before GST. Jewellery brands price on average "
-            f"{premium:+.1f}% relative to the bullion reference today; the gap "
+            f"{premium_med:+.1f}% above the bullion reference today; the gap "
             "reflects each brand's sourcing and hallmarking premium.")
     else:
-        ibja_strip = ""
+        ibja_strip, ibja_section = "", ""
         ibja_faq = ("The IBJA (India Bullion and Jewellers Association) "
                     "publishes India's twice-daily bullion reference rate. "
                     "Jeweller board rates typically sit slightly above it, "
@@ -142,10 +161,15 @@ def main():
             if r.get("method") == "reference-median" else ""
         body_rows.append(
             f'<tr><th scope="row">{b["name"]}{best}{est}</th>'
-            f'<td data-v="{lad["24K"]:.0f}">{inr(lad["24K"])}</td>'
-            f'<td data-v="{lad["22K"]:.0f}">{inr(lad["22K"])}</td>'
-            f'<td data-v="{lad["18K"]:.0f}">{inr(lad["18K"])}</td>'
+            f'<td class="num" data-v="{lad["24K"]:.2f}">{inr(lad["24K"])}</td>'
+            f'<td class="num" data-v="{lad["22K"]:.2f}">{inr(lad["22K"])}</td>'
+            f'<td class="num" data-v="{lad["18K"]:.2f}">{inr(lad["18K"])}</td>'
             f'<td class="{dcls}" data-v="{drift:.2f}">{dtxt}</td></tr>')
+
+    calc_brands = [{"name": "Market median", "r24": round(median24, 2)}] + [
+        {"name": r["brands"]["name"],
+         "r24": round(r["canonical_24k_pre_gst"], 2)}
+        for r in sorted(live, key=lambda x: x["brands"]["name"])]
 
     # ------------------------------------------------------------- JSON-LD
     faq = [
@@ -163,8 +187,9 @@ def main():
          ibja_faq),
         ("Are these gold rates inclusive of GST?",
          "Rates shown are per gram, pre-GST, so brands can be compared on the "
-         "same basis. Add 3% GST for the billed price of the gold value. "
-         "Making charges vary by design and are always extra."),
+         "same basis. Use the GST switch on the comparison table, or the "
+         "calculator, to see prices including 3% GST. Making charges vary by "
+         "design and are always extra."),
         ("What is the difference between 24K, 22K and 18K gold?",
          "24K (99.9% pure) is investment-grade gold used for coins and bars. "
          "22K (91.6%) is the standard for traditional Indian jewellery. 18K "
@@ -174,7 +199,7 @@ def main():
         ("How often are these rates updated?",
          "Rates are refreshed automatically several times every day, and each "
          "brand's figure is quality-checked against the market before it is "
-         "published."),
+         "published. Subscribers get the day's comparison by email."),
     ]
     jsonld = json.dumps([
         {"@context": "https://schema.org", "@type": "WebSite",
@@ -183,8 +208,8 @@ def main():
         {"@context": "https://schema.org", "@type": "Dataset",
          "name": f"Gold rates across Indian jewellers on {display_date}",
          "description": "Daily 24K, 22K and 18K per-gram gold rates compared "
-                        "across major Indian jewellery brands, with trend "
-                        "history and the IBJA bullion reference.",
+                        "across major Indian jewellery brands, with the IBJA "
+                        "bullion reference and per-brand premium.",
          "dateModified": now_ist.isoformat(), "url": SITE_URL,
          "creator": {"@type": "Organization", "name": "GoldRates"}},
         {"@context": "https://schema.org", "@type": "FAQPage",
@@ -197,29 +222,35 @@ def main():
         f'<details class="faq"><summary>{q}</summary><p>{a}</p></details>'
         for q, a in faq)
 
+    common = dict(site_url=SITE_URL, date=display_date, time=display_time,
+                  iso_now=now_ist.isoformat(), year=str(now_ist.year),
+                  base_css=BASE_CSS)
     html = TEMPLATE.substitute(
-        site_url=SITE_URL, date=display_date, time=display_time,
-        iso_now=now_ist.isoformat(), n_brands=str(len(live)),
+        n_brands=str(len(live)),
         med24=inr(med["24K"]), med22=inr(med["22K"]), med18=inr(med["18K"]),
         low24=inr(ladder(lowest["canonical_24k_pre_gst"])["24K"]),
         low_brand=lowest["brands"]["name"],
-        ibja_strip=ibja_strip,
-        trend_json=json.dumps(trend),
-        trend_since=trend[0][0] if trend else today,
-        rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld,
-        year=str(now_ist.year))
+        ibja_strip=ibja_strip, ibja_section=ibja_section,
+        calc_brands=json.dumps(calc_brands),
+        rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld, **common)
+    inquiry = INQUIRY_TEMPLATE.substitute(
+        supabase_url=supabase_url, anon_key=anon_key, **common)
 
     os.makedirs("docs", exist_ok=True)
     with open("docs/index.html", "w", encoding="utf-8") as f:
         f.write(html)
+    with open("docs/inquiry.html", "w", encoding="utf-8") as f:
+        f.write(inquiry)
     with open("docs/robots.txt", "w", encoding="utf-8") as f:
         f.write(f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}/sitemap.xml\n")
     with open("docs/sitemap.xml", "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-                f"  <url><loc>{SITE_URL}/</loc>"
-                f"<lastmod>{today}</lastmod>"
+                f"  <url><loc>{SITE_URL}/</loc><lastmod>{today}</lastmod>"
                 "<changefreq>daily</changefreq><priority>1.0</priority></url>\n"
+                f"  <url><loc>{SITE_URL}/inquiry.html</loc>"
+                f"<lastmod>{today}</lastmod>"
+                "<changefreq>monthly</changefreq><priority>0.6</priority></url>\n"
                 "</urlset>\n")
     with open("docs/ads.txt", "w", encoding="utf-8") as f:
         f.write("# Replace with your AdSense publisher line after approval:\n"
@@ -227,45 +258,30 @@ def main():
     with open("docs/.nojekyll", "w", encoding="utf-8") as f:
         f.write("")
     print(f"site generated: {len(live)} brands, median 24K {inr(med['24K'])}, "
-          f"trend points {len(trend)}, IBJA {'ok' if ibja else 'unavailable'}")
+          f"IBJA {'ok' if ibja else 'unavailable'}, "
+          f"inquiry form {'armed' if anon_key else 'DISABLED (no anon key)'}")
 
 
-TEMPLATE = Template("""<!DOCTYPE html>
-<html lang="en-IN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gold Rate Today in India ($date) - Compare 24K, 22K &amp; 18K Rates Across $n_brands Jewellers</title>
-<meta name="description" content="Live gold rate comparison for $date: 24K median $med24/g, 22K $med22/g pre-GST. Compare today's gold rates across $n_brands top Indian jewellers with IBJA bullion reference and price trend. Updated daily.">
-<link rel="canonical" href="$site_url/">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Gold Rate Today in India - Compare $n_brands Jewellers">
-<meta property="og:description" content="24K median $med24/g today. Daily gold rate comparison, trend chart and IBJA reference.">
-<meta property="og:url" content="$site_url/">
-<meta name="twitter:card" content="summary">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
-<script type="application/ld+json">$jsonld</script>
-<style>
+BASE_CSS = """
 :root{
   --paper:#FBF9F4; --ink:#181F1B; --ink-2:#49544D; --ink-3:#79847D;
   --board:#152420; --board-2:#1C312A; --gold:#9C7514; --gold-bright:#D9B24A;
   --gold-foil:linear-gradient(100deg,#8C6A18,#D9B24A 45%,#F0DB9A 55%,#C79A2E);
   --emerald:#1E5C46; --line:#E7E1D3; --card:#FFFFFF; --warm:#8A5A2B;
-  --chart-line:#B98A1E; --chart-fill:rgba(185,138,30,.12);
+  --bar:#B98A1E;
 }
 @media (prefers-color-scheme: dark){
   :root{
     --paper:#0E1613; --ink:#EDE9DD; --ink-2:#B4BDB4; --ink-3:#84908A;
     --board:#0A100D; --board-2:#131E18; --gold:#D9B24A; --gold-bright:#E8C86A;
     --emerald:#5BBB93; --line:#22302A; --card:#151F1A; --warm:#D89A5B;
-    --chart-line:#D9B24A; --chart-fill:rgba(217,178,74,.12);
+    --bar:#D9B24A;
   }
 }
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth}
-@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}
+  *{transition:none!important}}
 body{background:var(--paper);color:var(--ink);
   font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif;
   -webkit-font-smoothing:antialiased}
@@ -274,8 +290,55 @@ a{color:var(--emerald)}
 h1,h2,.brand{font-family:"Marcellus",serif;font-weight:400;letter-spacing:.02em}
 .eyebrow{font:500 11.5px/1 "IBM Plex Mono",monospace;letter-spacing:.28em;
   text-transform:uppercase;color:var(--gold);margin:40px 0 8px}
+header.top{display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:6px 18px;padding:18px 0 14px}
+.brand{font-size:22px;letter-spacing:.14em;text-transform:uppercase;
+  text-decoration:none;color:var(--ink)}
+.brand .karat{background:var(--gold-foil);-webkit-background-clip:text;
+  background-clip:text;color:transparent}
+.topright{display:flex;align-items:center;gap:16px}
+.updated{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
+.btn{display:inline-block;font:500 13.5px/1 "IBM Plex Sans",sans-serif;
+  background:var(--board);color:#F0DB9A;border:1px solid rgba(217,178,74,.5);
+  padding:11px 18px;border-radius:999px;text-decoration:none;cursor:pointer;
+  transition:transform .15s ease, box-shadow .15s ease}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.btn-gold{background:var(--gold-foil);color:#1A1508;border:0;font-weight:600}
+h2{font-size:24px;margin:2px 0 6px}
+.hint{font-size:13.5px;color:var(--ink-3);margin-bottom:14px;max-width:72ch}
+.chartcard{background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:18px}
+.stamp{display:inline-block;font:500 10.5px/1 "IBM Plex Mono",monospace;
+  letter-spacing:.08em;text-transform:uppercase;border-radius:4px;
+  padding:3px 7px;margin-left:8px;vertical-align:2px}
+.stamp-best{color:var(--gold);border:1px solid var(--gold)}
+.stamp-est{color:var(--ink-3);border:1px solid var(--ink-3)}
+footer{margin:44px 0 30px;padding-top:20px;border-top:1px solid var(--line);
+  font-size:13px;color:var(--ink-3)}
+footer p{margin:6px 0;max-width:80ch}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+"""
 
-/* IBJA reference ticker */
+TEMPLATE = Template("""<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gold Rate Today in India ($date) - Compare 24K, 22K &amp; 18K Rates Across $n_brands Jewellers</title>
+<meta name="description" content="Live gold rate comparison for $date: 24K median $med24/g, 22K $med22/g pre-GST. Compare today's gold rates across $n_brands top Indian jewellers, check the IBJA bullion premium, and calculate gold prices instantly.">
+<link rel="canonical" href="$site_url/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Gold Rate Today in India - Compare $n_brands Jewellers">
+<meta property="og:description" content="24K median $med24/g today. Compare jewellers, check the bullion premium, calculate prices.">
+<meta property="og:url" content="$site_url/">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script type="application/ld+json">$jsonld</script>
+<style>
+$base_css
+/* IBJA ticker */
 .ibja{display:flex;flex-wrap:wrap;align-items:center;gap:8px 22px;
   font-family:"IBM Plex Mono",monospace;font-size:12.5px;
   padding:9px 0;border-bottom:1px solid var(--line);color:var(--ink-2)}
@@ -285,18 +348,11 @@ h1,h2,.brand{font-family:"Marcellus",serif;font-weight:400;letter-spacing:.02em}
 .ibja-p{color:var(--emerald)}
 .ibja-src{margin-left:auto;font-size:10.5px;color:var(--ink-3)}
 
-header.top{display:flex;justify-content:space-between;align-items:baseline;
-  flex-wrap:wrap;gap:4px 18px;padding:20px 0 16px}
-.brand{font-size:22px;letter-spacing:.14em;text-transform:uppercase}
-.brand .karat{background:var(--gold-foil);-webkit-background-clip:text;
-  background-clip:text;color:transparent}
-.updated{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-3)}
-
 /* rate board hero */
 .board{background:
   radial-gradient(120% 160% at 85% -20%,rgba(217,178,74,.16),transparent 55%),
   linear-gradient(160deg,var(--board),var(--board-2));
-  color:#EDE9DD;border-radius:16px;margin:22px 0 12px;padding:40px 38px 34px;
+  color:#EDE9DD;border-radius:16px;margin:20px 0 12px;padding:40px 38px 34px;
   position:relative;overflow:hidden;border:1px solid rgba(217,178,74,.22)}
 .board::after{content:"999 · 916 · 750";position:absolute;right:26px;bottom:18px;
   font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.35em;
@@ -313,35 +369,64 @@ header.top{display:flex;justify-content:space-between;align-items:baseline;
   -webkit-background-clip:text;background-clip:text;color:transparent}
 .tile .u{font-size:12px;color:#8E9A8C}
 .tile.best{background:rgba(217,178,74,.14)}
-
 .note{font-size:13px;color:var(--ink-3);margin:12px 0 24px}
 
-/* stamps */
-.stamp{display:inline-block;font:500 10.5px/1 "IBM Plex Mono",monospace;
-  letter-spacing:.08em;text-transform:uppercase;border-radius:4px;
-  padding:3px 7px;margin-left:8px;vertical-align:2px}
-.stamp-best{color:var(--gold);border:1px solid var(--gold)}
-.stamp-est{color:var(--ink-3);border:1px solid var(--ink-3)}
+/* calculator */
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+@media (max-width:720px){.calc{grid-template-columns:1fr}}
+.calc-fields{display:grid;gap:14px}
+.field label{display:block;font:500 12px/1.4 "IBM Plex Mono",monospace;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
+  margin-bottom:6px}
+.field input,.field select{width:100%;font:15px "IBM Plex Sans",sans-serif;
+  color:var(--ink);background:var(--paper);border:1px solid var(--line);
+  border-radius:10px;padding:12px 14px}
+.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:10px;
+  overflow:hidden}
+.seg button{flex:1;font:500 13.5px "IBM Plex Mono",monospace;background:none;
+  border:0;padding:11px 0;color:var(--ink-2);cursor:pointer;
+  border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--board);color:#F0DB9A}
+.calc-out{background:
+  radial-gradient(140% 150% at 90% -30%,rgba(217,178,74,.18),transparent 55%),
+  linear-gradient(160deg,var(--board),var(--board-2));
+  border:1px solid rgba(217,178,74,.3);border-radius:14px;
+  padding:26px 26px 22px;color:#EDE9DD;min-height:100%}
+.calc-out .k{font-family:"IBM Plex Mono",monospace;font-size:11.5px;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--gold-bright)}
+.calc-out .v{font-family:"IBM Plex Mono",monospace;
+  font-size:clamp(30px,5vw,44px);margin:10px 0 4px;
+  background:linear-gradient(100deg,#F0DB9A,#FFFDF4 45%,#E8C86A);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.calc-out .sub{font-size:13px;color:#8E9A8C}
+.calc-out .split{margin-top:16px;padding-top:14px;
+  border-top:1px solid rgba(217,178,74,.25);display:grid;gap:6px;
+  font-family:"IBM Plex Mono",monospace;font-size:13px;color:#B9C2B4}
+.calc-out .split div{display:flex;justify-content:space-between}
+.calc-out .split .amt{color:#EDE9DD}
 
-/* trend chart */
-h2{font-size:24px;margin:2px 0 6px}
-.hint{font-size:13.5px;color:var(--ink-3);margin-bottom:14px}
-.chartcard{background:var(--card);border:1px solid var(--line);
-  border-radius:14px;padding:18px 18px 8px;position:relative}
-.ranges{display:flex;gap:8px;margin-bottom:8px}
-.ranges button{font:500 12px/1 "IBM Plex Mono",monospace;letter-spacing:.06em;
+/* premium bars */
+.pbar-card{display:grid;gap:11px}
+.pbar-row{display:grid;grid-template-columns:minmax(110px,180px) 1fr 58px;
+  gap:12px;align-items:center}
+.pbar-name{font-size:13.5px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.pbar-track{height:12px;border-radius:6px;
+  background:color-mix(in srgb,var(--line) 55%,transparent);overflow:hidden}
+.pbar-fill{display:block;height:100%;border-radius:6px 4px 4px 6px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--bar) 70%,transparent),var(--bar));
+  transition:width .5s ease}
+.pbar-val{font-family:"IBM Plex Mono",monospace;font-size:12.5px;
+  text-align:right;color:var(--ink-2)}
+
+/* table */
+.tablebar{display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.gst{font:500 12px/1 "IBM Plex Mono",monospace;letter-spacing:.06em;
   background:none;border:1px solid var(--line);color:var(--ink-2);
-  border-radius:999px;padding:7px 14px;cursor:pointer}
-.ranges button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
-#chart{width:100%;height:260px;display:block}
-.tip{position:absolute;pointer-events:none;background:var(--board);
-  color:#F6F1E3;font:500 12px/1.5 "IBM Plex Mono",monospace;border-radius:8px;
-  padding:7px 11px;transform:translate(-50%,-115%);white-space:nowrap;
-  display:none;border:1px solid rgba(217,178,74,.4)}
-.chart-note{font-size:12px;color:var(--ink-3);padding:6px 2px 8px;
-  font-family:"IBM Plex Mono",monospace}
-
-/* comparison table */
+  border-radius:999px;padding:8px 15px;cursor:pointer}
+.gst[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
 .tablecard{background:var(--card);border:1px solid var(--line);
   border-radius:14px;overflow:auto}
 table{width:100%;border-collapse:collapse;min-width:640px}
@@ -364,19 +449,22 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 .delta-high{color:var(--warm)}
 .delta-par{color:var(--ink-3)}
 
+/* alerts CTA */
+.cta{background:
+  radial-gradient(130% 160% at 10% -30%,rgba(217,178,74,.2),transparent 55%),
+  linear-gradient(160deg,var(--board),var(--board-2));
+  border:1px solid rgba(217,178,74,.3);border-radius:16px;color:#EDE9DD;
+  margin:38px 0 0;padding:30px 32px;display:flex;flex-wrap:wrap;
+  align-items:center;gap:18px;justify-content:space-between}
+.cta h2{color:#F6F1E3;margin:0 0 4px}
+.cta p{color:#B9C2B4;font-size:14.5px;max-width:48ch}
+
 .adslot{margin:30px 0;min-height:90px;border:1px dashed var(--line);
   border-radius:10px;display:flex;align-items:center;justify-content:center;
   color:var(--ink-3);font-size:12px;letter-spacing:.08em}
-
-.prose{max-width:68ch;color:var(--ink-2);font-size:15px}
-.prose p{margin:10px 0}
 .faq{border-bottom:1px solid var(--line);padding:14px 0}
 .faq summary{font-weight:500;cursor:pointer;color:var(--ink)}
 .faq p{margin-top:10px;color:var(--ink-2);max-width:70ch;font-size:15px}
-footer{margin:44px 0 30px;padding-top:20px;border-top:1px solid var(--line);
-  font-size:13px;color:var(--ink-3)}
-footer p{margin:6px 0;max-width:80ch}
-:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -385,8 +473,11 @@ footer p{margin:6px 0;max-width:80ch}
 $ibja_strip
 
 <header class="top">
-  <div class="brand">Gold<span class="karat">Rates</span></div>
-  <div class="updated">Updated $date, $time</div>
+  <a class="brand" href="$site_url/">Gold<span class="karat">Rates</span></a>
+  <div class="topright">
+    <span class="updated">Updated $date, $time</span>
+    <a class="btn" href="inquiry.html">Daily rate alerts</a>
+  </div>
 </header>
 
 <section class="board" aria-label="Today's gold rate summary">
@@ -409,33 +500,55 @@ $ibja_strip
 <p class="note">All rates are per gram of gold, before 3% GST and before
 making charges, so every brand is compared on the same basis.</p>
 
-<!-- AdSense: paste your ad unit snippet inside this div after approval -->
-<div class="adslot" aria-hidden="true">advertisement</div>
-
-<section aria-labelledby="trendh">
-  <p class="eyebrow">Price History</p>
-  <h2 id="trendh">Gold Rate Trend</h2>
-  <p class="hint">Median 24K rate per gram across tracked jewellers.</p>
-  <div class="chartcard">
-    <div class="ranges" role="group" aria-label="Trend range">
-      <button data-days="7" aria-pressed="true">1W</button>
-      <button data-days="30" aria-pressed="false">1M</button>
-      <button data-days="90" aria-pressed="false">3M</button>
-      <button data-days="365" aria-pressed="false">1Y</button>
+<section aria-labelledby="calch">
+  <p class="eyebrow">Price Calculator</p>
+  <h2 id="calch">What Will Your Gold Cost?</h2>
+  <p class="hint">Pick a weight, purity and brand - the price updates as you
+  type. Making charges vary by design and are not included.</p>
+  <div class="calc">
+    <div class="calc-fields">
+      <div class="field"><label for="c-w">Weight in grams</label>
+        <input id="c-w" type="number" inputmode="decimal" min="0.1"
+        step="0.1" value="10"></div>
+      <div class="field"><label id="c-p-label">Purity</label>
+        <div class="seg" role="group" aria-labelledby="c-p-label">
+          <button data-p="24K" aria-pressed="true">24K</button>
+          <button data-p="22K" aria-pressed="false">22K</button>
+          <button data-p="18K" aria-pressed="false">18K</button>
+          <button data-p="14K" aria-pressed="false">14K</button>
+        </div></div>
+      <div class="field"><label for="c-b">Brand rate</label>
+        <select id="c-b"></select></div>
+      <div class="field"><label id="c-g-label">GST</label>
+        <div class="seg" role="group" aria-labelledby="c-g-label">
+          <button data-g="0" aria-pressed="true">Excl. GST</button>
+          <button data-g="1" aria-pressed="false">Incl. 3% GST</button>
+        </div></div>
     </div>
-    <svg id="chart" role="img" aria-label="Gold rate trend chart"></svg>
-    <div class="tip" id="tip"></div>
-    <div class="chart-note">tracking daily since $trend_since - history
-    deepens automatically every day</div>
+    <div class="calc-out" aria-live="polite">
+      <div class="k" id="c-title">10 g · 24K</div>
+      <div class="v" id="c-total">-</div>
+      <div class="sub" id="c-basis">-</div>
+      <div class="split">
+        <div><span>Rate per gram</span><span class="amt" id="c-rate">-</span></div>
+        <div><span>Gold value</span><span class="amt" id="c-gold">-</span></div>
+        <div><span>GST (3%)</span><span class="amt" id="c-gst">-</span></div>
+      </div>
+    </div>
   </div>
 </section>
+
+<!-- AdSense: paste your ad unit snippet inside this div after approval -->
+<div class="adslot" aria-hidden="true">advertisement</div>
 
 <section aria-labelledby="cmp">
   <p class="eyebrow">Today's Board</p>
   <h2 id="cmp">Compare Gold Rates Across Jewellers</h2>
-  <p class="hint">Sorted by today's effective 24K rate - tap any column
-  heading to re-sort. "Δ vs median" shows how far each brand's pricing sits
-  from the market middle.</p>
+  <div class="tablebar">
+    <p class="hint" style="margin:0">Sorted by today's effective 24K rate -
+    tap a column to re-sort.</p>
+    <button class="gst" id="gstbtn" aria-pressed="false">Show incl. 3% GST</button>
+  </div>
   <div class="tablecard">
   <table id="rates">
     <thead><tr>
@@ -451,6 +564,17 @@ $rows
   </table>
   </div>
 </section>
+
+$ibja_section
+
+<div class="cta">
+  <div>
+    <h2>Tomorrow's rates, in your inbox</h2>
+    <p>One clean email every morning with the day's comparison - which brand
+    is cheapest, the bullion premium, and the median. Free.</p>
+  </div>
+  <a class="btn btn-gold" href="inquiry.html">Get daily alerts</a>
+</div>
 
 <div class="adslot" aria-hidden="true">advertisement</div>
 
@@ -471,11 +595,33 @@ $faq
 
 </div>
 <script>
-var TREND=$trend_json;
+var BRANDS=$calc_brands;
+var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
 (function(){
-  /* ---- sortable table ---- */
+  /* ---- sortable table + GST switch ---- */
   var table=document.getElementById('rates');
   var heads=table.tHead.rows[0].cells, body=table.tBodies[0];
+  var gstOn=false;
+  function fmt(n){
+    var s=Math.round(n).toString(), out=s.slice(-3), rest=s.slice(0,-3);
+    while(rest.length>2){out=rest.slice(-2)+','+out;rest=rest.slice(0,-2);}
+    if(rest)out=rest+','+out;
+    return '\\u20B9'+out;
+  }
+  function repaint(){
+    [].forEach.call(body.rows,function(r){
+      for(var i=1;i<=3;i++){
+        var td=r.cells[i], base=parseFloat(td.dataset.v);
+        td.textContent=fmt(gstOn?base*1.03:base);
+      }
+    });
+  }
+  document.getElementById('gstbtn').addEventListener('click',function(){
+    gstOn=!gstOn;
+    this.setAttribute('aria-pressed',gstOn?'true':'false');
+    this.textContent=gstOn?'Showing incl. 3% GST':'Show incl. 3% GST';
+    repaint();
+  });
   function sortBy(i,dir){
     var rows=[].slice.call(body.rows);
     rows.sort(function(a,b){
@@ -494,119 +640,190 @@ var TREND=$trend_json;
     });
   });
 
-  /* ---- trend chart ---- */
-  var svg=document.getElementById('chart'), tip=document.getElementById('tip');
-  var css=getComputedStyle(document.documentElement);
-  function v(name){return css.getPropertyValue(name).trim();}
-  var NS='http://www.w3.org/2000/svg';
-  var pts=[];
-  function fmt(n){
-    var s=Math.round(n).toString(), out=s.slice(-3), rest=s.slice(0,-3);
-    while(rest.length>2){out=rest.slice(-2)+','+out;rest=rest.slice(0,-2);}
-    if(rest)out=rest+','+out;
-    return '\\u20B9'+out;
+  /* ---- calculator ---- */
+  var sel=document.getElementById('c-b');
+  BRANDS.forEach(function(b,i){
+    var o=document.createElement('option');
+    o.value=i;o.textContent=b.name;sel.appendChild(o);
+  });
+  var purity='24K', gst=false;
+  var w=document.getElementById('c-w');
+  function calc(){
+    var grams=parseFloat(w.value)||0;
+    var b=BRANDS[parseInt(sel.value,10)||0];
+    /* r24 is the canonical 24K(.999) per-gram rate; scale by purity */
+    var rate=b.r24*({'24K':0.999,'22K':0.916,'18K':0.750,'14K':0.583}[purity])/0.999;
+    var goldVal=rate*grams, gstAmt=goldVal*0.03;
+    var total=gst?goldVal+gstAmt:goldVal;
+    document.getElementById('c-title').textContent=grams+' g · '+purity+' · '+b.name;
+    document.getElementById('c-total').textContent=fmt(total);
+    document.getElementById('c-basis').textContent=gst?'including 3% GST, excluding making charges':'pre-GST, excluding making charges';
+    document.getElementById('c-rate').textContent=fmt(rate)+'/g';
+    document.getElementById('c-gold').textContent=fmt(goldVal);
+    document.getElementById('c-gst').textContent=gst?fmt(gstAmt):'not applied';
   }
-  function draw(days){
-    var cutoff=new Date(); cutoff.setDate(cutoff.getDate()-days);
-    var data=TREND.filter(function(d){return new Date(d[0])>=cutoff;});
-    if(data.length<2)data=TREND.slice();
-    while(svg.firstChild)svg.removeChild(svg.firstChild);
-    var W=svg.clientWidth||800, H=260, padL=64, padR=16, padT=18, padB=30;
-    svg.setAttribute('viewBox','0 0 '+W+' '+H);
-    if(data.length===0)return;
-    var ys=data.map(function(d){return d[1];});
-    var mn=Math.min.apply(null,ys), mx=Math.max.apply(null,ys);
-    var span=Math.max(mx-mn,mx*0.004); mn-=span*0.25; mx+=span*0.25;
-    function X(i){return data.length===1?(padL+(W-padL-padR)/2)
-      :padL+(W-padL-padR)*i/(data.length-1);}
-    function Y(val){return padT+(H-padT-padB)*(1-(val-mn)/(mx-mn));}
-    // gridlines + y labels
-    for(var g=0;g<3;g++){
-      var gv=mn+(mx-mn)*(0.15+0.35*g), gy=Y(gv);
-      var ln=document.createElementNS(NS,'line');
-      ln.setAttribute('x1',padL);ln.setAttribute('x2',W-padR);
-      ln.setAttribute('y1',gy);ln.setAttribute('y2',gy);
-      ln.setAttribute('stroke',v('--line'));ln.setAttribute('stroke-width','1');
-      svg.appendChild(ln);
-      var tx=document.createElementNS(NS,'text');
-      tx.setAttribute('x',padL-8);tx.setAttribute('y',gy+4);
-      tx.setAttribute('text-anchor','end');
-      tx.setAttribute('fill',v('--ink-3'));
-      tx.setAttribute('font-size','11');
-      tx.setAttribute('font-family','IBM Plex Mono,monospace');
-      tx.textContent=fmt(gv);svg.appendChild(tx);
-    }
-    // x labels: first / last
-    [[0,'start'],[data.length-1,'end']].forEach(function(p){
-      if(data.length<2&&p[0]>0)return;
-      var tx=document.createElementNS(NS,'text');
-      tx.setAttribute('x',X(p[0]));tx.setAttribute('y',H-8);
-      tx.setAttribute('text-anchor',p[1]);
-      tx.setAttribute('fill',v('--ink-3'));tx.setAttribute('font-size','11');
-      tx.setAttribute('font-family','IBM Plex Mono,monospace');
-      var d=new Date(data[p[0]][0]);
-      tx.textContent=d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
-      svg.appendChild(tx);
-    });
-    // area + line
-    var line='',area='';
-    data.forEach(function(d,i){
-      line+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(d[1]).toFixed(1);
-    });
-    area=line+'L'+X(data.length-1).toFixed(1)+' '+(H-padB)
-      +'L'+X(0).toFixed(1)+' '+(H-padB)+'Z';
-    var ap=document.createElementNS(NS,'path');
-    ap.setAttribute('d',area);ap.setAttribute('fill',v('--chart-fill'));
-    svg.appendChild(ap);
-    var lp=document.createElementNS(NS,'path');
-    lp.setAttribute('d',line);lp.setAttribute('fill','none');
-    lp.setAttribute('stroke',v('--chart-line'));
-    lp.setAttribute('stroke-width','2');lp.setAttribute('stroke-linecap','round');
-    svg.appendChild(lp);
-    // points + last label
-    data.forEach(function(d,i){
-      var c=document.createElementNS(NS,'circle');
-      c.setAttribute('cx',X(i));c.setAttribute('cy',Y(d[1]));
-      c.setAttribute('r',i===data.length-1?4:3);
-      c.setAttribute('fill',v('--chart-line'));
-      c.setAttribute('stroke',v('--card'));c.setAttribute('stroke-width','2');
-      svg.appendChild(c);
-    });
-    var last=document.createElementNS(NS,'text');
-    last.setAttribute('x',Math.min(X(data.length-1),W-padR-4));
-    last.setAttribute('y',Y(data[data.length-1][1])-12);
-    last.setAttribute('text-anchor','end');
-    last.setAttribute('fill',v('--gold'));
-    last.setAttribute('font-size','12.5');last.setAttribute('font-weight','600');
-    last.setAttribute('font-family','IBM Plex Mono,monospace');
-    last.textContent=fmt(data[data.length-1][1]);
-    svg.appendChild(last);
-    // hover
-    svg.onmousemove=function(e){
-      var r=svg.getBoundingClientRect();
-      var mx_=(e.clientX-r.left)*(W/r.width);
-      var best=0,bd=1e9;
-      data.forEach(function(d,i){var dd=Math.abs(X(i)-mx_);if(dd<bd){bd=dd;best=i;}});
-      var d=new Date(data[best][0]);
-      tip.style.display='block';
-      tip.style.left=(X(best)*(r.width/W))+'px';
-      tip.style.top=(Y(data[best][1])*(r.height/H))+'px';
-      tip.textContent=d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' · '+fmt(data[best][1]);
-    };
-    svg.onmouseleave=function(){tip.style.display='none';};
-  }
-  var btns=document.querySelectorAll('.ranges button');
-  [].forEach.call(btns,function(b){
+  w.addEventListener('input',calc);
+  sel.addEventListener('change',calc);
+  document.querySelectorAll('[data-p]').forEach(function(b){
     b.addEventListener('click',function(){
-      [].forEach.call(btns,function(x){x.setAttribute('aria-pressed','false');});
-      b.setAttribute('aria-pressed','true');
-      draw(parseInt(b.dataset.days,10));
+      document.querySelectorAll('[data-p]').forEach(function(x){x.setAttribute('aria-pressed','false');});
+      b.setAttribute('aria-pressed','true');purity=b.dataset.p;calc();
     });
   });
-  draw(7);
-  window.addEventListener('resize',function(){
-    var act=document.querySelector('.ranges button[aria-pressed="true"]');
-    draw(parseInt(act.dataset.days,10));
+  document.querySelectorAll('[data-g]').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('[data-g]').forEach(function(x){x.setAttribute('aria-pressed','false');});
+      b.setAttribute('aria-pressed','true');gst=b.dataset.g==='1';calc();
+    });
+  });
+  calc();
+})();
+</script>
+</body>
+</html>
+""")
+
+
+INQUIRY_TEMPLATE = Template("""<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Gold Rate Alerts by Email - GoldRates</title>
+<meta name="description" content="Get one clean email every morning with India's gold rate comparison - the cheapest jeweller, the IBJA bullion premium and the market median. Free sign-up.">
+<link rel="canonical" href="$site_url/inquiry.html">
+<meta name="robots" content="index,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+$base_css
+.formcard{background:var(--card);border:1px solid var(--line);
+  border-radius:16px;padding:30px;max-width:640px;margin:8px 0 40px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:560px){.grid2{grid-template-columns:1fr}}
+.field{margin-bottom:16px}
+.field label{display:block;font:500 12px/1.4 "IBM Plex Mono",monospace;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
+  margin-bottom:6px}
+.field input,.field select{width:100%;font:15px "IBM Plex Sans",sans-serif;
+  color:var(--ink);background:var(--paper);border:1px solid var(--line);
+  border-radius:10px;padding:12px 14px}
+.field input:focus,.field select:focus{border-color:var(--gold);outline:none}
+.req{color:var(--warm)}
+.hp{position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden}
+.msg{border-radius:10px;padding:14px 16px;font-size:14.5px;margin-top:14px;
+  display:none}
+.msg-ok{background:color-mix(in srgb,var(--emerald) 12%,transparent);
+  color:var(--emerald);border:1px solid var(--emerald)}
+.msg-err{background:color-mix(in srgb,var(--warm) 12%,transparent);
+  color:var(--warm);border:1px solid var(--warm)}
+.privacy{font-size:12.5px;color:var(--ink-3);margin-top:14px;max-width:60ch}
+.hero-sm{background:
+  radial-gradient(120% 160% at 85% -20%,rgba(217,178,74,.16),transparent 55%),
+  linear-gradient(160deg,var(--board),var(--board-2));
+  color:#EDE9DD;border-radius:16px;margin:20px 0 26px;padding:34px 34px;
+  border:1px solid rgba(217,178,74,.22)}
+.hero-sm h1{font-size:clamp(24px,4vw,34px);color:#F6F1E3;margin-bottom:6px}
+.hero-sm p{color:#B9C2B4;max-width:52ch;font-size:15px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <a class="brand" href="$site_url/">Gold<span class="karat">Rates</span></a>
+  <div class="topright">
+    <a class="btn" href="$site_url/">← Today's rates</a>
+  </div>
+</header>
+
+<section class="hero-sm">
+  <h1>Daily Gold Rate Alerts</h1>
+  <p>One clean email every morning: which jeweller is cheapest, the market
+  median, and the premium over the IBJA bullion rate. No spam, unsubscribe
+  any time.</p>
+</section>
+
+<form id="inq" class="formcard" novalidate>
+  <div class="field"><label for="f-name">Name <span class="req">*</span></label>
+    <input id="f-name" name="name" autocomplete="name" required maxlength="80"></div>
+  <div class="grid2">
+    <div class="field"><label for="f-email">Email <span class="req">*</span></label>
+      <input id="f-email" name="email" type="email" autocomplete="email"
+      required maxlength="120"></div>
+    <div class="field"><label for="f-phone">Phone <span class="req">*</span></label>
+      <input id="f-phone" name="phone" type="tel" autocomplete="tel"
+      inputmode="tel" required maxlength="20" placeholder="+91"></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="f-country">Country</label>
+      <select id="f-country" name="country" autocomplete="country-name">
+        <option selected>India</option><option>United Arab Emirates</option>
+        <option>United States</option><option>United Kingdom</option>
+        <option>Singapore</option><option>Other</option>
+      </select></div>
+    <div class="field"><label for="f-state">State</label>
+      <input id="f-state" name="state" autocomplete="address-level1"
+      maxlength="60"></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="f-city">City</label>
+      <input id="f-city" name="city" autocomplete="address-level2"
+      maxlength="60"></div>
+    <div class="field"><label for="f-zip">PIN / ZIP code</label>
+      <input id="f-zip" name="zip" autocomplete="postal-code"
+      inputmode="numeric" maxlength="10"></div>
+  </div>
+  <div class="hp" aria-hidden="true">
+    <label>Website<input name="website" tabindex="-1" autocomplete="off"></label>
+  </div>
+  <button class="btn btn-gold" type="submit" id="f-btn">Subscribe to daily rates</button>
+  <div class="msg msg-ok" id="m-ok">You're in - the next morning's rates will
+  land in your inbox. You can reply to any email to unsubscribe.</div>
+  <div class="msg msg-err" id="m-err">Something went wrong - please check the
+  highlighted fields and try again.</div>
+  <p class="privacy">Your details are used only to send the daily gold-rate
+  email and are never sold or shared with jewellers or advertisers.</p>
+</form>
+
+<footer>
+  <p>© $year GoldRates - daily gold rate comparison for India.</p>
+</footer>
+
+</div>
+<script>
+(function(){
+  var URL_="$supabase_url", KEY="$anon_key";
+  var form=document.getElementById('inq');
+  var ok=document.getElementById('m-ok'), err=document.getElementById('m-err');
+  var btn=document.getElementById('f-btn');
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    ok.style.display='none';err.style.display='none';
+    if(form.website.value){return;}          /* honeypot */
+    if(!form.reportValidity()){return;}
+    if(!KEY){err.textContent='Subscriptions open shortly - please check back soon.';
+      err.style.display='block';return;}
+    btn.disabled=true;btn.textContent='Subscribing...';
+    fetch(URL_+'/rest/v1/inquiries',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY,
+               'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
+      body:JSON.stringify({
+        name:form.name.value.trim(), email:form.email.value.trim(),
+        phone:form.phone.value.trim(), country:form.country.value,
+        state:form.state.value.trim(), city:form.city.value.trim(),
+        zip:form.zip.value.trim()
+      })
+    }).then(function(r){
+      if(!r.ok){throw new Error('bad status');}
+      form.reset();ok.style.display='block';
+      btn.textContent='Subscribed';
+    }).catch(function(){
+      err.style.display='block';
+      btn.disabled=false;btn.textContent='Subscribe to daily rates';
+    });
   });
 })();
 </script>
