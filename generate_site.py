@@ -425,6 +425,11 @@ $base_css
 .pbar-neg{background:linear-gradient(90deg,color-mix(in srgb,var(--emerald) 70%,transparent),var(--emerald))}
 .pbar-val{flex:0 0 52px;font-family:"IBM Plex Mono",monospace;
   font-size:12.5px;text-align:right;color:var(--ink-2)}
+@media (max-width:420px){
+  .pbar-row{flex-wrap:wrap;row-gap:5px}
+  .pbar-name{flex:1 1 100%}
+  .pbar-track{flex:1 1 auto}
+}
 
 /* table */
 .tablebar{display:flex;justify-content:space-between;align-items:center;
