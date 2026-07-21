@@ -189,7 +189,7 @@ def main():
          f"On {display_date}, the market median 24K gold rate across major "
          f"Indian jewellers is {inr(med['24K'])} per gram (pre-GST). The 22K "
          f"rate is {inr(med['22K'])} per gram. Rates are compared across "
-         f"{len(live)} leading jewellery brands and refreshed daily."),
+         f"{len(live)} leading jewellery brands and updated daily."),
         ("Which jeweller has the lowest gold rate today?",
          f"Today, {lowest['brands']['name']} lists the lowest effective 24K "
          f"gold rate at {inr(ladder(lowest['canonical_24k_pre_gst'])['24K'])} "
@@ -209,9 +209,9 @@ def main():
          "Purity scales the price: the 22K rate is 91.6% of the pure-gold "
          "rate."),
         ("How often are these rates updated?",
-         "Rates are refreshed automatically several times every day, and each "
-         "brand's figure is quality-checked against the market before it is "
-         "published. Subscribers get the day's comparison by email."),
+         "Our team updates the rates manually every day. Each brand's figure "
+         "is checked against the market before it is published, and "
+         "subscribers receive the day's comparison by email."),
     ]
     jsonld = json.dumps([
         {"@context": "https://schema.org", "@type": "WebSite",
@@ -656,8 +656,8 @@ $faq
   brand's published prices, and can change during the day. Always confirm the
   billed rate with the jeweller before purchase. This site does not provide
   investment advice.</p>
-  <p>© $year GoldRates - daily gold rate comparison for India. Data refreshed
-  automatically; last build $iso_now.</p>
+  <p>© $year GoldRates - daily gold rate comparison for India.
+  Rates updated daily; last updated $date.</p>
 </footer>
 
 </div>
