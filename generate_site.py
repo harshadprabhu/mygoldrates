@@ -72,7 +72,7 @@ def main():
     anon_key = os.environ.get("SUPABASE_ANON_KEY", "")
     supabase_url = os.environ["SUPABASE_URL"]
     today = datetime.now(timezone.utc).date().isoformat()
-    rows = sb.table("rates").select("*, brands(name, slug)") \
+    rows = sb.table("rates").select("*, brands(name, slug, domain)") \
              .eq("rate_date", today).execute().data
     rows = [r for r in rows if r.get("brands") and r.get("canonical_24k_pre_gst")]
     live = [r for r in rows if r["status"] == "published"]
@@ -165,8 +165,13 @@ def main():
             if r["brand_id"] == lowest["brand_id"] else ""
         est = ' <span class="stamp stamp-est">indicative</span>' \
             if r.get("method") == "reference-median" else ""
+        dom = (b.get("domain") or "").replace("https://", "").split("/")[0]
+        logo = (f'<img class="blogo" alt="" loading="lazy" '
+                f'src="https://www.google.com/s2/favicons?domain={dom}&amp;sz=64" '
+                f'onerror="this.style.visibility=\'hidden\'">') if dom else ""
         body_rows.append(
-            f'<tr><th scope="row">{b["name"]}{best}{est}</th>'
+            f'<tr><th scope="row"><span class="bcell">{logo}'
+            f'<span>{b["name"]}{best}{est}</span></span></th>'
             f'<td class="num" data-v="{lad["24K"]:.2f}">{inr(lad["24K"])}</td>'
             f'<td class="num" data-v="{lad["22K"]:.2f}">{inr(lad["22K"])}</td>'
             f'<td class="num" data-v="{lad["18K"]:.2f}">{inr(lad["18K"])}</td>'
@@ -238,6 +243,7 @@ def main():
         low_brand=lowest["brands"]["name"],
         ibja_strip=ibja_strip, ibja_section=ibja_section,
         calc_brands=json.dumps(calc_brands),
+        supabase_url=supabase_url, anon_key=anon_key,
         rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld, **common)
     inquiry = INQUIRY_TEMPLATE.substitute(
         supabase_url=supabase_url, anon_key=anon_key, **common)
@@ -473,6 +479,53 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 .adslot{margin:30px 0;min-height:90px;border:1px dashed var(--line);
   border-radius:10px;display:flex;align-items:center;justify-content:center;
   color:var(--ink-3);font-size:12px;letter-spacing:.08em}
+
+/* brand logos */
+.bcell{display:inline-flex;align-items:center;gap:10px}
+.blogo{width:20px;height:20px;border-radius:5px;object-fit:contain;
+  background:#fff;border:1px solid var(--line);padding:1px;flex:0 0 20px}
+
+/* gold coin cursor trail */
+.coin{position:fixed;border-radius:50%;pointer-events:none;z-index:1200;
+  background:radial-gradient(circle at 35% 30%,#F7E7A9,#D9B24A 55%,#8C6A18);
+  box-shadow:0 0 6px rgba(217,178,74,.55);
+  animation:coinfall .9s ease-in forwards}
+@keyframes coinfall{to{transform:translateY(48px) scale(.35);opacity:0}}
+
+/* signup modal */
+.overlay{position:fixed;inset:0;background:rgba(8,13,10,.66);display:none;
+  align-items:center;justify-content:center;z-index:1000;padding:18px}
+.overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid rgba(217,178,74,.45);
+  border-radius:16px;max-width:560px;width:100%;max-height:92vh;
+  overflow:auto;padding:28px;position:relative;
+  box-shadow:0 24px 70px rgba(0,0,0,.4)}
+.modal h2{margin:0 0 4px}
+.modal .hint{margin-bottom:16px}
+.modal-x{position:absolute;top:8px;right:12px;background:none;border:0;
+  font-size:24px;line-height:1;color:var(--ink-3);cursor:pointer;padding:6px}
+.modal-x:hover{color:var(--ink)}
+.m-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:520px){.m-grid2{grid-template-columns:1fr}}
+.m-field{margin-bottom:13px}
+.m-field label{display:block;font:500 11.5px/1.4 "IBM Plex Mono",monospace;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
+  margin-bottom:5px}
+.m-field input,.m-field select{width:100%;font:15px "IBM Plex Sans",sans-serif;
+  color:var(--ink);background:var(--paper);border:1px solid var(--line);
+  border-radius:10px;padding:11px 13px}
+.m-field input:focus,.m-field select:focus{border-color:var(--gold);outline:none}
+.consent{display:flex;gap:8px;align-items:flex-start;margin:4px 0 14px;
+  font-size:11.5px;color:var(--ink-3);max-width:52ch}
+.consent input{margin-top:2px;accent-color:var(--gold)}
+.m-msg{border-radius:10px;padding:12px 14px;font-size:14px;margin-top:12px;
+  display:none}
+.m-ok{background:color-mix(in srgb,var(--emerald) 12%,transparent);
+  color:var(--emerald);border:1px solid var(--emerald)}
+.m-err{background:color-mix(in srgb,var(--warm) 12%,transparent);
+  color:var(--warm);border:1px solid var(--warm)}
+.hp{position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden}
+
 .faq{border-bottom:1px solid var(--line);padding:14px 0}
 .faq summary{font-weight:500;cursor:pointer;color:var(--ink)}
 .faq p{margin-top:10px;color:var(--ink-2);max-width:70ch;font-size:15px}
@@ -487,7 +540,7 @@ $ibja_strip
   <a class="brand" href="$site_url/">Gold<span class="karat">Rates</span></a>
   <div class="topright">
     <span class="updated">Updated $date, $time</span>
-    <a class="btn" href="inquiry.html">Daily rate alerts</a>
+    <a class="btn js-alert" href="inquiry.html">Daily rate alerts</a>
   </div>
 </header>
 
@@ -552,6 +605,8 @@ making charges, so every brand is compared on the same basis.</p>
 <!-- AdSense: paste your ad unit snippet inside this div after approval -->
 <div class="adslot" aria-hidden="true">advertisement</div>
 
+$ibja_section
+
 <section aria-labelledby="cmp">
   <p class="eyebrow">Today's Board</p>
   <h2 id="cmp">Compare Gold Rates Across Jewellers</h2>
@@ -576,15 +631,13 @@ $rows
   </div>
 </section>
 
-$ibja_section
-
 <div class="cta">
   <div>
     <h2>Tomorrow's rates, in your inbox</h2>
     <p>One clean email every morning with the day's comparison - which brand
     is cheapest, the bullion premium, and the median. Free.</p>
   </div>
-  <a class="btn btn-gold" href="inquiry.html">Get daily alerts</a>
+  <a class="btn btn-gold js-alert" href="inquiry.html">Get daily alerts</a>
 </div>
 
 <div class="adslot" aria-hidden="true">advertisement</div>
@@ -605,6 +658,60 @@ $faq
 </footer>
 
 </div>
+
+<div class="overlay" id="alert-overlay" role="dialog" aria-modal="true"
+     aria-labelledby="m-title">
+  <div class="modal">
+    <button class="modal-x" id="m-close" aria-label="Close">×</button>
+    <p class="eyebrow" style="margin-top:0">Daily Rate Alerts</p>
+    <h2 id="m-title">Tomorrow's rates, in your inbox</h2>
+    <p class="hint">One clean email every morning - the cheapest jeweller,
+    the market median and the bullion premium. Free, unsubscribe any time.</p>
+    <form id="m-form" novalidate>
+      <div class="m-field"><label for="m-name">Name *</label>
+        <input id="m-name" name="name" autocomplete="name" required maxlength="80"></div>
+      <div class="m-grid2">
+        <div class="m-field"><label for="m-email">Email *</label>
+          <input id="m-email" name="email" type="email" autocomplete="email"
+          required maxlength="120"></div>
+        <div class="m-field"><label for="m-phone">Phone *</label>
+          <input id="m-phone" name="phone" type="tel" autocomplete="tel"
+          inputmode="tel" required maxlength="20" placeholder="+91"></div>
+      </div>
+      <div class="m-grid2">
+        <div class="m-field"><label for="m-country">Country</label>
+          <select id="m-country" name="country" autocomplete="country-name">
+            <option selected>India</option><option>United Arab Emirates</option>
+            <option>United States</option><option>United Kingdom</option>
+            <option>Singapore</option><option>Other</option>
+          </select></div>
+        <div class="m-field"><label for="m-state">State</label>
+          <input id="m-state" name="state" autocomplete="address-level1"
+          maxlength="60"></div>
+      </div>
+      <div class="m-grid2">
+        <div class="m-field"><label for="m-city">City</label>
+          <input id="m-city" name="city" autocomplete="address-level2"
+          maxlength="60"></div>
+        <div class="m-field"><label for="m-zip">PIN / ZIP</label>
+          <input id="m-zip" name="zip" autocomplete="postal-code"
+          inputmode="numeric" maxlength="10"></div>
+      </div>
+      <div class="hp" aria-hidden="true">
+        <label>Website<input name="website" tabindex="-1" autocomplete="off"></label>
+      </div>
+      <label class="consent"><input type="checkbox" name="offers" checked>
+        <span>Also send me gold offers, festive-scheme alerts and buying
+        guides by email. You can opt out any time.</span></label>
+      <button class="btn btn-gold" type="submit" id="m-btn">Subscribe</button>
+      <div class="m-msg m-ok" id="mm-ok">You're in - see you tomorrow
+      morning.</div>
+      <div class="m-msg m-err" id="mm-err">Something went wrong - please try
+      again.</div>
+    </form>
+  </div>
+</div>
+
 <script>
 var BRANDS=$calc_brands;
 var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
@@ -688,6 +795,84 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     });
   });
   calc();
+
+  /* ---- gold coin cursor trail ---- */
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches &&
+     !matchMedia('(pointer: coarse)').matches){
+    var lastCoin=0;
+    document.addEventListener('mousemove',function(e){
+      var now=Date.now(); if(now-lastCoin<55)return; lastCoin=now;
+      var c=document.createElement('span'); c.className='coin';
+      var s=5+Math.random()*7;
+      c.style.width=s+'px'; c.style.height=s+'px';
+      c.style.left=(e.clientX+(Math.random()*16-8))+'px';
+      c.style.top=(e.clientY+4+(Math.random()*8))+'px';
+      document.body.appendChild(c);
+      setTimeout(function(){if(c.parentNode)c.parentNode.removeChild(c);},950);
+    },{passive:true});
+  }
+
+  /* ---- daily-alerts modal ---- */
+  var SB_URL="$supabase_url", SB_KEY="$anon_key";
+  var overlay=document.getElementById('alert-overlay');
+  var mform=document.getElementById('m-form');
+  var mok=document.getElementById('mm-ok'), merr=document.getElementById('mm-err');
+  var mbtn=document.getElementById('m-btn');
+  function openModal(){overlay.classList.add('open');
+    document.getElementById('m-name').focus();}
+  function closeModal(){overlay.classList.remove('open');
+    try{sessionStorage.setItem('gr_dismissed','1');}catch(e){}}
+  document.getElementById('m-close').addEventListener('click',closeModal);
+  overlay.addEventListener('click',function(e){
+    if(e.target===overlay)closeModal();});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&overlay.classList.contains('open'))closeModal();});
+  document.querySelectorAll('.js-alert').forEach(function(a){
+    a.addEventListener('click',function(e){e.preventDefault();openModal();});
+  });
+  var subscribed=false;
+  try{subscribed=!!localStorage.getItem('gr_sub');}catch(e){}
+  var dismissed=false;
+  try{dismissed=!!sessionStorage.getItem('gr_dismissed');}catch(e){}
+  if(!subscribed&&!dismissed){setTimeout(openModal,18000);}
+  function send(payload,retried){
+    return fetch(SB_URL+'/rest/v1/inquiries',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,
+               'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+      body:JSON.stringify(payload)
+    }).then(function(r){
+      if(r.ok)return true;
+      /* older table without the offers column: retry once without it */
+      if(!retried&&payload.offers_optin!==undefined){
+        var p2={};for(var k in payload){if(k!=='offers_optin')p2[k]=payload[k];}
+        return send(p2,true);
+      }
+      throw new Error('bad status');
+    });
+  }
+  mform.addEventListener('submit',function(e){
+    e.preventDefault();
+    mok.style.display='none';merr.style.display='none';
+    if(mform.website.value){return;}
+    if(!mform.reportValidity()){return;}
+    if(!SB_KEY){merr.textContent='Subscriptions open shortly - please check back soon.';
+      merr.style.display='block';return;}
+    mbtn.disabled=true;mbtn.textContent='Subscribing...';
+    send({
+      name:mform.name.value.trim(), email:mform.email.value.trim(),
+      phone:mform.phone.value.trim(), country:mform.country.value,
+      state:mform.state.value.trim(), city:mform.city.value.trim(),
+      zip:mform.zip.value.trim(), offers_optin:mform.offers.checked
+    },false).then(function(){
+      mok.style.display='block';mbtn.textContent='Subscribed';
+      try{localStorage.setItem('gr_sub','1');}catch(e){}
+      setTimeout(closeModal,1600);
+    }).catch(function(){
+      merr.style.display='block';
+      mbtn.disabled=false;mbtn.textContent='Subscribe';
+    });
+  });
 })();
 </script>
 </body>
@@ -789,6 +974,12 @@ $base_css
   <div class="hp" aria-hidden="true">
     <label>Website<input name="website" tabindex="-1" autocomplete="off"></label>
   </div>
+  <label style="display:flex;gap:8px;align-items:flex-start;margin:2px 0 16px;
+  font-size:11.5px;color:var(--ink-3);max-width:52ch">
+    <input type="checkbox" name="offers" checked
+    style="margin-top:2px;accent-color:var(--gold)">
+    <span>Also send me gold offers, festive-scheme alerts and buying guides
+    by email. You can opt out any time.</span></label>
   <button class="btn btn-gold" type="submit" id="f-btn">Subscribe to daily rates</button>
   <div class="msg msg-ok" id="m-ok">You're in - the next morning's rates will
   land in your inbox. You can reply to any email to unsubscribe.</div>
@@ -825,7 +1016,7 @@ $base_css
         name:form.name.value.trim(), email:form.email.value.trim(),
         phone:form.phone.value.trim(), country:form.country.value,
         state:form.state.value.trim(), city:form.city.value.trim(),
-        zip:form.zip.value.trim()
+        zip:form.zip.value.trim(), offers_optin:form.offers.checked
       })
     }).then(function(r){
       if(!r.ok){throw new Error('bad status');}
