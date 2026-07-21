@@ -54,8 +54,9 @@ PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 
 # Brands behind anti-bot walls only reachable through Zyte API (needs the
 # ZYTE_API_KEY secret) instead of a direct request; keyed by brand slug so no
-# DB schema change is needed.
-NEEDS_PROXY = {"tanishq", "malabar"}
+# DB schema change is needed. caratlane (Titan, like tanishq) serves its
+# product price-breakup only to real browsers.
+NEEDS_PROXY = {"tanishq", "malabar", "caratlane"}
 
 # Method tag for estimated rows: a brand with no live source gets the day's
 # market median so no brand is ever missing. Excluded from the median itself,
@@ -629,7 +630,10 @@ def main():
         }
         try:
             persisted_ladder = upsert_rate(sb, row)
-            if url != b.get("rate_url"):
+            # Record a discovered URL only when the brand had none configured:
+            # a curated rate_url (hand-picked product/breakup page) must not be
+            # overwritten just because path discovery found some other page.
+            if not b.get("rate_url"):
                 sb.table("brands").update({"rate_url": url}).eq("id", b["id"]).execute()
             saved.append(row)
             detail = " ".join(f"{k}={found[k]:,.0f}x{counts[k]}" for k in sorted(found))
