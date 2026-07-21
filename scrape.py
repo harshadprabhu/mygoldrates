@@ -234,27 +234,38 @@ def extract_labeled_rates(text):
     return buckets
 
 
-# 'Gold' label (cells may join with no space, so no trailing boundary), then
-# the gold portion's weight and rupee value, e.g. 'Gold1.880 g RS 15,874'.
+# The gold portion's value, with the weight either inline (Kisna:
+# 'Gold1.880 g RS 15,874') or in a separate field (BlueStone: 'Gold Rs.
+# 1,61,615' + 'Weight 11.97 gram'). Gap after 'Gold' is spaces/colons only
+# (no letters) so 'Gold Color'/'Gold Purity' can't match; currency may be
+# the rupee sign or 'Rs.'/'INR'.
+_CUR = r"(?:₹|Rs\.?|INR)"
 _GOLD_VAL_RE = re.compile(
-    r"\bGold(?:\s*value)?\s*([\d.]+)\s*(?:g|gm|gram)\b\s*₹\s*([\d,]+(?:\.\d{1,2})?)",
-    re.I)
-_PURITY_LABEL_RE = re.compile(r"purity\D{0,12}(\d{2})\s*K", re.I)
+    r"\bGold[ \t:]{0,3}(?:([\d.]+)\s*(?:g|gm|gram)\b\s*)?"
+    + _CUR + r"\s*([\d,]+(?:\.\d{1,2})?)", re.I)
+_WEIGHT_RE = re.compile(r"\bWeight\b\D{0,8}([\d.]+)\s*(?:g|gm|gram)\b", re.I)
+_PURITY_LABEL_RE = re.compile(r"(?:purity|type)\D{0,12}(\d{2})\s*K", re.I)
+_PURITY_ANY_RE = re.compile(r"(\d{2})\s*K(?:T|ARAT)?\b", re.I)
 
 
 def extract_gold_value_breakup(text):
-    """Price breakups that give the gold portion's value and weight but no
-    per-gram rate (e.g. Kisna: 'Gold 1.880 g RS 15,874') let us back it out:
+    """Price breakups that give the gold portion's value (and weight, inline
+    or in a separate Weight field) but no per-gram rate let us back it out:
     rate = gold_value / gold_weight, bound to the item's stated purity. The
     gold line is already separated from the diamond/stone line, so stones do
-    not contaminate it."""
+    not contaminate it. Handles Kisna ('Gold 1.880 g RS 15,874') and BlueStone
+    ('Gold RS 1,61,615' + 'Weight 11.97 gram')."""
     m = _GOLD_VAL_RE.search(text)
     if not m:
         return {}
-    weight, value = _f(m.group(1)), _f(m.group(2))
-    if not weight or not value:
+    value = _f(m.group(2))
+    weight = _f(m.group(1)) if m.group(1) else None
+    if weight is None:
+        wm = _WEIGHT_RE.search(text)
+        weight = _f(wm.group(1)) if wm else None
+    if not value or not weight:
         return {}
-    pm = _PURITY_LABEL_RE.search(text) or PURITY_RE.search(text)
+    pm = _PURITY_LABEL_RE.search(text) or _PURITY_ANY_RE.search(text)
     if not pm:
         return {}
     karat = f"{pm.group(1)}K"
@@ -398,6 +409,17 @@ def render(url):
             except Exception:
                 pass
             pg.wait_for_timeout(3500)
+            # Some jewellers lazy-load the gold value only when the collapsed
+            # price-breakup section is opened; click any such toggle first.
+            try:
+                pg.evaluate(
+                    "Array.from(document.querySelectorAll('*'))"
+                    ".filter(e=>/^\\s*(view\\s*)?price\\s*break-?\\s*up\\s*$/i"
+                    ".test(e.textContent||'')&&(e.textContent||'').length<25)"
+                    ".slice(0,3).forEach(e=>e.click())")
+                pg.wait_for_timeout(1500)
+            except Exception:
+                pass
             html = pg.content()
             b.close()
             return html
