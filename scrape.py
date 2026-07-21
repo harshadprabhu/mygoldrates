@@ -241,9 +241,11 @@ def extract_labeled_rates(text):
 # the rupee sign or 'Rs.'/'INR'.
 _CUR = r"(?:₹|Rs\.?|INR)"
 _GOLD_VAL_RE = re.compile(
-    r"\bGold[ \t:]{0,3}(?:([\d.]+)\s*(?:g|gm|gram)\b\s*)?"
+    r"\bGold(?:\s*(?:value|rate|amount))?[ \t:]{0,4}"
+    r"(?:([\d.]+)\s*(?:g|gm|gram)\b\s*)?"
     + _CUR + r"\s*([\d,]+(?:\.\d{1,2})?)", re.I)
-_WEIGHT_RE = re.compile(r"\bWeight\b\D{0,8}([\d.]+)\s*(?:g|gm|gram)\b", re.I)
+# No trailing boundary after 'Weight' since the value can abut it ('Weight5.72 g').
+_WEIGHT_RE = re.compile(r"\bWeight[^\d]{0,8}([\d.]+)\s*(?:g|gm|gram)\b", re.I)
 _PURITY_LABEL_RE = re.compile(r"(?:purity|type)\D{0,12}(\d{2})\s*K", re.I)
 _PURITY_ANY_RE = re.compile(r"(\d{2})\s*K(?:T|ARAT)?\b", re.I)
 
