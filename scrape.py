@@ -210,16 +210,19 @@ def extract_headline_rate(text):
     return {karat: [pg]} if pg else {}
 
 
+# Karat, then a short gap that may hold a fineness "(999)" and/or a word like
+# "Gold (", then the per-gram rate ending in /g. Covers header banners
+# ("24 KT (999) : RS 14,429/g") and price-breakup lines ("18KT Gold (RS 10,835 / g)").
 _LABELED_RE = re.compile(
-    r"(\d{2})\s*K(?:T|ARAT)?\b\s*(?:\(\d{3}\))?\s*:?\s*"
+    r"(\d{2})\s*K(?:T|ARAT)?\b[^₹\d]{0,10}(?:\d{3}[^₹\d]{0,6})?"
     r"₹\s*([\d,]+(?:\.\d{1,2})?)\s*/\s*(?:g|gm|gram)\b", re.I)
 
 
 def extract_labeled_rates(text):
-    """Direct 'NN KT ... RS NNNNN /g' displays (header rate banners, tickers)
-    bind each karat to its per-gram rate right next to it, so every purity is
-    captured unambiguously even when several sit side by side - which is
-    exactly where a proximity window fails."""
+    """Direct 'NN KT ... RS NNNNN /g' displays - header rate banners/tickers
+    and per-item price-breakup lines - bind each karat to the per-gram rate
+    right next to it, so every purity is captured unambiguously even when
+    several sit side by side, which is exactly where a proximity window fails."""
     buckets = {}
     for m in _LABELED_RE.finditer(text):
         karat = f"{m.group(1)}K"
