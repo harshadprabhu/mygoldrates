@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://harshadprabhu.github.io/goldrates/sitemap.xml
