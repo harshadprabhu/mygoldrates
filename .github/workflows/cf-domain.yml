@@ -1,0 +1,74 @@
+name: cf-domain
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "inspect (read-only) or switch (change DNS)"
+        default: "inspect"
+
+jobs:
+  domain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manage Cloudflare Pages custom domain
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          MODE: ${{ inputs.mode }}
+        run: |
+          set -u
+          api="https://api.cloudflare.com/client/v4"
+          auth=(-H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/json")
+
+          echo "### token verify"
+          curl -s "${auth[@]}" "$api/user/tokens/verify" | jq '{success, status:.result.status}'
+
+          echo "### attach custom domains to Pages project (additive, safe)"
+          for d in mygoldrates.com www.mygoldrates.com; do
+            echo "-- $d"
+            curl -s "${auth[@]}" -X POST \
+              "$api/accounts/$CF_ACCT/pages/projects/mygoldrates/domains" \
+              -d "{\"name\":\"$d\"}" \
+              | jq '{success, name:.result.name, status:.result.status, errors:(.errors|map(.message))}'
+          done
+
+          echo "### zone lookup"
+          zid=$(curl -s "${auth[@]}" "$api/zones?name=mygoldrates.com" | jq -r '.result[0].id // empty')
+          echo "zone_id=${zid:-<none>}"
+          if [ -z "$zid" ]; then
+            echo "!! token has no Zone/DNS access - cannot switch DNS. Add Zone:DNS:Edit."
+            exit 0
+          fi
+
+          echo "### current DNS records"
+          curl -s "${auth[@]}" "$api/zones/$zid/dns_records?per_page=100" \
+            | jq -r '.result[] | "\(.type)\t\(.name)\t-> \(.content)\tproxied=\(.proxied)"'
+
+          if [ "$MODE" != "switch" ]; then
+            echo "### inspect mode - no DNS changes made"
+            exit 0
+          fi
+
+          echo "### SWITCH: delete GitHub apex A records and old www CNAME"
+          curl -s "${auth[@]}" "$api/zones/$zid/dns_records?per_page=100" \
+            | jq -r '.result[]
+                | select( (.type=="A" and (.content|startswith("185.199.")))
+                       or (.type=="AAAA" and (.content|startswith("2606:50c0")))
+                       or (.type=="CNAME" and (.name=="www.mygoldrates.com")) )
+                | .id' \
+            | while read -r rid; do
+                echo "delete $rid"
+                curl -s "${auth[@]}" -X DELETE "$api/zones/$zid/dns_records/$rid" | jq '{success}'
+              done
+
+          echo "### create proxied CNAMEs -> Cloudflare Pages"
+          for name in mygoldrates.com www.mygoldrates.com; do
+            curl -s "${auth[@]}" -X POST "$api/zones/$zid/dns_records" \
+              -d "{\"type\":\"CNAME\",\"name\":\"$name\",\"content\":\"mygoldrates.pages.dev\",\"proxied\":true}" \
+              | jq '{success, name:.result.name, errors:(.errors|map(.message))}'
+          done
+
+          echo "### final DNS records"
+          curl -s "${auth[@]}" "$api/zones/$zid/dns_records?per_page=100" \
+            | jq -r '.result[] | "\(.type)\t\(.name)\t-> \(.content)\tproxied=\(.proxied)"'
