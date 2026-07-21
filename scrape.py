@@ -22,6 +22,7 @@ THE FIX - two layers:
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import statistics
@@ -513,6 +514,72 @@ def try_html(html):
     return found, counts, how, "ok"
 
 
+# ------------------------------------------------- product self-discovery
+
+def _score_product(text):
+    """Rank candidate products: plain high-purity gold anchors first, stone
+    or non-gold items last (their breakups don't isolate a clean gold rate)."""
+    t = text.lower()
+    s = 0
+    if re.search(r"\bcoins?\b|\bbars?\b", t):
+        s += 3
+    if "24k" in t or "24-k" in t or "24 k" in t:
+        s += 2
+    if "22k" in t or "22-k" in t or "22 k" in t:
+        s += 2
+    if "gold" in t:
+        s += 1
+    if re.search(r"diamond|platinum|silver|solitaire|gemstone|pearl", t):
+        s -= 3
+    return s
+
+
+def discover_products(b, session, limit=3):
+    """When the curated rate_url stops yielding, hunt for other gold product
+    pages on the same site (Shopify catalog JSON, then sitemaps) so the brand
+    recovers with a real rate instead of falling back to an estimate."""
+    base = b["domain"] if b["domain"].startswith("http") else f"https://{b['domain']}"
+    scored: list[tuple[int, str]] = []
+
+    # 1) Shopify stores publish their catalog at /products.json.
+    html, _ = fetch(urljoin(base, "/products.json?limit=250"), session, FAST_TIMEOUT)
+    if html:
+        try:
+            for p in json.loads(html).get("products", []):
+                blob = f"{p.get('title', '')} {p.get('handle', '')} {p.get('product_type', '')}"
+                s = _score_product(blob)
+                if s > 0:
+                    scored.append((s, urljoin(base, f"/products/{p['handle']}")))
+        except (ValueError, KeyError, TypeError):
+            pass
+
+    # 2) Sitemaps (following one nested product sitemap if indexed).
+    if len(scored) < limit:
+        xml, _ = fetch(urljoin(base, "/sitemap.xml"), session, FAST_TIMEOUT)
+        if xml:
+            locs = re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", xml)
+            nested = [u for u in locs if "product" in u and u.endswith(".xml")]
+            if nested:
+                sub, _ = fetch(nested[0], session, FAST_TIMEOUT)
+                if sub:
+                    locs += re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", sub)
+            for u in locs:
+                if u.endswith(".xml"):
+                    continue
+                s = _score_product(u)
+                if s > 0:
+                    scored.append((s, u))
+
+    seen, out = set(), []
+    for s, u in sorted(scored, key=lambda x: -x[0]):
+        if u not in seen:
+            seen.add(u)
+            out.append(u)
+        if len(out) >= limit:
+            break
+    return out
+
+
 def scrape_brand(b, session):
     started = time.monotonic()
     tried, blocked = [], False
@@ -578,6 +645,30 @@ def scrape_brand(b, session):
                 if found:
                     return url, found, counts, f"rendered/{how}", "static " + reason
         tried.append(reason)
+
+    # Last resort for non-proxied brands: the configured URL is dead (product
+    # sold out, path changed), so discover another gold product on the same
+    # site and read its breakup - a real rate instead of an estimate.
+    if not proxied and b.get("domain"):
+        for url in discover_products(b, session):
+            if time.monotonic() - started > BRAND_BUDGET * 2:
+                tried.append("budget")
+                break
+            if not robots_ok(url, session):
+                continue
+            html, reason = fetch(url, session, FULL_TIMEOUT)
+            if not html:
+                tried.append("disc:" + reason)
+                continue
+            found, counts, how, note = try_html(html)
+            if found:
+                return url, found, counts, f"discovered/static/{how}", note
+            rhtml = render(url)
+            if rhtml:
+                found, counts, how, note = try_html(rhtml)
+                if found:
+                    return url, found, counts, f"discovered/rendered/{how}", note
+            tried.append("disc:" + note)
 
     uniq = []
     for t in tried:
