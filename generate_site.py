@@ -110,21 +110,27 @@ def main():
             p = (r["canonical_24k_pre_gst"] / r999 - 1) * 100
             prem.append((r["brands"]["name"], p,
                          r["canonical_24k_pre_gst"] - r999))
-        pmax = max(max(p for _, p, _ in prem), 0.1)
-        bars = "\n".join(
-            f'<div class="pbar-row" title="{name}: {inr(diff)} above bullion '
-            f'per gram"><span class="pbar-name">{name}</span>'
-            f'<span class="pbar-track"><span class="pbar-fill" '
-            f'style="width:{max(min(p / pmax * 100, 100), 2):.1f}%"></span></span>'
-            f'<span class="pbar-val">{p:+.1f}%</span></div>'
-            for name, p, diff in prem)
+        pmax = max(max(abs(p) for _, p, _ in prem), 0.1)
+        bar_rows = []
+        for name, p, diff in prem:
+            side = "above" if diff >= 0 else "below"
+            width = max(min(abs(p) / pmax * 100, 100), 2)
+            cls = "pbar-fill" if diff >= 0 else "pbar-fill pbar-neg"
+            bar_rows.append(
+                f'<div class="pbar-row" title="{name}: {inr(abs(diff))} '
+                f'{side} bullion per gram">'
+                f'<span class="pbar-name">{name}</span>'
+                f'<span class="pbar-track"><span class="{cls}" '
+                f'style="width:{width:.1f}%"></span></span>'
+                f'<span class="pbar-val">{p:+.1f}%</span></div>')
+        bars = "\n".join(bar_rows)
         ibja_section = f'''
 <section aria-labelledby="ibjah">
   <p class="eyebrow">Bullion vs Board</p>
   <h2 id="ibjah">Jeweller Premium Over the IBJA Rate</h2>
   <p class="hint">IBJA's bullion reference today is <strong>{inr(r999)}/g</strong>
-  (999) and <strong>{inr(r916)}/g</strong> (916), pre-GST. Every jeweller
-  prices above bullion - this is each brand's premium per gram of pure gold,
+  (999) and <strong>{inr(r916)}/g</strong> (916), pre-GST. Each bar is a
+  brand's premium (or discount) per gram of pure gold versus bullion,
   smallest first. Hover a bar for the rupee difference.</p>
   <div class="chartcard pbar-card">
 {bars}
@@ -407,18 +413,18 @@ $base_css
 .calc-out .split .amt{color:#EDE9DD}
 
 /* premium bars */
-.pbar-card{display:grid;gap:11px}
-.pbar-row{display:grid;grid-template-columns:minmax(110px,180px) 1fr 58px;
-  gap:12px;align-items:center}
-.pbar-name{font-size:13.5px;white-space:nowrap;overflow:hidden;
-  text-overflow:ellipsis}
-.pbar-track{height:12px;border-radius:6px;
+.pbar-card{display:flex;flex-direction:column;gap:11px}
+.pbar-row{display:flex;align-items:center;gap:12px;width:100%}
+.pbar-name{flex:0 0 clamp(110px,26vw,170px);font-size:13.5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbar-track{flex:1 1 auto;min-width:0;height:12px;border-radius:6px;
   background:color-mix(in srgb,var(--line) 55%,transparent);overflow:hidden}
 .pbar-fill{display:block;height:100%;border-radius:6px 4px 4px 6px;
   background:linear-gradient(90deg,color-mix(in srgb,var(--bar) 70%,transparent),var(--bar));
   transition:width .5s ease}
-.pbar-val{font-family:"IBM Plex Mono",monospace;font-size:12.5px;
-  text-align:right;color:var(--ink-2)}
+.pbar-neg{background:linear-gradient(90deg,color-mix(in srgb,var(--emerald) 70%,transparent),var(--emerald))}
+.pbar-val{flex:0 0 52px;font-family:"IBM Plex Mono",monospace;
+  font-size:12.5px;text-align:right;color:var(--ink-2)}
 
 /* table */
 .tablebar{display:flex;justify-content:space-between;align-items:center;
