@@ -470,10 +470,20 @@ h1,h2,.brand{font-family:"Marcellus",serif;font-weight:400;letter-spacing:.02em}
   text-transform:uppercase;color:var(--gold);margin:40px 0 8px}
 header.top{display:flex;justify-content:space-between;align-items:center;
   flex-wrap:wrap;gap:6px 18px;padding:18px 0 14px}
-.brand{font-size:22px;letter-spacing:.14em;text-transform:uppercase;
-  text-decoration:none;color:var(--ink)}
-.brand .karat{background:var(--gold-foil);-webkit-background-clip:text;
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+  color:var(--ink)}
+.brand-mark{width:34px;height:34px;flex:none;
+  filter:drop-shadow(0 1px 1px rgba(140,106,24,.28))}
+.brand-text{display:flex;flex-direction:column;line-height:1}
+.wm{font-family:"IBM Plex Sans",system-ui,sans-serif;font-weight:700;
+  font-size:21px;letter-spacing:-.015em;color:var(--ink);white-space:nowrap}
+.wm b{font-weight:700;background:var(--gold-foil);-webkit-background-clip:text;
   background-clip:text;color:transparent}
+.wm .tld{color:var(--ink-3);font-weight:600}
+.brand-tag{font:600 8px/1 "IBM Plex Mono",monospace;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin-top:5px}
+@media (max-width:520px){.brand-tag{display:none}.wm{font-size:19px}
+  .brand-mark{width:30px;height:30px}}
 .topright{display:flex;align-items:center;gap:16px}
 .updated{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
 .btn{display:inline-block;font:500 13.5px/1 "IBM Plex Sans",sans-serif;
@@ -540,26 +550,27 @@ $base_css
 
 /* rate board hero */
 .board{background:
-  radial-gradient(130% 150% at 84% -30%,rgba(224,186,86,.34),transparent 56%),
-  radial-gradient(120% 130% at 8% 130%,rgba(176,132,42,.18),transparent 55%),
-  linear-gradient(155deg,#171106,#0B0805 55%,#1B1409);
-  color:#F0EAD8;border-radius:14px;margin:16px 0 10px;padding:24px 28px 20px;
-  position:relative;overflow:hidden;border:1px solid rgba(224,186,86,.34)}
-.board::after{content:"999 · 916 · 750";position:absolute;right:20px;bottom:12px;
-  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.35em;
-  color:var(--gold-bright);opacity:.5}
-.board h1{font-size:clamp(21px,3.4vw,31px);color:#F8EFD6;margin-bottom:4px}
-.board .sub{color:#CFC7AE;max-width:58ch;font-size:13.5px;line-height:1.55}
-.board-rates{display:flex;gap:11px;flex-wrap:wrap;margin-top:16px}
-.tile{border:1px solid rgba(224,186,86,.32);border-radius:11px;
-  padding:11px 15px;min-width:132px;flex:1;background:rgba(224,186,86,.05)}
-.tile .k{font-family:"IBM Plex Mono",monospace;font-size:10.5px;
-  letter-spacing:.18em;color:var(--gold-bright);text-transform:uppercase}
-.tile .v{font-family:"IBM Plex Mono",monospace;font-size:clamp(18px,2.5vw,23px);
-  margin-top:3px;background:linear-gradient(100deg,#F0DB9A,#FFFDF4 45%,#E8C86A);
+  linear-gradient(104deg,transparent 0 40%,rgba(240,219,154,.08) 46%,
+    rgba(255,253,244,.15) 50%,rgba(240,219,154,.08) 54%,transparent 61%),
+  radial-gradient(130% 150% at 85% -35%,rgba(224,186,86,.30),transparent 55%),
+  radial-gradient(120% 130% at 4% 135%,rgba(176,132,42,.15),transparent 55%),
+  linear-gradient(155deg,#1A130A,#0B0805 55%,#17110A);
+  color:#F0EAD8;border-radius:13px;margin:14px 0 10px;padding:19px 24px 16px;
+  position:relative;overflow:hidden;border:1px solid rgba(224,186,86,.38);
+  box-shadow:inset 0 1px 0 rgba(255,247,214,.10)}
+.board h1{font-size:clamp(19px,2.9vw,27px);color:#F8EFD6;margin-bottom:3px}
+.board .sub{color:#CFC7AE;max-width:60ch;font-size:12.5px;line-height:1.5}
+.board-rates{display:flex;gap:10px;flex-wrap:wrap;margin-top:13px}
+.tile{border:1px solid rgba(224,186,86,.34);border-radius:10px;
+  padding:10px 14px;min-width:124px;flex:1;
+  background:linear-gradient(158deg,rgba(224,186,86,.11),rgba(224,186,86,.02))}
+.tile .k{font-family:"IBM Plex Mono",monospace;font-size:10px;
+  letter-spacing:.16em;color:var(--gold-bright);text-transform:uppercase}
+.tile .v{font-family:"IBM Plex Mono",monospace;font-size:clamp(17px,2.3vw,22px);
+  margin-top:3px;background:linear-gradient(100deg,#E8C86A,#FFFDF4 46%,#D9B24A);
   -webkit-background-clip:text;background-clip:text;color:transparent}
-.tile .u{font-size:11px;color:#A79B7E}
-.tile.best{background:rgba(224,186,86,.13)}
+.tile .u{font-size:10.5px;color:#A79B7E}
+.tile.best{background:linear-gradient(158deg,rgba(224,186,86,.20),rgba(224,186,86,.06))}
 .note{font-size:13px;color:var(--ink-3);margin:12px 0 24px}
 
 /* calculator */
@@ -714,7 +725,7 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 <div class="wrap">
 
 <header class="top">
-  <a class="brand" href="$site_url/">Gold<span class="karat">Rates</span></a>
+  <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
   <div class="topright">
     <span class="updated">Updated $date, $time</span>
     <a class="btn js-alert" href="inquiry.html">Daily rate alerts</a>
@@ -1138,7 +1149,7 @@ $base_css
 <div class="wrap">
 
 <header class="top">
-  <a class="brand" href="$site_url/">Gold<span class="karat">Rates</span></a>
+  <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
   <div class="topright">
     <a class="btn" href="$site_url/">← Today's rates</a>
   </div>
@@ -1274,7 +1285,7 @@ $base_css
 <body>
 <div class="wrap">
 <header class="top">
-  <a class="brand" href="$site_url/">Gold<span class="karat">Rates</span></a>
+  <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
   <div class="topright"><a class="btn" href="$site_url/">Today's rates</a></div>
 </header>
 <article class="page">
@@ -1318,7 +1329,7 @@ $base_css
 <body>
 <div class="wrap">
 <header class="top">
-  <a class="brand" href="$site_url/">Gold<span class="karat">Rates</span></a>
+  <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
 </header>
 <div class="card">
   <h1>Unsubscribe</h1>
