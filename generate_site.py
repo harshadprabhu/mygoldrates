@@ -252,11 +252,11 @@ def main():
     for r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):
         b = r["brands"]
         lad = ladder(r["canonical_24k_pre_gst"])
-        drift = (r["canonical_24k_pre_gst"] - median24) / median24 * 100
-        if drift <= -0.05:
-            dcls, dtxt = "delta-low", f"{drift:+.1f}%"
-        elif drift >= 0.05:
-            dcls, dtxt = "delta-high", f"{drift:+.1f}%"
+        ddiff = r["canonical_24k_pre_gst"] - median24
+        if ddiff <= -0.5:
+            dcls, dtxt = "delta-low", f"-{inr(abs(ddiff))}"
+        elif ddiff >= 0.5:
+            dcls, dtxt = "delta-high", f"+{inr(ddiff)}"
         else:
             dcls, dtxt = "delta-par", "at median"
         best = ' <span class="stamp stamp-best">lowest today</span>' \
@@ -270,10 +270,10 @@ def main():
         body_rows.append(
             f'<tr><th scope="row"><span class="bcell">{logo}'
             f'<span>{b["name"]}{best}{est}</span></span></th>'
-            f'<td class="num" data-v="{lad["24K"]:.2f}">{inr(lad["24K"])}</td>'
-            f'<td class="num" data-v="{lad["22K"]:.2f}">{inr(lad["22K"])}</td>'
-            f'<td class="num" data-v="{lad["18K"]:.2f}">{inr(lad["18K"])}</td>'
-            f'<td class="{dcls}" data-v="{drift:.2f}">{dtxt}</td></tr>')
+            f'<td class="num col-24" data-v="{lad["24K"]:.2f}">{inr(lad["24K"])}</td>'
+            f'<td class="num col-22" data-v="{lad["22K"]:.2f}">{inr(lad["22K"])}</td>'
+            f'<td class="num col-18" data-v="{lad["18K"]:.2f}">{inr(lad["18K"])}</td>'
+            f'<td class="{dcls} col-delta" data-v="{ddiff:.2f}">{dtxt}</td></tr>')
 
     calc_brands = [{"name": "Market median", "r24": round(median24, 2)}] + [
         {"name": r["brands"]["name"],
@@ -847,6 +847,34 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 .delta-low{color:var(--emerald)}
 .delta-high{color:var(--warm)}
 .delta-par{color:var(--ink-3)}
+.tbar-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.karatseg{display:none}
+.karatseg button{font:600 12px/1 "IBM Plex Mono",monospace;letter-spacing:.05em;
+  background:none;border:1px solid var(--line);color:var(--ink-2);
+  padding:8px 14px;cursor:pointer}
+.karatseg button:first-child{border-radius:999px 0 0 999px}
+.karatseg button:last-child{border-radius:0 999px 999px 0}
+.karatseg button+button{border-left:0}
+.karatseg button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);
+  background:color-mix(in srgb,var(--gold) 12%,transparent)}
+@media (max-width:640px){
+  .karatseg{display:inline-flex}
+  table{min-width:0}
+  .tablecard{overflow:visible}
+  #rates .col-22,#rates .col-18{display:none}
+  #rates.k22 .col-24{display:none}
+  #rates.k22 .col-22{display:table-cell}
+  #rates.k18 .col-24{display:none}
+  #rates.k18 .col-18{display:table-cell}
+  thead th,tbody th,tbody td{padding:11px 9px}
+  thead th{font-size:10.5px;letter-spacing:.05em;white-space:normal}
+  tbody td{font-size:14px}
+  tbody th{white-space:normal;font-size:13.5px;line-height:1.28}
+  .bcell{gap:7px}
+  .blogo{width:18px;height:18px;flex:0 0 18px}
+  .stamp{margin-left:0;margin-top:4px;padding:2px 6px;font-size:9.5px}
+  .bcell>span{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+}
 
 /* alerts CTA */
 .cta{background:
@@ -950,18 +978,25 @@ making charges, so every brand is compared on the same basis.</p>
   <p class="eyebrow">Today's Board</p>
   <h2 id="cmp">Compare Gold Rates Across Jewellers</h2>
   <div class="tablebar">
-    <p class="hint" style="margin:0">Sorted by today's effective 24K rate -
-    tap a column to re-sort.</p>
-    <button class="gst" id="gstbtn" aria-pressed="false">Show incl. 3% GST</button>
+    <p class="hint" style="margin:0">Sorted by today's 24K rate - tap a column
+    to re-sort. On mobile, use the karat filter to switch purity.</p>
+    <div class="tbar-controls">
+      <div class="karatseg" role="group" aria-label="Show karat">
+        <button data-k="24" aria-pressed="true">24K</button>
+        <button data-k="22" aria-pressed="false">22K</button>
+        <button data-k="18" aria-pressed="false">18K</button>
+      </div>
+      <button class="gst" id="gstbtn" aria-pressed="false">+3% GST</button>
+    </div>
   </div>
   <div class="tablecard">
   <table id="rates">
     <thead><tr>
       <th scope="col">Jeweller</th>
-      <th scope="col" aria-sort="ascending">24K / g</th>
-      <th scope="col">22K / g</th>
-      <th scope="col">18K / g</th>
-      <th scope="col">Δ vs median</th>
+      <th scope="col" class="col-24" aria-sort="ascending">24K / g</th>
+      <th scope="col" class="col-22">22K / g</th>
+      <th scope="col" class="col-18">18K / g</th>
+      <th scope="col" class="col-delta">Δ vs median</th>
     </tr></thead>
     <tbody>
 $rows
@@ -1146,6 +1181,17 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
       var dir=cur==='ascending'?-1:1;
       h.setAttribute('aria-sort',dir===1?'ascending':'descending');
       sortBy(i,dir);
+    });
+  });
+  /* ---- karat filter (mobile) ---- */
+  document.querySelectorAll('.karatseg button').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.karatseg button').forEach(function(x){
+        x.setAttribute('aria-pressed','false');});
+      b.setAttribute('aria-pressed','true');
+      table.classList.remove('k22','k18');
+      if(b.dataset.k==='22')table.classList.add('k22');
+      else if(b.dataset.k==='18')table.classList.add('k18');
     });
   });
 
