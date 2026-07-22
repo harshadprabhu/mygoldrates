@@ -76,3 +76,11 @@ jobs:
             --project-name=mygoldrates \
             --branch=main \
             --commit-dirty=true
+
+      - name: Send daily alert emails
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTS_FROM: ${{ secrets.ALERTS_FROM }}
+        run: python send_alerts.py

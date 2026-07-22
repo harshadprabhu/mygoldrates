@@ -277,12 +277,16 @@ def main():
         rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld, **common)
     inquiry = INQUIRY_TEMPLATE.substitute(
         supabase_url=supabase_url, anon_key=anon_key, **common)
+    unsub = UNSUB_TEMPLATE.substitute(
+        supabase_url=supabase_url, anon_key=anon_key, **common)
 
     os.makedirs("docs", exist_ok=True)
     with open("docs/index.html", "w", encoding="utf-8") as f:
         f.write(html)
     with open("docs/inquiry.html", "w", encoding="utf-8") as f:
         f.write(inquiry)
+    with open("docs/unsubscribe.html", "w", encoding="utf-8") as f:
+        f.write(unsub)
     with open("docs/robots.txt", "w", encoding="utf-8") as f:
         f.write(f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}/sitemap.xml\n")
     with open("docs/sitemap.xml", "w", encoding="utf-8") as f:
@@ -1098,6 +1102,56 @@ $base_css
       btn.disabled=false;btn.textContent='Subscribe to daily rates';
     });
   });
+})();
+</script>
+</body>
+</html>
+""")
+
+
+UNSUB_TEMPLATE = Template("""<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unsubscribe - GoldRates</title>
+<meta name="robots" content="noindex,follow">
+<link rel="canonical" href="$site_url/unsubscribe.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+$base_css
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:34px;max-width:520px;margin:26px 0;text-align:center}
+.card h1{font-size:26px;margin:0 0 10px}
+.card p{color:var(--ink-2);font-size:15px;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <a class="brand" href="$site_url/">Gold<span class="karat">Rates</span></a>
+</header>
+<div class="card">
+  <h1>Unsubscribe</h1>
+  <p id="msg">Processing your request&hellip;</p>
+  <p style="margin-top:16px"><a class="btn" href="$site_url/">Back to gold rates</a></p>
+</div>
+</div>
+<script>
+(function(){
+  var URL_="$supabase_url", KEY="$anon_key";
+  var msg=document.getElementById('msg');
+  var t=new URLSearchParams(location.search).get('t');
+  if(!t){msg.textContent='This unsubscribe link looks invalid.';return;}
+  if(!KEY){msg.textContent='Unsubscribe is temporarily unavailable - please email us.';return;}
+  fetch(URL_+'/rest/v1/rpc/unsubscribe',{method:'POST',
+    headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
+    body:JSON.stringify({t:t})})
+   .then(function(r){if(!r.ok)throw 0;
+     msg.textContent="You've been unsubscribed. You won't receive any more daily gold-rate emails.";})
+   .catch(function(){msg.textContent='Something went wrong. Please reply to any of our emails to unsubscribe.';});
 })();
 </script>
 </body>
