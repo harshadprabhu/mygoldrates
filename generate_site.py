@@ -21,6 +21,7 @@ from supabase import create_client
 
 SITE_URL = "https://mygoldrates.com"
 CUSTOM_DOMAIN = "mygoldrates.com"
+CONTACT_EMAIL = "contact@mygoldrates.com"
 PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 IST = timezone(timedelta(hours=5, minutes=30))
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -287,6 +288,125 @@ def main():
         f.write(inquiry)
     with open("docs/unsubscribe.html", "w", encoding="utf-8") as f:
         f.write(unsub)
+
+    # ---- static content pages (About / Contact / Privacy) ----
+    def write_page(slug, title, desc, heading, body):
+        with open(f"docs/{slug}.html", "w", encoding="utf-8") as fp:
+            fp.write(PAGE_TEMPLATE.substitute(
+                title=title, desc=desc, heading=heading, body=body,
+                canonical=f"{SITE_URL}/{slug}.html", **common))
+
+    write_page(
+        "about",
+        "About GoldRates - Daily Gold Rate Comparison India",
+        "About GoldRates: why we compare daily 24K, 22K and 18K gold rates "
+        "across India's leading jewellers alongside the IBJA bullion reference.",
+        "About GoldRates",
+        f"""
+  <p>GoldRates is an independent website that helps people in India compare
+  today's gold rates across the country's leading jewellery brands, all on one
+  page and on the same basis.</p>
+  <h2>What we do</h2>
+  <p>Every day we publish the 24K, 22K and 18K gold rate for {len(live)} major
+  jewellers, normalised to a per-gram, pre-GST figure so you can compare them
+  fairly. Alongside that we show the <strong>IBJA</strong> (India Bullion and
+  Jewellers Association) bullion reference, so you can see how far each
+  jeweller prices above the wholesale benchmark.</p>
+  <h2>Why we built it</h2>
+  <p>Gold pricing is confusing: every jeweller quotes a slightly different rate,
+  making charges vary, and GST is added on top. A buyer rarely gets to compare
+  before walking into a store. GoldRates puts the numbers side by side so you
+  can make an informed decision and know roughly what your gold should cost
+  before you buy.</p>
+  <h2>How to use it</h2>
+  <p>Check the comparison table to see who's cheapest today, use the price
+  calculator to estimate the cost of a specific weight and purity, and
+  <a href="{SITE_URL}/inquiry.html">subscribe</a> to get the day's comparison
+  by email each morning.</p>
+  <h2>A note on the numbers</h2>
+  <p>Rates shown are indicative and pre-GST, compiled from each brand's own
+  published prices and updated daily. Making charges are extra and vary by
+  design. Always confirm the billed rate with the jeweller before purchase.
+  GoldRates is not affiliated with any jeweller and does not provide investment
+  advice.</p>
+  <p>Questions? <a href="{SITE_URL}/contact.html">Get in touch</a>.</p>""")
+
+    write_page(
+        "contact",
+        "Contact GoldRates",
+        "Contact GoldRates - questions, feedback or corrections about our daily "
+        "gold rate comparison for India.",
+        "Contact Us",
+        f"""
+  <p>We'd love to hear from you - whether it's feedback, a correction to a
+  rate, a partnership enquiry, or a data-privacy request.</p>
+  <h2>Email</h2>
+  <p><a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a><br>
+  We aim to reply within 2-3 working days.</p>
+  <h2>Daily rate alerts</h2>
+  <p>To get the day's gold-rate comparison in your inbox each morning,
+  <a href="{SITE_URL}/inquiry.html">subscribe here</a>. You can unsubscribe from
+  any email at any time.</p>
+  <h2>Privacy requests</h2>
+  <p>To access or delete the personal details you've shared with us, email the
+  address above or see our
+  <a href="{SITE_URL}/privacy.html">Privacy Policy</a>.</p>""")
+
+    write_page(
+        "privacy",
+        "Privacy Policy - GoldRates",
+        "How GoldRates collects, uses and protects your personal information, "
+        "including cookies and advertising.",
+        "Privacy Policy",
+        f"""
+  <p>This policy explains what information GoldRates ("we", "us") collects when
+  you use <a href="{SITE_URL}/">mygoldrates.com</a>, how we use it, and the
+  choices you have.</p>
+  <h2>Information you give us</h2>
+  <p>If you subscribe to daily rate alerts, we collect the details you enter:
+  your name, email address, phone number and location (country, state, city and
+  PIN/ZIP code). We use these only to send you the daily gold-rate email and to
+  respond to you.</p>
+  <h2>Information collected automatically</h2>
+  <p>Like most websites we collect basic, non-identifying usage data such as an
+  anonymous visit count and standard server/CDN logs (for security and
+  performance). We also use privacy-respecting analytics to understand overall
+  traffic.</p>
+  <h2>Cookies and advertising</h2>
+  <p>We may display ads served by Google, using
+  <strong>Google AdSense</strong>. Third-party vendors, including Google, use
+  cookies to serve ads based on your prior visits to this and other websites.
+  Google's use of advertising cookies enables it and its partners to serve ads
+  to you based on your visits. You can opt out of personalised advertising by
+  visiting <a href="https://www.google.com/settings/ads" rel="nofollow">Google
+  Ads Settings</a>, or opt out of some third-party vendors at
+  <a href="https://www.aboutads.info/choices/" rel="nofollow">aboutads.info</a>.</p>
+  <h2>Who we share data with</h2>
+  <p>We do not sell your personal information. We share it only with the service
+  providers that run this site: <strong>Supabase</strong> (secure data
+  storage), <strong>Resend</strong> (email delivery), <strong>Cloudflare</strong>
+  (hosting and security) and <strong>Google AdSense</strong> (advertising).
+  Each processes data on our behalf under its own terms.</p>
+  <h2>Your choices and rights</h2>
+  <ul>
+    <li>Unsubscribe from emails any time via the link in every email.</li>
+    <li>Request a copy or deletion of your data by emailing
+        <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</li>
+    <li>Control ad personalisation via the links above.</li>
+  </ul>
+  <h2>Data retention &amp; security</h2>
+  <p>We keep subscriber details only while you remain subscribed; unsubscribing
+  removes your record. Data is stored with reputable providers using
+  industry-standard security.</p>
+  <h2>Children</h2>
+  <p>This site is not directed at children under 18 and we do not knowingly
+  collect their data.</p>
+  <h2>Changes</h2>
+  <p>We may update this policy; the "last updated" date above reflects the
+  latest version.</p>
+  <h2>Contact</h2>
+  <p>Questions about this policy?
+  <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>""")
     with open("docs/robots.txt", "w", encoding="utf-8") as f:
         f.write(f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}/sitemap.xml\n")
     with open("docs/sitemap.xml", "w", encoding="utf-8") as f:
@@ -297,7 +417,12 @@ def main():
                 f"  <url><loc>{SITE_URL}/inquiry.html</loc>"
                 f"<lastmod>{today}</lastmod>"
                 "<changefreq>monthly</changefreq><priority>0.6</priority></url>\n"
-                "</urlset>\n")
+                + "".join(
+                    f"  <url><loc>{SITE_URL}/{p}.html</loc><lastmod>{today}"
+                    "</lastmod><changefreq>monthly</changefreq>"
+                    "<priority>0.4</priority></url>\n"
+                    for p in ("about", "contact", "privacy"))
+                + "</urlset>\n")
     with open("docs/ads.txt", "w", encoding="utf-8") as f:
         if ads_client:
             pub = ads_client.replace("ca-", "")   # ca-pub-XXXX -> pub-XXXX
@@ -369,6 +494,9 @@ h2{font-size:24px;margin:2px 0 6px}
 footer{margin:44px 0 30px;padding-top:20px;border-top:1px solid var(--line);
   font-size:13px;color:var(--ink-3)}
 footer p{margin:6px 0;max-width:80ch}
+.foot-nav{margin:0 0 10px}
+.foot-nav a{color:var(--ink-3);margin-right:16px;text-decoration:none}
+.foot-nav a:hover{color:var(--ink)}
 .hits{font-family:"IBM Plex Mono",monospace;font-size:10.5px;
   letter-spacing:.05em;color:var(--ink-3);opacity:.7}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -703,6 +831,12 @@ $faq
   Always confirm the billed rate with the jeweller before purchase. This site
   does not provide investment advice. Data is provided for personal reference
   only; automated collection or redistribution is not permitted.</p>
+  <div class="foot-nav">
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="inquiry.html">Daily alerts</a>
+  </div>
   <p>© $year GoldRates - daily gold rate comparison for India.
   Rates updated daily; last updated $date.</p>
   <p class="hits" id="hits" hidden>👁 <span id="hitcount">—</span> visits</p>
@@ -1104,6 +1238,58 @@ $base_css
   });
 })();
 </script>
+</body>
+</html>
+""")
+
+
+PAGE_TEMPLATE = Template("""<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>$title</title>
+<meta name="description" content="$desc">
+<link rel="canonical" href="$canonical">
+$ads_head
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+$base_css
+.page{max-width:720px;margin:10px 0 30px}
+.page h1{font-size:clamp(26px,4.5vw,36px);margin:8px 0 6px}
+.page h2{font-size:20px;margin:26px 0 8px}
+.page p,.page li{color:var(--ink-2);font-size:15px;line-height:1.7}
+.page ul{padding-left:20px;margin:8px 0}
+.page a{color:var(--emerald)}
+.updated-on{font-family:"IBM Plex Mono",monospace;font-size:12px;
+  color:var(--ink-3);margin-bottom:18px}
+.foot-nav{margin:8px 0}
+.foot-nav a{color:var(--ink-3);margin-right:14px;text-decoration:none}
+.foot-nav a:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <a class="brand" href="$site_url/">Gold<span class="karat">Rates</span></a>
+  <div class="topright"><a class="btn" href="$site_url/">Today's rates</a></div>
+</header>
+<article class="page">
+  <h1>$heading</h1>
+  <p class="updated-on">Last updated $date</p>
+$body
+</article>
+<footer>
+  <div class="foot-nav">
+    <a href="$site_url/about.html">About</a>
+    <a href="$site_url/contact.html">Contact</a>
+    <a href="$site_url/privacy.html">Privacy Policy</a>
+  </div>
+  <p>© $year GoldRates - daily gold rate comparison for India.</p>
+</footer>
+</div>
 </body>
 </html>
 """)
