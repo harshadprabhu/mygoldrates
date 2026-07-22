@@ -292,6 +292,29 @@ def main():
          f"gold rate at {inr(ladder(lowest['canonical_24k_pre_gst'])['24K'])} "
          "per gram. Jewellers' rates typically differ by 1-3% because each "
          "brand embeds slightly different premiums in its pricing."),
+        ("What is the gold rate today in Hyderabad?",
+         f"The gold rate today in Hyderabad closely tracks the national jeweller "
+         f"rate. On {display_date}, the median 24K (999) rate is {inr(med['24K'])} "
+         f"per gram and 22K (916) is {inr(med['22K'])} per gram, pre-GST. Most "
+         f"national chains quote a uniform price across their Hyderabad stores, "
+         f"so the {len(live)}-brand comparison on this page applies in Hyderabad."),
+        ("What is the gold rate today in Chennai?",
+         f"On {display_date}, the gold rate today in Chennai is in line with the "
+         f"national median of {inr(med['24K'])} per gram for 24K and "
+         f"{inr(med['22K'])} per gram for 22K (pre-GST). Chennai buyers can use "
+         f"the comparison board and calculator above to check each jeweller's "
+         f"rate before purchase."),
+        ("What is the gold rate today in Pune?",
+         f"The gold rate today in Pune mirrors the pan-India jeweller rate. As of "
+         f"{display_date}, 24K gold is around {inr(med['24K'])} per gram and 22K "
+         f"is {inr(med['22K'])} per gram (pre-GST) across the brands compared "
+         f"here, which price uniformly across their Pune outlets."),
+        ("What is the gold rate today in Mumbai?",
+         f"On {display_date}, the gold rate today in Mumbai matches the national "
+         f"median of {inr(med['24K'])} per gram (24K) and {inr(med['22K'])} per "
+         f"gram (22K), pre-GST. Because leading chains quote one rate across all "
+         f"their Mumbai showrooms, this {len(live)}-brand comparison applies in "
+         f"Mumbai too."),
         ("What is the IBJA gold rate and why does it differ from jeweller rates?",
          ibja_faq),
         ("Are these gold rates inclusive of GST?",
@@ -314,6 +337,20 @@ def main():
         {"@context": "https://schema.org", "@type": "WebSite",
          "name": "GoldRates - Daily Gold Rate Comparison India",
          "url": SITE_URL},
+        {"@context": "https://schema.org", "@type": "Organization",
+         "name": "MyGoldRates.com", "alternateName": "GoldRates",
+         "url": SITE_URL, "logo": f"{SITE_URL}/og.png",
+         "image": f"{SITE_URL}/og.png",
+         "description": "India's gold rate comparison platform - compare today's "
+                        "24K, 22K and 18K gold rates across leading jewellers, "
+                        "with the IBJA bullion reference, updated daily.",
+         "areaServed": {"@type": "Country", "name": "India"},
+         "knowsAbout": ["Gold rate", "Gold rate today", "24 carat gold rate",
+                        "22K gold rate", "IBJA gold rate", "Gold price India"]},
+        {"@context": "https://schema.org", "@type": "BreadcrumbList",
+         "itemListElement": [
+             {"@type": "ListItem", "position": 1,
+              "name": "Gold Rate Today", "item": f"{SITE_URL}/"}]},
         {"@context": "https://schema.org", "@type": "Dataset",
          "name": f"Gold rates across Indian jewellers on {display_date}",
          "description": "Daily 24K, 22K and 18K per-gram gold rates compared "
