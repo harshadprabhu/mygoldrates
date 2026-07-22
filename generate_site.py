@@ -46,6 +46,63 @@ def inr(v, dec=0):
     return "₹" + ",".join(groups) + "," + tail
 
 
+def _draw_mark(d, s, ox, oy, gold):
+    """Draw the chart-arrow brand mark (40x40 viewBox coords, scaled by s)."""
+    def X(v): return ox + v * s
+    def Y(v): return oy + v * s
+    rad = max(2, int(1.6 * s))
+    d.rounded_rectangle([X(4.5), Y(21), X(13.5), Y(36)], radius=rad, fill=gold)
+    d.rounded_rectangle([X(16.5), Y(12), X(25.5), Y(36)], radius=rad, fill=gold)
+    lw = max(2, int(s * 3.2))
+    d.line([X(5), Y(25.5), X(17), Y(17), X(25), Y(21), X(34), Y(8.5)],
+           fill=gold, width=lw, joint="curve")
+    d.line([X(27.5), Y(7.5), X(35), Y(6.5), X(34.5), Y(14)],
+           fill=gold, width=lw, joint="curve")
+
+
+FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<defs><linearGradient id="g" x1="4" y1="38" x2="36" y2="4" \
+gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/>\
+<stop offset=".55" stop-color="#E3BF63"/>\
+<stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs>
+<rect width="48" height="48" rx="10" fill="#171106"/>
+<g transform="translate(4,4)">
+<rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#g)"/>
+<rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#g)"/>
+<path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#g)" stroke-width="3.4" \
+fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#g)" stroke-width="3.4" \
+fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</g></svg>
+"""
+
+
+def build_favicons():
+    """Favicon set drawn from the brand mark. Deterministic (no daily churn).
+
+    Writes favicon.svg always; the PNG/ICO set needs Pillow (present in CI).
+    """
+    with open("docs/favicon.svg", "w", encoding="utf-8") as f:
+        f.write(FAVICON_SVG)
+    try:
+        from PIL import Image, ImageDraw
+    except Exception as e:  # pragma: no cover - Pillow missing
+        print("favicon: Pillow unavailable, PNG/ICO skipped:", e)
+        return
+    master = Image.new("RGBA", (512, 512), (0, 0, 0, 0))
+    d = ImageDraw.Draw(master)
+    d.rounded_rectangle([0, 0, 511, 511], radius=104, fill=(23, 17, 6))
+    s = 10.4
+    off = (512 - 40 * s) / 2
+    _draw_mark(d, s, off, off, (227, 191, 99))
+    for size, name in ((180, "apple-touch-icon.png"), (192, "icon-192.png"),
+                       (512, "icon-512.png")):
+        master.resize((size, size), Image.LANCZOS).save(f"docs/{name}")
+    master.save("docs/favicon.ico", format="ICO",
+                sizes=[(16, 16), (32, 32), (48, 48)])
+    print("favicon: wrote svg/ico/png set")
+
+
 def build_og_image(path="docs/og.png"):
     """Static branded 1200x630 Open Graph card (deterministic, no daily churn).
 
@@ -86,16 +143,7 @@ def build_og_image(path="docs/og.png"):
     d.rectangle([0, H - 7, W, H], fill=(120, 92, 26))    # bottom hairline
 
     # chart-arrow mark (scaled from the 40x40 SVG viewBox)
-    s, ox, oy = 3.1, 150, 210
-    def X(v): return ox + v * s
-    def Y(v): return oy + v * s
-    d.rounded_rectangle([X(4.5), Y(21), X(13.5), Y(36)], radius=5, fill=GOLD)
-    d.rounded_rectangle([X(16.5), Y(12), X(25.5), Y(36)], radius=5, fill=GOLD)
-    lw = int(s * 3.2)
-    d.line([X(5), Y(25.5), X(17), Y(17), X(25), Y(21), X(34), Y(8.5)],
-           fill=GOLD, width=lw, joint="curve")
-    d.line([X(27.5), Y(7.5), X(35), Y(6.5), X(34.5), Y(14)],
-           fill=GOLD, width=lw, joint="curve")
+    _draw_mark(d, 3.1, 150, 210, GOLD)
 
     # wordmark
     big = font(78, bold=True)
@@ -339,7 +387,7 @@ def main():
          "url": SITE_URL},
         {"@context": "https://schema.org", "@type": "Organization",
          "name": "MyGoldRates.com", "alternateName": "GoldRates",
-         "url": SITE_URL, "logo": f"{SITE_URL}/og.png",
+         "url": SITE_URL, "logo": f"{SITE_URL}/icon-512.png",
          "image": f"{SITE_URL}/og.png",
          "description": "India's gold rate comparison platform - compare today's "
                         "24K, 22K and 18K gold rates across leading jewellers, "
@@ -453,6 +501,7 @@ def main():
 
     os.makedirs("docs", exist_ok=True)
     build_og_image()
+    build_favicons()
     with open("docs/index.html", "w", encoding="utf-8") as f:
         f.write(html)
     with open("docs/inquiry.html", "w", encoding="utf-8") as f:
@@ -698,6 +747,9 @@ TEMPLATE = Template("""<!DOCTYPE html>
 <meta name="author" content="MyGoldRates.com">
 <meta name="geo.region" content="IN">
 <link rel="canonical" href="$site_url/">
+<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
+<link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MyGoldRates.com">
 <meta property="og:locale" content="en_IN">
@@ -1348,6 +1400,9 @@ INQUIRY_TEMPLATE = Template("""<!DOCTYPE html>
 <title>Daily Gold Rate Alerts by Email - GoldRates</title>
 <meta name="description" content="Get one clean email every morning with India's gold rate comparison - the cheapest jeweller, the IBJA bullion premium and the market median. Free sign-up.">
 <link rel="canonical" href="$site_url/inquiry.html">
+<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
+<link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
 <meta name="robots" content="index,follow">
 $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1503,6 +1558,9 @@ PAGE_TEMPLATE = Template("""<!DOCTYPE html>
 <title>$title</title>
 <meta name="description" content="$desc">
 <link rel="canonical" href="$canonical">
+<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
+<link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
 $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1555,6 +1613,9 @@ UNSUB_TEMPLATE = Template("""<!DOCTYPE html>
 <title>Unsubscribe - GoldRates</title>
 <meta name="robots" content="noindex,follow">
 <link rel="canonical" href="$site_url/unsubscribe.html">
+<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
+<link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
