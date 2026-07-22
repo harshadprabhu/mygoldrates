@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Unsubscribe - GoldRates</title>
-<meta name="robots" content="noindex,follow">
-<link rel="canonical" href="https://mygoldrates.com/unsubscribe.html">
+<title>About GoldRates - Daily Gold Rate Comparison India</title>
+<meta name="description" content="About GoldRates: why we compare daily 24K, 22K and 18K gold rates across India's leading jewellers alongside the IBJA bullion reference.">
+<link rel="canonical" href="https://mygoldrates.com/about.html">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1893036481180379" crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-1893036481180379">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -71,37 +73,65 @@ footer p{margin:6px 0;max-width:80ch}
   letter-spacing:.05em;color:var(--ink-3);opacity:.7}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
-  padding:34px;max-width:520px;margin:26px 0;text-align:center}
-.card h1{font-size:26px;margin:0 0 10px}
-.card p{color:var(--ink-2);font-size:15px;margin:8px 0}
+.page{max-width:720px;margin:10px 0 30px}
+.page h1{font-size:clamp(26px,4.5vw,36px);margin:8px 0 6px}
+.page h2{font-size:20px;margin:26px 0 8px}
+.page p,.page li{color:var(--ink-2);font-size:15px;line-height:1.7}
+.page ul{padding-left:20px;margin:8px 0}
+.page a{color:var(--emerald)}
+.updated-on{font-family:"IBM Plex Mono",monospace;font-size:12px;
+  color:var(--ink-3);margin-bottom:18px}
+.foot-nav{margin:8px 0}
+.foot-nav a{color:var(--ink-3);margin-right:14px;text-decoration:none}
+.foot-nav a:hover{color:var(--ink)}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header class="top">
   <a class="brand" href="https://mygoldrates.com/">Gold<span class="karat">Rates</span></a>
+  <div class="topright"><a class="btn" href="https://mygoldrates.com/">Today's rates</a></div>
 </header>
-<div class="card">
-  <h1>Unsubscribe</h1>
-  <p id="msg">Processing your request&hellip;</p>
-  <p style="margin-top:16px"><a class="btn" href="https://mygoldrates.com/">Back to gold rates</a></p>
+<article class="page">
+  <h1>About GoldRates</h1>
+  <p class="updated-on">Last updated 22 July 2026</p>
+
+  <p>GoldRates is an independent website that helps people in India compare
+  today's gold rates across the country's leading jewellery brands, all on one
+  page and on the same basis.</p>
+  <h2>What we do</h2>
+  <p>Every day we publish the 24K, 22K and 18K gold rate for 13 major
+  jewellers, normalised to a per-gram, pre-GST figure so you can compare them
+  fairly. Alongside that we show the <strong>IBJA</strong> (India Bullion and
+  Jewellers Association) bullion reference, so you can see how far each
+  jeweller prices above the wholesale benchmark.</p>
+  <h2>Why we built it</h2>
+  <p>Gold pricing is confusing: every jeweller quotes a slightly different rate,
+  making charges vary, and GST is added on top. A buyer rarely gets to compare
+  before walking into a store. GoldRates puts the numbers side by side so you
+  can make an informed decision and know roughly what your gold should cost
+  before you buy.</p>
+  <h2>How to use it</h2>
+  <p>Check the comparison table to see who's cheapest today, use the price
+  calculator to estimate the cost of a specific weight and purity, and
+  <a href="https://mygoldrates.com/inquiry.html">subscribe</a> to get the day's comparison
+  by email each morning.</p>
+  <h2>A note on the numbers</h2>
+  <p>Rates shown are indicative and pre-GST, compiled from each brand's own
+  published prices and updated daily. Making charges are extra and vary by
+  design. Always confirm the billed rate with the jeweller before purchase.
+  GoldRates is not affiliated with any jeweller and does not provide investment
+  advice.</p>
+  <p>Questions? <a href="https://mygoldrates.com/contact.html">Get in touch</a>.</p>
+</article>
+<footer>
+  <div class="foot-nav">
+    <a href="https://mygoldrates.com/about.html">About</a>
+    <a href="https://mygoldrates.com/contact.html">Contact</a>
+    <a href="https://mygoldrates.com/privacy.html">Privacy Policy</a>
+  </div>
+  <p>© 2026 GoldRates - daily gold rate comparison for India.</p>
+</footer>
 </div>
-</div>
-<script>
-(function(){
-  var URL_="https://opwrfflzzowhobesysmr.supabase.co", KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE";
-  var msg=document.getElementById('msg');
-  var t=new URLSearchParams(location.search).get('t');
-  if(!t){msg.textContent='This unsubscribe link looks invalid.';return;}
-  if(!KEY){msg.textContent='Unsubscribe is temporarily unavailable - please email us.';return;}
-  fetch(URL_+'/rest/v1/rpc/unsubscribe',{method:'POST',
-    headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
-    body:JSON.stringify({t:t})})
-   .then(function(r){if(!r.ok)throw 0;
-     msg.textContent="You've been unsubscribed. You won't receive any more daily gold-rate emails.";})
-   .catch(function(){msg.textContent='Something went wrong. Please reply to any of our emails to unsubscribe.';});
-})();
-</script>
 </body>
 </html>
