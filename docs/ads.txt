@@ -1,2 +1,2 @@
-# Replace with your AdSense publisher line after approval:
+# Set the ADSENSE_CLIENT secret to publish your ads.txt line automatically.
 # google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
