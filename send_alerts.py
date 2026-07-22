@@ -54,10 +54,11 @@ def email_html(first, date, med, low, low_brand, unsub):
 padding:24px 12px;font-family:Arial,Helvetica,sans-serif;color:#152420">
   <table role="presentation" width="100%" style="max-width:520px;margin:0 auto;
   background:#FFFFFF;border:1px solid #E7E1D3;border-radius:14px;overflow:hidden">
-    <tr><td style="background:#152420;padding:22px 26px">
-      <div style="font-size:20px;letter-spacing:3px;color:#F6F1E3">
-        GOLD<span style="color:#D9B24A">RATES</span></div>
-      <div style="color:#B9C2B4;font-size:13px;margin-top:2px">
+    <tr><td style="background:#120D06;padding:20px 26px">
+      <img src="{SITE_URL}/email-logo.png" width="330" height="56"
+        alt="MyGoldRates.com" style="display:block;border:0;outline:none;
+        max-width:100%;height:auto">
+      <div style="color:#A79B7E;font-size:13px;margin-top:8px">
         Gold Rate Today &middot; {date}</div>
     </td></tr>
     <tr><td style="padding:24px 26px">

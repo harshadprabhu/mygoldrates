@@ -103,6 +103,35 @@ def build_favicons():
     print("favicon: wrote svg/ico/png set")
 
 
+def build_email_logo(path="docs/email-logo.png"):
+    """Mark + wordmark on transparent bg for the email digest header (2x)."""
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except Exception as e:  # pragma: no cover - Pillow missing
+        print("email-logo: Pillow unavailable, skipping:", e)
+        return
+    CREAM, GOLD, MUTED = (240, 234, 216), (227, 191, 99), (167, 155, 126)
+
+    def font(sz):
+        try:
+            return ImageFont.truetype(
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", sz)
+        except Exception:
+            return ImageFont.load_default()
+
+    img = Image.new("RGBA", (760, 128), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    _draw_mark(d, 2.9, 4, 6, GOLD)
+    big = font(62)
+    x = 136
+    for t, c in (("My", CREAM), ("Gold", GOLD), ("Rates", CREAM),
+                 (".com", MUTED)):
+        d.text((x, 28), t, font=big, fill=c)
+        x += d.textlength(t, font=big)
+    img.save(path)
+    print(f"email-logo: wrote {path}")
+
+
 def build_og_image(path="docs/og.png"):
     """Static branded 1200x630 Open Graph card (deterministic, no daily churn).
 
@@ -502,6 +531,7 @@ def main():
     os.makedirs("docs", exist_ok=True)
     build_og_image()
     build_favicons()
+    build_email_logo()
     with open("docs/index.html", "w", encoding="utf-8") as f:
         f.write(html)
     with open("docs/inquiry.html", "w", encoding="utf-8") as f:
