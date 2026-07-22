@@ -4,3 +4,4 @@ supabase
 playwright
 truststore
 brotli
+pillow

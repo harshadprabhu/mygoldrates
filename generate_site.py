@@ -46,6 +46,76 @@ def inr(v, dec=0):
     return "₹" + ",".join(groups) + "," + tail
 
 
+def build_og_image(path="docs/og.png"):
+    """Static branded 1200x630 Open Graph card (deterministic, no daily churn).
+
+    Drawn with Pillow using DejaVu fonts (present on the CI runner); degrades
+    gracefully if Pillow or the fonts are unavailable.
+    """
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except Exception as e:  # pragma: no cover - Pillow missing
+        print("og: Pillow unavailable, skipping og.png:", e)
+        return
+
+    W, H = 1200, 630
+    CREAM, GOLD, MUTED, TEXT2 = (240, 234, 216), (227, 191, 99), \
+        (167, 155, 126), (200, 193, 175)
+
+    def font(sz, bold=False):
+        for p in (f"/usr/share/fonts/truetype/dejavu/DejaVuSans"
+                  f"{'-Bold' if bold else ''}.ttf",):
+            try:
+                return ImageFont.truetype(p, sz)
+            except Exception:
+                pass
+        return ImageFont.load_default()
+
+    img = Image.new("RGB", (W, H), (11, 8, 5))
+    # gold glow, top-right
+    glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    gd = ImageDraw.Draw(glow)
+    cx, cy = 1000, 90
+    for r in range(420, 0, -6):
+        a = int(30 * (1 - r / 420))
+        gd.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(224, 186, 86, a))
+    img = Image.alpha_composite(img.convert("RGBA"), glow).convert("RGB")
+    d = ImageDraw.Draw(img)
+
+    d.rectangle([0, 0, W, 7], fill=GOLD)                 # top hairline
+    d.rectangle([0, H - 7, W, H], fill=(120, 92, 26))    # bottom hairline
+
+    # chart-arrow mark (scaled from the 40x40 SVG viewBox)
+    s, ox, oy = 3.1, 150, 210
+    def X(v): return ox + v * s
+    def Y(v): return oy + v * s
+    d.rounded_rectangle([X(4.5), Y(21), X(13.5), Y(36)], radius=5, fill=GOLD)
+    d.rounded_rectangle([X(16.5), Y(12), X(25.5), Y(36)], radius=5, fill=GOLD)
+    lw = int(s * 3.2)
+    d.line([X(5), Y(25.5), X(17), Y(17), X(25), Y(21), X(34), Y(8.5)],
+           fill=GOLD, width=lw, joint="curve")
+    d.line([X(27.5), Y(7.5), X(35), Y(6.5), X(34.5), Y(14)],
+           fill=GOLD, width=lw, joint="curve")
+
+    # wordmark
+    big = font(78, bold=True)
+    x, y = 300, 232
+    for t, c in (("My", CREAM), ("Gold", GOLD), ("Rates", CREAM),
+                 (".com", MUTED)):
+        d.text((x, y), t, font=big, fill=c)
+        x += d.textlength(t, font=big)
+
+    d.text((302, 336), "INDIA'S 1ST GOLD RATE COMPARISON PLATFORM",
+           font=font(28, bold=True), fill=MUTED)
+    d.text((150, 430), "Compare 24K, 22K & 18K gold rates today across",
+           font=font(34), fill=TEXT2)
+    d.text((150, 478), "India's top jewellers - updated every day.",
+           font=font(34), fill=TEXT2)
+
+    img.save(path)
+    print(f"og: wrote {path}")
+
+
 def fetch_ibja():
     """IBJA daily reference rates, per 10g pre-GST -> per gram.
     Returns (r999, r916) or None."""
@@ -264,6 +334,68 @@ def main():
         f'<details class="faq"><summary>{q}</summary><p>{a}</p></details>'
         for q, a in faq)
 
+    nb = str(len(live))
+    seo_content = f"""<section class="seo" aria-labelledby="abouth">
+  <p class="eyebrow">About the Tool</p>
+  <h2 id="abouth">Gold Rate Today in India, Compared Every Day</h2>
+
+  <p>Checking the <strong>gold rate today</strong> before you buy can save you
+  thousands of rupees on a single piece of jewellery. MyGoldRates.com is India's
+  first dedicated <strong>gold rate</strong> comparison platform, built to place
+  the <strong>today gold rate</strong> from {nb} of the country's most recognised
+  jewellers side by side on one clean page, refreshed every single day. Instead
+  of opening a dozen websites or walking store to store, you see the whole market
+  at a glance and instantly spot which jeweller is offering the best value.</p>
+
+  <p>Gold is quoted per gram, but the rate you actually pay is rarely identical
+  at every store. Two jewellers can advertise the same metal on the same morning
+  yet differ by &#8377;50 to &#8377;150 per gram once their margins are added,
+  and over a 20-gram purchase that gap alone runs into thousands. By comparing
+  the <strong>gold rate</strong> across brands, and against the official IBJA
+  bullion benchmark, this tool shows exactly how much premium each jeweller
+  charges over pure bullion, so nothing stays hidden.</p>
+
+  <h3>24 carat and 22K gold rate today</h3>
+  <p>The <strong>24 carat gold rate today</strong> reflects the purest,
+  investment-grade gold, 99.9% fine and also written as 999, and is the figure
+  most buyers and investors track. Coins, bars and digital gold are usually
+  priced off this 24K rate. The <strong>gold rate today 22k</strong> (916 purity)
+  is what the vast majority of Indian jewellery is crafted from, because pure
+  gold is too soft to hold intricate designs. We publish 24K, 22K and 18K rates
+  together so you can compare like for like, whether you are buying an investment
+  coin or a bridal set.</p>
+
+  <h3>Gold rate today in Hyderabad, Chennai, Pune and Mumbai</h3>
+  <p>Retail gold prices across India tend to move together, so the
+  <strong>gold rate today in Hyderabad</strong>, the
+  <strong>gold rate today in Chennai</strong>, the
+  <strong>gold rate today in Pune</strong> and the
+  <strong>gold rate today in Mumbai</strong> usually sit within a narrow band of
+  one another. Most national jewellery chains quote a single, uniform price
+  across all their outlets, which means the brand rates listed here apply whether
+  you are shopping in Hyderabad, Chennai, Pune, Mumbai or any other major city.
+  Local taxes and small city-level adjustments can add minor differences, but the
+  underlying <strong>today gold rate</strong> you see on this page is an accurate
+  reference wherever you are in India.</p>
+
+  <h3>How to use MyGoldRates.com</h3>
+  <p>Start with the comparison board to see the <strong>gold rate today</strong>
+  ranked from lowest to highest, then use the built-in calculator to estimate the
+  exact cost of your gold by weight, purity and brand, with or without 3% GST.
+  Check the IBJA premium section to understand how much each jeweller adds over
+  the bullion benchmark, and subscribe to free daily alerts to get the morning's
+  comparison delivered straight to your inbox. Every rate is shown per gram,
+  before GST and before making charges, so every brand is measured on the same
+  honest basis.</p>
+
+  <p>Because the numbers are updated daily and compiled directly from each
+  brand's own published prices, you are always looking at a current, real-world
+  snapshot rather than a stale estimate. Whether you are planning a wedding
+  purchase, buying a gift, or simply tracking the <strong>gold rate</strong> as an
+  investor, MyGoldRates.com gives you a clear, up-to-date and unbiased view of
+  what India's leading jewellers are charging today, all in one place.</p>
+</section>"""
+
     common = dict(site_url=SITE_URL, date=display_date, time=display_time,
                   iso_now=now_ist.isoformat(), year=str(now_ist.year),
                   base_css=BASE_CSS, ads_head=ads_head)
@@ -275,13 +407,15 @@ def main():
         ibja_tiles=ibja_tiles, ibja_section=ibja_section, ads_unit=ads_unit,
         calc_brands=json.dumps(calc_brands),
         supabase_url=supabase_url, anon_key=anon_key,
-        rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld, **common)
+        rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld,
+        seo_content=seo_content, **common)
     inquiry = INQUIRY_TEMPLATE.substitute(
         supabase_url=supabase_url, anon_key=anon_key, **common)
     unsub = UNSUB_TEMPLATE.substitute(
         supabase_url=supabase_url, anon_key=anon_key, **common)
 
     os.makedirs("docs", exist_ok=True)
+    build_og_image()
     with open("docs/index.html", "w", encoding="utf-8") as f:
         f.write(html)
     with open("docs/inquiry.html", "w", encoding="utf-8") as f:
@@ -519,14 +653,28 @@ TEMPLATE = Template("""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gold Rate Today in India ($date) - Compare 24K, 22K &amp; 18K Rates Across $n_brands Jewellers</title>
-<meta name="description" content="Live gold rate comparison for $date: 24K median $med24/g, 22K $med22/g pre-GST. Compare today's gold rates across $n_brands top Indian jewellers, check the IBJA bullion premium, and calculate gold prices instantly.">
+<title>Gold Rate Today in India ($date) - 24 Carat &amp; 22K Gold Rate, Compare $n_brands Jewellers</title>
+<meta name="description" content="Gold rate today in India ($date): 24 carat gold rate $med24/g and 22K gold rate $med22/g pre-GST, compared across $n_brands top jewellers. Check today's gold rate for Hyderabad, Chennai, Pune &amp; Mumbai, the IBJA bullion premium, and calculate gold prices instantly.">
+<meta name="keywords" content="gold rate, gold rate today, today gold rate, 24 carat gold rate today, gold rate today 22k, gold rate today Hyderabad, gold rate today Chennai, gold rate today Pune, gold rate today Mumbai">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0B0805">
+<meta name="author" content="MyGoldRates.com">
+<meta name="geo.region" content="IN">
 <link rel="canonical" href="$site_url/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Gold Rate Today in India - Compare $n_brands Jewellers">
-<meta property="og:description" content="24K median $med24/g today. Compare jewellers, check the bullion premium, calculate prices.">
+<meta property="og:site_name" content="MyGoldRates.com">
+<meta property="og:locale" content="en_IN">
+<meta property="og:title" content="Gold Rate Today in India - Compare 24K, 22K &amp; 18K Across $n_brands Jewellers">
+<meta property="og:description" content="Today's gold rate compared across $n_brands top Indian jewellers: 24 carat $med24/g, 22K $med22/g. IBJA bullion premium plus an instant price calculator.">
 <meta property="og:url" content="$site_url/">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="$site_url/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="MyGoldRates.com - India's gold rate comparison platform">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Gold Rate Today in India - Compare $n_brands Jewellers">
+<meta name="twitter:description" content="24 carat gold rate $med24/g, 22K $med22/g today. Compare jewellers, check the bullion premium, calculate prices.">
+<meta name="twitter:image" content="$site_url/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
@@ -574,6 +722,11 @@ $base_css
 .tile .u{font-size:10.5px;color:#A79B7E}
 .tile.best{background:linear-gradient(158deg,rgba(224,186,86,.20),rgba(224,186,86,.06))}
 .note{font-size:13px;color:var(--ink-3);margin:12px 0 24px}
+.seo{margin:40px 0 8px;max-width:74ch}
+.seo h3{font-family:"Marcellus",serif;font-weight:400;font-size:19px;
+  margin:24px 0 6px;color:var(--ink)}
+.seo p{color:var(--ink-2);font-size:15px;line-height:1.72;margin:0 0 14px}
+.seo strong{color:var(--ink);font-weight:600}
 
 /* calculator */
 .calc{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
@@ -838,6 +991,8 @@ $ads_unit
   <h2 id="faqh">Gold Rate FAQs</h2>
 $faq
 </section>
+
+$seo_content
 
 <footer>
   <p id="terms"><strong>Disclaimer &amp; terms:</strong> Rates are indicative,
