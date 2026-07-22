@@ -540,25 +540,26 @@ $base_css
 
 /* rate board hero */
 .board{background:
-  radial-gradient(120% 160% at 85% -20%,rgba(217,178,74,.16),transparent 55%),
-  linear-gradient(160deg,var(--board),var(--board-2));
-  color:#EDE9DD;border-radius:16px;margin:20px 0 12px;padding:40px 38px 34px;
-  position:relative;overflow:hidden;border:1px solid rgba(217,178,74,.22)}
-.board::after{content:"999 · 916 · 750";position:absolute;right:26px;bottom:18px;
-  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.35em;
-  color:var(--gold-bright);opacity:.45}
-.board h1{font-size:clamp(27px,4.6vw,42px);color:#F6F1E3;margin-bottom:6px}
-.board .sub{color:#B9C2B4;max-width:54ch;font-size:15px}
-.board-rates{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px}
-.tile{border:1px solid rgba(217,178,74,.35);border-radius:12px;
-  padding:15px 20px;min-width:150px;flex:1;background:rgba(0,0,0,.14)}
-.tile .k{font-family:"IBM Plex Mono",monospace;font-size:11.5px;
-  letter-spacing:.22em;color:var(--gold-bright);text-transform:uppercase}
-.tile .v{font-family:"IBM Plex Mono",monospace;font-size:clamp(20px,3vw,27px);
-  margin-top:5px;background:linear-gradient(100deg,#F0DB9A,#FFFDF4 45%,#E8C86A);
+  radial-gradient(130% 150% at 84% -30%,rgba(224,186,86,.34),transparent 56%),
+  radial-gradient(120% 130% at 8% 130%,rgba(176,132,42,.18),transparent 55%),
+  linear-gradient(155deg,#171106,#0B0805 55%,#1B1409);
+  color:#F0EAD8;border-radius:14px;margin:16px 0 10px;padding:24px 28px 20px;
+  position:relative;overflow:hidden;border:1px solid rgba(224,186,86,.34)}
+.board::after{content:"999 · 916 · 750";position:absolute;right:20px;bottom:12px;
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.35em;
+  color:var(--gold-bright);opacity:.5}
+.board h1{font-size:clamp(21px,3.4vw,31px);color:#F8EFD6;margin-bottom:4px}
+.board .sub{color:#CFC7AE;max-width:58ch;font-size:13.5px;line-height:1.55}
+.board-rates{display:flex;gap:11px;flex-wrap:wrap;margin-top:16px}
+.tile{border:1px solid rgba(224,186,86,.32);border-radius:11px;
+  padding:11px 15px;min-width:132px;flex:1;background:rgba(224,186,86,.05)}
+.tile .k{font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  letter-spacing:.18em;color:var(--gold-bright);text-transform:uppercase}
+.tile .v{font-family:"IBM Plex Mono",monospace;font-size:clamp(18px,2.5vw,23px);
+  margin-top:3px;background:linear-gradient(100deg,#F0DB9A,#FFFDF4 45%,#E8C86A);
   -webkit-background-clip:text;background-clip:text;color:transparent}
-.tile .u{font-size:12px;color:#8E9A8C}
-.tile.best{background:rgba(217,178,74,.14)}
+.tile .u{font-size:11px;color:#A79B7E}
+.tile.best{background:rgba(224,186,86,.13)}
 .note{font-size:13px;color:var(--ink-3);margin:12px 0 24px}
 
 /* calculator */
