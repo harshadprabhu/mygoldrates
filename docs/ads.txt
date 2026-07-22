@@ -1,2 +1,1 @@
-# Set the ADSENSE_CLIENT secret to publish your ads.txt line automatically.
-# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+google.com, pub-1893036481180379, DIRECT, f08c47fec0942fa0
