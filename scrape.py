@@ -626,15 +626,24 @@ def scrape_brand(b, session):
                              FULL_TIMEOUT if b.get("rate_url") else FAST_TIMEOUT)
         if html:
             found, counts, how, note = try_html(html)
-            if found:
+            if found and how != "proximity":
                 return url, found, counts, f"static/{how}", note
-            tried.append(note)
+            # A structured breakup beats a proximity guess: proximity can grab
+            # the wrong number on product pages (e.g. a GST-inclusive per-gram
+            # total). If static gave only proximity (or nothing), render and
+            # prefer any structured result before falling back to it.
+            static_hit = (found, counts, how, note) if found else None
+            if not found:
+                tried.append(note)
             rhtml = render(url)
             if rhtml:
-                found, counts, how, note = try_html(rhtml)
-                if found:
-                    return url, found, counts, f"rendered/{how}", note
-                tried.append("rendered:" + note)
+                rf, rc, rh, rn = try_html(rhtml)
+                if rf and (rh != "proximity" or static_hit is None):
+                    return url, rf, rc, f"rendered/{rh}", rn
+                tried.append("rendered:" + (rh if rf else rn))
+            if static_hit:
+                f, c, h, n = static_hit
+                return url, f, c, f"static/{h}", n
             continue
 
         if reason.startswith("blocked"):
