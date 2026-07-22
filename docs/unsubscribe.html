@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unsubscribe - GoldRates</title>
+<meta name="robots" content="noindex,follow">
+<link rel="canonical" href="https://mygoldrates.com/unsubscribe.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --paper:#FBF9F4; --ink:#181F1B; --ink-2:#49544D; --ink-3:#79847D;
+  --board:#152420; --board-2:#1C312A; --gold:#9C7514; --gold-bright:#D9B24A;
+  --gold-foil:linear-gradient(100deg,#8C6A18,#D9B24A 45%,#F0DB9A 55%,#C79A2E);
+  --emerald:#1E5C46; --line:#E7E1D3; --card:#FFFFFF; --warm:#8A5A2B;
+  --bar:#B98A1E;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#0E1613; --ink:#EDE9DD; --ink-2:#B4BDB4; --ink-3:#84908A;
+    --board:#0A100D; --board-2:#131E18; --gold:#D9B24A; --gold-bright:#E8C86A;
+    --emerald:#5BBB93; --line:#22302A; --card:#151F1A; --warm:#D89A5B;
+    --bar:#D9B24A;
+  }
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}
+  *{transition:none!important}}
+body{background:var(--paper);color:var(--ink);
+  font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+a{color:var(--emerald)}
+h1,h2,.brand{font-family:"Marcellus",serif;font-weight:400;letter-spacing:.02em}
+.eyebrow{font:500 11.5px/1 "IBM Plex Mono",monospace;letter-spacing:.28em;
+  text-transform:uppercase;color:var(--gold);margin:40px 0 8px}
+header.top{display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:6px 18px;padding:18px 0 14px}
+.brand{font-size:22px;letter-spacing:.14em;text-transform:uppercase;
+  text-decoration:none;color:var(--ink)}
+.brand .karat{background:var(--gold-foil);-webkit-background-clip:text;
+  background-clip:text;color:transparent}
+.topright{display:flex;align-items:center;gap:16px}
+.updated{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
+.btn{display:inline-block;font:500 13.5px/1 "IBM Plex Sans",sans-serif;
+  background:var(--board);color:#F0DB9A;border:1px solid rgba(217,178,74,.5);
+  padding:11px 18px;border-radius:999px;text-decoration:none;cursor:pointer;
+  transition:transform .15s ease, box-shadow .15s ease}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.btn-gold{background:var(--gold-foil);color:#1A1508;border:0;font-weight:600}
+h2{font-size:24px;margin:2px 0 6px}
+.hint{font-size:13.5px;color:var(--ink-3);margin-bottom:14px;max-width:72ch}
+.chartcard{background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:18px}
+.stamp{display:inline-block;font:500 10.5px/1 "IBM Plex Mono",monospace;
+  letter-spacing:.08em;text-transform:uppercase;border-radius:4px;
+  padding:3px 7px;margin-left:8px;vertical-align:2px}
+.stamp-best{color:var(--gold);border:1px solid var(--gold)}
+.stamp-est{color:var(--ink-3);border:1px solid var(--ink-3)}
+footer{margin:44px 0 30px;padding-top:20px;border-top:1px solid var(--line);
+  font-size:13px;color:var(--ink-3)}
+footer p{margin:6px 0;max-width:80ch}
+.hits{font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  letter-spacing:.05em;color:var(--ink-3);opacity:.7}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:34px;max-width:520px;margin:26px 0;text-align:center}
+.card h1{font-size:26px;margin:0 0 10px}
+.card p{color:var(--ink-2);font-size:15px;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <a class="brand" href="https://mygoldrates.com/">Gold<span class="karat">Rates</span></a>
+</header>
+<div class="card">
+  <h1>Unsubscribe</h1>
+  <p id="msg">Processing your request&hellip;</p>
+  <p style="margin-top:16px"><a class="btn" href="https://mygoldrates.com/">Back to gold rates</a></p>
+</div>
+</div>
+<script>
+(function(){
+  var URL_="https://opwrfflzzowhobesysmr.supabase.co", KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE";
+  var msg=document.getElementById('msg');
+  var t=new URLSearchParams(location.search).get('t');
+  if(!t){msg.textContent='This unsubscribe link looks invalid.';return;}
+  if(!KEY){msg.textContent='Unsubscribe is temporarily unavailable - please email us.';return;}
+  fetch(URL_+'/rest/v1/rpc/unsubscribe',{method:'POST',
+    headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
+    body:JSON.stringify({t:t})})
+   .then(function(r){if(!r.ok)throw 0;
+     msg.textContent="You've been unsubscribed. You won't receive any more daily gold-rate emails.";})
+   .catch(function(){msg.textContent='Something went wrong. Please reply to any of our emails to unsubscribe.';});
+})();
+</script>
+</body>
+</html>
