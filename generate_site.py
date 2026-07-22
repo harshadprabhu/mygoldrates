@@ -249,7 +249,10 @@ def main():
                         "across major Indian jewellery brands, with the IBJA "
                         "bullion reference and per-brand premium.",
          "dateModified": now_ist.isoformat(), "url": SITE_URL,
-         "creator": {"@type": "Organization", "name": "GoldRates"}},
+         "license": f"{SITE_URL}/#terms",
+         "isAccessibleForFree": True,
+         "creator": {"@type": "Organization", "name": "GoldRates",
+                     "url": SITE_URL}},
         {"@context": "https://schema.org", "@type": "FAQPage",
          "mainEntity": [{"@type": "Question", "name": q,
                          "acceptedAnswer": {"@type": "Answer", "text": a}}
@@ -362,6 +365,8 @@ h2{font-size:24px;margin:2px 0 6px}
 footer{margin:44px 0 30px;padding-top:20px;border-top:1px solid var(--line);
   font-size:13px;color:var(--ink-3)}
 footer p{margin:6px 0;max-width:80ch}
+.hits{font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  letter-spacing:.05em;color:var(--ink-3);opacity:.7}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 """
 
@@ -689,12 +694,14 @@ $faq
 </section>
 
 <footer>
-  <p><strong>Disclaimer:</strong> Rates are indicative, compiled from each
-  brand's published prices, and can change during the day. Always confirm the
-  billed rate with the jeweller before purchase. This site does not provide
-  investment advice.</p>
+  <p id="terms"><strong>Disclaimer &amp; terms:</strong> Rates are indicative,
+  compiled from each brand's published prices, and can change during the day.
+  Always confirm the billed rate with the jeweller before purchase. This site
+  does not provide investment advice. Data is provided for personal reference
+  only; automated collection or redistribution is not permitted.</p>
   <p>© $year GoldRates - daily gold rate comparison for India.
   Rates updated daily; last updated $date.</p>
+  <p class="hits" id="hits" hidden>👁 <span id="hitcount">—</span> visits</p>
 </footer>
 
 </div>
@@ -918,6 +925,24 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
       mbtn.disabled=false;mbtn.textContent='Subscribe';
     });
   });
+
+  /* ---- visitor hit counter ---- */
+  (function(){
+    var el=document.getElementById('hitcount'),
+        wrap=document.getElementById('hits');
+    if(!SB_KEY||!el)return;
+    var counted=false; try{counted=!!sessionStorage.getItem('gr_hit');}catch(e){}
+    var fn=counted?'hits_count':'bump_hits';   /* bump once per session */
+    fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,
+               'Authorization':'Bearer '+SB_KEY},body:'{}'})
+      .then(function(r){return r.ok?r.json():Promise.reject();})
+      .then(function(n){
+        n=Number(n);
+        if(!isNaN(n)){el.textContent=n.toLocaleString('en-IN');wrap.hidden=false;}
+        try{sessionStorage.setItem('gr_hit','1');}catch(e){}
+      }).catch(function(){});
+  })();
 })();
 </script>
 </body>
