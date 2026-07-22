@@ -48,15 +48,17 @@ header.top{display:flex;justify-content:space-between;align-items:center;
 .brand-mark{width:34px;height:34px;flex:none;
   filter:drop-shadow(0 1px 1px rgba(140,106,24,.28))}
 .brand-text{display:flex;flex-direction:column;line-height:1}
-.wm{font-family:"IBM Plex Sans",system-ui,sans-serif;font-weight:700;
-  font-size:21px;letter-spacing:-.015em;color:var(--ink);white-space:nowrap}
-.wm b{font-weight:700;background:var(--gold-foil);-webkit-background-clip:text;
+.wm{font-family:"Marcellus",serif;font-weight:400;font-size:23px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink);
+  white-space:nowrap}
+.wm b{font-weight:400;background:var(--gold-foil);-webkit-background-clip:text;
   background-clip:text;color:transparent}
-.wm .tld{color:var(--ink-3);font-weight:600}
+.wm .tld{color:var(--ink-3);text-transform:lowercase;letter-spacing:.04em;
+  font-size:.82em}
 .brand-tag{font:600 8px/1 "IBM Plex Mono",monospace;letter-spacing:.13em;
-  text-transform:uppercase;color:var(--ink-3);margin-top:5px}
-@media (max-width:520px){.brand-tag{display:none}.wm{font-size:19px}
-  .brand-mark{width:30px;height:30px}}
+  text-transform:uppercase;color:var(--ink-3);margin-top:6px}
+@media (max-width:520px){.brand-tag{display:none}.wm{font-size:19px;
+  letter-spacing:.1em}.brand-mark{width:30px;height:30px}}
 .topright{display:flex;align-items:center;gap:16px}
 .updated{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
 .btn{display:inline-block;font:500 13.5px/1 "IBM Plex Sans",sans-serif;
