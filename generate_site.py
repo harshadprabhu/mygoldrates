@@ -72,6 +72,24 @@ def main():
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
     anon_key = os.environ.get("SUPABASE_ANON_KEY", "")
     supabase_url = os.environ["SUPABASE_URL"]
+    # AdSense: dormant until the ADSENSE_CLIENT secret (ca-pub-...) is set.
+    ads_client = os.environ.get("ADSENSE_CLIENT", "").strip()
+    ads_slot = os.environ.get("ADSENSE_SLOT", "").strip()
+    if ads_client:
+        ads_head = (
+            '<script async src="https://pagead2.googlesyndication.com/pagead/'
+            f'js/adsbygoogle.js?client={ads_client}" crossorigin="anonymous">'
+            f'</script>\n<meta name="google-adsense-account" content="{ads_client}">')
+    else:
+        ads_head = ""
+    if ads_client and ads_slot:
+        ads_unit = (
+            '<ins class="adsbygoogle" style="display:block" '
+            f'data-ad-client="{ads_client}" data-ad-slot="{ads_slot}" '
+            'data-ad-format="auto" data-full-width-responsive="true"></ins>'
+            '<script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>')
+    else:
+        ads_unit = ""   # Auto ads (head script) place ads; no manual boxes
     today = datetime.now(timezone.utc).date().isoformat()
     rows = sb.table("rates").select("*, brands(name, slug, domain)") \
              .eq("rate_date", today).execute().data
@@ -244,13 +262,13 @@ def main():
 
     common = dict(site_url=SITE_URL, date=display_date, time=display_time,
                   iso_now=now_ist.isoformat(), year=str(now_ist.year),
-                  base_css=BASE_CSS)
+                  base_css=BASE_CSS, ads_head=ads_head)
     html = TEMPLATE.substitute(
         n_brands=str(len(live)),
         med24=inr(med["24K"]), med22=inr(med["22K"]), med18=inr(med["18K"]),
         low24=inr(ladder(lowest["canonical_24k_pre_gst"])["24K"]),
         low_brand=lowest["brands"]["name"],
-        ibja_tiles=ibja_tiles, ibja_section=ibja_section,
+        ibja_tiles=ibja_tiles, ibja_section=ibja_section, ads_unit=ads_unit,
         calc_brands=json.dumps(calc_brands),
         supabase_url=supabase_url, anon_key=anon_key,
         rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld, **common)
@@ -274,8 +292,13 @@ def main():
                 "<changefreq>monthly</changefreq><priority>0.6</priority></url>\n"
                 "</urlset>\n")
     with open("docs/ads.txt", "w", encoding="utf-8") as f:
-        f.write("# Replace with your AdSense publisher line after approval:\n"
-                "# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0\n")
+        if ads_client:
+            pub = ads_client.replace("ca-", "")   # ca-pub-XXXX -> pub-XXXX
+            f.write(f"google.com, {pub}, DIRECT, f08c47fec0942fa0\n")
+        else:
+            f.write("# Set the ADSENSE_CLIENT secret to publish your ads.txt "
+                    "line automatically.\n"
+                    "# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0\n")
     with open("docs/.nojekyll", "w", encoding="utf-8") as f:
         f.write("")
     with open("docs/CNAME", "w", encoding="utf-8") as f:
@@ -358,6 +381,7 @@ TEMPLATE = Template("""<!DOCTYPE html>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+$ads_head
 <script type="application/ld+json">$jsonld</script>
 <style>
 $base_css
@@ -605,8 +629,7 @@ $rows
   </div>
 </section>
 
-<!-- AdSense: paste your ad unit snippet inside this div after approval -->
-<div class="adslot" aria-hidden="true">advertisement</div>
+$ads_unit
 
 <section aria-labelledby="calch">
   <p class="eyebrow">Price Calculator</p>
@@ -657,7 +680,7 @@ $ibja_section
   <a class="btn btn-gold js-alert" href="inquiry.html">Get daily alerts</a>
 </div>
 
-<div class="adslot" aria-hidden="true">advertisement</div>
+$ads_unit
 
 <section aria-labelledby="faqh">
   <p class="eyebrow">Know Your Gold</p>
@@ -911,6 +934,7 @@ INQUIRY_TEMPLATE = Template("""<!DOCTYPE html>
 <meta name="description" content="Get one clean email every morning with India's gold rate comparison - the cheapest jeweller, the IBJA bullion premium and the market median. Free sign-up.">
 <link rel="canonical" href="$site_url/inquiry.html">
 <meta name="robots" content="index,follow">
+$ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
