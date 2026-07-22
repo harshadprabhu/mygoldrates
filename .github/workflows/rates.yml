@@ -2,13 +2,13 @@ name: fetch-rates
 
 on:
   schedule:
-    # Adaptive-ish window, all times UTC. IST = UTC+5:30.
-    # Morning discovery sweep: 09:00-11:30 IST, every 30 min.
-    - cron: "30 3,4,5,6 * * *"
-    # Afternoon revision checks: 14:00 and 17:00 IST.
-    - cron: "30 8,11 * * *"
-    # Late retry for anything still missing.
-    - cron: "30 14 * * *"
+    # Three runs a day, all times UTC (IST = UTC+5:30).
+    # 05:35 UTC = 11:05 IST - alerts are emailed from this run (~11:10 IST).
+    - cron: "35 5 * * *"
+    # 08:30 UTC = 14:00 IST.
+    - cron: "30 8 * * *"
+    # 11:30 UTC = 17:00 IST.
+    - cron: "30 11 * * *"
   workflow_dispatch:        # lets you trigger a run by hand if you ever want to
 
 concurrency:
@@ -78,6 +78,9 @@ jobs:
             --commit-dirty=true
 
       - name: Send daily alert emails
+        # Only from the 11:05 IST run, so the digest lands ~11:10 IST once a
+        # day. (send_alerts.py's last_emailed guard is a second safety net.)
+        if: github.event.schedule == '35 5 * * *'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
