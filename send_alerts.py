@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Send the daily gold-rate digest to subscribers via Resend.
+"""Send the daily gold-rate digest to subscribers via Brevo.
 
-Runs after the scrape. No-ops unless RESEND_API_KEY is set. Emails each
+Runs after the scrape. No-ops unless BREVO_API_KEY is set. Emails each
 subscriber at most once per calendar day (last_emailed guard), personalised,
 with a one-click unsubscribe link. Safe to run on every scrape - the guard
 prevents duplicates.
@@ -93,12 +93,23 @@ padding:24px 12px;font-family:Arial,Helvetica,sans-serif;color:#152420">
 </body></html>"""
 
 
+def parse_sender(raw):
+    """'GoldRates <alerts@mygoldrates.com>' -> ('GoldRates', 'alerts@...')."""
+    raw = (raw or "").strip()
+    if "<" in raw and ">" in raw:
+        name = raw[:raw.index("<")].strip() or "GoldRates"
+        email = raw[raw.index("<") + 1:raw.index(">")].strip()
+        return name, email
+    return "GoldRates", (raw or "alerts@mygoldrates.com")
+
+
 def main():
-    key = os.environ.get("RESEND_API_KEY", "").strip()
+    key = os.environ.get("BREVO_API_KEY", "").strip()
     if not key:
-        print("alerts: RESEND_API_KEY not set - skipping")
+        print("alerts: BREVO_API_KEY not set - skipping")
         return
-    frm = os.environ.get("ALERTS_FROM", "GoldRates <alerts@mygoldrates.com>")
+    from_name, from_email = parse_sender(
+        os.environ.get("ALERTS_FROM", "GoldRates <alerts@mygoldrates.com>"))
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
     today = datetime.now(timezone.utc).date().isoformat()
 
@@ -131,13 +142,18 @@ def main():
         first = (s.get("name") or "there").strip().split(" ")[0] or "there"
         unsub = f"{SITE_URL}/unsubscribe.html?t={s['unsub_token']}"
         html = email_html(first, date, med, low, lowest["brands"]["name"], unsub)
+        to = {"email": s["email"]}
+        if s.get("name"):
+            to["name"] = s["name"].strip()
         try:
             r = requests.post(
-                "https://api.resend.com/emails",
-                headers={"Authorization": f"Bearer {key}",
-                         "Content-Type": "application/json"},
-                json={"from": frm, "to": [s["email"]],
-                      "subject": f"Gold Rate Today - {date}", "html": html,
+                "https://api.brevo.com/v3/smtp/email",
+                headers={"api-key": key, "accept": "application/json",
+                         "content-type": "application/json"},
+                json={"sender": {"name": from_name, "email": from_email},
+                      "to": [to],
+                      "subject": f"Gold Rate Today - {date}",
+                      "htmlContent": html,
                       "headers": {"List-Unsubscribe": f"<{unsub}>",
                                   "List-Unsubscribe-Post":
                                       "List-Unsubscribe=One-Click"}},
