@@ -40,10 +40,20 @@ h1,h2,.brand{font-family:"Marcellus",serif;font-weight:400;letter-spacing:.02em}
   text-transform:uppercase;color:var(--gold);margin:40px 0 8px}
 header.top{display:flex;justify-content:space-between;align-items:center;
   flex-wrap:wrap;gap:6px 18px;padding:18px 0 14px}
-.brand{font-size:22px;letter-spacing:.14em;text-transform:uppercase;
-  text-decoration:none;color:var(--ink)}
-.brand .karat{background:var(--gold-foil);-webkit-background-clip:text;
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+  color:var(--ink)}
+.brand-mark{width:34px;height:34px;flex:none;
+  filter:drop-shadow(0 1px 1px rgba(140,106,24,.28))}
+.brand-text{display:flex;flex-direction:column;line-height:1}
+.wm{font-family:"IBM Plex Sans",system-ui,sans-serif;font-weight:700;
+  font-size:21px;letter-spacing:-.015em;color:var(--ink);white-space:nowrap}
+.wm b{font-weight:700;background:var(--gold-foil);-webkit-background-clip:text;
   background-clip:text;color:transparent}
+.wm .tld{color:var(--ink-3);font-weight:600}
+.brand-tag{font:600 8px/1 "IBM Plex Mono",monospace;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin-top:5px}
+@media (max-width:520px){.brand-tag{display:none}.wm{font-size:19px}
+  .brand-mark{width:30px;height:30px}}
 .topright{display:flex;align-items:center;gap:16px}
 .updated{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
 .btn{display:inline-block;font:500 13.5px/1 "IBM Plex Sans",sans-serif;
@@ -80,7 +90,7 @@ footer p{margin:6px 0;max-width:80ch}
 <body>
 <div class="wrap">
 <header class="top">
-  <a class="brand" href="https://mygoldrates.com/">Gold<span class="karat">Rates</span></a>
+  <a class="brand" href="https://mygoldrates.com/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
 </header>
 <div class="card">
   <h1>Unsubscribe</h1>
