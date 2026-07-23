@@ -1655,6 +1655,13 @@ $base_css
   padding:34px;max-width:520px;margin:26px 0;text-align:center}
 .card h1{font-size:26px;margin:0 0 10px}
 .card p{color:var(--ink-2);font-size:15px;margin:8px 0}
+.reasons{text-align:left;max-width:340px;margin:18px auto 0}
+.reasons .r{display:flex;align-items:center;gap:10px;padding:11px 13px;margin:8px 0;
+  border:1px solid var(--line);border-radius:10px;font-size:15px;cursor:pointer}
+.reasons .r:hover{border-color:var(--gold,#D9B24A)}
+.reasons .r input{accent-color:var(--gold,#D9B24A);width:16px;height:16px}
+.reasons .btn{width:100%;margin-top:14px}
+.skip{margin-top:12px;font-size:13px;text-align:center}
 </style>
 </head>
 <body>
@@ -1664,23 +1671,54 @@ $base_css
 </header>
 <div class="card">
   <h1>Unsubscribe</h1>
-  <p id="msg">Processing your request&hellip;</p>
+  <div id="ask">
+    <p>Sorry to see you go. Mind telling us why? It helps us improve.</p>
+    <form id="reason-form" class="reasons">
+      <label class="r"><input type="radio" name="reason" value="Too many emails"> Too many emails</label>
+      <label class="r"><input type="radio" name="reason" value="Rates not relevant"> The rates aren&rsquo;t relevant to me</label>
+      <label class="r"><input type="radio" name="reason" value="No longer tracking gold"> I no longer track gold rates</label>
+      <label class="r"><input type="radio" name="reason" value="Did not sign up"> I didn&rsquo;t sign up for this</label>
+      <label class="r"><input type="radio" name="reason" value="Other"> Other</label>
+      <button class="btn" id="u-btn" type="submit">Unsubscribe</button>
+      <p class="skip"><a href="#" id="skip-link">Unsubscribe without a reason</a></p>
+    </form>
+  </div>
+  <p id="msg" style="display:none"></p>
   <p style="margin-top:16px"><a class="btn" href="$site_url/">Back to gold rates</a></p>
 </div>
 </div>
 <script>
 (function(){
   var URL_="$supabase_url", KEY="$anon_key";
+  var ask=document.getElementById('ask');
   var msg=document.getElementById('msg');
+  var form=document.getElementById('reason-form');
+  var btn=document.getElementById('u-btn');
   var t=new URLSearchParams(location.search).get('t');
-  if(!t){msg.textContent='This unsubscribe link looks invalid.';return;}
-  if(!KEY){msg.textContent='Unsubscribe is temporarily unavailable - please email us.';return;}
-  fetch(URL_+'/rest/v1/rpc/unsubscribe',{method:'POST',
-    headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
-    body:JSON.stringify({t:t})})
-   .then(function(r){if(!r.ok)throw 0;
-     msg.textContent="You've been unsubscribed. You won't receive any more daily gold-rate emails.";})
-   .catch(function(){msg.textContent='Something went wrong. Please reply to any of our emails to unsubscribe.';});
+  function show(text){ask.style.display='none';msg.style.display='block';msg.textContent=text;}
+  if(!t){show('This unsubscribe link looks invalid.');return;}
+  if(!KEY){show('Unsubscribe is temporarily unavailable - please email us.');return;}
+  function rpc(fn,body){
+    return fetch(URL_+'/rest/v1/rpc/'+fn,{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
+      body:JSON.stringify(body)});
+  }
+  function unsub(reason){
+    btn.disabled=true; btn.textContent='Unsubscribing...';
+    /* Save the reason first (best effort - never block the unsubscribe), then
+       run the actual unsubscribe. Reason storage keeps no personal data. */
+    var saved = reason ? rpc('save_unsub_reason',{t:t,reason:reason}).catch(function(){})
+                       : Promise.resolve();
+    saved.then(function(){return rpc('unsubscribe',{t:t});})
+      .then(function(r){if(!r.ok)throw 0;
+        show("You've been unsubscribed. You won't receive any more daily gold-rate emails.");})
+      .catch(function(){show('Something went wrong. Please reply to any of our emails to unsubscribe.');});
+  }
+  form.addEventListener('submit',function(e){e.preventDefault();
+    var sel=form.querySelector('input[name=reason]:checked');
+    unsub(sel?sel.value:'');});
+  document.getElementById('skip-link').addEventListener('click',function(e){
+    e.preventDefault(); unsub('');});
 })();
 </script>
 </body>

@@ -2,12 +2,13 @@
 """One-off: send today's digest directly to TEST_EMAIL (no list touched)."""
 import os
 import statistics
-from datetime import datetime, timezone
+from datetime import datetime
 
 import requests
 from supabase import create_client
 
-from send_alerts import email_html, ladder, parse_sender, IST
+from send_alerts import (email_html, ladder, parse_sender, IST,
+                         latest_published_rates)
 
 
 def main():
@@ -17,11 +18,10 @@ def main():
         os.environ.get("ALERTS_FROM", "GoldRates <alerts@mygoldrates.com>"))
     sb = create_client(os.environ["SUPABASE_URL"],
                        os.environ["SUPABASE_SERVICE_KEY"])
-    today = datetime.now(timezone.utc).date().isoformat()
-    rows = sb.table("rates").select("*, brands(name)") \
-             .eq("rate_date", today).execute().data
-    live = [r for r in rows if r.get("brands") and r.get("canonical_24k_pre_gst")
-            and r["status"] == "published"]
+    live, _ = latest_published_rates(sb)
+    if not live:
+        print("no published rates found in the last 10 days")
+        return
     median24 = statistics.median(r["canonical_24k_pre_gst"] for r in live)
     lowest = min(live, key=lambda r: r["canonical_24k_pre_gst"])
     med, low = ladder(median24), ladder(lowest["canonical_24k_pre_gst"])

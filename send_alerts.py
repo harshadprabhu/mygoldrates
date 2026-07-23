@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import os
 import statistics
+import sys
 from datetime import datetime, timezone, timedelta
 
 import requests
@@ -104,23 +105,44 @@ def parse_sender(raw):
     return "GoldRates", (raw or "alerts@mygoldrates.com")
 
 
+def latest_published_rates(sb, lookback_days=10):
+    """Most recent day that has published rates - today, or the latest prior
+    day within the lookback window. Carries forward on weekends, holidays, and
+    missed/failed scrapes so the digest always has real numbers to send.
+    Returns (rows_for_that_day, rate_date_iso). ([], None) if nothing found.
+    """
+    today = datetime.now(timezone.utc).date().isoformat()
+    since = (datetime.now(timezone.utc)
+             - timedelta(days=lookback_days)).date().isoformat()
+    rows = sb.table("rates").select("*, brands(name)") \
+             .lte("rate_date", today).gte("rate_date", since) \
+             .eq("status", "published") \
+             .order("rate_date", desc=True).execute().data
+    live = [r for r in rows if r.get("brands") and r.get("canonical_24k_pre_gst")]
+    if not live:
+        return [], None
+    as_of = max(r["rate_date"] for r in live)
+    return [r for r in live if r["rate_date"] == as_of], as_of
+
+
 def main():
     key = os.environ.get("BREVO_API_KEY", "").strip()
     if not key:
-        print("alerts: BREVO_API_KEY not set - skipping")
-        return
+        # Emails are mandatory - fail loudly instead of a silent green no-op so
+        # a missing secret is caught, not shrugged off.
+        print("alerts: BREVO_API_KEY not set - cannot send", file=sys.stderr)
+        sys.exit(1)
     from_name, from_email = parse_sender(
         os.environ.get("ALERTS_FROM", "GoldRates <alerts@mygoldrates.com>"))
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
     today = datetime.now(timezone.utc).date().isoformat()
 
-    rows = sb.table("rates").select("*, brands(name)") \
-             .eq("rate_date", today).execute().data
-    live = [r for r in rows if r.get("brands") and r.get("canonical_24k_pre_gst")
-            and r["status"] == "published"]
+    live, rate_as_of = latest_published_rates(sb)
     if not live:
-        print("alerts: no published rates today - skipping")
+        print("alerts: no published rates in the last 10 days - skipping")
         return
+    if rate_as_of != today:
+        print(f"alerts: no rates for {today}; carrying forward {rate_as_of}")
     median24 = statistics.median(r["canonical_24k_pre_gst"] for r in live)
     lowest = min(live, key=lambda r: r["canonical_24k_pre_gst"])
     med, low = ladder(median24), ladder(lowest["canonical_24k_pre_gst"])
@@ -168,6 +190,12 @@ def main():
         except requests.RequestException as e:
             print(f"  send error {s['email']}: {type(e).__name__}")
     print(f"alerts: sent {sent}/{len(pending)}")
+    # Recipients that failed keep their old last_emailed (updated only on
+    # success), so the next scheduled run of the day retries just them. If the
+    # whole batch failed it's a systemic problem (Brevo down/auth/sender
+    # unverified) - fail the run so it's visible and the next run retries.
+    if pending and sent == 0:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

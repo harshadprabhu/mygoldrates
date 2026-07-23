@@ -78,9 +78,12 @@ jobs:
             --commit-dirty=true
 
       - name: Send daily alert emails
-        # Only from the 11:05 IST run, so the digest lands ~11:10 IST once a
-        # day. (send_alerts.py's last_emailed guard is a second safety net.)
-        if: github.event.schedule == '35 5 * * *'
+        # Runs on every scheduled run (11:05/14:00/17:00 IST) and manual runs,
+        # and even if an earlier step failed, so a missed or failed 11:05 send
+        # is retried the same day. send_alerts.py's per-subscriber last_emailed
+        # guard (set only on a successful send) keeps it to one email a day and
+        # makes the later runs retry only whoever hasn't received it yet.
+        if: ${{ !cancelled() }}
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
