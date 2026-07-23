@@ -9,6 +9,7 @@ anon key (insert-only table behind RLS); no privileged keys are shipped.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -704,10 +705,12 @@ def main():
     gsi = ('<script src="https://accounts.google.com/gsi/client" async defer>'
            '</script>') if gclient else ""
 
+    sig_ver = hashlib.md5(SIGNUP_JS.encode()).hexdigest()[:8]
     common = dict(site_url=SITE_URL, date=display_date, time=display_time,
                   iso_now=now_ist.isoformat(), year=str(now_ist.year),
                   base_css=BASE_CSS, ads_head=ads_head,
-                  gclient=gclient, gsi=gsi, google_btn=GOOGLE_BTN)
+                  gclient=gclient, gsi=gsi, google_btn=GOOGLE_BTN,
+                  sig_ver=sig_ver)
     def city_cloud(current_slug=None):
         parts = []
         for nm in LOCATIONS:
@@ -922,6 +925,16 @@ def main():
 
 
 BASE_CSS = """
+/* google signup (shared by modal + inquiry) */
+.gwrap{margin:0 0 10px;text-align:center}
+.ghost{display:flex;justify-content:center;min-height:44px}
+.gdone{font-size:12.5px;color:var(--emerald);margin:10px 0 2px}
+.gmanual{display:inline-block;margin-top:12px;font-size:12.5px;
+  color:var(--ink-3);text-decoration:underline;cursor:pointer}
+.gmanual:hover{color:var(--gold)}
+.has-google .manualbox{display:none}
+.has-google .manualbox.reveal{display:block;
+  border-top:1px solid var(--line);margin-top:14px;padding-top:16px}
 :root{
   --paper:#FBF9F4; --ink:#181F1B; --ink-2:#49544D; --ink-3:#79847D;
   --board:#152420; --board-2:#1C312A; --gold:#9C7514; --gold-bright:#D9B24A;
@@ -1219,16 +1232,6 @@ $base_css
 .citycloud a:hover{border-color:var(--gold);color:var(--gold)}
 .citycloud a[aria-current="page"]{border-color:var(--gold);
   color:var(--gold);font-weight:600}
-/* google signup */
-.gwrap{margin:0 0 10px;text-align:center}
-.ghost{display:flex;justify-content:center;min-height:44px}
-.gdone{font-size:12.5px;color:var(--emerald);margin:10px 0 2px}
-.gmanual{display:inline-block;margin-top:12px;font-size:12.5px;
-  color:var(--ink-3);text-decoration:underline;cursor:pointer}
-.gmanual:hover{color:var(--gold)}
-.has-google .manualbox{display:none}
-.has-google .manualbox.reveal{display:block;
-  border-top:1px solid var(--line);margin-top:14px;padding-top:16px}
 
 /* calculator */
 .calc{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
@@ -1878,7 +1881,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
 })();
 </script>
 <script>window.GR_GCID="$gclient";</script>
-<script src="signup.js" defer></script>
+<script src="signup.js?v=$sig_ver" defer></script>
 </body>
 </html>
 """)
@@ -2060,7 +2063,7 @@ $base_css
 })();
 </script>
 <script>window.GR_GCID="$gclient";</script>
-<script src="signup.js" defer></script>
+<script src="signup.js?v=$sig_ver" defer></script>
 </body>
 </html>
 """)
