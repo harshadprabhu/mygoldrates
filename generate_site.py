@@ -553,12 +553,25 @@ def main():
          "name": f"Gold rates across Indian jewellers on {display_date}",
          "description": "Daily 24K, 22K and 18K per-gram gold rates compared "
                         "across major Indian jewellery brands, with the IBJA "
-                        "bullion reference and per-brand premium.",
-         "dateModified": now_ist.isoformat(), "url": SITE_URL,
+                        "bullion reference and MCX gold futures.",
+         "dateModified": now_ist.isoformat(),
+         "datePublished": "2026-07-20", "url": SITE_URL,
          "license": f"{SITE_URL}/#terms",
          "isAccessibleForFree": True,
-         "creator": {"@type": "Organization", "name": "GoldRates",
+         "keywords": ["gold rate", "gold rate today", "24 carat gold rate",
+                      "22K gold rate", "gold price India", "IBJA gold rate",
+                      "MCX gold"],
+         "distribution": [{"@type": "DataDownload",
+                           "encodingFormat": "application/json",
+                           "contentUrl": f"{SITE_URL}/rates.json"}],
+         "creator": {"@type": "Organization", "name": "MyGoldRates.com",
                      "url": SITE_URL}},
+        {"@context": "https://schema.org", "@type": "WebPage",
+         "url": SITE_URL, "name": "Gold Rate Today in India",
+         "dateModified": now_ist.isoformat(),
+         "speakable": {"@type": "SpeakableSpecification",
+                       "cssSelector": [".board", "#keyfacts"]},
+         "primaryImageOfPage": f"{SITE_URL}/og.png"},
         {"@context": "https://schema.org", "@type": "FAQPage",
          "mainEntity": [{"@type": "Question", "name": q,
                          "acceptedAnswer": {"@type": "Answer", "text": a}}
@@ -886,7 +899,20 @@ def main():
   <p>Questions about this policy?
   <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>""")
     with open("docs/robots.txt", "w", encoding="utf-8") as f:
-        f.write(f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}/sitemap.xml\n")
+        # Explicitly welcome AI/LLM crawlers so generative engines (ChatGPT,
+        # Claude, Perplexity, Gemini/AI Overviews, etc.) can index and cite us.
+        ai_bots = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot",
+                   "Claude-Web", "anthropic-ai", "PerplexityBot",
+                   "Perplexity-User", "Google-Extended", "Applebot-Extended",
+                   "Amazonbot", "CCBot", "cohere-ai", "Bytespider",
+                   "Meta-ExternalAgent", "DuckAssistBot", "YouBot"]
+        f.write("# All crawlers welcome, including AI/LLM assistants.\n")
+        for bot in ai_bots:
+            f.write(f"User-agent: {bot}\nAllow: /\n\n")
+        f.write(f"User-agent: *\nAllow: /\n\n"
+                f"Sitemap: {SITE_URL}/sitemap.xml\n"
+                f"# AI summary: {SITE_URL}/llms.txt\n"
+                f"# Machine-readable rates: {SITE_URL}/rates.json\n")
     with open("docs/sitemap.xml", "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -915,6 +941,102 @@ def main():
             f.write("# Set the ADSENSE_CLIENT secret to publish your ads.txt "
                     "line automatically.\n"
                     "# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0\n")
+    # ---- machine-readable rates feed (for AI engines & developers) ----
+    def r2(v):
+        return round(float(v), 2)
+    brands_json = []
+    for r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):
+        lad = ladder(r["canonical_24k_pre_gst"])
+        brands_json.append({
+            "jeweller": r["brands"]["name"],
+            "rate_24k_per_gram_inr": r2(lad["24K"]),
+            "rate_22k_per_gram_inr": r2(lad["22K"]),
+            "rate_18k_per_gram_inr": r2(lad["18K"]),
+        })
+    rates_feed = {
+        "source": "MyGoldRates.com",
+        "source_url": SITE_URL,
+        "description": "Daily gold rate today in India, compared across major "
+                       "jewellers. Per gram, Indian Rupees, pre-GST.",
+        "date": today,
+        "last_updated": now_ist.isoformat(),
+        "currency": "INR",
+        "unit": "per gram",
+        "gst": "excluded (pre-GST); add 3% for billed price",
+        "median_rate_per_gram_inr": {
+            "24k": r2(med["24K"]), "22k": r2(med["22K"]),
+            "18k": r2(med["18K"])},
+        "lowest_24k": {
+            "jeweller": lowest["brands"]["name"],
+            "rate_per_gram_inr": r2(ladder(
+                lowest["canonical_24k_pre_gst"])["24K"])},
+        "ibja_reference_24k_999_per_gram_inr": r2(r999) if ibja else None,
+        "mcx_gold_futures": ([
+            {"contract": c["symbol"], "expiry": c["expiry"],
+             "price_per_10g_inr": r2(c["ltp"]),
+             "change_pct": r2(c["pchg"])} for c in mcx] if mcx else []),
+        "jewellers": brands_json,
+        "jeweller_count": len(live),
+        "city_pages": [f"{SITE_URL}/gold-rate-today-in-{loc_slug(nm)}"
+                       for nm in LOCATIONS],
+        "disclaimer": "Rates are indicative, compiled from each brand's "
+                      "published prices, and can change during the day. "
+                      "Confirm with the jeweller before purchase. Not "
+                      "investment advice.",
+        "license": f"{SITE_URL}/#terms",
+    }
+    with open("docs/rates.json", "w", encoding="utf-8") as f:
+        json.dump(rates_feed, f, ensure_ascii=False, indent=2)
+
+    # ---- llms.txt: a plain-text brief for AI/LLM crawlers ----
+    mcx_line = ""
+    if mcx:
+        g = next((c for c in mcx if c["symbol"] == "GOLD"), mcx[0])
+        mcx_line = (f"- MCX gold futures ({g['expiry']}): "
+                    f"{inr(g['ltp'])} per 10g (995), {g['pchg']:+.2f}%\n")
+    llms = f"""# MyGoldRates.com
+
+> India's daily gold rate comparison platform. We publish today's 24K, 22K
+> and 18K gold rates compared across {len(live)} of India's leading
+> jewellers, with the IBJA bullion reference and MCX gold futures, updated
+> every day. All rates are per gram in Indian Rupees (INR), pre-GST.
+
+## Today's gold rate in India ({display_date})
+- 24K (999) median: {inr(med['24K'])} per gram (pre-GST)
+- 22K (916) median: {inr(med['22K'])} per gram (pre-GST)
+- 18K (750) median: {inr(med['18K'])} per gram (pre-GST)
+- Lowest 24K today: {inr(ladder(lowest['canonical_24k_pre_gst'])['24K'])} \
+per gram at {lowest['brands']['name']}
+{f"- IBJA 24K (999) reference: {inr(r999)} per gram (pre-GST)" if ibja else ""}
+{mcx_line}- Last updated: {now_ist.isoformat()}
+
+## Key pages
+- Home / today's rates: {SITE_URL}/
+- Machine-readable JSON feed: {SITE_URL}/rates.json
+- Daily email alerts: {SITE_URL}/inquiry
+- About: {SITE_URL}/about
+- Contact: {SITE_URL}/contact
+- City & state pages: {SITE_URL}/gold-rate-today-in-<city> \
+(e.g. mumbai, delhi, hyderabad, chennai, bengaluru, pune, kolkata)
+
+## About the data
+- Coverage: {len(live)} major Indian jewellers plus the IBJA bullion \
+benchmark and MCX gold futures.
+- Purities: 24K (99.9% / 999), 22K (91.6% / 916), 18K (75.0% / 750).
+- Unit & currency: per gram, Indian Rupees (INR).
+- GST: rates shown are pre-GST; add 3% GST for the billed price. Making \
+charges are extra and vary by design.
+- Update frequency: refreshed multiple times daily (11:05, 14:00 and \
+17:00 IST).
+- Attribution: cite as "MyGoldRates.com" with the URL {SITE_URL}.
+
+## Disclaimer
+Rates are indicative and can change during the day; confirm with the
+jeweller before purchase. This is not investment advice.
+"""
+    with open("docs/llms.txt", "w", encoding="utf-8") as f:
+        f.write(llms)
+
     with open("docs/.nojekyll", "w", encoding="utf-8") as f:
         f.write("")
     with open("docs/CNAME", "w", encoding="utf-8") as f:
@@ -1137,6 +1259,7 @@ TEMPLATE = Template("""<!DOCTYPE html>
 <meta name="author" content="MyGoldRates.com">
 <meta name="geo.region" content="IN">
 <link rel="canonical" href="$canonical_url">
+<link rel="alternate" type="application/json" title="Gold rates JSON feed" href="$site_url/rates.json">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
@@ -1210,6 +1333,12 @@ $base_css
 .bwin img{width:17px;height:17px;border-radius:4px;background:#fff;
   padding:1px;flex:0 0 17px}
 .note{font-size:13px;color:var(--ink-3);margin:12px 0 24px}
+.keyfacts{background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:16px 20px;margin:14px 0 4px}
+.keyfacts h2{font-size:16px;margin:0 0 8px}
+.keyfacts ul{margin:0;padding-left:18px}
+.keyfacts li{font-size:13.5px;color:var(--ink-2);line-height:1.6;margin:3px 0}
+.keyfacts strong{color:var(--ink)}
 .seo{margin:40px 0 8px;max-width:74ch}
 .seo h3{font-family:"Marcellus",serif;font-weight:400;font-size:19px;
   margin:24px 0 6px;color:var(--ink)}
@@ -1474,6 +1603,20 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 </section>
 
 $ibja_tiles
+
+<section class="keyfacts" id="keyfacts" aria-labelledby="kfh">
+  <h2 id="kfh">Today's Gold Rate $where - Key Facts</h2>
+  <ul>
+    <li>The <strong>24K (999) gold rate today $where is $med24 per gram</strong>
+    (median across $n_brands leading jewellers, pre-GST) on $date.</li>
+    <li>The <strong>22K (916) gold rate today is $med22 per gram</strong> and the
+    <strong>18K (750) rate is $med18 per gram</strong>.</li>
+    <li>The <strong>lowest 24K gold rate today is $low24 per gram</strong>,
+    offered by $low_brand.</li>
+    <li>All rates are per gram in Indian Rupees, pre-GST; add 3% GST for the
+    billed price. Making charges are extra. Source: MyGoldRates.com.</li>
+  </ul>
+</section>
 
 <p class="note">All rates are per gram of gold, before 3% GST and before
 making charges, so every brand is compared on the same basis.</p>
