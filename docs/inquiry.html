@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+
 <style>
 
 :root{
@@ -137,6 +138,11 @@ footer p{margin:6px 0;max-width:80ch}
 </section>
 
 <form id="inq" class="formcard" novalidate>
+  <div class="gwrap" id="gwrap" hidden>
+    <button type="button" class="gbtn"><svg viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92a8.78 8.78 0 0 0 2.68-6.62z"/><path fill="#34A853" d="M9 18a8.6 8.6 0 0 0 5.96-2.18l-2.92-2.26a5.4 5.4 0 0 1-8.09-2.85H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.71a5.41 5.41 0 0 1 0-3.42V4.96H.96a9 9 0 0 0 0 8.08l2.99-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59A9 9 0 0 0 .96 4.96l2.99 2.33A5.36 5.36 0 0 1 9 3.58z"/></svg>Continue with Google</button>
+    <div class="gdone" hidden></div>
+    <div class="ordiv"><span>or fill in manually</span></div>
+  </div>
   <div class="field"><label for="f-name">Name <span class="req">*</span></label>
     <input id="f-name" name="name" autocomplete="name" required maxlength="80"></div>
   <div class="grid2">
@@ -145,7 +151,8 @@ footer p{margin:6px 0;max-width:80ch}
       required maxlength="120"></div>
     <div class="field"><label for="f-phone">Phone <span class="req">*</span></label>
       <input id="f-phone" name="phone" type="tel" autocomplete="tel"
-      inputmode="tel" required maxlength="20" placeholder="+91"></div>
+      inputmode="tel" required maxlength="20" value="+91 "
+      placeholder="+91 98765 43210"></div>
   </div>
   <div class="grid2">
     <div class="field"><label for="f-country">Country</label>
@@ -166,6 +173,10 @@ footer p{margin:6px 0;max-width:80ch}
       <input id="f-zip" name="zip" autocomplete="postal-code"
       inputmode="numeric" maxlength="10"></div>
   </div>
+  <div class="field"><label for="f-area">Area / Locality</label>
+    <input id="f-area" name="area" maxlength="80" list="f-areas"
+    autocomplete="address-level3" placeholder="auto-fills from PIN code">
+    <datalist id="f-areas"></datalist></div>
   <div class="hp" aria-hidden="true">
     <label>Website<input name="website" tabindex="-1" autocomplete="off"></label>
   </div>
@@ -203,18 +214,31 @@ footer p{margin:6px 0;max-width:80ch}
     if(!KEY){err.textContent='Subscriptions open shortly - please check back soon.';
       err.style.display='block';return;}
     btn.disabled=true;btn.textContent='Subscribing...';
-    fetch(URL_+'/rest/v1/inquiries',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':KEY,
-               'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify({
-        name:form.name.value.trim(), email:form.email.value.trim(),
-        phone:form.phone.value.trim(), country:form.country.value,
-        state:form.state.value.trim(), city:form.city.value.trim(),
-        zip:form.zip.value.trim(), offers_optin:form.offers.checked
-      })
-    }).then(function(r){
-      if(!r.ok){throw new Error('bad status');}
+    var payload={
+      name:form.name.value.trim(), email:form.email.value.trim(),
+      phone:form.phone.value.trim(), country:form.country.value,
+      state:form.state.value.trim(), city:form.city.value.trim(),
+      zip:form.zip.value.trim(), area:form.area.value.trim(),
+      offers_optin:form.offers.checked
+    };
+    var g=window.GR_GDATA||{};
+    for(var k in g){if(g[k]!==null&&g[k]!==undefined)payload[k]=g[k];}
+    function post(p){
+      return fetch(URL_+'/rest/v1/inquiries',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':KEY,
+                 'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
+        body:JSON.stringify(p)});
+    }
+    post(payload).then(function(r){
+      if(r.ok)return r;
+      /* older table without newer columns: retry with base fields only */
+      var BASE=['name','email','phone','country','state','city','zip'];
+      var p2={};BASE.forEach(function(k){
+        if(payload[k]!==undefined)p2[k]=payload[k];});
+      return post(p2).then(function(r2){
+        if(!r2.ok)throw new Error('bad status');return r2;});
+    }).then(function(){
       form.reset();ok.style.display='block';
       btn.textContent='Subscribed';
     }).catch(function(){
@@ -224,5 +248,7 @@ footer p{margin:6px 0;max-width:80ch}
   });
 })();
 </script>
+<script>window.GR_GCID="";</script>
+<script src="signup.js" defer></script>
 </body>
 </html>
