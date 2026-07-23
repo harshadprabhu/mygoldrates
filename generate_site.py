@@ -216,6 +216,74 @@ def fetch_ibja():
     return None
 
 
+def fetch_mcx():
+    """MCX gold futures (per 10g, 995 fine). Best-effort.
+
+    Returns [{symbol, expiry, ltp, chg, pchg}, ...] (GOLD, GOLDM nearest
+    expiries) or None if the exchange feed is unreachable.
+    """
+    try:
+        r = requests.post(
+            "https://www.mcxindia.com/backpage.aspx/GetMarketWatch",
+            headers={"User-Agent": UA,
+                     "Content-Type": "application/json; charset=UTF-8",
+                     "Accept": "application/json, text/javascript, */*; q=0.01",
+                     "Referer": "https://www.mcxindia.com/market-data/market-watch",
+                     "Origin": "https://www.mcxindia.com",
+                     "X-Requested-With": "XMLHttpRequest"},
+            json={}, timeout=25)
+        d = r.json().get("d")
+        if isinstance(d, str):
+            d = json.loads(d)
+        if isinstance(d, dict):
+            d = d.get("Data") or d.get("data") or []
+        out, seen = [], set()
+        for x in d or []:
+            sym = str(x.get("Symbol") or "").upper()
+            if sym in ("GOLD", "GOLDM") and sym not in seen:
+                ltp = float(x.get("LTP") or 0)
+                if 60000 <= ltp <= 400000:      # sanity: Rs per 10g
+                    out.append({"symbol": sym,
+                                "expiry": str(x.get("ExpiryDate") or ""),
+                                "ltp": ltp,
+                                "chg": float(x.get("AbsoluteChange") or 0),
+                                "pchg": float(x.get("PercentChange") or 0)})
+                    seen.add(sym)
+        if out:
+            print(f"mcx: {', '.join(c['symbol'] for c in out)} fetched")
+            return out
+        print("mcx: no gold contracts in feed")
+    except Exception as e:
+        print("mcx: fetch failed:", type(e).__name__, str(e)[:120])
+    return None
+
+
+def trend_chart(trend):
+    """Inline SVG line chart of (iso_date, median) points; grows with history."""
+    if len(trend) < 2:
+        return ('<p class="dnote">The trend chart builds up as daily history '
+                'accumulates - check back in a few days.</p>')
+    w, h, pad = 352, 150, 14
+    vals = [v for _, v in trend]
+    lo, hi = min(vals), max(vals)
+    rng = (hi - lo) or 1.0
+    n = len(trend)
+    pts = " ".join(
+        f"{pad + (w - 2 * pad) * i / (n - 1):.1f},"
+        f"{h - pad - (h - 2 * pad) * (v - lo) / rng:.1f}"
+        for i, (_, v) in enumerate(trend))
+    d0 = datetime.fromisoformat(trend[0][0]).strftime("%d %b")
+    d1 = datetime.fromisoformat(trend[-1][0]).strftime("%d %b")
+    return (f'<svg viewBox="0 0 {w} {h}" role="img" '
+            f'aria-label="Median 24K gold rate trend {d0} to {d1}">'
+            f'<polyline points="{pts}" fill="none" stroke="#D9B24A" '
+            f'stroke-width="2.5" stroke-linejoin="round" '
+            f'stroke-linecap="round"/>'
+            f'<text x="{pad}" y="12">{inr(hi)} high</text>'
+            f'<text x="{pad}" y="{h - 3}">{inr(lo)} low · {d0} - {d1}</text>'
+            f'</svg>')
+
+
 def main():
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
     anon_key = os.environ.get("SUPABASE_ANON_KEY", "")
@@ -258,6 +326,17 @@ def main():
 
     med = ladder(median24)
 
+    # --------------------------------------------------- MCX gold futures
+    mcx = fetch_mcx()
+    mcx_tile = ""
+    if mcx:
+        g = next((c for c in mcx if c["symbol"] == "GOLD"), mcx[0])
+        mcx_tile = (
+            f'<div class="rtile"><div class="k">MCX Gold Futures</div>'
+            f'<div class="v">{inr(g["ltp"])}</div>'
+            f'<div class="u">per 10g (995) · {g["expiry"]} · '
+            f'{g["pchg"]:+.2f}%</div></div>')
+
     # --------------------------------------------------------------- IBJA
     ibja = fetch_ibja()
     if ibja:
@@ -265,15 +344,15 @@ def main():
         premium_med = (median24 / r999 - 1) * 100
         ibja_tiles = f'''
 <section class="ibja-ref" aria-labelledby="ibjarefh">
-  <p class="eyebrow">Bullion Reference</p>
+  <p class="eyebrow">Bullion &amp; Futures Reference</p>
   <h2 id="ibjarefh">IBJA Gold Rate Today</h2>
-  <p class="hint">The India Bullion &amp; Jewellers Association benchmark,
-  pre-GST - the wholesale rate jewellers price above.</p>
+  <p class="hint">The India Bullion &amp; Jewellers Association 24K benchmark,
+  pre-GST - the wholesale rate jewellers price above - alongside the
+  exchange-traded gold futures quote.</p>
   <div class="ref-tiles">
-    <div class="rtile"><div class="k">999 Fine · 24K</div>
+    <div class="rtile"><div class="k">IBJA 999 Fine · 24K</div>
       <div class="v">{inr(r999)}</div><div class="u">per gram, pre-GST</div></div>
-    <div class="rtile"><div class="k">916 · 22K</div>
-      <div class="v">{inr(r916)}</div><div class="u">per gram, pre-GST</div></div>
+    {mcx_tile}
     <div class="rtile prem"><div class="k">Jeweller premium</div>
       <div class="v">{premium_med:+.1f}%</div>
       <div class="u">median vs bullion, today</div></div>
@@ -303,22 +382,25 @@ def main():
 <section aria-labelledby="ibjah">
   <p class="eyebrow">Bullion vs Board</p>
   <h2 id="ibjah">Jeweller Premium Over the IBJA Rate</h2>
-  <p class="hint">IBJA's bullion reference today is <strong>{inr(r999)}/g</strong>
-  (999) and <strong>{inr(r916)}/g</strong> (916), pre-GST. Each bar is a
-  brand's premium (or discount) per gram of pure gold versus bullion,
-  smallest first. Hover a bar for the rupee difference.</p>
+  <p class="hint">IBJA's 24K bullion reference today is
+  <strong>{inr(r999)}/g</strong> (999), pre-GST. Each bar is a brand's
+  premium (or discount) per gram of pure gold versus bullion, smallest
+  first. Hover a bar for the rupee difference.</p>
   <div class="chartcard pbar-card">
 {bars}
   </div>
 </section>'''
         ibja_faq = (
-            f"The IBJA (India Bullion and Jewellers Association) reference rate "
-            f"today is {inr(r999)} per gram for 999 gold and {inr(r916)} per "
-            f"gram for 916 gold, before GST. Jewellery brands price on average "
-            f"{premium_med:+.1f}% above the bullion reference today; the gap "
-            "reflects each brand's sourcing and hallmarking premium.")
+            f"The IBJA (India Bullion and Jewellers Association) 24K reference "
+            f"rate today is {inr(r999)} per gram for 999 gold, before GST. "
+            f"Jewellery brands price on average {premium_med:+.1f}% above the "
+            "bullion reference today; the gap reflects each brand's sourcing "
+            "and hallmarking premium.")
     else:
-        ibja_tiles, ibja_section = "", ""
+        ibja_section = ""
+        ibja_tiles = (f'<section class="ibja-ref"><p class="eyebrow">Futures '
+                      f'Reference</p><div class="ref-tiles">{mcx_tile}</div>'
+                      f'</section>') if mcx_tile else ""
         ibja_faq = ("The IBJA (India Bullion and Jewellers Association) "
                     "publishes India's twice-daily bullion reference rate. "
                     "Jeweller board rates typically sit slightly above it, "
@@ -448,10 +530,17 @@ def main():
         f'<details class="faq"><summary>{q}</summary><p>{a}</p></details>'
         for q, a in faq)
 
+    low_dom = (lowest["brands"].get("domain") or "") \
+        .replace("https://", "").replace("http://", "").split("/")[0]
+    low_logo = (f' <img src="https://www.google.com/s2/favicons?domain='
+                f'{low_dom}&amp;sz=64" alt="" loading="lazy" '
+                f'onerror="this.style.display=\'none\'">') if low_dom else ""
+
     nb = str(len(live))
     seo_content = f"""<section class="seo" aria-labelledby="abouth">
   <p class="eyebrow">About the Tool</p>
-  <h2 id="abouth">Gold Rate Today in India, Compared Every Day</h2>
+  <details class="seofold">
+  <summary><h2 id="abouth">Gold Rate Today in India, Compared Every Day</h2></summary>
 
   <p>Checking the <strong>gold rate today</strong> before you buy can save you
   thousands of rupees on a single piece of jewellery. MyGoldRates.com is India's
@@ -508,7 +597,69 @@ def main():
   purchase, buying a gift, or simply tracking the <strong>gold rate</strong> as an
   investor, MyGoldRates.com gives you a clear, up-to-date and unbiased view of
   what India's leading jewellers are charging today, all in one place.</p>
+  </details>
 </section>"""
+
+    # ------------------------------------------------- markets side drawer
+    since = (datetime.now(timezone.utc).date() - timedelta(days=120)).isoformat()
+    try:
+        hist_rows = sb.table("rates") \
+            .select("rate_date, canonical_24k_pre_gst, status") \
+            .eq("status", "published").gte("rate_date", since).execute().data
+    except Exception as e:
+        print("trend: history query failed:", e)
+        hist_rows = []
+    by_day = {}
+    for hr in hist_rows:
+        if hr.get("canonical_24k_pre_gst"):
+            by_day.setdefault(hr["rate_date"], []) \
+                  .append(hr["canonical_24k_pre_gst"])
+    trend = sorted((d, statistics.median(v)) for d, v in by_day.items())
+
+    if mcx:
+        mcx_rows = ""
+        for c in mcx:
+            nm = "GOLD (1 kg lot)" if c["symbol"] == "GOLD" \
+                else "GOLDM (100 g lot)"
+            cls = "up" if c["chg"] >= 0 else "dn"
+            mcx_rows += (
+                f'<tr><td>{nm}<span class="mex">expiry {c["expiry"]}</span></td>'
+                f'<td>{inr(c["ltp"])}</td>'
+                f'<td class="{cls}">{c["pchg"]:+.2f}%</td></tr>')
+        mcx_block = f'''<h3>MCX Gold Futures</h3>
+  <p class="dnote">Exchange-traded gold futures, quoted per 10 g of 995 fine
+  gold. Indicative, delayed quotes.</p>
+  <table class="dtable"><thead><tr><th>Contract</th><th>Price /10g</th>
+  <th>&Delta; day</th></tr></thead><tbody>{mcx_rows}</tbody></table>'''
+    else:
+        mcx_block = ('<h3>MCX Gold Futures</h3><p class="dnote">The futures '
+                     'feed is unavailable right now - check back later '
+                     'today.</p>')
+
+    hist_table = "".join(
+        f'<tr><td>{datetime.fromisoformat(d).strftime("%d %b %Y")}</td>'
+        f'<td>{inr(v)}</td></tr>' for d, v in reversed(trend[-10:]))
+    drawer = f'''
+<button class="drawer-tab" id="drtab" aria-controls="mdrawer"
+  aria-expanded="false">Markets &#9670;</button>
+<div class="drawer-ov" id="drov" hidden></div>
+<aside class="drawer" id="mdrawer" aria-hidden="true"
+  aria-label="Gold markets panel">
+  <div class="drawer-head"><h2>Gold Markets</h2>
+    <button class="drawer-x" id="drx" aria-label="Close panel">&times;</button>
+  </div>
+  {mcx_block}
+  <h3>Gold Rate Trend</h3>
+  <p class="dnote">Median 24K jeweller board rate per gram, pre-GST, by day.</p>
+  <div class="chartcard">{trend_chart(trend)}</div>
+  <table class="dtable"><thead><tr><th>Date</th><th>Median 24K /g</th></tr>
+  </thead><tbody>{hist_table}</tbody></table>
+  <h3>Spot vs Futures</h3>
+  <p class="dnote">MCX futures quote wholesale 995 gold for a future delivery
+  date, so they usually sit below retail jeweller board rates, which add
+  sourcing and hallmarking premiums. Watching both tells you where retail
+  prices are likely headed.</p>
+</aside>'''
 
     common = dict(site_url=SITE_URL, date=display_date, time=display_time,
                   iso_now=now_ist.isoformat(), year=str(now_ist.year),
@@ -518,11 +669,12 @@ def main():
         med24=inr(med["24K"]), med22=inr(med["22K"]), med18=inr(med["18K"]),
         low24=inr(ladder(lowest["canonical_24k_pre_gst"])["24K"]),
         low_brand=lowest["brands"]["name"],
+        low_logo=low_logo,
         ibja_tiles=ibja_tiles, ibja_section=ibja_section, ads_unit=ads_unit,
         calc_brands=json.dumps(calc_brands),
         supabase_url=supabase_url, anon_key=anon_key,
         rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld,
-        seo_content=seo_content, **common)
+        seo_content=seo_content, drawer=drawer, **common)
     inquiry = INQUIRY_TEMPLATE.substitute(
         supabase_url=supabase_url, anon_key=anon_key, **common)
     unsub = UNSUB_TEMPLATE.substitute(
@@ -796,7 +948,7 @@ TEMPLATE = Template("""<!DOCTYPE html>
 <meta name="twitter:image" content="$site_url/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
 $ads_head
 <script type="application/ld+json">$jsonld</script>
 <style>
@@ -839,13 +991,30 @@ $base_css
   margin-top:3px;background:linear-gradient(100deg,#E8C86A,#FFFDF4 46%,#D9B24A);
   -webkit-background-clip:text;background-clip:text;color:transparent}
 .tile .u{font-size:10.5px;color:#A79B7E}
-.tile.best{background:linear-gradient(158deg,rgba(224,186,86,.20),rgba(224,186,86,.06))}
+.tile.best{background:linear-gradient(158deg,rgba(224,186,86,.26),rgba(224,186,86,.08));
+  border:2px solid rgba(224,186,86,.6);flex:1.35;min-width:168px;
+  box-shadow:0 0 26px rgba(224,186,86,.14)}
+.tile.best .k{color:#F4E3A6;font-weight:700}
+.tile.best .v{font-weight:700;font-size:clamp(20px,2.9vw,27px)}
+.bwin{margin-top:7px;font-weight:700;font-size:13.5px;color:#F8EFD6;
+  display:flex;align-items:center;gap:7px}
+.bwin img{width:17px;height:17px;border-radius:4px;background:#fff;
+  padding:1px;flex:0 0 17px}
 .note{font-size:13px;color:var(--ink-3);margin:12px 0 24px}
 .seo{margin:40px 0 8px;max-width:74ch}
 .seo h3{font-family:"Marcellus",serif;font-weight:400;font-size:19px;
   margin:24px 0 6px;color:var(--ink)}
 .seo p{color:var(--ink-2);font-size:15px;line-height:1.72;margin:0 0 14px}
 .seo strong{color:var(--ink);font-weight:600}
+.seofold summary{cursor:pointer;list-style:none;display:flex;
+  align-items:center;gap:12px}
+.seofold summary::-webkit-details-marker{display:none}
+.seofold summary h2{margin:0}
+.seofold summary::after{content:"+";font:500 24px/1 "IBM Plex Mono",monospace;
+  color:var(--gold);margin-left:auto}
+.seofold[open] summary::after{content:"\\2212"}
+.seofold summary:hover h2{color:var(--gold)}
+.seofold>p:first-of-type{margin-top:14px}
 
 /* calculator */
 .calc{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
@@ -939,6 +1108,41 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 .karatseg button+button{border-left:0}
 .karatseg button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);
   background:color-mix(in srgb,var(--gold) 12%,transparent)}
+/* markets side drawer */
+.drawer-tab{position:fixed;right:0;top:44%;z-index:940;writing-mode:vertical-rl;
+  text-orientation:mixed;font:600 12px/1 "IBM Plex Mono",monospace;
+  letter-spacing:.2em;text-transform:uppercase;color:#1A1508;
+  background:var(--gold-foil);border:0;border-radius:9px 0 0 9px;
+  padding:15px 9px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.28)}
+.drawer-ov{position:fixed;inset:0;background:rgba(10,8,4,.5);z-index:950}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(400px,94vw);
+  background:var(--paper);border-left:1px solid var(--line);z-index:960;
+  transform:translateX(105%);transition:transform .28s ease;
+  overflow-y:auto;padding:20px 22px 34px}
+.drawer.open{transform:translateX(0)}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:4px}
+.drawer-head h2{margin:0;font-size:22px}
+.drawer-x{background:none;border:0;font-size:28px;color:var(--ink-3);
+  cursor:pointer;line-height:1;padding:2px 6px}
+.drawer h3{font-family:"Marcellus",serif;font-weight:400;font-size:18px;
+  margin:22px 0 4px}
+.dnote{font-size:12.5px;color:var(--ink-3);margin:0 0 10px;line-height:1.55}
+.dtable{width:100%;border-collapse:collapse;min-width:0}
+.dtable th{font:500 10.5px/1.3 "IBM Plex Mono",monospace;
+  text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);
+  text-align:right;padding:8px 6px;border-bottom:1px solid var(--line);
+  cursor:default}
+.dtable th:first-child,.dtable td:first-child{text-align:left}
+.dtable td{padding:9px 6px;text-align:right;
+  font-family:"IBM Plex Mono",monospace;font-size:13px;
+  border-bottom:1px solid var(--line);white-space:nowrap}
+.dtable tr:last-child td{border-bottom:0}
+.mex{display:block;font:400 10.5px/1.5 "IBM Plex Mono",monospace;
+  color:var(--ink-3)}
+.up{color:var(--emerald)}.dn{color:var(--warm)}
+.drawer svg{width:100%;height:auto;display:block}
+.drawer svg text{font:500 10.5px "IBM Plex Mono",monospace;fill:var(--ink-3)}
 @media (max-width:640px){
   .karatseg{display:inline-flex}
   table{min-width:0}
@@ -1040,14 +1244,15 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
   India's top jewellery brands - updated daily, with the IBJA bullion
   reference for context.</p>
   <div class="board-rates">
+    <div class="tile best"><div class="k">&#9733; Lowest 24K Today</div>
+      <div class="v">$low24</div><div class="u">per gram, pre-GST</div>
+      <div class="bwin">$low_brand$low_logo</div></div>
     <div class="tile"><div class="k">24K Median</div>
       <div class="v">$med24</div><div class="u">per gram, pre-GST</div></div>
     <div class="tile"><div class="k">22K Median</div>
       <div class="v">$med22</div><div class="u">per gram, pre-GST</div></div>
     <div class="tile"><div class="k">18K Median</div>
       <div class="v">$med18</div><div class="u">per gram, pre-GST</div></div>
-    <div class="tile best"><div class="k">Lowest 24K - $low_brand</div>
-      <div class="v">$low24</div><div class="u">per gram, pre-GST</div></div>
   </div>
 </section>
 
@@ -1147,6 +1352,8 @@ $faq
 </section>
 
 $seo_content
+
+$drawer
 
 <footer>
   <p id="terms"><strong>Disclaimer &amp; terms:</strong> Rates are indicative,
@@ -1276,6 +1483,22 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
       else if(b.dataset.k==='18')table.classList.add('k18');
     });
   });
+  /* ---- markets drawer ---- */
+  var drw=document.getElementById('mdrawer'),
+      drov=document.getElementById('drov'),
+      drtab=document.getElementById('drtab');
+  function drSet(open){
+    drw.classList.toggle('open',open);
+    drov.hidden=!open;
+    drtab.setAttribute('aria-expanded',open?'true':'false');
+    drw.setAttribute('aria-hidden',open?'false':'true');
+  }
+  drtab.addEventListener('click',function(){
+    drSet(!drw.classList.contains('open'));});
+  document.getElementById('drx').addEventListener('click',function(){drSet(false);});
+  drov.addEventListener('click',function(){drSet(false);});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&drw.classList.contains('open'))drSet(false);});
 
   /* ---- calculator ---- */
   var sel=document.getElementById('c-b');
