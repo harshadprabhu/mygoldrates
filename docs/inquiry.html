@@ -139,10 +139,11 @@ footer p{margin:6px 0;max-width:80ch}
 
 <form id="inq" class="formcard" novalidate>
   <div class="gwrap" id="gwrap" hidden>
-    <button type="button" class="gbtn"><svg viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92a8.78 8.78 0 0 0 2.68-6.62z"/><path fill="#34A853" d="M9 18a8.6 8.6 0 0 0 5.96-2.18l-2.92-2.26a5.4 5.4 0 0 1-8.09-2.85H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.71a5.41 5.41 0 0 1 0-3.42V4.96H.96a9 9 0 0 0 0 8.08l2.99-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59A9 9 0 0 0 .96 4.96l2.99 2.33A5.36 5.36 0 0 1 9 3.58z"/></svg>Continue with Google</button>
+    <div class="ghost" id="ghost"></div>
     <div class="gdone" hidden></div>
-    <div class="ordiv"><span>or fill in manually</span></div>
+    <a href="#" class="gmanual" id="gmanual">Prefer to enter details manually?</a>
   </div>
+  <div class="manualbox" id="f-manual">
   <div class="field"><label for="f-name">Name <span class="req">*</span></label>
     <input id="f-name" name="name" autocomplete="name" required maxlength="80"></div>
   <div class="grid2">
@@ -187,6 +188,7 @@ footer p{margin:6px 0;max-width:80ch}
     <span>Also send me gold offers, festive-scheme alerts and buying guides
     by email. You can opt out any time.</span></label>
   <button class="btn btn-gold" type="submit" id="f-btn">Subscribe to daily rates</button>
+  </div>
   <div class="msg msg-ok" id="m-ok">You're in - the next morning's rates will
   land in your inbox. You can reply to any email to unsubscribe.</div>
   <div class="msg msg-err" id="m-err">Something went wrong - please check the

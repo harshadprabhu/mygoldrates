@@ -45,46 +45,57 @@
     zip.addEventListener('blur',pinLookup);
   }
 
-  /* ---- optional Google sign-in (People API autofill) ---- */
+  /* ---- optional Google sign-in (ID token: profile is in the token) ---- */
   var GCID=window.GR_GCID||'';
   var wrap=document.getElementById('gwrap');
   if(!GCID||!wrap)return;
   wrap.hidden=false;
-  var btn=wrap.querySelector('.gbtn'),done=wrap.querySelector('.gdone');
-  /* Basic (non-sensitive) scopes only - no app verification needed. Gender/
-     birthday/address can be added back once the app is Google-verified. */
-  var SCOPES='openid email profile';
+  form.classList.add('has-google');           /* CSS hides manual fields */
+  var host=document.getElementById('ghost'),
+      done=wrap.querySelector('.gdone'),
+      manual=document.getElementById('m-manual')||
+             document.getElementById('f-manual'),
+      link=document.getElementById('gmanual');
   function fill(el,v){if(el&&v&&!el.value.trim())el.value=v;}
-  function people(token){
-    /* Standard OIDC userinfo - works with basic scopes, no People API. */
-    fetch('https://www.googleapis.com/oauth2/v3/userinfo',
-      {headers:{'Authorization':'Bearer '+token}})
-    .then(function(r){return r.ok?r.json():Promise.reject();})
-    .then(function(u){
-      fill(F('name'),u.name);
-      if(F('email')&&u.email)F('email').value=u.email;
-      window.GR_GDATA={signup_method:'google',
-        google_id:u.sub||null,
-        google_email_verified:!!u.email_verified,
-        picture_url:u.picture||null,
-        locale:u.locale||null};
-      btn.hidden=true;done.hidden=false;
-      done.textContent='Connected as '+(u.email||'your Google account')+
-        ' - name and email filled from Google';
-      if(zip&&zip.value.trim())pinLookup();
-    }).catch(function(){
-      alert('Could not fetch details from Google - please fill the form '+
-            'manually.');});
+  function reveal(){
+    if(manual)manual.classList.add('reveal');
+    if(F('phone')&&!F('phone').value.trim())F('phone').value='+91 ';
   }
-  var tc=null;
-  btn.addEventListener('click',function(){
-    if(!(window.google&&google.accounts&&google.accounts.oauth2)){
-      alert('Google sign-in is still loading - try again in a second.');
-      return;}
-    tc=tc||google.accounts.oauth2.initTokenClient({client_id:GCID,
-      scope:SCOPES,
-      callback:function(res){
-        if(res&&res.access_token)people(res.access_token);}});
-    tc.requestAccessToken();
-  });
+  if(link)link.addEventListener('click',function(e){
+    e.preventDefault();reveal();link.style.display='none';});
+  function decode(jwt){
+    try{return JSON.parse(decodeURIComponent(
+      atob(jwt.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))
+        .split('').map(function(c){
+          return '%'+('00'+c.charCodeAt(0).toString(16)).slice(-2);})
+        .join('')));}catch(e){return null;}
+  }
+  function onCred(resp){
+    var p=resp&&resp.credential?decode(resp.credential):null;
+    if(!p){reveal();if(link)link.style.display='none';return;}
+    fill(F('name'),p.name);
+    if(F('email')&&p.email)F('email').value=p.email;
+    window.GR_GDATA={signup_method:'google',
+      google_id:p.sub||null,
+      google_email_verified:!!p.email_verified,
+      picture_url:p.picture||null,
+      locale:p.locale||null};
+    if(done){done.hidden=false;
+      done.textContent='Signed in as '+(p.email||'your Google account')+
+        ' - add your phone below to finish.';}
+    reveal();if(link)link.style.display='none';
+    if(zip&&zip.value.trim())pinLookup();
+  }
+  var tries=0;
+  (function gready(){
+    if(window.google&&google.accounts&&google.accounts.id){
+      google.accounts.id.initialize({client_id:GCID,callback:onCred,
+        auto_select:false,cancel_on_tap_outside:true});
+      google.accounts.id.renderButton(host,{type:'standard',
+        theme:'filled_blue',size:'large',text:'continue_with',
+        shape:'pill',logo_alignment:'center',
+        width:Math.min(360,Math.max(240,host.clientWidth||300))});
+    }else if(tries++<40){setTimeout(gready,150);}
+    else if(link){reveal();link.style.display='none';}   /* GIS blocked */
+  })();
 })();
