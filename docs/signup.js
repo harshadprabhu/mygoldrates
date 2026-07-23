@@ -57,7 +57,10 @@
       zip.addEventListener('blur',pinLookup);}
   }
 
-  /* ---- optional Google sign-in, SITE-WIDE (header + One Tap + form) ---- */
+  /* ---- optional Google One Tap, SITE-WIDE (popup only, no buttons) ----
+     The One Tap prompt appears on its own; when the user picks an account we
+     silently capture + save their Google data and show a small header chip.
+     No persistent "Sign in with Google" button anywhere. */
   if(!GCID)return;
   function decode(jwt){try{return JSON.parse(decodeURIComponent(
     atob(jwt.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')).split('')
@@ -68,11 +71,13 @@
     h.innerHTML='<span class="uchip" title="'+(u.email||'')+'">'+
       (u.picture?'<img src="'+u.picture+'" alt="" referrerpolicy="no-referrer">':'')+
       '<span>'+(u.name||u.email||'Signed in')+'</span></span>';}
+  function prefill(u){if(!form)return;
+    if(F('email')&&!F('email').value.trim())F('email').value=u.email||'';
+    if(F('name')&&!F('name').value.trim())F('name').value=u.name||'';
+    if(F('phone')&&!F('phone').value.trim())F('phone').value='+91 ';}
   var stored=null;try{stored=JSON.parse(localStorage.getItem('gr_user')||'null');}
     catch(e){}
-  if(stored&&stored.email){chip(stored);
-    if(form){if(F('email')&&!F('email').value.trim())F('email').value=stored.email;
-      if(F('name')&&!F('name').value.trim())F('name').value=stored.name||'';}}
+  if(stored&&stored.email){chip(stored);prefill(stored);}
   function onCred(resp){
     var p=resp&&resp.credential?decode(resp.credential):null;
     if(!p||!p.email)return;
@@ -83,47 +88,16 @@
     try{localStorage.setItem('gr_user',JSON.stringify(
       {email:p.email,name:p.name,picture:p.picture}));}catch(e){}
     chip({email:p.email,name:p.name,picture:p.picture});
-    saveSubscriber(g).catch(function(){});   /* grab Google data at once */
-    if(form){
-      if(F('name')&&!F('name').value.trim())F('name').value=p.name||'';
-      if(F('email'))F('email').value=p.email;
-      var man=document.getElementById('m-manual')||
-              document.getElementById('f-manual');
-      if(man)man.classList.add('reveal');
-      var lk=document.getElementById('gmanual');if(lk)lk.style.display='none';
-      if(F('phone')&&!F('phone').value.trim())F('phone').value='+91 ';
-      if(zip&&zip.value.trim())pinLookup();
-      var done=document.querySelector('.gdone');
-      if(done){done.hidden=false;done.textContent='Signed in as '+p.email+
-        ' - add more details below (optional).';}
-    }
+    saveSubscriber(g).catch(function(){});   /* grab + save Google data at once */
+    prefill({email:p.email,name:p.name});
   }
-  if(form)form.classList.add('has-google');
-  var link=document.getElementById('gmanual');
-  if(link&&form)link.addEventListener('click',function(e){e.preventDefault();
-    var man=document.getElementById('m-manual')||
-            document.getElementById('f-manual');
-    if(man)man.classList.add('reveal');link.style.display='none';
-    if(F('phone')&&!F('phone').value.trim())F('phone').value='+91 ';});
   var tries=0;
   (function gready(){
     if(window.google&&google.accounts&&google.accounts.id){
       google.accounts.id.initialize({client_id:GCID,callback:onCred,
-        auto_select:true,cancel_on_tap_outside:false,itp_support:true});
-      var hh=document.getElementById('ghead');
-      if(hh&&!(stored&&stored.email))google.accounts.id.renderButton(hh,
-        {type:'standard',theme:'outline',size:'medium',
-         text:'signin_with',shape:'pill'});
-      var fh=document.getElementById('ghost');
-      if(fh)google.accounts.id.renderButton(fh,{type:'standard',
-        theme:'filled_blue',size:'large',text:'continue_with',shape:'pill',
-        logo_alignment:'center',
-        width:Math.min(360,Math.max(240,fh.clientWidth||300))});
-      if(!stored)try{google.accounts.id.prompt();}catch(e){}  /* One Tap */
+        auto_select:true,cancel_on_tap_outside:true,itp_support:true});
+      if(!(stored&&stored.email))
+        try{google.accounts.id.prompt();}catch(e){}   /* One Tap: comes & goes */
     }else if(tries++<40){setTimeout(gready,150);}
-    else if(form){var man=document.getElementById('m-manual')||
-        document.getElementById('f-manual');
-      if(man)man.classList.add('reveal');
-      if(link)link.style.display='none';}
   })();
 })();
