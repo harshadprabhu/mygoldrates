@@ -708,7 +708,7 @@ def main():
             sl = loc_slug(nm)
             cur = ' aria-current="page"' if sl == current_slug else ""
             parts.append(
-                f'<a href="gold-rate-today-in-{sl}.html"{cur}>{nm}</a>')
+                f'<a href="gold-rate-today-in-{sl}"{cur}>{nm}</a>')
         return "".join(parts)
 
     tvars = dict(
@@ -745,7 +745,7 @@ def main():
                 "India.")
         page = TEMPLATE.substitute(
             where=f"in {nm}", where_note=note,
-            canonical_url=f"{SITE_URL}/gold-rate-today-in-{sl}.html",
+            canonical_url=f"{SITE_URL}/gold-rate-today-in-{sl}",
             city_links=city_cloud(sl), **tvars)
         with open(f"docs/gold-rate-today-in-{sl}.html", "w",
                   encoding="utf-8") as f:
@@ -761,7 +761,7 @@ def main():
         with open(f"docs/{slug}.html", "w", encoding="utf-8") as fp:
             fp.write(PAGE_TEMPLATE.substitute(
                 title=title, desc=desc, heading=heading, body=body,
-                canonical=f"{SITE_URL}/{slug}.html", **common))
+                canonical=f"{SITE_URL}/{slug}", **common))
 
     write_page(
         "about",
@@ -881,17 +881,17 @@ def main():
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                 f"  <url><loc>{SITE_URL}/</loc><lastmod>{today}</lastmod>"
                 "<changefreq>daily</changefreq><priority>1.0</priority></url>\n"
-                f"  <url><loc>{SITE_URL}/inquiry.html</loc>"
+                f"  <url><loc>{SITE_URL}/inquiry</loc>"
                 f"<lastmod>{today}</lastmod>"
                 "<changefreq>monthly</changefreq><priority>0.6</priority></url>\n"
                 + "".join(
-                    f"  <url><loc>{SITE_URL}/{p}.html</loc><lastmod>{today}"
+                    f"  <url><loc>{SITE_URL}/{p}</loc><lastmod>{today}"
                     "</lastmod><changefreq>monthly</changefreq>"
                     "<priority>0.4</priority></url>\n"
                     for p in ("about", "contact", "privacy"))
                 + "".join(
                     f"  <url><loc>{SITE_URL}/gold-rate-today-in-"
-                    f"{loc_slug(nm)}.html</loc><lastmod>{today}</lastmod>"
+                    f"{loc_slug(nm)}</loc><lastmod>{today}</lastmod>"
                     "<changefreq>daily</changefreq>"
                     "<priority>0.7</priority></url>\n"
                     for nm in LOCATIONS)
@@ -1740,7 +1740,7 @@ INQUIRY_TEMPLATE = Template("""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Daily Gold Rate Alerts by Email - GoldRates</title>
 <meta name="description" content="Get one clean email every morning with India's gold rate comparison - the cheapest jeweller, the IBJA bullion premium and the market median. Free sign-up.">
-<link rel="canonical" href="$site_url/inquiry.html">
+<link rel="canonical" href="$site_url/inquiry">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
@@ -1953,7 +1953,7 @@ UNSUB_TEMPLATE = Template("""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unsubscribe - GoldRates</title>
 <meta name="robots" content="noindex,follow">
-<link rel="canonical" href="$site_url/unsubscribe.html">
+<link rel="canonical" href="$site_url/unsubscribe">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
