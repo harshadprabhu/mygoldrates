@@ -217,119 +217,60 @@ def fetch_ibja():
 
 
 def fetch_mcx():
-    """MCX gold futures (per 10g, 995 fine). Best-effort.
+    """MCX gold futures (per 10g, 995 fine) via Moneycontrol's price feed.
 
-    Returns [{symbol, expiry, ltp, chg, pchg}, ...] (GOLD, GOLDM nearest
-    expiries) or None if the exchange feed is unreachable.
+    MCX's own site is Akamai bot-walled; this public feed mirrors the
+    exchange quote. Contract expiry is nominally the 5th of the month but
+    shifts for holidays (e.g. 04DEC2026), so nearby days are probed.
+    Returns [{symbol, expiry, ltp, chg, pchg}, ...] or None.
     """
+    def quote(symbol, expiry):
+        r = requests.get(
+            "https://priceapi.moneycontrol.com/pricefeed/mcx/"
+            f"commodityfuture/{symbol}", params={"expiry": expiry},
+            headers={"User-Agent": UA, "Accept": "application/json"},
+            timeout=20)
+        j = r.json()
+        return j.get("data") if j.get("code") == "200" else None
+
+    out = []
+    today = datetime.now(IST).date()
     try:
-        r = requests.post(
-            "https://www.mcxindia.com/backpage.aspx/GetMarketWatch",
-            headers={"User-Agent": UA,
-                     "Content-Type": "application/json; charset=UTF-8",
-                     "Accept": "application/json, text/javascript, */*; q=0.01",
-                     "Referer": "https://www.mcxindia.com/market-data/market-watch",
-                     "Origin": "https://www.mcxindia.com",
-                     "X-Requested-With": "XMLHttpRequest"},
-            json={}, timeout=25)
-        d = r.json().get("d")
-        if isinstance(d, str):
-            d = json.loads(d)
-        if isinstance(d, dict):
-            d = d.get("Data") or d.get("data") or []
-        out, seen = [], set()
-        for x in d or []:
-            sym = str(x.get("Symbol") or "").upper()
-            if sym in ("GOLD", "GOLDM") and sym not in seen:
-                ltp = float(x.get("LTP") or 0)
-                if 60000 <= ltp <= 400000:      # sanity: Rs per 10g
-                    out.append({"symbol": sym,
-                                "expiry": str(x.get("ExpiryDate") or ""),
+        for sym in ("GOLD", "GOLDM"):
+            found = None
+            y, m = today.year, today.month
+            for _ in range(5):                      # this month + next 4
+                for day in (5, 4, 6):               # holiday-shifted expiries
+                    d = datetime(y, m, day, tzinfo=IST).date()
+                    if d < today:
+                        continue
+                    data = quote(sym, d.strftime("%d%b%Y").upper())
+                    if data:
+                        ltp = float(data.get("pricecurrent") or 0)
+                        if 60000 <= ltp <= 400000:  # sanity: Rs per 10g
+                            found = {
+                                "symbol": sym,
+                                "expiry": data.get("EXPIRY", ""),
                                 "ltp": ltp,
-                                "chg": float(x.get("AbsoluteChange") or 0),
-                                "pchg": float(x.get("PercentChange") or 0)})
-                    seen.add(sym)
-        if out:
-            print(f"mcx: {', '.join(c['symbol'] for c in out)} fetched")
-            return out
-        print("mcx: no gold contracts in feed")
+                                "chg": float(data.get("pricechange") or 0),
+                                "pchg": float(
+                                    data.get("pricepercentchange") or 0)}
+                        break
+                if found:
+                    break
+                m += 1
+                if m > 12:
+                    m, y = 1, y + 1
+            if found:
+                out.append(found)
     except Exception as e:
-        print("mcx: direct fetch failed:", type(e).__name__, str(e)[:100])
-
-    # Akamai blocks datacenter IPs; fall back to Zyte's IN residential render.
-    key = os.environ.get("ZYTE_API_KEY", "").strip()
-    if key:
-        try:
-            r = requests.post(
-                "https://api.zyte.com/v1/extract", auth=(key, ""),
-                json={"url":
-                      "https://www.mcxindia.com/market-data/market-watch",
-                      "browserHtml": True, "geolocation": "IN"},
-                headers={"Accept": "application/json"}, timeout=150)
-            if r.status_code == 200:
-                out = _mcx_from_html(r.json().get("browserHtml") or "")
-                if out:
-                    print(f"mcx: {', '.join(c['symbol'] for c in out)} "
-                          "via zyte")
-                    return out
-                print("mcx: zyte html had no gold rows")
-            else:
-                print("mcx: zyte", r.status_code, r.text[:100])
-        except Exception as e:
-            print("mcx: zyte failed:", type(e).__name__, str(e)[:100])
-    return None
-
-
-def _mcx_from_html(html):
-    """Parse GOLD/GOLDM rows from the rendered market-watch page.
-
-    Column positions are discovered from the table's own header row, so a
-    reordering on MCX's side degrades to None instead of a wrong number.
-    """
-    from bs4 import BeautifulSoup
-    soup = BeautifulSoup(html, "html.parser")
-    for table in soup.find_all("table"):
-        headers = [th.get_text(strip=True).lower()
-                   for th in table.find_all("th")]
-        if not headers:
-            continue
-
-        def col(*keys):
-            for i, h in enumerate(headers):
-                if any(k in h for k in keys):
-                    return i
-            return None
-
-        isym, iltp = col("symbol"), col("ltp", "last")
-        iexp, ipch = col("expiry"), col("%", "chg", "change")
-        if isym is None or iltp is None:
-            continue
-        out, seen = [], set()
-        for tr in table.find_all("tr"):
-            tds = [td.get_text(strip=True) for td in tr.find_all("td")]
-            if len(tds) <= max(isym, iltp):
-                continue
-            sym = tds[isym].upper()
-            if sym in ("GOLD", "GOLDM") and sym not in seen:
-                try:
-                    ltp = float(tds[iltp].replace(",", ""))
-                except ValueError:
-                    continue
-                if 60000 <= ltp <= 400000:
-                    exp = (tds[iexp] if iexp is not None and iexp < len(tds)
-                           else "")
-                    pchg = 0.0
-                    if ipch is not None and ipch < len(tds):
-                        try:
-                            pchg = float(
-                                re.sub(r"[^0-9.+-]", "", tds[ipch]) or 0)
-                        except ValueError:
-                            pass
-                    out.append({"symbol": sym, "expiry": exp, "ltp": ltp,
-                                "chg": pchg, "pchg": pchg})
-                    seen.add(sym)
-        if out:
-            return out
+        print("mcx: fetch failed:", type(e).__name__, str(e)[:100])
+        return None
+    if out:
+        print("mcx: " + ", ".join(
+            f"{c['symbol']} {c['expiry']} {c['ltp']:.0f}" for c in out))
+        return out
+    print("mcx: no contracts found")
     return None
 
 
