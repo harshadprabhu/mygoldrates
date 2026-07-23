@@ -699,9 +699,15 @@ def main():
   prices are likely headed.</p>
 </aside>'''
 
+    # Google sign-in: dormant until the GOOGLE_CLIENT_ID secret is set.
+    gclient = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+    gsi = ('<script src="https://accounts.google.com/gsi/client" async defer>'
+           '</script>') if gclient else ""
+
     common = dict(site_url=SITE_URL, date=display_date, time=display_time,
                   iso_now=now_ist.isoformat(), year=str(now_ist.year),
-                  base_css=BASE_CSS, ads_head=ads_head)
+                  base_css=BASE_CSS, ads_head=ads_head,
+                  gclient=gclient, gsi=gsi, google_btn=GOOGLE_BTN)
     def city_cloud(current_slug=None):
         parts = []
         for nm in LOCATIONS:
@@ -736,6 +742,8 @@ def main():
     build_email_logo()
     with open("docs/index.html", "w", encoding="utf-8") as f:
         f.write(html)
+    with open("docs/signup.js", "w", encoding="utf-8") as f:
+        f.write(SIGNUP_JS)
 
     # ---- programmatic city/state pages (same board, local landing page) ----
     for nm in LOCATIONS:
@@ -987,6 +995,127 @@ footer p{margin:6px 0;max-width:80ch}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 """
 
+# Shared signup helpers: +91 phone default, PIN autofill, optional Google
+# sign-in (dormant until the GOOGLE_CLIENT_ID secret is set). Served as
+# docs/signup.js and used by both the modal (index) and inquiry forms -
+# field NAMEs are identical on both, so everything works via form.elements.
+SIGNUP_JS = r"""(function(){
+  var form=document.getElementById('m-form')||document.getElementById('inq');
+  if(!form)return;
+  function F(n){return form.elements[n];}
+
+  /* ---- phone: default to India +91 ---- */
+  var ph=F('phone');
+  if(ph){
+    ph.addEventListener('focus',function(){
+      if(!ph.value.trim())ph.value='+91 ';});
+    ph.addEventListener('blur',function(){
+      var v=ph.value.replace(/[^\d]/g,'');
+      if(/^[6-9]\d{9}$/.test(v))ph.value='+91 '+v;   /* bare 10-digit Indian */
+    });
+  }
+
+  /* ---- PIN code -> area/city/state/country (India Post data) ---- */
+  var zip=F('zip'),area=F('area');
+  function pinLookup(){
+    var v=(zip.value||'').trim();
+    if(!/^[1-9]\d{5}$/.test(v))return;
+    var c=F('country');
+    if(c&&c.value&&c.value!=='India')return;
+    fetch('https://api.postalpincode.in/pincode/'+v)
+      .then(function(r){return r.json();})
+      .then(function(j){
+        var d=j&&j[0];
+        if(!d||d.Status!=='Success'||!d.PostOffice||!d.PostOffice.length)return;
+        var po=d.PostOffice;
+        if(c)c.value='India';
+        if(F('state')&&!F('state').value.trim())F('state').value=po[0].State;
+        if(F('city')&&!F('city').value.trim())F('city').value=po[0].District;
+        if(area){
+          var dl=document.getElementById(area.getAttribute('list'));
+          if(dl){dl.innerHTML='';po.forEach(function(p){
+            var o=document.createElement('option');o.value=p.Name;
+            dl.appendChild(o);});}
+          if(!area.value.trim())area.value=po[0].Name;
+        }
+      }).catch(function(){});
+  }
+  if(zip){
+    zip.addEventListener('input',function(){
+      if(/^[1-9]\d{5}$/.test(zip.value.trim()))pinLookup();});
+    zip.addEventListener('blur',pinLookup);
+  }
+
+  /* ---- optional Google sign-in (People API autofill) ---- */
+  var GCID=window.GR_GCID||'';
+  var wrap=document.getElementById('gwrap');
+  if(!GCID||!wrap)return;
+  wrap.hidden=false;
+  var btn=wrap.querySelector('.gbtn'),done=wrap.querySelector('.gdone');
+  var SCOPES='openid email profile '+
+    'https://www.googleapis.com/auth/user.gender.read '+
+    'https://www.googleapis.com/auth/user.birthday.read '+
+    'https://www.googleapis.com/auth/user.phonenumbers.read '+
+    'https://www.googleapis.com/auth/user.addresses.read';
+  function fill(el,v){if(el&&v&&!el.value.trim())el.value=v;}
+  function people(token){
+    fetch('https://people.googleapis.com/v1/people/me?personFields='+
+      'names,emailAddresses,genders,birthdays,photos,locales,'+
+      'phoneNumbers,addresses',
+      {headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.ok?r.json():Promise.reject();})
+    .then(function(p){
+      var em=(p.emailAddresses||[])[0]||{};
+      var nm=(p.names||[])[0]||{};
+      fill(F('name'),nm.displayName);
+      if(F('email')&&em.value)F('email').value=em.value;
+      var pn=(p.phoneNumbers||[])[0];if(pn)fill(F('phone'),pn.value);
+      var ad=(p.addresses||[])[0]||{};
+      fill(F('city'),ad.city);fill(F('state'),ad.region);
+      fill(F('zip'),ad.postalCode);
+      var g=(p.genders||[])[0],b=(p.birthdays||[])[0],
+          lo=(p.locales||[])[0],pic=(p.photos||[])[0];
+      var bd='';
+      if(b&&b.date){var dt=b.date;
+        bd=(dt.year||'')+'-'+('0'+(dt.month||0)).slice(-2)+
+           '-'+('0'+(dt.day||0)).slice(-2);}
+      window.GR_GDATA={signup_method:'google',
+        google_id:(p.resourceName||'').replace('people/',''),
+        google_email_verified:!!(em.metadata&&em.metadata.verified),
+        picture_url:pic&&pic.url?pic.url:null,
+        gender:g&&g.value?g.value:null,
+        birthday:bd||null,
+        locale:lo&&lo.value?lo.value:null};
+      btn.hidden=true;done.hidden=false;
+      done.textContent='Connected as '+(em.value||'your Google account')+
+        ' - details filled from Google';
+      if(zip&&zip.value.trim())pinLookup();
+    }).catch(function(){
+      alert('Could not fetch details from Google - please fill the form '+
+            'manually.');});
+  }
+  var tc=null;
+  btn.addEventListener('click',function(){
+    if(!(window.google&&google.accounts&&google.accounts.oauth2)){
+      alert('Google sign-in is still loading - try again in a second.');
+      return;}
+    tc=tc||google.accounts.oauth2.initTokenClient({client_id:GCID,
+      scope:SCOPES,
+      callback:function(res){
+        if(res&&res.access_token)people(res.access_token);}});
+    tc.requestAccessToken();
+  });
+})();
+"""
+
+# Google "Continue with" button + divider, shared by both forms.
+GOOGLE_BTN = """<div class="gwrap" id="gwrap" hidden>
+    <button type="button" class="gbtn"><svg viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92a8.78 8.78 0 0 0 2.68-6.62z"/><path fill="#34A853" d="M9 18a8.6 8.6 0 0 0 5.96-2.18l-2.92-2.26a5.4 5.4 0 0 1-8.09-2.85H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.71a5.41 5.41 0 0 1 0-3.42V4.96H.96a9 9 0 0 0 0 8.08l2.99-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59A9 9 0 0 0 .96 4.96l2.99 2.33A5.36 5.36 0 0 1 9 3.58z"/></svg>Continue with Google</button>
+    <div class="gdone" hidden></div>
+    <div class="ordiv"><span>or fill in manually</span></div>
+  </div>"""
+
+
 TEMPLATE = Template("""<!DOCTYPE html>
 <html lang="en-IN">
 <head>
@@ -1020,6 +1149,7 @@ TEMPLATE = Template("""<!DOCTYPE html>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+$gsi
 $ads_head
 <script type="application/ld+json">$jsonld</script>
 <style>
@@ -1094,6 +1224,20 @@ $base_css
 .citycloud a:hover{border-color:var(--gold);color:var(--gold)}
 .citycloud a[aria-current="page"]{border-color:var(--gold);
   color:var(--gold);font-weight:600}
+/* google signup */
+.gwrap{margin:0 0 6px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;font:600 14px/1 "IBM Plex Sans",sans-serif;color:#1F1F1F;
+  background:#fff;border:1px solid #DADCE0;border-radius:999px;
+  padding:12px 16px;cursor:pointer}
+.gbtn:hover{box-shadow:0 1px 8px rgba(0,0,0,.16)}
+.gbtn svg{width:18px;height:18px;flex:0 0 18px}
+.gdone{font-size:12.5px;color:var(--emerald);margin:6px 0 2px}
+.ordiv{display:flex;align-items:center;gap:10px;margin:12px 0 10px;
+  color:var(--ink-3);font:500 10.5px/1 "IBM Plex Mono",monospace;
+  letter-spacing:.12em;text-transform:uppercase}
+.ordiv::before,.ordiv::after{content:"";flex:1;height:1px;
+  background:var(--line)}
 
 /* calculator */
 .calc{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
@@ -1471,6 +1615,7 @@ $drawer
     <p class="hint">One clean email every morning - the cheapest jeweller,
     the market median and the bullion premium. Free, unsubscribe any time.</p>
     <form id="m-form" novalidate>
+      $google_btn
       <div class="m-field"><label for="m-name">Name *</label>
         <input id="m-name" name="name" autocomplete="name" required maxlength="80"></div>
       <div class="m-grid2">
@@ -1479,7 +1624,8 @@ $drawer
           required maxlength="120"></div>
         <div class="m-field"><label for="m-phone">Phone *</label>
           <input id="m-phone" name="phone" type="tel" autocomplete="tel"
-          inputmode="tel" required maxlength="20" placeholder="+91"></div>
+          inputmode="tel" required maxlength="20" value="+91 "
+          placeholder="+91 98765 43210"></div>
       </div>
       <div class="m-grid2">
         <div class="m-field"><label for="m-country">Country</label>
@@ -1500,6 +1646,10 @@ $drawer
           <input id="m-zip" name="zip" autocomplete="postal-code"
           inputmode="numeric" maxlength="10"></div>
       </div>
+      <div class="m-field"><label for="m-area">Area / Locality</label>
+        <input id="m-area" name="area" maxlength="80" list="m-areas"
+        autocomplete="address-level3" placeholder="auto-fills from PIN">
+        <datalist id="m-areas"></datalist></div>
       <div class="hp" aria-hidden="true">
         <label>Website<input name="website" tabindex="-1" autocomplete="off"></label>
       </div>
@@ -1678,9 +1828,11 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
       body:JSON.stringify(payload)
     }).then(function(r){
       if(r.ok)return true;
-      /* older table without the offers column: retry once without it */
-      if(!retried&&payload.offers_optin!==undefined){
-        var p2={};for(var k in payload){if(k!=='offers_optin')p2[k]=payload[k];}
+      /* older table without the newer columns: retry with base fields only */
+      if(!retried){
+        var BASE=['name','email','phone','country','state','city','zip'];
+        var p2={};BASE.forEach(function(k){
+          if(payload[k]!==undefined)p2[k]=payload[k];});
         return send(p2,true);
       }
       throw new Error('bad status');
@@ -1694,12 +1846,16 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     if(!SB_KEY){merr.textContent='Subscriptions open shortly - please check back soon.';
       merr.style.display='block';return;}
     mbtn.disabled=true;mbtn.textContent='Subscribing...';
-    send({
+    var payload={
       name:mform.name.value.trim(), email:mform.email.value.trim(),
       phone:mform.phone.value.trim(), country:mform.country.value,
       state:mform.state.value.trim(), city:mform.city.value.trim(),
-      zip:mform.zip.value.trim(), offers_optin:mform.offers.checked
-    },false).then(function(){
+      zip:mform.zip.value.trim(), area:mform.area.value.trim(),
+      offers_optin:mform.offers.checked
+    };
+    var g=window.GR_GDATA||{};
+    for(var k in g){if(g[k]!==null&&g[k]!==undefined)payload[k]=g[k];}
+    send(payload,false).then(function(){
       mok.style.display='block';mbtn.textContent='Subscribed';
       try{localStorage.setItem('gr_sub','1');}catch(e){}
       setTimeout(closeModal,1600);
@@ -1728,6 +1884,8 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   })();
 })();
 </script>
+<script>window.GR_GCID="$gclient";</script>
+<script src="signup.js" defer></script>
 </body>
 </html>
 """)
@@ -1749,6 +1907,7 @@ $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+$gsi
 <style>
 $base_css
 .formcard{background:var(--card);border:1px solid var(--line);
@@ -1799,6 +1958,7 @@ $base_css
 </section>
 
 <form id="inq" class="formcard" novalidate>
+  $google_btn
   <div class="field"><label for="f-name">Name <span class="req">*</span></label>
     <input id="f-name" name="name" autocomplete="name" required maxlength="80"></div>
   <div class="grid2">
@@ -1807,7 +1967,8 @@ $base_css
       required maxlength="120"></div>
     <div class="field"><label for="f-phone">Phone <span class="req">*</span></label>
       <input id="f-phone" name="phone" type="tel" autocomplete="tel"
-      inputmode="tel" required maxlength="20" placeholder="+91"></div>
+      inputmode="tel" required maxlength="20" value="+91 "
+      placeholder="+91 98765 43210"></div>
   </div>
   <div class="grid2">
     <div class="field"><label for="f-country">Country</label>
@@ -1828,6 +1989,10 @@ $base_css
       <input id="f-zip" name="zip" autocomplete="postal-code"
       inputmode="numeric" maxlength="10"></div>
   </div>
+  <div class="field"><label for="f-area">Area / Locality</label>
+    <input id="f-area" name="area" maxlength="80" list="f-areas"
+    autocomplete="address-level3" placeholder="auto-fills from PIN code">
+    <datalist id="f-areas"></datalist></div>
   <div class="hp" aria-hidden="true">
     <label>Website<input name="website" tabindex="-1" autocomplete="off"></label>
   </div>
@@ -1865,18 +2030,31 @@ $base_css
     if(!KEY){err.textContent='Subscriptions open shortly - please check back soon.';
       err.style.display='block';return;}
     btn.disabled=true;btn.textContent='Subscribing...';
-    fetch(URL_+'/rest/v1/inquiries',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':KEY,
-               'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify({
-        name:form.name.value.trim(), email:form.email.value.trim(),
-        phone:form.phone.value.trim(), country:form.country.value,
-        state:form.state.value.trim(), city:form.city.value.trim(),
-        zip:form.zip.value.trim(), offers_optin:form.offers.checked
-      })
-    }).then(function(r){
-      if(!r.ok){throw new Error('bad status');}
+    var payload={
+      name:form.name.value.trim(), email:form.email.value.trim(),
+      phone:form.phone.value.trim(), country:form.country.value,
+      state:form.state.value.trim(), city:form.city.value.trim(),
+      zip:form.zip.value.trim(), area:form.area.value.trim(),
+      offers_optin:form.offers.checked
+    };
+    var g=window.GR_GDATA||{};
+    for(var k in g){if(g[k]!==null&&g[k]!==undefined)payload[k]=g[k];}
+    function post(p){
+      return fetch(URL_+'/rest/v1/inquiries',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':KEY,
+                 'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
+        body:JSON.stringify(p)});
+    }
+    post(payload).then(function(r){
+      if(r.ok)return r;
+      /* older table without newer columns: retry with base fields only */
+      var BASE=['name','email','phone','country','state','city','zip'];
+      var p2={};BASE.forEach(function(k){
+        if(payload[k]!==undefined)p2[k]=payload[k];});
+      return post(p2).then(function(r2){
+        if(!r2.ok)throw new Error('bad status');return r2;});
+    }).then(function(){
       form.reset();ok.style.display='block';
       btn.textContent='Subscribed';
     }).catch(function(){
@@ -1886,6 +2064,8 @@ $base_css
   });
 })();
 </script>
+<script>window.GR_GCID="$gclient";</script>
+<script src="signup.js" defer></script>
 </body>
 </html>
 """)
