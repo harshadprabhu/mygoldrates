@@ -1,0 +1,179 @@
+{
+  "source": "MyGoldRates.com",
+  "source_url": "https://mygoldrates.com",
+  "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
+  "date": "2026-07-23",
+  "last_updated": "2026-07-24T01:26:33.139483+05:30",
+  "currency": "INR",
+  "unit": "per gram",
+  "gst": "excluded (pre-GST); add 3% for billed price",
+  "median_rate_per_gram_inr": {
+    "24k": 14631.75,
+    "22k": 13416.1,
+    "18k": 10984.8
+  },
+  "lowest_24k": {
+    "jeweller": "PN Gadgil",
+    "rate_per_gram_inr": 14436.0
+  },
+  "ibja_reference_24k_999_per_gram_inr": 14555.7,
+  "mcx_gold_futures": [
+    {
+      "contract": "GOLD",
+      "expiry": "05AUG2026",
+      "price_per_10g_inr": 142796.0,
+      "change_pct": -1.98
+    },
+    {
+      "contract": "GOLDM",
+      "expiry": "05AUG2026",
+      "price_per_10g_inr": 142585.0,
+      "change_pct": -0.02
+    }
+  ],
+  "jewellers": [
+    {
+      "jeweller": "PN Gadgil",
+      "rate_24k_per_gram_inr": 14436.0,
+      "rate_22k_per_gram_inr": 13236.61,
+      "rate_18k_per_gram_inr": 10837.84
+    },
+    {
+      "jeweller": "Senco Gold",
+      "rate_24k_per_gram_inr": 14566.34,
+      "rate_22k_per_gram_inr": 13356.12,
+      "rate_18k_per_gram_inr": 10935.69
+    },
+    {
+      "jeweller": "ORRA",
+      "rate_24k_per_gram_inr": 14574.86,
+      "rate_22k_per_gram_inr": 13363.94,
+      "rate_18k_per_gram_inr": 10942.09
+    },
+    {
+      "jeweller": "Malabar Gold",
+      "rate_24k_per_gram_inr": 14614.19,
+      "rate_22k_per_gram_inr": 13400.0,
+      "rate_18k_per_gram_inr": 10971.61
+    },
+    {
+      "jeweller": "GRT Jewellers",
+      "rate_24k_per_gram_inr": 14614.19,
+      "rate_22k_per_gram_inr": 13400.0,
+      "rate_18k_per_gram_inr": 10971.61
+    },
+    {
+      "jeweller": "Jos Alukkas",
+      "rate_24k_per_gram_inr": 14623.0,
+      "rate_22k_per_gram_inr": 13408.08,
+      "rate_18k_per_gram_inr": 10978.23
+    },
+    {
+      "jeweller": "Candere",
+      "rate_24k_per_gram_inr": 14629.0,
+      "rate_22k_per_gram_inr": 13413.57,
+      "rate_18k_per_gram_inr": 10982.73
+    },
+    {
+      "jeweller": "Kalyan Jewellers",
+      "rate_24k_per_gram_inr": 14634.5,
+      "rate_22k_per_gram_inr": 13418.62,
+      "rate_18k_per_gram_inr": 10986.86
+    },
+    {
+      "jeweller": "Bhima Jewels",
+      "rate_24k_per_gram_inr": 14729.0,
+      "rate_22k_per_gram_inr": 13505.27,
+      "rate_18k_per_gram_inr": 11057.81
+    },
+    {
+      "jeweller": "Tanishq",
+      "rate_24k_per_gram_inr": 14772.33,
+      "rate_22k_per_gram_inr": 13545.0,
+      "rate_18k_per_gram_inr": 11090.34
+    },
+    {
+      "jeweller": "Kisna",
+      "rate_24k_per_gram_inr": 14774.82,
+      "rate_22k_per_gram_inr": 13547.28,
+      "rate_18k_per_gram_inr": 11092.21
+    },
+    {
+      "jeweller": "CaratLane",
+      "rate_24k_per_gram_inr": 14783.48,
+      "rate_22k_per_gram_inr": 13555.22,
+      "rate_18k_per_gram_inr": 11098.71
+    },
+    {
+      "jeweller": "Waman Hari Pethe",
+      "rate_24k_per_gram_inr": 14793.0,
+      "rate_22k_per_gram_inr": 13563.95,
+      "rate_18k_per_gram_inr": 11105.86
+    },
+    {
+      "jeweller": "BlueStone",
+      "rate_24k_per_gram_inr": 14966.38,
+      "rate_22k_per_gram_inr": 13722.93,
+      "rate_18k_per_gram_inr": 11236.02
+    }
+  ],
+  "jeweller_count": 14,
+  "city_pages": [
+    "https://mygoldrates.com/gold-rate-today-in-mumbai",
+    "https://mygoldrates.com/gold-rate-today-in-delhi",
+    "https://mygoldrates.com/gold-rate-today-in-bengaluru",
+    "https://mygoldrates.com/gold-rate-today-in-hyderabad",
+    "https://mygoldrates.com/gold-rate-today-in-chennai",
+    "https://mygoldrates.com/gold-rate-today-in-kolkata",
+    "https://mygoldrates.com/gold-rate-today-in-pune",
+    "https://mygoldrates.com/gold-rate-today-in-ahmedabad",
+    "https://mygoldrates.com/gold-rate-today-in-jaipur",
+    "https://mygoldrates.com/gold-rate-today-in-surat",
+    "https://mygoldrates.com/gold-rate-today-in-lucknow",
+    "https://mygoldrates.com/gold-rate-today-in-kanpur",
+    "https://mygoldrates.com/gold-rate-today-in-nagpur",
+    "https://mygoldrates.com/gold-rate-today-in-indore",
+    "https://mygoldrates.com/gold-rate-today-in-bhopal",
+    "https://mygoldrates.com/gold-rate-today-in-patna",
+    "https://mygoldrates.com/gold-rate-today-in-chandigarh",
+    "https://mygoldrates.com/gold-rate-today-in-kochi",
+    "https://mygoldrates.com/gold-rate-today-in-coimbatore",
+    "https://mygoldrates.com/gold-rate-today-in-madurai",
+    "https://mygoldrates.com/gold-rate-today-in-visakhapatnam",
+    "https://mygoldrates.com/gold-rate-today-in-vijayawada",
+    "https://mygoldrates.com/gold-rate-today-in-mysuru",
+    "https://mygoldrates.com/gold-rate-today-in-thrissur",
+    "https://mygoldrates.com/gold-rate-today-in-kozhikode",
+    "https://mygoldrates.com/gold-rate-today-in-thiruvananthapuram",
+    "https://mygoldrates.com/gold-rate-today-in-guwahati",
+    "https://mygoldrates.com/gold-rate-today-in-bhubaneswar",
+    "https://mygoldrates.com/gold-rate-today-in-ludhiana",
+    "https://mygoldrates.com/gold-rate-today-in-amritsar",
+    "https://mygoldrates.com/gold-rate-today-in-vadodara",
+    "https://mygoldrates.com/gold-rate-today-in-nashik",
+    "https://mygoldrates.com/gold-rate-today-in-rajkot",
+    "https://mygoldrates.com/gold-rate-today-in-varanasi",
+    "https://mygoldrates.com/gold-rate-today-in-maharashtra",
+    "https://mygoldrates.com/gold-rate-today-in-tamil-nadu",
+    "https://mygoldrates.com/gold-rate-today-in-karnataka",
+    "https://mygoldrates.com/gold-rate-today-in-kerala",
+    "https://mygoldrates.com/gold-rate-today-in-telangana",
+    "https://mygoldrates.com/gold-rate-today-in-andhra-pradesh",
+    "https://mygoldrates.com/gold-rate-today-in-gujarat",
+    "https://mygoldrates.com/gold-rate-today-in-rajasthan",
+    "https://mygoldrates.com/gold-rate-today-in-west-bengal",
+    "https://mygoldrates.com/gold-rate-today-in-uttar-pradesh",
+    "https://mygoldrates.com/gold-rate-today-in-madhya-pradesh",
+    "https://mygoldrates.com/gold-rate-today-in-punjab",
+    "https://mygoldrates.com/gold-rate-today-in-haryana",
+    "https://mygoldrates.com/gold-rate-today-in-bihar",
+    "https://mygoldrates.com/gold-rate-today-in-odisha",
+    "https://mygoldrates.com/gold-rate-today-in-assam",
+    "https://mygoldrates.com/gold-rate-today-in-jharkhand",
+    "https://mygoldrates.com/gold-rate-today-in-uttarakhand",
+    "https://mygoldrates.com/gold-rate-today-in-himachal-pradesh",
+    "https://mygoldrates.com/gold-rate-today-in-goa"
+  ],
+  "disclaimer": "Rates are indicative, compiled from each brand's published prices, and can change during the day. Confirm with the jeweller before purchase. Not investment advice.",
+  "license": "https://mygoldrates.com/#terms"
+}
