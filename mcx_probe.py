@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
-"""One-off: apply GOLD filter via Zyte actions, check the rendered table."""
+"""One-off: call GetMarketWatch from inside the page session, read from DOM."""
+import json
 import os
 import re
 import requests
-from bs4 import BeautifulSoup
 
 JS = """
-function pick(id, vals){var s=document.querySelector(id);if(!s)return 'no '+id;
- var opts=[].map.call(s.options,function(o){return o.value});
- var v=null;for(var i=0;i<vals.length;i++){if(opts.indexOf(vals[i])>=0){v=vals[i];break;}}
- if(!v)return 'noopt '+id+' '+opts.slice(0,8).join(',');
- if(window.jQuery){jQuery(id).val(v).trigger('change');}
- else{s.value=v;s.dispatchEvent(new Event('change',{bubbles:true}));}
- return 'set '+id+'='+v;}
-pick('#ddlInstrumentName',['FUTCOM']);
-pick('#ddlSymbol',['gold','GOLD','Gold']);
+fetch('https://www.mcxindia.com/backpage.aspx/GetMarketWatch',{method:'POST',
+ credentials:'include',
+ headers:{'Content-Type':'application/json; charset=UTF-8',
+  'Accept':'application/json, text/javascript, */*; q=0.01',
+  'X-Requested-With':'XMLHttpRequest'},body:'{}'})
+ .then(function(r){return r.text();})
+ .then(function(t){var el=document.createElement('pre');el.id='grx-mcx';
+   el.textContent=t.slice(0,300000);document.body.appendChild(el);})
+ .catch(function(e){var el=document.createElement('pre');el.id='grx-mcx';
+   el.textContent='ERR '+e;document.body.appendChild(el);});
 """
 
 key = os.environ["ZYTE_API_KEY"].strip()
@@ -28,18 +29,32 @@ r = requests.post(
               {"action": "waitForTimeout", "timeout": 8}]},
     headers={"Accept": "application/json"}, timeout=170)
 print("zyte status", r.status_code)
-j = r.json()
-for a in j.get("actions", []):
-    print("action:", a.get("action"), "->", a.get("status", ""),
-          str(a.get("error", ""))[:120])
-html = j.get("browserHtml") or ""
-print("html len", len(html))
-soup = BeautifulSoup(html, "html.parser")
-for ti, t in enumerate(soup.find_all("table")):
-    ths = [th.get_text(strip=True) for th in t.find_all("th")]
-    trs = t.find_all("tr")
-    print(f"table {ti}: rows={len(trs)} ths={ths[:12]}")
-    for tr in trs[1:6]:
-        cells = [td.get_text(strip=True) for td in tr.find_all("td")]
-        if cells:
-            print("   row:", cells[:12])
+html = r.json().get("browserHtml") or ""
+m = re.search(r'<pre id="grx-mcx">(.*?)</pre>', html, re.S)
+if not m:
+    print("no grx-mcx pre found; html len", len(html))
+    raise SystemExit()
+raw = m.group(1)
+# unescape basic entities bs-free
+raw = raw.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">") \
+         .replace("&quot;", '"').replace("&#39;", "'")
+print("payload head:", raw[:220])
+try:
+    d = json.loads(raw).get("d")
+    if isinstance(d, str):
+        d = json.loads(d)
+    if isinstance(d, dict):
+        print("d keys:", list(d.keys())[:12])
+        d = d.get("Data") or d.get("data") or []
+    print("items:", len(d))
+    if d:
+        print("first keys:", list(d[0].keys()))
+    for x in d:
+        if str(x.get("Symbol", "")).upper() in ("GOLD", "GOLDM") \
+           and str(x.get("InstrumentName", "")).upper() in ("FUTCOM", ""):
+            print("GOLDROW:", json.dumps(
+                {k: x.get(k) for k in ("Symbol", "InstrumentName",
+                                       "ExpiryDate", "LTP", "AbsoluteChange",
+                                       "PercentChange", "Unit")}))
+except Exception as e:
+    print("parse error:", type(e).__name__, str(e)[:200])
