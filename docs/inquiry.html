@@ -18,6 +18,16 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 
+/* google signup (shared by modal + inquiry) */
+.gwrap{margin:0 0 10px;text-align:center}
+.ghost{display:flex;justify-content:center;min-height:44px}
+.gdone{font-size:12.5px;color:var(--emerald);margin:10px 0 2px}
+.gmanual{display:inline-block;margin-top:12px;font-size:12.5px;
+  color:var(--ink-3);text-decoration:underline;cursor:pointer}
+.gmanual:hover{color:var(--gold)}
+.has-google .manualbox{display:none}
+.has-google .manualbox.reveal{display:block;
+  border-top:1px solid var(--line);margin-top:14px;padding-top:16px}
 :root{
   --paper:#FBF9F4; --ink:#181F1B; --ink-2:#49544D; --ink-3:#79847D;
   --board:#152420; --board-2:#1C312A; --gold:#9C7514; --gold-bright:#D9B24A;
@@ -251,6 +261,6 @@ footer p{margin:6px 0;max-width:80ch}
 })();
 </script>
 <script>window.GR_GCID="459957139537-m6fl4clp90lua3ad2baupf20utkof6fl.apps.googleusercontent.com";</script>
-<script src="signup.js" defer></script>
+<script src="signup.js?v=4cd59c8d" defer></script>
 </body>
 </html>
