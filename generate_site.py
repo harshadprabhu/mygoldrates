@@ -254,7 +254,82 @@ def fetch_mcx():
             return out
         print("mcx: no gold contracts in feed")
     except Exception as e:
-        print("mcx: fetch failed:", type(e).__name__, str(e)[:120])
+        print("mcx: direct fetch failed:", type(e).__name__, str(e)[:100])
+
+    # Akamai blocks datacenter IPs; fall back to Zyte's IN residential render.
+    key = os.environ.get("ZYTE_API_KEY", "").strip()
+    if key:
+        try:
+            r = requests.post(
+                "https://api.zyte.com/v1/extract", auth=(key, ""),
+                json={"url":
+                      "https://www.mcxindia.com/market-data/market-watch",
+                      "browserHtml": True, "geolocation": "IN"},
+                headers={"Accept": "application/json"}, timeout=150)
+            if r.status_code == 200:
+                out = _mcx_from_html(r.json().get("browserHtml") or "")
+                if out:
+                    print(f"mcx: {', '.join(c['symbol'] for c in out)} "
+                          "via zyte")
+                    return out
+                print("mcx: zyte html had no gold rows")
+            else:
+                print("mcx: zyte", r.status_code, r.text[:100])
+        except Exception as e:
+            print("mcx: zyte failed:", type(e).__name__, str(e)[:100])
+    return None
+
+
+def _mcx_from_html(html):
+    """Parse GOLD/GOLDM rows from the rendered market-watch page.
+
+    Column positions are discovered from the table's own header row, so a
+    reordering on MCX's side degrades to None instead of a wrong number.
+    """
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html, "html.parser")
+    for table in soup.find_all("table"):
+        headers = [th.get_text(strip=True).lower()
+                   for th in table.find_all("th")]
+        if not headers:
+            continue
+
+        def col(*keys):
+            for i, h in enumerate(headers):
+                if any(k in h for k in keys):
+                    return i
+            return None
+
+        isym, iltp = col("symbol"), col("ltp", "last")
+        iexp, ipch = col("expiry"), col("%", "chg", "change")
+        if isym is None or iltp is None:
+            continue
+        out, seen = [], set()
+        for tr in table.find_all("tr"):
+            tds = [td.get_text(strip=True) for td in tr.find_all("td")]
+            if len(tds) <= max(isym, iltp):
+                continue
+            sym = tds[isym].upper()
+            if sym in ("GOLD", "GOLDM") and sym not in seen:
+                try:
+                    ltp = float(tds[iltp].replace(",", ""))
+                except ValueError:
+                    continue
+                if 60000 <= ltp <= 400000:
+                    exp = (tds[iexp] if iexp is not None and iexp < len(tds)
+                           else "")
+                    pchg = 0.0
+                    if ipch is not None and ipch < len(tds):
+                        try:
+                            pchg = float(
+                                re.sub(r"[^0-9.+-]", "", tds[ipch]) or 0)
+                        except ValueError:
+                            pass
+                    out.append({"symbol": sym, "expiry": exp, "ltp": ltp,
+                                "chg": pchg, "pchg": pchg})
+                    seen.add(sym)
+        if out:
+            return out
     return None
 
 
