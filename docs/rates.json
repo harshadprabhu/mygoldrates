@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-07-23",
-  "last_updated": "2026-07-24T01:26:33.139483+05:30",
+  "last_updated": "2026-07-24T01:44:40.330690+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -51,13 +51,13 @@
       "rate_18k_per_gram_inr": 10942.09
     },
     {
-      "jeweller": "Malabar Gold",
+      "jeweller": "GRT Jewellers",
       "rate_24k_per_gram_inr": 14614.19,
       "rate_22k_per_gram_inr": 13400.0,
       "rate_18k_per_gram_inr": 10971.61
     },
     {
-      "jeweller": "GRT Jewellers",
+      "jeweller": "Malabar Gold",
       "rate_24k_per_gram_inr": 14614.19,
       "rate_22k_per_gram_inr": 13400.0,
       "rate_18k_per_gram_inr": 10971.61

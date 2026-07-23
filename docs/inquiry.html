@@ -73,8 +73,17 @@ header.top{display:flex;justify-content:space-between;align-items:center;
   text-transform:uppercase;color:var(--ink-3);margin-top:6px}
 @media (max-width:520px){.brand-tag{display:none}.wm{font-size:19px;
   letter-spacing:.1em}.brand-mark{width:30px;height:30px}}
-.topright{display:flex;align-items:center;gap:16px}
+.topright{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .updated{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
+.ghead{display:inline-flex;align-items:center}
+.uchip{display:inline-flex;align-items:center;gap:7px;font:600 12.5px/1
+  "IBM Plex Sans",sans-serif;color:var(--ink);border:1px solid var(--line);
+  background:var(--card);border-radius:999px;padding:5px 12px 5px 6px;
+  max-width:180px}
+.uchip img{width:22px;height:22px;border-radius:50%;flex:0 0 22px;
+  object-fit:cover}
+.uchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:520px){.uchip{max-width:120px}.updated{display:none}}
 .btn{display:inline-block;font:500 13.5px/1 "IBM Plex Sans",sans-serif;
   background:var(--board);color:#F0DB9A;border:1px solid rgba(217,178,74,.5);
   padding:11px 18px;border-radius:999px;text-decoration:none;cursor:pointer;
@@ -240,17 +249,12 @@ footer p{margin:6px 0;max-width:80ch}
         method:'POST',
         headers:{'Content-Type':'application/json','apikey':KEY,
                  'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
-        body:JSON.stringify(p)});
+        body:JSON.stringify(p)}).then(function(r){
+          if(!r.ok)throw new Error('bad status');return r;});
     }
-    post(payload).then(function(r){
-      if(r.ok)return r;
-      /* older table without newer columns: retry with base fields only */
-      var BASE=['name','email','phone','country','state','city','zip'];
-      var p2={};BASE.forEach(function(k){
-        if(payload[k]!==undefined)p2[k]=payload[k];});
-      return post(p2).then(function(r2){
-        if(!r2.ok)throw new Error('bad status');return r2;});
-    }).then(function(){
+    /* merge into the same email row via RPC when available; else insert */
+    var save=window.GR_SAVE?window.GR_SAVE(payload):post(payload);
+    save.then(function(){
       form.reset();ok.style.display='block';
       btn.textContent='Subscribed';
     }).catch(function(){
@@ -260,7 +264,7 @@ footer p{margin:6px 0;max-width:80ch}
   });
 })();
 </script>
-<script>window.GR_GCID="459957139537-m6fl4clp90lua3ad2baupf20utkof6fl.apps.googleusercontent.com";</script>
-<script src="signup.js?v=4cd59c8d" defer></script>
+<script>window.GR_GCID="459957139537-m6fl4clp90lua3ad2baupf20utkof6fl.apps.googleusercontent.com";window.GR_SB_URL="https://opwrfflzzowhobesysmr.supabase.co";window.GR_SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE";</script>
+<script src="signup.js?v=85f643bc" defer></script>
 </body>
 </html>
