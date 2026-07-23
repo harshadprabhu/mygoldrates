@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""One-off: find the commodity dropdown selector on the market-watch page."""
+"""One-off: locate the embedded market-watch data blob in the page source."""
 import os
 import re
 import requests
-from bs4 import BeautifulSoup
 
 key = os.environ["ZYTE_API_KEY"].strip()
 r = requests.post(
@@ -11,31 +10,22 @@ r = requests.post(
     json={"url": "https://www.mcxindia.com/market-data/market-watch",
           "browserHtml": True, "geolocation": "IN"},
     headers={"Accept": "application/json"}, timeout=150)
-print("zyte status", r.status_code)
 html = r.json().get("browserHtml") or ""
 print("html len", len(html))
-soup = BeautifulSoup(html, "html.parser")
 
-for s in soup.find_all("select"):
-    opts = [o.get("value") for o in s.find_all("option")][:6]
-    print("SELECT id=%r name=%r class=%r nopts=%d first=%s" %
-          (s.get("id"), s.get("name"), " ".join(s.get("class") or []),
-           len(s.find_all("option")), opts))
+# JSON-ish occurrences of GOLD with quotes around
+for pat in (r'"Symbol"\s*:\s*"GOLD"', r"'Symbol'\s*:\s*'GOLD'",
+            r'"GOLD"', r'FUTCOM'):
+    ms = list(re.finditer(pat, html))
+    print(f"pattern {pat!r}: {len(ms)} hits")
+    if ms:
+        i = ms[0].start()
+        print("  ctx:", re.sub(r"\s+", " ", html[max(0, i-250):i+420])[:640])
+        break
 
-# instrument-type radio/tabs?
-for inp in soup.find_all("input"):
-    t = inp.get("type")
-    if t in ("radio", "button", "submit"):
-        print("INPUT type=%s id=%r name=%r value=%r" %
-              (t, inp.get("id"), inp.get("name"), inp.get("value")))
-
-# does FUTCOM GOLD already exist anywhere in the DOM text?
-txt = soup.get_text(" ")
-print("FUTCOM count:", len(re.findall(r"FUTCOM", txt)))
-m = re.search(r"FUTCOM\s+GOLD[^A-Z]", txt)
-print("FUTCOM GOLD present:", bool(m))
-# pagination hints
-for a in soup.find_all(["a", "button"]):
-    tt = (a.get_text(strip=True) or "")[:20]
-    if re.fullmatch(r"\d+|Next|»|>", tt):
-        print("PAGER:", a.name, "id=%r" % a.get("id"), "text=%r" % tt)
+# look for var assignments that hold big arrays
+for m in re.finditer(r"var\s+(\w+)\s*=\s*(\[|\{)", html):
+    name = m.group(1)
+    seg = html[m.start():m.start() + 160]
+    if re.search(r"Symbol|LTP|Expiry|FUTCOM", html[m.start():m.start() + 3000]):
+        print("VAR:", name, "->", re.sub(r"\s+", " ", seg)[:150])
