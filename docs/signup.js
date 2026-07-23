@@ -51,43 +51,26 @@
   if(!GCID||!wrap)return;
   wrap.hidden=false;
   var btn=wrap.querySelector('.gbtn'),done=wrap.querySelector('.gdone');
-  var SCOPES='openid email profile '+
-    'https://www.googleapis.com/auth/user.gender.read '+
-    'https://www.googleapis.com/auth/user.birthday.read '+
-    'https://www.googleapis.com/auth/user.phonenumbers.read '+
-    'https://www.googleapis.com/auth/user.addresses.read';
+  /* Basic (non-sensitive) scopes only - no app verification needed. Gender/
+     birthday/address can be added back once the app is Google-verified. */
+  var SCOPES='openid email profile';
   function fill(el,v){if(el&&v&&!el.value.trim())el.value=v;}
   function people(token){
-    fetch('https://people.googleapis.com/v1/people/me?personFields='+
-      'names,emailAddresses,genders,birthdays,photos,locales,'+
-      'phoneNumbers,addresses',
+    /* Standard OIDC userinfo - works with basic scopes, no People API. */
+    fetch('https://www.googleapis.com/oauth2/v3/userinfo',
       {headers:{'Authorization':'Bearer '+token}})
     .then(function(r){return r.ok?r.json():Promise.reject();})
-    .then(function(p){
-      var em=(p.emailAddresses||[])[0]||{};
-      var nm=(p.names||[])[0]||{};
-      fill(F('name'),nm.displayName);
-      if(F('email')&&em.value)F('email').value=em.value;
-      var pn=(p.phoneNumbers||[])[0];if(pn)fill(F('phone'),pn.value);
-      var ad=(p.addresses||[])[0]||{};
-      fill(F('city'),ad.city);fill(F('state'),ad.region);
-      fill(F('zip'),ad.postalCode);
-      var g=(p.genders||[])[0],b=(p.birthdays||[])[0],
-          lo=(p.locales||[])[0],pic=(p.photos||[])[0];
-      var bd='';
-      if(b&&b.date){var dt=b.date;
-        bd=(dt.year||'')+'-'+('0'+(dt.month||0)).slice(-2)+
-           '-'+('0'+(dt.day||0)).slice(-2);}
+    .then(function(u){
+      fill(F('name'),u.name);
+      if(F('email')&&u.email)F('email').value=u.email;
       window.GR_GDATA={signup_method:'google',
-        google_id:(p.resourceName||'').replace('people/',''),
-        google_email_verified:!!(em.metadata&&em.metadata.verified),
-        picture_url:pic&&pic.url?pic.url:null,
-        gender:g&&g.value?g.value:null,
-        birthday:bd||null,
-        locale:lo&&lo.value?lo.value:null};
+        google_id:u.sub||null,
+        google_email_verified:!!u.email_verified,
+        picture_url:u.picture||null,
+        locale:u.locale||null};
       btn.hidden=true;done.hidden=false;
-      done.textContent='Connected as '+(em.value||'your Google account')+
-        ' - details filled from Google';
+      done.textContent='Connected as '+(u.email||'your Google account')+
+        ' - name and email filled from Google';
       if(zip&&zip.value.trim())pinLookup();
     }).catch(function(){
       alert('Could not fetch details from Google - please fill the form '+
