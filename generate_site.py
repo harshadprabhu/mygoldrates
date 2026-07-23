@@ -193,6 +193,28 @@ def build_og_image(path="docs/og.png"):
     print(f"og: wrote {path}")
 
 
+# City/state landing pages: same national board, one URL per location.
+LOCATIONS = [
+    # metros & major cities
+    "Mumbai", "Delhi", "Bengaluru", "Hyderabad", "Chennai", "Kolkata",
+    "Pune", "Ahmedabad", "Jaipur", "Surat", "Lucknow", "Kanpur", "Nagpur",
+    "Indore", "Bhopal", "Patna", "Chandigarh", "Kochi", "Coimbatore",
+    "Madurai", "Visakhapatnam", "Vijayawada", "Mysuru", "Thrissur",
+    "Kozhikode", "Thiruvananthapuram", "Guwahati", "Bhubaneswar",
+    "Ludhiana", "Amritsar", "Vadodara", "Nashik", "Rajkot", "Varanasi",
+    # states & UTs
+    "Maharashtra", "Tamil Nadu", "Karnataka", "Kerala", "Telangana",
+    "Andhra Pradesh", "Gujarat", "Rajasthan", "West Bengal",
+    "Uttar Pradesh", "Madhya Pradesh", "Punjab", "Haryana", "Bihar",
+    "Odisha", "Assam", "Jharkhand", "Uttarakhand", "Himachal Pradesh",
+    "Goa",
+]
+
+
+def loc_slug(name):
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
 def fetch_ibja():
     """IBJA daily reference rates, per 10g pre-GST -> per gram.
     Returns (r999, r916) or None."""
@@ -680,7 +702,16 @@ def main():
     common = dict(site_url=SITE_URL, date=display_date, time=display_time,
                   iso_now=now_ist.isoformat(), year=str(now_ist.year),
                   base_css=BASE_CSS, ads_head=ads_head)
-    html = TEMPLATE.substitute(
+    def city_cloud(current_slug=None):
+        parts = []
+        for nm in LOCATIONS:
+            sl = loc_slug(nm)
+            cur = ' aria-current="page"' if sl == current_slug else ""
+            parts.append(
+                f'<a href="gold-rate-today-in-{sl}.html"{cur}>{nm}</a>')
+        return "".join(parts)
+
+    tvars = dict(
         n_brands=str(len(live)),
         med24=inr(med["24K"]), med22=inr(med["22K"]), med18=inr(med["18K"]),
         low24=inr(ladder(lowest["canonical_24k_pre_gst"])["24K"]),
@@ -691,6 +722,9 @@ def main():
         supabase_url=supabase_url, anon_key=anon_key,
         rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld,
         seo_content=seo_content, drawer=drawer, **common)
+    html = TEMPLATE.substitute(
+        where="in India", where_note="",
+        canonical_url=f"{SITE_URL}/", city_links=city_cloud(), **tvars)
     inquiry = INQUIRY_TEMPLATE.substitute(
         supabase_url=supabase_url, anon_key=anon_key, **common)
     unsub = UNSUB_TEMPLATE.substitute(
@@ -702,6 +736,21 @@ def main():
     build_email_logo()
     with open("docs/index.html", "w", encoding="utf-8") as f:
         f.write(html)
+
+    # ---- programmatic city/state pages (same board, local landing page) ----
+    for nm in LOCATIONS:
+        sl = loc_slug(nm)
+        note = (f" Rates shown apply across {nm} - national jewellery chains "
+                f"quote the same board price in {nm} as everywhere else in "
+                "India.")
+        page = TEMPLATE.substitute(
+            where=f"in {nm}", where_note=note,
+            canonical_url=f"{SITE_URL}/gold-rate-today-in-{sl}.html",
+            city_links=city_cloud(sl), **tvars)
+        with open(f"docs/gold-rate-today-in-{sl}.html", "w",
+                  encoding="utf-8") as f:
+            f.write(page)
+    print(f"city pages: wrote {len(LOCATIONS)}")
     with open("docs/inquiry.html", "w", encoding="utf-8") as f:
         f.write(inquiry)
     with open("docs/unsubscribe.html", "w", encoding="utf-8") as f:
@@ -840,6 +889,12 @@ def main():
                     "</lastmod><changefreq>monthly</changefreq>"
                     "<priority>0.4</priority></url>\n"
                     for p in ("about", "contact", "privacy"))
+                + "".join(
+                    f"  <url><loc>{SITE_URL}/gold-rate-today-in-"
+                    f"{loc_slug(nm)}.html</loc><lastmod>{today}</lastmod>"
+                    "<changefreq>daily</changefreq>"
+                    "<priority>0.7</priority></url>\n"
+                    for nm in LOCATIONS)
                 + "</urlset>\n")
     with open("docs/ads.txt", "w", encoding="utf-8") as f:
         if ads_client:
@@ -937,29 +992,29 @@ TEMPLATE = Template("""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gold Rate Today in India ($date) - 24 Carat &amp; 22K Gold Rate, Compare $n_brands Jewellers</title>
-<meta name="description" content="Gold rate today in India ($date): 24 carat gold rate $med24/g and 22K gold rate $med22/g pre-GST, compared across $n_brands top jewellers. Check today's gold rate for Hyderabad, Chennai, Pune &amp; Mumbai, the IBJA bullion premium, and calculate gold prices instantly.">
+<title>Gold Rate Today $where ($date) - 24 Carat &amp; 22K Gold Rate, Compare $n_brands Jewellers</title>
+<meta name="description" content="Gold rate today $where ($date): 24 carat gold rate $med24/g and 22K gold rate $med22/g pre-GST, compared across $n_brands top jewellers. Check the IBJA bullion premium, MCX futures, and calculate gold prices instantly.">
 <meta name="keywords" content="gold rate, gold rate today, today gold rate, 24 carat gold rate today, gold rate today 22k, gold rate today Hyderabad, gold rate today Chennai, gold rate today Pune, gold rate today Mumbai">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#0B0805">
 <meta name="author" content="MyGoldRates.com">
 <meta name="geo.region" content="IN">
-<link rel="canonical" href="$site_url/">
+<link rel="canonical" href="$canonical_url">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MyGoldRates.com">
 <meta property="og:locale" content="en_IN">
-<meta property="og:title" content="Gold Rate Today in India - Compare 24K, 22K &amp; 18K Across $n_brands Jewellers">
+<meta property="og:title" content="Gold Rate Today $where - Compare 24K, 22K &amp; 18K Across $n_brands Jewellers">
 <meta property="og:description" content="Today's gold rate compared across $n_brands top Indian jewellers: 24 carat $med24/g, 22K $med22/g. IBJA bullion premium plus an instant price calculator.">
-<meta property="og:url" content="$site_url/">
+<meta property="og:url" content="$canonical_url">
 <meta property="og:image" content="$site_url/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="MyGoldRates.com - India's gold rate comparison platform">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Gold Rate Today in India - Compare $n_brands Jewellers">
+<meta name="twitter:title" content="Gold Rate Today $where - Compare $n_brands Jewellers">
 <meta name="twitter:description" content="24 carat gold rate $med24/g, 22K $med22/g today. Compare jewellers, check the bullion premium, calculate prices.">
 <meta name="twitter:image" content="$site_url/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1031,6 +1086,14 @@ $base_css
 .seofold[open] summary::after{content:"\\2212"}
 .seofold summary:hover h2{color:var(--gold)}
 .seofold>p:first-of-type{margin-top:14px}
+.citylinks{margin:34px 0 8px}
+.citycloud{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.citycloud a{font-size:12.5px;border:1px solid var(--line);
+  border-radius:999px;padding:6px 13px;text-decoration:none;
+  color:var(--ink-2);white-space:nowrap}
+.citycloud a:hover{border-color:var(--gold);color:var(--gold)}
+.citycloud a[aria-current="page"]{border-color:var(--gold);
+  color:var(--gold);font-weight:600}
 
 /* calculator */
 .calc{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
@@ -1255,10 +1318,10 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 </header>
 
 <section class="board" aria-label="Today's gold rate summary">
-  <h1>Gold Rate Today in India</h1>
+  <h1>Gold Rate Today $where</h1>
   <p class="sub">Live 24K, 22K and 18K gold rates compared across $n_brands of
   India's top jewellery brands - updated daily, with the IBJA bullion
-  reference for context.</p>
+  reference for context.$where_note</p>
   <div class="board-rates">
     <div class="tile best"><div class="k">&#9733; Lowest 24K Today</div>
       <div class="v">$low24</div><div class="u">per gram, pre-GST</div>
@@ -1368,6 +1431,15 @@ $faq
 </section>
 
 $seo_content
+
+<section class="citylinks" aria-labelledby="cityh">
+  <p class="eyebrow">Local Rates</p>
+  <h2 id="cityh">Gold Rate Today by City &amp; State</h2>
+  <p class="hint">National jewellery chains quote one board price across
+  India, so today's rates apply wherever you shop. Pick your city or state
+  for its dedicated page.</p>
+  <div class="citycloud">$city_links</div>
+</section>
 
 $drawer
 

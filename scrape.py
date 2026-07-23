@@ -710,18 +710,17 @@ def main():
     brands = sb.table("brands").select("*").eq("active", True).execute().data
     today = datetime.now(timezone.utc).date().isoformat()
 
-    # Idempotent: only fetch brands that don't already have today's rate, so a
-    # brand's site (and Zyte credits) isn't hit again once its rate is in.
-    # Successive scheduled runs pick up only what's still missing.
+    # Every scheduled run re-scrapes ALL brands so intraday board revisions
+    # (jewellers often revise on volatile days) are captured at 11:05, 14:00
+    # and 17:00 IST. A failed re-scrape simply keeps the stored rate - the
+    # upsert only happens on a successful extraction.
     existing = sb.table("rates").select("brand_id, canonical_24k_pre_gst, method") \
                  .eq("rate_date", today).execute().data
-    # A brand is "done" only once it has a LIVE rate; placeholder-only brands
-    # keep retrying so they upgrade to a real rate as soon as one is available.
     real_ids = {r["brand_id"] for r in existing
                 if r.get("method") != PLACEHOLDER_METHOD}
-    pending = [b for b in brands if b["id"] not in real_ids]
-    print(f"{len(brands)} active brands - {len(real_ids)} have a live rate today, "
-          f"{len(pending)} to (re)try\n")
+    pending = brands
+    print(f"{len(brands)} active brands - {len(real_ids)} already have a live "
+          f"rate today; refreshing all for intraday revisions\n")
     saved = []
 
     for b in pending:
