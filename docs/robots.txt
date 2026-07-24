@@ -54,5 +54,6 @@ User-agent: *
 Allow: /
 
 Sitemap: https://mygoldrates.com/sitemap.xml
+Sitemap: https://mygoldrates.com/sitemap_news.xml
 # AI summary: https://mygoldrates.com/llms.txt
 # Machine-readable rates: https://mygoldrates.com/rates.json
