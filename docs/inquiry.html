@@ -28,6 +28,13 @@
 .has-google .manualbox{display:none}
 .has-google .manualbox.reveal{display:block;
   border-top:1px solid var(--line);margin-top:14px;padding-top:16px}
+.locbtn{display:inline-flex;align-items:center;gap:6px;width:100%;
+  justify-content:center;font:600 13px/1 "IBM Plex Sans",sans-serif;
+  color:var(--emerald);background:color-mix(in srgb,var(--emerald) 8%,transparent);
+  border:1px solid color-mix(in srgb,var(--emerald) 40%,transparent);
+  border-radius:10px;padding:11px 14px;cursor:pointer;margin:2px 0 12px}
+.locbtn:hover{background:color-mix(in srgb,var(--emerald) 14%,transparent)}
+.locbtn:disabled{opacity:.7;cursor:default}
 :root{
   --paper:#FBF9F4; --ink:#181F1B; --ink-2:#49544D; --ink-3:#79847D;
   --board:#152420; --board-2:#1C312A; --gold:#9C7514; --gold-bright:#D9B24A;
@@ -170,6 +177,8 @@ footer p{margin:6px 0;max-width:80ch}
       inputmode="tel" required maxlength="20" value="+91 "
       placeholder="+91 98765 43210"></div>
   </div>
+  <button type="button" class="locbtn" id="f-loc">&#128205; Use my current
+  location to autofill address</button>
   <div class="grid2">
     <div class="field"><label for="f-country">Country</label>
       <select id="f-country" name="country" autocomplete="country-name">
@@ -261,6 +270,6 @@ footer p{margin:6px 0;max-width:80ch}
 })();
 </script>
 <script>window.GR_GCID="459957139537-m6fl4clp90lua3ad2baupf20utkof6fl.apps.googleusercontent.com";window.GR_SB_URL="https://opwrfflzzowhobesysmr.supabase.co";window.GR_SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE";</script>
-<script src="signup.js?v=c66f6e16" defer></script>
+<script src="signup.js?v=78db4f53" defer></script>
 </body>
 </html>

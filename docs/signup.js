@@ -46,6 +46,37 @@
           if(!area.value.trim())area.value=po[0].Name;}
       }).catch(function(){});
   }
+  /* ---- "use my location": geolocation -> reverse geocode -> address ---- */
+  function set(n,v,force){var el=F(n);
+    if(el&&v&&(force||!el.value.trim()))el.value=v;}
+  function useLocation(btn){
+    if(!navigator.geolocation){alert('Location is not supported by this '+
+      'browser - please type your address.');return;}
+    var old=btn.textContent;btn.disabled=true;btn.textContent='Locating...';
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var la=pos.coords.latitude,lo=pos.coords.longitude;
+      fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?'+
+        'latitude='+la+'&longitude='+lo+'&localityLanguage=en')
+        .then(function(r){return r.json();})
+        .then(function(d){
+          var c=F('country');
+          if(c&&d.countryName&&/india/i.test(d.countryName))c.value='India';
+          set('state',d.principalSubdivision,true);
+          set('city',d.city||d.locality,true);
+          set('area',d.locality||d.city,true);
+          if(d.postcode)set('zip',d.postcode,true);
+          btn.textContent='Location added';
+          if(zip&&/^[1-9]\d{5}$/.test((zip.value||'').trim()))pinLookup();
+          setTimeout(function(){btn.disabled=false;btn.textContent=old;},2500);
+        }).catch(function(){btn.disabled=false;btn.textContent=old;
+          alert('Could not look up your location - please type your address.');});
+    },function(err){btn.disabled=false;btn.textContent=old;
+      alert(err&&err.code===1?'Location permission was denied. You can type '+
+        'your address instead.':'Could not get your location - please type '+
+        'your address.');},
+     {enableHighAccuracy:true,timeout:12000,maximumAge:600000});
+  }
+
   if(form){
     var ph=F('phone');
     if(ph){ph.addEventListener('focus',function(){
@@ -55,6 +86,8 @@
     if(zip){zip.addEventListener('input',function(){
         if(/^[1-9]\d{5}$/.test(zip.value.trim()))pinLookup();});
       zip.addEventListener('blur',pinLookup);}
+    var lb=form.querySelector('.locbtn');
+    if(lb)lb.addEventListener('click',function(){useLocation(lb);});
   }
 
   /* ---- optional Google One Tap, SITE-WIDE (popup only, no buttons) ----
