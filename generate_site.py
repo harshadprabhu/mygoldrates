@@ -1550,6 +1550,27 @@ def main():
                     "</url>\n"
                     for loc, dd, ttl in daily_meta)
                 + "</urlset>\n")
+
+    # ---- IndexNow: instantly notify Bing/Yandex/Seznam of fresh URLs ----
+    INDEXNOW_KEY = "b7f3c9a1e04d4f6a8c2b5d9e1f0a3c7d"
+    with open(f"docs/{INDEXNOW_KEY}.txt", "w", encoding="utf-8") as f:
+        f.write(INDEXNOW_KEY)
+    try:
+        fresh_now = [f"{SITE_URL}/", f"{SITE_URL}/news"]
+        fresh_now += [f"{SITE_URL}/{loc}" for loc, dd, _ in daily_meta
+                      if dd == now_ist.date()]
+        if recaps and recaps[0][1].date() == now_ist.date():
+            fresh_now.append(f"{SITE_URL}/news/recap/{recaps[0][0]}")
+        rr = requests.post(
+            "https://api.indexnow.org/indexnow",
+            json={"host": CUSTOM_DOMAIN, "key": INDEXNOW_KEY,
+                  "keyLocation": f"{SITE_URL}/{INDEXNOW_KEY}.txt",
+                  "urlList": fresh_now[:100]},
+            headers={"Content-Type": "application/json"}, timeout=20)
+        print(f"indexnow: pinged {len(fresh_now)} urls -> {rr.status_code}")
+    except Exception as e:
+        print("indexnow: skipped:", type(e).__name__, str(e)[:80])
+
     with open("docs/ads.txt", "w", encoding="utf-8") as f:
         if ads_client:
             pub = ads_client.replace("ca-", "")   # ca-pub-XXXX -> pub-XXXX
