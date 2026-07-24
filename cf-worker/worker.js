@@ -12,7 +12,7 @@
  */
 const OWNER = "harshadprabhu";
 const REPO = "goldrates";
-const WORKFLOW = "fetch-rates.yml";
+const WORKFLOW = "rates.yml"; // the workflow FILE name (not its display name)
 const MORNING_CRON = "30 5 * * *"; // 11:00 IST -> this run emails the digest
 
 export default {
