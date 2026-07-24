@@ -12,7 +12,12 @@ on:
     - cron: "3 6 * * *"     # 11:33 IST  (catch-up if earlier ones were dropped)
     - cron: "17 9 * * *"    # 14:47 IST  (afternoon revision)
     - cron: "41 11 * * *"   # 17:11 IST  (late revision)
-  workflow_dispatch:        # lets you trigger a run by hand if you ever want to
+  workflow_dispatch:        # manual runs + the Cloudflare Worker cron
+    inputs:
+      alerts:
+        description: "Send the daily digest from this run (true/false)"
+        type: string
+        default: "false"
 
 concurrency:
   group: fetch-rates
@@ -88,6 +93,7 @@ jobs:
         # morning run lands first sends it and the rest are no-ops. (Excludes
         # the afternoon crons so a delayed day still emails in the morning.)
         if: >
+          github.event.inputs.alerts == 'true' ||
           github.event.schedule == '3 2 * * *' ||
           github.event.schedule == '23 3 * * *' ||
           github.event.schedule == '43 4 * * *' ||
