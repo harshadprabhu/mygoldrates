@@ -10,6 +10,7 @@ anon key (insert-only table behind RLS); no privileged keys are shipped.
 from __future__ import annotations
 
 import hashlib
+import html as _html
 import json
 import os
 import re
@@ -203,6 +204,13 @@ LOCATIONS = [
     "Madurai", "Visakhapatnam", "Vijayawada", "Mysuru", "Thrissur",
     "Kozhikode", "Thiruvananthapuram", "Guwahati", "Bhubaneswar",
     "Ludhiana", "Amritsar", "Vadodara", "Nashik", "Rajkot", "Varanasi",
+    "Agra", "Meerut", "Faridabad", "Ghaziabad", "Gurugram", "Noida",
+    "Ranchi", "Raipur", "Jodhpur", "Udaipur", "Kota", "Dehradun",
+    "Jamshedpur", "Dhanbad", "Aurangabad", "Solapur", "Tiruchirappalli",
+    "Salem", "Tirupati", "Guntur", "Warangal", "Mangaluru", "Hubli",
+    "Belagavi", "Kolhapur", "Jalandhar", "Siliguri", "Cuttack", "Ajmer",
+    "Gwalior", "Jabalpur", "Allahabad", "Bareilly", "Moradabad", "Aligarh",
+    "Vijayapura", "Davanagere", "Erode", "Tirunelveli", "Kollam", "Kannur",
     # states & UTs
     "Maharashtra", "Tamil Nadu", "Karnataka", "Kerala", "Telangana",
     "Andhra Pradesh", "Gujarat", "Rajasthan", "West Bengal",
@@ -237,6 +245,50 @@ def fetch_ibja():
     except Exception:
         pass
     return None
+
+
+def fetch_news(limit=14):
+    """Live gold news via Google News RSS (auto-refreshes each build).
+
+    Returns [{title, link, source, dt}] - headlines only, each linking to the
+    original publisher (aggregation, not reproduction).
+    """
+    url = ("https://news.google.com/rss/search?q="
+           "gold%20rate%20OR%20gold%20price%20India%20when:3d"
+           "&hl=en-IN&gl=IN&ceid=IN:en")
+    try:
+        r = requests.get(url, headers={"User-Agent": UA}, timeout=20)
+        items = re.findall(r"<item>(.*?)</item>", r.text, re.S)
+
+        def field(block, tag):
+            m = re.search(r"<" + tag + r"[^>]*>(.*?)</" + tag + ">",
+                          block, re.S)
+            return m.group(1).strip() if m else ""
+
+        out, seen = [], set()
+        for it in items:
+            title = _html.unescape(re.sub(r"<[^>]+>", "", field(it, "title")))
+            link = _html.unescape(field(it, "link"))
+            src = _html.unescape(re.sub(r"<[^>]+>", "", field(it, "source")))
+            if src and title.endswith(" - " + src):
+                title = title[:-(len(src) + 3)].strip()
+            try:
+                dt = datetime.strptime(field(it, "pubDate")[:25].strip(),
+                                       "%a, %d %b %Y %H:%M:%S")
+            except Exception:
+                dt = None
+            key = title.lower()
+            if title and link and key not in seen and len(title) > 15:
+                out.append({"title": title, "link": link, "source": src,
+                            "dt": dt})
+                seen.add(key)
+            if len(out) >= limit:
+                break
+        print(f"news: {len(out)} gold headlines fetched")
+        return out
+    except Exception as e:
+        print("news: fetch failed:", type(e).__name__, str(e)[:100])
+        return []
 
 
 def fetch_mcx():
@@ -523,6 +575,30 @@ def main():
         return {p: c * f for p, f in PURITY_FRACTION.items()}
 
     med = ladder(median24)
+
+    # ---------------------------------------------- live gold news feed
+    news_items = fetch_news()
+
+    def news_card(n):
+        when = n["dt"].strftime("%d %b, %H:%M") if n["dt"] else ""
+        meta = " &middot; ".join([x for x in (n["source"], when) if x])
+        return (f'<a class="newscard" href="{_html.escape(n["link"])}" '
+                f'target="_blank" rel="nofollow noopener">'
+                f'<div class="nt">{_html.escape(n["title"])}</div>'
+                f'<div class="nd">{_html.escape(meta)}</div></a>')
+
+    news_home = ""
+    if news_items:
+        cards = "".join(news_card(n) for n in news_items[:5])
+        news_home = (
+            '<section class="citylinks" aria-labelledby="newsh">'
+            '<p class="eyebrow">Gold News</p>'
+            '<h2 id="newsh">Latest Gold News Today</h2>'
+            '<p class="hint">Live headlines, refreshed through the day.</p>'
+            f'{cards}'
+            f'<p style="margin-top:10px"><a href="{SITE_URL}/news" '
+            'style="font-weight:600">All gold news &amp; daily recaps '
+            '&rarr;</a></p></section>')
 
     # --------------------------------------------------- MCX gold futures
     mcx = fetch_mcx()
@@ -902,7 +978,7 @@ def main():
         calc_brands=json.dumps(calc_brands),
         supabase_url=supabase_url, anon_key=anon_key,
         rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld,
-        seo_content=seo_content, drawer=drawer, **common)
+        seo_content=seo_content, drawer=drawer, news_home=news_home, **common)
     html = TEMPLATE.substitute(
         where="in India", where_note="",
         canonical_url=f"{SITE_URL}/", city_links=city_cloud(), **tvars)
@@ -1271,17 +1347,28 @@ def main():
     if not news_cards:
         news_cards = ('<p>Daily recaps will appear here as rate history builds '
                       'up over the coming days.</p>')
+
+    # live headlines (Google News), rendered as external-link cards
+    live_news = "".join(news_card(n) for n in news_items)
+    live_block = (
+        '<h2>Latest Gold News</h2>'
+        '<p style="font-size:13px;color:var(--ink-3);margin-bottom:6px">'
+        'Live headlines from across the web, refreshed through the day. '
+        'Tap a headline to read the full story at the source.</p>'
+        + live_news) if live_news else ""
+
     render_content(
         "news",
-        "Gold Market News & Daily Recap (India) | MyGoldRates",
-        "Daily gold market recaps for India - how the 24K, 22K and 18K rates "
-        "moved each session, auto-compiled from live jeweller data.",
+        "Gold News Today & Daily Rate Recap (India) | MyGoldRates",
+        "Latest gold price news for India plus a daily data-driven recap of how "
+        "24K, 22K and 18K rates moved - refreshed through the day.",
         crumbs(("News", None)) +
-        "<h1>Gold Market News &amp; Daily Recap</h1>"
-        "<p>A short, data-driven recap of how India's gold rate moved each "
-        "trading session - compiled automatically from the live jeweller "
-        "medians we track.</p>" + news_cards)
-    extra_urls.append(("news", "daily", "0.7"))
+        "<h1>Gold News &amp; Daily Rate Recap</h1>"
+        "<p>The latest gold price headlines from across the web, plus our own "
+        "data-driven recap of how India's gold rate moved each session.</p>"
+        + live_block +
+        '<h2>Daily Market Recap</h2>' + news_cards)
+    extra_urls.append(("news", "hourly", "0.8"))
     print(f"content pages: 4 calculators, "
           f"{len(list(_articles(rate_str, med, inr)))} articles, "
           f"{len(recaps)} recaps")
@@ -1298,8 +1385,29 @@ def main():
             f.write(f"User-agent: {bot}\nAllow: /\n\n")
         f.write(f"User-agent: *\nAllow: /\n\n"
                 f"Sitemap: {SITE_URL}/sitemap.xml\n"
+                f"Sitemap: {SITE_URL}/sitemap_news.xml\n"
                 f"# AI summary: {SITE_URL}/llms.txt\n"
                 f"# Machine-readable rates: {SITE_URL}/rates.json\n")
+
+    # ---- Google News sitemap (recaps from the last 2 days only) ----
+    cutoff = datetime.now(IST).date() - timedelta(days=2)
+    fresh = [(s, dt, disp, m24, mv, pc) for (s, dt, disp, m24, mv, pc) in recaps
+             if dt.date() >= cutoff]
+    news_urls = "".join(
+        f"  <url><loc>{SITE_URL}/news/recap/{s}</loc>\n"
+        f"    <news:news><news:publication><news:name>MyGoldRates</news:name>"
+        f"<news:language>en</news:language></news:publication>"
+        f"<news:publication_date>{dt.strftime('%Y-%m-%d')}T09:00:00+05:30"
+        f"</news:publication_date>"
+        f"<news:title>Gold Rate Daily Recap - {disp}</news:title>"
+        f"</news:news></url>\n"
+        for (s, dt, disp, m24, mv, pc) in fresh)
+    with open("docs/sitemap_news.xml", "w", encoding="utf-8") as f:
+        f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
+                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n'
+                '        xmlns:news="http://www.google.com/schemas/'
+                'sitemap-news/0.9">\n'
+                + news_urls + "</urlset>\n")
     with open("docs/sitemap.xml", "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -1882,6 +1990,13 @@ $base_css
 .citycloud a:hover{border-color:var(--gold);color:var(--gold)}
 .citycloud a[aria-current="page"]{border-color:var(--gold);
   color:var(--gold);font-weight:600}
+.newscard{display:block;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:14px 16px;margin:9px 0;text-decoration:none}
+.newscard:hover{border-color:var(--gold)}
+.newscard .nt{font-weight:600;color:var(--ink);font-size:14.5px;line-height:1.4}
+.newscard .nd{font:500 11.5px/1 "IBM Plex Mono",monospace;color:var(--ink-3);
+  margin-top:5px}
+.recap-move{font-family:"IBM Plex Mono",monospace;font-weight:600}
 
 /* calculator */
 .calc{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
@@ -2220,6 +2335,8 @@ $ads_unit
   <h2 id="faqh">Gold Rate FAQs</h2>
 $faq
 </section>
+
+$news_home
 
 $seo_content
 
