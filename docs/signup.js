@@ -95,7 +95,8 @@
   (function gready(){
     if(window.google&&google.accounts&&google.accounts.id){
       google.accounts.id.initialize({client_id:GCID,callback:onCred,
-        auto_select:true,cancel_on_tap_outside:true,itp_support:true});
+        auto_select:true,cancel_on_tap_outside:true,itp_support:true,
+        use_fedcm_for_prompt:true});   /* required for One Tap in modern Chrome */
       if(!(stored&&stored.email))
         try{google.accounts.id.prompt();}catch(e){}   /* One Tap: comes & goes */
     }else if(tries++<40){setTimeout(gready,150);}
