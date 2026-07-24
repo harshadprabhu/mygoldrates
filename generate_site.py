@@ -323,6 +323,165 @@ def trend_chart(trend):
             f'</svg>')
 
 
+_FMT_JS = ("function g(id){return document.getElementById(id);}"
+           "function fmt(n){if(!isFinite(n))return '-';var s=Math.round(n)"
+           ".toString(),o=s.slice(-3),r=s.slice(0,-3);"
+           "while(r.length>2){o=r.slice(-2)+','+o;r=r.slice(0,-2);}"
+           "if(r)o=r+','+o;return '₹'+o;}")
+
+
+def _calc_js(kind, rate24):
+    """Inline calculator script; RATE is the per-gram 24K(999) rate."""
+    body = {
+        "loan": """
+        function calc(){var wt=+g('w').value||0,pur=+g('p').value,
+          L=(+g('ltv').value||0)/100,R=(+g('r').value||0)/1200,N=+g('n').value||0;
+          var val=wt*RATE*pur/0.999,loan=val*L;
+          var emi=R>0?loan*R*Math.pow(1+R,N)/(Math.pow(1+R,N)-1):(N>0?loan/N:0);
+          g('loan').textContent=fmt(loan)+' eligible';
+          g('val').textContent=fmt(val);
+          g('emi').textContent=(isFinite(emi)&&emi>0)?fmt(emi):'-';
+          g('tot').textContent=(isFinite(emi)&&emi>0)?fmt(emi*N):'-';}
+        ['w','p','ltv','r','n'].forEach(function(id){
+          g(id).addEventListener('input',calc);});calc();""",
+        "sip": """
+        function calc(){var i=(+g('g').value||0)/1200,n=(+g('y').value||0)*12,
+          P=+g('m').value||0;
+          var fv=i>0?P*((Math.pow(1+i,n)-1)/i)*(1+i):P*n;
+          var inv=P*n;
+          g('fv').textContent=fmt(fv)+' value';
+          g('inv').textContent=fmt(inv);
+          g('gain').textContent=fmt(fv-inv);
+          g('grams').textContent=(fv/RATE).toFixed(1)+' g';}
+        ['m','y','g'].forEach(function(id){
+          g(id).addEventListener('input',calc);});calc();""",
+        "making": """
+        function calc(){var wt=+g('w').value||0,pur=+g('p').value,
+          mt=g('mt').value,mc=+g('mc').value||0;
+          var gv=wt*RATE*pur/0.999;
+          var mk=mt==='pct'?gv*mc/100:mc*wt;
+          var sub=gv+mk,gst=sub*0.03;
+          g('total').textContent=fmt(sub+gst)+' total';
+          g('gv').textContent=fmt(gv);
+          g('mk').textContent=fmt(mk);
+          g('gst').textContent=fmt(gst);}
+        ['w','p','mt','mc'].forEach(function(id){
+          g(id).addEventListener('input',calc);});calc();""",
+    }[kind]
+    return ("<script>(function(){var RATE=" + str(rate24) + ";" +
+            _FMT_JS + body + "})();</script>")
+
+
+def _articles(rate_str, med, inr):
+    """Evergreen SEO guides: (slug, title, desc, h1, body_html)."""
+    return [
+        ("22k-vs-24k-gold",
+         "22K vs 24K Gold - Difference, Purity & Which to Buy | MyGoldRates",
+         "22K vs 24K gold explained: purity, price, durability and which is "
+         "better for jewellery vs investment in India.",
+         "22K vs 24K Gold: What's the Difference?",
+         f"""
+  <p>The number before the "K" (karat) tells you how pure the gold is. Pure
+  gold is 24 karat; lower karats mix in other metals for strength.</p>
+  <h2>24K gold (99.9% pure)</h2>
+  <p>24K, also stamped <strong>999</strong>, is the purest investment-grade
+  gold, used for coins, bars and digital gold. It is soft and scratches
+  easily, so it is rarely used for intricate jewellery. Today the 24K rate is
+  about <strong>{rate_str}/g</strong> (pre-GST).</p>
+  <h2>22K gold (91.6% pure)</h2>
+  <p>22K, stamped <strong>916</strong>, is 91.6% gold with 8.4% alloy for
+  durability - the standard for Indian jewellery. At today's rates 22K works
+  out to roughly <strong>{inr(med['22K'])}/g</strong>.</p>
+  <h2>Which should you buy?</h2>
+  <ul>
+    <li><strong>For investment:</strong> 24K coins/bars - maximum purity, easy
+    to value and resell.</li>
+    <li><strong>For jewellery you'll wear:</strong> 22K - holds designs and
+    stones far better.</li>
+    <li><strong>For diamond or daily-wear pieces:</strong> 18K (75%) is harder
+    still.</li>
+  </ul>
+  <p>Whatever you choose, compare the <a href="{SITE_URL}/">gold rate today</a>
+  across jewellers first - the per-gram rate can differ by &#8377;50-150.</p>"""),
+        ("gold-hallmarking",
+         "Gold Hallmarking in India - BIS Hallmark & HUID Explained | MyGoldRates",
+         "What the BIS hallmark and 6-digit HUID mean, how to check purity, and "
+         "why hallmarked gold protects you when buying jewellery in India.",
+         "Gold Hallmarking (BIS): What to Check Before You Buy",
+         f"""
+  <p>A <strong>BIS hallmark</strong> is an official certification that your
+  gold's purity is genuine. Since 2021 hallmarking is mandatory for gold
+  jewellery sold in most of India.</p>
+  <h2>The three marks to look for</h2>
+  <ul>
+    <li>The <strong>BIS logo</strong> (a triangle).</li>
+    <li>The <strong>purity/fineness</strong>, e.g. 22K916, 18K750 or 24K999.</li>
+    <li>A <strong>6-digit alphanumeric HUID</strong> (Hallmark Unique ID)
+    unique to that piece.</li>
+  </ul>
+  <h2>Why it matters</h2>
+  <p>Hallmarking guarantees you are paying for the purity you are billed for.
+  You can verify a HUID in the free BIS Care app. Always insist on a proper
+  tax invoice that states the purity and net gold weight separately from
+  making charges.</p>
+  <h2>Check the rate too</h2>
+  <p>Hallmarking confirms purity, not price. Compare the day's
+  <a href="{SITE_URL}/">gold rate</a> and the
+  <a href="{SITE_URL}/making-charges-calculator">making charges</a> so you know
+  the fair billed amount before you pay.</p>"""),
+        ("how-gold-rates-are-set",
+         "How Gold Rates Are Set in India - Explained | MyGoldRates",
+         "How daily gold rates in India are decided: international spot price, "
+         "rupee-dollar rate, import duty, GST, and jeweller premiums.",
+         "How Are Gold Rates Set in India?",
+         f"""
+  <p>The gold rate you see at a jeweller is built up from several layers.</p>
+  <h2>1. International spot price</h2>
+  <p>Gold trades globally in US dollars per troy ounce. This is the base that
+  moves 24x7 with demand, interest rates and global risk.</p>
+  <h2>2. Rupee-dollar exchange rate</h2>
+  <p>The dollar price is converted to rupees, so a weaker rupee pushes Indian
+  gold prices up even if global gold is flat.</p>
+  <h2>3. Import duty &amp; GST</h2>
+  <p>India imports most of its gold, so customs duty is added, then 3% GST on
+  top at billing.</p>
+  <h2>4. Association benchmark &amp; jeweller premium</h2>
+  <p>Bodies like the <strong>IBJA</strong> publish a daily bullion reference.
+  Individual jewellers add a small premium over this for sourcing and
+  hallmarking - which is why rates differ slightly between brands.</p>
+  <p>We track that gap for you: see the live
+  <a href="{SITE_URL}/">gold rate today</a> and each jeweller's premium over
+  the IBJA benchmark.</p>"""),
+        ("making-charges-explained",
+         "Gold Making Charges Explained - How They Work | MyGoldRates",
+         "What gold making charges and wastage are, how they're calculated "
+         "(% or per gram), and how to reduce what you pay in India.",
+         "Gold Making Charges &amp; Wastage, Explained",
+         f"""
+  <p><strong>Making charges</strong> are what a jeweller charges to turn raw
+  gold into a finished piece - the labour and design cost - on top of the metal
+  value.</p>
+  <h2>How they're charged</h2>
+  <ul>
+    <li><strong>As a percentage</strong> of the gold value (commonly 8-25%).</li>
+    <li><strong>As a flat rate per gram</strong> (e.g. &#8377;400-800/g).</li>
+  </ul>
+  <p>Intricate or machine-light handmade designs cost more; plain coins and
+  bars have little or no making charge.</p>
+  <h2>The final bill</h2>
+  <p>Billed price = gold value + making charges + 3% GST (on the total). On a
+  &#8377;1,00,000 piece, a 15% making charge plus GST can add roughly
+  &#8377;18,000.</p>
+  <h2>How to pay less</h2>
+  <ul>
+    <li>Compare making charges between jewellers - they are negotiable.</li>
+    <li>Prefer lightweight or plain designs for better value.</li>
+    <li>Use our <a href="{SITE_URL}/making-charges-calculator">making charges
+    calculator</a> to see the true final price before you buy.</li>
+  </ul>"""),
+    ]
+
+
 def main():
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
     anon_key = os.environ.get("SUPABASE_ANON_KEY", "")
@@ -723,7 +882,7 @@ def main():
                   iso_now=now_ist.isoformat(), year=str(now_ist.year),
                   base_css=BASE_CSS, ads_head=ads_head,
                   gclient=gclient, gsi=gsi, google_btn="",
-                  sig_ver=sig_ver)
+                  sig_ver=sig_ver, nav=NAV)
     def city_cloud(current_slug=None):
         parts = []
         for nm in LOCATIONS:
@@ -898,6 +1057,234 @@ def main():
   <h2>Contact</h2>
   <p>Questions about this policy?
   <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>""")
+
+    # ================= content pages: calculators / news / learn =========
+    extra_urls = []          # (loc, changefreq, priority) added to sitemap
+
+    def render_content(slug, title, desc, body, extra_js="", jsonld_block=""):
+        path = f"docs/{slug}.html"
+        d = os.path.dirname(path)
+        if d and d != "docs":
+            os.makedirs(d, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as fp:
+            fp.write(CONTENT_TEMPLATE.substitute(
+                title=title, desc=desc, canonical=f"{SITE_URL}/{slug}",
+                body=body, extra_js=extra_js, jsonld_block=jsonld_block,
+                **common))
+
+    rate24 = round(median24, 2)
+    rate_str = inr(med["24K"])
+
+    def crumbs(*items):
+        parts = [f'<a href="{SITE_URL}/">Home</a>']
+        for label, href in items:
+            parts.append(f'<a href="{href}">{label}</a>' if href else label)
+        return '<p class="crumbs">' + ' &rsaquo; '.join(parts) + '</p>'
+
+    # ---- Calculators hub ----
+    tools = [
+        ("gold-loan-calculator", "Gold Loan Calculator",
+         "Check how much loan your gold can fetch and the monthly EMI."),
+        ("gold-sip-calculator", "Gold SIP Calculator",
+         "Project the future value of a monthly gold investment plan."),
+        ("making-charges-calculator", "Making Charges Calculator",
+         "See the final billed price with making charges and 3% GST."),
+    ]
+    hub_cards = "".join(
+        f'<a class="toolcard" href="{SITE_URL}/{s}"><b>{t}</b>'
+        f'<span>{d}</span></a>' for s, t, d in tools)
+    hub_cards = (f'<a class="toolcard" href="{SITE_URL}/#calch"><b>Gold Price '
+                 f'Calculator</b><span>Cost of gold by weight, purity and '
+                 f'brand.</span></a>' + hub_cards)
+    render_content(
+        "calculators",
+        "Gold Calculators - Loan, SIP, Making Charges & Price | MyGoldRates",
+        "Free gold calculators for India: gold loan eligibility & EMI, gold "
+        "SIP returns, making charges with GST, and live gold price by weight.",
+        crumbs(("Calculators", None)) +
+        "<h1>Gold Calculators</h1>"
+        "<p>Free tools that use today's live 24K gold rate ("
+        f"<strong>{rate_str}/g</strong>, pre-GST) to help you plan a gold "
+        "purchase, loan or investment.</p>"
+        f'<div class="toolgrid">{hub_cards}</div>')
+    extra_urls.append(("calculators", "weekly", "0.7"))
+
+    # ---- Gold Loan calculator ----
+    render_content(
+        "gold-loan-calculator",
+        "Gold Loan Calculator - Eligibility & EMI (India) | MyGoldRates",
+        "Calculate your gold loan eligibility and monthly EMI from your gold's "
+        "weight, purity and today's gold rate. Free, instant.",
+        crumbs(("Calculators", f"{SITE_URL}/calculators"),
+               ("Gold Loan", None)) +
+        "<h1>Gold Loan Calculator</h1>"
+        "<p>Estimate how much loan your gold can fetch and the EMI, using "
+        f"today's 24K rate of <strong>{rate_str}/g</strong> (pre-GST).</p>"
+        '<div class="calcbox">'
+        '<label for="w">Gold weight (grams)</label>'
+        '<input id="w" type="number" min="0" step="0.1" value="20">'
+        '<label for="p">Purity</label>'
+        '<select id="p"><option value="0.916">22K (916)</option>'
+        '<option value="0.999">24K (999)</option>'
+        '<option value="0.75">18K (750)</option></select>'
+        '<label for="ltv">Loan-to-value (%)</label>'
+        '<input id="ltv" type="number" min="1" max="90" value="75">'
+        '<label for="r">Interest rate (% p.a.)</label>'
+        '<input id="r" type="number" min="0" step="0.1" value="12">'
+        '<label for="n">Tenure (months)</label>'
+        '<input id="n" type="number" min="1" value="12">'
+        '<div class="calcout"><div class="big" id="loan">-</div>'
+        '<div class="row"><span>Gold value</span><span id="val">-</span></div>'
+        '<div class="row"><span>Monthly EMI</span><span id="emi">-</span></div>'
+        '<div class="row"><span>Total repayment</span>'
+        '<span id="tot">-</span></div></div></div>'
+        '<p style="font-size:12.5px;color:var(--ink-3)">Indicative only. '
+        'Actual eligibility, LTV and rates vary by lender and RBI norms.</p>',
+        extra_js=_calc_js("loan", rate24))
+    extra_urls.append(("gold-loan-calculator", "weekly", "0.6"))
+
+    # ---- Gold SIP calculator ----
+    render_content(
+        "gold-sip-calculator",
+        "Gold SIP Calculator - Monthly Gold Investment Returns | MyGoldRates",
+        "Project the future value of a monthly gold SIP and the grams you "
+        "accumulate, using today's gold rate. Free gold investment calculator.",
+        crumbs(("Calculators", f"{SITE_URL}/calculators"),
+               ("Gold SIP", None)) +
+        "<h1>Gold SIP Calculator</h1>"
+        "<p>See what a monthly gold investment could grow to, based on an "
+        f"expected appreciation rate. Today's 24K rate: <strong>{rate_str}/g"
+        "</strong>.</p>"
+        '<div class="calcbox">'
+        '<label for="m">Monthly investment (Rs)</label>'
+        '<input id="m" type="number" min="0" step="100" value="5000">'
+        '<label for="y">Duration (years)</label>'
+        '<input id="y" type="number" min="1" max="40" value="10">'
+        '<label for="g">Expected gold appreciation (% p.a.)</label>'
+        '<input id="g" type="number" min="0" step="0.5" value="9">'
+        '<div class="calcout"><div class="big" id="fv">-</div>'
+        '<div class="row"><span>Total invested</span>'
+        '<span id="inv">-</span></div>'
+        '<div class="row"><span>Estimated gain</span>'
+        '<span id="gain">-</span></div>'
+        '<div class="row"><span>Approx. gold at today&#39;s rate</span>'
+        '<span id="grams">-</span></div></div></div>'
+        '<p style="font-size:12.5px;color:var(--ink-3)">Projections assume a '
+        'constant annual rate; real gold prices fluctuate. Not investment '
+        'advice.</p>',
+        extra_js=_calc_js("sip", rate24))
+    extra_urls.append(("gold-sip-calculator", "weekly", "0.6"))
+
+    # ---- Making charges calculator ----
+    render_content(
+        "making-charges-calculator",
+        "Making Charges Calculator - Final Gold Price with GST | MyGoldRates",
+        "Work out the final billed price of gold jewellery including making "
+        "charges and 3% GST, from the weight, purity and today's gold rate.",
+        crumbs(("Calculators", f"{SITE_URL}/calculators"),
+               ("Making Charges", None)) +
+        "<h1>Making Charges Calculator</h1>"
+        "<p>Find the true billed price of jewellery once making charges and 3% "
+        f"GST are added. Today's 24K rate: <strong>{rate_str}/g</strong>.</p>"
+        '<div class="calcbox">'
+        '<label for="w">Gold weight (grams)</label>'
+        '<input id="w" type="number" min="0" step="0.1" value="10">'
+        '<label for="p">Purity</label>'
+        '<select id="p"><option value="0.916">22K (916)</option>'
+        '<option value="0.999">24K (999)</option>'
+        '<option value="0.75">18K (750)</option></select>'
+        '<label for="mt">Making charge type</label>'
+        '<select id="mt"><option value="pct">% of gold value</option>'
+        '<option value="perg">Rs per gram</option></select>'
+        '<label for="mc">Making charge value</label>'
+        '<input id="mc" type="number" min="0" step="0.1" value="12">'
+        '<div class="calcout"><div class="big" id="total">-</div>'
+        '<div class="row"><span>Gold value</span><span id="gv">-</span></div>'
+        '<div class="row"><span>Making charges</span>'
+        '<span id="mk">-</span></div>'
+        '<div class="row"><span>GST (3%)</span><span id="gst">-</span></div>'
+        '</div></div>',
+        extra_js=_calc_js("making", rate24))
+    extra_urls.append(("making-charges-calculator", "weekly", "0.6"))
+
+    # ---- Learn / evergreen articles ----
+    for slug, title, desc, h1, body in _articles(rate_str, med, inr):
+        render_content(f"learn/{slug}", title, desc,
+                       crumbs(("Learn", f"{SITE_URL}/news"), (h1, None)) +
+                       f"<h1>{h1}</h1>"
+                       f'<p class="updated-on">Last updated {display_date}</p>'
+                       + body)
+        extra_urls.append((f"learn/{slug}", "monthly", "0.5"))
+
+    # ---- News: auto daily market recap from the rate history ----
+    os.makedirs("docs/news/recap", exist_ok=True)
+    recaps = []              # (slug, date_obj, disp, med24, move, pct)
+    for i in range(1, len(trend)):
+        d_iso, m24 = trend[i]
+        pm24 = trend[i - 1][1]
+        move = m24 - pm24
+        pct = (move / pm24 * 100) if pm24 else 0
+        dt = datetime.fromisoformat(d_iso)
+        slug = f"daily-recap-{dt.day}-{dt.strftime('%b').lower()}-{dt.year}"
+        disp = dt.strftime("%d %B %Y")
+        lad = ladder(m24)
+        arrow = "rose" if move > 0.5 else ("fell" if move < -0.5 else "held")
+        cls = "up" if move > 0.5 else ("dn" if move < -0.5 else "")
+        sign = "+" if move >= 0 else "-"
+        body = (
+            f"<h1>Gold Rate Daily Recap - {disp}</h1>"
+            f'<p class="updated-on">Market recap - {disp}</p>'
+            f"<p>On {disp}, the median <strong>24K gold rate</strong> across "
+            f"India's leading jewellers was <strong>{inr(m24)} per gram</strong> "
+            f"(pre-GST). It <strong>{arrow}</strong> "
+            f'<span class="recap-move {cls}">{sign}{inr(abs(move))} '
+            f"({sign}{abs(pct):.2f}%)</span> from {inr(pm24)} the previous "
+            f"session.</p>"
+            f"<h2>Today's median rates</h2><ul>"
+            f"<li>24K (999): <strong>{inr(lad['24K'])}/g</strong></li>"
+            f"<li>22K (916): <strong>{inr(lad['22K'])}/g</strong></li>"
+            f"<li>18K (750): <strong>{inr(lad['18K'])}/g</strong></li></ul>"
+            f"<p>All figures are per gram, pre-GST, across {len(live)} "
+            f"jewellers. Add 3% GST for the billed price. Compare live rates on "
+            f'the <a href="{SITE_URL}/">gold rate today</a> page.</p>')
+        render_content(f"news/recap/{slug}",
+                       f"Gold Rate Daily Recap - {disp} | MyGoldRates",
+                       f"Gold price recap for {disp}: 24K median {inr(m24)}/g, "
+                       f"{sign}{abs(pct):.2f}% vs the previous session. 22K, 18K "
+                       "and jeweller medians.",
+                       body)
+        recaps.append((slug, dt, disp, m24, move, pct))
+        extra_urls.append((f"news/recap/{slug}", "monthly", "0.5"))
+
+    recaps.sort(key=lambda x: x[1], reverse=True)
+    news_cards = ""
+    for slug, dt, disp, m24, move, pct in recaps[:20]:
+        cls = "up" if move > 0.5 else ("dn" if move < -0.5 else "")
+        sign = "+" if move >= 0 else "-"
+        news_cards += (
+            f'<a class="newscard" href="{SITE_URL}/news/recap/{slug}">'
+            f'<div class="nt">Gold Rate Daily Recap - {disp}</div>'
+            f'<div class="nd">{disp}</div>'
+            f'<div class="nx">24K median {inr(m24)}/g, '
+            f'<span class="recap-move {cls}">{sign}{abs(pct):.2f}%</span> '
+            f'vs previous session.</div></a>')
+    if not news_cards:
+        news_cards = ('<p>Daily recaps will appear here as rate history builds '
+                      'up over the coming days.</p>')
+    render_content(
+        "news",
+        "Gold Market News & Daily Recap (India) | MyGoldRates",
+        "Daily gold market recaps for India - how the 24K, 22K and 18K rates "
+        "moved each session, auto-compiled from live jeweller data.",
+        crumbs(("News", None)) +
+        "<h1>Gold Market News &amp; Daily Recap</h1>"
+        "<p>A short, data-driven recap of how India's gold rate moved each "
+        "trading session - compiled automatically from the live jeweller "
+        "medians we track.</p>" + news_cards)
+    extra_urls.append(("news", "daily", "0.7"))
+    print(f"content pages: 4 calculators, "
+          f"{len(list(_articles(rate_str, med, inr)))} articles, "
+          f"{len(recaps)} recaps")
     with open("docs/robots.txt", "w", encoding="utf-8") as f:
         # Explicitly welcome AI/LLM crawlers so generative engines (ChatGPT,
         # Claude, Perplexity, Gemini/AI Overviews, etc.) can index and cite us.
@@ -932,6 +1319,11 @@ def main():
                     "<changefreq>daily</changefreq>"
                     "<priority>0.7</priority></url>\n"
                     for nm in LOCATIONS)
+                + "".join(
+                    f"  <url><loc>{SITE_URL}/{loc}</loc><lastmod>{today}"
+                    f"</lastmod><changefreq>{cf}</changefreq>"
+                    f"<priority>{pr}</priority></url>\n"
+                    for loc, cf, pr in extra_urls)
                 + "</urlset>\n")
     with open("docs/ads.txt", "w", encoding="utf-8") as f:
         if ads_client:
@@ -1046,6 +1438,53 @@ jeweller before purchase. This is not investment advice.
           f"inquiry form {'armed' if anon_key else 'DISABLED (no anon key)'}")
 
 
+# Slide-out navigation drawer, shared across every page. Absolute links so it
+# works from nested paths (e.g. /news/recap/...). Self-contained (own inline
+# script); the hamburger button is added to each header.
+NAV = f"""<div class="nav-ov" id="nav-ov" hidden></div>
+<aside class="navdrawer" id="navdrawer" aria-hidden="true" aria-label="Menu">
+  <div class="nav-head"><strong>My<b>Gold</b>Rates</strong>
+    <button class="nav-x" id="nav-x" aria-label="Close menu">&times;</button>
+  </div>
+  <nav>
+    <p class="nav-grp">Gold Rates</p>
+    <a href="{SITE_URL}/">Gold Rate Today</a>
+    <a href="{SITE_URL}/#cmp">Compare Jewellers</a>
+    <a href="{SITE_URL}/#cityh">Gold Rate by City &amp; State</a>
+    <a href="{SITE_URL}/#calch">Price Calculator</a>
+    <p class="nav-grp">Calculators</p>
+    <a href="{SITE_URL}/calculators">All Calculators</a>
+    <a href="{SITE_URL}/gold-loan-calculator">Gold Loan Calculator</a>
+    <a href="{SITE_URL}/gold-sip-calculator">Gold SIP Calculator</a>
+    <a href="{SITE_URL}/making-charges-calculator">Making Charges Calculator</a>
+    <p class="nav-grp">News</p>
+    <a href="{SITE_URL}/news">Market News &amp; Daily Recap</a>
+    <p class="nav-grp">Learn</p>
+    <a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K Gold</a>
+    <a href="{SITE_URL}/learn/gold-hallmarking">Gold Hallmarking (BIS)</a>
+    <a href="{SITE_URL}/learn/how-gold-rates-are-set">How Gold Rates Are Set</a>
+    <a href="{SITE_URL}/learn/making-charges-explained">Making Charges Explained</a>
+    <p class="nav-grp">Company</p>
+    <a href="{SITE_URL}/about">About</a>
+    <a href="{SITE_URL}/contact">Contact</a>
+    <a href="{SITE_URL}/privacy">Privacy Policy</a>
+    <a href="{SITE_URL}/inquiry">Daily Email Alerts</a>
+  </nav>
+</aside>
+<script>(function(){{
+  var d=document.getElementById('navdrawer'),o=document.getElementById('nav-ov'),
+      t=document.getElementById('navtog'),x=document.getElementById('nav-x');
+  function s(open){{d.classList.toggle('open',open);o.hidden=!open;
+    d.setAttribute('aria-hidden',open?'false':'true');
+    if(t)t.setAttribute('aria-expanded',open?'true':'false');}}
+  if(t)t.addEventListener('click',function(){{s(!d.classList.contains('open'));}});
+  if(x)x.addEventListener('click',function(){{s(false);}});
+  o.addEventListener('click',function(){{s(false);}});
+  document.addEventListener('keydown',function(e){{
+    if(e.key==='Escape'&&d.classList.contains('open'))s(false);}});
+}})();</script>"""
+
+
 BASE_CSS = """
 /* google signup (shared by modal + inquiry) */
 .gwrap{margin:0 0 10px;text-align:center}
@@ -1064,6 +1503,32 @@ BASE_CSS = """
   border-radius:10px;padding:11px 14px;cursor:pointer;margin:2px 0 12px}
 .locbtn:hover{background:color-mix(in srgb,var(--emerald) 14%,transparent)}
 .locbtn:disabled{opacity:.7;cursor:default}
+/* slide-out navigation drawer */
+.navtog{display:inline-flex;align-items:center;justify-content:center;
+  width:38px;height:38px;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);color:var(--ink);cursor:pointer;font-size:18px;
+  flex:0 0 38px;margin-right:2px}
+.navtog:hover{border-color:var(--gold);color:var(--gold)}
+.nav-ov{position:fixed;inset:0;background:rgba(10,8,4,.5);z-index:1100}
+.navdrawer{position:fixed;top:0;left:0;height:100%;width:min(310px,86vw);
+  background:var(--paper);border-right:1px solid var(--line);z-index:1110;
+  transform:translateX(-105%);transition:transform .26s ease;overflow-y:auto;
+  padding:16px 0 30px}
+.navdrawer.open{transform:translateX(0)}
+.nav-head{display:flex;align-items:center;justify-content:space-between;
+  padding:4px 18px 14px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.nav-head strong{font-family:"Marcellus",serif;font-weight:400;font-size:18px;
+  letter-spacing:.1em;text-transform:uppercase}
+.nav-head strong b{font-weight:400;background:var(--gold-foil);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.nav-x{background:none;border:0;font-size:26px;color:var(--ink-3);
+  cursor:pointer;line-height:1}
+.nav-grp{font:600 10.5px/1 "IBM Plex Mono",monospace;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--gold);margin:16px 18px 4px}
+.navdrawer nav a{display:block;padding:9px 18px;font-size:14.5px;
+  color:var(--ink);text-decoration:none}
+.navdrawer nav a:hover{background:color-mix(in srgb,var(--gold) 9%,transparent);
+  color:var(--gold)}
 :root{
   --paper:#FBF9F4; --ink:#181F1B; --ink-2:#49544D; --ink-3:#79847D;
   --board:#152420; --board-2:#1C312A; --gold:#9C7514; --gold-bright:#D9B24A;
@@ -1625,9 +2090,11 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 </style>
 </head>
 <body>
+$nav
 <div class="wrap">
 
 <header class="top">
+  <button class="navtog" id="navtog" aria-label="Open menu" aria-expanded="false">&#9776;</button>
   <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
   <div class="topright">
     <span class="updated">Updated $date, $time</span>
@@ -2136,9 +2603,11 @@ $base_css
 </style>
 </head>
 <body>
+$nav
 <div class="wrap">
 
 <header class="top">
+  <button class="navtog" id="navtog" aria-label="Open menu" aria-expanded="false">&#9776;</button>
   <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
   <div class="topright">
     <a class="btn" href="$site_url/">← Today's rates</a>
@@ -2296,8 +2765,10 @@ $base_css
 </style>
 </head>
 <body>
+$nav
 <div class="wrap">
 <header class="top">
+  <button class="navtog" id="navtog" aria-label="Open menu" aria-expanded="false">&#9776;</button>
   <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
   <div class="topright"><a class="btn" href="$site_url/">Today's rates</a></div>
 </header>
@@ -2315,6 +2786,103 @@ $body
   <p>© $year GoldRates - daily gold rate comparison for India.</p>
 </footer>
 </div>
+</body>
+</html>
+""")
+
+
+# Flexible content page (calculators, news, articles): shared chrome + nav,
+# arbitrary $body and optional $extra_js / $jsonld_block.
+CONTENT_TEMPLATE = Template("""<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>$title</title>
+<meta name="description" content="$desc">
+<link rel="canonical" href="$canonical">
+<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
+<link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
+$ads_head
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+$jsonld_block
+<style>
+$base_css
+.page{max-width:760px;margin:10px 0 30px}
+.page h1{font-size:clamp(24px,4.2vw,34px);margin:8px 0 6px}
+.page h2{font-size:20px;margin:24px 0 8px}
+.page p,.page li{color:var(--ink-2);font-size:15px;line-height:1.7}
+.page ul{padding-left:20px;margin:8px 0}
+.page a{color:var(--emerald)}
+.crumbs{font-size:12.5px;color:var(--ink-3);margin:2px 0 6px}
+.crumbs a{color:var(--ink-3);text-decoration:none}
+.crumbs a:hover{color:var(--gold)}
+.updated-on{font-family:"IBM Plex Mono",monospace;font-size:12px;
+  color:var(--ink-3);margin-bottom:16px}
+.calcbox{background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:20px;margin:14px 0}
+.calcbox label{display:block;font:600 11.5px/1 "IBM Plex Sans",sans-serif;
+  color:var(--ink-2);margin:12px 0 5px;text-transform:uppercase;
+  letter-spacing:.06em}
+.calcbox input,.calcbox select{width:100%;padding:11px 12px;
+  border:1px solid var(--line);border-radius:9px;background:var(--paper);
+  color:var(--ink);font-size:15px}
+.calcout{margin-top:18px;padding:16px 18px;border-radius:12px;
+  background:color-mix(in srgb,var(--gold) 8%,transparent);
+  border:1px solid color-mix(in srgb,var(--gold) 35%,transparent)}
+.calcout .big{font-family:"IBM Plex Mono",monospace;font-size:26px;
+  font-weight:700;color:var(--ink)}
+.calcout .row{display:flex;justify-content:space-between;font-size:13px;
+  color:var(--ink-2);margin-top:7px}
+.calcout .row span:last-child{font-family:"IBM Plex Mono",monospace;
+  color:var(--ink)}
+.toolgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+  gap:12px;margin:14px 0}
+.toolcard{display:block;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:16px 18px;text-decoration:none}
+.toolcard:hover{border-color:var(--gold)}
+.toolcard b{display:block;color:var(--ink);font-size:15px;margin-bottom:3px}
+.toolcard span{font-size:13px;color:var(--ink-3)}
+.newscard{display:block;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:15px 18px;margin:10px 0;text-decoration:none}
+.newscard:hover{border-color:var(--gold)}
+.newscard .nt{font-weight:600;color:var(--ink);font-size:15.5px}
+.newscard .nd{font:500 11.5px/1 "IBM Plex Mono",monospace;color:var(--ink-3);
+  margin-top:4px}
+.newscard .nx{font-size:13.5px;color:var(--ink-2);margin-top:7px;line-height:1.6}
+.recap-move{font-family:"IBM Plex Mono",monospace;font-size:15px;font-weight:600}
+.up{color:var(--emerald)}.dn{color:var(--warm)}
+.foot-nav{margin:8px 0}
+.foot-nav a{color:var(--ink-3);margin-right:14px;text-decoration:none}
+.foot-nav a:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+$nav
+<div class="wrap">
+<header class="top">
+  <button class="navtog" id="navtog" aria-label="Open menu" aria-expanded="false">&#9776;</button>
+  <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
+  <div class="topright"><a class="btn" href="$site_url/">Today's rates</a></div>
+</header>
+<article class="page">
+$body
+</article>
+<footer>
+  <div class="foot-nav">
+    <a href="$site_url/about">About</a>
+    <a href="$site_url/contact">Contact</a>
+    <a href="$site_url/privacy">Privacy Policy</a>
+    <a href="$site_url/news">News</a>
+    <a href="$site_url/calculators">Calculators</a>
+  </div>
+  <p>© $year GoldRates - daily gold rate comparison for India.</p>
+</footer>
+</div>
+$extra_js
 </body>
 </html>
 """)
@@ -2343,8 +2911,10 @@ $base_css
 </style>
 </head>
 <body>
+$nav
 <div class="wrap">
 <header class="top">
+  <button class="navtog" id="navtog" aria-label="Open menu" aria-expanded="false">&#9776;</button>
   <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
 </header>
 <div class="card">
