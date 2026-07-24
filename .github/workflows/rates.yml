@@ -2,13 +2,16 @@ name: fetch-rates
 
 on:
   schedule:
-    # Three runs a day, all times UTC (IST = UTC+5:30).
-    # 05:35 UTC = 11:05 IST - alerts are emailed from this run (~11:10 IST).
-    - cron: "35 5 * * *"
-    # 08:30 UTC = 14:00 IST.
-    - cron: "30 8 * * *"
-    # 11:30 UTC = 17:00 IST.
-    - cron: "30 11 * * *"
+    # GitHub delays scheduled runs on private repos (often 30-120+ min) and
+    # :00/:30 are the most congested minutes - so we use odd minutes and
+    # schedule the MORNING runs early with several attempts, so fresh rates
+    # are up well before ~11 IST even after a delay. Times UTC (IST=UTC+5:30).
+    - cron: "3 2 * * *"     # 07:33 IST  (morning window)
+    - cron: "23 3 * * *"    # 08:53 IST
+    - cron: "43 4 * * *"    # 10:13 IST
+    - cron: "3 6 * * *"     # 11:33 IST  (catch-up if earlier ones were dropped)
+    - cron: "17 9 * * *"    # 14:47 IST  (afternoon revision)
+    - cron: "41 11 * * *"   # 17:11 IST  (late revision)
   workflow_dispatch:        # lets you trigger a run by hand if you ever want to
 
 concurrency:
@@ -80,9 +83,15 @@ jobs:
             --commit-dirty=true
 
       - name: Send daily alert emails
-        # Only from the 11:05 IST run, so the digest lands ~11:10 IST once a
-        # day. (send_alerts.py's last_emailed guard is a second safety net.)
-        if: github.event.schedule == '35 5 * * *'
+        # Fire on the morning-window crons; send_alerts.py's per-subscriber
+        # last_emailed guard ensures at most ONE email per day, so whichever
+        # morning run lands first sends it and the rest are no-ops. (Excludes
+        # the afternoon crons so a delayed day still emails in the morning.)
+        if: >
+          github.event.schedule == '3 2 * * *' ||
+          github.event.schedule == '23 3 * * *' ||
+          github.event.schedule == '43 4 * * *' ||
+          github.event.schedule == '3 6 * * *'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}

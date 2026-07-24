@@ -1240,7 +1240,8 @@ SIGNUP_JS = r"""(function(){
   (function gready(){
     if(window.google&&google.accounts&&google.accounts.id){
       google.accounts.id.initialize({client_id:GCID,callback:onCred,
-        auto_select:true,cancel_on_tap_outside:true,itp_support:true});
+        auto_select:true,cancel_on_tap_outside:true,itp_support:true,
+        use_fedcm_for_prompt:true});   /* required for One Tap in modern Chrome */
       if(!(stored&&stored.email))
         try{google.accounts.id.prompt();}catch(e){}   /* One Tap: comes & goes */
     }else if(tries++<40){setTimeout(gready,150);}
@@ -1616,20 +1617,6 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 
 $ibja_tiles
 
-<section class="keyfacts" id="keyfacts" aria-labelledby="kfh">
-  <h2 id="kfh">Today's Gold Rate $where - Key Facts</h2>
-  <ul>
-    <li>The <strong>24K (999) gold rate today $where is $med24 per gram</strong>
-    (median across $n_brands leading jewellers, pre-GST) on $date.</li>
-    <li>The <strong>22K (916) gold rate today is $med22 per gram</strong> and the
-    <strong>18K (750) rate is $med18 per gram</strong>.</li>
-    <li>The <strong>lowest 24K gold rate today is $low24 per gram</strong>,
-    offered by $low_brand.</li>
-    <li>All rates are per gram in Indian Rupees, pre-GST; add 3% GST for the
-    billed price. Making charges are extra. Source: MyGoldRates.com.</li>
-  </ul>
-</section>
-
 <p class="note">All rates are per gram of gold, before 3% GST and before
 making charges, so every brand is compared on the same basis.</p>
 
@@ -1732,6 +1719,20 @@ $seo_content
   India, so today's rates apply wherever you shop. Pick your city or state
   for its dedicated page.</p>
   <div class="citycloud">$city_links</div>
+</section>
+
+<section class="keyfacts" id="keyfacts" aria-labelledby="kfh">
+  <h2 id="kfh">Today's Gold Rate $where - Key Facts</h2>
+  <ul>
+    <li>The <strong>24K (999) gold rate today $where is $med24 per gram</strong>
+    (median across $n_brands leading jewellers, pre-GST) on $date.</li>
+    <li>The <strong>22K (916) gold rate today is $med22 per gram</strong> and the
+    <strong>18K (750) rate is $med18 per gram</strong>.</li>
+    <li>The <strong>lowest 24K gold rate today is $low24 per gram</strong>,
+    offered by $low_brand.</li>
+    <li>All rates are per gram in Indian Rupees, pre-GST; add 3% GST for the
+    billed price. Making charges are extra. Source: MyGoldRates.com.</li>
+  </ul>
 </section>
 
 $drawer
