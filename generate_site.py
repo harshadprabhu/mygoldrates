@@ -1057,6 +1057,13 @@ BASE_CSS = """
 .has-google .manualbox{display:none}
 .has-google .manualbox.reveal{display:block;
   border-top:1px solid var(--line);margin-top:14px;padding-top:16px}
+.locbtn{display:inline-flex;align-items:center;gap:6px;width:100%;
+  justify-content:center;font:600 13px/1 "IBM Plex Sans",sans-serif;
+  color:var(--emerald);background:color-mix(in srgb,var(--emerald) 8%,transparent);
+  border:1px solid color-mix(in srgb,var(--emerald) 40%,transparent);
+  border-radius:10px;padding:11px 14px;cursor:pointer;margin:2px 0 12px}
+.locbtn:hover{background:color-mix(in srgb,var(--emerald) 14%,transparent)}
+.locbtn:disabled{opacity:.7;cursor:default}
 :root{
   --paper:#FBF9F4; --ink:#181F1B; --ink-2:#49544D; --ink-3:#79847D;
   --board:#152420; --board-2:#1C312A; --gold:#9C7514; --gold-bright:#D9B24A;
@@ -1191,6 +1198,37 @@ SIGNUP_JS = r"""(function(){
           if(!area.value.trim())area.value=po[0].Name;}
       }).catch(function(){});
   }
+  /* ---- "use my location": geolocation -> reverse geocode -> address ---- */
+  function set(n,v,force){var el=F(n);
+    if(el&&v&&(force||!el.value.trim()))el.value=v;}
+  function useLocation(btn){
+    if(!navigator.geolocation){alert('Location is not supported by this '+
+      'browser - please type your address.');return;}
+    var old=btn.textContent;btn.disabled=true;btn.textContent='Locating...';
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var la=pos.coords.latitude,lo=pos.coords.longitude;
+      fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?'+
+        'latitude='+la+'&longitude='+lo+'&localityLanguage=en')
+        .then(function(r){return r.json();})
+        .then(function(d){
+          var c=F('country');
+          if(c&&d.countryName&&/india/i.test(d.countryName))c.value='India';
+          set('state',d.principalSubdivision,true);
+          set('city',d.city||d.locality,true);
+          set('area',d.locality||d.city,true);
+          if(d.postcode)set('zip',d.postcode,true);
+          btn.textContent='Location added';
+          if(zip&&/^[1-9]\d{5}$/.test((zip.value||'').trim()))pinLookup();
+          setTimeout(function(){btn.disabled=false;btn.textContent=old;},2500);
+        }).catch(function(){btn.disabled=false;btn.textContent=old;
+          alert('Could not look up your location - please type your address.');});
+    },function(err){btn.disabled=false;btn.textContent=old;
+      alert(err&&err.code===1?'Location permission was denied. You can type '+
+        'your address instead.':'Could not get your location - please type '+
+        'your address.');},
+     {enableHighAccuracy:true,timeout:12000,maximumAge:600000});
+  }
+
   if(form){
     var ph=F('phone');
     if(ph){ph.addEventListener('focus',function(){
@@ -1200,6 +1238,8 @@ SIGNUP_JS = r"""(function(){
     if(zip){zip.addEventListener('input',function(){
         if(/^[1-9]\d{5}$/.test(zip.value.trim()))pinLookup();});
       zip.addEventListener('blur',pinLookup);}
+    var lb=form.querySelector('.locbtn');
+    if(lb)lb.addEventListener('click',function(){useLocation(lb);});
   }
 
   /* ---- optional Google One Tap, SITE-WIDE (popup only, no buttons) ----
@@ -1777,6 +1817,8 @@ $drawer
           inputmode="tel" required maxlength="20" value="+91 "
           placeholder="+91 98765 43210"></div>
       </div>
+      <button type="button" class="locbtn" id="m-loc">&#128205; Use my current
+      location to autofill address</button>
       <div class="m-grid2">
         <div class="m-field"><label for="m-country">Country</label>
           <select id="m-country" name="country" autocomplete="country-name">
@@ -2124,6 +2166,8 @@ $base_css
       inputmode="tel" required maxlength="20" value="+91 "
       placeholder="+91 98765 43210"></div>
   </div>
+  <button type="button" class="locbtn" id="f-loc">&#128205; Use my current
+  location to autofill address</button>
   <div class="grid2">
     <div class="field"><label for="f-country">Country</label>
       <select id="f-country" name="country" autocomplete="country-name">
