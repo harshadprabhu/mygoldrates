@@ -9,6 +9,7 @@ anon key (insert-only table behind RLS); no privileged keys are shipped.
 
 from __future__ import annotations
 
+import glob
 import hashlib
 import html as _html
 import json
@@ -218,6 +219,12 @@ LOCATIONS = [
     "Odisha", "Assam", "Jharkhand", "Uttarakhand", "Himachal Pradesh",
     "Goa",
 ]
+
+
+# Cities that get their own dated daily gold-news page (GoodReturns-style).
+DAILY_NEWS_CITIES = ["Mumbai", "Delhi", "Bengaluru", "Chennai", "Hyderabad",
+                     "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow",
+                     "Surat", "Coimbatore"]
 
 
 def loc_slug(name):
@@ -1333,6 +1340,82 @@ def main():
         extra_urls.append((f"news/recap/{slug}", "monthly", "0.5"))
 
     recaps.sort(key=lambda x: x[1], reverse=True)
+
+    # ---- dated DAILY news pages (India + top cities), GoodReturns-style ----
+    # Each build writes today's dated pages; past ones persist in docs/ and are
+    # picked up for the sitemap by globbing, so the archive grows every day.
+    os.makedirs("docs/news/daily", exist_ok=True)
+    prev24 = trend[-2][1] if len(trend) >= 2 else median24
+    dmove = median24 - prev24
+    dpct = (dmove / prev24 * 100) if prev24 else 0
+    darrow = ("rose" if dmove > 0.5 else
+              ("fell" if dmove < -0.5 else "held steady"))
+    dcls = "up" if dmove > 0.5 else ("dn" if dmove < -0.5 else "")
+    dsign = "+" if dmove >= 0 else "-"
+    date_slug = f"{now_ist.day}-{now_ist.strftime('%b').lower()}-{now_ist.year}"
+    today_daily = []          # (slug, place) generated this run
+
+    def gen_daily(place, place_slug):
+        lad = ladder(median24)
+        where_in = f"in {place}"
+        slug = f"news/daily/gold-rate-{place_slug}-{date_slug}"
+        local = ("" if place == "India" else
+                 f" National jewellery chains quote the same board rate in "
+                 f"{place} as across India, so these figures apply in {place} "
+                 f"today.")
+        citylink = ("" if place == "India" else
+                    f' or the <a href="{SITE_URL}/gold-rate-today-in-'
+                    f'{place_slug}">{place} gold rate page</a>')
+        body = (
+            crumbs(("News", f"{SITE_URL}/news"),
+                   (f"Gold Rate {display_date}", None)) +
+            f"<h1>Gold Rate Today {where_in} - {display_date}</h1>"
+            f'<p class="updated-on">Updated {display_time}, {display_date}</p>'
+            f"<p>The <strong>gold rate today {where_in}</strong> is "
+            f"<strong>{inr(lad['24K'])} per gram for 24 carat (999)</strong> "
+            f"and <strong>{inr(lad['22K'])} per gram for 22 carat (916)</strong>"
+            f", pre-GST - the median across {len(live)} of India's leading "
+            f"jewellers on {display_date}. The 24K rate <strong>{darrow}"
+            f'</strong> <span class="recap-move {dcls}">{dsign}'
+            f"{inr(abs(dmove))} ({dsign}{abs(dpct):.2f}%)</span> from the "
+            f"previous session.{local}</p>"
+            f"<h2>Today's gold rate {where_in} by purity</h2>"
+            f"<ul><li><strong>24K (999):</strong> {inr(lad['24K'])} / gram</li>"
+            f"<li><strong>22K (916):</strong> {inr(lad['22K'])} / gram</li>"
+            f"<li><strong>18K (750):</strong> {inr(lad['18K'])} / gram</li></ul>"
+            f"<p>All prices are per gram and pre-GST; add 3% GST for the billed "
+            f"amount, and remember making charges are extra. Compare every "
+            f'jeweller live on the <a href="{SITE_URL}/">gold rate today</a> '
+            f"page{citylink}.</p>"
+            f"<h2>What moved the gold rate</h2>"
+            f"<p>Daily gold prices in India track the international spot price, "
+            f"the rupee-dollar exchange rate, import duty and each jeweller's "
+            f'premium - see <a href="{SITE_URL}/learn/how-gold-rates-are-set">'
+            f"how gold rates are set</a> for the full breakdown. For a purity "
+            f'comparison read <a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs '
+            f"24K gold</a>.</p>")
+        render_content(
+            slug,
+            f"Gold Rate Today {where_in} ({display_date}) - 24K, 22K, 18K "
+            "Price | MyGoldRates",
+            f"Gold rate today {where_in} on {display_date}: 24K "
+            f"{inr(lad['24K'])}/g, 22K {inr(lad['22K'])}/g, 18K "
+            f"{inr(lad['18K'])}/g (pre-GST). 24K {darrow} {dsign}"
+            f"{abs(dpct):.2f}% vs the previous session.",
+            body)
+        today_daily.append((slug, place))
+
+    gen_daily("India", "india")
+    for _c in DAILY_NEWS_CITIES:
+        gen_daily(_c, loc_slug(_c))
+
+    # today's dated articles, featured at the top of /news
+    daily_cards = "".join(
+        f'<a class="newscard" href="{SITE_URL}/{slug}">'
+        f'<div class="nt">Gold Rate Today {"in " + place if place != "India" else "in India"} - {display_date}</div>'
+        f'<div class="nd">{display_date} &middot; 24K {inr(med["24K"])}/g</div>'
+        f'</a>' for slug, place in today_daily)
+
     news_cards = ""
     for slug, dt, disp, m24, move, pct in recaps[:20]:
         cls = "up" if move > 0.5 else ("dn" if move < -0.5 else "")
@@ -1365,8 +1448,9 @@ def main():
         crumbs(("News", None)) +
         "<h1>Gold News &amp; Daily Rate Recap</h1>"
         "<p>The latest gold price headlines from across the web, plus our own "
-        "data-driven recap of how India's gold rate moved each session.</p>"
-        + live_block +
+        "dated daily gold-rate reports and a data-driven market recap.</p>"
+        f'<h2>Today\'s Gold Rate Reports - {display_date}</h2>' + daily_cards +
+        live_block +
         '<h2>Daily Market Recap</h2>' + news_cards)
     extra_urls.append(("news", "hourly", "0.8"))
     print(f"content pages: 4 calculators, "
@@ -1389,10 +1473,29 @@ def main():
                 f"# AI summary: {SITE_URL}/llms.txt\n"
                 f"# Machine-readable rates: {SITE_URL}/rates.json\n")
 
-    # ---- Google News sitemap (recaps from the last 2 days only) ----
+    # ---- all dated daily news pages (glob = growing archive) ----
+    def _daily_date(path):
+        parts = os.path.basename(path)[:-5].split("-")
+        try:
+            return datetime.strptime("-".join(parts[-3:]), "%d-%b-%Y").date()
+        except Exception:
+            return None
+
+    daily_files = sorted(glob.glob("docs/news/daily/*.html"))
+    daily_meta = []          # (loc, date, title)
+    for pth in daily_files:
+        stem = os.path.basename(pth)[:-5]
+        dd = _daily_date(pth)
+        # rebuild a human title from the slug (place between 'gold-rate-' & date)
+        mid = stem[len("gold-rate-"):].rsplit("-", 3)[0] if \
+            stem.startswith("gold-rate-") else stem
+        place = mid.replace("-", " ").title() or "India"
+        ttl = (f"Gold Rate Today in {place} - "
+               f"{dd.strftime('%d %B %Y') if dd else ''}")
+        daily_meta.append((f"news/daily/{stem}", dd, ttl))
+
+    # ---- Google News sitemap: recaps + daily pages from the last 2 days ----
     cutoff = datetime.now(IST).date() - timedelta(days=2)
-    fresh = [(s, dt, disp, m24, mv, pc) for (s, dt, disp, m24, mv, pc) in recaps
-             if dt.date() >= cutoff]
     news_urls = "".join(
         f"  <url><loc>{SITE_URL}/news/recap/{s}</loc>\n"
         f"    <news:news><news:publication><news:name>MyGoldRates</news:name>"
@@ -1401,7 +1504,15 @@ def main():
         f"</news:publication_date>"
         f"<news:title>Gold Rate Daily Recap - {disp}</news:title>"
         f"</news:news></url>\n"
-        for (s, dt, disp, m24, mv, pc) in fresh)
+        for (s, dt, disp, m24, mv, pc) in recaps if dt.date() >= cutoff)
+    news_urls += "".join(
+        f"  <url><loc>{SITE_URL}/{loc}</loc>\n"
+        f"    <news:news><news:publication><news:name>MyGoldRates</news:name>"
+        f"<news:language>en</news:language></news:publication>"
+        f"<news:publication_date>{dd.strftime('%Y-%m-%d')}T09:00:00+05:30"
+        f"</news:publication_date>"
+        f"<news:title>{_html.escape(ttl)}</news:title></news:news></url>\n"
+        for (loc, dd, ttl) in daily_meta if dd and dd >= cutoff)
     with open("docs/sitemap_news.xml", "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n'
@@ -1432,6 +1543,12 @@ def main():
                     f"</lastmod><changefreq>{cf}</changefreq>"
                     f"<priority>{pr}</priority></url>\n"
                     for loc, cf, pr in extra_urls)
+                + "".join(
+                    f"  <url><loc>{SITE_URL}/{loc}</loc><lastmod>"
+                    f"{(dd or now_ist.date()).isoformat()}</lastmod>"
+                    "<changefreq>monthly</changefreq><priority>0.6</priority>"
+                    "</url>\n"
+                    for loc, dd, ttl in daily_meta)
                 + "</urlset>\n")
     with open("docs/ads.txt", "w", encoding="utf-8") as f:
         if ads_client:
