@@ -185,16 +185,21 @@ footer p{margin:6px 0;max-width:80ch}
   </nav>
 </aside>
 <script>(function(){
-  var d=document.getElementById('navdrawer'),o=document.getElementById('nav-ov'),
-      t=document.getElementById('navtog'),x=document.getElementById('nav-x');
-  function s(open){d.classList.toggle('open',open);o.hidden=!open;
-    d.setAttribute('aria-hidden',open?'false':'true');
-    if(t)t.setAttribute('aria-expanded',open?'true':'false');}
-  if(t)t.addEventListener('click',function(){s(!d.classList.contains('open'));});
-  if(x)x.addEventListener('click',function(){s(false);});
-  o.addEventListener('click',function(){s(false);});
-  document.addEventListener('keydown',function(e){
-    if(e.key==='Escape'&&d.classList.contains('open'))s(false);});
+  function init(){
+    var d=document.getElementById('navdrawer'),o=document.getElementById('nav-ov'),
+        t=document.getElementById('navtog'),x=document.getElementById('nav-x');
+    if(!d||!t)return;
+    function s(open){d.classList.toggle('open',open);o.hidden=!open;
+      d.setAttribute('aria-hidden',open?'false':'true');
+      t.setAttribute('aria-expanded',open?'true':'false');}
+    t.addEventListener('click',function(){s(!d.classList.contains('open'));});
+    if(x)x.addEventListener('click',function(){s(false);});
+    o.addEventListener('click',function(){s(false);});
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'&&d.classList.contains('open'))s(false);});
+  }
+  if(document.readyState!=='loading')init();
+  else document.addEventListener('DOMContentLoaded',init);
 })();</script>
 <div class="wrap">
 <header class="top">
