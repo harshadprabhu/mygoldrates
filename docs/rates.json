@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-07-25",
-  "last_updated": "2026-07-25T12:35:56.256092+05:30",
+  "last_updated": "2026-07-25T13:44:45.233961+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -40,21 +40,21 @@
     },
     {
       "jeweller": "Senco Gold",
-      "rate_24k_per_gram_inr": 14381.96,
-      "rate_22k_per_gram_inr": 13187.07,
-      "rate_18k_per_gram_inr": 10797.27
-    },
-    {
-      "jeweller": "Candere",
-      "rate_24k_per_gram_inr": 14443.0,
-      "rate_22k_per_gram_inr": 13243.03,
-      "rate_18k_per_gram_inr": 10843.09
+      "rate_24k_per_gram_inr": 14367.85,
+      "rate_22k_per_gram_inr": 13174.12,
+      "rate_18k_per_gram_inr": 10786.67
     },
     {
       "jeweller": "Kalyan Jewellers",
       "rate_24k_per_gram_inr": 14463.0,
       "rate_22k_per_gram_inr": 13261.37,
       "rate_18k_per_gram_inr": 10858.11
+    },
+    {
+      "jeweller": "Candere",
+      "rate_24k_per_gram_inr": 14463.1,
+      "rate_22k_per_gram_inr": 13261.46,
+      "rate_18k_per_gram_inr": 10858.18
     },
     {
       "jeweller": "Kisna",
@@ -106,9 +106,9 @@
     },
     {
       "jeweller": "CaratLane",
-      "rate_24k_per_gram_inr": 14833.34,
-      "rate_22k_per_gram_inr": 13600.94,
-      "rate_18k_per_gram_inr": 11136.14
+      "rate_24k_per_gram_inr": 14834.37,
+      "rate_22k_per_gram_inr": 13601.89,
+      "rate_18k_per_gram_inr": 11136.91
     },
     {
       "jeweller": "BlueStone",
