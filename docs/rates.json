@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-07-25",
-  "last_updated": "2026-07-25T11:35:18.746642+05:30",
+  "last_updated": "2026-07-25T12:35:56.256092+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14488.78,
-    "22k": 13285.0,
-    "18k": 10877.46
+    "24k": 14492.97,
+    "22k": 13288.85,
+    "18k": 10880.61
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -43,12 +43,6 @@
       "rate_24k_per_gram_inr": 14381.96,
       "rate_22k_per_gram_inr": 13187.07,
       "rate_18k_per_gram_inr": 10797.27
-    },
-    {
-      "jeweller": "Bhima Jewels",
-      "rate_24k_per_gram_inr": 14439.0,
-      "rate_22k_per_gram_inr": 13239.36,
-      "rate_18k_per_gram_inr": 10840.09
     },
     {
       "jeweller": "Candere",
@@ -93,6 +87,12 @@
       "rate_18k_per_gram_inr": 10884.38
     },
     {
+      "jeweller": "Bhima Jewels",
+      "rate_24k_per_gram_inr": 14499.0,
+      "rate_22k_per_gram_inr": 13294.38,
+      "rate_18k_per_gram_inr": 10885.13
+    },
+    {
       "jeweller": "Tanishq",
       "rate_24k_per_gram_inr": 14537.85,
       "rate_22k_per_gram_inr": 13330.0,
@@ -106,9 +106,9 @@
     },
     {
       "jeweller": "CaratLane",
-      "rate_24k_per_gram_inr": 14834.37,
-      "rate_22k_per_gram_inr": 13601.89,
-      "rate_18k_per_gram_inr": 11136.91
+      "rate_24k_per_gram_inr": 14833.34,
+      "rate_22k_per_gram_inr": 13600.94,
+      "rate_18k_per_gram_inr": 11136.14
     },
     {
       "jeweller": "BlueStone",
