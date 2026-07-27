@@ -143,7 +143,9 @@ h2{font-size:24px;margin:2px 0 6px}
 .stamp-best{color:var(--gold);border:1px solid var(--gold)}
 .stamp-est{color:var(--ink-3);border:1px solid var(--ink-3)}
 .stamp-region{color:var(--emerald);border:1px solid var(--emerald)}
-tbody tr.offregion{opacity:.34}
+/* regional jewellers are hidden until "In my area" reveals the relevant ones */
+#rates tbody tr:not([data-states="all"]){display:none}
+#rates tbody tr.region-show{display:table-row}
 .region-note{font-size:12.5px;color:var(--emerald);margin:0 0 10px;
   font-weight:500}
 #nearbtn[aria-pressed="true"]{border-color:var(--emerald);color:var(--emerald)}
