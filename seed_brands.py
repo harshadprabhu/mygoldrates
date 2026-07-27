@@ -37,16 +37,17 @@ REGIONAL_BRANDS = [
     {"name": "Josco Jewellers", "slug": "josco", "domain": "joscogroup.com",
      "rate_url": "https://www.joscogroup.com/gold-rate",
      "active": False, "includes_gst": False},
-    # trial batch - JS pages that the browser-render path may still read
+    # trial batch - rates load via API after render (browser saw nothing);
+    # parked until wired through Zyte.
     {"name": "RBZ Jewellers", "slug": "rbz", "domain": "rbzjewellers.com",
      "rate_url": "https://www.rbzjewellers.com/gold-rate",
-     "active": True, "includes_gst": False},
+     "active": False, "includes_gst": False},
     {"name": "Sri Kumaran", "slug": "srikumaran", "domain": "srikumaran.com",
      "rate_url": "https://www.srikumaran.com/todays-gold-rate",
-     "active": True, "includes_gst": False},
+     "active": False, "includes_gst": False},
     {"name": "Bhindi Jewellers", "slug": "bhindi", "domain": "bhindi.com",
      "rate_url": "https://www.bhindi.com/gold-rate",
-     "active": True, "includes_gst": False},
+     "active": False, "includes_gst": False},
 ]
 
 
