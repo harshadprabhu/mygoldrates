@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-07-27",
-  "last_updated": "2026-07-27T14:05:53.266049+05:30",
+  "last_updated": "2026-07-27T15:29:22.493017+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14581.47,
-    "22k": 13370.0,
-    "18k": 10947.05
+    "24k": 14585.24,
+    "22k": 13373.45,
+    "18k": 10949.88
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -21,14 +21,14 @@
     {
       "contract": "GOLD",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 143755.0,
-      "change_pct": 0.45
+      "price_per_10g_inr": 143970.0,
+      "change_pct": 0.6
     },
     {
       "contract": "GOLDM",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 143612.0,
-      "change_pct": 0.43
+      "price_per_10g_inr": 143823.0,
+      "change_pct": 0.58
     }
   ],
   "jewellers": [
@@ -55,12 +55,6 @@
       "rate_24k_per_gram_inr": 14539.0,
       "rate_22k_per_gram_inr": 13331.05,
       "rate_18k_per_gram_inr": 10915.16
-    },
-    {
-      "jeweller": "Kisna",
-      "rate_24k_per_gram_inr": 14539.66,
-      "rate_22k_per_gram_inr": 13331.66,
-      "rate_18k_per_gram_inr": 10915.66
     },
     {
       "jeweller": "ORRA",
@@ -99,6 +93,12 @@
       "rate_18k_per_gram_inr": 10983.9
     },
     {
+      "jeweller": "Kisna",
+      "rate_24k_per_gram_inr": 14632.63,
+      "rate_22k_per_gram_inr": 13416.91,
+      "rate_18k_per_gram_inr": 10985.46
+    },
+    {
       "jeweller": "Waman Hari Pethe",
       "rate_24k_per_gram_inr": 14762.0,
       "rate_22k_per_gram_inr": 13535.53,
@@ -112,9 +112,9 @@
     },
     {
       "jeweller": "CaratLane",
-      "rate_24k_per_gram_inr": 14905.34,
-      "rate_22k_per_gram_inr": 13666.96,
-      "rate_18k_per_gram_inr": 11190.19
+      "rate_24k_per_gram_inr": 14926.99,
+      "rate_22k_per_gram_inr": 13686.81,
+      "rate_18k_per_gram_inr": 11206.45
     }
   ],
   "jeweller_count": 14,
