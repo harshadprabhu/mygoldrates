@@ -229,6 +229,15 @@ LOCATIONS = [
 DAILY_NEWS_CITIES = ["Mumbai", "Delhi", "Bengaluru", "Chennai"]
 
 
+# Regional jewellers -> states they serve. Brands not listed here are treated
+# as national (available everywhere). Used for the "jewellers in your area"
+# GPS filter and the Regional badge.
+REGION_MAP = {
+    "vaibhav": ["Andhra Pradesh", "Telangana", "Karnataka", "Tamil Nadu",
+                "Odisha"],
+}
+
+
 def loc_slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
 
@@ -725,9 +734,14 @@ def main():
         logo = (f'<img class="blogo" alt="" loading="lazy" '
                 f'src="https://www.google.com/s2/favicons?domain={dom}&amp;sz=64" '
                 f'onerror="this.style.visibility=\'hidden\'">') if dom else ""
+        states = REGION_MAP.get(b.get("slug") or "")
+        data_states = "|".join(states) if states else "all"
+        region_badge = (' <span class="stamp stamp-region">Regional</span>'
+                        if states else "")
         body_rows.append(
-            f'<tr><th scope="row"><span class="bcell">{logo}'
-            f'<span>{b["name"]}{best}{est}</span></span></th>'
+            f'<tr data-states="{data_states}"><th scope="row">'
+            f'<span class="bcell">{logo}'
+            f'<span>{b["name"]}{best}{est}{region_badge}</span></span></th>'
             f'<td class="num col-24" data-v="{lad["24K"]:.2f}">{inr(lad["24K"])}</td>'
             f'<td class="num col-22" data-v="{lad["22K"]:.2f}">{inr(lad["22K"])}</td>'
             f'<td class="num col-18" data-v="{lad["18K"]:.2f}">{inr(lad["18K"])}</td>'
@@ -1903,6 +1917,11 @@ h2{font-size:24px;margin:2px 0 6px}
   padding:3px 7px;margin-left:8px;vertical-align:2px}
 .stamp-best{color:var(--gold);border:1px solid var(--gold)}
 .stamp-est{color:var(--ink-3);border:1px solid var(--ink-3)}
+.stamp-region{color:var(--emerald);border:1px solid var(--emerald)}
+tbody tr.offregion{opacity:.34}
+.region-note{font-size:12.5px;color:var(--emerald);margin:0 0 10px;
+  font-weight:500}
+#nearbtn[aria-pressed="true"]{border-color:var(--emerald);color:var(--emerald)}
 footer{margin:44px 0 30px;padding-top:20px;border-top:1px solid var(--line);
   font-size:13px;color:var(--ink-3)}
 footer p{margin:6px 0;max-width:80ch}
@@ -2453,9 +2472,11 @@ making charges, so every brand is compared on the same basis.</p>
         <button data-k="22" aria-pressed="false">22K</button>
         <button data-k="18" aria-pressed="false">18K</button>
       </div>
+      <button class="gst" id="nearbtn">&#128205; In my area</button>
       <button class="gst" id="gstbtn" aria-pressed="false">+3% GST</button>
     </div>
   </div>
+  <p class="region-note" id="region-note" hidden></p>
   <div class="tablecard">
   <table id="rates">
     <thead><tr>
@@ -2697,6 +2718,42 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
       if(b.dataset.k==='22')table.classList.add('k22');
       else if(b.dataset.k==='18')table.classList.add('k18');
     });
+  });
+  /* ---- "in my area": GPS -> state -> filter regional jewellers ---- */
+  var nearOn=false, userState=null,
+      nearbtn=document.getElementById('nearbtn'),
+      rnote=document.getElementById('region-note');
+  function applyRegion(){
+    [].forEach.call(body.rows,function(r){
+      var ds=r.getAttribute('data-states');
+      if(!nearOn||ds==='all'){r.classList.remove('offregion');return;}
+      var serves=userState&&ds.split('|').indexOf(userState)>=0;
+      r.classList.toggle('offregion',!serves);
+    });
+  }
+  if(nearbtn)nearbtn.addEventListener('click',function(){
+    if(nearOn){nearOn=false;nearbtn.setAttribute('aria-pressed','false');
+      nearbtn.textContent='📍 In my area';rnote.hidden=true;
+      applyRegion();return;}
+    if(!navigator.geolocation){alert('Location is not supported here.');return;}
+    nearbtn.textContent='Locating...';
+    navigator.geolocation.getCurrentPosition(function(pos){
+      fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude='+
+        pos.coords.latitude+'&longitude='+pos.coords.longitude+
+        '&localityLanguage=en')
+      .then(function(r){return r.json();}).then(function(d){
+        userState=d.principalSubdivision||'';
+        nearOn=true;nearbtn.setAttribute('aria-pressed','true');
+        nearbtn.textContent='📍 '+(userState||'My area');
+        rnote.textContent='Showing jewellers available in '+
+          (userState||'your area')+' - national brands plus regional '+
+          'jewellers that serve your state. Tap again to show all.';
+        rnote.hidden=false;applyRegion();
+      }).catch(function(){nearbtn.textContent='📍 In my area';
+        alert('Could not detect your area - showing all jewellers.');});
+    },function(){nearbtn.textContent='📍 In my area';
+      alert('Location permission denied - showing all jewellers.');},
+     {enableHighAccuracy:false,timeout:12000,maximumAge:600000});
   });
   /* ---- markets drawer ---- */
   var drw=document.getElementById('mdrawer'),
