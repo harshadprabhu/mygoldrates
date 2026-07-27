@@ -130,7 +130,14 @@
       google.accounts.id.initialize({client_id:GCID,callback:onCred,
         auto_select:false,cancel_on_tap_outside:true,itp_support:true,
         use_fedcm_for_prompt:true});   /* required for One Tap in modern Chrome */
-      try{google.accounts.id.prompt();}catch(e){}   /* show the corner card */
+      /* reliable header button - always works on click, even in incognito */
+      var hh=document.getElementById('ghead');
+      if(hh&&!(stored&&stored.email)){
+        try{google.accounts.id.renderButton(hh,{type:'standard',
+          theme:'outline',size:'medium',text:'signin_with',shape:'pill'});
+        }catch(e){}
+      }
+      try{google.accounts.id.prompt();}catch(e){}   /* One Tap (best-effort) */
     }else if(tries++<40){setTimeout(gready,150);}
   })();
 })();
