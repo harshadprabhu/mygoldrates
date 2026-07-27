@@ -241,6 +241,9 @@ REGION_MAP = {
     "pngsons": ["Maharashtra"],
     "ranka": ["Maharashtra"],
     "josco": ["Kerala"],
+    "rbz": ["Gujarat"],
+    "srikumaran": ["Tamil Nadu", "Karnataka"],
+    "bhindi": ["Maharashtra", "Gujarat"],
 }
 
 
@@ -1924,7 +1927,9 @@ h2{font-size:24px;margin:2px 0 6px}
 .stamp-best{color:var(--gold);border:1px solid var(--gold)}
 .stamp-est{color:var(--ink-3);border:1px solid var(--ink-3)}
 .stamp-region{color:var(--emerald);border:1px solid var(--emerald)}
-tbody tr.offregion{opacity:.34}
+/* regional jewellers are hidden until "In my area" reveals the relevant ones */
+#rates tbody tr:not([data-states="all"]){display:none}
+#rates tbody tr.region-show{display:table-row}
 .region-note{font-size:12.5px;color:var(--emerald);margin:0 0 10px;
   font-weight:500}
 #nearbtn[aria-pressed="true"]{border-color:var(--emerald);color:var(--emerald)}
@@ -2730,12 +2735,15 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
       nearbtn=document.getElementById('nearbtn'),
       rnote=document.getElementById('region-note');
   function applyRegion(){
+    var shown=0;
     [].forEach.call(body.rows,function(r){
       var ds=r.getAttribute('data-states');
-      if(!nearOn||ds==='all'){r.classList.remove('offregion');return;}
-      var serves=userState&&ds.split('|').indexOf(userState)>=0;
-      r.classList.toggle('offregion',!serves);
+      if(ds==='all')return;                 /* national: always visible */
+      var serves=nearOn&&userState&&ds.split('|').indexOf(userState)>=0;
+      r.classList.toggle('region-show',serves);
+      if(serves)shown++;
     });
+    return shown;
   }
   if(nearbtn)nearbtn.addEventListener('click',function(){
     if(nearOn){nearOn=false;nearbtn.setAttribute('aria-pressed','false');
@@ -2751,14 +2759,16 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
         userState=d.principalSubdivision||'';
         nearOn=true;nearbtn.setAttribute('aria-pressed','true');
         nearbtn.textContent='📍 '+(userState||'My area');
-        rnote.textContent='Showing jewellers available in '+
-          (userState||'your area')+' - national brands plus regional '+
-          'jewellers that serve your state. Tap again to show all.';
-        rnote.hidden=false;applyRegion();
+        var n=applyRegion();
+        rnote.textContent=(n?('Now showing '+n+' local jeweller'+(n>1?'s':'')+
+          ' that serve '+userState):('No local jewellers we track serve '+
+          (userState||'your area')+' yet'))+' - national brands are always '+
+          'shown. Tap again to hide local jewellers.';
+        rnote.hidden=false;
       }).catch(function(){nearbtn.textContent='📍 In my area';
-        alert('Could not detect your area - showing all jewellers.');});
+        alert('Could not detect your area.');});
     },function(){nearbtn.textContent='📍 In my area';
-      alert('Location permission denied - showing all jewellers.');},
+      alert('Location permission denied.');},
      {enableHighAccuracy:false,timeout:12000,maximumAge:600000});
   });
   /* ---- markets drawer ---- */
