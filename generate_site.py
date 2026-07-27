@@ -1853,6 +1853,8 @@ header.top{display:flex;justify-content:space-between;align-items:center;
 .uchip img{width:22px;height:22px;border-radius:50%;flex:0 0 22px;
   object-fit:cover}
 .uchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ghead{display:inline-flex;align-items:center}
+.ghead:empty{display:none}
 @media (max-width:520px){.uchip{max-width:110px}}
 .btn{display:inline-block;font:500 13.5px/1 "IBM Plex Sans",sans-serif;
   background:var(--board);color:#F0DB9A;border:1px solid rgba(217,178,74,.5);
@@ -2019,7 +2021,14 @@ SIGNUP_JS = r"""(function(){
       google.accounts.id.initialize({client_id:GCID,callback:onCred,
         auto_select:false,cancel_on_tap_outside:true,itp_support:true,
         use_fedcm_for_prompt:true});   /* required for One Tap in modern Chrome */
-      try{google.accounts.id.prompt();}catch(e){}   /* show the corner card */
+      /* reliable header button - always works on click, even in incognito */
+      var hh=document.getElementById('ghead');
+      if(hh&&!(stored&&stored.email)){
+        try{google.accounts.id.renderButton(hh,{type:'standard',
+          theme:'outline',size:'medium',text:'signin_with',shape:'pill'});
+        }catch(e){}
+      }
+      try{google.accounts.id.prompt();}catch(e){}   /* One Tap (best-effort) */
     }else if(tries++<40){setTimeout(gready,150);}
   })();
 })();
@@ -2380,6 +2389,7 @@ $nav
   <div class="topright">
     <span class="updated">Updated $date, $time</span>
     <span class="hauth" id="hauth" hidden></span>
+    <span class="ghead" id="ghead"></span>
     <a class="btn btn-lite" href="#cmp">Compare jewellers</a>
     <a class="btn js-alert" href="inquiry.html">Daily rate alerts</a>
   </div>
