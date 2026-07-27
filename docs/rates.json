@@ -3,32 +3,32 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-07-27",
-  "last_updated": "2026-07-27T11:31:38.178912+05:30",
+  "last_updated": "2026-07-27T12:21:05.631331+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14560.56,
-    "22k": 13350.83,
-    "18k": 10931.35
+    "24k": 14580.19,
+    "22k": 13368.82,
+    "18k": 10946.08
   },
   "lowest_24k": {
     "jeweller": "Senco Gold",
     "rate_per_gram_inr": 14367.85
   },
-  "ibja_reference_24k_999_per_gram_inr": null,
+  "ibja_reference_24k_999_per_gram_inr": 14453.2,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 144130.0,
-      "change_pct": 0.72
+      "price_per_10g_inr": 144193.0,
+      "change_pct": 0.76
     },
     {
       "contract": "GOLDM",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 143948.0,
-      "change_pct": 0.67
+      "price_per_10g_inr": 144002.0,
+      "change_pct": 0.7
     }
   ],
   "jewellers": [
@@ -45,12 +45,6 @@
       "rate_18k_per_gram_inr": 10846.84
     },
     {
-      "jeweller": "ORRA",
-      "rate_24k_per_gram_inr": 14475.98,
-      "rate_22k_per_gram_inr": 13273.27,
-      "rate_18k_per_gram_inr": 10867.85
-    },
-    {
       "jeweller": "Bhima Jewels",
       "rate_24k_per_gram_inr": 14499.0,
       "rate_22k_per_gram_inr": 13294.38,
@@ -58,9 +52,9 @@
     },
     {
       "jeweller": "Candere",
-      "rate_24k_per_gram_inr": 14503.0,
-      "rate_22k_per_gram_inr": 13298.05,
-      "rate_18k_per_gram_inr": 10888.14
+      "rate_24k_per_gram_inr": 14515.5,
+      "rate_22k_per_gram_inr": 13309.51,
+      "rate_18k_per_gram_inr": 10897.52
     },
     {
       "jeweller": "Kalyan Jewellers",
@@ -73,6 +67,12 @@
       "rate_24k_per_gram_inr": 14539.66,
       "rate_22k_per_gram_inr": 13331.66,
       "rate_18k_per_gram_inr": 10915.66
+    },
+    {
+      "jeweller": "ORRA",
+      "rate_24k_per_gram_inr": 14578.9,
+      "rate_22k_per_gram_inr": 13367.64,
+      "rate_18k_per_gram_inr": 10945.12
     },
     {
       "jeweller": "GRT Jewellers",
@@ -112,9 +112,9 @@
     },
     {
       "jeweller": "CaratLane",
-      "rate_24k_per_gram_inr": 14936.53,
-      "rate_22k_per_gram_inr": 13695.56,
-      "rate_18k_per_gram_inr": 11213.61
+      "rate_24k_per_gram_inr": 14948.52,
+      "rate_22k_per_gram_inr": 13706.55,
+      "rate_18k_per_gram_inr": 11222.61
     }
   ],
   "jeweller_count": 14,
