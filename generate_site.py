@@ -235,6 +235,12 @@ DAILY_NEWS_CITIES = ["Mumbai", "Delhi", "Bengaluru", "Chennai"]
 REGION_MAP = {
     "vaibhav": ["Andhra Pradesh", "Telangana", "Karnataka", "Tamil Nadu",
                 "Odisha"],
+    "vummidi": ["Tamil Nadu"],
+    "lalithaa": ["Tamil Nadu", "Andhra Pradesh", "Telangana", "Karnataka"],
+    "kirtilals": ["Tamil Nadu", "Karnataka", "Kerala"],
+    "pngsons": ["Maharashtra"],
+    "ranka": ["Maharashtra"],
+    "josco": ["Kerala"],
 }
 
 
