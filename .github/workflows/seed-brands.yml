@@ -1,13 +1,9 @@
-name: add-brand
+name: seed-brands
 on:
   workflow_dispatch:
-    inputs:
-      brand_json:
-        description: "Brand row as JSON"
-        required: true
 
 jobs:
-  add:
+  seed:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,9 +11,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install supabase
-      - name: Add brand
+      - name: Seed regional brands
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          BRAND_JSON: ${{ inputs.brand_json }}
-        run: python add_brand.py
+        run: python seed_brands.py
