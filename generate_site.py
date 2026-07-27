@@ -1825,8 +1825,11 @@ a{color:var(--emerald)}
 h1,h2,.brand{font-family:"Marcellus",serif;font-weight:400;letter-spacing:.02em}
 .eyebrow{font:500 11.5px/1 "IBM Plex Mono",monospace;letter-spacing:.28em;
   text-transform:uppercase;color:var(--gold);margin:40px 0 8px}
-header.top{display:flex;justify-content:space-between;align-items:center;
-  flex-wrap:wrap;gap:6px 18px;padding:18px 0 14px}
+header.top{display:flex;justify-content:flex-start;align-items:center;
+  flex-wrap:wrap;gap:6px 14px;padding:18px 0 14px}
+header.top .navtog{order:1}
+header.top .topright{order:2}
+header.top .brand{order:3;margin-left:auto}
 .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;
   color:var(--ink)}
 .brand-mark{width:34px;height:34px;flex:none;
@@ -2021,13 +2024,6 @@ SIGNUP_JS = r"""(function(){
       google.accounts.id.initialize({client_id:GCID,callback:onCred,
         auto_select:false,cancel_on_tap_outside:true,itp_support:true,
         use_fedcm_for_prompt:true});   /* required for One Tap in modern Chrome */
-      /* reliable header button - always works on click, even in incognito */
-      var hh=document.getElementById('ghead');
-      if(hh&&!(stored&&stored.email)){
-        try{google.accounts.id.renderButton(hh,{type:'standard',
-          theme:'outline',size:'medium',text:'signin_with',shape:'pill'});
-        }catch(e){}
-      }
       try{google.accounts.id.prompt();}catch(e){}   /* One Tap (best-effort) */
     }else if(tries++<40){setTimeout(gready,150);}
   })();
@@ -2389,7 +2385,6 @@ $nav
   <div class="topright">
     <span class="updated">Updated $date, $time</span>
     <span class="hauth" id="hauth" hidden></span>
-    <span class="ghead" id="ghead"></span>
     <a class="btn btn-lite" href="#cmp">Compare jewellers</a>
     <a class="btn js-alert" href="inquiry.html">Daily rate alerts</a>
   </div>
