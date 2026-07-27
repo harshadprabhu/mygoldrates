@@ -18,13 +18,15 @@ REGIONAL_BRANDS = [
     {"name": "Vummidi Bangaru", "slug": "vummidi", "domain": "vummidi.com",
      "rate_url": "https://www.vummidi.com/gold-rate-in-chennai",
      "active": True, "includes_gst": False},
+    # JS/bot-walled - no static or rendered rate found; parked until we wire
+    # a Zyte render for them. Kept inactive so they aren't scraped.
     {"name": "Lalithaa Jewellery", "slug": "lalithaa",
      "domain": "lalithaajewellery.com",
      "rate_url": "https://www.lalithaajewellery.com/gold-rate-today",
-     "active": True, "includes_gst": False},
+     "active": False, "includes_gst": False},
     {"name": "Kirtilals", "slug": "kirtilals", "domain": "kirtilals.com",
      "rate_url": "https://www.kirtilals.com/gold-rate",
-     "active": True, "includes_gst": False},
+     "active": False, "includes_gst": False},
     {"name": "PN Gadgil & Sons", "slug": "pngsons",
      "domain": "pngadgilandsons.com",
      "rate_url": "https://pngadgilandsons.com/gold-rates/",
@@ -34,7 +36,7 @@ REGIONAL_BRANDS = [
      "active": True, "includes_gst": False},
     {"name": "Josco Jewellers", "slug": "josco", "domain": "joscogroup.com",
      "rate_url": "https://www.joscogroup.com/gold-rate",
-     "active": True, "includes_gst": False},
+     "active": False, "includes_gst": False},
 ]
 
 
