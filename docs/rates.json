@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-07-27",
-  "last_updated": "2026-07-27T11:06:01.677141+05:30",
+  "last_updated": "2026-07-27T11:31:38.178912+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14539.66,
-    "22k": 13331.66,
-    "18k": 10915.66
+    "24k": 14560.56,
+    "22k": 13350.83,
+    "18k": 10931.35
   },
   "lowest_24k": {
     "jeweller": "Senco Gold",
@@ -21,14 +21,14 @@
     {
       "contract": "GOLD",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 144028.0,
-      "change_pct": 0.64
+      "price_per_10g_inr": 144130.0,
+      "change_pct": 0.72
     },
     {
       "contract": "GOLDM",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 143840.0,
-      "change_pct": 0.59
+      "price_per_10g_inr": 143948.0,
+      "change_pct": 0.67
     }
   ],
   "jewellers": [
@@ -99,6 +99,12 @@
       "rate_18k_per_gram_inr": 10983.9
     },
     {
+      "jeweller": "Waman Hari Pethe",
+      "rate_24k_per_gram_inr": 14634.0,
+      "rate_22k_per_gram_inr": 13418.16,
+      "rate_18k_per_gram_inr": 10986.49
+    },
+    {
       "jeweller": "BlueStone",
       "rate_24k_per_gram_inr": 14842.08,
       "rate_22k_per_gram_inr": 13608.96,
@@ -106,12 +112,12 @@
     },
     {
       "jeweller": "CaratLane",
-      "rate_24k_per_gram_inr": 14940.04,
-      "rate_22k_per_gram_inr": 13698.77,
-      "rate_18k_per_gram_inr": 11216.24
+      "rate_24k_per_gram_inr": 14936.53,
+      "rate_22k_per_gram_inr": 13695.56,
+      "rate_18k_per_gram_inr": 11213.61
     }
   ],
-  "jeweller_count": 13,
+  "jeweller_count": 14,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
