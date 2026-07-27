@@ -3,18 +3,18 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-07-27",
-  "last_updated": "2026-07-27T23:49:43.017184+05:30",
+  "last_updated": "2026-07-28T00:25:34.416466+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14585.0,
-    "22k": 13373.23,
-    "18k": 10949.7
+    "24k": 14587.0,
+    "22k": 13375.07,
+    "18k": 10951.2
   },
   "lowest_24k": {
-    "jeweller": "PN Gadgil",
-    "rate_per_gram_inr": 14448.0
+    "jeweller": "PN Gadgil & Sons",
+    "rate_per_gram_inr": 14420.0
   },
   "ibja_reference_24k_999_per_gram_inr": 14453.2,
   "mcx_gold_futures": [
@@ -32,6 +32,12 @@
     }
   ],
   "jewellers": [
+    {
+      "jeweller": "PN Gadgil & Sons",
+      "rate_24k_per_gram_inr": 14420.0,
+      "rate_22k_per_gram_inr": 13221.94,
+      "rate_18k_per_gram_inr": 10825.82
+    },
     {
       "jeweller": "PN Gadgil",
       "rate_24k_per_gram_inr": 14448.0,
@@ -93,6 +99,12 @@
       "rate_18k_per_gram_inr": 10953.45
     },
     {
+      "jeweller": "Vummidi Bangaru",
+      "rate_24k_per_gram_inr": 14596.0,
+      "rate_22k_per_gram_inr": 13383.32,
+      "rate_18k_per_gram_inr": 10957.96
+    },
+    {
       "jeweller": "Tanishq",
       "rate_24k_per_gram_inr": 14630.55,
       "rate_22k_per_gram_inr": 13415.0,
@@ -111,6 +123,12 @@
       "rate_18k_per_gram_inr": 11082.59
     },
     {
+      "jeweller": "Ranka Jewellers",
+      "rate_24k_per_gram_inr": 14770.0,
+      "rate_22k_per_gram_inr": 13542.86,
+      "rate_18k_per_gram_inr": 11088.59
+    },
+    {
       "jeweller": "BlueStone",
       "rate_24k_per_gram_inr": 14842.08,
       "rate_22k_per_gram_inr": 13608.96,
@@ -123,7 +141,7 @@
       "rate_18k_per_gram_inr": 11146.49
     }
   ],
-  "jeweller_count": 15,
+  "jeweller_count": 18,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
