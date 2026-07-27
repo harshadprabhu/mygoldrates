@@ -223,10 +223,10 @@ LOCATIONS = [
 ]
 
 
-# Cities that get their own dated daily gold-news page (GoodReturns-style).
-DAILY_NEWS_CITIES = ["Mumbai", "Delhi", "Bengaluru", "Chennai", "Hyderabad",
-                     "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow",
-                     "Surat", "Coimbatore"]
+# Cities that get their own dated daily gold-news page. Kept small on purpose:
+# a new domain shouldn't flood Google with near-duplicate dated pages (that
+# triggers "discovered - not indexed" and can dent overall site quality).
+DAILY_NEWS_CITIES = ["Mumbai", "Delhi", "Bengaluru", "Chennai"]
 
 
 def loc_slug(name):
@@ -993,6 +993,32 @@ def main():
                 f'<a href="gold-rate-today-in-{sl}"{cur}>{nm}</a>')
         return "".join(parts)
 
+    low_g = inr(ladder(lowest["canonical_24k_pre_gst"])["24K"])
+
+    def local_intro(nm):
+        """Unique per-city body so city pages aren't near-duplicates."""
+        if nm == "India":
+            return ""
+        return (
+            f'<section class="seo"><h2>Gold Rate Today in {nm}</h2>'
+            f'<p>The <strong>gold rate today in {nm}</strong> is '
+            f'<strong>{inr(med["24K"])} per gram for 24K (999)</strong> and '
+            f'<strong>{inr(med["22K"])} per gram for 22K (916)</strong>, '
+            f'pre-GST - the live median from {len(live)} of India’s leading '
+            f'jewellers shown above. National chains such as Tanishq, Malabar '
+            f'Gold and Kalyan Jewellers quote the same board rate in {nm} as '
+            f'across India, so these figures are accurate for buyers in {nm} '
+            f'today. Right now {lowest["brands"]["name"]} lists the lowest 24K '
+            f'rate at {low_g} per gram.</p>'
+            f'<p>Buying gold in {nm}? Compare each jeweller and its premium in '
+            f'the table above, estimate the billed price with our '
+            f'<a href="{SITE_URL}/making-charges-calculator">making charges '
+            f'calculator</a> (3% GST and making charges are extra), and read '
+            f'<a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K gold</a> '
+            f'before you choose. Prefer a daily update? Get '
+            f'<a href="{SITE_URL}/inquiry">free {nm} gold rate alerts</a> by '
+            f'email.</p></section>')
+
     tvars = dict(
         n_brands=str(len(live)),
         med24=inr(med["24K"]), med22=inr(med["22K"]), med18=inr(med["18K"]),
@@ -1005,7 +1031,7 @@ def main():
         rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld,
         seo_content=seo_content, drawer=drawer, news_home=news_home, **common)
     html = TEMPLATE.substitute(
-        where="in India", where_note="",
+        where="in India", where_note="", local_intro="",
         canonical_url=f"{SITE_URL}/", city_links=city_cloud(), **tvars)
     inquiry = INQUIRY_TEMPLATE.substitute(
         supabase_url=supabase_url, anon_key=anon_key, **common)
@@ -1028,7 +1054,7 @@ def main():
                 f"quote the same board price in {nm} as everywhere else in "
                 "India.")
         page = TEMPLATE.substitute(
-            where=f"in {nm}", where_note=note,
+            where=f"in {nm}", where_note=note, local_intro=local_intro(nm),
             canonical_url=f"{SITE_URL}/gold-rate-today-in-{sl}",
             city_links=city_cloud(sl), **tvars)
         with open(f"docs/gold-rate-today-in-{sl}.html", "w",
@@ -2409,6 +2435,8 @@ $nav
 </section>
 
 $ibja_tiles
+
+$local_intro
 
 <p class="note">All rates are per gram of gold, before 3% GST and before
 making charges, so every brand is compared on the same basis.</p>
