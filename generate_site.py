@@ -98,9 +98,11 @@ def build_favicons():
     s = 10.4
     off = (512 - 40 * s) / 2
     _draw_mark(d, s, off, off, (227, 191, 99))
-    for size, name in ((180, "apple-touch-icon.png"), (192, "icon-192.png"),
+    for size, name in ((48, "icon-48.png"), (96, "icon-96.png"),
+                       (180, "apple-touch-icon.png"), (192, "icon-192.png"),
                        (512, "icon-512.png")):
         master.resize((size, size), Image.LANCZOS).save(f"docs/{name}")
+    # ICO with the sizes Google/browsers look for (incl. 48x48).
     master.save("docs/favicon.ico", format="ICO",
                 sizes=[(16, 16), (32, 32), (48, 48)])
     print("favicon: wrote svg/ico/png set")
@@ -564,12 +566,28 @@ def main():
     else:
         ads_unit = ""   # Auto ads (head script) place ads; no manual boxes
     today = datetime.now(timezone.utc).date().isoformat()
-    rows = sb.table("rates").select("*, brands(name, slug, domain)") \
-             .eq("rate_date", today).execute().data
-    rows = [r for r in rows if r.get("brands") and r.get("canonical_24k_pre_gst")]
-    live = [r for r in rows if r["status"] == "published"]
+
+    def load_rates(day):
+        rw = sb.table("rates").select("*, brands(name, slug, domain)") \
+               .eq("rate_date", day).execute().data
+        rw = [r for r in rw if r.get("brands")
+              and r.get("canonical_24k_pre_gst")]
+        return [r for r in rw if r["status"] == "published"]
+
+    live = load_rates(today)
     if not live:
-        print("no published rates today; site not regenerated")
+        # Weekends/holidays: no fresh rates for today. Reuse the most recent
+        # published day so the site STILL regenerates with today's date & time
+        # (keeps lastmod/date fresh = site stays "alive" for SEO).
+        latest = sb.table("rates").select("rate_date") \
+                   .eq("status", "published").order("rate_date", desc=True) \
+                   .limit(1).execute().data
+        if latest:
+            live = load_rates(latest[0]["rate_date"])
+            print(f"no fresh rates today; reusing {latest[0]['rate_date']} "
+                  "with today's date/time")
+    if not live:
+        print("no rates at all; site not regenerated")
         return
 
     median24 = statistics.median(r["canonical_24k_pre_gst"] for r in live)
@@ -1835,13 +1853,16 @@ header.top{display:flex;justify-content:space-between;align-items:center;
 .uchip img{width:22px;height:22px;border-radius:50%;flex:0 0 22px;
   object-fit:cover}
 .uchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@media (max-width:520px){.uchip{max-width:120px}.updated{display:none}}
+@media (max-width:520px){.uchip{max-width:110px}}
 .btn{display:inline-block;font:500 13.5px/1 "IBM Plex Sans",sans-serif;
   background:var(--board);color:#F0DB9A;border:1px solid rgba(217,178,74,.5);
   padding:11px 18px;border-radius:999px;text-decoration:none;cursor:pointer;
   transition:transform .15s ease, box-shadow .15s ease}
 .btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.18)}
 .btn-gold{background:var(--gold-foil);color:#1A1508;border:0;font-weight:600}
+.btn-lite{background:transparent;color:var(--ink);
+  border:1px solid var(--line)}
+.btn-lite:hover{border-color:var(--gold);color:var(--gold)}
 h2{font-size:24px;margin:2px 0 6px}
 .hint{font-size:13.5px;color:var(--ink-3);margin-bottom:14px;max-width:72ch}
 .chartcard{background:var(--card);border:1px solid var(--line);
@@ -2018,7 +2039,7 @@ TEMPLATE = Template("""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gold Rate Today $where ($date) - 24 Carat &amp; 22K Gold Rate, Compare $n_brands Jewellers</title>
+<title>Gold Rate Today $where ($date) - 24 Carat &amp; 22K Gold Rate, Compare Top Jewellers</title>
 <meta name="description" content="Gold rate today $where ($date): 24 carat gold rate $med24/g and 22K gold rate $med22/g pre-GST, compared across $n_brands top jewellers. Check the IBJA bullion premium, MCX futures, and calculate gold prices instantly.">
 <meta name="keywords" content="gold rate, gold rate today, today gold rate, 24 carat gold rate today, gold rate today 22k, gold rate today Hyderabad, gold rate today Chennai, gold rate today Pune, gold rate today Mumbai">
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -2027,13 +2048,15 @@ TEMPLATE = Template("""<!DOCTYPE html>
 <meta name="geo.region" content="IN">
 <link rel="canonical" href="$canonical_url">
 <link rel="alternate" type="application/json" title="Gold rates JSON feed" href="$site_url/rates.json">
-<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="96x96" href="$site_url/icon-96.png">
+<link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
+<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MyGoldRates.com">
 <meta property="og:locale" content="en_IN">
-<meta property="og:title" content="Gold Rate Today $where - Compare 24K, 22K &amp; 18K Across $n_brands Jewellers">
+<meta property="og:title" content="Gold Rate Today $where - Compare 24K, 22K &amp; 18K Across Top Jewellers">
 <meta property="og:description" content="Today's gold rate compared across $n_brands top Indian jewellers: 24 carat $med24/g, 22K $med22/g. IBJA bullion premium plus an instant price calculator.">
 <meta property="og:url" content="$canonical_url">
 <meta property="og:image" content="$site_url/og.png">
@@ -2041,7 +2064,7 @@ TEMPLATE = Template("""<!DOCTYPE html>
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="MyGoldRates.com - India's gold rate comparison platform">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Gold Rate Today $where - Compare $n_brands Jewellers">
+<meta name="twitter:title" content="Gold Rate Today $where - Compare Top Jewellers">
 <meta name="twitter:description" content="24 carat gold rate $med24/g, 22K $med22/g today. Compare jewellers, check the bullion premium, calculate prices.">
 <meta name="twitter:image" content="$site_url/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2357,14 +2380,15 @@ $nav
   <div class="topright">
     <span class="updated">Updated $date, $time</span>
     <span class="hauth" id="hauth" hidden></span>
+    <a class="btn btn-lite" href="#cmp">Compare jewellers</a>
     <a class="btn js-alert" href="inquiry.html">Daily rate alerts</a>
   </div>
 </header>
 
 <section class="board" aria-label="Today's gold rate summary">
   <h1>Gold Rate Today $where</h1>
-  <p class="sub">Live 24K, 22K and 18K gold rates compared across $n_brands of
-  India's top jewellery brands - updated daily, with the IBJA bullion
+  <p class="sub">Live 24K, 22K and 18K gold rates compared across India's
+  top jewellers - updated daily, with the IBJA bullion
   reference for context.$where_note</p>
   <div class="board-rates">
     <div class="tile best"><div class="k">&#9733; Lowest 24K Today</div>
@@ -2821,8 +2845,10 @@ INQUIRY_TEMPLATE = Template("""<!DOCTYPE html>
 <title>Daily Gold Rate Alerts by Email - GoldRates</title>
 <meta name="description" content="Get one clean email every morning with India's gold rate comparison - the cheapest jeweller, the IBJA bullion premium and the market median. Free sign-up.">
 <link rel="canonical" href="$site_url/inquiry">
-<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="96x96" href="$site_url/icon-96.png">
+<link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
+<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
 <meta name="robots" content="index,follow">
 $ads_head
@@ -3002,8 +3028,10 @@ PAGE_TEMPLATE = Template("""<!DOCTYPE html>
 <title>$title</title>
 <meta name="description" content="$desc">
 <link rel="canonical" href="$canonical">
-<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="96x96" href="$site_url/icon-96.png">
+<link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
+<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
 $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3061,8 +3089,10 @@ CONTENT_TEMPLATE = Template("""<!DOCTYPE html>
 <title>$title</title>
 <meta name="description" content="$desc">
 <link rel="canonical" href="$canonical">
-<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="96x96" href="$site_url/icon-96.png">
+<link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
+<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
 $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3156,8 +3186,10 @@ UNSUB_TEMPLATE = Template("""<!DOCTYPE html>
 <title>Unsubscribe - GoldRates</title>
 <meta name="robots" content="noindex,follow">
 <link rel="canonical" href="$site_url/unsubscribe">
-<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="96x96" href="$site_url/icon-96.png">
+<link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
+<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
