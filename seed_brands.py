@@ -57,10 +57,11 @@ REGIONAL_BRANDS = [
      "domain": "ckcjewellers.com",
      "rate_url": "https://www.ckcjewellers.com/",   # rate is a homepage banner
      "active": True, "includes_gst": False},
-    # National player (distinct from our "Jos Alukkas" = josalukkasonline.com)
+    # National player (distinct from our "Jos Alukkas" = josalukkasonline.com).
+    # JS-rendered + slow -> parked for Zyte.
     {"name": "Joyalukkas", "slug": "joyalukkas", "domain": "joyalukkas.in",
      "rate_url": "https://www.joyalukkas.in/goldrate",
-     "active": True, "includes_gst": False},
+     "active": False, "includes_gst": False},
 ]
 
 
