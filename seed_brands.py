@@ -56,7 +56,7 @@ REGIONAL_BRANDS = [
     {"name": "C Krishniah Chetty", "slug": "ckc",
      "domain": "ckcjewellers.com",
      "rate_url": "https://www.ckcjewellers.com/gold-rate",
-     "active": True, "includes_gst": False},
+     "active": False, "includes_gst": False},
 ]
 
 
