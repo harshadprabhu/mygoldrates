@@ -3,35 +3,59 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-07-28",
-  "last_updated": "2026-07-28T08:35:23.890825+05:30",
+  "last_updated": "2026-07-28T10:54:59.099247+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14585.0,
-    "22k": 13373.23,
-    "18k": 10949.7
+    "24k": 14558.95,
+    "22k": 13349.34,
+    "18k": 10930.14
   },
   "lowest_24k": {
-    "jeweller": "PN Gadgil & Sons",
-    "rate_per_gram_inr": 14420.0
+    "jeweller": "PN Gadgil",
+    "rate_per_gram_inr": 14246.0
   },
   "ibja_reference_24k_999_per_gram_inr": null,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 143105.0,
-      "change_pct": 0.03
+      "price_per_10g_inr": 141900.0,
+      "change_pct": -0.81
     },
     {
       "contract": "GOLDM",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 142895.0,
-      "change_pct": -0.0
+      "price_per_10g_inr": 141711.0,
+      "change_pct": -0.83
     }
   ],
   "jewellers": [
+    {
+      "jeweller": "PN Gadgil",
+      "rate_24k_per_gram_inr": 14246.0,
+      "rate_22k_per_gram_inr": 13062.4,
+      "rate_18k_per_gram_inr": 10695.19
+    },
+    {
+      "jeweller": "Chandukaka Saraf",
+      "rate_24k_per_gram_inr": 14270.0,
+      "rate_22k_per_gram_inr": 13084.4,
+      "rate_18k_per_gram_inr": 10713.21
+    },
+    {
+      "jeweller": "GRT Jewellers",
+      "rate_24k_per_gram_inr": 14412.43,
+      "rate_22k_per_gram_inr": 13215.0,
+      "rate_18k_per_gram_inr": 10820.15
+    },
+    {
+      "jeweller": "Malabar Gold",
+      "rate_24k_per_gram_inr": 14412.43,
+      "rate_22k_per_gram_inr": 13215.0,
+      "rate_18k_per_gram_inr": 10820.15
+    },
     {
       "jeweller": "PN Gadgil & Sons",
       "rate_24k_per_gram_inr": 14420.0,
@@ -39,16 +63,16 @@
       "rate_18k_per_gram_inr": 10825.82
     },
     {
-      "jeweller": "PN Gadgil",
-      "rate_24k_per_gram_inr": 14448.0,
-      "rate_22k_per_gram_inr": 13247.61,
-      "rate_18k_per_gram_inr": 10846.84
+      "jeweller": "Jos Alukkas",
+      "rate_24k_per_gram_inr": 14422.0,
+      "rate_22k_per_gram_inr": 13223.78,
+      "rate_18k_per_gram_inr": 10827.33
     },
     {
-      "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 14450.0,
-      "rate_22k_per_gram_inr": 13249.45,
-      "rate_18k_per_gram_inr": 10848.34
+      "jeweller": "Vummidi Bangaru",
+      "rate_24k_per_gram_inr": 14427.0,
+      "rate_22k_per_gram_inr": 13228.36,
+      "rate_18k_per_gram_inr": 10831.08
     },
     {
       "jeweller": "Senco Gold",
@@ -75,18 +99,6 @@
       "rate_18k_per_gram_inr": 10945.12
     },
     {
-      "jeweller": "GRT Jewellers",
-      "rate_24k_per_gram_inr": 14581.47,
-      "rate_22k_per_gram_inr": 13370.0,
-      "rate_18k_per_gram_inr": 10947.05
-    },
-    {
-      "jeweller": "Malabar Gold",
-      "rate_24k_per_gram_inr": 14581.47,
-      "rate_22k_per_gram_inr": 13370.0,
-      "rate_18k_per_gram_inr": 10947.05
-    },
-    {
       "jeweller": "Vaibhav Jewellers",
       "rate_24k_per_gram_inr": 14585.0,
       "rate_22k_per_gram_inr": 13373.23,
@@ -97,18 +109,6 @@
       "rate_24k_per_gram_inr": 14589.0,
       "rate_22k_per_gram_inr": 13376.9,
       "rate_18k_per_gram_inr": 10952.7
-    },
-    {
-      "jeweller": "Jos Alukkas",
-      "rate_24k_per_gram_inr": 14590.0,
-      "rate_22k_per_gram_inr": 13377.81,
-      "rate_18k_per_gram_inr": 10953.45
-    },
-    {
-      "jeweller": "Vummidi Bangaru",
-      "rate_24k_per_gram_inr": 14596.0,
-      "rate_22k_per_gram_inr": 13383.32,
-      "rate_18k_per_gram_inr": 10957.96
     },
     {
       "jeweller": "Tanishq",
@@ -123,10 +123,22 @@
       "rate_18k_per_gram_inr": 10985.46
     },
     {
+      "jeweller": "CaratLane",
+      "rate_24k_per_gram_inr": 14723.88,
+      "rate_22k_per_gram_inr": 13500.58,
+      "rate_18k_per_gram_inr": 11053.97
+    },
+    {
       "jeweller": "C Krishniah Chetty",
       "rate_24k_per_gram_inr": 14727.04,
       "rate_22k_per_gram_inr": 13503.47,
       "rate_18k_per_gram_inr": 11056.34
+    },
+    {
+      "jeweller": "Waman Hari Pethe",
+      "rate_24k_per_gram_inr": 14762.0,
+      "rate_22k_per_gram_inr": 13535.53,
+      "rate_18k_per_gram_inr": 11082.59
     },
     {
       "jeweller": "Ranka Jewellers",
@@ -139,15 +151,9 @@
       "rate_24k_per_gram_inr": 14842.08,
       "rate_22k_per_gram_inr": 13608.96,
       "rate_18k_per_gram_inr": 11142.7
-    },
-    {
-      "jeweller": "CaratLane",
-      "rate_24k_per_gram_inr": 14847.13,
-      "rate_22k_per_gram_inr": 13613.58,
-      "rate_18k_per_gram_inr": 11146.49
     }
   ],
-  "jeweller_count": 19,
+  "jeweller_count": 20,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
