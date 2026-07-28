@@ -55,8 +55,12 @@ REGIONAL_BRANDS = [
      "active": True, "includes_gst": False},
     {"name": "C Krishniah Chetty", "slug": "ckc",
      "domain": "ckcjewellers.com",
-     "rate_url": "https://www.ckcjewellers.com/gold-rate",
-     "active": False, "includes_gst": False},
+     "rate_url": "https://www.ckcjewellers.com/",   # rate is a homepage banner
+     "active": True, "includes_gst": False},
+    # National player (distinct from our "Jos Alukkas" = josalukkasonline.com)
+    {"name": "Joyalukkas", "slug": "joyalukkas", "domain": "joyalukkas.in",
+     "rate_url": "https://www.joyalukkas.in/goldrate",
+     "active": True, "includes_gst": False},
 ]
 
 
