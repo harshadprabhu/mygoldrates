@@ -48,6 +48,15 @@ REGIONAL_BRANDS = [
     {"name": "Bhindi Jewellers", "slug": "bhindi", "domain": "bhindi.com",
      "rate_url": "https://www.bhindi.com/gold-rate",
      "active": False, "includes_gst": False},
+    # corrected-domain trials (JS SPAs - let the browser-render path test)
+    {"name": "Chandukaka Saraf", "slug": "chandukaka",
+     "domain": "chandukakasaraf.in",
+     "rate_url": "https://www.chandukakasaraf.in/todays-gold-rate/",
+     "active": True, "includes_gst": False},
+    {"name": "C Krishniah Chetty", "slug": "ckc",
+     "domain": "ckcjewellers.com",
+     "rate_url": "https://www.ckcjewellers.com/gold-rate",
+     "active": True, "includes_gst": False},
 ]
 
 

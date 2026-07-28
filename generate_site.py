@@ -244,6 +244,8 @@ REGION_MAP = {
     "rbz": ["Gujarat"],
     "srikumaran": ["Tamil Nadu", "Karnataka"],
     "bhindi": ["Maharashtra", "Gujarat"],
+    "chandukaka": ["Maharashtra"],
+    "ckc": ["Karnataka"],
 }
 
 
