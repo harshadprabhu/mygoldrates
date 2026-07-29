@@ -1007,6 +1007,58 @@ def main():
   prices are likely headed.</p>
 </aside>'''
 
+    calcdrawer = f'''
+<button class="drawer-tab drawer-tab2" id="cdtab" aria-controls="cdrawer"
+  aria-expanded="false">Calculators &#9670;</button>
+<div class="drawer-ov" id="cdov" hidden></div>
+<aside class="drawer" id="cdrawer" aria-hidden="true"
+  aria-label="Gold calculators panel">
+  <div class="drawer-head"><h2>Gold Calculators</h2>
+    <button class="drawer-x" id="cdx" aria-label="Close panel">&times;</button>
+  </div>
+  <h3>Price Calculator</h3>
+  <p class="dnote">Weight, purity and brand - the price updates as you type.
+  Making charges vary by design and are not included.</p>
+  <div class="calc calc-drawer">
+    <div class="calc-fields">
+      <div class="field"><label for="c-w">Weight in grams</label>
+        <input id="c-w" type="number" inputmode="decimal" min="0.1"
+        step="0.1" value="10"></div>
+      <div class="field"><label id="c-p-label">Purity</label>
+        <div class="seg" role="group" aria-labelledby="c-p-label">
+          <button data-p="24K" aria-pressed="true">24K</button>
+          <button data-p="22K" aria-pressed="false">22K</button>
+          <button data-p="18K" aria-pressed="false">18K</button>
+          <button data-p="14K" aria-pressed="false">14K</button>
+        </div></div>
+      <div class="field"><label for="c-b">Brand rate</label>
+        <select id="c-b"></select></div>
+      <div class="field"><label id="c-g-label">GST</label>
+        <div class="seg" role="group" aria-labelledby="c-g-label">
+          <button data-g="0" aria-pressed="true">Excl. GST</button>
+          <button data-g="1" aria-pressed="false">Incl. 3% GST</button>
+        </div></div>
+    </div>
+    <div class="calc-out" aria-live="polite">
+      <div class="k" id="c-title">10 g &middot; 24K</div>
+      <div class="v" id="c-total">-</div>
+      <div class="sub" id="c-basis">-</div>
+      <div class="split">
+        <div><span>Rate per gram</span><span class="amt" id="c-rate">-</span></div>
+        <div><span>Gold value</span><span class="amt" id="c-gold">-</span></div>
+        <div><span>GST (3%)</span><span class="amt" id="c-gst">-</span></div>
+      </div>
+    </div>
+  </div>
+  <h3>More calculators</h3>
+  <a class="toolcard" href="{SITE_URL}/gold-loan-calculator"><b>Gold Loan
+    Calculator</b><span>Eligibility &amp; EMI</span></a>
+  <a class="toolcard" href="{SITE_URL}/gold-sip-calculator"><b>Gold SIP
+    Calculator</b><span>Future value &amp; grams</span></a>
+  <a class="toolcard" href="{SITE_URL}/making-charges-calculator"><b>Making
+    Charges</b><span>Final billed price with GST</span></a>
+</aside>'''
+
     # Google sign-in: dormant until the GOOGLE_CLIENT_ID secret is set.
     gclient = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
     gsi = ('<script src="https://accounts.google.com/gsi/client" async defer>'
@@ -1063,7 +1115,8 @@ def main():
         calc_brands=json.dumps(calc_brands),
         supabase_url=supabase_url, anon_key=anon_key,
         rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld,
-        seo_content=seo_content, drawer=drawer, news_home=news_home, **common)
+        seo_content=seo_content, drawer=drawer, calcdrawer=calcdrawer,
+        news_home=news_home, **common)
     html = TEMPLATE.substitute(
         where="in India", where_note="", local_intro="",
         canonical_url=f"{SITE_URL}/", city_links=city_cloud(), **tvars)
@@ -1254,9 +1307,9 @@ def main():
     hub_cards = "".join(
         f'<a class="toolcard" href="{SITE_URL}/{s}"><b>{t}</b>'
         f'<span>{d}</span></a>' for s, t, d in tools)
-    hub_cards = (f'<a class="toolcard" href="{SITE_URL}/#calch"><b>Gold Price '
+    hub_cards = (f'<a class="toolcard" href="{SITE_URL}/"><b>Gold Price '
                  f'Calculator</b><span>Cost of gold by weight, purity and '
-                 f'brand.</span></a>' + hub_cards)
+                 f'brand - in the Calculators tab.</span></a>' + hub_cards)
     render_content(
         "calculators",
         "Gold Calculators - Loan, SIP, Making Charges & Price | MyGoldRates",
@@ -1775,7 +1828,7 @@ NAV = f"""<div class="nav-ov" id="nav-ov" hidden></div>
     <a href="{SITE_URL}/">Gold Rate Today</a>
     <a href="{SITE_URL}/#cmp">Compare Jewellers</a>
     <a href="{SITE_URL}/#cityh">Gold Rate by City &amp; State</a>
-    <a href="{SITE_URL}/#calch">Price Calculator</a>
+    <a href="{SITE_URL}/calculators">Price Calculator</a>
     <p class="nav-grp">Calculators</p>
     <a href="{SITE_URL}/calculators">All Calculators</a>
     <a href="{SITE_URL}/gold-loan-calculator">Gold Loan Calculator</a>
@@ -2324,7 +2377,9 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 .karatseg button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);
   background:color-mix(in srgb,var(--gold) 12%,transparent)}
 /* markets side drawer */
-.drawer-tab{position:fixed;right:0;top:44%;z-index:940;writing-mode:vertical-rl;
+.drawer-tab2{top:auto;bottom:26%}
+.calc-drawer{grid-template-columns:1fr!important}
+.drawer-tab{position:fixed;right:0;top:34%;z-index:940;writing-mode:vertical-rl;
   text-orientation:mixed;font:600 12px/1 "IBM Plex Mono",monospace;
   letter-spacing:.2em;text-transform:uppercase;color:#1A1508;
   background:var(--gold-foil);border:0;border-radius:9px 0 0 9px;
@@ -2517,44 +2572,6 @@ $rows
 
 $ads_unit
 
-<section aria-labelledby="calch">
-  <p class="eyebrow">Price Calculator</p>
-  <h2 id="calch">What Will Your Gold Cost?</h2>
-  <p class="hint">Pick a weight, purity and brand - the price updates as you
-  type. Making charges vary by design and are not included.</p>
-  <div class="calc">
-    <div class="calc-fields">
-      <div class="field"><label for="c-w">Weight in grams</label>
-        <input id="c-w" type="number" inputmode="decimal" min="0.1"
-        step="0.1" value="10"></div>
-      <div class="field"><label id="c-p-label">Purity</label>
-        <div class="seg" role="group" aria-labelledby="c-p-label">
-          <button data-p="24K" aria-pressed="true">24K</button>
-          <button data-p="22K" aria-pressed="false">22K</button>
-          <button data-p="18K" aria-pressed="false">18K</button>
-          <button data-p="14K" aria-pressed="false">14K</button>
-        </div></div>
-      <div class="field"><label for="c-b">Brand rate</label>
-        <select id="c-b"></select></div>
-      <div class="field"><label id="c-g-label">GST</label>
-        <div class="seg" role="group" aria-labelledby="c-g-label">
-          <button data-g="0" aria-pressed="true">Excl. GST</button>
-          <button data-g="1" aria-pressed="false">Incl. 3% GST</button>
-        </div></div>
-    </div>
-    <div class="calc-out" aria-live="polite">
-      <div class="k" id="c-title">10 g · 24K</div>
-      <div class="v" id="c-total">-</div>
-      <div class="sub" id="c-basis">-</div>
-      <div class="split">
-        <div><span>Rate per gram</span><span class="amt" id="c-rate">-</span></div>
-        <div><span>Gold value</span><span class="amt" id="c-gold">-</span></div>
-        <div><span>GST (3%)</span><span class="amt" id="c-gst">-</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
 $ibja_section
 
 <div class="cta">
@@ -2602,6 +2619,7 @@ $seo_content
 </section>
 
 $drawer
+$calcdrawer
 
 <footer>
   <p id="terms"><strong>Disclaimer &amp; terms:</strong> Rates are indicative,
@@ -2816,6 +2834,20 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   drov.addEventListener('click',function(){drSet(false);});
   document.addEventListener('keydown',function(e){
     if(e.key==='Escape'&&drw.classList.contains('open'))drSet(false);});
+  /* calculators drawer */
+  var cdw=document.getElementById('cdrawer'),
+      cdov=document.getElementById('cdov'),cdtab=document.getElementById('cdtab');
+  if(cdw&&cdtab){
+    var cdSet=function(o){cdw.classList.toggle('open',o);cdov.hidden=!o;
+      cdtab.setAttribute('aria-expanded',o?'true':'false');
+      cdw.setAttribute('aria-hidden',o?'false':'true');};
+    cdtab.addEventListener('click',function(){
+      cdSet(!cdw.classList.contains('open'));});
+    document.getElementById('cdx').addEventListener('click',function(){cdSet(false);});
+    cdov.addEventListener('click',function(){cdSet(false);});
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'&&cdw.classList.contains('open'))cdSet(false);});
+  }
 
   /* ---- calculator ---- */
   var sel=document.getElementById('c-b');
