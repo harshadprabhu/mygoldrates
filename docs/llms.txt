@@ -5,14 +5,14 @@
 > jewellers, with the IBJA bullion reference and MCX gold futures, updated
 > every day. All rates are per gram in Indian Rupees (INR), pre-GST.
 
-## Today's gold rate in India (29 July 2026)
+## Today's gold rate in India (30 July 2026)
 - 24K (999) median: ₹14,371 per gram (pre-GST)
 - 22K (916) median: ₹13,177 per gram (pre-GST)
 - 18K (750) median: ₹10,789 per gram (pre-GST)
 - Lowest 24K today: ₹14,216 per gram at PN Gadgil
 
 - MCX gold futures (05AUG2026): ₹142,050 per 10g (995), +0.19%
-- Last updated: 2026-07-29T23:50:51.855455+05:30
+- Last updated: 2026-07-30T00:04:16.088266+05:30
 
 ## Key pages
 - Home / today's rates: https://mygoldrates.com/
