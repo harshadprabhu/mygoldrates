@@ -16,6 +16,11 @@ from datetime import datetime, timezone, timedelta
 import requests
 from supabase import create_client
 
+try:
+    from generate_site import REGION_MAP   # regional slugs to exclude
+except Exception:
+    REGION_MAP = {}
+
 SITE_URL = "https://mygoldrates.com"
 PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -41,54 +46,66 @@ def ladder(c):
     return {p: c * f for p, f in PURITY_FRACTION.items()}
 
 
-def email_html(first, date, med, low, low_brand, unsub):
-    """Branded HTML digest. Inline styles - email clients ignore <style>."""
-    row = ('<tr><td style="padding:8px 0;color:#4A5A50;font-size:14px">{k}</td>'
-           '<td style="padding:8px 0;text-align:right;font-family:monospace;'
-           'font-size:15px;color:#152420;font-weight:600">{v}</td></tr>')
-    rows = (row.format(k="24K (999) median", v=inr(med["24K"]) + " / g")
-            + row.format(k="22K (916) median", v=inr(med["22K"]) + " / g")
-            + row.format(k="18K (750) median", v=inr(med["18K"]) + " / g"))
+def email_html(first, date, med, low, low_brand, unsub, n_brands=14):
+    """Branded HTML digest (refreshed design). Inline styles - email clients
+    ignore <style>. Text wordmark (no heavy logo image) + one gold button:
+    looks premium and is lighter for Primary-inbox placement."""
+    def prow(label, val):
+        return (
+            '<tr>'
+            '<td style="padding:11px 2px;border-bottom:1px solid #eee7d8;'
+            'font-size:14px;color:#514b41">' + label + '</td>'
+            '<td style="padding:11px 2px;border-bottom:1px solid #eee7d8;'
+            'font-size:15px;color:#1f1c17;text-align:right;font-weight:bold">'
+            + val + ' <span style="color:#9a9284;font-weight:normal;'
+            'font-size:12px">/ g</span></td></tr>')
     return f"""\
-<!DOCTYPE html><html><body style="margin:0;background:#FBF9F4;
-padding:24px 12px;font-family:Arial,Helvetica,sans-serif;color:#152420">
-  <table role="presentation" width="100%" style="max-width:520px;margin:0 auto;
-  background:#FFFFFF;border:1px solid #E7E1D3;border-radius:14px;overflow:hidden">
-    <tr><td style="background:#120D06;padding:20px 26px">
-      <img src="{SITE_URL}/email-logo.png" width="330" height="56"
-        alt="MyGoldRates.com" style="display:block;border:0;outline:none;
-        max-width:100%;height:auto">
-      <div style="color:#A79B7E;font-size:13px;margin-top:8px">
-        Gold Rate Today &middot; {date}</div>
-    </td></tr>
-    <tr><td style="padding:24px 26px">
-      <p style="margin:0 0 14px;font-size:15px">Hi {first},</p>
-      <p style="margin:0 0 18px;font-size:15px;color:#4A5A50">
-        Today's median gold rate across India's leading jewellers, per gram,
-        pre-GST:</p>
-      <table role="presentation" width="100%"
-      style="border-top:1px solid #E7E1D3;border-bottom:1px solid #E7E1D3">
-        {rows}
-      </table>
-      <div style="margin:20px 0;padding:14px 16px;background:#F4F7F2;
-      border:1px solid #cfe0d6;border-radius:10px">
-        <div style="font-size:12px;letter-spacing:1px;text-transform:uppercase;
-        color:#1E5C46">Lowest 24K today</div>
-        <div style="font-size:20px;font-family:monospace;color:#152420;
-        margin-top:4px">{inr(low['24K'])} / g
-          <span style="font-size:14px;color:#4A5A50">&mdash; {low_brand}</span>
-        </div>
+<!DOCTYPE html><html><body style="margin:0;background:#e9e6df;
+padding:26px 12px;font-family:Arial,Helvetica,sans-serif;color:#2c2a26">
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0"
+  style="width:600px;max-width:600px;margin:0 auto;background:#ffffff;
+  border-radius:16px;overflow:hidden;border:1px solid #e7e1d3">
+    <tr><td style="height:4px;background:linear-gradient(90deg,#8C6A18,#E3BF63 45%,#F4E3A6 55%,#C79A2E);font-size:0;line-height:0">&nbsp;</td></tr>
+    <tr><td style="background:#0b0805;background:linear-gradient(135deg,#1a1307 0%,#0b0805 58%,#17110a 100%);padding:26px 30px 22px">
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:27px;letter-spacing:1.5px;line-height:1">
+        <span style="color:#efe8d6">My</span><span style="color:#e6c268">Gold</span><span style="color:#efe8d6">Rates</span><span style="color:#9a8f78">.com</span>
       </div>
-      <a href="{SITE_URL}/" style="display:inline-block;background:#D9B24A;
-      color:#1A1508;text-decoration:none;font-weight:bold;font-size:14px;
-      padding:12px 22px;border-radius:999px">See all {14} jewellers &rarr;</a>
+      <div style="margin-top:11px;font-family:Arial,sans-serif;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#d3ad4e">
+        Gold Rate Today &nbsp;&middot;&nbsp; {date}</div>
     </td></tr>
-    <tr><td style="padding:16px 26px;background:#FBF9F4;border-top:1px solid
-    #E7E1D3;font-size:11px;color:#79847D">
-      <p style="margin:0 0 6px">Rates are indicative and pre-GST; confirm with
-      the jeweller before purchase. Not investment advice.</p>
-      <p style="margin:0">You're getting this because you subscribed at
-      mygoldrates.com. <a href="{unsub}" style="color:#79847D">Unsubscribe</a>.</p>
+    <tr><td style="padding:28px 30px 8px">
+      <p style="margin:0 0 4px;font-size:15px;color:#3b3833">Good morning, {first}</p>
+      <p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#6b6459">
+        Here's today's median gold rate across India's leading jewellers -
+        per gram, before GST.</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+      style="background:#fbf7ec;border:1px solid #efe2c2;border-radius:12px">
+        <tr><td style="padding:20px 22px">
+          <div style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#a98f45">24K &middot; 999 fine &middot; median</div>
+          <div style="font-family:Georgia,serif;font-size:40px;line-height:1.05;color:#1f1c17;font-weight:bold;margin-top:6px">{inr(med['24K'])}<span style="font-size:17px;color:#8a8377;font-weight:normal;font-family:Arial,sans-serif"> / gram</span></div>
+        </td></tr>
+      </table>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px">
+        {prow("22K &middot; 916", inr(med['22K']))}
+        {prow("18K &middot; 750", inr(med['18K']))}
+      </table>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+      style="margin-top:18px;background:#f3f7f2;border:1px solid #cfe0d6;border-radius:12px">
+        <tr><td style="padding:14px 18px">
+          <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#2f7a58;font-weight:bold">Lowest 24K today</div>
+          <div style="margin-top:5px;font-size:18px;color:#1f1c17;font-family:Georgia,serif">{inr(low['24K'])} <span style="font-size:14px;color:#5a6b5f;font-family:Arial,sans-serif">/g &nbsp;&middot;&nbsp; {low_brand}</span></div>
+        </td></tr>
+      </table>
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0 6px">
+        <tr><td style="border-radius:999px;background:linear-gradient(100deg,#8C6A18,#D9B24A 48%,#C79A2E)">
+          <a href="{SITE_URL}/" style="display:inline-block;padding:12px 26px;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;color:#1a1508;text-decoration:none">Compare all {n_brands} jewellers &rarr;</a>
+        </td></tr>
+      </table>
+      <p style="margin:12px 0 4px;font-size:12px;color:#9a9284">Prices are indicative and pre-GST; confirm the billed rate with the jeweller. Not investment advice.</p>
+    </td></tr>
+    <tr><td style="padding:16px 30px 22px;background:#faf8f2;border-top:1px solid #efe9db;font-family:Arial,sans-serif;font-size:11px;color:#8f887c;line-height:1.6">
+      You're receiving this because you subscribed at mygoldrates.com.<br>
+      <a href="{unsub}" style="color:#8f887c">Unsubscribe</a> &nbsp;&middot;&nbsp; <a href="{SITE_URL}/" style="color:#8f887c">mygoldrates.com</a>
     </td></tr>
   </table>
 </body></html>"""
@@ -114,16 +131,21 @@ def main():
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
     today = datetime.now(timezone.utc).date().isoformat()
 
-    rows = sb.table("rates").select("*, brands(name)") \
+    rows = sb.table("rates").select("*, brands(name, slug)") \
              .eq("rate_date", today).execute().data
     live = [r for r in rows if r.get("brands") and r.get("canonical_24k_pre_gst")
             and r["status"] == "published"]
     if not live:
         print("alerts: no published rates today - skipping")
         return
-    median24 = statistics.median(r["canonical_24k_pre_gst"] for r in live)
-    lowest = min(live, key=lambda r: r["canonical_24k_pre_gst"])
+    # Median + lowest over NATIONAL brands only (regional excluded).
+    national = [r for r in live
+                if (r["brands"] or {}).get("slug") not in REGION_MAP]
+    base = national or live
+    median24 = statistics.median(r["canonical_24k_pre_gst"] for r in base)
+    lowest = min(base, key=lambda r: r["canonical_24k_pre_gst"])
     med, low = ladder(median24), ladder(lowest["canonical_24k_pre_gst"])
+    n_brands = len(base)
     date = datetime.now(IST).strftime("%d %B %Y")
 
     try:
@@ -142,7 +164,8 @@ def main():
     for s in pending:
         first = (s.get("name") or "there").strip().split(" ")[0] or "there"
         unsub = f"{SITE_URL}/unsubscribe.html?t={s['unsub_token']}"
-        html = email_html(first, date, med, low, lowest["brands"]["name"], unsub)
+        html = email_html(first, date, med, low, lowest["brands"]["name"],
+                          unsub, n_brands)
         to = {"email": s["email"]}
         if s.get("name"):
             to["name"] = s["name"].strip()

@@ -610,8 +610,14 @@ def main():
         print("no rates at all; site not regenerated")
         return
 
-    median24 = statistics.median(r["canonical_24k_pre_gst"] for r in live)
-    lowest = min(live, key=lambda r: r["canonical_24k_pre_gst"])
+    # Median + lowest are computed over NATIONAL brands only (the default
+    # view). Regional stores are excluded here; the site re-computes "lowest"
+    # client-side when a visitor taps "In my area".
+    national = [r for r in live
+                if (r["brands"] or {}).get("slug") not in REGION_MAP]
+    base = national or live
+    median24 = statistics.median(r["canonical_24k_pre_gst"] for r in base)
+    lowest = min(base, key=lambda r: r["canonical_24k_pre_gst"])
     now_ist = datetime.now(IST)
     display_date = now_ist.strftime("%d %B %Y")
     display_time = now_ist.strftime("%I:%M %p IST").lstrip("0")
@@ -749,8 +755,11 @@ def main():
         data_states = "|".join(states) if states else "all"
         region_badge = (' <span class="stamp stamp-region">Regional</span>'
                         if states else "")
+        logo_src = (f"https://www.google.com/s2/favicons?domain={dom}&amp;sz=64"
+                    if dom else "")
         body_rows.append(
-            f'<tr data-states="{data_states}"><th scope="row">'
+            f'<tr data-states="{data_states}" data-brand="{b["name"]}" '
+            f'data-logo="{logo_src}"><th scope="row">'
             f'<span class="bcell">{logo}'
             f'<span>{b["name"]}{best}{est}{region_badge}</span></span></th>'
             f'<td class="num col-24" data-v="{lad["24K"]:.2f}">{inr(lad["24K"])}</td>'
@@ -2736,6 +2745,23 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   var nearOn=false, userState=null,
       nearbtn=document.getElementById('nearbtn'),
       rnote=document.getElementById('region-note');
+  function rowVisible(r){var ds=r.getAttribute('data-states');
+    return ds==='all'||r.classList.contains('region-show');}
+  function updateBest(){
+    /* recompute the hero "Lowest 24K" over whatever rows are visible */
+    var bestV=Infinity,name='',logo='';
+    [].forEach.call(body.rows,function(r){
+      if(!rowVisible(r))return;
+      var c=r.querySelector('td.col-24');if(!c)return;
+      var v=parseFloat(c.dataset.v);
+      if(v<bestV){bestV=v;name=r.getAttribute('data-brand')||'';
+        logo=r.getAttribute('data-logo')||'';}
+    });
+    var vEl=document.querySelector('.tile.best .v'),
+        bw=document.querySelector('.bwin');
+    if(vEl&&isFinite(bestV))vEl.textContent=fmt(bestV);
+    if(bw)bw.innerHTML=name+(logo?' <img src="'+logo+'" alt="">':'');
+  }
   function applyRegion(){
     var shown=0;
     [].forEach.call(body.rows,function(r){
@@ -2745,6 +2771,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
       r.classList.toggle('region-show',serves);
       if(serves)shown++;
     });
+    updateBest();                           /* lowest may now be a local store */
     return shown;
   }
   if(nearbtn)nearbtn.addEventListener('click',function(){
