@@ -253,6 +253,31 @@ def loc_slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
 
 
+def fetch_akgsma():
+    """AKGSMA (All Kerala Gold & Silver Merchants Assoc.) South-India rate.
+    Publishes 22K & 18K per gram; returns (r24_derived, r22, r18) or None."""
+    try:
+        r = requests.get("https://akgsma.com/", headers={"User-Agent": UA},
+                         timeout=20)
+        t = re.sub(r"<[^>]+>", " ", r.text)
+
+        def grab(tag):
+            m = re.search(tag + r".{0,40}?([1-9][0-9,]{3,5})", t, re.S)
+            if not m:
+                return None
+            v = float(m.group(1).replace(",", ""))
+            return v if 6000 <= v <= 20000 else None
+
+        r22, r18 = grab("22K916"), grab("18K750")
+        if r22:
+            r24 = round(r22 / 0.916, 2)
+            print(f"akgsma: 22K {r22} -> 24K {r24}")
+            return r24, r22, (r18 or round(r24 * 0.75, 2))
+    except Exception as e:
+        print("akgsma: fetch failed:", type(e).__name__, str(e)[:80])
+    return None
+
+
 def fetch_ibja():
     """IBJA daily reference rates, per 10g pre-GST -> per gram.
     Returns (r999, r916) or None."""
@@ -662,6 +687,16 @@ def main():
             f'<div class="u">per 10g (995) · {g["expiry"]} · '
             f'{g["pchg"]:+.2f}%</div></div>')
 
+    # ----------------------------------------- AKGSMA (South India benchmark)
+    akgsma = fetch_akgsma()
+    akgsma_tile = ""
+    if akgsma:
+        ak24, ak22, ak18 = akgsma
+        akgsma_tile = (
+            f'<div class="rtile"><div class="k">AKGSMA · South India 24K</div>'
+            f'<div class="v">{inr(ak24)}</div>'
+            f'<div class="u">per gram · 22K {inr(ak22)}</div></div>')
+
     # --------------------------------------------------------------- IBJA
     ibja = fetch_ibja()
     if ibja:
@@ -669,14 +704,15 @@ def main():
         premium_med = (median24 / r999 - 1) * 100
         ibja_tiles = f'''
 <section class="ibja-ref" aria-labelledby="ibjarefh">
-  <p class="eyebrow">Bullion &amp; Futures Reference</p>
-  <h2 id="ibjarefh">IBJA Gold Rate Today</h2>
-  <p class="hint">The India Bullion &amp; Jewellers Association 24K benchmark,
-  pre-GST - the wholesale rate jewellers price above - alongside the
-  exchange-traded gold futures quote.</p>
+  <p class="eyebrow">Bullion, Futures &amp; Regional Reference</p>
+  <h2 id="ibjarefh">IBJA &amp; AKGSMA Gold Rate Today</h2>
+  <p class="hint">The India Bullion &amp; Jewellers Association 24K benchmark
+  (national) and the AKGSMA South-India association rate, pre-GST, alongside
+  the exchange-traded gold futures quote.</p>
   <div class="ref-tiles">
     <div class="rtile"><div class="k">IBJA 999 Fine · 24K</div>
       <div class="v">{inr(r999)}</div><div class="u">per gram, pre-GST</div></div>
+    {akgsma_tile}
     {mcx_tile}
     <div class="rtile prem"><div class="k">Jeweller premium</div>
       <div class="v">{premium_med:+.1f}%</div>
@@ -723,9 +759,9 @@ def main():
             "and hallmarking premium.")
     else:
         ibja_section = ""
-        ibja_tiles = (f'<section class="ibja-ref"><p class="eyebrow">Futures '
-                      f'Reference</p><div class="ref-tiles">{mcx_tile}</div>'
-                      f'</section>') if mcx_tile else ""
+        ibja_tiles = (f'<section class="ibja-ref"><p class="eyebrow">Reference'
+                      f'</p><div class="ref-tiles">{akgsma_tile}{mcx_tile}</div>'
+                      f'</section>') if (mcx_tile or akgsma_tile) else ""
         ibja_faq = ("The IBJA (India Bullion and Jewellers Association) "
                     "publishes India's twice-daily bullion reference rate. "
                     "Jeweller board rates typically sit slightly above it, "
@@ -1740,6 +1776,7 @@ def main():
             "rate_per_gram_inr": r2(ladder(
                 lowest["canonical_24k_pre_gst"])["24K"])},
         "ibja_reference_24k_999_per_gram_inr": r2(r999) if ibja else None,
+        "akgsma_south_india_22k_per_gram_inr": r2(akgsma[1]) if akgsma else None,
         "mcx_gold_futures": ([
             {"contract": c["symbol"], "expiry": c["expiry"],
              "price_per_10g_inr": r2(c["ltp"]),
@@ -2377,9 +2414,9 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 .karatseg button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);
   background:color-mix(in srgb,var(--gold) 12%,transparent)}
 /* markets side drawer */
-.drawer-tab.drawer-tab2{top:auto;bottom:24%}
+.drawer-tab.drawer-tab2{top:calc(50% + 18px);bottom:auto}
 .calc-drawer{grid-template-columns:1fr!important}
-.drawer-tab{position:fixed;right:0;top:34%;z-index:940;writing-mode:vertical-rl;
+.drawer-tab{position:fixed;right:0;top:calc(50% - 152px);z-index:940;writing-mode:vertical-rl;
   text-orientation:mixed;font:600 12px/1 "IBM Plex Mono",monospace;
   letter-spacing:.2em;text-transform:uppercase;color:#1A1508;
   background:var(--gold-foil);border:0;border-radius:9px 0 0 9px;
