@@ -1466,6 +1466,53 @@ def main():
                        + body)
         extra_urls.append((f"learn/{slug}", "monthly", "0.5"))
 
+    # ---- Making charges comparison (from scrape_charges.py output) ----
+    try:
+        with open("docs/making-charges.json", encoding="utf-8") as f:
+            mc = json.load(f)
+    except Exception:
+        mc = None
+    if mc and mc.get("brands"):
+        cats = sorted({c["category"] for b in mc["brands"]
+                       for c in b["categories"]})
+        brs = [b["brand"] for b in mc["brands"]]
+        look = {(b["brand"], c["category"]): c
+                for b in mc["brands"] for c in b["categories"]}
+        head = "".join(f"<th>{b}</th>" for b in brs)
+        rows_html = ""
+        for cat in cats:
+            vals = [look[(b, cat)]["making_pct_median"]
+                    for b in brs if (b, cat) in look]
+            lo = min(vals) if vals else None
+            cells = ""
+            for b in brs:
+                if (b, cat) in look:
+                    v = look[(b, cat)]["making_pct_median"]
+                    cells += (f'<td class="{"up" if v == lo else ""}">{v}%</td>')
+                else:
+                    cells += "<td>-</td>"
+            rows_html += f"<tr><td>{cat}</td>{cells}</tr>"
+        render_content(
+            "making-charges-comparison",
+            "Gold Making Charges Comparison by Category (India) | MyGoldRates",
+            "Compare gold jewellery making charges by category - chain, ring, "
+            "bangle, coin & more - as a % of gold value across jewellers.",
+            crumbs(("Making Charges", None)) +
+            "<h1>Gold Making Charges Comparison</h1>"
+            "<p>Making charge as a percentage of gold value, by category, taken "
+            "from each jeweller's published product price breakup - the median "
+            "across multiple real products. Lower means cheaper to craft. "
+            f"Updated {mc.get('updated', '')[:10]}.</p>"
+            '<div class="tablecard" style="overflow:auto"><table class="dtable">'
+            f"<thead><tr><th>Category</th>{head}</tr></thead>"
+            f"<tbody>{rows_html}</tbody></table></div>"
+            '<p class="dnote">Indicative only - making charges vary by specific '
+            "design and negotiation. Coins carry the lowest making charge; "
+            "ornate pieces the highest. GST (3%) is extra. Use the "
+            f'<a href="{SITE_URL}/making-charges-calculator">making charges '
+            "calculator</a> to estimate a billed price.</p>")
+        extra_urls.append(("making-charges-comparison", "monthly", "0.6"))
+
     # ---- News: auto daily market recap from the rate history ----
     os.makedirs("docs/news/recap", exist_ok=True)
     recaps = []              # (slug, date_obj, disp, med24, move, pct)
@@ -1871,6 +1918,7 @@ NAV = f"""<div class="nav-ov" id="nav-ov" hidden></div>
     <a href="{SITE_URL}/gold-loan-calculator">Gold Loan Calculator</a>
     <a href="{SITE_URL}/gold-sip-calculator">Gold SIP Calculator</a>
     <a href="{SITE_URL}/making-charges-calculator">Making Charges Calculator</a>
+    <a href="{SITE_URL}/making-charges-comparison">Making Charges Comparison</a>
     <p class="nav-grp">News</p>
     <a href="{SITE_URL}/news">Market News &amp; Daily Recap</a>
     <p class="nav-grp">Learn</p>
