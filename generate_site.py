@@ -2377,7 +2377,7 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 .karatseg button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);
   background:color-mix(in srgb,var(--gold) 12%,transparent)}
 /* markets side drawer */
-.drawer-tab2{top:auto;bottom:26%}
+.drawer-tab.drawer-tab2{top:auto;bottom:24%}
 .calc-drawer{grid-template-columns:1fr!important}
 .drawer-tab{position:fixed;right:0;top:34%;z-index:940;writing-mode:vertical-rl;
   text-orientation:mixed;font:600 12px/1 "IBM Plex Mono",monospace;
