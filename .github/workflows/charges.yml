@@ -2,7 +2,7 @@ name: charges
 on:
   workflow_dispatch:
   schedule:
-    - cron: "17 4 * * 1"   # weekly, Monday ~09:47 IST
+    - cron: "17 4 1,16 * *"   # ~every 15 days (1st & 16th), ~09:47 IST
 
 permissions:
   contents: write
