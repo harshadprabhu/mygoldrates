@@ -1,0 +1,18 @@
+{
+  "updated": "2026-07-30T00:25:58.913471+05:30",
+  "note": "Making charge as % of gold value, from each jeweller's public product price breakup. Indicative - varies by specific design.",
+  "items": [
+    {
+      "brand": "Senco Gold",
+      "category": "Chain",
+      "making_pct": 27.0,
+      "url": "https://sencogoldanddiamonds.com/jewellery/sleek-n-stylish-gold-mens-chain"
+    },
+    {
+      "brand": "ORRA",
+      "category": "Pendant",
+      "making_pct": 33.1,
+      "url": "https://www.orra.co.in/product/round-diamond-crown-star-pendant-set-in-rose-gold-osp20029-m300x0b"
+    }
+  ]
+}
