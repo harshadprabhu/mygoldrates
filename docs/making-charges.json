@@ -1,18 +1,67 @@
 {
-  "updated": "2026-07-30T00:25:58.913471+05:30",
-  "note": "Making charge as % of gold value, from each jeweller's public product price breakup. Indicative - varies by specific design.",
-  "items": [
+  "updated": "2026-07-30T00:30:52.286122+05:30",
+  "note": "Making charge as % of gold value, median across multiple real products per category from each jeweller's public price breakup. Indicative - varies by specific design.",
+  "brands": [
     {
       "brand": "Senco Gold",
-      "category": "Chain",
-      "making_pct": 27.0,
-      "url": "https://sencogoldanddiamonds.com/jewellery/sleek-n-stylish-gold-mens-chain"
-    },
-    {
-      "brand": "ORRA",
-      "category": "Pendant",
-      "making_pct": 33.1,
-      "url": "https://www.orra.co.in/product/round-diamond-crown-star-pendant-set-in-rose-gold-osp20029-m300x0b"
+      "categories": [
+        {
+          "category": "Bangle",
+          "items": 6,
+          "making_pct_median": 22.8,
+          "making_pct_min": 22.6,
+          "making_pct_max": 27.0
+        },
+        {
+          "category": "Bracelet",
+          "items": 6,
+          "making_pct_median": 32.5,
+          "making_pct_min": 27.0,
+          "making_pct_max": 35.0
+        },
+        {
+          "category": "Chain",
+          "items": 6,
+          "making_pct_median": 22.4,
+          "making_pct_min": 21.9,
+          "making_pct_max": 27.0
+        },
+        {
+          "category": "Coin",
+          "items": 6,
+          "making_pct_median": 5.0,
+          "making_pct_min": 5.0,
+          "making_pct_max": 5.0
+        },
+        {
+          "category": "Earrings",
+          "items": 6,
+          "making_pct_median": 27.4,
+          "making_pct_min": 19.9,
+          "making_pct_max": 40.0
+        },
+        {
+          "category": "Mangalsutra",
+          "items": 6,
+          "making_pct_median": 18.2,
+          "making_pct_min": 17.8,
+          "making_pct_max": 27.0
+        },
+        {
+          "category": "Necklace",
+          "items": 6,
+          "making_pct_median": 27.0,
+          "making_pct_min": 27.0,
+          "making_pct_max": 27.0
+        },
+        {
+          "category": "Ring",
+          "items": 6,
+          "making_pct_median": 30.0,
+          "making_pct_min": 22.5,
+          "making_pct_max": 35.0
+        }
+      ]
     }
   ]
 }
