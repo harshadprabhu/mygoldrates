@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-30T00:30:52.286122+05:30",
+  "updated": "2026-07-30T21:44:29.149057+05:30",
   "note": "Making charge as % of gold value, median across multiple real products per category from each jeweller's public price breakup. Indicative - varies by specific design.",
   "brands": [
     {
@@ -7,58 +7,65 @@
       "categories": [
         {
           "category": "Bangle",
-          "items": 6,
-          "making_pct_median": 22.8,
-          "making_pct_min": 22.6,
-          "making_pct_max": 27.0
+          "items": 20,
+          "making_pct_median": 27.0,
+          "making_pct_min": 22.5,
+          "making_pct_max": 30.0
         },
         {
           "category": "Bracelet",
-          "items": 6,
+          "items": 20,
           "making_pct_median": 32.5,
-          "making_pct_min": 27.0,
-          "making_pct_max": 35.0
+          "making_pct_min": 18.1,
+          "making_pct_max": 40.0
         },
         {
           "category": "Chain",
-          "items": 6,
-          "making_pct_median": 22.4,
+          "items": 20,
+          "making_pct_median": 27.0,
           "making_pct_min": 21.9,
           "making_pct_max": 27.0
         },
         {
           "category": "Coin",
-          "items": 6,
+          "items": 9,
           "making_pct_median": 5.0,
           "making_pct_min": 5.0,
-          "making_pct_max": 5.0
+          "making_pct_max": 27.0
         },
         {
           "category": "Earrings",
-          "items": 6,
-          "making_pct_median": 27.4,
-          "making_pct_min": 19.9,
+          "items": 20,
+          "making_pct_median": 20.2,
+          "making_pct_min": 19.6,
           "making_pct_max": 40.0
         },
         {
           "category": "Mangalsutra",
-          "items": 6,
-          "making_pct_median": 18.2,
+          "items": 20,
+          "making_pct_median": 27.0,
           "making_pct_min": 17.8,
           "making_pct_max": 27.0
         },
         {
           "category": "Necklace",
-          "items": 6,
+          "items": 20,
           "making_pct_median": 27.0,
           "making_pct_min": 27.0,
-          "making_pct_max": 27.0
+          "making_pct_max": 30.0
+        },
+        {
+          "category": "Pendant",
+          "items": 13,
+          "making_pct_median": 40.7,
+          "making_pct_min": 30.0,
+          "making_pct_max": 49.1
         },
         {
           "category": "Ring",
-          "items": 6,
+          "items": 20,
           "making_pct_median": 30.0,
-          "making_pct_min": 22.5,
+          "making_pct_min": 18.2,
           "making_pct_max": 35.0
         }
       ]
