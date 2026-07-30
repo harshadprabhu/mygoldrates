@@ -1030,6 +1030,7 @@ def main():
   <div class="drawer-head"><h2>Gold Markets</h2>
     <button class="drawer-x" id="drx" aria-label="Close panel">&times;</button>
   </div>
+  {ibja_tiles}
   {mcx_block}
   <h3>Gold Rate Trend</h3>
   <p class="dnote">Median 24K jeweller board rate per gram, pre-GST, by day.</p>
@@ -2058,7 +2059,8 @@ header.top .topright{order:3}
 .ghead:empty{display:none}
 @media (max-width:520px){.uchip{max-width:110px}}
 .btn{display:inline-block;font:500 13.5px/1 "IBM Plex Sans",sans-serif;
-  background:var(--board);color:#F0DB9A;border:1px solid rgba(217,178,74,.5);
+  background:linear-gradient(140deg,#3A2A0C,#140D04 55%,#241809);
+  color:#F0DB9A;border:1px solid rgba(224,186,86,.55);
   padding:11px 18px;border-radius:999px;text-decoration:none;cursor:pointer;
   transition:transform .15s ease, box-shadow .15s ease}
 .btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.18)}
@@ -2305,9 +2307,9 @@ $base_css
 .board{background:
   linear-gradient(104deg,transparent 0 40%,rgba(240,219,154,.08) 46%,
     rgba(255,253,244,.15) 50%,rgba(240,219,154,.08) 54%,transparent 61%),
-  radial-gradient(130% 150% at 85% -35%,rgba(224,186,86,.30),transparent 55%),
-  radial-gradient(120% 130% at 4% 135%,rgba(176,132,42,.15),transparent 55%),
-  linear-gradient(155deg,#1A130A,#0B0805 55%,#17110A);
+  radial-gradient(130% 150% at 85% -35%,rgba(224,186,86,.42),transparent 58%),
+  radial-gradient(120% 130% at 4% 135%,rgba(176,132,42,.28),transparent 58%),
+  linear-gradient(150deg,#3A2A0C,#140D04 52%,#241809);
   color:#F0EAD8;border-radius:13px;margin:14px 0 10px;padding:19px 24px 16px;
   position:relative;overflow:hidden;border:1px solid rgba(224,186,86,.38);
   box-shadow:inset 0 1px 0 rgba(255,247,214,.10)}
@@ -2387,9 +2389,10 @@ $base_css
 .seg button:last-child{border-right:0}
 .seg button[aria-pressed="true"]{background:var(--board);color:#F0DB9A}
 .calc-out{background:
-  radial-gradient(140% 150% at 90% -30%,rgba(217,178,74,.18),transparent 55%),
-  linear-gradient(160deg,var(--board),var(--board-2));
-  border:1px solid rgba(217,178,74,.3);border-radius:14px;
+  radial-gradient(140% 150% at 90% -30%,rgba(224,186,86,.34),transparent 58%),
+  radial-gradient(120% 130% at 4% 130%,rgba(176,132,42,.22),transparent 58%),
+  linear-gradient(150deg,#3A2A0C,#140D04 55%,#241809);
+  border:1px solid rgba(224,186,86,.42);border-radius:14px;
   padding:26px 26px 22px;color:#EDE9DD;min-height:100%}
 .calc-out .k{font-family:"IBM Plex Mono",monospace;font-size:11.5px;
   letter-spacing:.22em;text-transform:uppercase;color:var(--gold-bright)}
@@ -2616,8 +2619,6 @@ $nav
       <div class="v">$med18</div><div class="u">per gram, pre-GST</div></div>
   </div>
 </section>
-
-$ibja_tiles
 
 $local_intro
 

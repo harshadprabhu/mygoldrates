@@ -19,8 +19,8 @@ import requests
 IST = timezone(timedelta(hours=5, minutes=30))
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
-PER_CAT = 6            # max products sampled per category per brand
-TOTAL_CAP = 70         # hard cap on product fetches per brand
+PER_CAT = 20           # products sampled per category per brand
+TOTAL_CAP = 280        # hard cap on product fetches per brand
 
 # slug keyword -> category (order matters; earring before ring)
 CAT_RULES = [
