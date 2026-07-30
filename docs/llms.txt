@@ -11,8 +11,8 @@
 - 18K (750) median: ₹10,842 per gram (pre-GST)
 - Lowest 24K today: ₹14,330 per gram at Senco Gold
 - IBJA 24K (999) reference: ₹14,240 per gram (pre-GST)
-- MCX gold futures (05AUG2026): ₹142,477 per 10g (995), +0.49%
-- Last updated: 2026-07-30T18:46:12.986997+05:30
+- MCX gold futures (05AUG2026): ₹143,251 per 10g (995), +1.04%
+- Last updated: 2026-07-30T21:48:03.861065+05:30
 
 ## Key pages
 - Home / today's rates: https://mygoldrates.com/
