@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-07-30",
-  "last_updated": "2026-07-30T16:57:12.152939+05:30",
+  "last_updated": "2026-07-30T17:05:31.528106+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 142550.0,
-      "change_pct": 0.54
+      "price_per_10g_inr": 142479.0,
+      "change_pct": 0.49
     },
     {
       "contract": "GOLDM",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 142451.0,
-      "change_pct": 0.55
+      "price_per_10g_inr": 142431.0,
+      "change_pct": 0.53
     }
   ],
   "jewellers": [
@@ -124,12 +124,6 @@
       "rate_18k_per_gram_inr": 10871.18
     },
     {
-      "jeweller": "Waman Hari Pethe",
-      "rate_24k_per_gram_inr": 14557.0,
-      "rate_22k_per_gram_inr": 13347.56,
-      "rate_18k_per_gram_inr": 10928.68
-    },
-    {
       "jeweller": "C Krishniah Chetty",
       "rate_24k_per_gram_inr": 14572.82,
       "rate_22k_per_gram_inr": 13362.07,
@@ -142,6 +136,12 @@
       "rate_18k_per_gram_inr": 10964.21
     },
     {
+      "jeweller": "Waman Hari Pethe",
+      "rate_24k_per_gram_inr": 14608.0,
+      "rate_22k_per_gram_inr": 13394.32,
+      "rate_18k_per_gram_inr": 10966.97
+    },
+    {
       "jeweller": "Ranka Jewellers",
       "rate_24k_per_gram_inr": 14680.0,
       "rate_22k_per_gram_inr": 13460.34,
@@ -149,9 +149,9 @@
     },
     {
       "jeweller": "CaratLane",
-      "rate_24k_per_gram_inr": 14813.9,
-      "rate_22k_per_gram_inr": 13583.12,
-      "rate_18k_per_gram_inr": 11121.55
+      "rate_24k_per_gram_inr": 14814.01,
+      "rate_22k_per_gram_inr": 13583.22,
+      "rate_18k_per_gram_inr": 11121.63
     }
   ],
   "jeweller_count": 20,
