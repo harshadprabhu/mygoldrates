@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-07-30",
-  "last_updated": "2026-07-30T10:49:53.245481+05:30",
+  "last_updated": "2026-07-30T11:07:31.688961+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 141800.0,
-      "change_pct": 0.01
+      "price_per_10g_inr": 141951.0,
+      "change_pct": 0.12
     },
     {
       "contract": "GOLDM",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 141637.0,
-      "change_pct": -0.03
+      "price_per_10g_inr": 141777.0,
+      "change_pct": 0.07
     }
   ],
   "jewellers": [
@@ -68,12 +68,6 @@
       "rate_24k_per_gram_inr": 14359.0,
       "rate_22k_per_gram_inr": 13166.01,
       "rate_18k_per_gram_inr": 10780.03
-    },
-    {
-      "jeweller": "Vummidi Bangaru",
-      "rate_24k_per_gram_inr": 14361.0,
-      "rate_22k_per_gram_inr": 13167.85,
-      "rate_18k_per_gram_inr": 10781.53
     },
     {
       "jeweller": "Kalyan Jewellers",
@@ -124,6 +118,12 @@
       "rate_18k_per_gram_inr": 10839.34
     },
     {
+      "jeweller": "Vummidi Bangaru",
+      "rate_24k_per_gram_inr": 14443.0,
+      "rate_22k_per_gram_inr": 13243.03,
+      "rate_18k_per_gram_inr": 10843.09
+    },
+    {
       "jeweller": "C Krishniah Chetty",
       "rate_24k_per_gram_inr": 14490.24,
       "rate_22k_per_gram_inr": 13286.34,
@@ -143,9 +143,9 @@
     },
     {
       "jeweller": "CaratLane",
-      "rate_24k_per_gram_inr": 14728.88,
-      "rate_22k_per_gram_inr": 13505.16,
-      "rate_18k_per_gram_inr": 11057.72
+      "rate_24k_per_gram_inr": 14737.66,
+      "rate_22k_per_gram_inr": 13513.21,
+      "rate_18k_per_gram_inr": 11064.31
     }
   ],
   "jeweller_count": 19,
