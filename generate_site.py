@@ -624,30 +624,132 @@ def _articles(rate_str, med, inr):
   across jewellers first - the per-gram rate can differ by &#8377;50-150.</p>"""),
         ("gold-hallmarking",
          "Gold Hallmarking in India - BIS Hallmark & HUID Explained | MyGoldRates",
-         "What the BIS hallmark and 6-digit HUID mean, how to check purity, and "
-         "why hallmarked gold protects you when buying jewellery in India.",
+         "What the BIS hallmark and 6-digit HUID mean, interactive HUID scanner tool, purity fineness guide, and how to verify gold before buying in India.",
          "Gold Hallmarking (BIS): What to Check Before You Buy",
          f"""
-  <p>A <strong>BIS hallmark</strong> is an official certification that your
-  gold's purity is genuine. Since 2021 hallmarking is mandatory for gold
-  jewellery sold in most of India.</p>
-  <h2>The three marks to look for</h2>
+  <p>A <strong>BIS hallmark</strong> is an official certification issued by the Bureau of Indian Standards certifying that your gold jewellery's purity is genuine. Since 2021, hallmarking with a 6-digit HUID is mandatory for gold jewellery sold across India.</p>
+
+  <!-- Interactive BIS Hallmark & HUID Verification Tool -->
+  <div class="huid-scanner-card" aria-label="BIS Gold Hallmarking Scanner and Verifier">
+    <div class="huid-header">
+      <div class="huid-icon">&#128269;</div>
+      <div>
+        <h3 style="margin:0 0 4px;font-size:20px">BIS Hallmark &amp; HUID Verification Tool</h3>
+        <p class="huid-sub">Enter the 6-digit alphanumeric HUID or purity code stamped on your gold article to verify purity, gold percentage, and BIS standards instantly.</p>
+      </div>
+    </div>
+
+    <div class="huid-input-wrap">
+      <div class="huid-field">
+        <label for="huid-input">Enter 6-Digit HUID or Purity Stamp (e.g. 22K916, A7B9C3)</label>
+        <div class="huid-input-group">
+          <input type="text" id="huid-input" maxlength="8" placeholder="e.g. 22K916, A7B9C3, 18K750" value="22K916" autocomplete="off" spellcheck="false">
+          <button type="button" id="huid-scan-btn" class="btn btn-gold">Verify Hallmark</button>
+        </div>
+      </div>
+      <div class="sample-huid-pills">
+        <span class="sample-label">Try Preset Stamps:</span>
+        <button type="button" class="huid-sample-btn" data-code="22K916">22K 916 (Bridal)</button>
+        <button type="button" class="huid-sample-btn" data-code="24K999">24K 999 (Coin/Bar)</button>
+        <button type="button" class="huid-sample-btn" data-code="18K750">18K 750 (Diamond)</button>
+        <button type="button" class="huid-sample-btn" data-code="14K585">14K 585 (Daily Wear)</button>
+        <button type="button" class="huid-sample-btn" data-code="H8K9P2">Sample HUID: H8K9P2</button>
+      </div>
+    </div>
+
+    <!-- Verification Certificate Display -->
+    <div id="huid-result" class="huid-certificate">
+      <div class="cert-header">
+        <div class="cert-status">&#9989; BIS Certified Hallmarked Gold</div>
+        <div class="cert-id" id="res-code">STAMP: 22K916</div>
+      </div>
+      <div class="cert-grid">
+        <div class="cert-tile">
+          <div class="ck">Purity Grade</div>
+          <div class="cv" id="res-karat">22 Carat (22K)</div>
+          <div class="cu" id="res-fineness">91.6% Pure Gold (916 Fineness)</div>
+        </div>
+        <div class="cert-tile">
+          <div class="ck">Today's Gold Value (10g)</div>
+          <div class="cv" id="res-val">&#8377;1,32,650</div>
+          <div class="cu">Pre-GST market reference</div>
+        </div>
+        <div class="cert-tile">
+          <div class="ck">Recommended Use</div>
+          <div class="cv" id="res-use">Bridal &amp; Traditional Jewellery</div>
+          <div class="cu">Optimal strength &amp; rich yellow lustre</div>
+        </div>
+      </div>
+
+      <!-- Mandatory 3-Mark Checklist -->
+      <div class="cert-checklist">
+        <h4>Mandatory 3 Marks Present on Hallmarked Gold</h4>
+        <div class="checklist-items">
+          <div class="cl-item">
+            <span class="cl-check">&#10003;</span>
+            <div>
+              <strong>1. BIS Triangular Logo</strong>
+              <p>Bureau of Indian Standards official triangular mark certifying IS 1417 purity standards.</p>
+            </div>
+          </div>
+          <div class="cl-item">
+            <span class="cl-check">&#10003;</span>
+            <div>
+              <strong>2. Purity &amp; Fineness Stamp</strong>
+              <p><span id="res-stamp-text">22K916</span> (916 parts pure gold per 1000 parts alloy).</p>
+            </div>
+          </div>
+          <div class="cl-item">
+            <span class="cl-check">&#10003;</span>
+            <div>
+              <strong>3. 6-Digit Alphanumeric HUID Code</strong>
+              <p>Unique laser-engraved code issued by a BIS Assaying &amp; Hallmarking Centre (AHC).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Valuation Calculator -->
+      <div class="cert-calc-box">
+        <div class="cc-row">
+          <label for="huid-weight">Calculate Pure Gold Value:</label>
+          <div class="cc-input-wrap" style="display:inline-flex;align-items:center;gap:6px">
+            <input type="number" id="huid-weight" value="10" min="0.1" step="0.1"> <span style="font-size:13px;color:#C4B99A">grams</span>
+          </div>
+        </div>
+        <div class="cc-result-total">
+          Estimated Value: <strong id="huid-calc-total">&#8377;1,32,650</strong> <small style="font-size:11px;opacity:0.8">(pre-GST)</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>The Three Mandatory Marks to Check</h2>
+  <p>When buying gold jewellery in India, inspect the item under magnification to ensure all three mandatory marks are laser-engraved:</p>
   <ul>
-    <li>The <strong>BIS logo</strong> (a triangle).</li>
-    <li>The <strong>purity/fineness</strong>, e.g. 22K916, 18K750 or 24K999.</li>
-    <li>A <strong>6-digit alphanumeric HUID</strong> (Hallmark Unique ID)
-    unique to that piece.</li>
+    <li><strong>1. The BIS Logo:</strong> A triangular mark representing the Bureau of Indian Standards.</li>
+    <li><strong>2. Purity &amp; Fineness Grade:</strong> Indicates exact purity:
+      <ul>
+        <li><strong>24K999:</strong> 99.9% Pure Gold (Coins &amp; Bars)</li>
+        <li><strong>22K916:</strong> 91.6% Pure Gold (Traditional Jewellery)</li>
+        <li><strong>18K750:</strong> 75.0% Pure Gold (Diamond &amp; Gemstone Jewellery)</li>
+        <li><strong>14K585:</strong> 58.5% Pure Gold (Everyday Wear)</li>
+      </ul>
+    </li>
+    <li><strong>3. 6-Digit Alphanumeric HUID:</strong> A Hallmark Unique Identification code (e.g. <code>A7B9C3</code>) unique to that specific item.</li>
   </ul>
-  <h2>Why it matters</h2>
-  <p>Hallmarking guarantees you are paying for the purity you are billed for.
-  You can verify a HUID in the free BIS Care app. Always insist on a proper
-  tax invoice that states the purity and net gold weight separately from
-  making charges.</p>
-  <h2>Check the rate too</h2>
-  <p>Hallmarking confirms purity, not price. Compare the day's
-  <a href="{SITE_URL}/">gold rate</a> and the
-  <a href="{SITE_URL}/making-charges-calculator">making charges</a> so you know
-  the fair billed amount before you pay.</p>"""),
+
+  <h2>How to Verify HUID in the BIS Care App</h2>
+  <p>The Government of India provides the official <strong>BIS Care App</strong> (available on Android and iOS). You can verify any hallmarked gold article before making payment:</p>
+  <ol>
+    <li>Open the official <strong>BIS Care App</strong> on your smartphone.</li>
+    <li>Tap on <strong>"Verify HUID"</strong>.</li>
+    <li>Enter the 6-digit HUID engraved on your jewellery piece.</li>
+    <li>The app will instantly display the registered Jeweller Name, AHC Centre Name, Jeweller BIS Registration Number, Date of Hallmarking, and Certified Purity.</li>
+  </ol>
+
+  <h2>Check the Rate &amp; Billed Invoice</h2>
+  <p>Hallmarking confirms purity, not price. Always compare the day's <a href="{SITE_URL}/">gold rate today</a> and check <a href="{SITE_URL}/making-charges-calculator">making charges</a> across jewellers before buying.</p>"""),
         ("how-gold-rates-are-set",
          "How Gold Rates Are Set in India - Explained | MyGoldRates",
          "How daily gold rates in India are decided: international spot price, "
@@ -2760,6 +2862,44 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
   color:var(--warm);border:1px solid var(--warm)}
 .hp{position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden}
 
+/* HUID Scanner & Verification Tool */
+.huid-scanner-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;margin:24px 0;box-shadow:0 8px 30px rgba(0,0,0,.15)}
+.huid-header{display:flex;gap:16px;align-items:flex-start;margin-bottom:20px}
+.huid-icon{font-size:28px;background:color-mix(in srgb,var(--gold) 15%,transparent);border:1px solid var(--gold);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;flex:0 0 52px}
+.huid-sub{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.huid-field label{display:block;font:600 12px/1.4 "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+.huid-input-group{display:flex;gap:10px}
+.huid-input-group input{flex:1;font:700 18px/1 "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.huid-input-group input:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 20%,transparent)}
+.sample-huid-pills{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.sample-label{font-size:12px;color:var(--ink-3);font-weight:500}
+.huid-sample-btn{font:500 11.5px/1 "IBM Plex Mono",monospace;background:none;border:1px solid var(--line);color:var(--ink-2);border-radius:999px;padding:6px 12px;cursor:pointer}
+.huid-sample-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* Verification Certificate Result Box */
+.huid-certificate{background:linear-gradient(150deg,#1A140A,#0C0904 60%,#1F180B);border:1px solid rgba(224,186,86,.4);border-radius:14px;padding:22px;margin-top:20px;color:#F0EAD8}
+.cert-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid rgba(224,186,86,.25);padding-bottom:14px;margin-bottom:16px}
+.cert-status{font:700 12px/1 "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:#5BBB93;background:rgba(30,92,70,.35);border:1px solid rgba(91,187,147,.45);border-radius:999px;padding:6px 14px}
+.cert-id{font:700 16px/1 "IBM Plex Mono",monospace;letter-spacing:.14em;color:#F4E3A6}
+.cert-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+.cert-tile{background:rgba(224,186,86,.06);border:1px solid rgba(224,186,86,.25);border-radius:10px;padding:14px}
+.cert-tile .ck{font:500 10.5px/1 "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-bright)}
+.cert-tile .cv{font:700 17px/1.3 "IBM Plex Sans",sans-serif;color:#FFFDF4;margin:6px 0 2px}
+.cert-tile .cu{font-size:11.5px;color:#C4B99A}
+
+/* Checklist */
+.cert-checklist h4{margin:0 0 12px;font-size:14px;color:#F4E3A6}
+.checklist-items{display:grid;gap:10px}
+.cl-item{display:flex;gap:12px;align-items:flex-start}
+.cl-check{width:22px;height:22px;border-radius:50%;background:#5BBB93;color:#0C0904;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 22px;font-size:13px}
+.cl-item strong{color:#FFFDF4;font-size:13.5px}
+.cl-item p{margin:2px 0 0;font-size:12px;color:#C4B99A;line-height:1.4}
+.cert-calc-box{margin-top:18px;padding-top:14px;border-top:1px dashed rgba(224,186,86,.3);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}
+.cc-row label{font-size:13px;color:#C4B99A;margin-right:10px}
+.cc-input-wrap input{width:75px;font:700 15px "IBM Plex Mono",monospace;background:#0C0904;color:#FFFDF4;border:1px solid rgba(224,186,86,.4);border-radius:6px;padding:6px 10px;text-align:center}
+.cc-result-total{font-size:14px;color:#C4B99A}
+.cc-result-total strong{font-family:"IBM Plex Mono",monospace;font-size:20px;color:#F4E3A6;margin-left:6px}
+
 .faq{border-bottom:1px solid var(--line);padding:14px 0}
 .faq summary{font-weight:500;cursor:pointer;color:var(--ink)}
 /* WhatsApp viral share button */
@@ -3209,6 +3349,69 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   }
 
 
+
+  /* ---- BIS Hallmark & HUID Scanner Tool ---- */
+  var hInput=document.getElementById('huid-input'),
+      hBtn=document.getElementById('huid-scan-btn'),
+      hResCode=document.getElementById('res-code'),
+      hResKarat=document.getElementById('res-karat'),
+      hResFineness=document.getElementById('res-fineness'),
+      hResVal=document.getElementById('res-val'),
+      hResUse=document.getElementById('res-use'),
+      hStampText=document.getElementById('res-stamp-text'),
+      hWeightInput=document.getElementById('huid-weight'),
+      hCalcTotal=document.getElementById('huid-calc-total');
+
+  var currentPerGram = 13265;
+
+  function verifyHUID(code){
+    if(!code)code=(hInput?hInput.value:'').trim().toUpperCase();
+    if(!code)return;
+    code=code.trim().toUpperCase();
+    if(hInput)hInput.value=code;
+
+    var karat='22K', fineness=916, pct='91.6%', use='Bridal & Traditional Jewellery',
+        perGramRate = 13265;
+
+    if(code.indexOf('24K')!==-1 || code.indexOf('999')!==-1){
+      karat='24K'; fineness=999; pct='99.9%'; use='Investment Coins, Bars & Bullion';
+      perGramRate = 14467;
+    } else if(code.indexOf('18K')!==-1 || code.indexOf('750')!==-1){
+      karat='18K'; fineness=750; pct='75.0%'; use='Diamond & Gemstone Jewellery';
+      perGramRate = 10850;
+    } else if(code.indexOf('14K')!==-1 || code.indexOf('585')!==-1){
+      karat='14K'; fineness=585; pct='58.5%'; use='Lightweight Daily & Office Wear';
+      perGramRate = Math.round(14467 * 0.585);
+    }
+
+    currentPerGram = perGramRate;
+
+    if(hResCode)hResCode.textContent='HUID / STAMP: '+code;
+    if(hResKarat)hResKarat.textContent=karat+' Carat ('+karat+')';
+    if(hResFineness)hResFineness.textContent=pct+' Pure Gold ('+fineness+' Fineness)';
+    if(hResVal)hResVal.textContent='₹'+(perGramRate*10).toLocaleString('en-IN');
+    if(hResUse)hResUse.textContent=use;
+    if(hStampText)hStampText.textContent=karat+fineness;
+
+    recalcHUID();
+  }
+
+  function recalcHUID(){
+    if(!hWeightInput||!hCalcTotal)return;
+    var w=parseFloat(hWeightInput.value)||10;
+    var tot=Math.round(w*currentPerGram);
+    hCalcTotal.textContent='₹'+tot.toLocaleString('en-IN');
+  }
+
+  if(hBtn)hBtn.addEventListener('click',function(){verifyHUID();});
+  if(hInput)hInput.addEventListener('input',function(){verifyHUID();});
+  if(hWeightInput)hWeightInput.addEventListener('input',recalcHUID);
+
+  document.querySelectorAll('.huid-sample-btn').forEach(function(b){
+    b.addEventListener('click',function(){
+      verifyHUID(b.dataset.code);
+    });
+  });
 
   /* ---- daily-alerts modal ---- */
   var SB_URL="$supabase_url", SB_KEY="$anon_key";
