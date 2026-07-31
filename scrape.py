@@ -465,42 +465,78 @@ def render(url):
 ZYTE_ENDPOINT = "https://api.zyte.com/v1/extract"
 
 
-def fetch_via_zyte(url, session, actions=None):
-    """Fetch through Zyte API: an India residential IP that clears anti-bot
-    walls (Cloudflare/Akamai) and returns fully rendered HTML. Used only for
-    brands flagged needs_proxy, and only for their one configured rate_url so
-    we don't burn credits on path discovery. -> (html, note)."""
-    key = os.environ.get("ZYTE_API_KEY")
-    if not key:
-        return None, "no zyte key"
-    payload = {"url": url, "browserHtml": True, "geolocation": "IN"}
-    if actions:
-        payload["actions"] = actions
-    r = None
-    for attempt in (1, 2):     # slow sites can blow one render window
+def fetch_via_proxy_waterfall(url, session, actions=None):
+    """Multi-proxy failover waterfall:
+    1. ScraperAPI (5,000 free req/mo)
+    2. ScrapingBee (1,000 free req/mo)
+    3. ZenRows (1,000 free req/mo)
+    4. WebScrapingAPI (1,000 free req/mo)
+    5. Crawlbase (1,000 free req/mo)
+    6. Zyte (Paid/Final Fallback)
+    -> (html, note)
+    """
+    # 1. ScraperAPI
+    key = os.environ.get("SCRAPERAPI_KEY")
+    if key:
         try:
-            r = session.post(
-                ZYTE_ENDPOINT, auth=(key, ""),
-                json=payload,
-                # The session mimics a browser (incl. Accept-Encoding: br) for
-                # scraping targets; Zyte is a plain JSON API - clean headers.
-                headers={"Accept": "application/json",
-                         "Accept-Encoding": "gzip, deflate",
-                         "User-Agent": "goldrates/1.0"},
-                timeout=150,
-            )
-            break
-        except requests.Timeout:
-            if attempt == 2:
-                return None, "zyte ReadTimeout"
-        except requests.RequestException as e:
-            return None, f"zyte {type(e).__name__}"
-    if r.status_code != 200:
-        return None, f"zyte {r.status_code}"
-    try:
-        return r.json().get("browserHtml"), "ok"
-    except ValueError:
-        return None, "zyte badjson"
+            r = session.get("http://api.scraperapi.com",
+                            params={"api_key": key, "url": url, "render": "true", "country_code": "in"},
+                            timeout=45)
+            if r.status_code == 200 and len(r.text) > 500:
+                return r.text, "ok:scraperapi"
+        except Exception:
+            pass
+
+    # 2. ScrapingBee
+    key = os.environ.get("SCRAPINGBEE_KEY")
+    if key:
+        try:
+            r = session.get("https://app.scrapingbee.com/api/v1/",
+                            params={"api_key": key, "url": url, "render_js": "true"},
+                            timeout=45)
+            if r.status_code == 200 and len(r.text) > 500:
+                return r.text, "ok:scrapingbee"
+        except Exception:
+            pass
+
+    # 3. ZenRows
+    key = os.environ.get("ZENROWS_KEY")
+    if key:
+        try:
+            r = session.get("https://api.zenrows.com/v1/",
+                            params={"apikey": key, "url": url, "js_render": "true"},
+                            timeout=45)
+            if r.status_code == 200 and len(r.text) > 500:
+                return r.text, "ok:zenrows"
+        except Exception:
+            pass
+
+    # 4. WebScrapingAPI
+    key = os.environ.get("WEBSCRAPINGAPI_KEY")
+    if key:
+        try:
+            r = session.get("https://api.webscrapingapi.com/v1",
+                            params={"api_key": key, "url": url, "render_js": "1"},
+                            timeout=45)
+            if r.status_code == 200 and len(r.text) > 500:
+                return r.text, "ok:webscrapingapi"
+        except Exception:
+            pass
+
+    # 5. Crawlbase
+    key = os.environ.get("CRAWLBASE_KEY")
+    if key:
+        try:
+            r = session.get("https://api.crawlbase.com/",
+                            params={"token": key, "url": url},
+                            timeout=45)
+            if r.status_code == 200 and len(r.text) > 500:
+                return r.text, "ok:crawlbase"
+        except Exception:
+            pass
+
+    # 6. Zyte (Paid / Final Fallback)
+    return fetch_via_zyte(url, session, actions=actions)
 
 
 def try_html(html):
@@ -605,17 +641,15 @@ def scrape_brand(b, session):
             break
 
         if proxied:
-            zhtml, zreason = fetch_via_zyte(url, session,
-                                            ZYTE_ACTIONS.get(b.get("slug")))
+            zhtml, zreason = fetch_via_proxy_waterfall(url, session,
+                                                    ZYTE_ACTIONS.get(b.get("slug")))
             if zhtml:
                 found, counts, how, note = try_html(zhtml)
                 if found:
-                    return url, found, counts, f"zyte/{how}", note
-                tried.append("zyte:" + note)
+                    return url, found, counts, f"proxy/{how}", note
+                tried.append("proxy:" + note)
             else:
                 tried.append(zreason)
-                if zreason == "no zyte key":
-                    break
             continue
 
         if not robots_ok(url, session):
