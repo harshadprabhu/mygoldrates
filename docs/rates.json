@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-07-31",
-  "last_updated": "2026-07-31T22:08:05.994781+05:30",
+  "last_updated": "2026-07-31T22:22:54.082318+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 141750.0,
-      "change_pct": -1.03
+      "price_per_10g_inr": 141583.0,
+      "change_pct": -1.15
     },
     {
       "contract": "GOLDM",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 141643.0,
-      "change_pct": -1.0
+      "price_per_10g_inr": 141558.0,
+      "change_pct": -1.06
     }
   ],
   "jewellers": [
@@ -143,9 +143,9 @@
     },
     {
       "jeweller": "CaratLane",
-      "rate_24k_per_gram_inr": 14749.14,
-      "rate_22k_per_gram_inr": 13523.73,
-      "rate_18k_per_gram_inr": 11072.92
+      "rate_24k_per_gram_inr": 14731.88,
+      "rate_22k_per_gram_inr": 13507.91,
+      "rate_18k_per_gram_inr": 11059.97
     },
     {
       "jeweller": "Ranka Jewellers",
