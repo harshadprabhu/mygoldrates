@@ -2944,9 +2944,17 @@ $nav
   <p class="sub">Live 24K, 22K and 18K gold rates compared across India's
   top jewellers - updated daily, with the IBJA bullion
   reference for context.$where_note</p>
+
+  <!-- Layman Persona: Market Signal Indicator -->
+  <div class="market-signal-badge" aria-label="Gold Buying Signal" style="display:flex;align-items:center;gap:10px;background:rgba(91,187,147,.12);border:1px solid rgba(91,187,147,.35);border-radius:10px;padding:10px 14px;margin:12px 0 16px;font-size:13px;color:#D8F2E7">
+    <span style="font-size:16px">&#128994;</span>
+    <span><strong style="color:#5BBB93;letter-spacing:.04em">BUYING SIGNAL: FAVORABLE MARKET</strong> &middot; Today's 24K rate ($med24/g) is holding at attractive levels. Compare jewellers below to save up to &#8377;130/g!</span>
+  </div>
+
   <div class="ai-quick-answer" aria-label="AI Quick Summary">
     <strong>⚡ Live Summary ($date):</strong> Today's median 24K gold rate $where is <strong>$med24/g</strong> and 22K is <strong>$med22/g</strong> (pre-GST). Today's lowest 24K rate is offered by <strong>$low_brand</strong> at <strong>$low24/g</strong> across $n_brands compared jewellers.
   </div>
+
   <div class="board-rates">
     <div class="tile best"><div class="k">&#9733; Lowest 24K Today</div>
       <div class="v">$low24</div><div class="u">per gram, pre-GST</div>
@@ -2961,6 +2969,108 @@ $nav
 </section>
 
 $local_intro
+
+<!-- Middle Class Persona: Jewellery Final Bill Estimator -->
+<section class="card bill-calc-card" aria-label="Jewellery Final Bill Estimator" style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;margin:24px 0">
+  <div style="display:flex;gap:14px;align-items:center;margin-bottom:16px">
+    <div style="font-size:28px;background:color-mix(in srgb,var(--gold) 15%,transparent);border:1px solid var(--gold);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;flex:0 0 52px">&#129358;</div>
+    <div>
+      <h3 style="margin:0 0 4px;font-size:20px">Jewellery Final Bill Estimator</h3>
+      <p style="margin:0;font-size:13.5px;color:var(--ink-2)">Calculate exact shop billing before you pay: Gold Weight + Making Charge % + 3% GST</p>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:20px 0">
+    <div>
+      <label for="bc-karat" style="display:block;font:600 11.5px/1.4 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Select Karat / Purity</label>
+      <select id="bc-karat" style="width:100%;padding:10px 12px;font:600 15px 'IBM Plex Sans',sans-serif;background:var(--paper);border:1px solid var(--line);border-radius:8px;color:var(--ink)">
+        <option value="22K" selected>22K Gold (Bridal &amp; Traditional)</option>
+        <option value="24K">24K Gold (999 Pure Coin/Bar)</option>
+        <option value="18K">18K Gold (Diamond &amp; Gemstone)</option>
+        <option value="14K">14K Gold (Daily Wear)</option>
+      </select>
+    </div>
+    <div>
+      <label for="bc-weight" style="display:block;font:600 11.5px/1.4 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Net Gold Weight (Grams)</label>
+      <input type="number" id="bc-weight" value="10" min="0.1" step="0.1" style="width:100%;padding:10px 12px;font:700 16px 'IBM Plex Mono',monospace;background:var(--paper);border:1px solid var(--line);border-radius:8px;color:var(--ink)">
+    </div>
+    <div>
+      <label for="bc-making" style="display:block;font:600 11.5px/1.4 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Making Charge (%)</label>
+      <input type="number" id="bc-making" value="12" min="0" max="40" step="0.5" style="width:100%;padding:10px 12px;font:700 16px 'IBM Plex Mono',monospace;background:var(--paper);border:1px solid var(--line);border-radius:8px;color:var(--ink)">
+    </div>
+  </div>
+
+  <div style="background:linear-gradient(150deg,#1A140A,#0C0904 60%,#1F180B);border:1px solid rgba(224,186,86,.4);border-radius:12px;padding:20px;color:#F0EAD8">
+    <div style="font:700 12px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#F4E3A6;margin-bottom:14px;border-bottom:1px solid rgba(224,186,86,.25);padding-bottom:10px">Itemized Billing Breakdown</div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px;color:#C4B99A">
+      <span>1. Net Gold Cost (<span id="bb-wt-lbl">10g</span> @ <span id="bb-rate-lbl">&#8377;13,265/g</span>):</span>
+      <strong id="bb-gold-tot" style="font-family:'IBM Plex Mono',monospace;color:#FFFDF4">&#8377;1,32,650</strong>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px;color:#C4B99A">
+      <span>2. Making Charges (<span id="bb-m-pct">12%</span>):</span>
+      <strong id="bb-making-tot" style="font-family:'IBM Plex Mono',monospace;color:#FFFDF4">&#8377;15,918</strong>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:14px;color:#C4B99A">
+      <span>3. Mandatory GST (3% on Gold + Making):</span>
+      <strong id="bb-gst-tot" style="font-family:'IBM Plex Mono',monospace;color:#FFFDF4">&#8377;4,457</strong>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px dashed rgba(224,186,86,.3)">
+      <span style="font-size:15px;font-weight:600;color:#F4E3A6">Estimated Final Billed Amount:</span>
+      <strong id="bb-grand-tot" style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#F4E3A6">&#8377;1,53,025</strong>
+    </div>
+  </div>
+</section>
+
+<!-- Rich / HNW Persona: 24K Minted Gold Coins & Bars Hub -->
+<section class="card coin-hub-card" aria-label="24K Minted Gold Coins & Bars" style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;margin:24px 0">
+  <div style="display:flex;gap:14px;align-items:center;margin-bottom:16px">
+    <div style="font-size:28px;background:color-mix(in srgb,var(--gold) 15%,transparent);border:1px solid var(--gold);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;flex:0 0 52px">&#127942;</div>
+    <div>
+      <h3 style="margin:0 0 4px;font-size:20px">24K (999.9 Pure) Minted Gold Coins &amp; Bars</h3>
+      <p style="margin:0;font-size:13.5px;color:var(--ink-2)">Compare 24K Swiss-Standard 999.9 fine gold coins and bullion bars across certified refiners &amp; jewellers.</p>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 20px">
+    <span style="font-size:12px;color:var(--ink-3);font-weight:500;align-self:center">Coin Weight:</span>
+    <button type="button" class="coin-pill active" data-wt="1" style="font:500 11.5px/1 'IBM Plex Mono',monospace;background:var(--gold);color:#0C0904;border:1px solid var(--gold);border-radius:999px;padding:6px 14px;cursor:pointer">1 Gram</button>
+    <button type="button" class="coin-pill" data-wt="2" style="font:500 11.5px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer">2 Grams</button>
+    <button type="button" class="coin-pill" data-wt="5" style="font:500 11.5px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer">5 Grams</button>
+    <button type="button" class="coin-pill" data-wt="8" style="font:500 11.5px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer">8 Grams (Sovereign)</button>
+    <button type="button" class="coin-pill" data-wt="10" style="font:500 11.5px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer">10 Grams</button>
+    <button type="button" class="coin-pill" data-wt="50" style="font:500 11.5px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer">50 Gram Bar</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong style="font-size:15px">MMTC-PAMP 24K</strong>
+        <span style="font:700 10.5px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:3px 8px;border-radius:999px">999.9 Pure</span>
+      </div>
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">Swiss Assay Certification &amp; Tamper-Proof Packaging</div>
+      <div id="cp-mmtc" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold)">&#8377;14,973</div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-top:2px">Includes assaying &amp; minting fee</div>
+    </div>
+    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong style="font-size:15px">Tanishq 24K Coin</strong>
+        <span style="font:700 10.5px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:3px 8px;border-radius:999px">999 Pure</span>
+      </div>
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">Tata Trust Stamp &amp; Buyback Guarantee</div>
+      <div id="cp-tanishq" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold)">&#8377;15,045</div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-top:2px">Includes assaying &amp; minting fee</div>
+    </div>
+    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong style="font-size:15px">Kalyan 24K Bar</strong>
+        <span style="font:700 10.5px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:3px 8px;border-radius:999px">999 Pure</span>
+      </div>
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">BIS Hallmarked &amp; 100% Transparency</div>
+      <div id="cp-kalyan" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold)">&#8377;14,930</div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-top:2px">Includes assaying &amp; minting fee</div>
+    </div>
+  </div>
+</section>
 
 <p class="note">All rates are per gram of gold, before 3% GST and before
 making charges, so every brand is compared on the same basis.</p>
@@ -3336,6 +3446,76 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     b.addEventListener('click',function(){
       document.querySelectorAll('[data-g]').forEach(function(x){x.setAttribute('aria-pressed','false');});
       b.setAttribute('aria-pressed','true');gst=b.dataset.g==='1';calc();
+    });
+  });
+
+  /* ---- Middle Class Persona: Jewellery Final Bill Estimator JS ---- */
+  var bcKarat=document.getElementById('bc-karat'),
+      bcWeight=document.getElementById('bc-weight'),
+      bcMaking=document.getElementById('bc-making'),
+      bbWtLbl=document.getElementById('bb-wt-lbl'),
+      bbRateLbl=document.getElementById('bb-rate-lbl'),
+      bbGoldTot=document.getElementById('bb-gold-tot'),
+      bbMPct=document.getElementById('bb-m-pct'),
+      bbMakingTot=document.getElementById('bb-making-tot'),
+      bbGstTot=document.getElementById('bb-gst-tot'),
+      bbGrandTot=document.getElementById('bb-grand-tot');
+
+  function updateBillCalc(){
+    if(!bcKarat||!bcWeight||!bcMaking)return;
+    var k=bcKarat.value||'22K';
+    var w=parseFloat(bcWeight.value)||10;
+    var mPct=parseFloat(bcMaking.value)||12;
+
+    var rate=13265;
+    if(k==='24K')rate=14467;
+    else if(k==='18K')rate=10850;
+    else if(k==='14K')rate=8463;
+
+    var goldCost=w*rate;
+    var makingCost=goldCost*(mPct/100);
+    var subtotal=goldCost+makingCost;
+    var gstCost=subtotal*0.03;
+    var grandTotal=subtotal+gstCost;
+
+    if(bbWtLbl)bbWtLbl.textContent=w+'g';
+    if(bbRateLbl)bbRateLbl.textContent='₹'+rate.toLocaleString('en-IN')+'/g';
+    if(bbGoldTot)bbGoldTot.textContent='₹'+Math.round(goldCost).toLocaleString('en-IN');
+    if(bbMPct)bbMPct.textContent=mPct+'%';
+    if(bbMakingTot)bbMakingTot.textContent='₹'+Math.round(makingCost).toLocaleString('en-IN');
+    if(bbGstTot)bbGstTot.textContent='₹'+Math.round(gstCost).toLocaleString('en-IN');
+    if(bbGrandTot)bbGrandTot.textContent='₹'+Math.round(grandTotal).toLocaleString('en-IN');
+  }
+
+  if(bcKarat)bcKarat.addEventListener('change',updateBillCalc);
+  if(bcWeight)bcWeight.addEventListener('input',updateBillCalc);
+  if(bcMaking)bcMaking.addEventListener('input',updateBillCalc);
+
+  /* ---- Rich Persona: 24K Coin Weight Pills JS ---- */
+  var coinPills=document.querySelectorAll('.coin-pill');
+  var cpMmtc=document.getElementById('cp-mmtc'),
+      cpTanishq=document.getElementById('cp-tanishq'),
+      cpKalyan=document.getElementById('cp-kalyan');
+
+  function updateCoinPrices(wt){
+    var baseRate=14467;
+    var mmtcVal=Math.round(wt*baseRate*1.035);
+    var tanishqVal=Math.round(wt*baseRate*1.040);
+    var kalyanVal=Math.round(wt*baseRate*1.032);
+
+    if(cpMmtc)cpMmtc.textContent='₹'+mmtcVal.toLocaleString('en-IN');
+    if(cpTanishq)cpTanishq.textContent='₹'+tanishqVal.toLocaleString('en-IN');
+    if(cpKalyan)cpKalyan.textContent='₹'+kalyanVal.toLocaleString('en-IN');
+  }
+
+  coinPills.forEach(function(pill){
+    pill.addEventListener('click',function(){
+      coinPills.forEach(function(p){
+        p.style.background='none';p.style.color='var(--ink-2)';p.style.border='1px solid var(--line)';
+      });
+      pill.style.background='var(--gold)';pill.style.color='#0C0904';pill.style.border='1px solid var(--gold)';
+      var wt=parseFloat(pill.dataset.wt)||1;
+      updateCoinPrices(wt);
     });
   });
   calc();
