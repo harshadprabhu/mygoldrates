@@ -1172,8 +1172,15 @@ def main():
   <div class="calc calc-drawer">
     <div class="calc-fields">
       <div class="field"><label for="c-w">Weight in grams</label>
-        <input id="c-w" type="number" inputmode="decimal" min="0.1"
-        step="0.1" value="10"></div>
+        <div class="quick-weights" role="group" aria-label="Quick weights">
+          <button type="button" class="qw-pill" data-w="1">1g</button>
+          <button type="button" class="qw-pill" data-w="8">8g (Sovereign)</button>
+          <button type="button" class="qw-pill active" data-w="10">10g</button>
+          <button type="button" class="qw-pill" data-w="50">50g</button>
+          <button type="button" class="qw-pill" data-w="100">100g</button>
+          <button type="button" class="qw-pill" data-w="11.66">1 Tola</button>
+        </div>
+        <input id="c-w" type="number" inputmode="decimal" min="0.1" step="0.1" value="10"></div>
       <div class="field"><label id="c-p-label">Purity</label>
         <div class="seg" role="group" aria-labelledby="c-p-label">
           <button data-p="24K" aria-pressed="true">24K</button>
@@ -2445,6 +2452,36 @@ $base_css
 .rtile.prem::before{background:var(--emerald)}
 .rtile.prem .v{color:var(--emerald)}
 
+/* live market pulse badge */
+.live-badge{display:inline-flex;align-items:center;gap:7px;font:700 10.5px/1 "IBM Plex Mono",monospace;
+  letter-spacing:.16em;text-transform:uppercase;color:#5BBB93;background:rgba(30,92,70,.28);
+  border:1px solid rgba(91,187,147,.45);border-radius:999px;padding:5px 12px;margin-bottom:10px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#5BBB93;
+  box-shadow:0 0 8px #5BBB93;animation:livepulse 1.8s infinite ease-in-out}
+@keyframes livepulse{
+  0%{transform:scale(0.95);opacity:0.8;box-shadow:0 0 0 0 rgba(91,187,147,0.7)}
+  70%{transform:scale(1.15);opacity:1;box-shadow:0 0 0 8px rgba(91,187,147,0)}
+  100%{transform:scale(0.95);opacity:0.8;box-shadow:0 0 0 0 rgba(91,187,147,0)}
+}
+
+/* brand search box */
+.brand-search-box{position:relative;flex:1 1 200px;max-width:280px}
+.brand-search-box input{width:100%;font:500 13px "IBM Plex Sans",sans-serif;
+  background:var(--card);color:var(--ink);border:1px solid var(--line);
+  border-radius:999px;padding:8px 14px 8px 34px;transition:border-color .2s ease,box-shadow .2s ease}
+.brand-search-box input:focus{border-color:var(--gold);outline:none;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 20%,transparent)}
+.brand-search-box::before{content:"🔍";position:absolute;left:11px;top:50%;
+  transform:translateY(-50%);font-size:12px;opacity:.65;pointer-events:none}
+
+/* quick weight pills */
+.quick-weights{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 10px}
+.qw-pill{font:600 11.5px/1 "IBM Plex Mono",monospace;background:var(--card);
+  border:1px solid var(--line);color:var(--ink-2);border-radius:999px;
+  padding:6px 12px;cursor:pointer;transition:all .15s ease}
+.qw-pill:hover,.qw-pill.active{border-color:var(--gold);color:var(--gold);
+  background:color-mix(in srgb,var(--gold) 12%,transparent)}
+
 /* rate board hero */
 .board{background:
   linear-gradient(104deg,transparent 0 40%,rgba(240,219,154,.08) 46%,
@@ -2744,6 +2781,7 @@ $nav
 </header>
 
 <section class="board" aria-label="Today's gold rate summary">
+  <div class="live-badge"><span class="live-dot"></span> LIVE MARKET &middot; REFRESHED DAILY</div>
   <h1>Gold Rate Today $where</h1>
   <p class="sub">Live 24K, 22K and 18K gold rates compared across India's
   top jewellers - updated daily, with the IBJA bullion
@@ -2773,6 +2811,7 @@ making charges, so every brand is compared on the same basis.</p>
     <p class="hint" style="margin:0">Sorted by today's 24K rate - tap a column
     to re-sort. On mobile, use the karat filter to switch purity.</p>
     <div class="tbar-controls">
+      <div class="brand-search-box"><input id="brandsearch" type="search" placeholder="Search jeweller..." aria-label="Search jeweller"></div>
       <div class="karatseg" role="group" aria-label="Show karat">
         <button data-k="24" aria-pressed="true">24K</button>
         <button data-k="22" aria-pressed="false">22K</button>
@@ -2987,6 +3026,29 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
       table.classList.remove('k22','k18');
       if(b.dataset.k==='22')table.classList.add('k22');
       else if(b.dataset.k==='18')table.classList.add('k18');
+    });
+  });
+  /* ---- live brand search filter ---- */
+  var bsearch=document.getElementById('brandsearch');
+  if(bsearch){
+    bsearch.addEventListener('input',function(){
+      var q=this.value.toLowerCase().trim();
+      [].forEach.call(body.rows,function(r){
+        var name=r.cells[0].textContent.toLowerCase();
+        r.style.display=name.indexOf(q)!==-1?'':'none';
+      });
+    });
+  }
+  /* ---- calculator quick weight pills ---- */
+  document.querySelectorAll('.qw-pill').forEach(function(pill){
+    pill.addEventListener('click',function(){
+      document.querySelectorAll('.qw-pill').forEach(function(p){p.classList.remove('active');});
+      pill.classList.add('active');
+      var wInput=document.getElementById('c-w');
+      if(wInput){
+        wInput.value=pill.dataset.w;
+        wInput.dispatchEvent(new Event('input',{bubbles:true}));
+      }
     });
   });
   /* ---- "in my area": GPS -> state -> filter regional jewellers ---- */
