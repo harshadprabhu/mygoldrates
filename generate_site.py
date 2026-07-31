@@ -2894,15 +2894,14 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 .karatseg button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);
   background:color-mix(in srgb,var(--gold) 12%,transparent)}
 /* markets side drawer */
-.drawer-tab.drawer-tab2{top:calc(50% + 18px);bottom:auto}
 .calc-drawer{grid-template-columns:1fr!important}
-.drawer-tab{position:fixed;right:0;top:calc(50% - 150px);z-index:940;writing-mode:vertical-rl;
+.drawer-tab{position:fixed;right:0;top:calc(50% - 175px);z-index:940;writing-mode:vertical-rl;
   text-orientation:mixed;font:600 12px/1 "IBM Plex Mono",monospace;
   letter-spacing:.14em;text-transform:uppercase;color:#1A1508;
   background:var(--gold-foil);border:0;border-radius:9px 0 0 9px;
   padding:15px 9px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.28)}
-.drawer-tab.drawer-tab2{top:calc(50% - 15px)}
-.drawer-tab.drawer-tab3{top:calc(50% + 120px)}
+.drawer-tab.drawer-tab2{top:calc(50% - 37px)}
+.drawer-tab.drawer-tab3{top:calc(50% + 136px)}
 .drawer-ov{position:fixed;inset:0;background:rgba(10,8,4,.5);z-index:950}
 .drawer{position:fixed;top:0;right:0;height:100%;width:min(440px,94vw);
   background:var(--paper);border-left:1px solid var(--line);z-index:960;
