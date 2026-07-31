@@ -2908,7 +2908,12 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
   box-shadow:0 3px 10px rgba(37,211,102,.25);transition:transform .2s ease,box-shadow .2s ease}
 .wa-share-btn:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(37,211,102,.35)}
 
-/* Leaderboard rank medals & savings pills */
+/* Leaderboard rank me/* AI & GEO Search Direct Answer Box */
+.ai-quick-answer{background:rgba(240,219,154,.07);border:1px solid rgba(240,219,154,.25);
+  border-radius:10px;padding:10px 14px;margin:10px 0 14px;font-size:13px;
+  line-height:1.55;color:#E8DFCA}
+.ai-quick-answer strong{color:#F8EFD6;font-weight:600}
+
 .rank-badge{font:700 10px/1 "IBM Plex Mono",monospace;padding:3px 6px;border-radius:4px;margin-right:6px}
 .rank-1{background:#D9B24A;color:#140D04}
 .rank-2{background:#C0C0C0;color:#140D04}
@@ -2927,7 +2932,7 @@ $nav
   <div class="topright">
     <span class="updated">Updated $date, $time</span>
     <span class="hauth" id="hauth" hidden></span>
-    <a class="wa-share-btn" href="https://api.whatsapp.com/send?text=Check%20today%27s%20live%2024K%20and%2022K%20gold%20rates%20across%20all%20top%20jewellers%20on%20https%3A%2F%2Fmygoldrates.com" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.485 1.332 5.001l-1.417 5.176 5.297-1.39c1.464.798 3.116 1.218 4.775 1.219h.004c5.505 0 9.988-4.478 9.989-9.984 0-2.667-1.038-5.174-2.924-7.06-1.886-1.886-4.393-2.925-7.061-2.925zm0 1.666c4.588 0 8.324 3.736 8.325 8.324 0 2.224-.866 4.314-2.439 5.888-1.573 1.574-3.663 2.44-5.887 2.44h-.003c-1.428 0-2.834-.378-4.066-1.094l-.291-.17-3.142.823.838-3.061-.186-.296c-.787-1.252-1.202-2.7-1.202-4.185.001-4.588 3.737-8.325 8.326-8.325z"/></svg> Share</a>
+    <a class="wa-share-btn" href="https://api.whatsapp.com/send?text=Check%20today%27s%20live%2024K%20and%2022K%20gold%20rates%20across%20all%20top%20jewellers%20on%20https%3A%2F%2Fmygoldrates.com" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.485 1.332 5.001l-1.417 5.176 5.297-1.39c1.464.798 3.116 1.218 4.775 1.219h.004c5.505 0 9.988-4.478 9.989-9.984 0-2.667-1.038-5.174-2.924-7.06-1.886-1.886-4.393-2.925-7.061-2.925zm0 1.666c4.588 0 8.324 3.736 8.325 8.324 0 2.224-.866 4.314-2.439 5.888-1.573 1.574-3.663 2.44-5.887 2.44h-.003c-1.428 0-2.834-.378-4.066-1.094l-.291-.17-3.142.823.838-3.061-.186-.296c-.787-1.252-1.202-2.7-1.202-4.185.001-4.588 3.737-8.325 8.326-8.326z"/></svg> Share</a>
     <a class="btn btn-lite" href="#cmp">Compare jewellers</a>
     <a class="btn js-alert" href="inquiry.html">Daily rate alerts</a>
   </div>
@@ -2939,6 +2944,9 @@ $nav
   <p class="sub">Live 24K, 22K and 18K gold rates compared across India's
   top jewellers - updated daily, with the IBJA bullion
   reference for context.$where_note</p>
+  <div class="ai-quick-answer" aria-label="AI Quick Summary">
+    <strong>⚡ Live Summary ($date):</strong> Today's median 24K gold rate $where is <strong>$med24/g</strong> and 22K is <strong>$med22/g</strong> (pre-GST). Today's lowest 24K rate is offered by <strong>$low_brand</strong> at <strong>$low24/g</strong> across $n_brands compared jewellers.
+  </div>
   <div class="board-rates">
     <div class="tile best"><div class="k">&#9733; Lowest 24K Today</div>
       <div class="v">$low24</div><div class="u">per gram, pre-GST</div>
