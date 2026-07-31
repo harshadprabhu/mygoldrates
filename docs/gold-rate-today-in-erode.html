@@ -621,7 +621,7 @@ making charges, so every brand is compared on the same basis.</p>
         <button data-k="22" aria-pressed="false">22K</button>
         <button data-k="18" aria-pressed="false">18K</button>
       </div>
-      <button class="gst" id="nearbtn">&#128205; In my area</button>
+      <button class="gst" id="nearbtn">&#128205; Brands near me</button>
       <button class="gst" id="gstbtn" aria-pressed="false">+3% GST</button>
     </div>
   </div>
@@ -1099,7 +1099,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   }
   if(nearbtn)nearbtn.addEventListener('click',function(){
     if(nearOn){nearOn=false;nearbtn.setAttribute('aria-pressed','false');
-      nearbtn.textContent='📍 In my area';rnote.hidden=true;
+      nearbtn.textContent='📍 Brands near me';rnote.hidden=true;
       applyRegion();return;}
     if(!navigator.geolocation){alert('Location is not supported here.');return;}
     nearbtn.textContent='Locating...';
@@ -1110,16 +1110,16 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
       .then(function(r){return r.json();}).then(function(d){
         userState=d.principalSubdivision||'';
         nearOn=true;nearbtn.setAttribute('aria-pressed','true');
-        nearbtn.textContent='📍 '+(userState||'My area');
+        nearbtn.textContent='📍 Brands in '+(userState||'My area');
         var n=applyRegion();
         rnote.textContent=(n?('Now showing '+n+' local jeweller'+(n>1?'s':'')+
           ' that serve '+userState):('No local jewellers we track serve '+
           (userState||'your area')+' yet'))+' - national brands are always '+
           'shown. Tap again to hide local jewellers.';
         rnote.hidden=false;
-      }).catch(function(){nearbtn.textContent='📍 In my area';
+      }).catch(function(){nearbtn.textContent='📍 Brands near me';
         alert('Could not detect your area.');});
-    },function(){nearbtn.textContent='📍 In my area';
+    },function(){nearbtn.textContent='📍 Brands near me';
       alert('Location permission denied.');},
      {enableHighAccuracy:false,timeout:12000,maximumAge:600000});
   });
