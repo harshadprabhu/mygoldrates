@@ -1261,11 +1261,11 @@ def main():
 
     calcdrawer = f'''
 <button class="drawer-tab drawer-tab2" id="cdtab" aria-controls="cdrawer"
-  aria-expanded="false">Calculators &#128095;</button>
+  aria-expanded="false">Calculators &#9672;</button>
 <div class="drawer-ov" id="cdov" hidden></div>
 <aside class="drawer" id="cdrawer" aria-hidden="true"
   aria-label="Gold calculators panel">
-  <div class="drawer-head"><h2>Gold Calculators &#128095;</h2>
+  <div class="drawer-head"><h2>Gold Calculators &#9672;</h2>
     <button class="drawer-x" id="cdx" aria-label="Close panel">&times;</button>
   </div>
 
