@@ -198,29 +198,142 @@ def build_og_image(path="docs/og.png"):
     print(f"og: wrote {path}")
 
 
-# City/state landing pages: same national board, one URL per location.
+# City/state landing pages: enriched with local market hubs, regional jeweller tags & unique intro content.
 LOCATIONS = [
-    # metros & major cities
-    "Mumbai", "Delhi", "Bengaluru", "Hyderabad", "Chennai", "Kolkata",
-    "Pune", "Ahmedabad", "Jaipur", "Surat", "Lucknow", "Kanpur", "Nagpur",
-    "Indore", "Bhopal", "Patna", "Chandigarh", "Kochi", "Coimbatore",
-    "Madurai", "Visakhapatnam", "Vijayawada", "Mysuru", "Thrissur",
-    "Kozhikode", "Thiruvananthapuram", "Guwahati", "Bhubaneswar",
-    "Ludhiana", "Amritsar", "Vadodara", "Nashik", "Rajkot", "Varanasi",
-    "Agra", "Meerut", "Faridabad", "Ghaziabad", "Gurugram", "Noida",
-    "Ranchi", "Raipur", "Jodhpur", "Udaipur", "Kota", "Dehradun",
-    "Jamshedpur", "Dhanbad", "Aurangabad", "Solapur", "Tiruchirappalli",
-    "Salem", "Tirupati", "Guntur", "Warangal", "Mangaluru", "Hubli",
-    "Belagavi", "Kolhapur", "Jalandhar", "Siliguri", "Cuttack", "Ajmer",
-    "Gwalior", "Jabalpur", "Allahabad", "Bareilly", "Moradabad", "Aligarh",
-    "Vijayapura", "Davanagere", "Erode", "Tirunelveli", "Kollam", "Kannur",
-    # states & UTs
+    # Top major gold trading & retail hubs in India
+    "Mumbai", "Delhi", "Bengaluru", "Chennai", "Hyderabad", "Kolkata",
+    "Pune", "Ahmedabad", "Jaipur", "Kochi", "Coimbatore", "Lucknow",
+    "Surat", "Chandigarh", "Patna", "Indore", "Visakhapatnam", "Vadodara",
+    "Nagpur", "Bhopal",
+    # Key states
     "Maharashtra", "Tamil Nadu", "Karnataka", "Kerala", "Telangana",
-    "Andhra Pradesh", "Gujarat", "Rajasthan", "West Bengal",
-    "Uttar Pradesh", "Madhya Pradesh", "Punjab", "Haryana", "Bihar",
-    "Odisha", "Assam", "Jharkhand", "Uttarakhand", "Himachal Pradesh",
-    "Goa",
+    "Andhra Pradesh", "Gujarat", "Rajasthan", "West Bengal", "Uttar Pradesh",
+    "Madhya Pradesh", "Punjab", "Haryana", "Bihar", "Odisha", "Assam",
 ]
+
+CITY_ENRICHMENT_DATA = {
+    "Mumbai": {
+        "hubs": "Zaveri Bazaar, Dadar TT Circle, Bandra Turner Road, Borivali West",
+        "state": "Maharashtra",
+        "regional_brands": ["PNG Sons", "Ranka Jewellers", "Chandukaka Saraf", "Bhindi Jewellers"],
+        "intro": "Mumbai is India's primary gold trading hub and home to the historic Zaveri Bazaar in South Mumbai, where daily wholesale rates set the benchmark for physical gold trading across Western India. Gold buyers in Mumbai frequently compare live 24K and 22K per-gram rates before visiting premier jewellers in Dadar, Bandra, and Borivali.",
+    },
+    "Delhi": {
+        "hubs": "Chandni Chowk (Dariba Kalan), Karol Bagh (Bank Street), South Extension",
+        "state": "Delhi",
+        "regional_brands": ["PC Jeweller", "Tanishq", "Kalyan Jewellers"],
+        "intro": "Delhi's gold market centers around the historic Dariba Kalan in Chandni Chowk and Bank Street in Karol Bagh, representing one of Northern India's largest retail gold hubs. Buyers across NCR (Delhi, Noida, Gurugram, Ghaziabad) track daily 24K and 22K rates to evaluate festival and wedding season price movements.",
+    },
+    "Bengaluru": {
+        "hubs": "Chickpet, Commercial Street, Jayanagar 4th Block, Malleshwaram",
+        "state": "Karnataka",
+        "regional_brands": ["C. Krishniah Chetty (CKC)", "Lalithaa Jewellery", "Bhima Jewellers", "Kirtilals"],
+        "intro": "Bengaluru's traditional gold market in Chickpet and modern showrooms in Commercial Street and Jayanagar feature traditional South Indian jewelry alongside modern lightweight gold. Gold rates in Karnataka reflect national board rates, with 22K (916 purity) being the preferred choice for traditional temple jewelry.",
+    },
+    "Chennai": {
+        "hubs": "T. Nagar (Usman Road), Sowcarpet, Mylapore, Anna Nagar",
+        "state": "Tamil Nadu",
+        "regional_brands": ["Vummidi Bangaru Jewellers (VBJ)", "Lalithaa Jewellery", "Kirtilals", "Sri Kumaran Stores"],
+        "intro": "Chennai is one of India's largest consumer markets for gold, centered around Usman Road in T. Nagar and NSC Bose Road in Sowcarpet. The Madras Jewellers & Diamond Merchants Association and major regional brands publish daily rates, making rate comparison essential for buyers across Tamil Nadu.",
+    },
+    "Hyderabad": {
+        "hubs": "Panjagutta, Abids, General Bazaar (Secunderabad), Madhapur",
+        "state": "Telangana",
+        "regional_brands": ["Vaibhav Jewellers", "Lalithaa Jewellery", "Kalyan Jewellers"],
+        "intro": "Hyderabad's gold market spans historic shopping districts in General Bazaar Secunderabad and Abids to major modern showrooms along the Panjagutta stretch. Gold purchasing in Telangana peaks during auspicious occasions like Akshaya Tritiya, Ugadi, and wedding seasons.",
+    },
+    "Kolkata": {
+        "hubs": "Bada Bazar, Bowbazar (BB Ganguly Street), Gariahat, Salt Lake",
+        "state": "West Bengal",
+        "regional_brands": ["Senco Gold", "PC Chandra Jewellers", "Anjali Jewellers"],
+        "intro": "Kolkata's Bowbazar and Bada Bazar are renowned for handcrafted gold filigree work (Kalka & Nakshi craftsmanship). Buyers in West Bengal closely follow daily 22K rates for traditional Bengali bridal jewelry, comparing board rates across leading regional and national brands.",
+    },
+    "Pune": {
+        "hubs": "Laxmi Road, Raviwar Peth, Kothrud, MG Road Camp",
+        "state": "Maharashtra",
+        "regional_brands": ["PNG Sons", "Ranka Jewellers", "Chandukaka Saraf"],
+        "intro": "Pune's traditional gold market along Laxmi Road and Raviwar Peth features iconic Maharashtrian designs like Kolhapuri Saaj, Thushi, and Mangalsutra. Daily rates in Pune mirror Mumbai board rates across national and heritage Maharashtrian jewellers.",
+    },
+    "Ahmedabad": {
+        "hubs": "CG Road, Manek Chowk, Satellite, Ashram Road",
+        "state": "Gujarat",
+        "regional_brands": ["RBZ Jewellers", "Bhindi Jewellers", "Kalyan Jewellers"],
+        "intro": "Ahmedabad's historic Manek Chowk night market and premier shopping showrooms along CG Road serve gold investors and jewelry buyers across Gujarat. Gold is valued both as an investment asset and for traditional Gujarati wedding ornaments.",
+    },
+    "Jaipur": {
+        "hubs": "Johari Bazaar, MI Road, Vaishali Nagar",
+        "state": "Rajasthan",
+        "regional_brands": ["PC Jeweller", "Tanishq", "Kalyan Jewellers"],
+        "intro": "Jaipur's famous Johari Bazaar is world-renowned for traditional Kundan, Meenakari, and Jadau gold jewelry. Buyers in Rajasthan track national 24K and 22K gold rates to evaluate raw gold value separate from intricate artisanal labor charges.",
+    },
+    "Kochi": {
+        "hubs": "MG Road, Broadway, Edappally",
+        "state": "Kerala",
+        "regional_brands": ["Josco Jewellers", "Bhima Jewellers", "Jos Alukkas", "Malabar Gold"],
+        "intro": "Kerala accounts for a significant share of India's total gold consumption. In Kochi, the All Kerala Gold & Silver Merchants Association (AKGSMA) publishes daily benchmark rates followed by major Kerala-based global jewelry chains along MG Road.",
+    },
+    "Coimbatore": {
+        "hubs": "Cross Cut Road, Oppanakara Street, RS Puram",
+        "state": "Tamil Nadu",
+        "regional_brands": ["Kirtilals", "Lalithaa Jewellery", "Vummidi Bangaru"],
+        "intro": "Coimbatore is a major manufacturing and retail hub for gold jewelry in South India, centered along Cross Cut Road and Oppanakara Street. Known for machine-made chains and precision casting, local buyers closely compare daily 22K and 18K per-gram quotes.",
+    },
+    "Lucknow": {
+        "hubs": "Hazratganj, Chowk, Aminabad",
+        "state": "Uttar Pradesh",
+        "regional_brands": ["PC Jeweller", "Tanishq", "Kalyan Jewellers"],
+        "intro": "Lucknow's historic Chowk market and commercial hub in Hazratganj are famous for handcrafted gold ornaments and traditional Awadhi jewelry designs. Gold rate comparison in UP helps buyers calculate net gold costs before making charges and 3% GST.",
+    },
+    "Surat": {
+        "hubs": "Ghod Dod Road, Varachha, Ring Road",
+        "state": "Gujarat",
+        "regional_brands": ["RBZ Jewellers", "Kalyan Jewellers", "Tanishq"],
+        "intro": "Surat, known globally as a gem and diamond processing center, has a bustling gold retail market along Ghod Dod Road. Local buyers analyze 24K bullion rates alongside 18K gold rates common in diamond-studded jewelry.",
+    },
+    "Chandigarh": {
+        "hubs": "Sector 17, Sector 22, Sector 35",
+        "state": "Punjab / Haryana",
+        "regional_brands": ["PC Jeweller", "Tanishq", "Malabar Gold"],
+        "intro": "Chandigarh's Sector 17 and Sector 22 markets serve shoppers across Punjab, Haryana, and Himachal Pradesh. Heavy gold jewelry and investment coins are widely purchased, making daily rate tracking essential during festival and marriage seasons.",
+    },
+    "Patna": {
+        "hubs": "Hathwa Market, Maurya Lok, Boring Road",
+        "state": "Bihar",
+        "regional_brands": ["Tanishq", "Kalyan Jewellers", "PC Jeweller"],
+        "intro": "Patna's gold retail sector along Boring Road and Hathwa Market sees high demand for 22K traditional jewelry during Chhath Puja, Dhanteras, and wedding seasons. National board rates apply uniformly across major showrooms in Bihar.",
+    },
+    "Indore": {
+        "hubs": "Sarafa Bazaar, MG Road, Palasia",
+        "state": "Madhya Pradesh",
+        "regional_brands": ["DP Abhushan", "Tanishq", "Kalyan Jewellers"],
+        "intro": "Indore's famous Sarafa Bazaar—a bustling gold market by day and food street by night—is the commercial heart of Madhya Pradesh's jewelry trade. Daily 24K and 22K rates in Indore follow national bullion trends closely.",
+    },
+    "Visakhapatnam": {
+        "hubs": "Daba Gardens, Kurupam Market, VIP Road",
+        "state": "Andhra Pradesh",
+        "regional_brands": ["Vaibhav Jewellers", "Lalithaa Jewellery", "Kalyan Jewellers"],
+        "intro": "Visakhapatnam is a primary gold buying destination in Coastal Andhra, with Kurupam Market and VIP Road hosting heritage jewelers like Vaibhav Jewellers alongside national chains. Buyers track per-gram 22K (916) prices daily.",
+    },
+    "Vadodara": {
+        "hubs": "Alkapuri, Mandvi, Raopura",
+        "state": "Gujarat",
+        "regional_brands": ["RBZ Jewellers", "Bhindi Jewellers", "Kalyan Jewellers"],
+        "intro": "Vadodara's historic Mandvi market and modern retail district in Alkapuri cater to gold buyers across Central Gujarat. Daily rates for 24K coins and 22K ornaments match state-wide board benchmarks.",
+    },
+    "Nagpur": {
+        "hubs": "Itwari, Dharampeth, Sadar",
+        "state": "Maharashtra",
+        "regional_brands": ["PNG Sons", "Ranka Jewellers", "Chandukaka Saraf"],
+        "intro": "Nagpur's Itwari market is Vidarbha's largest wholesale and retail gold market. Shoppers compare daily rates between heritage Maharashtrian jewelers and national chains in Dharampeth before purchasing.",
+    },
+    "Bhopal": {
+        "hubs": "New Market, Chowk Bazaar, MP Nagar",
+        "state": "Madhya Pradesh",
+        "regional_brands": ["Tanishq", "Kalyan Jewellers", "PC Jeweller"],
+        "intro": "Bhopal's Chowk Bazaar in Old City and MP Nagar in New City feature a mix of traditional gold craft and modern retail chains. Daily rates reflect national median gold prices.",
+    },
+}
+
 
 
 # Cities that get their own dated daily gold-news page. Kept small on purpose:
@@ -1119,28 +1232,29 @@ def main():
     low_g = inr(ladder(lowest["canonical_24k_pre_gst"])["24K"])
 
     def local_intro(nm):
-        """Unique per-city body so city pages aren't near-duplicates."""
+        """Enriched, unique per-city body so city pages have genuine local value."""
         if nm == "India":
             return ""
+        data = CITY_ENRICHMENT_DATA.get(nm, {})
+        hubs_info = f'<p><strong>Key Shopping Hubs in {nm}:</strong> {data["hubs"]}.</p>' if data.get("hubs") else ""
+        brands_info = f'<p><strong>Featured Regional & National Jewellers in {nm}:</strong> {", ".join(data["regional_brands"])} and leading national brands.</p>' if data.get("regional_brands") else ""
+        custom_desc = data.get("intro", f"Gold rates in {nm} follow national board rates across major jewellers. Compare live 24K, 22K, and 18K per-gram prices pre-GST below.")
+        
         return (
-            f'<section class="seo"><h2>Gold Rate Today in {nm}</h2>'
-            f'<p>The <strong>gold rate today in {nm}</strong> is '
-            f'<strong>{inr(med["24K"])} per gram for 24K (999)</strong> and '
-            f'<strong>{inr(med["22K"])} per gram for 22K (916)</strong>, '
-            f'pre-GST - the live median from {len(live)} of India’s leading '
-            f'jewellers shown above. National chains such as Tanishq, Malabar '
-            f'Gold and Kalyan Jewellers quote the same board rate in {nm} as '
-            f'across India, so these figures are accurate for buyers in {nm} '
-            f'today. Right now {lowest["brands"]["name"]} lists the lowest 24K '
-            f'rate at {low_g} per gram.</p>'
-            f'<p>Buying gold in {nm}? Compare each jeweller and its premium in '
-            f'the table above, estimate the billed price with our '
-            f'<a href="{SITE_URL}/making-charges-calculator">making charges '
-            f'calculator</a> (3% GST and making charges are extra), and read '
-            f'<a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K gold</a> '
-            f'before you choose. Prefer a daily update? Get '
-            f'<a href="{SITE_URL}/inquiry">free {nm} gold rate alerts</a> by '
-            f'email.</p></section>')
+            f'<section class="seo"><h2>Gold Rate Today in {nm} - Market Overview & Shopping Hubs</h2>'
+            f'<p>{custom_desc}</p>'
+            f'<p>Today the live median gold rate in <strong>{nm}</strong> is '
+            f'<strong>{inr(med["24K"])} per gram for 24K (999 purity)</strong> and '
+            f'<strong>{inr(med["22K"])} per gram for 22K (916 purity)</strong>, pre-GST. '
+            f'Currently, <strong>{lowest["brands"]["name"]}</strong> offers the lowest 24K rate at '
+            f'<strong>{low_g} per gram</strong>.</p>'
+            f'{hubs_info}'
+            f'{brands_info}'
+            f'<p>Before buying gold in {nm}, use our <a href="{SITE_URL}/making-charges-calculator.html">making charges calculator</a> '
+            f'to estimate total billed costs with 3% GST, or read our <a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K guide</a>. '
+            f'You can also <a href="{SITE_URL}/inquiry.html">subscribe to free daily {nm} rate alerts</a>.</p>'
+            f'</section>')
+
 
     tvars = dict(
         n_brands=str(len(live)),
@@ -1254,6 +1368,33 @@ def main():
   <a href="{SITE_URL}/privacy.html">Privacy Policy</a>.</p>""")
 
     write_page(
+        "terms",
+        "Terms of Service - MyGoldRates",
+        "Terms of Service, Disclaimer and User Conditions for MyGoldRates.com gold rate comparison platform.",
+        "Terms of Service",
+        f"""
+  <p>Welcome to <strong>MyGoldRates.com</strong> ("GoldRates", "we", "us", "our"). By accessing or using this website, you agree to comply with and be bound by the following Terms of Service.</p>
+  
+  <h2>1. Informational &amp; Non-Financial Advice Disclaimer</h2>
+  <p>All data, gold rates, calculative results, and market benchmarks presented on MyGoldRates.com are provided strictly for <strong>informational and comparative reference only</strong>. We do not provide financial, investment, tax, or legal advice.</p>
+  <p>Gold prices change continuously based on market dynamics. While we compile published rates from verified sources daily, we do not guarantee real-time accuracy or specific jeweller store pricing. Always confirm billed rates directly with authorized jewellers before making purchasing or investment decisions.</p>
+  
+  <h2>2. Accuracy of Data &amp; Jeweller Quotes</h2>
+  <p>Board rates displayed on this platform are compiled from public jeweller quotes, industry association rates (such as IBJA), and market feeds. GoldRates is an independent comparison platform and is not affiliated with, endorsed by, or sponsored by any listed jewellery brand unless explicitly stated.</p>
+  
+  <h2>3. Acceptable Use &amp; Intellectual Property</h2>
+  <p>The layout, design, comparison tools, calculators, and compiled datasets on MyGoldRates.com are protected by copyright and intellectual property laws. You may use this website for personal, non-commercial purposes. Automated scraping, data extraction, or redistribution of our compiled data without explicit written consent is strictly prohibited.</p>
+  
+  <h2>4. Third-Party Advertising &amp; Cookies</h2>
+  <p>We work with third-party advertising partners, including <strong>Google AdSense</strong>, to serve advertisements when you visit our website. These partners may use cookies and web beacons to serve ads based on your visit history. For more information, please see our <a href="{SITE_URL}/privacy.html">Privacy Policy</a>.</p>
+  
+  <h2>5. Limitation of Liability</h2>
+  <p>In no event shall GoldRates, its owners, or operators be liable for any direct, indirect, incidental, or consequential damages resulting from your reliance on information or tools provided on this website.</p>
+  
+  <h2>6. Contact &amp; Questions</h2>
+  <p>For questions regarding these Terms of Service or editorial inquiries, please email us at <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>""")
+
+    write_page(
         "privacy",
         "Privacy Policy - GoldRates",
         "How GoldRates collects, uses and protects your personal information, "
@@ -1262,7 +1403,7 @@ def main():
         f"""
   <p>This policy explains what information GoldRates ("we", "us") collects when
   you use <a href="{SITE_URL}/">mygoldrates.com</a>, how we use it, and the
-  choices you have.</p>
+  choices you have. Please also review our <a href="{SITE_URL}/terms.html">Terms of Service</a>.</p>
   <h2>Information you give us</h2>
   <p>If you subscribe to daily rate alerts, we collect the details you enter:
   your name, email address, phone number and location (country, state, city and
@@ -1274,7 +1415,7 @@ def main():
   performance). We also use privacy-respecting analytics to understand overall
   traffic.</p>
   <h2>Cookies and advertising</h2>
-  <p>We may display ads served by Google, using
+  <p>We display ads served by Google, using
   <strong>Google AdSense</strong>. Third-party vendors, including Google, use
   cookies to serve ads based on your prior visits to this and other websites.
   Google's use of advertising cookies enables it and its partners to serve ads
@@ -1308,6 +1449,7 @@ def main():
   <h2>Contact</h2>
   <p>Questions about this policy?
   <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>""")
+
 
     # ================= content pages: calculators / news / learn =========
     extra_urls = []          # (loc, changefreq, priority) added to sitemap
@@ -2539,8 +2681,7 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 .blogo{width:20px;height:20px;border-radius:5px;object-fit:contain;
   background:#fff;border:1px solid var(--line);padding:1px;flex:0 0 20px}
 
-/* gold-water ripple on click/touch */
-#ripplec{position:fixed;inset:0;z-index:999;pointer-events:none}
+
 /* gold coin cursor trail */
 .coin{position:fixed;border-radius:50%;pointer-events:none;z-index:1200;
   background:radial-gradient(circle at 35% 30%,#F7E7A9,#D9B24A 55%,#8C6A18);
@@ -2718,6 +2859,7 @@ $calcdrawer
   <div class="foot-nav">
     <a href="about.html">About</a>
     <a href="contact.html">Contact</a>
+    <a href="terms.html">Terms of Service</a>
     <a href="privacy.html">Privacy Policy</a>
     <a href="inquiry.html">Daily alerts</a>
   </div>
@@ -2991,43 +3133,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     },{passive:true});
   }
 
-  /* ---- gold-water ripple on click / touch (desktop + mobile) ---- */
-  if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
-    var rc=document.createElement('canvas');rc.id='ripplec';
-    document.body.appendChild(rc);
-    var rx=rc.getContext('2d'),rips=[],raf=null,
-        DPR=Math.min(window.devicePixelRatio||1,2);
-    function rsz(){rc.width=innerWidth*DPR;rc.height=innerHeight*DPR;
-      rc.style.width=innerWidth+'px';rc.style.height=innerHeight+'px';
-      rx.setTransform(DPR,0,0,DPR,0,0);}
-    rsz();addEventListener('resize',rsz,{passive:true});
-    function drawR(){
-      rx.clearRect(0,0,innerWidth,innerHeight);var t=Date.now()/1000;
-      rips=rips.filter(function(p){return p.life>0;});
-      rips.forEach(function(p){
-        p.r+=p.spd;p.spd*=0.986;p.life-=0.011;
-        for(var ring=0;ring<3;ring++){
-          var base=p.r-ring*15;if(base<=0)continue;
-          var a=Math.max(0,p.life)*(0.55-ring*0.15);
-          rx.beginPath();
-          for(var ang=0;ang<=6.2832;ang+=0.17){
-            var wob=base+Math.sin(ang*6+p.ph+t*3)*(2+base*0.02);
-            var x=p.x+Math.cos(ang)*wob,y=p.y+Math.sin(ang)*wob;
-            ang===0?rx.moveTo(x,y):rx.lineTo(x,y);
-          }
-          rx.closePath();
-          rx.strokeStyle='rgba(214,175,72,'+a+')';rx.lineWidth=2.2;rx.stroke();
-          if(ring===0){rx.fillStyle='rgba(240,219,154,'+(a*0.09)+')';rx.fill();}
-        }
-      });
-      raf=rips.length?requestAnimationFrame(drawR):null;
-    }
-    function spawnR(x,y){rips.push({x:x,y:y,r:6,spd:3.6,life:1,
-      ph:Math.random()*6.28});if(rips.length>7)rips.shift();
-      if(!raf)raf=requestAnimationFrame(drawR);}
-    addEventListener('pointerdown',function(e){spawnR(e.clientX,e.clientY);},
-      {passive:true});
-  }
+
 
   /* ---- daily-alerts modal ---- */
   var SB_URL="$supabase_url", SB_KEY="$anon_key";
@@ -3362,6 +3468,7 @@ $body
   <div class="foot-nav">
     <a href="$site_url/about.html">About</a>
     <a href="$site_url/contact.html">Contact</a>
+    <a href="$site_url/terms.html">Terms of Service</a>
     <a href="$site_url/privacy.html">Privacy Policy</a>
   </div>
   <p>© $year GoldRates - daily gold rate comparison for India.</p>
