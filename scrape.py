@@ -470,9 +470,8 @@ def fetch_via_proxy_waterfall(url, session, actions=None):
     1. ScraperAPI (5,000 free req/mo)
     2. ScrapingBee (1,000 free req/mo)
     3. ZenRows (1,000 free req/mo)
-    4. WebScrapingAPI (1,000 free req/mo)
-    5. Crawlbase (1,000 free req/mo)
-    6. Zyte (Paid/Final Fallback)
+    4. Crawlbase (1,000 free req/mo)
+    5. Zyte (Paid/Final Fallback)
     -> (html, note)
     """
     # 1. ScraperAPI
@@ -511,19 +510,7 @@ def fetch_via_proxy_waterfall(url, session, actions=None):
         except Exception:
             pass
 
-    # 4. WebScrapingAPI
-    key = os.environ.get("WEBSCRAPINGAPI_KEY")
-    if key:
-        try:
-            r = session.get("https://api.webscrapingapi.com/v1",
-                            params={"api_key": key, "url": url, "render_js": "1"},
-                            timeout=45)
-            if r.status_code == 200 and len(r.text) > 500:
-                return r.text, "ok:webscrapingapi"
-        except Exception:
-            pass
-
-    # 5. Crawlbase
+    # 4. Crawlbase
     key = os.environ.get("CRAWLBASE_KEY")
     if key:
         try:
@@ -535,7 +522,7 @@ def fetch_via_proxy_waterfall(url, session, actions=None):
         except Exception:
             pass
 
-    # 6. Zyte (Paid / Final Fallback)
+    # 5. Zyte (Paid / Final Fallback)
     return fetch_via_zyte(url, session, actions=actions)
 
 
