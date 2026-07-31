@@ -390,13 +390,15 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 /* markets side drawer */
 .drawer-tab.drawer-tab2{top:calc(50% + 18px);bottom:auto}
 .calc-drawer{grid-template-columns:1fr!important}
-.drawer-tab{position:fixed;right:0;top:calc(50% - 152px);z-index:940;writing-mode:vertical-rl;
+.drawer-tab{position:fixed;right:0;top:calc(50% - 150px);z-index:940;writing-mode:vertical-rl;
   text-orientation:mixed;font:600 12px/1 "IBM Plex Mono",monospace;
-  letter-spacing:.2em;text-transform:uppercase;color:#1A1508;
+  letter-spacing:.14em;text-transform:uppercase;color:#1A1508;
   background:var(--gold-foil);border:0;border-radius:9px 0 0 9px;
   padding:15px 9px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.28)}
+.drawer-tab.drawer-tab2{top:calc(50% - 15px)}
+.drawer-tab.drawer-tab3{top:calc(50% + 120px)}
 .drawer-ov{position:fixed;inset:0;background:rgba(10,8,4,.5);z-index:950}
-.drawer{position:fixed;top:0;right:0;height:100%;width:min(400px,94vw);
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(440px,94vw);
   background:var(--paper);border-left:1px solid var(--line);z-index:960;
   transform:translateX(105%);transition:transform .28s ease;
   overflow-y:auto;padding:20px 22px 34px}
@@ -858,11 +860,11 @@ making charges, so every brand is compared on the same basis.</p>
 </aside>
 
 <button class="drawer-tab drawer-tab2" id="cdtab" aria-controls="cdrawer"
-  aria-expanded="false">Calculators &#9670;</button>
+  aria-expanded="false">Calculators &#128095;</button>
 <div class="drawer-ov" id="cdov" hidden></div>
 <aside class="drawer" id="cdrawer" aria-hidden="true"
   aria-label="Gold calculators panel">
-  <div class="drawer-head"><h2>Gold Calculators</h2>
+  <div class="drawer-head"><h2>Gold Calculators &#128095;</h2>
     <button class="drawer-x" id="cdx" aria-label="Close panel">&times;</button>
   </div>
   <h3>Price Calculator</h3>
@@ -906,6 +908,103 @@ making charges, so every brand is compared on the same basis.</p>
     Calculator</b><span>Future value &amp; grams</span></a>
   <a class="toolcard" href="https://mygoldrates.com/making-charges-calculator"><b>Making
     Charges</b><span>Final billed price with GST</span></a>
+</aside>
+
+
+
+<button class="drawer-tab drawer-tab3" id="coindtab" aria-controls="coindrawer"
+  aria-expanded="false">Gold Coins &#129689;</button>
+<div class="drawer-ov" id="coindov" hidden></div>
+<aside class="drawer" id="coindrawer" aria-hidden="true"
+  aria-label="Gold coins panel">
+  <div class="drawer-head"><h2>24K Minted Gold Coins &#129689;</h2>
+    <button class="drawer-x" id="coindx" aria-label="Close panel">&times;</button>
+  </div>
+  <p class="dnote">Compare 24K Swiss-Standard 999.9 &amp; 999 fine gold coins and bullion bars across certified refiners &amp; jewellers, with exact lowest making charges marked.</p>
+
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 16px">
+    <span style="font-size:11px;color:var(--ink-3);align-self:center">Weight:</span>
+    <button type="button" class="coin-pill active" data-wt="1" style="font:500 11px/1 'IBM Plex Mono',monospace;background:var(--gold);color:#0C0904;border:1px solid var(--gold);border-radius:999px;padding:5px 10px;cursor:pointer">1g</button>
+    <button type="button" class="coin-pill" data-wt="2" style="font:500 11px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer">2g</button>
+    <button type="button" class="coin-pill" data-wt="5" style="font:500 11px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer">5g</button>
+    <button type="button" class="coin-pill" data-wt="8" style="font:500 11px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer">8g</button>
+    <button type="button" class="coin-pill" data-wt="10" style="font:500 11px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer">10g</button>
+    <button type="button" class="coin-pill" data-wt="50" style="font:500 11px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer">50g</button>
+  </div>
+
+  <div style="display:grid;gap:14px">
+    <!-- MMTC-PAMP -->
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong style="font-size:14px">MMTC-PAMP 24K</strong>
+        <span style="font:700 10px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:2px 7px;border-radius:999px">999.9 Pure</span>
+      </div>
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 2.5% <span class="rank-badge rank-1" style="font-size:9px;padding:2px 5px">#1 LOWEST</span></div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Swiss Assay Certification &amp; CertiPAMP Packaging</div>
+      <div id="cp-mmtc" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;14,973</div>
+      <a href="https://www.mmtcpamp.com/shop" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy MMTC-PAMP 24K &rarr;</a>
+    </div>
+
+    <!-- Kalyan Jewellers / Candere -->
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong style="font-size:14px">Kalyan Jewellers / Candere</strong>
+        <span style="font:700 10px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:2px 7px;border-radius:999px">999 Pure</span>
+      </div>
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 3.0% <span class="rank-badge rank-2" style="font-size:9px;padding:2px 5px">#2</span></div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">BIS Hallmarked 999 Pure &amp; 100% Transparency</div>
+      <div id="cp-kalyan" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;14,930</div>
+      <a href="https://www.candere.com/gifts/gold-coins.html" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Kalyan 24K &rarr;</a>
+    </div>
+
+    <!-- Malabar Gold & Diamonds -->
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong style="font-size:14px">Malabar Gold &amp; Diamonds</strong>
+        <span style="font:700 10px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:2px 7px;border-radius:999px">999 Pure</span>
+      </div>
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 3.2% <span class="rank-badge rank-3" style="font-size:9px;padding:2px 5px">#3</span></div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Tested Purity &amp; Free Transit Insurance Coverage</div>
+      <div id="cp-malabar" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;14,950</div>
+      <a href="https://www.malabargoldanddiamonds.com/in/pan-india/en/product-list.html?search=Gold%20Bars%20%26%20Coins" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Malabar 24K &rarr;</a>
+    </div>
+
+    <!-- Senco Gold -->
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong style="font-size:14px">Senco Gold &amp; Diamonds</strong>
+        <span style="font:700 10px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:2px 7px;border-radius:999px">999 Pure</span>
+      </div>
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 3.5%</div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Traditional BIS Hallmarked &amp; Sealed Packaging</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;14,985</div>
+      <a href="https://sencogoldanddiamonds.com/products/category/gold-coins" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Senco 24K &rarr;</a>
+    </div>
+
+    <!-- Joyalukkas -->
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong style="font-size:14px">Joyalukkas</strong>
+        <span style="font:700 10px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:2px 7px;border-radius:999px">999 Pure</span>
+      </div>
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 3.8%</div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Assayer Certified 999 Pure &amp; Sealed Tamper-Proof</div>
+      <div id="cp-joyalukkas" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;15,020</div>
+      <a href="https://www.joyalukkas.in/search.html?query=gold+coin&amp;page=1" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Joyalukkas 24K &rarr;</a>
+    </div>
+
+    <!-- Tanishq -->
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong style="font-size:14px">Tanishq (Tata Product)</strong>
+        <span style="font:700 10px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:2px 7px;border-radius:999px">999 Pure</span>
+      </div>
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 4.0%</div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Tata Trust Stamp &amp; Buyback Guarantee</div>
+      <div id="cp-tanishq" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;15,045</div>
+      <a href="https://www.tanishq.co.in/search?search-button=&amp;q=gold+coins&amp;lang=en_IN" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Tanishq 24K &rarr;</a>
+    </div>
+  </div>
 </aside>
 
 <footer>
@@ -1156,7 +1255,25 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     document.getElementById('cdx').addEventListener('click',function(){cdSet(false);});
     cdov.addEventListener('click',function(){cdSet(false);});
     document.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&cdw.classList.contains('open'))cdSet(false);});
+      if(e.key==='Escape'&&cdw.classList.contains('open'))cdSet(false);}
+
+  /* gold coins drawer */
+  var coindw=document.getElementById('coindrawer'),
+      coindov=document.getElementById('coindov'),
+      coindtab=document.getElementById('coindtab');
+  if(coindw&&coindtab){
+    var coindSet=function(o){coindw.classList.toggle('open',o);coindov.hidden=!o;
+      coindtab.setAttribute('aria-expanded',o?'true':'false');
+      coindw.setAttribute('aria-hidden',o?'false':'true');};
+    coindtab.addEventListener('click',function(){
+      coindSet(!coindw.classList.contains('open'));});
+    var coindx=document.getElementById('coindx');
+    if(coindx)coindx.addEventListener('click',function(){coindSet(false);});
+    if(coindov)coindov.addEventListener('click',function(){coindSet(false);});
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'&&coindw.classList.contains('open'))coindSet(false);});
+  }
+);
   }
 
   /* ---- calculator ---- */
