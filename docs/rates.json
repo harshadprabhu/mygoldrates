@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-07-31",
-  "last_updated": "2026-07-31T14:27:17.920921+05:30",
+  "last_updated": "2026-07-31T17:05:26.836889+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 142067.0,
-      "change_pct": -0.81
+      "price_per_10g_inr": 141829.0,
+      "change_pct": -0.98
     },
     {
       "contract": "GOLDM",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 141966.0,
-      "change_pct": -0.77
+      "price_per_10g_inr": 141801.0,
+      "change_pct": -0.89
     }
   ],
   "jewellers": [
@@ -112,16 +112,16 @@
       "rate_18k_per_gram_inr": 10864.12
     },
     {
-      "jeweller": "Kisna",
-      "rate_24k_per_gram_inr": 14480.42,
-      "rate_22k_per_gram_inr": 13277.34,
-      "rate_18k_per_gram_inr": 10871.18
-    },
-    {
       "jeweller": "Tanishq",
       "rate_24k_per_gram_inr": 14505.13,
       "rate_22k_per_gram_inr": 13300.0,
       "rate_18k_per_gram_inr": 10889.74
+    },
+    {
+      "jeweller": "Kisna",
+      "rate_24k_per_gram_inr": 14507.76,
+      "rate_22k_per_gram_inr": 13302.41,
+      "rate_18k_per_gram_inr": 10891.71
     },
     {
       "jeweller": "C Krishniah Chetty",
@@ -137,15 +137,15 @@
     },
     {
       "jeweller": "Waman Hari Pethe",
-      "rate_24k_per_gram_inr": 14608.0,
-      "rate_22k_per_gram_inr": 13394.32,
-      "rate_18k_per_gram_inr": 10966.97
+      "rate_24k_per_gram_inr": 14644.0,
+      "rate_22k_per_gram_inr": 13427.33,
+      "rate_18k_per_gram_inr": 10993.99
     },
     {
       "jeweller": "CaratLane",
-      "rate_24k_per_gram_inr": 14754.09,
-      "rate_22k_per_gram_inr": 13528.28,
-      "rate_18k_per_gram_inr": 11076.65
+      "rate_24k_per_gram_inr": 14759.06,
+      "rate_22k_per_gram_inr": 13532.83,
+      "rate_18k_per_gram_inr": 11080.37
     },
     {
       "jeweller": "Ranka Jewellers",
