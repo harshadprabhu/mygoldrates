@@ -57,7 +57,7 @@ PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 # ZYTE_API_KEY secret) instead of a direct request; keyed by brand slug so no
 # DB schema change is needed. caratlane (Titan, like tanishq) serves its
 # product price-breakup only to real browsers.
-NEEDS_PROXY = {"tanishq", "malabar", "caratlane", "whp"}
+NEEDS_PROXY = {"tanishq", "malabar", "caratlane", "whp", "joyalukkas"}
 
 # Browser actions Zyte runs before returning HTML, per slug (none currently;
 # CaratLane reads from its digital-gold page, which needs no interaction).

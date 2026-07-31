@@ -61,7 +61,7 @@ REGIONAL_BRANDS = [
     # JS-rendered + slow -> parked for Zyte.
     {"name": "Joyalukkas", "slug": "joyalukkas", "domain": "joyalukkas.in",
      "rate_url": "https://www.joyalukkas.in/goldrate",
-     "active": False, "includes_gst": False},
+     "active": True, "includes_gst": False},
 ]
 
 
