@@ -3042,32 +3042,49 @@ $local_intro
   </div>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
-    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <strong style="font-size:15px">MMTC-PAMP 24K</strong>
-        <span style="font:700 10.5px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:3px 8px;border-radius:999px">999.9 Pure</span>
+    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong style="font-size:15px">MMTC-PAMP 24K</strong>
+          <span style="font:700 10.5px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:3px 8px;border-radius:999px">999.9 Pure</span>
+        </div>
+        <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">Swiss Assay Certification &amp; Tamper-Proof Packaging</div>
+        <div id="cp-mmtc" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:8px">&#8377;14,973</div>
       </div>
-      <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">Swiss Assay Certification &amp; Tamper-Proof Packaging</div>
-      <div id="cp-mmtc" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold)">&#8377;14,973</div>
-      <div style="font-size:11.5px;color:var(--ink-3);margin-top:2px">Includes assaying &amp; minting fee</div>
+      <a href="https://www.mmtcpamp.com/gold" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:12px;padding:8px 12px;margin-top:10px">Buy MMTC-PAMP 24K &rarr;</a>
     </div>
-    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <strong style="font-size:15px">Tanishq 24K Coin</strong>
-        <span style="font:700 10.5px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:3px 8px;border-radius:999px">999 Pure</span>
+    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong style="font-size:15px">Tanishq 24K Coin</strong>
+          <span style="font:700 10.5px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:3px 8px;border-radius:999px">999 Pure</span>
+        </div>
+        <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">Tata Trust Stamp &amp; Buyback Guarantee</div>
+        <div id="cp-tanishq" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:8px">&#8377;15,045</div>
       </div>
-      <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">Tata Trust Stamp &amp; Buyback Guarantee</div>
-      <div id="cp-tanishq" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold)">&#8377;15,045</div>
-      <div style="font-size:11.5px;color:var(--ink-3);margin-top:2px">Includes assaying &amp; minting fee</div>
+      <a href="https://www.tanishq.co.in/gold-coins" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:12px;padding:8px 12px;margin-top:10px">Buy Tanishq 24K &rarr;</a>
     </div>
-    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <strong style="font-size:15px">Kalyan 24K Bar</strong>
-        <span style="font:700 10.5px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:3px 8px;border-radius:999px">999 Pure</span>
+    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-space-between">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong style="font-size:15px">Kalyan 24K Bar</strong>
+          <span style="font:700 10.5px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:3px 8px;border-radius:999px">999 Pure</span>
+        </div>
+        <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">BIS Hallmarked &amp; 100% Transparency</div>
+        <div id="cp-kalyan" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:8px">&#8377;14,930</div>
       </div>
-      <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">BIS Hallmarked &amp; 100% Transparency</div>
-      <div id="cp-kalyan" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold)">&#8377;14,930</div>
-      <div style="font-size:11.5px;color:var(--ink-3);margin-top:2px">Includes assaying &amp; minting fee</div>
+      <a href="https://www.kalyanjewellers.net/" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:12px;padding:8px 12px;margin-top:10px">Buy Kalyan 24K Bar &rarr;</a>
+    </div>
+    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-space-between">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong style="font-size:15px">Malabar 24K Coin</strong>
+          <span style="font:700 10.5px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:3px 8px;border-radius:999px">999 Pure</span>
+        </div>
+        <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">Tested Purity &amp; Free Insurance Coverage</div>
+        <div id="cp-malabar" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:8px">&#8377;14,950</div>
+      </div>
+      <a href="https://www.malabargoldanddiamonds.com/gold-coins.html" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:12px;padding:8px 12px;margin-top:10px">Buy Malabar 24K &rarr;</a>
     </div>
   </div>
 </section>
@@ -3495,17 +3512,20 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   var coinPills=document.querySelectorAll('.coin-pill');
   var cpMmtc=document.getElementById('cp-mmtc'),
       cpTanishq=document.getElementById('cp-tanishq'),
-      cpKalyan=document.getElementById('cp-kalyan');
+      cpKalyan=document.getElementById('cp-kalyan'),
+      cpMalabar=document.getElementById('cp-malabar');
 
   function updateCoinPrices(wt){
     var baseRate=14467;
     var mmtcVal=Math.round(wt*baseRate*1.035);
     var tanishqVal=Math.round(wt*baseRate*1.040);
     var kalyanVal=Math.round(wt*baseRate*1.032);
+    var malabarVal=Math.round(wt*baseRate*1.034);
 
     if(cpMmtc)cpMmtc.textContent='₹'+mmtcVal.toLocaleString('en-IN');
     if(cpTanishq)cpTanishq.textContent='₹'+tanishqVal.toLocaleString('en-IN');
     if(cpKalyan)cpKalyan.textContent='₹'+kalyanVal.toLocaleString('en-IN');
+    if(cpMalabar)cpMalabar.textContent='₹'+malabarVal.toLocaleString('en-IN');
   }
 
   coinPills.forEach(function(pill){
