@@ -3038,7 +3038,7 @@ $local_intro
     <button type="button" class="coin-pill" data-wt="5" style="font:500 11.5px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer">5 Grams</button>
     <button type="button" class="coin-pill" data-wt="8" style="font:500 11.5px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer">8 Grams (Sovereign)</button>
     <button type="button" class="coin-pill" data-wt="10" style="font:500 11.5px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer">10 Grams</button>
-    <button type="button" class="coin-pill" data-wt="50" style="font:500 11.5px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer">50 Gram Bar</button>
+    <button type="button" class="coin-pill" data-wt="50" style="font:500 11.5px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer">50 Gram</button>
   </div>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
@@ -3051,7 +3051,7 @@ $local_intro
         <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">Swiss Assay Certification &amp; Tamper-Proof Packaging</div>
         <div id="cp-mmtc" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:8px">&#8377;14,973</div>
       </div>
-      <a href="https://www.mmtcpamp.com/gold" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:12px;padding:8px 12px;margin-top:10px">Buy MMTC-PAMP 24K &rarr;</a>
+      <a href="https://www.mmtcpamp.com/gold-coins" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:12px;padding:8px 12px;margin-top:10px">Buy MMTC-PAMP 24K &rarr;</a>
     </div>
     <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between">
       <div>
@@ -3064,7 +3064,7 @@ $local_intro
       </div>
       <a href="https://www.tanishq.co.in/gold-coins" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:12px;padding:8px 12px;margin-top:10px">Buy Tanishq 24K &rarr;</a>
     </div>
-    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-space-between">
+    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between">
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <strong style="font-size:15px">Kalyan 24K Bar</strong>
@@ -3073,9 +3073,9 @@ $local_intro
         <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">BIS Hallmarked &amp; 100% Transparency</div>
         <div id="cp-kalyan" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:8px">&#8377;14,930</div>
       </div>
-      <a href="https://www.kalyanjewellers.net/" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:12px;padding:8px 12px;margin-top:10px">Buy Kalyan 24K Bar &rarr;</a>
+      <a href="https://www.candere.com/trending/gold-coins.html" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:12px;padding:8px 12px;margin-top:10px">Buy Kalyan 24K Bar &rarr;</a>
     </div>
-    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-space-between">
+    <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between">
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <strong style="font-size:15px">Malabar 24K Coin</strong>
@@ -3084,14 +3084,76 @@ $local_intro
         <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">Tested Purity &amp; Free Insurance Coverage</div>
         <div id="cp-malabar" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:8px">&#8377;14,950</div>
       </div>
-      <a href="https://www.malabargoldanddiamonds.com/gold-coins.html" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:12px;padding:8px 12px;margin-top:10px">Buy Malabar 24K &rarr;</a>
     </div>
   </div>
+
+  <!-- Lowest to Highest 24K Coin Making Charges Leaderboard Table -->
+  <div style="margin-top:28px;overflow-x:auto;border-top:1px dashed var(--line);padding-top:20px">
+    <h4 style="margin:0 0 12px;font-size:16px;color:var(--gold)">Gold Coin Making Charges (Minting Premium) Leaderboard</h4>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;text-align:left">
+      <thead>
+        <tr style="border-bottom:1px solid var(--line);color:var(--ink-3);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;font-size:11px">
+          <th style="padding:10px 8px">Rank</th>
+          <th style="padding:10px 8px">Brand / Refiner</th>
+          <th style="padding:10px 8px">Purity</th>
+          <th style="padding:10px 8px">Minting Charge %</th>
+          <th style="padding:10px 8px">Est. 10g 24K Coin Price</th>
+          <th style="padding:10px 8px">Direct Buy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--line)">
+          <td style="padding:10px 8px;font-weight:700;color:var(--gold)"><span class="rank-badge rank-1">#1 LOWEST</span></td>
+          <td style="padding:10px 8px"><strong>MMTC-PAMP</strong> (Govt-PAMP Joint Venture)</td>
+          <td style="padding:10px 8px"><span style="color:#5BBB93;font-family:'IBM Plex Mono',monospace;font-weight:700">999.9 Fine</span></td>
+          <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace;font-weight:600">2.5% - 3.5%</td>
+          <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace">&#8377;1,49,730</td>
+          <td style="padding:10px 8px"><a href="https://www.mmtcpamp.com/gold-coins" target="_blank" rel="noopener nofollow" style="color:var(--gold);font-weight:600">Buy MMTC-PAMP &rarr;</a></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--line)">
+          <td style="padding:10px 8px;font-weight:700"><span class="rank-badge rank-2">#2</span></td>
+          <td style="padding:10px 8px"><strong>Kalyan Jewellers / Candere</strong></td>
+          <td style="padding:10px 8px"><span style="color:#5BBB93;font-family:'IBM Plex Mono',monospace;font-weight:700">999 Pure</span></td>
+          <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace;font-weight:600">3.0% - 3.8%</td>
+          <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace">&#8377;1,49,300</td>
+          <td style="padding:10px 8px"><a href="https://www.candere.com/trending/gold-coins.html" target="_blank" rel="noopener nofollow" style="color:var(--gold);font-weight:600">Buy Kalyan &rarr;</a></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--line)">
+          <td style="padding:10px 8px;font-weight:700"><span class="rank-badge rank-3">#3</span></td>
+          <td style="padding:10px 8px"><strong>Malabar Gold &amp; Diamonds</strong></td>
+          <td style="padding:10px 8px"><span style="color:#5BBB93;font-family:'IBM Plex Mono',monospace;font-weight:700">999 Pure</span></td>
+          <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace;font-weight:600">3.2% - 4.0%</td>
+          <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace">&#8377;1,49,500</td>
+          <td style="padding:10px 8px"><a href="https://www.malabargoldanddiamonds.com/gold-coins.html" target="_blank" rel="noopener nofollow" style="color:var(--gold);font-weight:600">Buy Malabar &rarr;</a></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--line)">
+          <td style="padding:10px 8px;font-weight:700">#4</td>
+          <td style="padding:10px 8px"><strong>Senco Gold &amp; Diamonds</strong></td>
+          <td style="padding:10px 8px"><span style="color:#5BBB93;font-family:'IBM Plex Mono',monospace;font-weight:700">999 Pure</span></td>
+          <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace;font-weight:600">3.5% - 4.2%</td>
+          <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace">&#8377;1,49,850</td>
+          <td style="padding:10px 8px"><a href="https://sencogoldanddiamonds.com/products/category/gold-coins" target="_blank" rel="noopener nofollow" style="color:var(--gold);font-weight:600">Buy Senco &rarr;</a></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--line)">
+          <td style="padding:10px 8px;font-weight:700">#5</td>
+          <td style="padding:10px 8px"><strong>Joyalukkas</strong></td>
+          <td style="padding:10px 8px"><span style="color:#5BBB93;font-family:'IBM Plex Mono',monospace;font-weight:700">999 Pure</span></td>
+          <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace;font-weight:600">3.8% - 4.5%</td>
+          <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace">&#8377;1,50,200</td>
+          <td style="padding:10px 8px"><a href="https://www.joyalukkas.in/gold-coins.html" target="_blank" rel="noopener nofollow" style="color:var(--gold);font-weight:600">Buy Joyalukkas &rarr;</a></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--line)">
+          <td style="padding:10px 8px;font-weight:700">#6</td>
+          <td style="padding:10px 8px"><strong>Tanishq (Tata Product)</strong></td>
+          <td style="padding:10px 8px"><span style="color:#5BBB93;font-family:'IBM Plex Mono',monospace;font-weight:700">999 Pure</span></td>
+          <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace;font-weight:600">4.0% - 5.0%</td>
+          <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace">&#8377;1,50,450</td>
+          <td style="padding:10px 8px"><a href="https://www.tanishq.co.in/gold-coins" target="_blank" rel="noopener nofollow" style="color:var(--gold);font-weight:600">Buy Tanishq &rarr;</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </section>
-
-<p class="note">All rates are per gram of gold, before 3% GST and before
-making charges, so every brand is compared on the same basis.</p>
-
 <section aria-labelledby="cmp">
   <p class="eyebrow">Today's Board</p>
   <h2 id="cmp">Compare Gold Rates Across Jewellers</h2>
