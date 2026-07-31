@@ -2762,7 +2762,19 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
 
 .faq{border-bottom:1px solid var(--line);padding:14px 0}
 .faq summary{font-weight:500;cursor:pointer;color:var(--ink)}
-.faq p{margin-top:10px;color:var(--ink-2);max-width:70ch;font-size:15px}
+/* WhatsApp viral share button */
+.wa-share-btn{display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff!important;
+  font:600 12px/1 "IBM Plex Sans",sans-serif;padding:7px 14px;border-radius:999px;text-decoration:none;
+  box-shadow:0 3px 10px rgba(37,211,102,.25);transition:transform .2s ease,box-shadow .2s ease}
+.wa-share-btn:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(37,211,102,.35)}
+
+/* Leaderboard rank medals & savings pills */
+.rank-badge{font:700 10px/1 "IBM Plex Mono",monospace;padding:3px 6px;border-radius:4px;margin-right:6px}
+.rank-1{background:#D9B24A;color:#140D04}
+.rank-2{background:#C0C0C0;color:#140D04}
+.rank-3{background:#CD7F32;color:#FFF}
+.save-pill{font:600 10px/1 "IBM Plex Mono",monospace;color:#5BBB93;background:rgba(30,92,70,.22);
+  border:1px solid rgba(91,187,147,.35);padding:2px 6px;border-radius:4px;margin-left:6px}
 </style>
 </head>
 <body>
@@ -2775,6 +2787,7 @@ $nav
   <div class="topright">
     <span class="updated">Updated $date, $time</span>
     <span class="hauth" id="hauth" hidden></span>
+    <a class="wa-share-btn" href="https://api.whatsapp.com/send?text=Check%20today%27s%20live%2024K%20and%2022K%20gold%20rates%20across%20all%20top%20jewellers%20on%20https%3A%2F%2Fmygoldrates.com" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.485 1.332 5.001l-1.417 5.176 5.297-1.39c1.464.798 3.116 1.218 4.775 1.219h.004c5.505 0 9.988-4.478 9.989-9.984 0-2.667-1.038-5.174-2.924-7.06-1.886-1.886-4.393-2.925-7.061-2.925zm0 1.666c4.588 0 8.324 3.736 8.325 8.324 0 2.224-.866 4.314-2.439 5.888-1.573 1.574-3.663 2.44-5.887 2.44h-.003c-1.428 0-2.834-.378-4.066-1.094l-.291-.17-3.142.823.838-3.061-.186-.296c-.787-1.252-1.202-2.7-1.202-4.185.001-4.588 3.737-8.325 8.326-8.325z"/></svg> Share</a>
     <a class="btn btn-lite" href="#cmp">Compare jewellers</a>
     <a class="btn js-alert" href="inquiry.html">Daily rate alerts</a>
   </div>
