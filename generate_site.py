@@ -3073,7 +3073,7 @@ $local_intro
         <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">BIS Hallmarked &amp; 100% Transparency</div>
         <div id="cp-kalyan" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:8px">&#8377;14,930</div>
       </div>
-      <a href="https://www.candere.com/trending/gold-coins.html" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:12px;padding:8px 12px;margin-top:10px">Buy Kalyan 24K Bar &rarr;</a>
+      <a href="https://www.candere.com/gifts/gold-coins.html" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:12px;padding:8px 12px;margin-top:10px">Buy Kalyan 24K Bar &rarr;</a>
     </div>
     <div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between">
       <div>
@@ -3116,7 +3116,7 @@ $local_intro
           <td style="padding:10px 8px"><span style="color:#5BBB93;font-family:'IBM Plex Mono',monospace;font-weight:700">999 Pure</span></td>
           <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace;font-weight:600">3.0% - 3.8%</td>
           <td style="padding:10px 8px;font-family:'IBM Plex Mono',monospace">&#8377;1,49,300</td>
-          <td style="padding:10px 8px"><a href="https://www.candere.com/trending/gold-coins.html" target="_blank" rel="noopener nofollow" style="color:var(--gold);font-weight:600">Buy Kalyan &rarr;</a></td>
+          <td style="padding:10px 8px"><a href="https://www.candere.com/gifts/gold-coins.html" target="_blank" rel="noopener nofollow" style="color:var(--gold);font-weight:600">Buy Kalyan &rarr;</a></td>
         </tr>
         <tr style="border-bottom:1px solid var(--line)">
           <td style="padding:10px 8px;font-weight:700"><span class="rank-badge rank-3">#3</span></td>
