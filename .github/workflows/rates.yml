@@ -73,7 +73,16 @@ jobs:
             echo "site unchanged"
           else
             git commit -m "Update site rates"
-            git pull --rebase origin main
+            # Fetch latest remote state
+            git fetch origin main
+            # Rebase onto latest main; on conflict, accept our (CI-generated) version
+            git rebase -X ours origin/main || {
+              git rebase --abort
+              # Fallback: hard reset to origin/main and re-apply our docs
+              git reset --soft origin/main
+              git add docs
+              git commit -m "Update site rates"
+            }
             git push
           fi
 
