@@ -1517,6 +1517,8 @@ def main():
         n_brands=str(len(live)),
         med24=inr(med["24K"]), med22=inr(med["22K"]), med18=inr(med["18K"]),
         low24=inr(ladder(lowest["canonical_24k_pre_gst"])["24K"]),
+        low22=inr(ladder(lowest["canonical_24k_pre_gst"])["22K"]),
+        low18=inr(ladder(lowest["canonical_24k_pre_gst"])["18K"]),
         low24_raw=f"{ladder(lowest['canonical_24k_pre_gst'])['24K']:,.0f}",
         low_brand=lowest["brands"]["name"],
         low_logo=low_logo,
@@ -3101,12 +3103,10 @@ $nav
     <div class="tile best"><div class="k">&#9733; Lowest 24K &middot; $low_brand</div>
       <div class="v">$low24</div>
       <div class="bwin">$low_logo<span style="font-size:11px;color:#A79B7E">best price today</span></div></div>
-    <div class="tile"><div class="k">24K Median</div>
-      <div class="v">$med24</div></div>
-    <div class="tile"><div class="k">22K Median</div>
-      <div class="v">$med22</div></div>
-    <div class="tile"><div class="k">18K Median</div>
-      <div class="v">$med18</div></div>
+    <div class="tile"><div class="k">22K &middot; $low_brand</div>
+      <div class="v">$low22</div></div>
+    <div class="tile"><div class="k">18K &middot; $low_brand</div>
+      <div class="v">$low18</div></div>
   </div>
   <div class="board-pregst">All rates per gram &middot; pre-GST &middot; $date</div>
 </section>
