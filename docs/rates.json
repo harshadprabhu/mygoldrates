@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-01",
-  "last_updated": "2026-08-01T14:06:28.718675+05:30",
+  "last_updated": "2026-08-01T16:24:11.238219+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14427.5,
-    "22k": 13228.82,
-    "18k": 10831.45
+    "24k": 14429.0,
+    "22k": 13230.19,
+    "18k": 10832.58
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -53,9 +53,9 @@
     },
     {
       "jeweller": "ORRA",
-      "rate_24k_per_gram_inr": 14393.24,
-      "rate_22k_per_gram_inr": 13197.41,
-      "rate_18k_per_gram_inr": 10805.74
+      "rate_24k_per_gram_inr": 14405.35,
+      "rate_22k_per_gram_inr": 13208.51,
+      "rate_18k_per_gram_inr": 10814.83
     },
     {
       "jeweller": "GRT Jewellers",
@@ -136,13 +136,19 @@
       "rate_18k_per_gram_inr": 10964.21
     },
     {
+      "jeweller": "Waman Hari Pethe",
+      "rate_24k_per_gram_inr": 14608.0,
+      "rate_22k_per_gram_inr": 13394.32,
+      "rate_18k_per_gram_inr": 10966.97
+    },
+    {
       "jeweller": "Ranka Jewellers",
       "rate_24k_per_gram_inr": 14710.0,
       "rate_22k_per_gram_inr": 13487.84,
       "rate_18k_per_gram_inr": 11043.54
     }
   ],
-  "jeweller_count": 18,
+  "jeweller_count": 19,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
