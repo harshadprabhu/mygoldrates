@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-30T21:53:38.511173+05:30",
+  "updated": "2026-08-01T12:12:00.774606+05:30",
   "note": "Making charge as % of gold value, median across multiple real products per category from each jeweller's public price breakup. Indicative - varies by specific design.",
   "brands": [
     {
@@ -23,7 +23,7 @@
           "category": "Chain",
           "items": 20,
           "making_pct_median": 27.0,
-          "making_pct_min": 21.9,
+          "making_pct_min": 21.8,
           "making_pct_max": 27.0
         },
         {
@@ -44,7 +44,7 @@
           "category": "Mangalsutra",
           "items": 20,
           "making_pct_median": 27.0,
-          "making_pct_min": 17.8,
+          "making_pct_min": 17.7,
           "making_pct_max": 27.0
         },
         {
@@ -56,16 +56,16 @@
         },
         {
           "category": "Pendant",
-          "items": 13,
-          "making_pct_median": 40.7,
+          "items": 14,
+          "making_pct_median": 40.9,
           "making_pct_min": 30.0,
-          "making_pct_max": 49.1
+          "making_pct_max": 60.0
         },
         {
           "category": "Ring",
           "items": 20,
           "making_pct_median": 30.0,
-          "making_pct_min": 18.2,
+          "making_pct_min": 18.1,
           "making_pct_max": 35.0
         }
       ]
