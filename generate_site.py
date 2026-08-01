@@ -1517,6 +1517,7 @@ def main():
         n_brands=str(len(live)),
         med24=inr(med["24K"]), med22=inr(med["22K"]), med18=inr(med["18K"]),
         low24=inr(ladder(lowest["canonical_24k_pre_gst"])["24K"]),
+        low24_raw=f"{ladder(lowest['canonical_24k_pre_gst'])['24K']:,.0f}",
         low_brand=lowest["brands"]["name"],
         low_logo=low_logo,
         ibja_tiles=ibja_tiles, ibja_section=ibja_section, ads_unit=ads_unit,
@@ -2739,30 +2740,35 @@ $base_css
   radial-gradient(130% 150% at 85% -35%,rgba(224,186,86,.42),transparent 58%),
   radial-gradient(120% 130% at 4% 135%,rgba(176,132,42,.28),transparent 58%),
   linear-gradient(150deg,#3A2A0C,#140D04 52%,#241809);
-  color:#F0EAD8;border-radius:13px;margin:14px 0 10px;padding:19px 24px 16px;
+  color:#F0EAD8;border-radius:13px;margin:10px 0 8px;padding:14px 18px 12px;
   position:relative;overflow:hidden;border:1px solid rgba(224,186,86,.38);
   box-shadow:inset 0 1px 0 rgba(255,247,214,.10)}
-.board h1{font-size:clamp(19px,2.9vw,27px);color:#F8EFD6;margin-bottom:3px}
-.board .sub{color:#CFC7AE;max-width:60ch;font-size:12.5px;line-height:1.5}
-.board-rates{display:flex;gap:10px;flex-wrap:wrap;margin-top:13px}
-.tile{border:1px solid rgba(224,186,86,.34);border-radius:10px;
-  padding:10px 14px;min-width:124px;flex:1;
+.board h1{font-size:clamp(18px,2.6vw,24px);color:#F8EFD6;margin-bottom:0}
+.board-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;
+  margin:5px 0 8px;font-size:12px;color:#A79B7E}
+.board-meta .signal{display:inline-flex;align-items:center;gap:5px;
+  color:#5BBB93;font-weight:600;letter-spacing:.03em}
+.board-meta .low-note{color:#CFC7AE}
+.board-rates{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.tile{border:1px solid rgba(224,186,86,.34);border-radius:9px;
+  padding:8px 12px;min-width:100px;flex:1;
   background:linear-gradient(158deg,rgba(224,186,86,.11),rgba(224,186,86,.02))}
-.tile .k{font-family:"IBM Plex Mono",monospace;font-size:10px;
-  letter-spacing:.16em;color:var(--gold-bright);text-transform:uppercase}
-.tile .v{font-family:"IBM Plex Mono",monospace;font-size:clamp(17px,2.3vw,22px);
-  margin-top:3px;background:linear-gradient(100deg,#E8C86A,#FFFDF4 46%,#D9B24A);
+.tile .k{font-family:"IBM Plex Mono",monospace;font-size:9.5px;
+  letter-spacing:.14em;color:var(--gold-bright);text-transform:uppercase}
+.tile .v{font-family:"IBM Plex Mono",monospace;font-size:clamp(16px,2.2vw,21px);
+  margin-top:2px;background:linear-gradient(100deg,#E8C86A,#FFFDF4 46%,#D9B24A);
   -webkit-background-clip:text;background-clip:text;color:transparent}
-.tile .u{font-size:10.5px;color:#A79B7E}
+.tile .u{font-size:10px;color:#A79B7E}
 .tile.best{background:linear-gradient(158deg,rgba(224,186,86,.26),rgba(224,186,86,.08));
-  border:2px solid rgba(224,186,86,.6);flex:1.35;min-width:168px;
-  box-shadow:0 0 26px rgba(224,186,86,.14)}
+  border:2px solid rgba(224,186,86,.6);flex:1.35;min-width:148px;
+  box-shadow:0 0 20px rgba(224,186,86,.12)}
 .tile.best .k{color:#F4E3A6;font-weight:700}
-.tile.best .v{font-weight:700;font-size:clamp(20px,2.9vw,27px)}
-.bwin{margin-top:7px;font-weight:700;font-size:13.5px;color:#F8EFD6;
-  display:flex;align-items:center;gap:7px}
-.bwin img{width:17px;height:17px;border-radius:4px;background:#fff;
-  padding:1px;flex:0 0 17px}
+.tile.best .v{font-weight:700;font-size:clamp(18px,2.6vw,24px)}
+.bwin{margin-top:5px;font-weight:700;font-size:12.5px;color:#F8EFD6;
+  display:flex;align-items:center;gap:6px}
+.bwin img{width:15px;height:15px;border-radius:3px;background:#fff;
+  padding:1px;flex:0 0 15px}
+.board-pregst{font-size:11px;color:#8A7E65;margin-top:6px}
 .note{font-size:13px;color:var(--ink-3);margin:12px 0 24px}
 .keyfacts{background:var(--card);border:1px solid var(--line);
   border-radius:12px;padding:16px 20px;margin:14px 0 4px}
@@ -3057,12 +3063,6 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
   box-shadow:0 3px 10px rgba(37,211,102,.25);transition:transform .2s ease,box-shadow .2s ease}
 .wa-share-btn:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(37,211,102,.35)}
 
-/* Leaderboard rank me/* AI & GEO Search Direct Answer Box */
-.ai-quick-answer{background:rgba(240,219,154,.07);border:1px solid rgba(240,219,154,.25);
-  border-radius:10px;padding:10px 14px;margin:10px 0 14px;font-size:13px;
-  line-height:1.55;color:#E8DFCA}
-.ai-quick-answer strong{color:#F8EFD6;font-weight:600}
-
 .rank-badge{font:700 10px/1 "IBM Plex Mono",monospace;padding:3px 6px;border-radius:4px;margin-right:6px}
 .rank-1{background:#D9B24A;color:#140D04}
 .rank-2{background:#C0C0C0;color:#140D04}
@@ -3088,36 +3088,28 @@ $nav
 </header>
 
 <section class="board" aria-label="Today's gold rate summary">
-  <div class="live-badge"><span class="live-dot"></span> LIVE MARKET &middot; REFRESHED DAILY</div>
-  <h1>Gold Rate Today $where</h1>
-  <p class="sub">Live 24K, 22K and 18K gold rates compared across India's
-  top jewellers - updated daily, with the IBJA bullion
-  reference for context.$where_note</p>
-
-  <!-- Layman Persona: Market Signal Indicator -->
-  <div class="market-signal-badge" aria-label="Gold Buying Signal" style="display:flex;align-items:center;gap:10px;background:rgba(91,187,147,.12);border:1px solid rgba(91,187,147,.35);border-radius:10px;padding:10px 14px;margin:12px 0 16px;font-size:13px;color:#D8F2E7">
-    <span style="font-size:16px">&#128994;</span>
-    <span><strong style="color:#5BBB93;letter-spacing:.04em">BUYING SIGNAL: FAVORABLE MARKET</strong> &middot; Today's 24K rate ($med24/g) is holding at attractive levels. Compare jewellers below to save up to &#8377;130/g!</span>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <div class="live-badge"><span class="live-dot"></span> LIVE &middot; $date</div>
+    <h1 style="margin:0">Gold Rate Today $where</h1>
   </div>
-
-  <div class="ai-quick-answer" aria-label="AI Quick Summary">
-    <strong>⚡ Live Summary ($date):</strong> Today's median 24K gold rate $where is <strong>$med24/g</strong> and 22K is <strong>$med22/g</strong> (pre-GST). Today's lowest 24K rate is offered by <strong>$low_brand</strong> at <strong>$low24/g</strong> across $n_brands compared jewellers.
+  <div class="board-meta">
+    <span class="signal">&#128994; Favorable &middot; Save up to &#8377;128/g vs highest</span>
+    <span class="low-note">Lowest: <strong style="color:#F4E3A6">$low_brand &#8377;$low24_raw/g</strong></span>
+    <span>$n_brands brands compared</span>
   </div>
-
   <div class="board-rates">
-    <div class="tile best"><div class="k">&#9733; Lowest 24K Today</div>
-      <div class="v">$low24</div><div class="u">per gram, pre-GST</div>
-      <div class="bwin">$low_brand$low_logo</div></div>
+    <div class="tile best"><div class="k">&#9733; Lowest 24K &middot; $low_brand</div>
+      <div class="v">$low24</div>
+      <div class="bwin">$low_logo<span style="font-size:11px;color:#A79B7E">best price today</span></div></div>
     <div class="tile"><div class="k">24K Median</div>
-      <div class="v">$med24</div><div class="u">per gram, pre-GST</div></div>
+      <div class="v">$med24</div></div>
     <div class="tile"><div class="k">22K Median</div>
-      <div class="v">$med22</div><div class="u">per gram, pre-GST</div></div>
+      <div class="v">$med22</div></div>
     <div class="tile"><div class="k">18K Median</div>
-      <div class="v">$med18</div><div class="u">per gram, pre-GST</div></div>
+      <div class="v">$med18</div></div>
   </div>
+  <div class="board-pregst">All rates per gram &middot; pre-GST &middot; $date</div>
 </section>
-
-$local_intro
 
 $local_intro
 <section aria-labelledby="cmp">
