@@ -25,7 +25,9 @@ from supabase import create_client
 SITE_URL = "https://mygoldrates.com"
 CUSTOM_DOMAIN = "mygoldrates.com"
 CONTACT_EMAIL = "contact@mygoldrates.com"
-PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
+# 24K uses 1.0 (canonical_24k_pre_gst IS already the 24K per-gram price;
+# applying 0.999 again would under-state it). 22K and 18K are scaled from it.
+PURITY_FRACTION = {"24K": 1.0, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 IST = timezone(timedelta(hours=5, minutes=30))
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/126.0 Safari/537.36")
