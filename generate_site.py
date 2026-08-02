@@ -1522,6 +1522,7 @@ def main():
         low22=inr(ladder(lowest["canonical_24k_pre_gst"])["22K"]),
         low18=inr(ladder(lowest["canonical_24k_pre_gst"])["18K"]),
         low24_raw=f"{ladder(lowest['canonical_24k_pre_gst'])['24K']:,.0f}",
+        low24_num=f"{ladder(lowest['canonical_24k_pre_gst'])['24K']:.0f}",
         low_brand=lowest["brands"]["name"],
         low_logo=low_logo,
         ibja_tiles=ibja_tiles, ibja_section=ibja_section, ads_unit=ads_unit,
@@ -3469,29 +3470,38 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   }
 
   /* ---- calculator ---- */
-  var sel=document.getElementById('c-b');
-  BRANDS.forEach(function(b,i){
-    var o=document.createElement('option');
-    o.value=i;o.textContent=b.name;sel.appendChild(o);
-  });
+  var sel=document.getElementById('c-b'), w=document.getElementById('c-w');
+  if(sel && typeof BRANDS !== 'undefined' && BRANDS.length){
+    BRANDS.forEach(function(b,i){
+      var o=document.createElement('option');
+      o.value=i;o.textContent=b.name;sel.appendChild(o);
+    });
+  }
   var purity='24K', gst=false;
-  var w=document.getElementById('c-w');
   function calc(){
+    if(!w || !sel || typeof BRANDS === 'undefined' || !BRANDS.length) return;
     var grams=parseFloat(w.value)||0;
-    var b=BRANDS[parseInt(sel.value,10)||0];
-    /* r24 is the canonical 24K(.999) per-gram rate; scale by purity */
-    var rate=b.r24*({'24K':0.999,'22K':0.916,'18K':0.750,'14K':0.583}[purity])/0.999;
+    var idx=parseInt(sel.value,10)||0;
+    var b=BRANDS[idx]||BRANDS[0];
+    if(!b) return;
+    var rate=b.r24*({'24K':1.0,'22K':0.916,'18K':0.750,'14K':0.583}[purity]||1.0);
     var goldVal=rate*grams, gstAmt=goldVal*0.03;
     var total=gst?goldVal+gstAmt:goldVal;
-    document.getElementById('c-title').textContent=grams+' g · '+purity+' · '+b.name;
-    document.getElementById('c-total').textContent=fmt(total);
-    document.getElementById('c-basis').textContent=gst?'including 3% GST, excluding making charges':'pre-GST, excluding making charges';
-    document.getElementById('c-rate').textContent=fmt(rate)+'/g';
-    document.getElementById('c-gold').textContent=fmt(goldVal);
-    document.getElementById('c-gst').textContent=gst?fmt(gstAmt):'not applied';
+    var cTitle=document.getElementById('c-title'),
+        cTotal=document.getElementById('c-total'),
+        cBasis=document.getElementById('c-basis'),
+        cRate=document.getElementById('c-rate'),
+        cGold=document.getElementById('c-gold'),
+        cGst=document.getElementById('c-gst');
+    if(cTitle)cTitle.textContent=grams+' g · '+purity+' · '+b.name;
+    if(cTotal)cTotal.textContent=fmt(total);
+    if(cBasis)cBasis.textContent=gst?'including 3% GST, excluding making charges':'pre-GST, excluding making charges';
+    if(cRate)cRate.textContent=fmt(rate)+'/g';
+    if(cGold)cGold.textContent=fmt(goldVal);
+    if(cGst)cGst.textContent=gst?fmt(gstAmt):'not applied';
   }
-  w.addEventListener('input',calc);
-  sel.addEventListener('change',calc);
+  if(w)w.addEventListener('input',calc);
+  if(sel)sel.addEventListener('change',calc);
   document.querySelectorAll('[data-p]').forEach(function(b){
     b.addEventListener('click',function(){
       document.querySelectorAll('[data-p]').forEach(function(x){x.setAttribute('aria-pressed','false');});
@@ -3523,10 +3533,8 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     var w=parseFloat(bcWeight.value)||10;
     var mPct=parseFloat(bcMaking.value)||12;
 
-    var rate=13265;
-    if(k==='24K')rate=14467;
-    else if(k==='18K')rate=10850;
-    else if(k==='14K')rate=8463;
+    var base24 = parseInt("$low24_num", 10) || 14467;
+    var rate = Math.round(base24 * ({'24K':1.0, '22K':0.916, '18K':0.750, '14K':0.583}[k] || 0.916));
 
     var goldCost=w*rate;
     var makingCost=goldCost*(mPct/100);
@@ -3557,7 +3565,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
       cpJoyalukkas=document.getElementById('cp-joyalukkas');
 
   function updateCoinPrices(wt){
-    var baseRate=$low24_raw;
+    var baseRate=parseInt("$low24_num", 10) || 14467;
     /* making-charge multipliers: gold cost + maker's % (pre-GST) */
     if(cpMmtc)cpMmtc.textContent='\u20b9'+(Math.round(wt*baseRate*1.025)).toLocaleString('en-IN');
     if(cpKalyan)cpKalyan.textContent='\u20b9'+(Math.round(wt*baseRate*1.030)).toLocaleString('en-IN');
@@ -3577,7 +3585,8 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
       updateCoinPrices(wt);
     });
   });
-  calc();
+  if(w && sel)calc();
+  if(bcKarat)updateBillCalc();
   updateCoinPrices(1); /* init all coin prices on page load using live rate */
 
   /* ---- gold coin cursor trail ---- */

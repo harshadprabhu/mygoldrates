@@ -243,8 +243,8 @@ def extract_headline_rate(text):
 # banners ("24 KT (999) : RS 14,429/g"), breakup lines ("18KT Gold
 # (RS 10,835 / g)"), and CaratLane's "14 Kt Yellow Gold RS 8,463 / g".
 _LABELED_RE = re.compile(
-    r"(\d{2})\s*K(?:T|ARAT)?\b[^₹\d]{0,18}(?:\d{3}[^₹\d]{0,6})?"
-    r"₹\s*([\d,]+(?:\.\d{1,2})?)\s*/\s*(?:g|gm|gram)\b", re.I)
+    r"(\d{2})\s*K(?:T|ARAT)?\b[^0-9\n]{0,35}?(?:₹|Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?)\s*(?:/\s*(?:g|gm|gram)|per\s*gram)\b",
+    re.I)
 
 
 def extract_labeled_rates(text):
