@@ -3290,7 +3290,8 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
 (function(){
   /* ---- sortable table + GST switch ---- */
   var table=document.getElementById('rates');
-  var heads=table.tHead.rows[0].cells, body=table.tBodies[0];
+  var heads=(table && table.tHead && table.tHead.rows.length) ? table.tHead.rows[0].cells : null;
+  var body=(table && table.tBodies.length) ? table.tBodies[0] : null;
   var gstOn=false;
   function fmt(n){
     var s=Math.round(n).toString(), out=s.slice(-3), rest=s.slice(0,-3);
@@ -3299,20 +3300,25 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     return '\\u20B9'+out;
   }
   function repaint(){
+    if(!body)return;
     [].forEach.call(body.rows,function(r){
       for(var i=1;i<=3;i++){
         var td=r.cells[i], base=parseFloat(td.dataset.v);
-        td.textContent=fmt(gstOn?base*1.03:base);
+        if(td)td.textContent=fmt(gstOn?base*1.03:base);
       }
     });
   }
-  document.getElementById('gstbtn').addEventListener('click',function(){
-    gstOn=!gstOn;
-    this.setAttribute('aria-pressed',gstOn?'true':'false');
-    this.textContent=gstOn?'Showing incl. 3% GST':'Show incl. 3% GST';
-    repaint();
-  });
+  var gstbtn=document.getElementById('gstbtn');
+  if(gstbtn){
+    gstbtn.addEventListener('click',function(){
+      gstOn=!gstOn;
+      this.setAttribute('aria-pressed',gstOn?'true':'false');
+      this.textContent=gstOn?'Showing incl. 3% GST':'Show incl. 3% GST';
+      repaint();
+    });
+  }
   function sortBy(i,dir){
+    if(!body)return;
     var rows=[].slice.call(body.rows);
     rows.sort(function(a,b){
       if(i===0){return a.cells[0].textContent.localeCompare(b.cells[0].textContent)*dir;}
@@ -3320,15 +3326,17 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     });
     rows.forEach(function(r){body.appendChild(r);});
   }
-  [].forEach.call(heads,function(h,i){
-    h.addEventListener('click',function(){
-      var cur=h.getAttribute('aria-sort');
-      [].forEach.call(heads,function(x){x.removeAttribute('aria-sort');});
-      var dir=cur==='ascending'?-1:1;
-      h.setAttribute('aria-sort',dir===1?'ascending':'descending');
-      sortBy(i,dir);
+  if(heads){
+    [].forEach.call(heads,function(h,i){
+      h.addEventListener('click',function(){
+        var cur=h.getAttribute('aria-sort');
+        [].forEach.call(heads,function(x){x.removeAttribute('aria-sort');});
+        var dir=cur==='ascending'?-1:1;
+        h.setAttribute('aria-sort',dir===1?'ascending':'descending');
+        sortBy(i,dir);
+      });
     });
-  });
+  }
   /* ---- karat filter (mobile) ---- */
   document.querySelectorAll('.karatseg button').forEach(function(b){
     b.addEventListener('click',function(){
@@ -3370,6 +3378,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   function rowVisible(r){var ds=r.getAttribute('data-states');
     return ds==='all'||r.classList.contains('region-show');}
   function updateBest(){
+    if(!body)return;
     /* recompute the hero "Lowest 24K" over whatever rows are visible */
     var bestV=Infinity,name='',logo='';
     [].forEach.call(body.rows,function(r){
@@ -3385,10 +3394,11 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     if(bw)bw.innerHTML=name+(logo?' <img src="'+logo+'" alt="">':'');
   }
   function applyRegion(){
+    if(!body)return 0;
     var shown=0;
     [].forEach.call(body.rows,function(r){
       var ds=r.getAttribute('data-states');
-      if(ds==='all')return;                 /* national: always visible */
+      if(!ds||ds==='all')return;             /* national: always visible */
       var serves=nearOn&&userState&&ds.split('|').indexOf(userState)>=0;
       r.classList.toggle('region-show',serves);
       if(serves)shown++;
@@ -3396,59 +3406,67 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     updateBest();                           /* lowest may now be a local store */
     return shown;
   }
-  if(nearbtn)nearbtn.addEventListener('click',function(){
-    if(nearOn){nearOn=false;nearbtn.setAttribute('aria-pressed','false');
-      nearbtn.textContent='📍 Brands near me';rnote.hidden=true;
-      applyRegion();return;}
-    if(!navigator.geolocation){alert('Location is not supported here.');return;}
-    nearbtn.textContent='Locating...';
-    navigator.geolocation.getCurrentPosition(function(pos){
-      fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude='+
-        pos.coords.latitude+'&longitude='+pos.coords.longitude+
-        '&localityLanguage=en')
-      .then(function(r){return r.json();}).then(function(d){
-        userState=d.principalSubdivision||'';
-        nearOn=true;nearbtn.setAttribute('aria-pressed','true');
-        nearbtn.textContent='📍 Brands in '+(userState||'My area');
-        var n=applyRegion();
-        rnote.textContent=(n?('Now showing '+n+' local jeweller'+(n>1?'s':'')+
-          ' in '+userState):('No local jewellers we track in '+
-          (userState||'your area')+' yet'))+' - national brands are always '+
-          'shown. Tap again to hide local jewellers.';
-        rnote.hidden=false;
-      }).catch(function(){nearbtn.textContent='📍 Brands near me';
-        alert('Could not detect your area.');});
-    },function(){nearbtn.textContent='📍 Brands near me';
-      alert('Location permission denied.');},
-     {enableHighAccuracy:false,timeout:12000,maximumAge:600000});
-  });
+  if(nearbtn){
+    nearbtn.addEventListener('click',function(){
+      if(nearOn){nearOn=false;nearbtn.setAttribute('aria-pressed','false');
+        nearbtn.textContent='📍 Brands near me';if(rnote)rnote.hidden=true;
+        applyRegion();return;}
+      if(!navigator.geolocation){alert('Location is not supported here.');return;}
+      nearbtn.textContent='Locating...';
+      navigator.geolocation.getCurrentPosition(function(pos){
+        fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude='+
+          pos.coords.latitude+'&longitude='+pos.coords.longitude+
+          '&localityLanguage=en')
+        .then(function(r){return r.json();}).then(function(d){
+          userState=d.principalSubdivision||'';
+          nearOn=true;nearbtn.setAttribute('aria-pressed','true');
+          nearbtn.textContent='📍 Brands in '+(userState||'My area');
+          var n=applyRegion();
+          if(rnote){
+            rnote.textContent=(n?('Now showing '+n+' local jeweller'+(n>1?'s':'')+
+              ' in '+userState):('No local jewellers we track in '+
+              (userState||'your area')+' yet'))+' - national brands are always '+
+              'shown. Tap again to hide local jewellers.';
+            rnote.hidden=false;
+          }
+        }).catch(function(){nearbtn.textContent='📍 Brands near me';
+          alert('Could not detect your area.');});
+      },function(){nearbtn.textContent='📍 Brands near me';
+        alert('Location permission denied.');},
+       {enableHighAccuracy:false,timeout:12000,maximumAge:600000});
+    });
+  }
   /* ---- markets drawer ---- */
   var drw=document.getElementById('mdrawer'),
       drov=document.getElementById('drov'),
       drtab=document.getElementById('drtab');
-  function drSet(open){
-    drw.classList.toggle('open',open);
-    drov.hidden=!open;
-    drtab.setAttribute('aria-expanded',open?'true':'false');
-    drw.setAttribute('aria-hidden',open?'false':'true');
+  if(drw&&drtab){
+    var drSet=function(open){
+      drw.classList.toggle('open',open);
+      if(drov)drov.hidden=!open;
+      drtab.setAttribute('aria-expanded',open?'true':'false');
+      drw.setAttribute('aria-hidden',open?'false':'true');
+    };
+    drtab.addEventListener('click',function(){
+      drSet(!drw.classList.contains('open'));});
+    var drx=document.getElementById('drx');
+    if(drx)drx.addEventListener('click',function(){drSet(false);});
+    if(drov)drov.addEventListener('click',function(){drSet(false);});
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'&&drw.classList.contains('open'))drSet(false);});
   }
-  drtab.addEventListener('click',function(){
-    drSet(!drw.classList.contains('open'));});
-  document.getElementById('drx').addEventListener('click',function(){drSet(false);});
-  drov.addEventListener('click',function(){drSet(false);});
-  document.addEventListener('keydown',function(e){
-    if(e.key==='Escape'&&drw.classList.contains('open'))drSet(false);});
   /* calculators drawer */
   var cdw=document.getElementById('cdrawer'),
       cdov=document.getElementById('cdov'),cdtab=document.getElementById('cdtab');
   if(cdw&&cdtab){
-    var cdSet=function(o){cdw.classList.toggle('open',o);cdov.hidden=!o;
+    var cdSet=function(o){cdw.classList.toggle('open',o);if(cdov)cdov.hidden=!o;
       cdtab.setAttribute('aria-expanded',o?'true':'false');
       cdw.setAttribute('aria-hidden',o?'false':'true');};
     cdtab.addEventListener('click',function(){
       cdSet(!cdw.classList.contains('open'));});
-    document.getElementById('cdx').addEventListener('click',function(){cdSet(false);});
-    cdov.addEventListener('click',function(){cdSet(false);});
+    var cdx=document.getElementById('cdx');
+    if(cdx)cdx.addEventListener('click',function(){cdSet(false);});
+    if(cdov)cdov.addEventListener('click',function(){cdSet(false);});
     document.addEventListener('keydown',function(e){
       if(e.key==='Escape'&&cdw.classList.contains('open'))cdSet(false);});
   }

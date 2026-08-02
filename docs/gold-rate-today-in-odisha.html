@@ -1141,7 +1141,8 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
 (function(){
   /* ---- sortable table + GST switch ---- */
   var table=document.getElementById('rates');
-  var heads=table.tHead.rows[0].cells, body=table.tBodies[0];
+  var heads=(table && table.tHead && table.tHead.rows.length) ? table.tHead.rows[0].cells : null;
+  var body=(table && table.tBodies.length) ? table.tBodies[0] : null;
   var gstOn=false;
   function fmt(n){
     var s=Math.round(n).toString(), out=s.slice(-3), rest=s.slice(0,-3);
@@ -1285,7 +1286,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   }
   drtab.addEventListener('click',function(){
     drSet(!drw.classList.contains('open'));});
-  document.getElementById('drx').addEventListener('click',function(){drSet(false);});
+  var drx=document.getElementById('drx');if(drx)drx.addEventListener('click',function(){drSet(false);});
   drov.addEventListener('click',function(){drSet(false);});
   document.addEventListener('keydown',function(e){
     if(e.key==='Escape'&&drw.classList.contains('open'))drSet(false);});
@@ -1298,7 +1299,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
       cdw.setAttribute('aria-hidden',o?'false':'true');};
     cdtab.addEventListener('click',function(){
       cdSet(!cdw.classList.contains('open'));});
-    document.getElementById('cdx').addEventListener('click',function(){cdSet(false);});
+    var cdx=document.getElementById('cdx');if(cdx)cdx.addEventListener('click',function(){cdSet(false);});
     cdov.addEventListener('click',function(){cdSet(false);});
     document.addEventListener('keydown',function(e){
       if(e.key==='Escape'&&cdw.classList.contains('open'))cdSet(false);});
@@ -1409,7 +1410,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
       cpJoyalukkas=document.getElementById('cp-joyalukkas');
 
   function updateCoinPrices(wt){
-    var baseRate=14,276;
+    var baseRate=14276;
     /* making-charge multipliers: gold cost + maker's % (pre-GST) */
     if(cpMmtc)cpMmtc.textContent='₹'+(Math.round(wt*baseRate*1.025)).toLocaleString('en-IN');
     if(cpKalyan)cpKalyan.textContent='₹'+(Math.round(wt*baseRate*1.030)).toLocaleString('en-IN');
