@@ -1612,116 +1612,23 @@ def main():
     write_page(
         "contact",
         "Contact GoldRates",
-        "Contact GoldRates - questions, feedback or corrections about our daily gold rate comparison for India.",
+        "Contact GoldRates - questions, feedback or corrections about our daily "
+        "gold rate comparison for India.",
         "Contact Us",
         f"""
-  <p>We'd love to hear from you — whether you have questions, feedback, a rate correction, a jeweller partnership enquiry, or a data-privacy request.</p>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px" class="grid2">
-    <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px">
-      <h2 style="margin-top:0;font-size:20px">Send Us a Message</h2>
-      <p style="font-size:13.5px;color:var(--ink-3);margin-bottom:16px">Fill out this form to send a message directly to <strong>{CONTACT_EMAIL}</strong>.</p>
-      
-      <form id="contact-form" action="https://formsubmit.co/{CONTACT_EMAIL}" method="POST" style="display:flex;flex-direction:column;gap:14px">
-        <input type="hidden" name="_subject" value="New Inquiry from MyGoldRates Contact Page">
-        <input type="hidden" name="_template" value="table">
-        <input type="hidden" name="_captcha" value="false">
-        <div class="hp" style="display:none"><input name="_honey" tabindex="-1" autocomplete="off"></div>
-
-        <div>
-          <label for="c-name" style="display:block;font:500 11px/1.4 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Your Name *</label>
-          <input type="text" id="c-name" name="name" required style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)">
-        </div>
-
-        <div>
-          <label for="c-email" style="display:block;font:500 11px/1.4 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Your Email *</label>
-          <input type="email" id="c-email" name="email" required style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)">
-        </div>
-
-        <div>
-          <label for="c-phone" style="display:block;font:500 11px/1.4 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Phone Number (Optional)</label>
-          <input type="tel" id="c-phone" name="phone" placeholder="+91 98765 43210" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)">
-        </div>
-
-        <div>
-          <label for="c-subject" style="display:block;font:500 11px/1.4 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Subject</label>
-          <select id="c-subject" name="subject" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)">
-            <option>General Inquiry</option>
-            <option>Rate Correction / Data Feedback</option>
-            <option>Jeweller Listing / Partnership</option>
-            <option>Privacy Request</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="c-msg" style="display:block;font:500 11px/1.4 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Your Message *</label>
-          <textarea id="c-msg" name="message" rows="5" required style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);resize:vertical"></textarea>
-        </div>
-
-        <button type="submit" id="c-submit" class="btn btn-gold" style="padding:12px;font-size:14px;font-weight:600;margin-top:4px">Send Message to Email</button>
-        <div id="c-status" style="display:none;padding:12px;border-radius:8px;font-size:13.5px;margin-top:10px"></div>
-      </form>
-    </div>
-
-    <div>
-      <h2 style="margin-top:0">Direct Contact Information</h2>
-      <p style="margin-bottom:12px">You can also write to us directly using your email client:</p>
-      <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:24px">
-        <strong style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em;font-family:'IBM Plex Mono',monospace">Official Email Address</strong><br>
-        <a href="mailto:{CONTACT_EMAIL}" style="font-size:19px;font-weight:600;color:var(--gold);display:inline-block;margin-top:6px">{CONTACT_EMAIL}</a>
-        <p style="font-size:12.5px;color:var(--ink-3);margin:8px 0 0">We aim to respond to all inquiries within 24-48 business hours.</p>
-      </div>
-
-      <h2>Daily Gold Rate Alerts</h2>
-      <p>To receive the daily gold rate comparison directly in your inbox every morning, <a href="{SITE_URL}/inquiry.html">subscribe to daily email alerts here</a>.</p>
-
-      <h2>Privacy &amp; Data Rights</h2>
-      <p>To request access to or removal of your personal information, email us at <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> or read our <a href="{SITE_URL}/privacy.html">Privacy Policy</a>.</p>
-    </div>
-  </div>
-
-  <script>
-  (function(){{
-    var cForm = document.getElementById('contact-form');
-    if (cForm) {{
-      cForm.addEventListener('submit', function(e) {{
-        e.preventDefault();
-        var btn = document.getElementById('c-submit');
-        var status = document.getElementById('c-status');
-        if (btn) {{ btn.disabled = true; btn.textContent = 'Sending Message...'; }}
-        var data = new FormData(cForm);
-        fetch('https://formsubmit.co/ajax/{CONTACT_EMAIL}', {{
-          method: 'POST',
-          headers: {{ 'Accept': 'application/json' }},
-          body: data
-        }}).then(function(res) {{
-          if (res.ok) {{
-            cForm.reset();
-            if (status) {{
-              status.style.display = 'block';
-              status.style.background = 'color-mix(in srgb, var(--emerald) 15%, transparent)';
-              status.style.color = 'var(--emerald)';
-              status.style.border = '1px solid var(--emerald)';
-              status.textContent = 'Thank you! Your message has been sent to {CONTACT_EMAIL}.';
-            }}
-            if (btn) {{ btn.disabled = false; btn.textContent = 'Message Sent ✓'; }}
-          }} else {{
-            throw new Error('Failed');
-          }}
-        }}).catch(function() {{
-          if (status) {{
-            status.style.display = 'block';
-            status.style.background = 'color-mix(in srgb, var(--warm) 15%, transparent)';
-            status.style.color = 'var(--warm)';
-            status.style.border = '1px solid var(--warm)';
-            status.textContent = 'Could not send automatically. Please email {CONTACT_EMAIL} directly.';
-          }}
-          if (btn) {{ btn.disabled = false; btn.textContent = 'Send Message to Email'; }}
-        }});
-      }});
-    }}
-  }})();
-  </script>""")
+  <p>We'd love to hear from you - whether it's feedback, a correction to a
+  rate, a partnership enquiry, or a data-privacy request.</p>
+  <h2>Email</h2>
+  <p><a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a><br>
+  We aim to reply within 2-3 working days.</p>
+  <h2>Daily rate alerts</h2>
+  <p>To get the day's gold-rate comparison in your inbox each morning,
+  <a href="{SITE_URL}/inquiry.html">subscribe here</a>. You can unsubscribe from
+  any email at any time.</p>
+  <h2>Privacy requests</h2>
+  <p>To access or delete the personal details you've shared with us, email the
+  address above or see our
+  <a href="{SITE_URL}/privacy.html">Privacy Policy</a>.</p>""")
 
     write_page(
         "terms",
@@ -2437,17 +2344,20 @@ NAV = f"""<div class="nav-ov" id="nav-ov" hidden></div>
     var d=document.getElementById('navdrawer'),o=document.getElementById('nav-ov'),
         t=document.getElementById('navtog'),x=document.getElementById('nav-x');
     if(!d||!t)return;
-    function s(open){{d.classList.toggle('open',open);if(o)o.hidden=!open;
+    function s(open){{d.classList.toggle('open',open);o.hidden=!open;
       d.setAttribute('aria-hidden',open?'false':'true');
       t.setAttribute('aria-expanded',open?'true':'false');}}
     t.addEventListener('click',function(){{s(!d.classList.contains('open'));}});
     if(x)x.addEventListener('click',function(){{s(false);}});
-    if(o)o.addEventListener('click',function(){{s(false);}});
+    o.addEventListener('click',function(){{s(false);}});
     document.addEventListener('keydown',function(e){{
       if(e.key==='Escape'&&d.classList.contains('open'))s(false);}});
   }}
-  if(document.readyState!=='loading')init();
-  else document.addEventListener('DOMContentLoaded',init);
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',init);
+  }else{
+    setTimeout(init,0);
+  }
 }})();</script>"""
 
 
@@ -3390,7 +3300,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     var s=Math.round(n).toString(), out=s.slice(-3), rest=s.slice(0,-3);
     while(rest.length>2){out=rest.slice(-2)+','+out;rest=rest.slice(0,-2);}
     if(rest)out=rest+','+out;
-    return '\\u20B9'+out;
+    return '₹'+out;
   }
   function repaint(){
     if(!body)return;
@@ -3561,7 +3471,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     if(cdx)cdx.addEventListener('click',function(){cdSet(false);});
     if(cdov)cdov.addEventListener('click',function(){cdSet(false);});
     document.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&cdw.classList.contains('open'))cdSet(false);});
+      if(e.key==='Escape'&&cdw.classList.contains('open'))cdSet(false);}););
   }
   /* gold coins drawer */
   var coindw=document.getElementById('coindrawer'),
@@ -3788,29 +3698,19 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   var mok=document.getElementById('mm-ok'), merr=document.getElementById('mm-err');
   var mbtn=document.getElementById('m-btn');
   function openModal(){
-    if(!overlay)return;
-    if(mform && typeof mform.reset === 'function') {
-      try{mform.reset();}catch(e){}
-    }
-    if(mok)mok.style.display='none';
-    if(merr)merr.style.display='none';
-    if(mbtn){mbtn.disabled=false;mbtn.textContent='Subscribe';}
+    mform.reset();                 /* never show previously typed/submitted data */
+    mok.style.display='none'; merr.style.display='none';
+    mbtn.disabled=false; mbtn.textContent='Subscribe';
     overlay.classList.add('open');
-    var mn=document.getElementById('m-name');
-    if(mn)mn.focus();
+    document.getElementById('m-name').focus();
   }
-  function closeModal(){
-    if(overlay)overlay.classList.remove('open');
-    try{sessionStorage.setItem('gr_dismissed','1');}catch(e){}
-  }
-  var mClose=document.getElementById('m-close');
-  if(mClose)mClose.addEventListener('click',closeModal);
-  if(overlay){
-    overlay.addEventListener('click',function(e){
-      if(e.target===overlay)closeModal();});
-    document.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&overlay.classList.contains('open'))closeModal();});
-  }
+  function closeModal(){overlay.classList.remove('open');
+    try{sessionStorage.setItem('gr_dismissed','1');}catch(e){}}
+  document.getElementById('m-close').addEventListener('click',closeModal);
+  overlay.addEventListener('click',function(e){
+    if(e.target===overlay)closeModal();});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&overlay.classList.contains('open'))closeModal();});
   document.querySelectorAll('.js-alert').forEach(function(a){
     a.addEventListener('click',function(e){e.preventDefault();openModal();});
   });
@@ -3818,38 +3718,49 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   try{subscribed=!!localStorage.getItem('gr_sub');}catch(e){}
   var dismissed=false;
   try{dismissed=!!sessionStorage.getItem('gr_dismissed');}catch(e){}
-  if(!subscribed&&!dismissed&&overlay){setTimeout(openModal,18000);}
-  if(mform){
-    mform.addEventListener('submit',function(e){
-      e.preventDefault();
-      if(mok)mok.style.display='none';if(merr)merr.style.display='none';
-      if(mform.website && mform.website.value){return;}
-      if(typeof mform.reportValidity==='function' && !mform.reportValidity()){return;}
-      if(!SB_KEY){
-        if(merr){merr.textContent='Subscriptions open shortly - please check back soon.';merr.style.display='block';}
-        return;
+  if(!subscribed&&!dismissed){setTimeout(openModal,18000);}
+  function send(payload,retried){
+    return fetch(SB_URL+'/rest/v1/inquiries',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,
+               'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+      body:JSON.stringify(payload)
+    }).then(function(r){
+      if(r.ok)return true;
+      /* older table without the newer columns: retry with base fields only */
+      if(!retried){
+        var BASE=['name','email','phone','country','state','city','zip'];
+        var p2={};BASE.forEach(function(k){
+          if(payload[k]!==undefined)p2[k]=payload[k];});
+        return send(p2,true);
       }
-      if(mbtn){mbtn.disabled=true;mbtn.textContent='Subscribing...';}
-      var payload={
-        name:(mform.name?mform.name.value:'').trim(), email:(mform.email?mform.email.value:'').trim(),
-        phone:(mform.phone?mform.phone.value:'').trim(), country:mform.country?mform.country.value:'',
-        state:(mform.state?mform.state.value:'').trim(), city:(mform.city?mform.city.value:'').trim(),
-        zip:(mform.zip?mform.zip.value:'').trim(), area:(mform.area?mform.area.value:'').trim(),
-        offers_optin:mform.offers?mform.offers.checked:true
-      };
-      var g=window.GR_GDATA||{};
-      for(var k in g){if(g[k]!==null&&g[k]!==undefined)payload[k]=g[k];}
-      var save=window.GR_SAVE?window.GR_SAVE(payload):send(payload,false);
-      save.then(function(){
-        if(mok)mok.style.display='block';if(mbtn)mbtn.textContent='Subscribed';
-        try{localStorage.setItem('gr_sub','1');}catch(e){}
-        setTimeout(closeModal,1600);
-      }).catch(function(){
-        if(merr){merr.textContent='Failed to subscribe - please check details.';merr.style.display='block';}
-        if(mbtn){mbtn.disabled=false;mbtn.textContent='Subscribe';}
-      });
+      throw new Error('bad status');
     });
   }
+  mform.addEventListener('submit',function(e){
+    e.preventDefault();
+    mok.style.display='none';merr.style.display='none';
+    if(mform.website.value){return;}
+    if(!mform.reportValidity()){return;}
+    if(!SB_KEY){merr.textContent='Subscriptions open shortly - please check back soon.';
+      merr.style.display='block';return;}
+    mbtn.disabled=true;mbtn.textContent='Subscribing...';
+    var payload={
+      name:mform.name.value.trim(), email:mform.email.value.trim(),
+      phone:mform.phone.value.trim(), country:mform.country.value,
+      state:mform.state.value.trim(), city:mform.city.value.trim(),
+      zip:mform.zip.value.trim(), area:mform.area.value.trim(),
+      offers_optin:mform.offers.checked
+    };
+    var g=window.GR_GDATA||{};
+    for(var k in g){if(g[k]!==null&&g[k]!==undefined)payload[k]=g[k];}
+    /* merge into the same email row when possible; else plain insert */
+    var save=window.GR_SAVE?window.GR_SAVE(payload):send(payload,false);
+    save.then(function(){
+      mok.style.display='block';mbtn.textContent='Subscribed';
+      try{localStorage.setItem('gr_sub','1');}catch(e){}
+      setTimeout(closeModal,1600);
+    }).catch(function(){
       merr.style.display='block';
       mbtn.disabled=false;mbtn.textContent='Subscribe';
     });
@@ -3872,7 +3783,6 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
         try{sessionStorage.setItem('gr_hit','1');}catch(e){}
       }).catch(function(){});
   })();
-})();
 </script>
 <script>window.GR_GCID="$gclient";window.GR_SB_URL="$supabase_url";window.GR_SB_KEY="$anon_key";</script>
 <script src="signup.js?v=$sig_ver" defer></script>
@@ -4020,6 +3930,27 @@ $nav
   var form=document.getElementById('inq');
   var ok=document.getElementById('m-ok'), err=document.getElementById('m-err');
   var btn=document.getElementById('f-btn');
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    ok.style.display='none';err.style.display='none';
+    if(form.website.value){return;}          /* honeypot */
+    if(!form.reportValidity()){return;}
+    if(!KEY){err.textContent='Subscriptions open shortly - please check back soon.';
+      err.style.display='block';return;}
+    btn.disabled=true;btn.textContent='Subscribing...';
+    var payload={
+      name:form.name.value.trim(), email:form.email.value.trim(),
+      phone:form.phone.value.trim(), country:form.country.value,
+      state:form.state.value.trim(), city:form.city.value.trim(),
+      zip:form.zip.value.trim(), area:form.area.value.trim(),
+      offers_optin:form.offers.checked
+    };
+    var g=window.GR_GDATA||{};
+    for(var k in g){if(g[k]!==null&&g[k]!==undefined)payload[k]=g[k];}
+    function post(p){
+      return fetch(URL_+'/rest/v1/inquiries',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':KEY,
                  'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
         body:JSON.stringify(p)}).then(function(r){
           if(!r.ok)throw new Error('bad status');return r;});

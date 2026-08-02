@@ -570,18 +570,28 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
   function init(){
     var d=document.getElementById('navdrawer'),o=document.getElementById('nav-ov'),
         t=document.getElementById('navtog'),x=document.getElementById('nav-x');
-    if(!d||!t)return;
-    function s(open){d.classList.toggle('open',open);if(o)o.hidden=!open;
-      d.setAttribute('aria-hidden',open?'false':'true');
-      t.setAttribute('aria-expanded',open?'true':'false');}
-    t.addEventListener('click',function(){s(!d.classList.contains('open'));});
+    if(!t)return;
+    function s(open){
+      if(d)d.classList.toggle('open',open);
+      if(o)o.hidden=!open;
+      if(d)d.setAttribute('aria-hidden',open?'false':'true');
+      t.setAttribute('aria-expanded',open?'true':'false');
+    }
+    t.addEventListener('click',function(){
+      var isOpen=d?d.classList.contains('open'):false;
+      s(!isOpen);
+    });
     if(x)x.addEventListener('click',function(){s(false);});
-    o.addEventListener('click',function(){s(false);});
+    if(o)o.addEventListener('click',function(){s(false);});
     document.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&d.classList.contains('open'))s(false);});
+      if(e.key==='Escape'&&d&&d.classList.contains('open'))s(false);
+    });
   }
-  if(document.readyState!=='loading')init();
-  else document.addEventListener('DOMContentLoaded',init);
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',init);
+  }else{
+    setTimeout(init,0);
+  }
 })();</script>
 <div class="wrap">
 
@@ -1110,7 +1120,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     var s=Math.round(n).toString(), out=s.slice(-3), rest=s.slice(0,-3);
     while(rest.length>2){out=rest.slice(-2)+','+out;rest=rest.slice(0,-2);}
     if(rest)out=rest+','+out;
-    return '\u20B9'+out;
+    return '₹'+out;
   }
   function repaint(){
     [].forEach.call(body.rows,function(r){
@@ -1264,7 +1274,8 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     var cdx=document.getElementById('cdx');if(cdx)cdx.addEventListener('click',function(){cdSet(false);});
     cdov.addEventListener('click',function(){cdSet(false);});
     document.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&cdw.classList.contains('open'))cdSet(false);}
+      if(e.key==='Escape'&&cdw.classList.contains('open'))cdSet(false);});
+  }
 
   /* gold coins drawer */
   var coindw=document.getElementById('coindrawer'),
@@ -1281,8 +1292,6 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     if(coindov)coindov.addEventListener('click',function(){coindSet(false);});
     document.addEventListener('keydown',function(e){
       if(e.key==='Escape'&&coindw.classList.contains('open'))coindSet(false);});
-  }
-);
   }
 
   /* ---- calculator ---- */
@@ -1384,8 +1393,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   var mok=document.getElementById('mm-ok'), merr=document.getElementById('mm-err');
   var mbtn=document.getElementById('m-btn');
   function openModal(){
-    if(!overlay)return;
-    if(mform && typeof mform.reset === 'function') { try{mform.reset();}catch(e){} }                 /* never show previously typed/submitted data */
+    mform.reset();                 /* never show previously typed/submitted data */
     mok.style.display='none'; merr.style.display='none';
     mbtn.disabled=false; mbtn.textContent='Subscribe';
     overlay.classList.add('open');
@@ -1393,7 +1401,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   }
   function closeModal(){overlay.classList.remove('open');
     try{sessionStorage.setItem('gr_dismissed','1');}catch(e){}}
-  var mClose=document.getElementById('m-close');if(mClose)mClose.addEventListener('click',closeModal);
+  document.getElementById('m-close').addEventListener('click',closeModal);
   overlay.addEventListener('click',function(e){
     if(e.target===overlay)closeModal();});
   document.addEventListener('keydown',function(e){
