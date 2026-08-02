@@ -1402,7 +1402,7 @@ def main():
       </div>
       <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 2.5% <span class="rank-badge rank-1" style="font-size:9px;padding:2px 5px">#1 LOWEST</span></div>
       <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Swiss Assay Certification &amp; CertiPAMP Packaging</div>
-      <div id="cp-mmtc" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;14,973</div>
+      <div id="cp-mmtc" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;—</div>
       <a href="https://www.mmtcpamp.com/shop" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy MMTC-PAMP 24K &rarr;</a>
     </div>
 
@@ -1414,7 +1414,7 @@ def main():
       </div>
       <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 3.0% <span class="rank-badge rank-2" style="font-size:9px;padding:2px 5px">#2</span></div>
       <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">BIS Hallmarked 999 Pure &amp; 100% Transparency</div>
-      <div id="cp-kalyan" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;14,930</div>
+      <div id="cp-kalyan" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;—</div>
       <a href="https://www.candere.com/gifts/gold-coins.html" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Kalyan 24K &rarr;</a>
     </div>
 
@@ -1426,7 +1426,7 @@ def main():
       </div>
       <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 3.2% <span class="rank-badge rank-3" style="font-size:9px;padding:2px 5px">#3</span></div>
       <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Tested Purity &amp; Free Transit Insurance Coverage</div>
-      <div id="cp-malabar" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;14,950</div>
+      <div id="cp-malabar" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;—</div>
       <a href="https://www.malabargoldanddiamonds.com/in/pan-india/en/product-list.html?search=Gold%20Bars%20%26%20Coins" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Malabar 24K &rarr;</a>
     </div>
 
@@ -1438,7 +1438,7 @@ def main():
       </div>
       <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 3.5%</div>
       <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Traditional BIS Hallmarked &amp; Sealed Packaging</div>
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;14,985</div>
+      <div id="cp-senco" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;—</div>
       <a href="https://sencogoldanddiamonds.com/products/category/gold-coins" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Senco 24K &rarr;</a>
     </div>
 
@@ -1450,7 +1450,7 @@ def main():
       </div>
       <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 3.8%</div>
       <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Assayer Certified 999 Pure &amp; Sealed Tamper-Proof</div>
-      <div id="cp-joyalukkas" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;15,020</div>
+      <div id="cp-joyalukkas" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;—</div>
       <a href="https://www.joyalukkas.in/search.html?query=gold+coin&amp;page=1" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Joyalukkas 24K &rarr;</a>
     </div>
 
@@ -1462,7 +1462,7 @@ def main():
       </div>
       <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 4.0%</div>
       <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Tata Trust Stamp &amp; Buyback Guarantee</div>
-      <div id="cp-tanishq" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;15,045</div>
+      <div id="cp-tanishq" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;—</div>
       <a href="https://www.tanishq.co.in/search?search-button=&amp;q=gold+coins&amp;lang=en_IN" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Tanishq 24K &rarr;</a>
     </div>
   </div>
@@ -3552,19 +3552,19 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   var cpMmtc=document.getElementById('cp-mmtc'),
       cpTanishq=document.getElementById('cp-tanishq'),
       cpKalyan=document.getElementById('cp-kalyan'),
-      cpMalabar=document.getElementById('cp-malabar');
+      cpMalabar=document.getElementById('cp-malabar'),
+      cpSenco=document.getElementById('cp-senco'),
+      cpJoyalukkas=document.getElementById('cp-joyalukkas');
 
   function updateCoinPrices(wt){
-    var baseRate=14467;
-    var mmtcVal=Math.round(wt*baseRate*1.035);
-    var tanishqVal=Math.round(wt*baseRate*1.040);
-    var kalyanVal=Math.round(wt*baseRate*1.032);
-    var malabarVal=Math.round(wt*baseRate*1.034);
-
-    if(cpMmtc)cpMmtc.textContent='₹'+mmtcVal.toLocaleString('en-IN');
-    if(cpTanishq)cpTanishq.textContent='₹'+tanishqVal.toLocaleString('en-IN');
-    if(cpKalyan)cpKalyan.textContent='₹'+kalyanVal.toLocaleString('en-IN');
-    if(cpMalabar)cpMalabar.textContent='₹'+malabarVal.toLocaleString('en-IN');
+    var baseRate=$low24_raw;
+    /* making-charge multipliers: gold cost + maker's % (pre-GST) */
+    if(cpMmtc)cpMmtc.textContent='\u20b9'+(Math.round(wt*baseRate*1.025)).toLocaleString('en-IN');
+    if(cpKalyan)cpKalyan.textContent='\u20b9'+(Math.round(wt*baseRate*1.030)).toLocaleString('en-IN');
+    if(cpMalabar)cpMalabar.textContent='\u20b9'+(Math.round(wt*baseRate*1.032)).toLocaleString('en-IN');
+    if(cpSenco)cpSenco.textContent='\u20b9'+(Math.round(wt*baseRate*1.035)).toLocaleString('en-IN');
+    if(cpJoyalukkas)cpJoyalukkas.textContent='\u20b9'+(Math.round(wt*baseRate*1.038)).toLocaleString('en-IN');
+    if(cpTanishq)cpTanishq.textContent='\u20b9'+(Math.round(wt*baseRate*1.040)).toLocaleString('en-IN');
   }
 
   coinPills.forEach(function(pill){
@@ -3578,6 +3578,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     });
   });
   calc();
+  updateCoinPrices(1); /* init all coin prices on page load using live rate */
 
   /* ---- gold coin cursor trail ---- */
   if(!matchMedia('(prefers-reduced-motion: reduce)').matches &&
