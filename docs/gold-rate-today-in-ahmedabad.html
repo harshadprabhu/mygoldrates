@@ -601,7 +601,7 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
     var d=document.getElementById('navdrawer'),o=document.getElementById('nav-ov'),
         t=document.getElementById('navtog'),x=document.getElementById('nav-x');
     if(!d||!t)return;
-    function s(open){d.classList.toggle('open',open);o.hidden=!open;
+    function s(open){d.classList.toggle('open',open);if(o)o.hidden=!open;
       d.setAttribute('aria-hidden',open?'false':'true');
       t.setAttribute('aria-expanded',open?'true':'false');}
     t.addEventListener('click',function(){s(!d.classList.contains('open'));});
@@ -1529,7 +1529,8 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   var mok=document.getElementById('mm-ok'), merr=document.getElementById('mm-err');
   var mbtn=document.getElementById('m-btn');
   function openModal(){
-    mform.reset();                 /* never show previously typed/submitted data */
+    if(!overlay)return;
+    if(mform && typeof mform.reset === 'function') { try{mform.reset();}catch(e){} }                 /* never show previously typed/submitted data */
     mok.style.display='none'; merr.style.display='none';
     mbtn.disabled=false; mbtn.textContent='Subscribe';
     overlay.classList.add('open');
@@ -1537,7 +1538,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   }
   function closeModal(){overlay.classList.remove('open');
     try{sessionStorage.setItem('gr_dismissed','1');}catch(e){}}
-  document.getElementById('m-close').addEventListener('click',closeModal);
+  var mClose=document.getElementById('m-close');if(mClose)mClose.addEventListener('click',closeModal);
   overlay.addEventListener('click',function(e){
     if(e.target===overlay)closeModal();});
   document.addEventListener('keydown',function(e){

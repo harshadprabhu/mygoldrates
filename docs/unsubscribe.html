@@ -199,7 +199,7 @@ footer p{margin:6px 0;max-width:80ch}
     var d=document.getElementById('navdrawer'),o=document.getElementById('nav-ov'),
         t=document.getElementById('navtog'),x=document.getElementById('nav-x');
     if(!d||!t)return;
-    function s(open){d.classList.toggle('open',open);o.hidden=!open;
+    function s(open){d.classList.toggle('open',open);if(o)o.hidden=!open;
       d.setAttribute('aria-hidden',open?'false':'true');
       t.setAttribute('aria-expanded',open?'true':'false');}
     t.addEventListener('click',function(){s(!d.classList.contains('open'));});

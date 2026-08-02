@@ -2344,12 +2344,12 @@ NAV = f"""<div class="nav-ov" id="nav-ov" hidden></div>
     var d=document.getElementById('navdrawer'),o=document.getElementById('nav-ov'),
         t=document.getElementById('navtog'),x=document.getElementById('nav-x');
     if(!d||!t)return;
-    function s(open){{d.classList.toggle('open',open);o.hidden=!open;
+    function s(open){{d.classList.toggle('open',open);if(o)o.hidden=!open;
       d.setAttribute('aria-hidden',open?'false':'true');
       t.setAttribute('aria-expanded',open?'true':'false');}}
     t.addEventListener('click',function(){{s(!d.classList.contains('open'));}});
     if(x)x.addEventListener('click',function(){{s(false);}});
-    o.addEventListener('click',function(){{s(false);}});
+    if(o)o.addEventListener('click',function(){{s(false);}});
     document.addEventListener('keydown',function(e){{
       if(e.key==='Escape'&&d.classList.contains('open'))s(false);}});
   }}
@@ -3695,19 +3695,29 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   var mok=document.getElementById('mm-ok'), merr=document.getElementById('mm-err');
   var mbtn=document.getElementById('m-btn');
   function openModal(){
-    mform.reset();                 /* never show previously typed/submitted data */
-    mok.style.display='none'; merr.style.display='none';
-    mbtn.disabled=false; mbtn.textContent='Subscribe';
+    if(!overlay)return;
+    if(mform && typeof mform.reset === 'function') {
+      try{mform.reset();}catch(e){}
+    }
+    if(mok)mok.style.display='none';
+    if(merr)merr.style.display='none';
+    if(mbtn){mbtn.disabled=false;mbtn.textContent='Subscribe';}
     overlay.classList.add('open');
-    document.getElementById('m-name').focus();
+    var mn=document.getElementById('m-name');
+    if(mn)mn.focus();
   }
-  function closeModal(){overlay.classList.remove('open');
-    try{sessionStorage.setItem('gr_dismissed','1');}catch(e){}}
-  document.getElementById('m-close').addEventListener('click',closeModal);
-  overlay.addEventListener('click',function(e){
-    if(e.target===overlay)closeModal();});
-  document.addEventListener('keydown',function(e){
-    if(e.key==='Escape'&&overlay.classList.contains('open'))closeModal();});
+  function closeModal(){
+    if(overlay)overlay.classList.remove('open');
+    try{sessionStorage.setItem('gr_dismissed','1');}catch(e){}
+  }
+  var mClose=document.getElementById('m-close');
+  if(mClose)mClose.addEventListener('click',closeModal);
+  if(overlay){
+    overlay.addEventListener('click',function(e){
+      if(e.target===overlay)closeModal();});
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'&&overlay.classList.contains('open'))closeModal();});
+  }
   document.querySelectorAll('.js-alert').forEach(function(a){
     a.addEventListener('click',function(e){e.preventDefault();openModal();});
   });
@@ -3715,49 +3725,38 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   try{subscribed=!!localStorage.getItem('gr_sub');}catch(e){}
   var dismissed=false;
   try{dismissed=!!sessionStorage.getItem('gr_dismissed');}catch(e){}
-  if(!subscribed&&!dismissed){setTimeout(openModal,18000);}
-  function send(payload,retried){
-    return fetch(SB_URL+'/rest/v1/inquiries',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_KEY,
-               'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify(payload)
-    }).then(function(r){
-      if(r.ok)return true;
-      /* older table without the newer columns: retry with base fields only */
-      if(!retried){
-        var BASE=['name','email','phone','country','state','city','zip'];
-        var p2={};BASE.forEach(function(k){
-          if(payload[k]!==undefined)p2[k]=payload[k];});
-        return send(p2,true);
+  if(!subscribed&&!dismissed&&overlay){setTimeout(openModal,18000);}
+  if(mform){
+    mform.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(mok)mok.style.display='none';if(merr)merr.style.display='none';
+      if(mform.website && mform.website.value){return;}
+      if(typeof mform.reportValidity==='function' && !mform.reportValidity()){return;}
+      if(!SB_KEY){
+        if(merr){merr.textContent='Subscriptions open shortly - please check back soon.';merr.style.display='block';}
+        return;
       }
-      throw new Error('bad status');
+      if(mbtn){mbtn.disabled=true;mbtn.textContent='Subscribing...';}
+      var payload={
+        name:(mform.name?mform.name.value:'').trim(), email:(mform.email?mform.email.value:'').trim(),
+        phone:(mform.phone?mform.phone.value:'').trim(), country:mform.country?mform.country.value:'',
+        state:(mform.state?mform.state.value:'').trim(), city:(mform.city?mform.city.value:'').trim(),
+        zip:(mform.zip?mform.zip.value:'').trim(), area:(mform.area?mform.area.value:'').trim(),
+        offers_optin:mform.offers?mform.offers.checked:true
+      };
+      var g=window.GR_GDATA||{};
+      for(var k in g){if(g[k]!==null&&g[k]!==undefined)payload[k]=g[k];}
+      var save=window.GR_SAVE?window.GR_SAVE(payload):send(payload,false);
+      save.then(function(){
+        if(mok)mok.style.display='block';if(mbtn)mbtn.textContent='Subscribed';
+        try{localStorage.setItem('gr_sub','1');}catch(e){}
+        setTimeout(closeModal,1600);
+      }).catch(function(){
+        if(merr){merr.textContent='Failed to subscribe - please check details.';merr.style.display='block';}
+        if(mbtn){mbtn.disabled=false;mbtn.textContent='Subscribe';}
+      });
     });
   }
-  mform.addEventListener('submit',function(e){
-    e.preventDefault();
-    mok.style.display='none';merr.style.display='none';
-    if(mform.website.value){return;}
-    if(!mform.reportValidity()){return;}
-    if(!SB_KEY){merr.textContent='Subscriptions open shortly - please check back soon.';
-      merr.style.display='block';return;}
-    mbtn.disabled=true;mbtn.textContent='Subscribing...';
-    var payload={
-      name:mform.name.value.trim(), email:mform.email.value.trim(),
-      phone:mform.phone.value.trim(), country:mform.country.value,
-      state:mform.state.value.trim(), city:mform.city.value.trim(),
-      zip:mform.zip.value.trim(), area:mform.area.value.trim(),
-      offers_optin:mform.offers.checked
-    };
-    var g=window.GR_GDATA||{};
-    for(var k in g){if(g[k]!==null&&g[k]!==undefined)payload[k]=g[k];}
-    /* merge into the same email row when possible; else plain insert */
-    var save=window.GR_SAVE?window.GR_SAVE(payload):send(payload,false);
-    save.then(function(){
-      mok.style.display='block';mbtn.textContent='Subscribed';
-      try{localStorage.setItem('gr_sub','1');}catch(e){}
-      setTimeout(closeModal,1600);
-    }).catch(function(){
       merr.style.display='block';
       mbtn.disabled=false;mbtn.textContent='Subscribe';
     });
@@ -3928,27 +3927,6 @@ $nav
   var form=document.getElementById('inq');
   var ok=document.getElementById('m-ok'), err=document.getElementById('m-err');
   var btn=document.getElementById('f-btn');
-  form.addEventListener('submit',function(e){
-    e.preventDefault();
-    ok.style.display='none';err.style.display='none';
-    if(form.website.value){return;}          /* honeypot */
-    if(!form.reportValidity()){return;}
-    if(!KEY){err.textContent='Subscriptions open shortly - please check back soon.';
-      err.style.display='block';return;}
-    btn.disabled=true;btn.textContent='Subscribing...';
-    var payload={
-      name:form.name.value.trim(), email:form.email.value.trim(),
-      phone:form.phone.value.trim(), country:form.country.value,
-      state:form.state.value.trim(), city:form.city.value.trim(),
-      zip:form.zip.value.trim(), area:form.area.value.trim(),
-      offers_optin:form.offers.checked
-    };
-    var g=window.GR_GDATA||{};
-    for(var k in g){if(g[k]!==null&&g[k]!==undefined)payload[k]=g[k];}
-    function post(p){
-      return fetch(URL_+'/rest/v1/inquiries',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','apikey':KEY,
                  'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
         body:JSON.stringify(p)}).then(function(r){
           if(!r.ok)throw new Error('bad status');return r;});
