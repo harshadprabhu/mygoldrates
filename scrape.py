@@ -72,6 +72,7 @@ ZYTE_ACTIONS = {}
 PLACEHOLDER_METHOD = "reference-median"
 
 CANDIDATE_PATHS = [
+    "/in/pan-india/en/live-gold-rate.html",
     "/gold-rate-today/", "/gold-rate-today", "/gold-rate", "/goldrate",
     "/goldprice", "/gold-rate.html", "/gold-price", "/todays-gold-rate",
     "/gold-price-calculator", "/gold-price-today", "/gold-rate-calculator",
