@@ -25,9 +25,12 @@ from supabase import create_client
 SITE_URL = "https://mygoldrates.com"
 CUSTOM_DOMAIN = "mygoldrates.com"
 CONTACT_EMAIL = "contact@mygoldrates.com"
-# 24K uses 1.0 (canonical_24k_pre_gst IS already the 24K per-gram price;
-# applying 0.999 again would under-state it). 22K and 18K are scaled from it.
-PURITY_FRACTION = {"24K": 1.0, "22K": 0.916, "18K": 0.750, "14K": 0.583}
+# General formula: Unknown Rate = (Known Rate / Known Karat) x Unknown Karat.
+# 24K uses 1.0 (canonical_24k_pre_gst IS already the 24K per-gram price).
+# Fractions are exact karat/24 ratios (not the rounded BIS fineness stamps
+# 916/750/583) so every displayed purity is derived with the same formula
+# used when a brand only publishes one purity. Kept in sync with scrape.py.
+PURITY_FRACTION = {"24K": 24 / 24, "22K": 22 / 24, "18K": 18 / 24, "14K": 14 / 24}
 IST = timezone(timedelta(hours=5, minutes=30))
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/126.0 Safari/537.36")
@@ -385,9 +388,9 @@ def fetch_akgsma():
 
         r22, r18 = grab("22K916"), grab("18K750")
         if r22:
-            r24 = round(r22 / 0.916, 2)
+            r24 = round(r22 / (22 / 24), 2)
             print(f"akgsma: 22K {r22} -> 24K {r24}")
-            return r24, r22, (r18 or round(r24 * 0.75, 2))
+            return r24, r22, (r18 or round(r24 * (18 / 24), 2))
     except Exception as e:
         print("akgsma: fetch failed:", type(e).__name__, str(e)[:80])
     return None
@@ -4168,7 +4171,7 @@ $coindrawer
 
 <script>
 var BRANDS=$calc_brands;
-var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
+var FRAC={"24K":24/24,"22K":22/24,"18K":18/24,"14K":14/24};
 (function(){
   /* ---- sortable table + GST switch ---- */
   var table=document.getElementById('rates');
@@ -4384,7 +4387,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     var idx=parseInt(sel.value,10)||0;
     var b=BRANDS[idx]||BRANDS[0];
     if(!b) return;
-    var rate=b.r24*({'24K':1.0,'22K':0.916,'18K':0.750,'14K':0.583}[purity]||1.0);
+    var rate=b.r24*({'24K':24/24,'22K':22/24,'18K':18/24,'14K':14/24}[purity]||1.0);
     var goldVal=rate*grams, gstAmt=goldVal*0.03;
     var total=gst?goldVal+gstAmt:goldVal;
     var cTitle=document.getElementById('c-title'),
@@ -4434,7 +4437,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
     var mPct=parseFloat(bcMaking.value)||12;
 
     var base24 = parseInt("$low24_num", 10) || 14467;
-    var rate = Math.round(base24 * ({'24K':1.0, '22K':0.916, '18K':0.750, '14K':0.583}[k] || 0.916));
+    var rate = Math.round(base24 * ({'24K':24/24, '22K':22/24, '18K':18/24, '14K':14/24}[k] || 22/24));
 
     var goldCost=w*rate;
     var makingCost=goldCost*(mPct/100);

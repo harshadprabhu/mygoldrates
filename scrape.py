@@ -51,10 +51,13 @@ OUTLIER_TOLERANCE = 0.04
 RATIO_TOLERANCE = 0.015
 MIN_FOR_MEDIAN = 5
 
-# 24K uses 1.0 — canonical_24k_pre_gst IS the per-gram 24K price.
-# Dividing the scraped 18K/22K rate by its fraction gives the 24K equivalent;
-# multiplying back by 0.999 would lose ≈₹15/g unnecessarily.
-PURITY_FRACTION = {"24K": 1.0, "22K": 0.916, "18K": 0.750, "14K": 0.583}
+# General formula: Unknown Rate = (Known Rate / Known Karat) x Unknown Karat.
+# 24K uses 1.0 — canonical_24k_pre_gst IS the per-gram 24K price. Dividing the
+# scraped 18K/22K rate by its fraction gives the 24K equivalent; scaling back
+# out by another purity's fraction gives that purity's rate. Fractions are
+# exact karat/24 ratios (not the rounded BIS fineness stamps 916/750/583),
+# so any known purity converts to any unknown purity with this one formula.
+PURITY_FRACTION = {"24K": 24 / 24, "22K": 22 / 24, "18K": 18 / 24, "14K": 14 / 24}
 
 # Brands behind anti-bot walls only reachable through Zyte API (needs the
 # ZYTE_API_KEY secret) instead of a direct request; keyed by brand slug so no
@@ -390,8 +393,9 @@ def derive_ladder(canonical_24k_pre_gst):
     """One karat's rate anchors the whole ladder.
 
     canonical_24k_pre_gst is the per-gram price of 24K gold. All other
-    purities are scaled proportionally: 22K = canonical * 0.916,
-    18K = canonical * 0.750, etc. 24K uses factor 1.0 (it IS the basis).
+    purities are scaled proportionally using Unknown Rate = (Known Rate /
+    Known Karat) x Unknown Karat, anchored at 24K: 22K = canonical * 22/24,
+    18K = canonical * 18/24, etc. 24K uses factor 1.0 (it IS the basis).
     Returns a pre-GST per-gram rate for each purity.
     """
     return {p: round(canonical_24k_pre_gst * frac, 2)
