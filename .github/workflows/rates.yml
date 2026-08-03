@@ -101,16 +101,18 @@ jobs:
             --commit-dirty=true
 
       - name: Send daily alert emails
-        # Fire on the morning-window crons; send_alerts.py's per-subscriber
-        # last_emailed guard ensures at most ONE email per day, so whichever
-        # morning run lands first sends it and the rest are no-ops. (Excludes
-        # the afternoon crons so a delayed day still emails in the morning.)
+        # Fire on the 4 morning-window crons and manual runs (with alerts=true),
+        # and even if an earlier step failed. The last_emailed guard keeps it to
+        # ONE email per subscriber per day - later morning retries are no-ops for
+        # already-sent subscribers and only retry those that failed.
         if: >
-          github.event.inputs.alerts == 'true' ||
-          github.event.schedule == '3 2 * * *' ||
-          github.event.schedule == '23 3 * * *' ||
-          github.event.schedule == '43 4 * * *' ||
-          github.event.schedule == '3 6 * * *'
+          !cancelled() && (
+            github.event.inputs.alerts == 'true' ||
+            github.event.schedule == '3 2 * * *' ||
+            github.event.schedule == '23 3 * * *' ||
+            github.event.schedule == '43 4 * * *' ||
+            github.event.schedule == '3 6 * * *'
+          )
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
