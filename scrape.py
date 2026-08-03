@@ -263,6 +263,30 @@ def extract_labeled_rates(text):
     return buckets
 
 
+# Some jewellers (Malabar) print the rate BEFORE the karat label, in the
+# opposite order to _LABELED_RE: "13220.00 INR/gms" ... "22k (916)". The
+# fineness in parens right after the karat ("(916)"/"(999)"/"(750)") is what
+# makes this pattern safe to match even with several purities stacked close
+# together on the page - it can't accidentally lock onto a stray "18K" tab
+# label, which never has a fineness code immediately after it.
+_VALUE_THEN_KARAT_RE = re.compile(
+    r"([\d,]+(?:\.\d{1,2})?)\s*(?:₹|Rs\.?|INR)?\s*/\s*(?:g|gms?|gram)\b"
+    r"[^0-9]{0,40}?(\d{2})\s*[kK][tT]?\s*\(\s*(?:999|916|750|583)\s*\)",
+    re.I)
+
+
+def extract_value_then_karat(text):
+    buckets = {}
+    for m in _VALUE_THEN_KARAT_RE.finditer(text):
+        karat = f"{m.group(2)}K"
+        if karat not in PURITY_FRACTION:
+            continue
+        pg = _per_gram(_f(m.group(1)))
+        if pg:
+            buckets.setdefault(karat, []).append(pg)
+    return buckets
+
+
 # The gold portion's value, with the weight either inline (Kisna:
 # 'Gold1.880 g RS 15,874') or in a separate field (BlueStone: 'Gold Rs.
 # 1,61,615' + 'Weight 11.97 gram'). Gap after 'Gold' is spaces/colons only
@@ -325,6 +349,7 @@ def extract(html):
     if not buckets:
         text = soup.get_text(" ", strip=True)
         for fn, name in ((extract_labeled_rates, "labeled"),
+                         (extract_value_then_karat, "valuekarat"),
                          (extract_pregst_rate, "pregst"),
                          (extract_gold_value_breakup, "goldvalue"),
                          (extract_headline_rate, "headline"),
