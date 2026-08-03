@@ -2993,12 +2993,21 @@ GATE_HTML = """
       <form id="gate-form" autocomplete="on">
         <input name="name" type="text" placeholder="Full name *" required autocomplete="name">
         <input name="email" type="email" placeholder="Email address *" required autocomplete="email">
-        <input name="phone" type="tel" placeholder="Mobile number" autocomplete="tel">
+        <input name="phone" type="tel" placeholder="Mobile number" autocomplete="tel" value="+91 ">
+        <button type="button" class="locbtn gate-locbtn">&#128205; Use my current location to autofill</button>
+        <div class="gate-row">
+          <input name="state" type="text" placeholder="State" autocomplete="address-level1">
+          <input name="city" type="text" placeholder="City" autocomplete="address-level2">
+        </div>
+        <div class="gate-row">
+          <input name="zip" type="text" placeholder="PIN code" inputmode="numeric" maxlength="10" autocomplete="postal-code">
+          <input name="area" type="text" placeholder="Area (auto)" list="gate-areas" autocomplete="address-level3">
+          <datalist id="gate-areas"></datalist>
+        </div>
         <div class="gate-row">
           <select name="gender"><option value="">Gender</option><option>Male</option><option>Female</option><option>Other</option><option>Prefer not to say</option></select>
           <input name="age" type="number" placeholder="Age" min="18" max="100">
         </div>
-        <input name="city" type="text" placeholder="City" autocomplete="address-level2">
         <button type="submit" class="gate-submit">Get Free Access &rarr;</button>
       </form>
       <p class="gate-note">No spam. Unsubscribe anytime. We never share your data.</p>
@@ -3009,13 +3018,21 @@ GATE_HTML = """
       <h3>Complete your profile</h3>
       <p class="gate-sub">Help us personalise your gold rate experience.</p>
       <form id="gate-enrich-form" autocomplete="on">
-        <input name="phone" type="tel" placeholder="Mobile number" autocomplete="tel">
+        <input name="phone" type="tel" placeholder="Mobile number" autocomplete="tel" value="+91 ">
+        <button type="button" class="locbtn gate-locbtn">&#128205; Use my current location to autofill</button>
+        <div class="gate-row">
+          <input name="state" type="text" placeholder="State" autocomplete="address-level1">
+          <input name="city" type="text" placeholder="City" autocomplete="address-level2">
+        </div>
+        <div class="gate-row">
+          <input name="zip" type="text" placeholder="PIN code" inputmode="numeric" maxlength="10" autocomplete="postal-code">
+          <input name="area" type="text" placeholder="Area (auto)" list="gate-enrich-areas" autocomplete="address-level3">
+          <datalist id="gate-enrich-areas"></datalist>
+        </div>
         <div class="gate-row">
           <select name="gender"><option value="">Gender</option><option>Male</option><option>Female</option><option>Other</option><option>Prefer not to say</option></select>
           <input name="age" type="number" placeholder="Age" min="18" max="100">
         </div>
-        <input name="city" type="text" placeholder="City" autocomplete="address-level2">
-        <input name="state" type="text" placeholder="State" autocomplete="address-level1">
         <button type="submit" class="gate-submit">Save &amp; Continue &rarr;</button>
         <button type="button" id="gate-enrich-skip" style="width:100%;padding:10px;margin-top:6px;border:0;background:none;color:var(--ink-3);font-size:13px;cursor:pointer">Skip for now</button>
       </form>
@@ -3087,6 +3104,70 @@ GATE_JS = r"""
   if(ov)ov.addEventListener('click',function(e){if(e.target===ov){pendingCb=null;closeGate();}});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ov&&!ov.hidden){pendingCb=null;closeGate();}});
 
+  /* ---- PIN autofill + "use my location", scoped per-form (same behaviour
+     as the main rate-alert form) so both gate-form and gate-enrich-form get
+     automatic state/city/area from a PIN code or from geolocation. ---- */
+  function wireLocation(form){
+    if(!form)return;
+    function F(n){return form.elements[n];}
+    var zip=F('zip'),area=F('area');
+    function pinLookup(){
+      if(!zip)return;var v=(zip.value||'').trim();
+      if(!/^[1-9]\d{5}$/.test(v))return;
+      fetch('https://api.postalpincode.in/pincode/'+v)
+        .then(function(r){return r.json();})
+        .then(function(j){var d=j&&j[0];
+          if(!d||d.Status!=='Success'||!d.PostOffice||!d.PostOffice.length)return;
+          var po=d.PostOffice;
+          if(F('state')&&!F('state').value.trim())F('state').value=po[0].State;
+          if(F('city')&&!F('city').value.trim())F('city').value=po[0].District;
+          if(area){var dl=document.getElementById(area.getAttribute('list'));
+            if(dl){dl.innerHTML='';po.forEach(function(p){var o=
+              document.createElement('option');o.value=p.Name;dl.appendChild(o);});}
+            if(!area.value.trim())area.value=po[0].Name;}
+        }).catch(function(){});
+    }
+    function set(n,v,force){var el=F(n);
+      if(el&&v&&(force||!el.value.trim()))el.value=v;}
+    function useLocation(btn){
+      if(!navigator.geolocation){alert('Location is not supported by this '+
+        'browser - please type your address.');return;}
+      var old=btn.textContent;btn.disabled=true;btn.textContent='Locating...';
+      navigator.geolocation.getCurrentPosition(function(pos){
+        var la=pos.coords.latitude,lo=pos.coords.longitude;
+        fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?'+
+          'latitude='+la+'&longitude='+lo+'&localityLanguage=en')
+          .then(function(r){return r.json();})
+          .then(function(d){
+            set('state',d.principalSubdivision,true);
+            set('city',d.city||d.locality,true);
+            set('area',d.locality||d.city,true);
+            if(d.postcode)set('zip',d.postcode,true);
+            btn.textContent='Location added';
+            if(zip&&/^[1-9]\d{5}$/.test((zip.value||'').trim()))pinLookup();
+            setTimeout(function(){btn.disabled=false;btn.textContent=old;},2500);
+          }).catch(function(){btn.disabled=false;btn.textContent=old;
+            alert('Could not look up your location - please type your address.');});
+      },function(err){btn.disabled=false;btn.textContent=old;
+        alert(err&&err.code===1?'Location permission was denied. You can type '+
+          'your address instead.':'Could not get your location - please type '+
+          'your address.');},
+       {enableHighAccuracy:true,timeout:12000,maximumAge:600000});
+    }
+    var ph=F('phone');
+    if(ph){ph.addEventListener('focus',function(){
+        if(!ph.value.trim())ph.value='+91 ';});
+      ph.addEventListener('blur',function(){var v=ph.value.replace(/[^\d]/g,'');
+        if(/^[6-9]\d{9}$/.test(v))ph.value='+91 '+v;});}
+    if(zip){zip.addEventListener('input',function(){
+        if(/^[1-9]\d{5}$/.test(zip.value.trim()))pinLookup();});
+      zip.addEventListener('blur',pinLookup);}
+    var lb=form.querySelector('.gate-locbtn');
+    if(lb)lb.addEventListener('click',function(){useLocation(lb);});
+  }
+  wireLocation(gform);
+  wireLocation(eform);
+
   /* ---- email/name form submit ---- */
   if(gform)gform.addEventListener('submit',function(e){
     e.preventDefault();
@@ -3098,7 +3179,10 @@ GATE_JS = r"""
       phone:(F('phone').value||'').trim()||null,
       gender:(F('gender').value||null),
       age:parseInt(F('age').value||'')||null,
+      state:(F('state').value||'').trim()||null,
       city:(F('city').value||'').trim()||null,
+      zip:(F('zip').value||'').trim()||null,
+      area:(F('area').value||'').trim()||null,
       signup_method:'form',signup_source:'gate_form'};
     saveGate(payload);
     afterAuth({email:email,name:name});
@@ -3115,6 +3199,8 @@ GATE_JS = r"""
       age:parseInt(F('age').value||'')||null,
       city:(F('city').value||'').trim()||null,
       state:(F('state').value||'').trim()||null,
+      zip:(F('zip').value||'').trim()||null,
+      area:(F('area').value||'').trim()||null,
       google_id:u.google_id||null,
       google_picture:u.picture||null,
       google_locale:u.locale||null,
