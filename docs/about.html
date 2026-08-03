@@ -207,22 +207,15 @@ footer p{margin:6px 0;max-width:80ch}
   function init(){
     var d=document.getElementById('navdrawer'),o=document.getElementById('nav-ov'),
         t=document.getElementById('navtog'),x=document.getElementById('nav-x');
-    if(!t)return;
-    function s(open){
-      if(d)d.classList.toggle('open',open);
-      if(o)o.hidden=!open;
-      if(d)d.setAttribute('aria-hidden',open?'false':'true');
-      t.setAttribute('aria-expanded',open?'true':'false');
-    }
-    t.addEventListener('click',function(){
-      var isOpen=d?d.classList.contains('open'):false;
-      s(!isOpen);
-    });
+    if(!d||!t)return;
+    function s(open){d.classList.toggle('open',open);o.hidden=!open;
+      d.setAttribute('aria-hidden',open?'false':'true');
+      t.setAttribute('aria-expanded',open?'true':'false');}
+    t.addEventListener('click',function(){s(!d.classList.contains('open'));});
     if(x)x.addEventListener('click',function(){s(false);});
-    if(o)o.addEventListener('click',function(){s(false);});
+    o.addEventListener('click',function(){s(false);});
     document.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&d&&d.classList.contains('open'))s(false);
-    });
+      if(e.key==='Escape'&&d.classList.contains('open'))s(false);});
   }
   if(document.readyState==='loading'){
     document.addEventListener('DOMContentLoaded',init);
@@ -238,7 +231,7 @@ footer p{margin:6px 0;max-width:80ch}
 </header>
 <article class="page">
   <h1>About GoldRates</h1>
-  <p class="updated-on">Last updated 02 August 2026</p>
+  <p class="updated-on">Last updated 03 August 2026</p>
 
   <p>GoldRates is an independent website that helps people in India compare
   today's gold rates across the country's leading jewellery brands, all on one

@@ -254,8 +254,11 @@ footer p{margin:6px 0;max-width:80ch}
     document.addEventListener('keydown',function(e){
       if(e.key==='Escape'&&d.classList.contains('open'))s(false);});
   }
-  if(document.readyState!=='loading')init();
-  else document.addEventListener('DOMContentLoaded',init);
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',init);
+  }else{
+    setTimeout(init,0);
+  }
 })();</script>
 <div class="wrap">
 <header class="top">
@@ -264,7 +267,7 @@ footer p{margin:6px 0;max-width:80ch}
   <div class="topright"><a class="btn" href="https://mygoldrates.com/">Today's rates</a></div>
 </header>
 <article class="page">
-<p class="crumbs"><a href="https://mygoldrates.com/">Home</a> &rsaquo; <a href="https://mygoldrates.com/news">Learn</a> &rsaquo; Gold Making Charges &amp; Wastage, Explained</p><h1>Gold Making Charges &amp; Wastage, Explained</h1><p class="updated-on">Last updated 02 August 2026</p>
+<p class="crumbs"><a href="https://mygoldrates.com/">Home</a> &rsaquo; <a href="https://mygoldrates.com/news">Learn</a> &rsaquo; Gold Making Charges &amp; Wastage, Explained</p><h1>Gold Making Charges &amp; Wastage, Explained</h1><p class="updated-on">Last updated 03 August 2026</p>
   <p><strong>Making charges</strong> are what a jeweller charges to turn raw
   gold into a finished piece - the labour and design cost - on top of the metal
   value.</p>

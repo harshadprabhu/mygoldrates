@@ -244,22 +244,15 @@ footer p{margin:6px 0;max-width:80ch}
   function init(){
     var d=document.getElementById('navdrawer'),o=document.getElementById('nav-ov'),
         t=document.getElementById('navtog'),x=document.getElementById('nav-x');
-    if(!t)return;
-    function s(open){
-      if(d)d.classList.toggle('open',open);
-      if(o)o.hidden=!open;
-      if(d)d.setAttribute('aria-hidden',open?'false':'true');
-      t.setAttribute('aria-expanded',open?'true':'false');
-    }
-    t.addEventListener('click',function(){
-      var isOpen=d?d.classList.contains('open'):false;
-      s(!isOpen);
-    });
+    if(!d||!t)return;
+    function s(open){d.classList.toggle('open',open);o.hidden=!open;
+      d.setAttribute('aria-hidden',open?'false':'true');
+      t.setAttribute('aria-expanded',open?'true':'false');}
+    t.addEventListener('click',function(){s(!d.classList.contains('open'));});
     if(x)x.addEventListener('click',function(){s(false);});
-    if(o)o.addEventListener('click',function(){s(false);});
+    o.addEventListener('click',function(){s(false);});
     document.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&d&&d.classList.contains('open'))s(false);
-    });
+      if(e.key==='Escape'&&d.classList.contains('open'))s(false);});
   }
   if(document.readyState==='loading'){
     document.addEventListener('DOMContentLoaded',init);
@@ -287,7 +280,7 @@ footer p{margin:6px 0;max-width:80ch}
   <p>© 2026 GoldRates - daily gold rate comparison for India.</p>
 </footer>
 </div>
-<script>(function(){var RATE=14432.31;function g(id){return document.getElementById(id);}function fmt(n){if(!isFinite(n))return '-';var s=Math.round(n).toString(),o=s.slice(-3),r=s.slice(0,-3);while(r.length>2){o=r.slice(-2)+','+o;r=r.slice(0,-2);}if(r)o=r+','+o;return '₹'+o;}
+<script>(function(){var RATE=14432.0;function g(id){return document.getElementById(id);}function fmt(n){if(!isFinite(n))return '-';var s=Math.round(n).toString(),o=s.slice(-3),r=s.slice(0,-3);while(r.length>2){o=r.slice(-2)+','+o;r=r.slice(0,-2);}if(r)o=r+','+o;return '₹'+o;}
         function calc(){var i=(+g('g').value||0)/1200,n=(+g('y').value||0)*12,
           P=+g('m').value||0;
           var fv=i>0?P*((Math.pow(1+i,n)-1)/i)*(1+i):P*n;
