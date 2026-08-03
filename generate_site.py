@@ -2931,19 +2931,13 @@ GATE_CSS = """
 #gate-close{position:absolute;top:14px;right:16px;background:none;border:0;
   font-size:24px;color:var(--ink-3);cursor:pointer;line-height:1}
 #gate-close:hover{color:var(--ink)}
-.gate-google-wrap{position:relative;width:100%;margin-bottom:6px;cursor:pointer}
 .gate-google-btn{display:flex;align-items:center;justify-content:center;gap:10px;
   width:100%;padding:12px 18px;border:1.5px solid var(--line);border-radius:12px;
   background:var(--card);font:600 14px/1 "IBM Plex Sans",sans-serif;color:var(--ink);
-  cursor:pointer;transition:border-color .15s,box-shadow .15s;pointer-events:none}
-.gate-google-wrap:hover .gate-google-btn{border-color:var(--gold);box-shadow:0 2px 10px rgba(0,0,0,.1)}
+  cursor:pointer;transition:border-color .15s,box-shadow .15s;margin-bottom:6px}
+.gate-google-btn:hover{border-color:var(--gold);box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.gate-google-btn:disabled{opacity:.6;cursor:default}
 .gate-google-btn svg{flex:none}
-/* The real Google button is rendered here, stretched invisibly on top of our
-   styled button, so the click that opens the account picker is a genuine
-   user gesture on Google's own iframe (required - JS can't synthesize it). */
-#gate-real-gbtn{position:absolute;inset:0;opacity:0;overflow:hidden;
-  display:flex;align-items:center;justify-content:center}
-#gate-real-gbtn iframe{width:100%!important}
 .gate-or{text-align:center;font-size:12px;color:var(--ink-3);margin:14px 0;
   display:flex;align-items:center;gap:8px}
 .gate-or::before,.gate-or::after{content:"";flex:1;height:1px;background:var(--line)}
@@ -2987,13 +2981,10 @@ GATE_HTML = """
       <p class="eyebrow" style="margin:0 0 6px">Free access</p>
       <h3 id="gate-title">Sign in to use this feature</h3>
       <p class="gate-sub">Get live gold rate comparisons, calculators and daily alerts — free.</p>
-      <div class="gate-google-wrap" id="gate-google-wrap">
-        <button class="gate-google-btn" id="gate-gbtn" tabindex="-1" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.1 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
-          Continue with Google
-        </button>
-        <div id="gate-real-gbtn"></div>
-      </div>
+      <button class="gate-google-btn" id="gate-gbtn" type="button">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.1 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+        Continue with Google
+      </button>
       <div class="gate-or">or enter details</div>
       <form id="gate-form" autocomplete="on">
         <input name="name" type="text" placeholder="Full name *" required autocomplete="name">
@@ -3225,14 +3216,20 @@ GATE_JS = r"""
     if(pendingCb){var fn=pendingCb;pendingCb=null;setTimeout(fn,50);}
   });
 
-  /* ---- Google One Tap via gate button ---- */
+  /* ---- Google sign-in ----
+     Two independent paths, both landing on the same applyGoogleUser():
+     1. One Tap - a small corner prompt that appears on its own (best-effort;
+        depends on FedCM/third-party cookies, so it can silently not appear
+        in some browsers - that's fine, it's a bonus, not the only way in).
+     2. The "Continue with Google" button - a plain OAuth popup via
+        google.accounts.oauth2, which does NOT depend on FedCM and is the
+        reliable path that always works when clicked. */
   function decode(jwt){try{return JSON.parse(decodeURIComponent(
     atob(jwt.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')).split('')
       .map(function(c){return '%'+('00'+c.charCodeAt(0).toString(16)).slice(-2);})
       .join('')));}catch(e){return null;}}
 
-  function onGoogleCred(resp){
-    var p=resp&&resp.credential?decode(resp.credential):null;
+  function applyGoogleUser(p){
     if(!p||!p.email)return;
     var wasAuthed=isAuthed();
     var user={email:p.email,name:p.name||null,picture:p.picture||null,
@@ -3257,46 +3254,75 @@ GATE_JS = r"""
       ov.hidden=false;
       document.body.style.overflow='hidden';
     }
-    // Pre-fill name if available
     if(eform&&p.name){var n=eform.elements['name'];if(n)n.value=p.name;}
-    // update chip immediately
     var h=document.getElementById('hauth');
     if(h){h.hidden=false;
       h.innerHTML='<span class="uchip" title="'+(p.email||'')+'">'+
         (p.picture?'<img src="'+p.picture+'" alt="" referrerpolicy="no-referrer">':'')+
         '<span>'+(p.name||p.email||'Signed in')+'</span></span>';}
+    if(gbtn){gbtn.disabled=false;gbtn.innerHTML=gbtnHTML;}
   }
 
-  /* Render Google's own button, invisibly, on top of our styled one - a
-     synthetic .click() on Google's iframe is blocked by browsers, so the
-     only reliable way to trigger the account picker from a custom-styled
-     button is to let the real click land on the real button. */
-  var realBtn=document.getElementById('gate-real-gbtn');
-  var gInited=false;
-  function ensureGoogleReady(cb){
-    if(!GCID)return;
+  function onGoogleCred(resp){          // One Tap JWT credential
+    applyGoogleUser(resp&&resp.credential?decode(resp.credential):null);
+  }
+
+  var gbtn=document.getElementById('gate-gbtn');
+  var gbtnHTML=gbtn?gbtn.innerHTML:'';
+  var tokenClient=null;
+  function getTokenClient(){
+    if(tokenClient)return tokenClient;
+    if(!GCID||!(window.google&&google.accounts&&google.accounts.oauth2))return null;
+    tokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:GCID,scope:'openid email profile',
+      callback:function(resp){
+        if(!resp||resp.error||!resp.access_token){
+          if(gbtn){gbtn.disabled=false;gbtn.innerHTML=gbtnHTML;}
+          return;
+        }
+        fetch('https://www.googleapis.com/oauth2/v3/userinfo',
+          {headers:{Authorization:'Bearer '+resp.access_token}})
+          .then(function(r){return r.json();})
+          .then(applyGoogleUser)
+          .catch(function(){
+            if(gbtn){gbtn.disabled=false;gbtn.innerHTML=gbtnHTML;}
+          });
+      }
+    });
+    return tokenClient;
+  }
+
+  if(gbtn)gbtn.addEventListener('click',function(){
+    if(!GCID){alert('Google sign-in is not configured.');return;}
+    gbtn.disabled=true;gbtn.textContent='Opening Google...';
+    var tries=0;
+    (function open(){
+      var tc=getTokenClient();
+      if(tc){tc.requestAccessToken({prompt:''});}
+      else if(tries++<40){setTimeout(open,150);}
+      else{gbtn.disabled=false;gbtn.innerHTML=gbtnHTML;
+        alert('Could not load Google sign-in - please try again.');}
+    })();
+  });
+
+  /* Best-effort auto One Tap - initialise the ID client too (separate from
+     the oauth2 client above) purely so the corner prompt can appear on its
+     own for users it works for. Silently does nothing if FedCM is
+     unsupported/blocked in this browser. */
+  (function autoOneTap(){
+    if(!GCID||isAuthed())return;
     var tries=0;
     (function tryG(){
       if(window.google&&google.accounts&&google.accounts.id){
-        if(!gInited){
+        try{
           google.accounts.id.initialize({client_id:GCID,callback:onGoogleCred,
             auto_select:false,cancel_on_tap_outside:true,itp_support:true,
             use_fedcm_for_prompt:true});
-          gInited=true;
-        }
-        cb();
+          google.accounts.id.prompt();
+        }catch(e){}
       }else if(tries++<40){setTimeout(tryG,150);}
     })();
-  }
-  ensureGoogleReady(function(){
-    if(realBtn)google.accounts.id.renderButton(realBtn,
-      {type:'standard',theme:'outline',size:'large',width:'320',
-       text:'continue_with',logo_alignment:'center'});
-    // Auto pop: show One Tap on its own, without waiting for a click - this
-    // is the "auto pop" prompt users are used to seeing top-right. Skip it
-    // for already-signed-in users.
-    if(!isAuthed()){try{google.accounts.id.prompt();}catch(e){}}
-  });
+  })();
 
   /* ---- FEATURE GATE: intercept gated elements ---- */
   function guard(el,originalHandler){
