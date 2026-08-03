@@ -602,28 +602,117 @@ def _articles(rate_str, med, inr):
          "better for jewellery vs investment in India.",
          "22K vs 24K Gold: What's the Difference?",
          f"""
-  <p>The number before the "K" (karat) tells you how pure the gold is. Pure
-  gold is 24 karat; lower karats mix in other metals for strength.</p>
+  <p>Walk into any jewellery store in India and you will see rate boards
+  showing both 22K and 24K prices. The difference seems simple — one is purer
+  than the other — but the choice between them shapes everything from how much
+  you pay, to how long your jewellery lasts, to how easily you can resell it
+  later. This guide explains both purities in plain language.</p>
+
+  <h2>Understanding gold purity: what "K" means</h2>
+  <p>The letter K stands for <em>karat</em>, a unit of purity that tells you
+  what fraction of the metal is pure gold. Pure gold is 24 parts gold out of
+  24 — hence 24K. 22K means 22 parts gold and 2 parts other metals. The
+  number is not arbitrary; it maps to a precise fineness stamp (parts per
+  thousand) that jewellers and BIS hallmarking use.</p>
+  <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px">
+    <thead><tr style="background:color-mix(in srgb,var(--gold) 10%,transparent)">
+      <th style="padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)">Karat</th>
+      <th style="padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)">Fineness</th>
+      <th style="padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)">Gold %</th>
+      <th style="padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)">Common use</th>
+    </tr></thead>
+    <tbody>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid var(--line)">24K</td><td style="padding:8px 12px;border-bottom:1px solid var(--line)">999</td><td style="padding:8px 12px;border-bottom:1px solid var(--line)">99.9%</td><td style="padding:8px 12px;border-bottom:1px solid var(--line)">Coins, bars, digital gold</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid var(--line)">22K</td><td style="padding:8px 12px;border-bottom:1px solid var(--line)">916</td><td style="padding:8px 12px;border-bottom:1px solid var(--line)">91.6%</td><td style="padding:8px 12px;border-bottom:1px solid var(--line)">Traditional jewellery, bridal sets</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid var(--line)">18K</td><td style="padding:8px 12px;border-bottom:1px solid var(--line)">750</td><td style="padding:8px 12px;border-bottom:1px solid var(--line)">75.0%</td><td style="padding:8px 12px;border-bottom:1px solid var(--line)">Diamond-set, daily-wear pieces</td></tr>
+      <tr><td style="padding:8px 12px">14K</td><td style="padding:8px 12px">585</td><td style="padding:8px 12px">58.5%</td><td style="padding:8px 12px">International fashion jewellery</td></tr>
+    </tbody>
+  </table>
+
   <h2>24K gold (99.9% pure)</h2>
-  <p>24K, also stamped <strong>999</strong>, is the purest investment-grade
-  gold, used for coins, bars and digital gold. It is soft and scratches
-  easily, so it is rarely used for intricate jewellery. Today the 24K rate is
-  about <strong>{rate_str}/g</strong> (pre-GST).</p>
+  <p>24K gold is the purest form commercially available. It carries the
+  <strong>999 fineness</strong> stamp and is the standard for investment
+  products: minted coins (like MMTC-PAMP, government Sovereign Gold Bonds),
+  gold bars, ETFs, and digital gold platforms. Because it is essentially
+  undiluted metal, its value is straightforward to calculate and easy for any
+  buyer worldwide to verify.</p>
+  <p>The downside is physical weakness. Pure gold is a soft metal — around 2.5
+  on the Mohs hardness scale, roughly as hard as a fingernail. A plain 24K
+  bangle will bend, dent and scratch with ordinary daily wear. Fine prong
+  settings holding diamonds or gemstones would deform over time. For this
+  reason, most traditional jewellers in India will not offer 24K wearable
+  jewellery beyond plain chains or very simple bangles.</p>
+  <p>Today the 24K gold rate is <strong>{rate_str} per gram</strong>
+  (pre-GST, median across leading Indian jewellers).</p>
+
   <h2>22K gold (91.6% pure)</h2>
-  <p>22K, stamped <strong>916</strong>, is 91.6% gold with 8.4% alloy for
-  durability - the standard for Indian jewellery. At today's rates 22K works
-  out to roughly <strong>{inr(med['22K'])}/g</strong>.</p>
-  <h2>Which should you buy?</h2>
+  <p>22K gold — stamped <strong>916</strong> — contains 91.6% gold and 8.4%
+  other metals, typically silver, copper or zinc. This small alloy addition
+  transforms the physical properties dramatically: 22K is significantly harder,
+  holds intricate filigree work, retains prong shapes, and survives years of
+  daily wear with far less deformation than 24K.</p>
+  <p>In India, 22K is the dominant jewellery purity. Virtually all traditional
+  bridal sets, temple jewellery, Kundan and Polki pieces, and festive ornaments
+  are made in 22K. When a jeweller quotes "the gold rate today," they almost
+  always mean the 22K price. At current rates, 22K is priced at roughly
+  <strong>{inr(med['22K'])} per gram</strong> — about 8.4% less than 24K,
+  reflecting the lower gold content.</p>
+  <p>The alloy metals used in 22K are chosen carefully. Copper adds warmth to
+  the colour and improves hardness; silver lightens the colour and adds
+  ductility. A skilled alloy blend is what gives different jewellers' gold
+  slightly different visual qualities, even at the same karat.</p>
+
+  <h2>18K gold: the third standard you should know</h2>
+  <p>18K (750 fineness, 75% gold) is increasingly popular in India for
+  diamond jewellery, everyday rings, and contemporary designs. The higher
+  alloy content makes it harder than 22K and better suited for complex
+  stone settings. Its lower gold fraction also means a lower gold cost, so
+  more of the piece's price reflects craftsmanship and stones rather than
+  metal. White gold and rose gold are typically 18K with specific alloys
+  (palladium or rhodium for white, copper for rose).</p>
+
+  <h2>Which should you buy? A decision guide</h2>
+  <p>The right purity depends entirely on how you will use the gold.</p>
   <ul>
-    <li><strong>For investment:</strong> 24K coins/bars - maximum purity, easy
-    to value and resell.</li>
-    <li><strong>For jewellery you'll wear:</strong> 22K - holds designs and
-    stones far better.</li>
-    <li><strong>For diamond or daily-wear pieces:</strong> 18K (75%) is harder
-    still.</li>
+    <li><strong>Buying for investment or resale:</strong> Choose 24K coins or
+    bars. They carry the highest gold content and are universally priced at
+    spot, making resale straightforward with any dealer.</li>
+    <li><strong>Bridal or traditional jewellery:</strong> 22K is the correct
+    choice. It holds complex designs, maintains its yellow colour, and is
+    what Indian buyers and resellers expect when you eventually sell.</li>
+    <li><strong>Diamond-set, everyday rings, contemporary pieces:</strong> 18K
+    provides the strength needed for fine stone settings and is the norm for
+    imported or international-style jewellery.</li>
+    <li><strong>Gifting gold coins:</strong> 24K minted coins (5g, 8g, 10g,
+    50g denominations from brands like Tanishq, Malabar or MMTC-PAMP) are
+    the most liquid and universally accepted gift form.</li>
   </ul>
-  <p>Whatever you choose, compare the <a href="{SITE_URL}/">gold rate today</a>
-  across jewellers first - the per-gram rate can differ by &#8377;50-150.</p>"""),
+
+  <h2>Price difference between 22K and 24K</h2>
+  <p>The price gap is proportional to gold content. At today's median 24K
+  rate of {rate_str}/g, the 22K price is approximately
+  {inr(med['22K'])}/g — a difference of about
+  {inr(round(med['24K'] - med['22K']))}/g. On a 20-gram piece this
+  adds up to {inr(round((med['24K'] - med['22K']) * 20))} just in metal value,
+  before making charges. This is why knowing the current rate matters before
+  you shop.</p>
+
+  <h2>Resale value: which purity sells better?</h2>
+  <p>Both 22K and 24K jewellery can be resold to most jewellers, but the
+  experience differs. 24K coins and bars from known mints fetch spot price
+  with minimal discount. 22K jewellery resale typically involves a small
+  deduction for assaying and melting, often 2-5% of metal value. Older
+  jewellery without a BIS hallmark may face a steeper deduction because the
+  buyer cannot immediately verify the purity without testing.</p>
+  <p>The practical takeaway: always buy BIS-hallmarked jewellery with a HUID
+  stamp — it makes purity undeniable and resale smoother.</p>
+
+  <h2>Before you buy: compare today's rate</h2>
+  <p>Whatever purity you choose, the per-gram gold rate varies between
+  jewellers by &#8377;50–200 at any given time. A &#8377;100/g difference
+  on a 40-gram necklace is &#8377;4,000 — significant for most buyers.
+  Use the <a href="{SITE_URL}/">comparison table</a> to see today's
+  rates side by side before walking into a store.</p>"""),
         ("gold-hallmarking",
          "Gold Hallmarking in India - BIS Hallmark & HUID Explained | MyGoldRates",
          "What the BIS hallmark and 6-digit HUID mean, interactive HUID scanner tool, purity fineness guide, and how to verify gold before buying in India.",
@@ -758,49 +847,234 @@ def _articles(rate_str, med, inr):
          "rupee-dollar rate, import duty, GST, and jeweller premiums.",
          "How Are Gold Rates Set in India?",
          f"""
-  <p>The gold rate you see at a jeweller is built up from several layers.</p>
-  <h2>1. International spot price</h2>
-  <p>Gold trades globally in US dollars per troy ounce. This is the base that
-  moves 24x7 with demand, interest rates and global risk.</p>
-  <h2>2. Rupee-dollar exchange rate</h2>
-  <p>The dollar price is converted to rupees, so a weaker rupee pushes Indian
-  gold prices up even if global gold is flat.</p>
-  <h2>3. Import duty &amp; GST</h2>
-  <p>India imports most of its gold, so customs duty is added, then 3% GST on
-  top at billing.</p>
-  <h2>4. Association benchmark &amp; jeweller premium</h2>
-  <p>Bodies like the <strong>IBJA</strong> publish a daily bullion reference.
-  Individual jewellers add a small premium over this for sourcing and
-  hallmarking - which is why rates differ slightly between brands.</p>
-  <p>We track that gap for you: see the live
-  <a href="{SITE_URL}/">gold rate today</a> and each jeweller's premium over
-  the IBJA benchmark.</p>"""),
+  <p>The gold rate you see on a jeweller's rate board or website is not a
+  single number handed down from one authority. It is the end result of a
+  chain of decisions — international markets, currency rates, government
+  duties, industry associations, and the jeweller's own pricing strategy.
+  Understanding each step helps you know whether today's quote is fair.</p>
+
+  <h2>Step 1: The international spot price</h2>
+  <p>Gold is a global commodity. It trades in US dollars per troy ounce
+  (1 troy ounce = 31.1035 grams) on two main exchanges: the COMEX futures
+  exchange in New York and the London OTC market (LBMA — London Bullion Market
+  Association). The <strong>LBMA Gold Price</strong> is the globally accepted
+  reference, set twice daily in London at approximately 10:30 AM and 3:00 PM
+  GMT through an electronic auction involving banks and bullion dealers.</p>
+  <p>This price fluctuates continuously based on global demand and supply,
+  US Federal Reserve interest rate expectations, geopolitical risk, currency
+  movements, and central bank buying. When US interest rates rise, gold often
+  falls (because bonds become a competing store of value). When global
+  uncertainty rises, gold typically rises as a safe-haven asset.</p>
+
+  <h2>Step 2: Converting dollars to rupees</h2>
+  <p>Since India prices gold in rupees per gram (not dollars per troy ounce),
+  the spot price must be converted. The formula is:</p>
+  <p style="background:color-mix(in srgb,var(--gold) 8%,transparent);
+  padding:12px 16px;border-radius:8px;font-family:'IBM Plex Mono',monospace;
+  font-size:13px;margin:12px 0">
+  Gold price (₹/g) = (Spot price in USD/oz ÷ 31.1035) × USD/INR rate</p>
+  <p>This means a weakening rupee pushes Indian gold prices up even when global
+  gold is flat. In 2023–24, the rupee depreciation accounted for a meaningful
+  portion of the rise in domestic gold prices. Conversely, a strengthening
+  rupee can offset some global price rises.</p>
+
+  <h2>Step 3: Import duty and other charges</h2>
+  <p>India imports approximately 700–900 tonnes of gold annually, making it
+  one of the world's largest importers. Every imported gold bar goes through
+  customs, and India levies a <strong>basic customs duty of 6%</strong> plus
+  Agriculture Infrastructure and Development Cess (AIDC) of 5% — an effective
+  combined import levy of around 9-10% on the CIF (cost, insurance, freight)
+  value. This duty was reduced from 15% in the July 2024 Union Budget to
+  boost official imports and curb smuggling.</p>
+  <p>Nominated agencies (banks, commodity exchanges, government entities like
+  MMTC and STCL) are authorized to import gold. The landed cost of a gold bar
+  includes the duty, freight, and insurance. This landed cost forms the
+  domestic wholesale reference.</p>
+
+  <h2>Step 4: IBJA and association benchmarks</h2>
+  <p>The <strong>India Bullion and Jewellers Association (IBJA)</strong>,
+  headquartered in Mumbai, publishes daily gold rates for 24K and 22K gold.
+  IBJA members are bullion traders, refiners and large jewellers who deal
+  in physical gold. The IBJA rate is essentially the Mumbai wholesale market
+  price — it reflects the landed import cost plus domestic supply-demand
+  dynamics in the country's largest bullion market.</p>
+  <p>The <strong>AKGSMA</strong> (All Kerala Gold &amp; Silver Merchants
+  Association) does the same for South India, particularly Kerala, where gold
+  consumption is among the highest in the country. Regional variation
+  between IBJA (Mumbai/North) and AKGSMA (South) rates reflects local
+  demand, transportation costs, and regional association influence.</p>
+  <p>Most large national jewellers use the IBJA rate as their base. The
+  published jeweller rate is typically IBJA rate plus a small premium
+  (usually &#8377;50–200/g) that covers sourcing costs, certification,
+  inventory risk, and brand margin.</p>
+
+  <h2>Step 5: The jeweller's pricing decision</h2>
+  <p>Individual jewellers set their own published rate. Factors include:</p>
+  <ul>
+    <li><strong>Sourcing cost:</strong> Large chains buying directly from
+    refiners may have a lower landed cost than smaller jewellers buying
+    through intermediaries.</li>
+    <li><strong>Hallmarking and certification:</strong> BIS-certified
+    jewellers incur costs for assaying and stamping each piece.</li>
+    <li><strong>Brand positioning:</strong> Premium brands like Tanishq
+    or Malabar may price slightly higher, using trust and certification
+    as justification. Newer or regional chains often price at or below
+    IBJA to attract customers.</li>
+    <li><strong>Inventory timing:</strong> A jeweller who bought gold
+    a month ago at a lower price may still quote a market-rate price
+    today — pocketing additional margin — or may pass on savings to
+    drive footfall.</li>
+  </ul>
+
+  <h2>Step 6: GST at point of sale</h2>
+  <p>When you buy jewellery in India, <strong>3% Goods and Services Tax</strong>
+  is added to the total billed amount (gold value + making charges). This GST
+  is paid by the buyer to the jeweller, who remits it to the government.
+  The rates shown on this site and on most jewellers' websites are
+  <em>pre-GST</em> — the GST is added at the billing counter. Always confirm
+  the GST-inclusive price before finalising a purchase.</p>
+
+  <h2>Why rates differ between jewellers</h2>
+  <p>On any given day, the 24K gold rate can vary by &#8377;100–300 per gram
+  between jewellers. The primary reason is not dishonesty — it is the
+  compounding of sourcing cost differences, inventory timing, regional
+  market factors, and brand margin. Some brands also embed a portion of
+  making charges into the base rate (so the headline rate looks higher but
+  making charges are lower, or vice versa).</p>
+  <p>This is exactly what <a href="{SITE_URL}/">MyGoldRates</a> solves:
+  we normalize all published rates to a pre-GST, per-gram, 24K basis so
+  you can compare them honestly on a single screen.</p>
+
+  <h2>MCX futures: a forward-looking signal</h2>
+  <p>The Multi Commodity Exchange (MCX) in India trades gold futures contracts
+  — agreements to buy or sell gold at a fixed price on a future date. MCX gold
+  futures are quoted in rupees per 10 grams for a standard 1 kg contract.
+  The near-month futures price reflects the market's expectation of where
+  spot gold will be on the delivery date. When futures trade at a premium
+  to today's spot (called contango), traders expect prices to rise or are
+  pricing in carrying costs. Watching MCX alongside spot helps gauge
+  short-term market sentiment. You can see today's MCX price in the
+  Markets drawer on the <a href="{SITE_URL}/">homepage</a>.</p>"""),
         ("making-charges-explained",
          "Gold Making Charges Explained - How They Work | MyGoldRates",
          "What gold making charges and wastage are, how they're calculated "
          "(% or per gram), and how to reduce what you pay in India.",
          "Gold Making Charges &amp; Wastage, Explained",
          f"""
-  <p><strong>Making charges</strong> are what a jeweller charges to turn raw
-  gold into a finished piece - the labour and design cost - on top of the metal
-  value.</p>
-  <h2>How they're charged</h2>
+  <p>Walk out of a jewellery store and the final bill is almost always higher
+  than the gold rate multiplied by the weight. The gap is making charges —
+  often 10–35% on top of metal value. Understanding how they work is the
+  single most effective way to save money when buying gold jewellery in India.</p>
+
+  <h2>What making charges actually are</h2>
+  <p><strong>Making charges</strong> (also called <em>value addition</em> or
+  <em>labour charges</em>) are the fee a jeweller levies for the craft involved
+  in turning raw gold into a finished piece. They cover:</p>
   <ul>
-    <li><strong>As a percentage</strong> of the gold value (commonly 8-25%).</li>
-    <li><strong>As a flat rate per gram</strong> (e.g. &#8377;400-800/g).</li>
+    <li>Artisan labour (hand-crafting, setting stones, soldering)</li>
+    <li>Design and mould costs for machine-made pieces</li>
+    <li>Quality control and finishing</li>
+    <li>A portion of the jeweller's overhead and margin</li>
   </ul>
-  <p>Intricate or machine-light handmade designs cost more; plain coins and
-  bars have little or no making charge.</p>
-  <h2>The final bill</h2>
-  <p>Billed price = gold value + making charges + 3% GST (on the total). On a
-  &#8377;1,00,000 piece, a 15% making charge plus GST can add roughly
-  &#8377;18,000.</p>
-  <h2>How to pay less</h2>
+  <p>Making charges are separate from the gold rate and from GST. On most
+  jewellery invoices you will see three line items: gold value, making charges,
+  and 3% GST on the combined total.</p>
+
+  <h2>Two ways jewellers charge making charges</h2>
+  <p>Indian jewellers use one of two methods — and the method matters enormously
+  for what you end up paying.</p>
+
+  <h3>1. Percentage of gold value</h3>
+  <p>The most common method. Making charges are expressed as a % of the gold
+  component's value. For example, 15% making on a piece whose gold is worth
+  &#8377;50,000 adds &#8377;7,500. This method is transparent and lets you
+  compare jewellers easily. Based on data from Senco Gold across hundreds of
+  products, typical rates by category are:</p>
+  <table style="width:100%;border-collapse:collapse;margin:14px 0;font-size:14px">
+    <thead><tr style="background:color-mix(in srgb,var(--gold) 10%,transparent)">
+      <th style="padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)">Category</th>
+      <th style="padding:9px 12px;text-align:right;border-bottom:1px solid var(--line)">Typical range</th>
+      <th style="padding:9px 12px;text-align:right;border-bottom:1px solid var(--line)">Senco median</th>
+    </tr></thead>
+    <tbody>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid var(--line)">Coins</td><td style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--line)">0–8%</td><td style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--line)">5%</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid var(--line)">Mangalsutra</td><td style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--line)">14–25%</td><td style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--line)">18%</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid var(--line)">Chains</td><td style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--line)">18–28%</td><td style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--line)">22%</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid var(--line)">Bangles</td><td style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--line)">18–30%</td><td style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--line)">27%</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid var(--line)">Earrings</td><td style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--line)">18–35%</td><td style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--line)">20%</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid var(--line)">Rings</td><td style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--line)">22–40%</td><td style="padding:8px 12px;text-align:right;border-bottom:1px solid var(--line)">30%</td></tr>
+      <tr><td style="padding:8px 12px">Pendants</td><td style="padding:8px 12px;text-align:right">30–55%</td><td style="padding:8px 12px;text-align:right">41%</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:13px;color:var(--ink-3)">Source: MyGoldRates making charges comparison, based on published product price breakups. Data refreshed every 15 days.</p>
+
+  <h3>2. Flat rate per gram</h3>
+  <p>Some jewellers (especially for lightweight or machine-made pieces) charge
+  a fixed rupee amount per gram — for example &#8377;450/g on a chain or
+  &#8377;600/g on earrings. This can be harder to compare when jewellers
+  use different methods, but the total effect is similar for mid-weight pieces.
+  You can convert: if a 10g piece has &#8377;500/g making on gold worth
+  &#8377;1,400/g, that's a 35.7% equivalent rate.</p>
+
+  <h2>What is "wastage"?</h2>
+  <p>In some traditional jewellers — especially in South India — you will see
+  a separate line item called <em>wastage</em> (also spelled wastidge) alongside
+  making charges. Wastage is supposed to represent the gold lost during the
+  manufacturing process: filings, polishing dust, solder material. Historically
+  it was a real cost on handcrafted pieces.</p>
+  <p>Today, however, most manufacturing is done in controlled factory settings
+  where physical waste is minimal and recovered. Many consumer advocates and
+  jewellery industry insiders note that wastage is increasingly a pricing
+  mechanism rather than a real cost, especially for machine-made jewellery.
+  When you see wastage on a bill, treat it as an additional making charge
+  and factor it into your comparison.</p>
+
+  <h2>How the final bill adds up</h2>
+  <p>The standard formula for a gold jewellery purchase:</p>
+  <p style="background:color-mix(in srgb,var(--gold) 8%,transparent);
+  padding:14px 16px;border-radius:8px;font-family:'IBM Plex Mono',monospace;
+  font-size:13px;line-height:1.8;margin:12px 0">
+  Gold value = weight (g) × gold rate (₹/g)<br>
+  Making charges = gold value × making % (or weight × per-gram rate)<br>
+  GST = (Gold value + making charges) × 3%<br>
+  <strong>Total billed = gold value + making charges + GST</strong></p>
+  <p>Example: a 20-gram 22K necklace at today's rate of {inr(med['22K'])}/g
+  with 25% making charges:</p>
   <ul>
-    <li>Compare making charges between jewellers - they are negotiable.</li>
-    <li>Prefer lightweight or plain designs for better value.</li>
-    <li>Use our <a href="{SITE_URL}/making-charges-calculator">making charges
-    calculator</a> to see the true final price before you buy.</li>
+    <li>Gold value: 20 × {inr(med['22K'])} = {inr(round(med['22K'] * 20))}</li>
+    <li>Making (25%): {inr(round(med['22K'] * 20 * 0.25))}</li>
+    <li>GST (3%): {inr(round(med['22K'] * 20 * 1.25 * 0.03))}</li>
+    <li><strong>Total: {inr(round(med['22K'] * 20 * 1.25 * 1.03))}</strong></li>
+  </ul>
+  <p>Use the <a href="{SITE_URL}/making-charges-calculator">making charges
+  calculator</a> to run your own numbers before you buy.</p>
+
+  <h2>Are making charges negotiable?</h2>
+  <p>Yes — more often than most buyers realise. Chain stores often have some
+  flexibility, especially during festival or clearance sales. Independent local
+  jewellers typically have more room to negotiate than national chains.
+  Key negotiation points:</p>
+  <ul>
+    <li>Ask explicitly: "What is your making charge on this piece?"</li>
+    <li>For heavier pieces (50g+), request a volume discount.</li>
+    <li>Old gold exchange programmes often absorb making charges on the new
+    piece — compare total cost including your exchange value.</li>
+    <li>Festival sale discounts are frequently applied to making charges
+    rather than the gold rate (which is market-linked).</li>
+  </ul>
+
+  <h2>How to minimise making charges</h2>
+  <ul>
+    <li><strong>Choose machine-made over handmade</strong> for investment pieces
+    — plain chains and simple bangles have the lowest making charges.</li>
+    <li><strong>Compare across jewellers</strong> using our
+    <a href="{SITE_URL}/making-charges-comparison">making charges comparison</a>
+    tool, which tracks real data from brands' own product listings.</li>
+    <li><strong>Avoid very intricate designs</strong> if resale value matters —
+    complex craftsmanship means high making charges that you recover very little
+    of at resale (resellers buy at gold rate, not craftsmanship value).</li>
+    <li><strong>Buy coins separately</strong> if you want gold for investment:
+    making charges on coins are 2–5%, far lower than jewellery.</li>
   </ul>"""),
     ]
 
@@ -2073,6 +2347,9 @@ def main():
         live_block +
         '<h2>Daily Market Recap</h2>' + news_cards)
     extra_urls.append(("news", "hourly", "0.8"))
+    extra_urls.append(("about", "monthly", "0.7"))
+    extra_urls.append(("methodology", "monthly", "0.7"))
+    extra_urls.append(("contact", "monthly", "0.5"))
     print(f"content pages: 4 calculators, "
           f"{len(list(_articles(rate_str, med, inr)))} articles, "
           f"{len(recaps)} recaps")
@@ -2334,6 +2611,7 @@ NAV = f"""<div class="nav-ov" id="nav-ov" hidden></div>
     <a href="{SITE_URL}/learn/making-charges-explained">Making Charges Explained</a>
     <p class="nav-grp">Company</p>
     <a href="{SITE_URL}/about">About</a>
+    <a href="{SITE_URL}/methodology">Our Methodology</a>
     <a href="{SITE_URL}/contact">Contact</a>
     <a href="{SITE_URL}/privacy">Privacy Policy</a>
     <a href="{SITE_URL}/inquiry">Daily Email Alerts</a>

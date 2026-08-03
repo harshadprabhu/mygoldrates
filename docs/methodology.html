@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How We Source Gold Rates - Data Methodology | MyGoldRates</title>
+<meta name="description" content="How MyGoldRates collects, verifies and publishes daily gold rates across 19 Indian jewellers — our data methodology, accuracy standards and update schedule.">
+<link rel="canonical" href="https://mygoldrates.com/methodology">
+<link rel="icon" href="https://mygoldrates.com/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="96x96" href="https://mygoldrates.com/icon-96.png">
+<link rel="icon" type="image/png" sizes="48x48" href="https://mygoldrates.com/icon-48.png">
+<link rel="icon" type="image/svg+xml" href="https://mygoldrates.com/favicon.svg">
+<link rel="apple-touch-icon" href="https://mygoldrates.com/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+.navtog{display:inline-flex;align-items:center;justify-content:center;
+  width:38px;height:38px;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);color:var(--ink);cursor:pointer;font-size:18px;
+  flex:0 0 38px;margin-right:2px}
+.navtog:hover{border-color:var(--gold);color:var(--gold)}
+.nav-ov{position:fixed;inset:0;background:rgba(10,8,4,.5);z-index:1100}
+.navdrawer{position:fixed;top:0;left:0;height:100%;width:min(310px,86vw);
+  background:var(--paper);border-right:1px solid var(--line);z-index:1110;
+  transform:translateX(-105%);transition:transform .26s ease;overflow-y:auto;
+  padding:16px 0 30px}
+.navdrawer.open{transform:translateX(0)}
+.nav-head{display:flex;align-items:center;justify-content:space-between;
+  padding:4px 18px 14px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.nav-head strong{font-family:"Marcellus",serif;font-weight:400;font-size:18px;
+  letter-spacing:.1em;text-transform:uppercase}
+.nav-head strong b{font-weight:400;background:var(--gold-foil);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.nav-x{background:none;border:0;font-size:26px;color:var(--ink-3);
+  cursor:pointer;line-height:1}
+.nav-grp{font:600 10.5px/1 "IBM Plex Mono",monospace;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--gold);margin:16px 18px 4px}
+.navdrawer nav a{display:block;padding:9px 18px;font-size:14.5px;
+  color:var(--ink);text-decoration:none}
+.navdrawer nav a:hover{background:color-mix(in srgb,var(--gold) 9%,transparent);
+  color:var(--gold)}
+:root{
+  --paper:#FBF9F4; --ink:#181F1B; --ink-2:#49544D; --ink-3:#79847D;
+  --board:#152420; --board-2:#1C312A; --gold:#9C7514; --gold-bright:#D9B24A;
+  --gold-foil:linear-gradient(100deg,#8C6A18,#D9B24A 45%,#F0DB9A 55%,#C79A2E);
+  --emerald:#1E5C46; --line:#E7E1D3; --card:#FFFFFF; --warm:#8A5A2B;
+  --bar:#B98A1E;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#0E1613; --ink:#EDE9DD; --ink-2:#B4BDB4; --ink-3:#84908A;
+    --board:#0A100D; --board-2:#131E18; --gold:#D9B24A; --gold-bright:#E8C86A;
+    --emerald:#5BBB93; --line:#22302A; --card:#151F1A; --warm:#D89A5B;
+    --bar:#D9B24A;
+  }
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);
+  font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+a{color:var(--emerald)}
+h1,h2,h3,.brand{font-family:"Marcellus",serif;font-weight:400;letter-spacing:.02em}
+header.top{display:flex;justify-content:flex-start;align-items:center;
+  flex-wrap:wrap;gap:6px 14px;padding:18px 0 14px}
+header.top .brand{order:1;margin-right:auto}
+header.top .navtog{order:2}
+header.top .topright{order:3}
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+  color:var(--ink)}
+.brand-mark{width:34px;height:34px;flex:none;
+  filter:drop-shadow(0 1px 1px rgba(140,106,24,.28))}
+.brand-text{display:flex;flex-direction:column;line-height:1}
+.wm{font-family:"Marcellus",serif;font-weight:400;font-size:23px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink);
+  white-space:nowrap}
+.wm b{font-weight:400;background:var(--gold-foil);-webkit-background-clip:text;
+  background-clip:text;color:transparent}
+.wm .tld{color:var(--ink-3);text-transform:lowercase;letter-spacing:.04em;
+  font-size:.82em}
+.brand-tag{font:600 8px/1 "IBM Plex Mono",monospace;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin-top:6px}
+@media (max-width:520px){.brand-tag{display:none}.wm{font-size:19px;
+  letter-spacing:.1em}.brand-mark{width:30px;height:30px}}
+.topright{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.btn{display:inline-block;font:500 13.5px/1 "IBM Plex Sans",sans-serif;
+  background:linear-gradient(140deg,#3A2A0C,#140D04 55%,#241809);
+  color:#F0DB9A;border:1px solid rgba(224,186,86,.55);
+  padding:11px 18px;border-radius:999px;text-decoration:none;cursor:pointer;
+  transition:transform .15s ease, box-shadow .15s ease}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+footer{margin:44px 0 30px;padding-top:20px;border-top:1px solid var(--line);
+  font-size:13px;color:var(--ink-3)}
+footer p{margin:6px 0;max-width:80ch}
+.foot-nav{margin:0 0 10px}
+.foot-nav a{color:var(--ink-3);margin-right:16px;text-decoration:none}
+.foot-nav a:hover{color:var(--ink)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.page{max-width:720px;margin:10px 0 30px}
+.page h1{font-size:clamp(26px,4.5vw,36px);margin:8px 0 6px}
+.page h2{font-size:20px;margin:26px 0 8px}
+.page h3{font-size:17px;margin:18px 0 6px;color:var(--ink)}
+.page p,.page li{color:var(--ink-2);font-size:15px;line-height:1.7}
+.page ul,.page ol{padding-left:20px;margin:8px 0}
+.page a{color:var(--emerald)}
+.updated-on{font-family:"IBM Plex Mono",monospace;font-size:12px;
+  color:var(--ink-3);margin-bottom:18px}
+.step-box{background:color-mix(in srgb,var(--gold) 7%,transparent);
+  border:1px solid color-mix(in srgb,var(--gold) 25%,transparent);
+  border-radius:10px;padding:14px 18px;margin:12px 0}
+.step-box strong{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="nav-ov" id="nav-ov" hidden></div>
+<aside class="navdrawer" id="navdrawer" aria-hidden="true" aria-label="Menu">
+  <div class="nav-head"><strong>My<b>Gold</b>Rates</strong>
+    <button class="nav-x" id="nav-x" aria-label="Close menu">&times;</button>
+  </div>
+  <nav>
+    <p class="nav-grp">Gold Rates</p>
+    <a href="https://mygoldrates.com/">Gold Rate Today</a>
+    <a href="https://mygoldrates.com/#cmp">Compare Jewellers</a>
+    <a href="https://mygoldrates.com/#cityh">Gold Rate by City &amp; State</a>
+    <p class="nav-grp">Calculators</p>
+    <a href="https://mygoldrates.com/calculators">All Calculators</a>
+    <a href="https://mygoldrates.com/gold-loan-calculator">Gold Loan Calculator</a>
+    <a href="https://mygoldrates.com/gold-sip-calculator">Gold SIP Calculator</a>
+    <a href="https://mygoldrates.com/making-charges-calculator">Making Charges Calculator</a>
+    <a href="https://mygoldrates.com/making-charges-comparison">Making Charges Comparison</a>
+    <p class="nav-grp">News</p>
+    <a href="https://mygoldrates.com/news">Market News &amp; Daily Recap</a>
+    <p class="nav-grp">Learn</p>
+    <a href="https://mygoldrates.com/learn/22k-vs-24k-gold">22K vs 24K Gold</a>
+    <a href="https://mygoldrates.com/learn/gold-hallmarking">Gold Hallmarking (BIS)</a>
+    <a href="https://mygoldrates.com/learn/how-gold-rates-are-set">How Gold Rates Are Set</a>
+    <a href="https://mygoldrates.com/learn/making-charges-explained">Making Charges Explained</a>
+    <p class="nav-grp">Company</p>
+    <a href="https://mygoldrates.com/about">About</a>
+    <a href="https://mygoldrates.com/methodology">Our Methodology</a>
+    <a href="https://mygoldrates.com/contact">Contact</a>
+    <a href="https://mygoldrates.com/privacy">Privacy Policy</a>
+    <a href="https://mygoldrates.com/inquiry">Daily Email Alerts</a>
+  </nav>
+</aside>
+<script>(function(){
+  function init(){
+    var d=document.getElementById('navdrawer'),o=document.getElementById('nav-ov'),
+        t=document.getElementById('navtog'),x=document.getElementById('nav-x');
+    if(!d||!t)return;
+    function s(open){d.classList.toggle('open',open);o.hidden=!open;
+      d.setAttribute('aria-hidden',open?'false':'true');
+      t.setAttribute('aria-expanded',open?'true':'false');}
+    t.addEventListener('click',function(){s(!d.classList.contains('open'));});
+    if(x)x.addEventListener('click',function(){s(false);});
+    o.addEventListener('click',function(){s(false);});
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'&&d.classList.contains('open'))s(false);});
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',init);
+  }else{
+    setTimeout(init,0);
+  }
+})();</script>
+<div class="wrap">
+<header class="top">
+  <button class="navtog" id="navtog" aria-label="Open menu" aria-expanded="false">&#9776;</button>
+  <a class="brand" href="https://mygoldrates.com/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s gold rate comparison platform</span></span></a>
+  <div class="topright"><a class="btn" href="https://mygoldrates.com/">Today's rates</a></div>
+</header>
+<article class="page">
+  <h1>Our Data Methodology</h1>
+  <p class="updated-on">Last updated 03 August 2026</p>
+
+  <p>Transparency about how we collect and present data is fundamental to what
+  we do. This page explains exactly how MyGoldRates sources gold rates, how we
+  verify them, what normalisations we apply, and where our numbers may differ
+  from what you see at a jewellery counter.</p>
+
+  <h2>What we track</h2>
+  <p>We track the <strong>published daily gold rate</strong> of each jewellery
+  brand — the rate they publicly display on their own website or official rate
+  page. This is the rate a walk-in customer could reference before visiting a
+  store. We do not contact jewellers directly, and the rates we show are not
+  negotiated or special rates.</p>
+  <p>We currently monitor more than 19 national jewellery brands including
+  Tanishq, Malabar Gold &amp; Diamonds, Kalyan Jewellers, Joyalukkas,
+  PC Jeweller, Senco Gold, Bhima Jewels, PNG Jewellers, CaratLane, Orra,
+  WHP Jewellers, and others. We also track the IBJA (India Bullion and
+  Jewellers Association) reference rate and the AKGSMA (All Kerala Gold
+  &amp; Silver Merchants Association) rate as wholesale benchmarks.</p>
+
+  <h2>How rates are collected</h2>
+  <p>Our team checks each jeweller's published rate page multiple times daily
+  during Indian market hours. Rates are typically updated by jewellers in the
+  morning, though some brands update rates intraday in response to significant
+  market movements. Our collection runs at approximately 11:00 AM, 2:00 PM and
+  5:00 PM IST — capturing the morning open rate and any intraday revisions.</p>
+  <p>For each brand, we record the rate as published. We do not adjust, round,
+  or editorially modify any rate. The exact figure as published is what we
+  store and display.</p>
+
+  <h2>Normalisation: the pre-GST, per-gram, 24K basis</h2>
+  <p>Different jewellers publish rates in different formats — some quote 22K
+  per gram, others 24K per 10 grams, others include GST in the displayed rate.
+  To make comparison meaningful, we normalise all rates to a single standard:</p>
+  <div class="step-box">
+    <strong>Our standard basis:</strong> 24K (999 fineness) gold, per gram,
+    before 3% GST.
+  </div>
+  <p>The conversion logic:</p>
+  <ul>
+    <li>If a brand publishes a 22K rate, we derive 24K as:
+    <strong>24K = 22K rate ÷ 0.916</strong></li>
+    <li>If a rate is published per 10 grams, we divide by 10 to get per gram.</li>
+    <li>If a rate includes GST (3%), we strip it: <strong>pre-GST = rate ÷ 1.03</strong></li>
+  </ul>
+  <p>This normalisation is applied consistently across all brands, which is why
+  a brand that publishes a "lower" headline 22K rate may show a higher
+  normalised 24K rate than another brand whose 22K price implies a lower
+  underlying gold value.</p>
+  <p>We then derive the 22K and 18K rates for display from the 24K base using
+  the standard purity fractions: <strong>22K = 24K × 0.916</strong>,
+  <strong>18K = 24K × 0.750</strong>.</p>
+
+  <h2>Sanity checks and outlier handling</h2>
+  <p>Gold rates should follow a predictable ordering: 24K &gt; 22K &gt; 18K.
+  We verify this invariant for every brand on every update. If a collected rate
+  violates this ordering — which can happen when a jeweller makes a website
+  error — we flag that rate for manual review rather than displaying it.</p>
+  <p>We also run an outlier check against the day's median. If a single brand's
+  rate deviates by more than a threshold from the field median (accounting for
+  normal intraday variation), it is quarantined and not shown until verified.
+  This prevents a data entry error or stale cached page from skewing the
+  comparison.</p>
+  <p>Brands whose rates cannot be confirmed are shown with an
+  <em>Estimated</em> label — they display the day's market median rather than
+  their own rate, and are excluded from the lowest-rate calculation. We re-check
+  estimated brands on every subsequent update run.</p>
+
+  <h2>What "national" vs "regional" means on this site</h2>
+  <p>Some jewellers we track operate only in specific regions of India — for
+  example, a South Indian chain present only in Tamil Nadu and Kerala, or a
+  Maharashtra-focused chain. These are labelled as <strong>regional</strong>
+  brands on our site.</p>
+  <p>For the headline "Lowest 24K" figure shown in the comparison summary, we
+  use national brands only — those available across India. Regional brands
+  are included in the full comparison table and visible when you tap
+  "In My Area" to filter by your state. This prevents a regional jeweller
+  available only in one state from appearing as "India's cheapest" to buyers
+  in other states where that brand does not operate.</p>
+
+  <h2>Reference rates: IBJA and AKGSMA</h2>
+  <p>Alongside jeweller rates, we display two wholesale benchmark rates:</p>
+  <ul>
+    <li><strong>IBJA</strong> (India Bullion and Jewellers Association,
+    Mumbai): the daily bullion reference widely used by North and Central
+    Indian jewellers as their base price before applying their premium.</li>
+    <li><strong>AKGSMA</strong> (All Kerala Gold &amp; Silver Merchants
+    Association): the equivalent benchmark for South India, reflecting the
+    higher gold demand and slightly different regional dynamics of Kerala,
+    Tamil Nadu and Andhra Pradesh.</li>
+  </ul>
+  <p>Both are collected from their respective official published sources each
+  morning. The premium a jeweller charges above the IBJA rate reflects their
+  sourcing cost, certification overhead, and brand margin — typically
+  &#8377;50–250 per gram.</p>
+
+  <h2>Making charges data</h2>
+  <p>Our <a href="https://mygoldrates.com/making-charges-comparison">making
+  charges comparison</a> is based on actual product price breakups published
+  by jewellers on their own websites. For each brand and category, we sample
+  multiple products (target: 20 per category) from their product catalogue
+  and extract the making charge percentage where it is disclosed in the
+  product price breakdown. We take the median across sampled products to
+  reduce the effect of outliers (unusually expensive handmade pieces or
+  discounted items).</p>
+  <p>Making charges data is refreshed approximately every 15 days, as these
+  figures change far less frequently than daily gold rates. The collection
+  date is shown on the comparison page.</p>
+
+  <h2>Update schedule and data freshness</h2>
+  <p>Gold rates are updated multiple times daily, Monday through Saturday,
+  during Indian market hours. On Sundays and public holidays, most jewellers
+  do not update their published rates; in these cases we carry forward the
+  most recently published rate and label it clearly with the date it
+  represents.</p>
+  <p>Each rate record includes a timestamp showing when it was last confirmed.
+  The "Updated" timestamp shown on the homepage reflects the most recent
+  successful data collection run.</p>
+
+  <h2>What our rates do not include</h2>
+  <ul>
+    <li><strong>GST:</strong> All rates shown are pre-GST. Add 3% at the
+    billing counter.</li>
+    <li><strong>Making charges:</strong> These are additional and vary by
+    design, brand and negotiation. Our making charges calculator and
+    comparison tool cover this separately.</li>
+    <li><strong>Stone or certification costs:</strong> For diamond or
+    gemstone jewellery, the stone value and certification (e.g. GIA, IGI)
+    are additional to the gold rate.</li>
+    <li><strong>Exchange or melt deductions:</strong> When exchanging old
+    gold, jewellers typically deduct for impurity, testing and melting.
+    These are not reflected in our published rates.</li>
+  </ul>
+
+  <h2>Corrections and disputes</h2>
+  <p>If you notice a rate on our site that appears incorrect, or if a jeweller
+  believes their rate has been misrepresented, please
+  <a href="https://mygoldrates.com/contact">contact us</a> with the specific
+  brand, date, and rate you observed. We review all such reports within one
+  business day and will correct any verified error promptly. Our goal is
+  accuracy, not advocacy for any particular brand or rate.</p>
+
+  <h2>Independence and conflicts of interest</h2>
+  <p>MyGoldRates has no commercial relationship with any jewellery brand whose
+  rates appear on this site. We do not accept payment from jewellers for
+  inclusion, placement, or rate presentation. Our revenue, to the extent it
+  exists, comes from display advertising shown to our readers — not from
+  jewellers. This independence is what makes our comparison trustworthy:
+  a brand that prices higher than the market shows up as higher, regardless
+  of their advertising relationships elsewhere.</p>
+
+  <p style="margin-top:28px"><a href="https://mygoldrates.com/about" class="btn">About us</a>
+  &nbsp; <a href="https://mygoldrates.com/contact" class="btn" style="margin-left:8px">Contact us</a></p>
+</article>
+<footer>
+  <div class="foot-nav">
+    <a href="https://mygoldrates.com/about">About</a>
+    <a href="https://mygoldrates.com/methodology">Methodology</a>
+    <a href="https://mygoldrates.com/contact">Contact</a>
+    <a href="https://mygoldrates.com/terms">Terms of Service</a>
+    <a href="https://mygoldrates.com/privacy">Privacy Policy</a>
+  </div>
+  <p>&copy; 2026 MyGoldRates &mdash; India&rsquo;s gold rate comparison platform.</p>
+</footer>
+</div>
+</body>
+</html>
