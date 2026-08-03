@@ -2790,8 +2790,7 @@ footer p{margin:6px 0;max-width:80ch}
 # docs/signup.js and used by both the modal (index) and inquiry forms -
 # field NAMEs are identical on both, so everything works via form.elements.
 SIGNUP_JS = r"""(function(){
-  var GCID=window.GR_GCID||'',
-      SB=window.GR_SB_URL||'', KEY=window.GR_SB_KEY||'';
+  var SB=window.GR_SB_URL||'', KEY=window.GR_SB_KEY||'';
   var form=document.getElementById('m-form')||document.getElementById('inq');
   function F(n){return form?form.elements[n]:null;}
 
@@ -2881,15 +2880,10 @@ SIGNUP_JS = r"""(function(){
     if(lb)lb.addEventListener('click',function(){useLocation(lb);});
   }
 
-  /* ---- optional Google One Tap, SITE-WIDE (popup only, no buttons) ----
-     The One Tap prompt appears on its own; when the user picks an account we
-     silently capture + save their Google data and show a small header chip.
-     No persistent "Sign in with Google" button anywhere. */
-  if(!GCID)return;
-  function decode(jwt){try{return JSON.parse(decodeURIComponent(
-    atob(jwt.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')).split('')
-      .map(function(c){return '%'+('00'+c.charCodeAt(0).toString(16)).slice(-2);})
-      .join('')));}catch(e){return null;}}
+  /* ---- restore header chip + prefill forms for a returning signed-in user.
+     Actual Google sign-in (auto One Tap + button) is owned by the gate
+     modal's own script (homepage only) - this just restores the visual
+     state from localStorage so it doesn't require a fresh sign-in. ---- */
   function chip(u){var h=document.getElementById('hauth');if(!h)return;
     h.hidden=false;
     h.innerHTML='<span class="uchip" title="'+(u.email||'')+'">'+
@@ -2902,28 +2896,6 @@ SIGNUP_JS = r"""(function(){
   var stored=null;try{stored=JSON.parse(localStorage.getItem('gr_user')||'null');}
     catch(e){}
   if(stored&&stored.email){chip(stored);prefill(stored);}
-  function onCred(resp){
-    var p=resp&&resp.credential?decode(resp.credential):null;
-    if(!p||!p.email)return;
-    var g={signup_method:'google',email:p.email,name:p.name||null,
-      google_id:p.sub||null,google_email_verified:!!p.email_verified,
-      picture_url:p.picture||null,locale:p.locale||null};
-    window.GR_GDATA=g;
-    try{localStorage.setItem('gr_user',JSON.stringify(
-      {email:p.email,name:p.name,picture:p.picture}));}catch(e){}
-    chip({email:p.email,name:p.name,picture:p.picture});
-    saveSubscriber(g).catch(function(){});   /* grab + save Google data at once */
-    prefill({email:p.email,name:p.name});
-  }
-  var tries=0;
-  (function gready(){
-    if(window.google&&google.accounts&&google.accounts.id){
-      google.accounts.id.initialize({client_id:GCID,callback:onCred,
-        auto_select:false,cancel_on_tap_outside:true,itp_support:true,
-        use_fedcm_for_prompt:true});   /* required for One Tap in modern Chrome */
-      try{google.accounts.id.prompt();}catch(e){}   /* One Tap (best-effort) */
-    }else if(tries++<40){setTimeout(gready,150);}
-  })();
 })();
 """
 
@@ -2950,12 +2922,19 @@ GATE_CSS = """
 #gate-close{position:absolute;top:14px;right:16px;background:none;border:0;
   font-size:24px;color:var(--ink-3);cursor:pointer;line-height:1}
 #gate-close:hover{color:var(--ink)}
+.gate-google-wrap{position:relative;width:100%;margin-bottom:6px;cursor:pointer}
 .gate-google-btn{display:flex;align-items:center;justify-content:center;gap:10px;
   width:100%;padding:12px 18px;border:1.5px solid var(--line);border-radius:12px;
   background:var(--card);font:600 14px/1 "IBM Plex Sans",sans-serif;color:var(--ink);
-  cursor:pointer;transition:border-color .15s,box-shadow .15s;margin-bottom:6px}
-.gate-google-btn:hover{border-color:var(--gold);box-shadow:0 2px 10px rgba(0,0,0,.1)}
+  cursor:pointer;transition:border-color .15s,box-shadow .15s;pointer-events:none}
+.gate-google-wrap:hover .gate-google-btn{border-color:var(--gold);box-shadow:0 2px 10px rgba(0,0,0,.1)}
 .gate-google-btn svg{flex:none}
+/* The real Google button is rendered here, stretched invisibly on top of our
+   styled button, so the click that opens the account picker is a genuine
+   user gesture on Google's own iframe (required - JS can't synthesize it). */
+#gate-real-gbtn{position:absolute;inset:0;opacity:0;overflow:hidden;
+  display:flex;align-items:center;justify-content:center}
+#gate-real-gbtn iframe{width:100%!important}
 .gate-or{text-align:center;font-size:12px;color:var(--ink-3);margin:14px 0;
   display:flex;align-items:center;gap:8px}
 .gate-or::before,.gate-or::after{content:"";flex:1;height:1px;background:var(--line)}
@@ -2985,10 +2964,13 @@ GATE_HTML = """
       <p class="eyebrow" style="margin:0 0 6px">Free access</p>
       <h3 id="gate-title">Sign in to use this feature</h3>
       <p class="gate-sub">Get live gold rate comparisons, calculators and daily alerts — free.</p>
-      <button class="gate-google-btn" id="gate-gbtn">
-        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.1 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
-        Continue with Google
-      </button>
+      <div class="gate-google-wrap" id="gate-google-wrap">
+        <button class="gate-google-btn" id="gate-gbtn" tabindex="-1" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.1 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+          Continue with Google
+        </button>
+        <div id="gate-real-gbtn"></div>
+      </div>
       <div class="gate-or">or enter details</div>
       <form id="gate-form" autocomplete="on">
         <input name="name" type="text" placeholder="Full name *" required autocomplete="name">
@@ -3224,17 +3206,29 @@ GATE_JS = r"""
   function onGoogleCred(resp){
     var p=resp&&resp.credential?decode(resp.credential):null;
     if(!p||!p.email)return;
+    var wasAuthed=isAuthed();
     var user={email:p.email,name:p.name||null,picture:p.picture||null,
       google_id:p.sub||null,locale:p.locale||null};
-    // Save what we have now; enrich step gets phone/age/gender
+    // Save everything Google gives us right away; enrich step (below)
+    // optionally adds phone/age/gender/location on top of this.
     saveGate({email:p.email,name:p.name||null,
       google_id:p.sub||null,google_picture:p.picture||null,
       google_locale:p.locale||null,
       signup_method:'google',signup_source:'gate_google'});
     setUser(user);
-    // show enrich step to collect phone/age/gender
-    if(step1)step1.hidden=true;
-    if(enrichDiv)enrichDiv.hidden=false;
+    if(pendingCb){
+      // came from a gated click -> resume it right away, still offer the
+      // enrich step in the (already open) modal
+      if(step1)step1.hidden=true;
+      if(enrichDiv)enrichDiv.hidden=false;
+    }else if(!wasAuthed&&ov){
+      // fresh sign-in via the auto One Tap popup -> gently open the modal
+      // just to offer the optional enrich step (skippable)
+      if(step1)step1.hidden=true;
+      if(enrichDiv)enrichDiv.hidden=false;
+      ov.hidden=false;
+      document.body.style.overflow='hidden';
+    }
     // Pre-fill name if available
     if(eform&&p.name){var n=eform.elements['name'];if(n)n.value=p.name;}
     // update chip immediately
@@ -3245,28 +3239,35 @@ GATE_JS = r"""
         '<span>'+(p.name||p.email||'Signed in')+'</span></span>';}
   }
 
-  var gbtn=document.getElementById('gate-gbtn');
-  if(gbtn)gbtn.addEventListener('click',function(){
-    if(!GCID){alert('Google sign-in is not configured.');return;}
-    // Trigger Google One Tap prompt or OAuth popup
+  /* Render Google's own button, invisibly, on top of our styled one - a
+     synthetic .click() on Google's iframe is blocked by browsers, so the
+     only reliable way to trigger the account picker from a custom-styled
+     button is to let the real click land on the real button. */
+  var realBtn=document.getElementById('gate-real-gbtn');
+  var gInited=false;
+  function ensureGoogleReady(cb){
+    if(!GCID)return;
     var tries=0;
     (function tryG(){
       if(window.google&&google.accounts&&google.accounts.id){
-        google.accounts.id.initialize({client_id:GCID,callback:onGoogleCred,
-          auto_select:false,cancel_on_tap_outside:false,itp_support:true,
-          use_fedcm_for_prompt:true});
-        google.accounts.id.prompt(function(n){
-          // If One Tap is dismissed/unavailable, fall back to OAuth popup
-          if(n.isNotDisplayed()||n.isSkippedMoment()){
-            google.accounts.oauth2.initCodeClient({
-              client_id:GCID,scope:'openid email profile',
-              callback:function(){},
-              error_callback:function(){}
-            });
-          }
-        });
-      }else if(tries++<30){setTimeout(tryG,200);}
+        if(!gInited){
+          google.accounts.id.initialize({client_id:GCID,callback:onGoogleCred,
+            auto_select:false,cancel_on_tap_outside:true,itp_support:true,
+            use_fedcm_for_prompt:true});
+          gInited=true;
+        }
+        cb();
+      }else if(tries++<40){setTimeout(tryG,150);}
     })();
+  }
+  ensureGoogleReady(function(){
+    if(realBtn)google.accounts.id.renderButton(realBtn,
+      {type:'standard',theme:'outline',size:'large',width:'320',
+       text:'continue_with',logo_alignment:'center'});
+    // Auto pop: show One Tap on its own, without waiting for a click - this
+    // is the "auto pop" prompt users are used to seeing top-right. Skip it
+    // for already-signed-in users.
+    if(!isAuthed()){try{google.accounts.id.prompt();}catch(e){}}
   });
 
   /* ---- FEATURE GATE: intercept gated elements ---- */
@@ -3756,7 +3757,6 @@ $nav
     <span class="hauth" id="hauth" hidden></span>
     <a class="wa-share-btn" href="https://api.whatsapp.com/send?text=Check%20today%27s%20live%2024K%20and%2022K%20gold%20rates%20across%20all%20top%20jewellers%20on%20https%3A%2F%2Fmygoldrates.com" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.485 1.332 5.001l-1.417 5.176 5.297-1.39c1.464.798 3.116 1.218 4.775 1.219h.004c5.505 0 9.988-4.478 9.989-9.984 0-2.667-1.038-5.174-2.924-7.06-1.886-1.886-4.393-2.925-7.061-2.925zm0 1.666c4.588 0 8.324 3.736 8.325 8.324 0 2.224-.866 4.314-2.439 5.888-1.573 1.574-3.663 2.44-5.887 2.44h-.003c-1.428 0-2.834-.378-4.066-1.094l-.291-.17-3.142.823.838-3.061-.186-.296c-.787-1.252-1.202-2.7-1.202-4.185.001-4.588 3.737-8.325 8.326-8.326z"/></svg> Share</a>
     <a class="btn btn-lite" href="#cmp">Compare jewellers</a>
-    <a class="btn js-alert" href="inquiry.html">Daily rate alerts</a>
   </div>
 </header>
 
@@ -4379,11 +4379,6 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
   document.querySelectorAll('.js-alert').forEach(function(a){
     a.addEventListener('click',function(e){e.preventDefault();openModal();});
   });
-  var subscribed=false;
-  try{subscribed=!!localStorage.getItem('gr_sub');}catch(e){}
-  var dismissed=false;
-  try{dismissed=!!sessionStorage.getItem('gr_dismissed');}catch(e){}
-  if(!subscribed&&!dismissed){setTimeout(openModal,18000);}
   function send(payload,retried){
     return fetch(SB_URL+'/rest/v1/inquiries',{
       method:'POST',
