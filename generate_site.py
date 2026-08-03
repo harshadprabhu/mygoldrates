@@ -3269,6 +3269,11 @@ GATE_JS = r"""
 
   var gbtn=document.getElementById('gate-gbtn');
   var gbtnHTML=gbtn?gbtn.innerHTML:'';
+  var gbtnResetTimer=null;
+  function resetGbtn(){
+    if(gbtnResetTimer){clearTimeout(gbtnResetTimer);gbtnResetTimer=null;}
+    if(gbtn){gbtn.disabled=false;gbtn.innerHTML=gbtnHTML;}
+  }
   var tokenClient=null;
   function getTokenClient(){
     if(tokenClient)return tokenClient;
@@ -3276,17 +3281,12 @@ GATE_JS = r"""
     tokenClient=google.accounts.oauth2.initTokenClient({
       client_id:GCID,scope:'openid email profile',
       callback:function(resp){
-        if(!resp||resp.error||!resp.access_token){
-          if(gbtn){gbtn.disabled=false;gbtn.innerHTML=gbtnHTML;}
-          return;
-        }
+        if(!resp||resp.error||!resp.access_token){resetGbtn();return;}
         fetch('https://www.googleapis.com/oauth2/v3/userinfo',
           {headers:{Authorization:'Bearer '+resp.access_token}})
           .then(function(r){return r.json();})
-          .then(applyGoogleUser)
-          .catch(function(){
-            if(gbtn){gbtn.disabled=false;gbtn.innerHTML=gbtnHTML;}
-          });
+          .then(function(profile){resetGbtn();applyGoogleUser(profile);})
+          .catch(resetGbtn);
       }
     });
     return tokenClient;
@@ -3307,6 +3307,13 @@ GATE_JS = r"""
     if(!tc){alert('Google sign-in is still loading - please try again in a moment.');return;}
     gbtn.disabled=true;gbtn.textContent='Opening Google...';
     tc.requestAccessToken({prompt:''});
+    // Safety net: if the popup was blocked and Google never calls back at
+    // all, don't leave the button stuck forever.
+    gbtnResetTimer=setTimeout(function(){
+      resetGbtn();
+      alert('The Google sign-in popup could not open - please allow popups '+
+        'for this site, or use the form below instead.');
+    },8000);
   });
 
   /* Best-effort auto One Tap - initialise the ID client too (separate from
