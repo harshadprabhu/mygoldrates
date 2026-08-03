@@ -31,7 +31,7 @@
   /* India Post PO names carry a "S.O"/"B.O"/"H.O" suffix - strip it for a
      clean neighbourhood name (e.g. "Kalachowki S.O" -> "Kalachowki"). */
   function cleanPO(n){return (n||'').replace(/\s+(S\.?O\.?|B\.?O\.?|H\.?O\.?)$/i,'').trim();}
-  function pinLookup(force){
+  function pinLookup(force,preferArea){
     if(!zip)return;var v=(zip.value||'').trim();
     if(!/^[1-9]\d{5}$/.test(v))return;
     var c=F('country');if(c&&c.value&&c.value!=='India')return;
@@ -40,12 +40,31 @@
       .then(function(j){var d=j&&j[0];
         if(!d||d.Status!=='Success'||!d.PostOffice||!d.PostOffice.length)return;
         var po=d.PostOffice;if(c)c.value='India';
+        var district=po[0].District||'';
         if(F('state')&&(force||!F('state').value.trim()))F('state').value=po[0].State;
-        if(F('city')&&(force||!F('city').value.trim()))F('city').value=po[0].District;
-        if(area){var dl=document.getElementById(area.getAttribute('list'));
-          if(dl){dl.innerHTML='';po.forEach(function(p){var o=
-            document.createElement('option');o.value=cleanPO(p.Name);dl.appendChild(o);});}
-          if(force||!area.value.trim())area.value=cleanPO(po[0].Name);}
+        if(F('city')&&(force||!F('city').value.trim()))F('city').value=district;
+        if(!area)return;
+        /* Offer every locality in this PIN in the dropdown - one PIN covers
+           several areas, so the user picks their exact one. */
+        var names=[];po.forEach(function(p){var n=cleanPO(p.Name);
+          if(n&&names.indexOf(n)<0)names.push(n);});
+        var dl=document.getElementById(area.getAttribute('list'));
+        if(dl){dl.innerHTML='';names.forEach(function(n){
+          var o=document.createElement('option');o.value=n;dl.appendChild(o);});}
+        if(!force&&area.value.trim())return;
+        var pick='';
+        if(preferArea){        /* match the GPS neighbourhood to a PO name */
+          var pl=preferArea.toLowerCase();
+          for(var i=0;i<names.length;i++){var nl=names[i].toLowerCase();
+            if(nl===pl||nl.indexOf(pl)>=0||pl.indexOf(nl)>=0){pick=names[i];break;}}
+          if(!pick)pick=preferArea;
+        }
+        if(!pick){           /* else first locality that isn't just the city */
+          for(var k=0;k<names.length;k++){
+            if(names[k].toLowerCase()!==district.toLowerCase()){pick=names[k];break;}}
+        }
+        if(!pick)pick=names[0]||'';
+        if(pick)area.value=pick;
       }).catch(function(){});
   }
   /* ---- "use my location": geolocation -> reverse geocode -> address ---- */
@@ -55,29 +74,48 @@
     if(!navigator.geolocation){alert('Location is not supported by this '+
       'browser - please type your address.');return;}
     var old=btn.textContent;btn.disabled=true;btn.textContent='Locating...';
+    function restore(){btn.disabled=false;btn.textContent=old;}
+    function jget(u){return fetch(u,{headers:{Accept:'application/json'}})
+      .then(function(r){return r.ok?r.json():null;})
+      .catch(function(){return null;});}
     navigator.geolocation.getCurrentPosition(function(pos){
       var la=pos.coords.latitude,lo=pos.coords.longitude;
-      fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?'+
-        'latitude='+la+'&longitude='+lo+'&localityLanguage=en')
-        .then(function(r){return r.json();})
-        .then(function(d){
-          var c=F('country');
-          if(c&&d.countryName&&/india/i.test(d.countryName))c.value='India';
-          set('state',d.principalSubdivision,true);
-          set('city',d.city||d.locality,true);
-          if(d.postcode)set('zip',d.postcode,true);
-          btn.textContent='Location added';
-          /* The PIN code lookup returns the actual local post-office name
-             (e.g. "Kalachowki" for 400033) - far more precise for Indian
-             addresses than the reverse-geocoded locality, so it wins over
-             whatever BigDataCloud guessed and overwrites "area" once ready. */
-          var v=(zip&&zip.value||'').trim();
-          if(/^[1-9]\d{5}$/.test(v)){pinLookup(true);}
-          else if(area){set('area',d.locality||d.city,true);}
-          setTimeout(function(){btn.disabled=false;btn.textContent=old;},2500);
-        }).catch(function(){btn.disabled=false;btn.textContent=old;
-          alert('Could not look up your location - please type your address.');});
-    },function(err){btn.disabled=false;btn.textContent=old;
+      /* OpenStreetMap/Nominatim first: it reliably returns the Indian PIN
+         code and a real neighbourhood name. BigDataCloud returns an empty
+         postcode for most Indian coordinates and repeats the city as the
+         locality - that's why the area used to come out as "Mumbai" twice
+         with no PIN. It stays as a backup for state/city only. */
+      Promise.all([
+        jget('https://nominatim.openstreetmap.org/reverse?format=jsonv2'+
+             '&zoom=18&addressdetails=1&lat='+la+'&lon='+lo),
+        jget('https://api.bigdatacloud.net/data/reverse-geocode-client?'+
+             'latitude='+la+'&longitude='+lo+'&localityLanguage=en')
+      ]).then(function(res){
+        var n=res[0],b=res[1];
+        if(!n&&!b){restore();
+          alert('Could not look up your location - please type your address.');
+          return;}
+        var a=(n&&n.address)||{};
+        var city=a.city||a.town||a.municipality||a.village||
+                 String(a.state_district||'').replace(/\s+district$/i,'')||
+                 (b&&(b.city||b.locality))||'';
+        var areaName=a.suburb||a.neighbourhood||a.quarter||a.city_district||'';
+        var st=a.state||(b&&b.principalSubdivision)||'';
+        var pin=String(a.postcode||(b&&b.postcode)||'').trim();
+        var c=F('country');
+        if(c&&/india/i.test(a.country||(b&&b.countryName)||''))c.value='India';
+        set('state',st,true);
+        set('city',city,true);
+        if(pin)set('zip',pin,true);
+        /* never echo the city straight back as the area */
+        if(area&&areaName&&areaName.toLowerCase()!==String(city).toLowerCase())
+          set('area',areaName,true);
+        var v=(zip&&zip.value||'').trim();
+        if(/^[1-9]\d{5}$/.test(v))pinLookup(true,areaName);
+        btn.textContent='Location added';
+        setTimeout(restore,2500);
+      });
+    },function(err){restore();
       alert(err&&err.code===1?'Location permission was denied. You can type '+
         'your address instead.':'Could not get your location - please type '+
         'your address.');},
