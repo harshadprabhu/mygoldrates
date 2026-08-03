@@ -2355,7 +2355,7 @@ def main():
           f"{len(recaps)} recaps")
     with open("docs/robots.txt", "w", encoding="utf-8") as f:
         # Explicitly welcome AI/LLM crawlers so generative engines (ChatGPT,
-        # Claude, Perplexity, Gemini/AI Overviews, etc.) can index and cite us.
+        # AI assistants, Perplexity, Gemini/AI Overviews, etc.) can index and cite us.
         ai_bots = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot",
                    "Claude-Web", "anthropic-ai", "PerplexityBot",
                    "Perplexity-User", "Google-Extended", "Applebot-Extended",
