@@ -2353,11 +2353,11 @@ NAV = f"""<div class="nav-ov" id="nav-ov" hidden></div>
     document.addEventListener('keydown',function(e){{
       if(e.key==='Escape'&&d.classList.contains('open'))s(false);}});
   }}
-  if(document.readyState==='loading'){
+  if(document.readyState==='loading'){{
     document.addEventListener('DOMContentLoaded',init);
-  }else{
+  }}else{{
     setTimeout(init,0);
-  }
+  }}
 }})();</script>"""
 
 
