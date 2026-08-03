@@ -2747,6 +2747,10 @@ header.top .topright{order:3}
 .uchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ghead{display:inline-flex;align-items:center}
 .ghead:empty{display:none}
+.signout-btn{margin-left:7px;border:1px solid var(--line);background:transparent;
+  color:var(--ink-3);font:600 11px/1 "IBM Plex Sans",sans-serif;cursor:pointer;
+  border-radius:999px;padding:5px 10px;white-space:nowrap}
+.signout-btn:hover{border-color:var(--gold);color:var(--gold)}
 @media (max-width:520px){.uchip{max-width:110px}}
 .btn{display:inline-block;font:500 13.5px/1 "IBM Plex Sans",sans-serif;
   background:linear-gradient(140deg,#3A2A0C,#140D04 55%,#241809);
@@ -2888,15 +2892,43 @@ SIGNUP_JS = r"""(function(){
     if(lb)lb.addEventListener('click',function(){useLocation(lb);});
   }
 
-  /* ---- restore header chip + prefill forms for a returning signed-in user.
+  /* ---- header chip (shared markup) + sign-out, available on every page.
      Actual Google sign-in (auto One Tap + button) is owned by the gate
-     modal's own script (homepage only) - this just restores the visual
-     state from localStorage so it doesn't require a fresh sign-in. ---- */
+     modal's own script; this restores the visual state from localStorage
+     so a returning user doesn't have to sign in again. ---- */
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function chipHTML(u){
+    return '<span class="uchip" title="'+esc(u.email)+'">'+
+      (u.picture?'<img src="'+esc(u.picture)+'" alt="" referrerpolicy="no-referrer">':'')+
+      '<span>'+esc(u.name||u.email||'Signed in')+'</span></span>'+
+      '<button type="button" class="signout-btn">Sign out</button>';
+  }
+  window.GR_CHIP_HTML=chipHTML;
   function chip(u){var h=document.getElementById('hauth');if(!h)return;
-    h.hidden=false;
-    h.innerHTML='<span class="uchip" title="'+(u.email||'')+'">'+
-      (u.picture?'<img src="'+u.picture+'" alt="" referrerpolicy="no-referrer">':'')+
-      '<span>'+(u.name||u.email||'Signed in')+'</span></span>';}
+    h.hidden=false;h.innerHTML=chipHTML(u);}
+
+  /* Sign out: clear our session, stop Google auto-selecting the same account
+     next load, and clear Google's g_state cookie so the One Tap prompt is no
+     longer in its "recently dismissed" cooldown. */
+  function signOut(){
+    try{localStorage.removeItem('gr_user');}catch(e){}
+    try{localStorage.removeItem('gr_sub');}catch(e){}
+    try{sessionStorage.removeItem('gr_dismissed');}catch(e){}
+    try{if(window.google&&google.accounts&&google.accounts.id)
+      google.accounts.id.disableAutoSelect();}catch(e){}
+    document.cookie='g_state=;path=/;max-age=0';
+    document.cookie='g_state=;path=/;domain=.'+location.hostname+';max-age=0';
+    var h=document.getElementById('hauth');
+    if(h){h.hidden=true;h.innerHTML='';}
+    location.reload();
+  }
+  window.GR_SIGNOUT=signOut;
+  document.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest?e.target.closest('.signout-btn'):null;
+    if(b){e.preventDefault();signOut();}
+  });
+
   function prefill(u){if(!form)return;
     if(F('email')&&!F('email').value.trim())F('email').value=u.email||'';
     if(F('name')&&!F('name').value.trim())F('name').value=u.name||'';
@@ -3073,15 +3105,20 @@ GATE_JS = r"""
     ov.hidden=true;
     document.body.style.overflow='';
   }
+  /* header chip - uses the shared markup from signup.js (which also owns the
+     delegated "Sign out" handler) so the chip looks/behaves the same
+     everywhere. */
+  function showChip(u){
+    var h=document.getElementById('hauth');if(!h)return;
+    h.hidden=false;
+    h.innerHTML=window.GR_CHIP_HTML?window.GR_CHIP_HTML(u):
+      ('<span class="uchip">'+(u.name||u.email||'Signed in')+'</span>'+
+       '<button type="button" class="signout-btn">Sign out</button>');
+  }
   function afterAuth(user){
     setUser(user);
     closeGate();
-    // update header chip
-    var h=document.getElementById('hauth');
-    if(h){h.hidden=false;
-      h.innerHTML='<span class="uchip" title="'+(user.email||'')+'">'+
-        (user.picture?'<img src="'+user.picture+'" alt="" referrerpolicy="no-referrer">':'')+
-        '<span>'+(user.name||user.email||'Signed in')+'</span></span>';}
+    showChip(user);
     if(pendingCb){var fn=pendingCb;pendingCb=null;setTimeout(fn,50);}
   }
 
@@ -3255,12 +3292,8 @@ GATE_JS = r"""
       document.body.style.overflow='hidden';
     }
     if(eform&&p.name){var n=eform.elements['name'];if(n)n.value=p.name;}
-    var h=document.getElementById('hauth');
-    if(h){h.hidden=false;
-      h.innerHTML='<span class="uchip" title="'+(p.email||'')+'">'+
-        (p.picture?'<img src="'+p.picture+'" alt="" referrerpolicy="no-referrer">':'')+
-        '<span>'+(p.name||p.email||'Signed in')+'</span></span>';}
-    if(gbtn){gbtn.disabled=false;gbtn.innerHTML=gbtnHTML;}
+    showChip(user);
+    resetGbtn();
   }
 
   function onGoogleCred(resp){          // One Tap JWT credential
@@ -3274,6 +3307,26 @@ GATE_JS = r"""
     if(gbtnResetTimer){clearTimeout(gbtnResetTimer);gbtnResetTimer=null;}
     if(gbtn){gbtn.disabled=false;gbtn.innerHTML=gbtnHTML;}
   }
+
+  /* ---- ID client (One Tap). Initialised once, as early as possible. ---- */
+  var idReady=false;
+  function initIdClient(){
+    if(idReady)return true;
+    if(!GCID||!(window.google&&google.accounts&&google.accounts.id))return false;
+    try{
+      google.accounts.id.initialize({client_id:GCID,callback:onGoogleCred,
+        auto_select:false,
+        /* Don't treat a stray outside-click as a dismissal - repeated
+           dismissals put One Tap into a multi-hour cooldown where it stops
+           appearing at all, which is exactly the "it never pops up" symptom. */
+        cancel_on_tap_outside:false,
+        itp_support:true,use_fedcm_for_prompt:true});
+      idReady=true;
+    }catch(e){}
+    return idReady;
+  }
+
+  /* ---- OAuth popup client (fallback for when One Tap can't show) ---- */
   var tokenClient=null;
   function getTokenClient(){
     if(tokenClient)return tokenClient;
@@ -3292,46 +3345,67 @@ GATE_JS = r"""
     return tokenClient;
   }
 
-  /* Pre-warm the token client from page load, in the background, so it's
-     already built by the time the user clicks. Browsers only allow
-     window.open() popups when triggered SYNCHRONOUSLY inside a real click
-     handler - building the client lazily inside the click handler (with a
-     setTimeout retry loop) delays requestAccessToken() past that window and
-     the popup gets silently blocked. This keeps the click handler itself
-     100% synchronous. */
-  (function warm(){if(!getTokenClient())setTimeout(warm,150);})();
+  /* Pre-warm BOTH clients from page load so the click handler never has to
+     wait (browsers only grant a popup a few seconds of "user activation"
+     after a real click). */
+  (function warm(){
+    var a=initIdClient(),b=!!getTokenClient();
+    if(!a||!b)setTimeout(warm,150);
+  })();
 
-  if(gbtn)gbtn.addEventListener('click',function(){
-    if(!GCID){alert('Google sign-in is not configured.');return;}
+  /* Open the OAuth popup - the "not signed in to Google yet" path. */
+  function openLoginPopup(){
     var tc=getTokenClient();
-    if(!tc){alert('Google sign-in is still loading - please try again in a moment.');return;}
-    gbtn.disabled=true;gbtn.textContent='Opening Google...';
+    if(!tc){resetGbtn();
+      alert('Google sign-in is still loading - please try again in a moment.');
+      return;}
+    if(gbtn){gbtn.disabled=true;gbtn.textContent='Opening Google...';}
     tc.requestAccessToken({prompt:''});
-    // Safety net: if the popup was blocked and Google never calls back at
-    // all, don't leave the button stuck forever.
     gbtnResetTimer=setTimeout(function(){
       resetGbtn();
-      alert('The Google sign-in popup could not open - please allow popups '+
+      alert('The Google sign-in window could not open - please allow popups '+
         'for this site, or use the form below instead.');
     },8000);
+  }
+
+  /* Button: behave exactly like One Tap when the user already has a Google
+     session (a small inline card - no popup, no page change); only fall back
+     to the full login popup when One Tap can't be shown (no Google session,
+     cooldown, or FedCM unavailable). The fallback runs inside prompt()'s
+     notification callback, which fires within the click's user-activation
+     window, so the popup is still allowed. */
+  if(gbtn)gbtn.addEventListener('click',function(){
+    if(!GCID){alert('Google sign-in is not configured.');return;}
+    if(!initIdClient()){openLoginPopup();return;}
+    var settled=false;
+    try{
+      google.accounts.id.prompt(function(n){
+        if(settled)return;
+        var skipped=false;
+        try{
+          /* FedCM only exposes isSkippedMoment/isDismissedMoment; the older
+             isNotDisplayed exists on the legacy path. Guard both. */
+          if(typeof n.isNotDisplayed==='function'&&n.isNotDisplayed())skipped=true;
+          if(typeof n.isSkippedMoment==='function'&&n.isSkippedMoment())skipped=true;
+        }catch(e){skipped=true;}
+        if(skipped){settled=true;openLoginPopup();}
+      });
+    }catch(e){openLoginPopup();return;}
+    /* If prompt() never reports back at all (some FedCM failures reject
+       silently), fall back so the button is never a dead end. */
+    setTimeout(function(){
+      if(settled||isAuthed())return;
+      settled=true;openLoginPopup();
+    },1500);
   });
 
-  /* Best-effort auto One Tap - initialise the ID client too (separate from
-     the oauth2 client above) purely so the corner prompt can appear on its
-     own for users it works for. Silently does nothing if FedCM is
-     unsupported/blocked in this browser. */
+  /* ---- auto One Tap on page load ---- */
   (function autoOneTap(){
     if(!GCID||isAuthed())return;
     var tries=0;
     (function tryG(){
-      if(window.google&&google.accounts&&google.accounts.id){
-        try{
-          google.accounts.id.initialize({client_id:GCID,callback:onGoogleCred,
-            auto_select:false,cancel_on_tap_outside:true,itp_support:true,
-            use_fedcm_for_prompt:true});
-          google.accounts.id.prompt();
-        }catch(e){}
-      }else if(tries++<40){setTimeout(tryG,150);}
+      if(initIdClient()){try{google.accounts.id.prompt();}catch(e){}}
+      else if(tries++<40){setTimeout(tryG,150);}
     })();
   })();
 
