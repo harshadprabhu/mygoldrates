@@ -28,7 +28,10 @@
 
   /* ---- form conveniences: +91 phone default, PIN -> area/city/state ---- */
   var zip=F('zip'),area=F('area');
-  function pinLookup(){
+  /* India Post PO names carry a "S.O"/"B.O"/"H.O" suffix - strip it for a
+     clean neighbourhood name (e.g. "Kalachowki S.O" -> "Kalachowki"). */
+  function cleanPO(n){return (n||'').replace(/\s+(S\.?O\.?|B\.?O\.?|H\.?O\.?)$/i,'').trim();}
+  function pinLookup(force){
     if(!zip)return;var v=(zip.value||'').trim();
     if(!/^[1-9]\d{5}$/.test(v))return;
     var c=F('country');if(c&&c.value&&c.value!=='India')return;
@@ -37,12 +40,12 @@
       .then(function(j){var d=j&&j[0];
         if(!d||d.Status!=='Success'||!d.PostOffice||!d.PostOffice.length)return;
         var po=d.PostOffice;if(c)c.value='India';
-        if(F('state')&&!F('state').value.trim())F('state').value=po[0].State;
-        if(F('city')&&!F('city').value.trim())F('city').value=po[0].District;
+        if(F('state')&&(force||!F('state').value.trim()))F('state').value=po[0].State;
+        if(F('city')&&(force||!F('city').value.trim()))F('city').value=po[0].District;
         if(area){var dl=document.getElementById(area.getAttribute('list'));
           if(dl){dl.innerHTML='';po.forEach(function(p){var o=
-            document.createElement('option');o.value=p.Name;dl.appendChild(o);});}
-          if(!area.value.trim())area.value=po[0].Name;}
+            document.createElement('option');o.value=cleanPO(p.Name);dl.appendChild(o);});}
+          if(force||!area.value.trim())area.value=cleanPO(po[0].Name);}
       }).catch(function(){});
   }
   /* ---- "use my location": geolocation -> reverse geocode -> address ---- */
@@ -62,10 +65,15 @@
           if(c&&d.countryName&&/india/i.test(d.countryName))c.value='India';
           set('state',d.principalSubdivision,true);
           set('city',d.city||d.locality,true);
-          set('area',d.locality||d.city,true);
           if(d.postcode)set('zip',d.postcode,true);
           btn.textContent='Location added';
-          if(zip&&/^[1-9]\d{5}$/.test((zip.value||'').trim()))pinLookup();
+          /* The PIN code lookup returns the actual local post-office name
+             (e.g. "Kalachowki" for 400033) - far more precise for Indian
+             addresses than the reverse-geocoded locality, so it wins over
+             whatever BigDataCloud guessed and overwrites "area" once ready. */
+          var v=(zip&&zip.value||'').trim();
+          if(/^[1-9]\d{5}$/.test(v)){pinLookup(true);}
+          else if(area){set('area',d.locality||d.city,true);}
           setTimeout(function(){btn.disabled=false;btn.textContent=old;},2500);
         }).catch(function(){btn.disabled=false;btn.textContent=old;
           alert('Could not look up your location - please type your address.');});
