@@ -97,15 +97,43 @@
     if(lb)lb.addEventListener('click',function(){useLocation(lb);});
   }
 
-  /* ---- restore header chip + prefill forms for a returning signed-in user.
+  /* ---- header chip (shared markup) + sign-out, available on every page.
      Actual Google sign-in (auto One Tap + button) is owned by the gate
-     modal's own script (homepage only) - this just restores the visual
-     state from localStorage so it doesn't require a fresh sign-in. ---- */
+     modal's own script; this restores the visual state from localStorage
+     so a returning user doesn't have to sign in again. ---- */
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function chipHTML(u){
+    return '<span class="uchip" title="'+esc(u.email)+'">'+
+      (u.picture?'<img src="'+esc(u.picture)+'" alt="" referrerpolicy="no-referrer">':'')+
+      '<span>'+esc(u.name||u.email||'Signed in')+'</span></span>'+
+      '<button type="button" class="signout-btn">Sign out</button>';
+  }
+  window.GR_CHIP_HTML=chipHTML;
   function chip(u){var h=document.getElementById('hauth');if(!h)return;
-    h.hidden=false;
-    h.innerHTML='<span class="uchip" title="'+(u.email||'')+'">'+
-      (u.picture?'<img src="'+u.picture+'" alt="" referrerpolicy="no-referrer">':'')+
-      '<span>'+(u.name||u.email||'Signed in')+'</span></span>';}
+    h.hidden=false;h.innerHTML=chipHTML(u);}
+
+  /* Sign out: clear our session, stop Google auto-selecting the same account
+     next load, and clear Google's g_state cookie so the One Tap prompt is no
+     longer in its "recently dismissed" cooldown. */
+  function signOut(){
+    try{localStorage.removeItem('gr_user');}catch(e){}
+    try{localStorage.removeItem('gr_sub');}catch(e){}
+    try{sessionStorage.removeItem('gr_dismissed');}catch(e){}
+    try{if(window.google&&google.accounts&&google.accounts.id)
+      google.accounts.id.disableAutoSelect();}catch(e){}
+    document.cookie='g_state=;path=/;max-age=0';
+    document.cookie='g_state=;path=/;domain=.'+location.hostname+';max-age=0';
+    var h=document.getElementById('hauth');
+    if(h){h.hidden=true;h.innerHTML='';}
+    location.reload();
+  }
+  window.GR_SIGNOUT=signOut;
+  document.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest?e.target.closest('.signout-btn'):null;
+    if(b){e.preventDefault();signOut();}
+  });
+
   function prefill(u){if(!form)return;
     if(F('email')&&!F('email').value.trim())F('email').value=u.email||'';
     if(F('name')&&!F('name').value.trim())F('name').value=u.name||'';
