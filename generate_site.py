@@ -2914,7 +2914,8 @@ GATE_CSS = """
   display:flex;align-items:center;justify-content:center;padding:16px}
 #gate-ov[hidden]{display:none}
 #gate-box{background:var(--paper);border:1px solid var(--line);border-radius:20px;
-  width:100%;max-width:420px;padding:28px 28px 24px;position:relative;
+  width:100%;max-width:460px;max-height:92vh;overflow-y:auto;
+  padding:28px 28px 24px;position:relative;
   box-shadow:0 24px 60px rgba(0,0,0,.35)}
 #gate-box h3{font-family:"Marcellus",serif;font-weight:400;font-size:22px;
   margin:0 0 6px;color:var(--ink)}
@@ -2938,20 +2939,34 @@ GATE_CSS = """
 .gate-or{text-align:center;font-size:12px;color:var(--ink-3);margin:14px 0;
   display:flex;align-items:center;gap:8px}
 .gate-or::before,.gate-or::after{content:"";flex:1;height:1px;background:var(--line)}
-#gate-form input,#gate-form select{width:100%;padding:10px 12px;margin-bottom:10px;
+#gate-form input,#gate-form select,
+#gate-enrich-form input,#gate-enrich-form select{
+  width:100%;padding:11px 13px;margin-bottom:11px;box-sizing:border-box;
   border:1.5px solid var(--line);border-radius:10px;font:14px "IBM Plex Sans",sans-serif;
   background:var(--card);color:var(--ink)}
-#gate-form input:focus,#gate-form select:focus{outline:none;border-color:var(--gold)}
-#gate-form .gate-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-#gate-form .gate-row input,#gate-form .gate-row select{margin-bottom:0}
-.gate-submit{width:100%;padding:12px;margin-top:4px;border:0;border-radius:12px;
-  background:var(--gold-foil);color:#1a1508;font:700 14px/1 "IBM Plex Sans",sans-serif;
+#gate-form input:focus,#gate-form select:focus,
+#gate-enrich-form input:focus,#gate-enrich-form select:focus{
+  outline:none;border-color:var(--gold)}
+#gate-form .gate-row,#gate-enrich-form .gate-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#gate-form .gate-row input,#gate-form .gate-row select,
+#gate-enrich-form .gate-row input,#gate-enrich-form .gate-row select{margin-bottom:11px}
+@media (max-width:480px){
+  #gate-form .gate-row,#gate-enrich-form .gate-row{grid-template-columns:1fr}
+}
+#gate-form .locbtn,#gate-enrich-form .locbtn{margin:2px 0 12px;width:100%}
+.gate-submit{width:100%;padding:13px;margin-top:6px;border:0;border-radius:12px;
+  background:var(--gold-foil);color:#1a1508;font:700 14.5px/1 "IBM Plex Sans",sans-serif;
   cursor:pointer;letter-spacing:.02em}
 .gate-submit:hover{opacity:.9}
 .gate-note{font-size:11px;color:var(--ink-3);text-align:center;margin-top:10px;line-height:1.5}
 #gate-enrich{background:var(--paper)}
-#gate-enrich h3{font-size:19px}
-#gate-enrich .gate-sub{margin-bottom:16px}
+#gate-enrich h3{font-size:20px}
+#gate-enrich .gate-sub{margin-bottom:18px}
+#gate-enrich-skip{width:100%;padding:11px;margin-top:8px;border:0;background:none;
+  color:var(--ink-3);font:600 13.5px "IBM Plex Sans",sans-serif;cursor:pointer;
+  border-radius:10px;transition:background .15s}
+#gate-enrich-skip:hover{background:color-mix(in srgb,var(--ink) 6%,transparent);color:var(--ink)}
 """
 
 # ---- Feature-gate modal HTML (injected before </body>) ----
@@ -3016,7 +3031,7 @@ GATE_HTML = """
           <input name="age" type="number" placeholder="Age" min="18" max="100">
         </div>
         <button type="submit" class="gate-submit">Save &amp; Continue &rarr;</button>
-        <button type="button" id="gate-enrich-skip" style="width:100%;padding:10px;margin-top:6px;border:0;background:none;color:var(--ink-3);font-size:13px;cursor:pointer">Skip for now</button>
+        <button type="button" id="gate-enrich-skip">Skip for now</button>
       </form>
     </div>
   </div>
