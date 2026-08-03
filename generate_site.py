@@ -3292,17 +3292,21 @@ GATE_JS = r"""
     return tokenClient;
   }
 
+  /* Pre-warm the token client from page load, in the background, so it's
+     already built by the time the user clicks. Browsers only allow
+     window.open() popups when triggered SYNCHRONOUSLY inside a real click
+     handler - building the client lazily inside the click handler (with a
+     setTimeout retry loop) delays requestAccessToken() past that window and
+     the popup gets silently blocked. This keeps the click handler itself
+     100% synchronous. */
+  (function warm(){if(!getTokenClient())setTimeout(warm,150);})();
+
   if(gbtn)gbtn.addEventListener('click',function(){
     if(!GCID){alert('Google sign-in is not configured.');return;}
+    var tc=getTokenClient();
+    if(!tc){alert('Google sign-in is still loading - please try again in a moment.');return;}
     gbtn.disabled=true;gbtn.textContent='Opening Google...';
-    var tries=0;
-    (function open(){
-      var tc=getTokenClient();
-      if(tc){tc.requestAccessToken({prompt:''});}
-      else if(tries++<40){setTimeout(open,150);}
-      else{gbtn.disabled=false;gbtn.innerHTML=gbtnHTML;
-        alert('Could not load Google sign-in - please try again.');}
-    })();
+    tc.requestAccessToken({prompt:''});
   });
 
   /* Best-effort auto One Tap - initialise the ID client too (separate from
