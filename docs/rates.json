@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-03",
-  "last_updated": "2026-08-03T17:07:49.874008+05:30",
+  "last_updated": "2026-08-03T18:14:16.803834+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -17,19 +17,19 @@
     "rate_per_gram_inr": 14292.0
   },
   "ibja_reference_24k_999_per_gram_inr": 14286.3,
-  "akgsma_south_india_22k_per_gram_inr": 13220.0,
+  "akgsma_south_india_22k_per_gram_inr": null,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 141748.0,
-      "change_pct": 0.17
+      "price_per_10g_inr": 141500.0,
+      "change_pct": -0.01
     },
     {
       "contract": "GOLDM",
       "expiry": "05AUG2026",
-      "price_per_10g_inr": 141775.0,
-      "change_pct": 0.3
+      "price_per_10g_inr": 141461.0,
+      "change_pct": 0.07
     }
   ],
   "jewellers": [
@@ -58,6 +58,12 @@
       "rate_18k_per_gram_inr": 10736.72
     },
     {
+      "jeweller": "ORRA",
+      "rate_24k_per_gram_inr": 14404.63,
+      "rate_22k_per_gram_inr": 13194.64,
+      "rate_18k_per_gram_inr": 10803.47
+    },
+    {
       "jeweller": "PN Gadgil & Sons",
       "rate_24k_per_gram_inr": 14420.0,
       "rate_22k_per_gram_inr": 13208.72,
@@ -74,12 +80,6 @@
       "rate_24k_per_gram_inr": 14422.0,
       "rate_22k_per_gram_inr": 13210.55,
       "rate_18k_per_gram_inr": 10816.5
-    },
-    {
-      "jeweller": "ORRA",
-      "rate_24k_per_gram_inr": 14422.8,
-      "rate_22k_per_gram_inr": 13211.28,
-      "rate_18k_per_gram_inr": 10817.1
     },
     {
       "jeweller": "Jos Alukkas",
@@ -118,16 +118,16 @@
       "rate_18k_per_gram_inr": 10824.23
     },
     {
+      "jeweller": "Kisna",
+      "rate_24k_per_gram_inr": 14473.01,
+      "rate_22k_per_gram_inr": 13257.28,
+      "rate_18k_per_gram_inr": 10854.76
+    },
+    {
       "jeweller": "Tanishq",
       "rate_24k_per_gram_inr": 14481.44,
       "rate_22k_per_gram_inr": 13265.0,
       "rate_18k_per_gram_inr": 10861.08
-    },
-    {
-      "jeweller": "Kisna",
-      "rate_24k_per_gram_inr": 14483.05,
-      "rate_22k_per_gram_inr": 13266.47,
-      "rate_18k_per_gram_inr": 10862.29
     },
     {
       "jeweller": "Waman Hari Pethe",
