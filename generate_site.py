@@ -1748,11 +1748,15 @@ def main():
            '</script>') if gclient else ""
 
     sig_ver = hashlib.md5(SIGNUP_JS.encode()).hexdigest()[:8]
+    gate_html = GATE_HTML if gclient else ""
+    gate_js   = GATE_JS   if gclient else ""
     common = dict(site_url=SITE_URL, date=display_date, time=display_time,
                   iso_now=now_ist.isoformat(), year=str(now_ist.year),
                   base_css=BASE_CSS, ads_head=ads_head,
                   gclient=gclient, gsi=gsi, google_btn="",
-                  sig_ver=sig_ver, nav=NAV)
+                  sig_ver=sig_ver, nav=NAV,
+                  gate_css=GATE_CSS if gclient else "",
+                  gate_html=gate_html, gate_js=gate_js)
     def city_cloud(current_slug=None):
         parts = []
         for nm in LOCATIONS:
@@ -2931,6 +2935,302 @@ GOOGLE_BTN = """<div class="gwrap" id="gwrap" hidden>
     <a href="#" class="gmanual" id="gmanual">Prefer to enter details manually?</a>
   </div>"""
 
+# ---- Feature-gate modal CSS (appended to BASE_CSS) ----
+GATE_CSS = """
+/* ---- feature gate modal ---- */
+#gate-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;
+  display:flex;align-items:center;justify-content:center;padding:16px}
+#gate-ov[hidden]{display:none}
+#gate-box{background:var(--paper);border:1px solid var(--line);border-radius:20px;
+  width:100%;max-width:420px;padding:28px 28px 24px;position:relative;
+  box-shadow:0 24px 60px rgba(0,0,0,.35)}
+#gate-box h3{font-family:"Marcellus",serif;font-weight:400;font-size:22px;
+  margin:0 0 6px;color:var(--ink)}
+#gate-box .gate-sub{font-size:14px;color:var(--ink-3);margin:0 0 20px;line-height:1.5}
+#gate-close{position:absolute;top:14px;right:16px;background:none;border:0;
+  font-size:24px;color:var(--ink-3);cursor:pointer;line-height:1}
+#gate-close:hover{color:var(--ink)}
+.gate-google-btn{display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:12px 18px;border:1.5px solid var(--line);border-radius:12px;
+  background:var(--card);font:600 14px/1 "IBM Plex Sans",sans-serif;color:var(--ink);
+  cursor:pointer;transition:border-color .15s,box-shadow .15s;margin-bottom:6px}
+.gate-google-btn:hover{border-color:var(--gold);box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.gate-google-btn svg{flex:none}
+.gate-or{text-align:center;font-size:12px;color:var(--ink-3);margin:14px 0;
+  display:flex;align-items:center;gap:8px}
+.gate-or::before,.gate-or::after{content:"";flex:1;height:1px;background:var(--line)}
+#gate-form input,#gate-form select{width:100%;padding:10px 12px;margin-bottom:10px;
+  border:1.5px solid var(--line);border-radius:10px;font:14px "IBM Plex Sans",sans-serif;
+  background:var(--card);color:var(--ink)}
+#gate-form input:focus,#gate-form select:focus{outline:none;border-color:var(--gold)}
+#gate-form .gate-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#gate-form .gate-row input,#gate-form .gate-row select{margin-bottom:0}
+.gate-submit{width:100%;padding:12px;margin-top:4px;border:0;border-radius:12px;
+  background:var(--gold-foil);color:#1a1508;font:700 14px/1 "IBM Plex Sans",sans-serif;
+  cursor:pointer;letter-spacing:.02em}
+.gate-submit:hover{opacity:.9}
+.gate-note{font-size:11px;color:var(--ink-3);text-align:center;margin-top:10px;line-height:1.5}
+#gate-enrich{background:var(--paper)}
+#gate-enrich h3{font-size:19px}
+#gate-enrich .gate-sub{margin-bottom:16px}
+"""
+
+# ---- Feature-gate modal HTML (injected before </body>) ----
+GATE_HTML = """
+<div id="gate-ov" hidden role="dialog" aria-modal="true" aria-labelledby="gate-title">
+  <div id="gate-box">
+    <button id="gate-close" aria-label="Close">&times;</button>
+    <!-- Step 1: sign-in / subscribe -->
+    <div id="gate-step1">
+      <p class="eyebrow" style="margin:0 0 6px">Free access</p>
+      <h3 id="gate-title">Sign in to use this feature</h3>
+      <p class="gate-sub">Get live gold rate comparisons, calculators and daily alerts — free.</p>
+      <button class="gate-google-btn" id="gate-gbtn">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.1 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+        Continue with Google
+      </button>
+      <div class="gate-or">or enter details</div>
+      <form id="gate-form" autocomplete="on">
+        <input name="name" type="text" placeholder="Full name *" required autocomplete="name">
+        <input name="email" type="email" placeholder="Email address *" required autocomplete="email">
+        <input name="phone" type="tel" placeholder="Mobile number" autocomplete="tel">
+        <div class="gate-row">
+          <select name="gender"><option value="">Gender</option><option>Male</option><option>Female</option><option>Other</option><option>Prefer not to say</option></select>
+          <input name="age" type="number" placeholder="Age" min="18" max="100">
+        </div>
+        <input name="city" type="text" placeholder="City" autocomplete="address-level2">
+        <button type="submit" class="gate-submit">Get Free Access &rarr;</button>
+      </form>
+      <p class="gate-note">No spam. Unsubscribe anytime. We never share your data.</p>
+    </div>
+    <!-- Step 2: enrich after Google sign-in -->
+    <div id="gate-enrich" hidden>
+      <p class="eyebrow" style="margin:0 0 6px">One more thing</p>
+      <h3>Complete your profile</h3>
+      <p class="gate-sub">Help us personalise your gold rate experience.</p>
+      <form id="gate-enrich-form" autocomplete="on">
+        <input name="phone" type="tel" placeholder="Mobile number" autocomplete="tel">
+        <div class="gate-row">
+          <select name="gender"><option value="">Gender</option><option>Male</option><option>Female</option><option>Other</option><option>Prefer not to say</option></select>
+          <input name="age" type="number" placeholder="Age" min="18" max="100">
+        </div>
+        <input name="city" type="text" placeholder="City" autocomplete="address-level2">
+        <input name="state" type="text" placeholder="State" autocomplete="address-level1">
+        <button type="submit" class="gate-submit">Save &amp; Continue &rarr;</button>
+        <button type="button" id="gate-enrich-skip" style="width:100%;padding:10px;margin-top:6px;border:0;background:none;color:var(--ink-3);font-size:13px;cursor:pointer">Skip for now</button>
+      </form>
+    </div>
+  </div>
+</div>
+"""
+
+# ---- Feature-gate JS (injected just before </body>, after SIGNUP_JS) ----
+GATE_JS = r"""
+<script>
+(function(){
+  var SB=window.GR_SB_URL||'', KEY=window.GR_SB_KEY||'';
+  var GCID=window.GR_GCID||'';
+
+  /* ---- Auth state ---- */
+  function getUser(){try{return JSON.parse(localStorage.getItem('gr_user')||'null');}catch(e){return null;}}
+  function setUser(u){try{localStorage.setItem('gr_user',JSON.stringify(u));}catch(e){}}
+  function isAuthed(){var u=getUser();return !!(u&&(u.email||u.google_id));}
+
+  /* ---- pending action to fire after auth ---- */
+  var pendingCb=null;
+
+  /* ---- modal elements ---- */
+  var ov=document.getElementById('gate-ov');
+  var step1=document.getElementById('gate-step1');
+  var enrichDiv=document.getElementById('gate-enrich');
+  var gform=document.getElementById('gate-form');
+  var eform=document.getElementById('gate-enrich-form');
+
+  function openGate(cb){
+    pendingCb=cb||null;
+    if(!ov)return;
+    step1.hidden=false; enrichDiv.hidden=true;
+    ov.hidden=false;
+    document.body.style.overflow='hidden';
+    var first=gform&&gform.querySelector('input[name="name"]');
+    if(first)setTimeout(function(){first.focus();},80);
+  }
+  function closeGate(){
+    if(!ov)return;
+    ov.hidden=true;
+    document.body.style.overflow='';
+  }
+  function afterAuth(user){
+    setUser(user);
+    closeGate();
+    // update header chip
+    var h=document.getElementById('hauth');
+    if(h){h.hidden=false;
+      h.innerHTML='<span class="uchip" title="'+(user.email||'')+'">'+
+        (user.picture?'<img src="'+user.picture+'" alt="" referrerpolicy="no-referrer">':'')+
+        '<span>'+(user.name||user.email||'Signed in')+'</span></span>';}
+    if(pendingCb){var fn=pendingCb;pendingCb=null;setTimeout(fn,50);}
+  }
+
+  /* ---- save subscriber via Supabase RPC ---- */
+  function saveGate(payload){
+    if(!SB||!KEY||!payload.email)return Promise.resolve();
+    return fetch(SB+'/rest/v1/rpc/upsert_subscriber',{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
+      body:JSON.stringify({payload:payload})
+    }).catch(function(){});
+  }
+
+  /* ---- close button / overlay click ---- */
+  var cBtn=document.getElementById('gate-close');
+  if(cBtn)cBtn.addEventListener('click',function(){pendingCb=null;closeGate();});
+  if(ov)ov.addEventListener('click',function(e){if(e.target===ov){pendingCb=null;closeGate();}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ov&&!ov.hidden){pendingCb=null;closeGate();}});
+
+  /* ---- email/name form submit ---- */
+  if(gform)gform.addEventListener('submit',function(e){
+    e.preventDefault();
+    var F=function(n){return gform.elements[n];};
+    var email=(F('email').value||'').trim();
+    var name=(F('name').value||'').trim();
+    if(!email)return;
+    var payload={email:email,name:name||null,
+      phone:(F('phone').value||'').trim()||null,
+      gender:(F('gender').value||null),
+      age:parseInt(F('age').value||'')||null,
+      city:(F('city').value||'').trim()||null,
+      signup_method:'form',signup_source:'gate_form'};
+    saveGate(payload);
+    afterAuth({email:email,name:name});
+  });
+
+  /* ---- enrich form (after Google) ---- */
+  if(eform)eform.addEventListener('submit',function(e){
+    e.preventDefault();
+    var F=function(n){return eform.elements[n];};
+    var u=getUser()||{};
+    var payload={email:u.email,name:u.name||null,
+      phone:(F('phone').value||'').trim()||null,
+      gender:(F('gender').value||null),
+      age:parseInt(F('age').value||'')||null,
+      city:(F('city').value||'').trim()||null,
+      state:(F('state').value||'').trim()||null,
+      google_id:u.google_id||null,
+      google_picture:u.picture||null,
+      google_locale:u.locale||null,
+      signup_source:'gate_google'};
+    saveGate(payload);
+    closeGate();
+    if(pendingCb){var fn=pendingCb;pendingCb=null;setTimeout(fn,50);}
+  });
+  var skipBtn=document.getElementById('gate-enrich-skip');
+  if(skipBtn)skipBtn.addEventListener('click',function(){
+    closeGate();
+    if(pendingCb){var fn=pendingCb;pendingCb=null;setTimeout(fn,50);}
+  });
+
+  /* ---- Google One Tap via gate button ---- */
+  function decode(jwt){try{return JSON.parse(decodeURIComponent(
+    atob(jwt.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')).split('')
+      .map(function(c){return '%'+('00'+c.charCodeAt(0).toString(16)).slice(-2);})
+      .join('')));}catch(e){return null;}}
+
+  function onGoogleCred(resp){
+    var p=resp&&resp.credential?decode(resp.credential):null;
+    if(!p||!p.email)return;
+    var user={email:p.email,name:p.name||null,picture:p.picture||null,
+      google_id:p.sub||null,locale:p.locale||null};
+    // Save what we have now; enrich step gets phone/age/gender
+    saveGate({email:p.email,name:p.name||null,
+      google_id:p.sub||null,google_picture:p.picture||null,
+      google_locale:p.locale||null,
+      signup_method:'google',signup_source:'gate_google'});
+    setUser(user);
+    // show enrich step to collect phone/age/gender
+    if(step1)step1.hidden=true;
+    if(enrichDiv)enrichDiv.hidden=false;
+    // Pre-fill name if available
+    if(eform&&p.name){var n=eform.elements['name'];if(n)n.value=p.name;}
+    // update chip immediately
+    var h=document.getElementById('hauth');
+    if(h){h.hidden=false;
+      h.innerHTML='<span class="uchip" title="'+(p.email||'')+'">'+
+        (p.picture?'<img src="'+p.picture+'" alt="" referrerpolicy="no-referrer">':'')+
+        '<span>'+(p.name||p.email||'Signed in')+'</span></span>';}
+  }
+
+  var gbtn=document.getElementById('gate-gbtn');
+  if(gbtn)gbtn.addEventListener('click',function(){
+    if(!GCID){alert('Google sign-in is not configured.');return;}
+    // Trigger Google One Tap prompt or OAuth popup
+    var tries=0;
+    (function tryG(){
+      if(window.google&&google.accounts&&google.accounts.id){
+        google.accounts.id.initialize({client_id:GCID,callback:onGoogleCred,
+          auto_select:false,cancel_on_tap_outside:false,itp_support:true,
+          use_fedcm_for_prompt:true});
+        google.accounts.id.prompt(function(n){
+          // If One Tap is dismissed/unavailable, fall back to OAuth popup
+          if(n.isNotDisplayed()||n.isSkippedMoment()){
+            google.accounts.oauth2.initCodeClient({
+              client_id:GCID,scope:'openid email profile',
+              callback:function(){},
+              error_callback:function(){}
+            });
+          }
+        });
+      }else if(tries++<30){setTimeout(tryG,200);}
+    })();
+  });
+
+  /* ---- FEATURE GATE: intercept gated elements ---- */
+  function guard(el,originalHandler){
+    if(!el)return;
+    el.addEventListener('click',function(e){
+      if(isAuthed())return;          // already signed in → let normal handler run
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      openGate(function(){
+        // re-fire a clean click after auth so original listener handles it
+        el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}));
+      });
+    },true);                         // capture phase → runs before page listeners
+  }
+
+  function guardInput(el){
+    if(!el)return;
+    el.addEventListener('focus',function(e){
+      if(isAuthed())return;
+      el.blur();
+      openGate(function(){el.focus();});
+    },true);
+  }
+
+  // Drawers
+  guard(document.getElementById('drtab'));
+  guard(document.getElementById('cdtab'));
+  guard(document.getElementById('coindtab'));
+
+  // Karat segment buttons
+  var kbtns=document.querySelectorAll('.karatseg button');
+  kbtns.forEach(function(b){guard(b);});
+
+  // Near me / GST toggle
+  guard(document.getElementById('nearbtn'));
+  guard(document.getElementById('gstbtn'));
+
+  // Calculator inputs (focus guard)
+  var calcInputs=document.querySelectorAll(
+    '#calc-weight,#calc-price,#bc-karat,#calc-mc,#lc-val,#lc-rate,#lc-ltv,#lc-int,#lc-months');
+  calcInputs.forEach(function(el){guardInput(el);});
+
+  // Brand search
+  guardInput(document.getElementById('brandsearch'));
+
+})();
+</script>
+"""
+
 
 TEMPLATE = Template("""<!DOCTYPE html>
 <html lang="en-IN">
@@ -2973,6 +3273,7 @@ $ads_head
 <script type="application/ld+json">$jsonld</script>
 <style>
 $base_css
+$gate_css
 /* IBJA reference tiles */
 .ibja-ref{margin-top:6px}
 .ref-tiles{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
@@ -4065,6 +4366,8 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
 </script>
 <script>window.GR_GCID="$gclient";window.GR_SB_URL="$supabase_url";window.GR_SB_KEY="$anon_key";</script>
 <script src="signup.js?v=$sig_ver" defer></script>
+$gate_html
+$gate_js
 </body>
 </html>
 """)
