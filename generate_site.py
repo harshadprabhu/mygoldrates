@@ -3783,6 +3783,7 @@ var FRAC={"24K":1,"22K":0.916/0.999,"18K":0.750/0.999,"14K":0.583/0.999};
         try{sessionStorage.setItem('gr_hit','1');}catch(e){}
       }).catch(function(){});
   })();
+})();
 </script>
 <script>window.GR_GCID="$gclient";window.GR_SB_URL="$supabase_url";window.GR_SB_KEY="$anon_key";</script>
 <script src="signup.js?v=$sig_ver" defer></script>
