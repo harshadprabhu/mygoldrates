@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Private Analytics - MyGoldRates</title>
+<style>
+:root{--bg:#0f1115;--card:#181b22;--line:#272b34;--ink:#eef1f6;--ink2:#a7afbe;
+  --gold:#e3bf63;--emerald:#54c08a;--warm:#e08a6a;--accent:#6aa0e0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1060px;margin:0 auto;padding:22px 18px 60px}
+h1{font-size:21px;margin:0 0 2px;letter-spacing:.02em}
+h1 b{color:var(--gold)}
+.sub{color:var(--ink2);font-size:12.5px;margin:0 0 18px}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:14px 16px;margin-bottom:16px}
+.filters label{display:block;font-size:11px;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--ink2);margin-bottom:4px}
+.filters input,.filters select{background:var(--bg);border:1px solid var(--line);
+  color:var(--ink);border-radius:8px;padding:8px 10px;font-size:13px;min-width:150px}
+.btn{background:var(--gold);color:#231a02;border:0;border-radius:8px;
+  padding:9px 16px;font-weight:600;font-size:13px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.kpi .n{font-size:28px;font-weight:700;letter-spacing:.01em}
+.kpi .l{color:var(--ink2);font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px;margin-bottom:16px}
+.card h2{font-size:14px;margin:0 0 12px;color:var(--ink);letter-spacing:.03em}
+.chart{display:flex;align-items:flex-end;gap:4px;height:170px;padding-top:6px;overflow-x:auto}
+.bar{flex:1;min-width:14px;display:flex;flex-direction:column;justify-content:flex-end;
+  align-items:center;gap:4px;height:100%}
+.bar .fill{width:70%;background:linear-gradient(180deg,var(--gold),#b8952f);
+  border-radius:4px 4px 0 0;min-height:2px;transition:height .2s}
+.bar .v{font-size:10px;color:var(--ink2)}
+.bar .d{font-size:9.5px;color:var(--ink2);white-space:nowrap;transform:rotate(0deg)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--ink2);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td.path{color:var(--accent);word-break:break-all}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+.msg{color:var(--ink2);padding:22px 4px;text-align:center;font-size:13px}
+.err{color:var(--warm)}
+.status{font-size:12px;color:var(--ink2);margin-left:auto}
+.foot{color:var(--ink2);font-size:11.5px;margin-top:24px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>My<b>Gold</b>Rates - Private Analytics</h1>
+  <p class="sub">Day-wise visitor activity. Built 05 August 2026. Visible only to you (Cloudflare Access + secret-gated).</p>
+
+  <div class="filters">
+    <div><label>From</label><input type="date" id="from"></div>
+    <div><label>To</label><input type="date" id="to"></div>
+    <div><label>Page</label><select id="page"><option value="">All pages</option></select></div>
+    <button class="btn" id="apply">Apply</button>
+    <button class="btn ghost" id="quick7">Last 7d</button>
+    <button class="btn ghost" id="quick30">Last 30d</button>
+    <span class="status" id="status"></span>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="card">
+    <h2>Daily page views</h2>
+    <div class="chart" id="chart"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card"><h2>Top pages</h2><div id="pages"></div></div>
+    <div class="card"><h2>Most-clicked elements</h2><div id="clicks"></div></div>
+  </div>
+
+  <div class="card"><h2>Traffic sources (referrers)</h2><div id="refs"></div></div>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+<script>
+(function(){
+  var SB="https://opwrfflzzowhobesysmr.supabase.co", KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE", TOKEN="082e4893148838d2fd2ef202bd45c36324d572f57bdda4ac";
+  var $=function(id){return document.getElementById(id);};
+  function nfmt(n){try{return Number(n).toLocaleString('en-IN');}catch(e){return n;}}
+  function iso(d){return d.toISOString().slice(0,10);}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+  // default range: last 14 days
+  var today=new Date();
+  var back=new Date(); back.setDate(today.getDate()-13);
+  $('to').value=iso(today); $('from').value=iso(back);
+
+  function setStatus(t,isErr){var s=$('status');s.textContent=t;
+    s.className='status'+(isErr?' err':'');}
+
+  function rpc(){
+    var body={p_secret:TOKEN,p_from:$('from').value,p_to:$('to').value,
+      p_page:$('page').value||null};
+    setStatus('Loading...');
+    return fetch(SB+'/rest/v1/rpc/analytics_report',{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY,
+        'Authorization':'Bearer '+KEY},
+      body:JSON.stringify(body)}).then(function(r){return r.json();});
+  }
+
+  function renderKPIs(t){
+    var k=$('kpis');
+    var items=[['Page views',t.views],['Unique visitors',t.visitors],['Clicks',t.clicks]];
+    k.innerHTML=items.map(function(it){
+      return '<div class="kpi"><div class="n">'+nfmt(it[1]||0)+
+        '</div><div class="l">'+it[0]+'</div></div>';}).join('');
+  }
+
+  function renderChart(daily){
+    var c=$('chart');
+    if(!daily||!daily.length){c.innerHTML='<div class="msg">No views in this range yet.</div>';return;}
+    var max=0; daily.forEach(function(d){if(d.views>max)max=d.views;});
+    max=max||1;
+    c.innerHTML=daily.map(function(d){
+      var h=Math.round((d.views/max)*130)+8;
+      var dd=(d.day||'').slice(8,10);
+      return '<div class="bar" title="'+esc(d.day)+': '+nfmt(d.views)+' views, '+
+        nfmt(d.visitors)+' visitors"><span class="v">'+nfmt(d.views)+
+        '</span><div class="fill" style="height:'+h+'px"></div>'+
+        '<span class="d">'+dd+'</span></div>';}).join('');
+  }
+
+  function renderTable(el,rows,cols){
+    if(!rows||!rows.length){el.innerHTML='<div class="msg">No data yet.</div>';return;}
+    var head='<tr>'+cols.map(function(c){
+      return '<th'+(c.num?' class="num"':'')+'>'+c.h+'</th>';}).join('')+'</tr>';
+    var body=rows.map(function(r){
+      return '<tr>'+cols.map(function(c){
+        var v=r[c.k]; if(c.num)return '<td class="num">'+nfmt(v||0)+'</td>';
+        return '<td class="'+(c.path?'path':'')+'">'+esc(v)+'</td>';
+      }).join('')+'</tr>';}).join('');
+    el.innerHTML='<table>'+head+body+'</table>';
+  }
+
+  function fillPages(list){
+    var sel=$('page'); if(!list||!list.length)return;
+    var cur=sel.value;
+    var opts='<option value="">All pages</option>'+list.map(function(p){
+      return '<option value="'+esc(p)+'">'+esc(p)+'</option>';}).join('');
+    sel.innerHTML=opts; sel.value=cur;
+  }
+
+  function load(){
+    rpc().then(function(d){
+      if(!d||d.error){
+        setStatus(d&&d.error==='unauthorized'?'Access token not configured':'Error',true);
+        $('kpis').innerHTML='<div class="msg err">'+
+          (d&&d.error==='unauthorized'
+            ? 'This report is not yet authorised. (ANALYTICS_TOKEN missing at build time.)'
+            : 'Could not load analytics.')+'</div>';
+        return;
+      }
+      var t=d.totals||{views:0,visitors:0,clicks:0};
+      renderKPIs(t);
+      renderChart(d.daily);
+      renderTable($('pages'),d.top_pages,[{h:'Page',k:'page',path:true},
+        {h:'Views',k:'views',num:true},{h:'Visitors',k:'visitors',num:true}]);
+      renderTable($('clicks'),d.top_clicks,[{h:'Element',k:'target'},
+        {h:'Clicks',k:'clicks',num:true}]);
+      renderTable($('refs'),d.top_referrers,[{h:'Referrer',k:'referrer',path:true},
+        {h:'Views',k:'views',num:true}]);
+      fillPages(d.pages_list);
+      $('foot').textContent='Range '+d.from+' to '+d.to+
+        (d.page_filter?(' - filtered to '+d.page_filter):'')+
+        '. No personal data is collected: only page path, referrer, a random '+
+        'session id and click labels.';
+      setStatus('Updated '+new Date().toLocaleTimeString());
+    }).catch(function(){setStatus('Network error',true);});
+  }
+
+  $('apply').onclick=load;
+  $('quick7').onclick=function(){var a=new Date(),b=new Date();b.setDate(a.getDate()-6);
+    $('from').value=iso(b);$('to').value=iso(a);load();};
+  $('quick30').onclick=function(){var a=new Date(),b=new Date();b.setDate(a.getDate()-29);
+    $('from').value=iso(b);$('to').value=iso(a);load();};
+  $('page').onchange=load;
+  load();
+})();
+</script>
+</body>
+</html>
