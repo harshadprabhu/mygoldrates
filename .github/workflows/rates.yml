@@ -62,6 +62,7 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           ADSENSE_CLIENT: ${{ secrets.ADSENSE_CLIENT }}
           ADSENSE_SLOT: ${{ secrets.ADSENSE_SLOT }}
+          ANALYTICS_TOKEN: ${{ secrets.ANALYTICS_TOKEN }}
         run: python generate_site.py
 
       - name: Publish site
