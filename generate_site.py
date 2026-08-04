@@ -1758,6 +1758,7 @@ def main():
                   base_css=BASE_CSS, ads_head=ads_head,
                   gclient=gclient, gsi=gsi, google_btn="",
                   sig_ver=sig_ver, nav=NAV,
+                  supabase_url=supabase_url, anon_key=anon_key,
                   gate_css=GATE_CSS if gclient else "",
                   gate_html=gate_html, gate_js=gate_js)
     def city_cloud(current_slug=None):
@@ -1808,17 +1809,14 @@ def main():
         low_logo=low_logo,
         ibja_tiles=ibja_tiles, ibja_section=ibja_section, ads_unit=ads_unit,
         calc_brands=json.dumps(calc_brands),
-        supabase_url=supabase_url, anon_key=anon_key,
         rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld,
         seo_content=seo_content, drawer=drawer, calcdrawer=calcdrawer,
         coindrawer=coindrawer, news_home=news_home, **common)
     html = TEMPLATE.substitute(
         where="in India", where_note="", local_intro="",
         canonical_url=f"{SITE_URL}/", city_links=city_cloud(), **tvars)
-    inquiry = INQUIRY_TEMPLATE.substitute(
-        supabase_url=supabase_url, anon_key=anon_key, **common)
-    unsub = UNSUB_TEMPLATE.substitute(
-        supabase_url=supabase_url, anon_key=anon_key, **common)
+    inquiry = INQUIRY_TEMPLATE.substitute(**common)
+    unsub = UNSUB_TEMPLATE.substitute(**common)
 
     os.makedirs("docs", exist_ok=True)
     build_og_image()
@@ -3072,6 +3070,44 @@ SIGNUP_JS = r"""(function(){
   var stored=null;try{stored=JSON.parse(localStorage.getItem('gr_user')||'null');}
     catch(e){}
   if(stored&&stored.email){chip(stored);prefill(stored);}
+})();
+
+/* ---- pageview + click analytics, day-wise (Supabase page_views/click_events) ---- */
+(function(){
+  var SB=window.GR_SB_URL||'', KEY=window.GR_SB_KEY||'';
+  if(!SB||!KEY)return;
+  var SID;
+  try{
+    SID=localStorage.getItem('gr_sid');
+    if(!SID){
+      SID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():
+        (Date.now().toString(36)+Math.random().toString(36).slice(2));
+      localStorage.setItem('gr_sid',SID);
+    }
+  }catch(e){SID='';}
+  function post(table,row){
+    fetch(SB+'/rest/v1/'+table,{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY,
+               'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
+      body:JSON.stringify(row)}).catch(function(){});
+  }
+  post('page_views',{page:location.pathname,referrer:document.referrer||null,
+    session_id:SID});
+
+  /* delegated click tracking on interactive elements, de-duped per target */
+  var lastTarget=null,lastAt=0;
+  document.addEventListener('click',function(e){
+    var el=e.target&&e.target.closest?
+      e.target.closest('a[href],button,input[type="submit"],[role="button"]'):null;
+    if(!el)return;
+    var label=el.id||el.getAttribute('data-track')||
+      (el.textContent||'').trim().slice(0,60)||el.tagName.toLowerCase();
+    if(!label)return;
+    var now=Date.now();
+    if(label===lastTarget&&now-lastAt<2000)return;
+    lastTarget=label;lastAt=now;
+    post('click_events',{page:location.pathname,target:label,session_id:SID});
+  },true);
 })();
 """
 
@@ -5004,6 +5040,8 @@ $body
   <p>© $year GoldRates - daily gold rate comparison for India.</p>
 </footer>
 </div>
+<script>window.GR_SB_URL="$supabase_url";window.GR_SB_KEY="$anon_key";</script>
+<script src="signup.js?v=$sig_ver" defer></script>
 </body>
 </html>
 """)
@@ -5102,6 +5140,8 @@ $body
   <p>© $year GoldRates - daily gold rate comparison for India.</p>
 </footer>
 </div>
+<script>window.GR_SB_URL="$supabase_url";window.GR_SB_KEY="$anon_key";</script>
+<script src="$site_url/signup.js?v=$sig_ver" defer></script>
 $extra_js
 </body>
 </html>
