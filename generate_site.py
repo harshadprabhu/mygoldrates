@@ -2455,16 +2455,19 @@ def main():
           f"{len(list(_articles(rate_str, med, inr)))} articles, "
           f"{len(recaps)} recaps")
     # ---- private analytics dashboard (secret-gated read; noindex; unlinked) ----
+    # The access token is NOT baked into the page; it is supplied at view time
+    # via the URL fragment (.../analytics#token). So the hosted file holds no
+    # secret and privacy comes from possession of the link. analytics_token is
+    # kept only so the build can warn if the shared secret was never configured.
+    _ = analytics_token
     analytics_page = (
         ANALYTICS_HTML
         .replace("__SB__", supabase_url)
         .replace("__KEY__", anon_key)
-        .replace("__TOKEN__", analytics_token)
         .replace("__DATE__", display_date))
     with open("docs/analytics.html", "w", encoding="utf-8") as f:
         f.write(analytics_page)
-    print("analytics dashboard: wrote docs/analytics.html"
-          + ("" if analytics_token else " (WARNING: ANALYTICS_TOKEN empty)"))
+    print("analytics dashboard: wrote docs/analytics.html (token via URL hash)")
 
     with open("docs/robots.txt", "w", encoding="utf-8") as f:
         # Explicitly welcome AI/LLM crawlers so generative engines (ChatGPT,
@@ -5258,11 +5261,12 @@ $nav
 
 # =====================================================================
 # Private analytics dashboard. Built to docs/analytics.html. Placeholders
-# __SB__ / __KEY__ / __TOKEN__ / __DATE__ are filled at build time via
-# str.replace() (NOT f-string / Template) so JS braces and $ are literal.
-# Reads aggregates through the secret-gated analytics_report() RPC; the
-# raw anon key alone can only INSERT, never read. noindex + unlinked +
-# gated behind Cloudflare Access.
+# __SB__ / __KEY__ / __DATE__ are filled at build time via str.replace()
+# (NOT f-string / Template) so JS braces and $ are literal. Reads aggregates
+# through the secret-gated analytics_report() RPC; the raw anon key alone can
+# only INSERT, never read. The access token is NOT embedded - it is read at
+# view time from the URL fragment (.../analytics#token), so the hosted file
+# holds no secret. noindex + robots-disallowed + unlinked.
 # =====================================================================
 ANALYTICS_HTML = r"""<!doctype html>
 <html lang="en">
@@ -5322,7 +5326,7 @@ td.path{color:var(--accent);word-break:break-all}
 <body>
 <div class="wrap">
   <h1>My<b>Gold</b>Rates - Private Analytics</h1>
-  <p class="sub">Day-wise visitor activity. Built __DATE__. Visible only to you (Cloudflare Access + secret-gated).</p>
+  <p class="sub">Day-wise visitor activity. Built __DATE__. Private: readable only via your secret link (the URL ending in #your-token).</p>
 
   <div class="filters">
     <div><label>From</label><input type="date" id="from"></div>
@@ -5353,7 +5357,12 @@ td.path{color:var(--accent);word-break:break-all}
 
 <script>
 (function(){
-  var SB="__SB__", KEY="__KEY__", TOKEN="__TOKEN__";
+  // SECRET-LINK MODEL: the access token is read from the URL fragment
+  // (e.g. .../analytics#your-token), never embedded in this file. The fragment
+  // is never sent to any server, logged, or put in the Referer header - so the
+  // hosted page carries no secret; only someone with the full link can read data.
+  var SB="__SB__", KEY="__KEY__",
+      TOKEN=(location.hash ? decodeURIComponent(location.hash.slice(1)) : "");
   var $=function(id){return document.getElementById(id);};
   function nfmt(n){try{return Number(n).toLocaleString('en-IN');}catch(e){return n;}}
   function iso(d){return d.toISOString().slice(0,10);}
@@ -5426,7 +5435,7 @@ td.path{color:var(--accent);word-break:break-all}
         setStatus(d&&d.error==='unauthorized'?'Access token not configured':'Error',true);
         $('kpis').innerHTML='<div class="msg err">'+
           (d&&d.error==='unauthorized'
-            ? 'This report is not yet authorised. (ANALYTICS_TOKEN missing at build time.)'
+            ? 'Open this page using your private link (the URL ending in #your-token). Without it, no data is shown.'
             : 'Could not load analytics.')+'</div>';
         return;
       }
