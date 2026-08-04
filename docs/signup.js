@@ -180,3 +180,41 @@
     catch(e){}
   if(stored&&stored.email){chip(stored);prefill(stored);}
 })();
+
+/* ---- pageview + click analytics, day-wise (Supabase page_views/click_events) ---- */
+(function(){
+  var SB=window.GR_SB_URL||'', KEY=window.GR_SB_KEY||'';
+  if(!SB||!KEY)return;
+  var SID;
+  try{
+    SID=localStorage.getItem('gr_sid');
+    if(!SID){
+      SID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():
+        (Date.now().toString(36)+Math.random().toString(36).slice(2));
+      localStorage.setItem('gr_sid',SID);
+    }
+  }catch(e){SID='';}
+  function post(table,row){
+    fetch(SB+'/rest/v1/'+table,{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY,
+               'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
+      body:JSON.stringify(row)}).catch(function(){});
+  }
+  post('page_views',{page:location.pathname,referrer:document.referrer||null,
+    session_id:SID});
+
+  /* delegated click tracking on interactive elements, de-duped per target */
+  var lastTarget=null,lastAt=0;
+  document.addEventListener('click',function(e){
+    var el=e.target&&e.target.closest?
+      e.target.closest('a[href],button,input[type="submit"],[role="button"]'):null;
+    if(!el)return;
+    var label=el.id||el.getAttribute('data-track')||
+      (el.textContent||'').trim().slice(0,60)||el.tagName.toLowerCase();
+    if(!label)return;
+    var now=Date.now();
+    if(label===lastTarget&&now-lastAt<2000)return;
+    lastTarget=label;lastAt=now;
+    post('click_events',{page:location.pathname,target:label,session_id:SID});
+  },true);
+})();
