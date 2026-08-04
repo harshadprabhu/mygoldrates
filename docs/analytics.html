@@ -56,7 +56,7 @@ td.path{color:var(--accent);word-break:break-all}
 <body>
 <div class="wrap">
   <h1>My<b>Gold</b>Rates - Private Analytics</h1>
-  <p class="sub">Day-wise visitor activity. Built 05 August 2026. Visible only to you (Cloudflare Access + secret-gated).</p>
+  <p class="sub">Day-wise visitor activity. Built 05 August 2026. Private: readable only via your secret link (the URL ending in #your-token).</p>
 
   <div class="filters">
     <div><label>From</label><input type="date" id="from"></div>
@@ -87,7 +87,12 @@ td.path{color:var(--accent);word-break:break-all}
 
 <script>
 (function(){
-  var SB="https://opwrfflzzowhobesysmr.supabase.co", KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE", TOKEN="082e4893148838d2fd2ef202bd45c36324d572f57bdda4ac";
+  // SECRET-LINK MODEL: the access token is read from the URL fragment
+  // (e.g. .../analytics#your-token), never embedded in this file. The fragment
+  // is never sent to any server, logged, or put in the Referer header - so the
+  // hosted page carries no secret; only someone with the full link can read data.
+  var SB="https://opwrfflzzowhobesysmr.supabase.co", KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE",
+      TOKEN=(location.hash ? decodeURIComponent(location.hash.slice(1)) : "");
   var $=function(id){return document.getElementById(id);};
   function nfmt(n){try{return Number(n).toLocaleString('en-IN');}catch(e){return n;}}
   function iso(d){return d.toISOString().slice(0,10);}
@@ -160,7 +165,7 @@ td.path{color:var(--accent);word-break:break-all}
         setStatus(d&&d.error==='unauthorized'?'Access token not configured':'Error',true);
         $('kpis').innerHTML='<div class="msg err">'+
           (d&&d.error==='unauthorized'
-            ? 'This report is not yet authorised. (ANALYTICS_TOKEN missing at build time.)'
+            ? 'Open this page using your private link (the URL ending in #your-token). Without it, no data is shown.'
             : 'Could not load analytics.')+'</div>';
         return;
       }
