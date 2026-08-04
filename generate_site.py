@@ -5333,6 +5333,7 @@ td.path{color:var(--accent);word-break:break-all}
     <div><label>To</label><input type="date" id="to"></div>
     <div><label>Page</label><select id="page"><option value="">All pages</option></select></div>
     <button class="btn" id="apply">Apply</button>
+    <button class="btn ghost" id="today">Today</button>
     <button class="btn ghost" id="quick7">Last 7d</button>
     <button class="btn ghost" id="quick30">Last 30d</button>
     <span class="status" id="status"></span>
@@ -5369,10 +5370,28 @@ td.path{color:var(--accent);word-break:break-all}
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
-  // default range: last 14 days
+  // default range: today only
   var today=new Date();
-  var back=new Date(); back.setDate(today.getDate()-13);
-  $('to').value=iso(today); $('from').value=iso(back);
+  $('from').value=iso(today); $('to').value=iso(today);
+
+  // friendly names for click labels (raw element ids -> readable actions)
+  var CLICK_LABELS={
+    'drtab':'Rate-trend drawer','cdtab':'Calculator drawer','coindtab':'Coin drawer',
+    'nearbtn':'Brands near me','gstbtn':'GST toggle (+3%)','brandsearch':'Jeweller search',
+    'navtog':'Menu (hamburger)','gate-close':'Sign-in gate: dismissed',
+    'gate-gbtn':'Sign-in gate: Continue with Google','gate-form':'Sign-in gate: manual form',
+    'gate-enrich':'Sign-in gate: details step','m-form':'Subscribe form','mbtn':'Subscribe button',
+    'inq':'Inquiry form','apply':'Analytics: Apply','today':'Analytics: Today'};
+  function friendly(t){
+    if(t==null||t==='')return '(unlabelled)';
+    if(CLICK_LABELS[t])return CLICK_LABELS[t];
+    var s=String(t);
+    if(s.indexOf('Use my current location')>-1||s.indexOf('location to autofill')>-1)
+      return 'Use my location (autofill)';
+    if(/^(24K|22K|18K|14K)$/.test(s))return s+' rate column';
+    s=s.replace(/^[^\x00-\x7F]+\s*/,'').trim();   // drop a leading emoji/pin
+    return s||String(t);
+  }
 
   function setStatus(t,isErr){var s=$('status');s.textContent=t;
     s.className='status'+(isErr?' err':'');}
@@ -5444,7 +5463,8 @@ td.path{color:var(--accent);word-break:break-all}
       renderChart(d.daily);
       renderTable($('pages'),d.top_pages,[{h:'Page',k:'page',path:true},
         {h:'Views',k:'views',num:true},{h:'Visitors',k:'visitors',num:true}]);
-      renderTable($('clicks'),d.top_clicks,[{h:'Element',k:'target'},
+      (d.top_clicks||[]).forEach(function(r){r.target=friendly(r.target);});
+      renderTable($('clicks'),d.top_clicks,[{h:'Action',k:'target'},
         {h:'Clicks',k:'clicks',num:true}]);
       renderTable($('refs'),d.top_referrers,[{h:'Referrer',k:'referrer',path:true},
         {h:'Views',k:'views',num:true}]);
@@ -5458,6 +5478,8 @@ td.path{color:var(--accent);word-break:break-all}
   }
 
   $('apply').onclick=load;
+  $('today').onclick=function(){var a=new Date();
+    $('from').value=iso(a);$('to').value=iso(a);load();};
   $('quick7').onclick=function(){var a=new Date(),b=new Date();b.setDate(a.getDate()-6);
     $('from').value=iso(b);$('to').value=iso(a);load();};
   $('quick30').onclick=function(){var a=new Date(),b=new Date();b.setDate(a.getDate()-29);
