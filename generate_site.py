@@ -3657,26 +3657,13 @@ GATE_JS = r"""
     },true);
   }
 
-  // Drawers
-  guard(document.getElementById('drtab'));
-  guard(document.getElementById('cdtab'));
-  guard(document.getElementById('coindtab'));
-
-  // Karat segment buttons
-  var kbtns=document.querySelectorAll('.karatseg button');
-  kbtns.forEach(function(b){guard(b);});
-
-  // Near me / GST toggle
-  guard(document.getElementById('nearbtn'));
-  guard(document.getElementById('gstbtn'));
-
-  // Calculator inputs (focus guard)
-  var calcInputs=document.querySelectorAll(
-    '#calc-weight,#calc-price,#bc-karat,#calc-mc,#lc-val,#lc-rate,#lc-ltv,#lc-int,#lc-months');
-  calcInputs.forEach(function(el){guardInput(el);});
-
-  // Brand search
-  guardInput(document.getElementById('brandsearch'));
+  // Browsing (drawers, karat tabs, near-me/GST, calculators, brand search) is
+  // intentionally NOT gated: analytics showed ~79% of people who hit a hard
+  // sign-in wall here just left, and it blocked exactly the content Google
+  // needs to index. guard()/guardInput()/openGate() stay defined so a future
+  // "sign in" affordance can still reuse them - they're just not wired to
+  // these elements any more. window.GR_OPENGATE exposes it if ever needed.
+  window.GR_OPENGATE=openGate;
 
 })();
 </script>
@@ -4003,6 +3990,18 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
   align-items:center;gap:18px;justify-content:space-between}
 .cta h2{color:#F6F1E3;margin:0 0 4px}
 .cta p{color:#B9C2B4;font-size:14.5px;max-width:48ch}
+.quick-sub{display:flex;gap:8px;flex:0 0 auto}
+.quick-sub input{width:220px;max-width:60vw;padding:11px 14px;border-radius:10px;
+  border:1px solid rgba(217,178,74,.35);background:rgba(255,255,255,.06);
+  color:#F6F1E3;font-size:14px}
+.quick-sub input::placeholder{color:#8b8676}
+.quick-sub input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.qs-msg{font-size:13px;margin:8px 0 0;display:none}
+.qs-msg.qs-ok{color:#9fd9a8}.qs-msg.qs-err{color:#e08a6a}
+.qs-msg a{color:inherit;text-decoration:underline}
+@media(max-width:560px){.quick-sub{flex-wrap:wrap;width:100%}
+  .quick-sub input{width:100%;max-width:none}
+  .quick-sub button{width:100%}}
 
 .adslot{margin:30px 0;min-height:90px;border:1px dashed var(--line);
   border-radius:10px;display:flex;align-items:center;justify-content:center;
@@ -4185,13 +4184,21 @@ $ads_unit
 
 $ibja_section
 
-<div class="cta">
+<div class="cta" id="qs-cta">
   <div>
-    <h2>Tomorrow's rates, in your inbox</h2>
-    <p>One clean email every morning with the day's comparison - which brand
-    is cheapest, the bullion premium, and the median. Free.</p>
+    <h2>Know today's cheapest rate before you leave home</h2>
+    <p>One free email each morning - who's cheapest today, the bullion
+    premium, and the market median. Takes five seconds, no password needed.</p>
+    <p class="qs-msg qs-ok" id="qs-ok" hidden>You're in - see you tomorrow
+    morning. <a href="#" class="js-alert">Add your city for local alerts too &rarr;</a></p>
+    <p class="qs-msg qs-err" id="qs-err" hidden>Something went wrong - please
+    try again, or <a href="#" class="js-alert">use the full form</a>.</p>
   </div>
-  <a class="btn btn-gold js-alert" href="inquiry.html">Get daily alerts</a>
+  <form id="qs-form" class="quick-sub" novalidate>
+    <input type="email" id="qs-email" name="email" required maxlength="120"
+      placeholder="you@email.com" aria-label="Email address" autocomplete="email">
+    <button class="btn btn-gold" type="submit" id="qs-btn">Get Free Alerts</button>
+  </form>
 </div>
 
 $ads_unit
@@ -4257,22 +4264,22 @@ $coindrawer
      aria-labelledby="m-title">
   <div class="modal">
     <button class="modal-x" id="m-close" aria-label="Close">×</button>
-    <p class="eyebrow" style="margin-top:0">Daily Rate Alerts</p>
-    <h2 id="m-title">Tomorrow's rates, in your inbox</h2>
-    <p class="hint">One clean email every morning - the cheapest jeweller,
-    the market median and the bullion premium. Free, unsubscribe any time.</p>
+    <p class="eyebrow" style="margin-top:0">Add Your City</p>
+    <h2 id="m-title">Get alerts for your city too</h2>
+    <p class="hint">Just your email works. Add your city and we'll also flag
+    when a jeweller near you is the cheapest. Free, unsubscribe any time.</p>
     <form id="m-form" novalidate>
       $google_btn
       <div class="manualbox" id="m-manual">
-      <div class="m-field"><label for="m-name">Name *</label>
-        <input id="m-name" name="name" autocomplete="name" required maxlength="80"></div>
+      <div class="m-field"><label for="m-name">Name</label>
+        <input id="m-name" name="name" autocomplete="name" maxlength="80"></div>
       <div class="m-grid2">
         <div class="m-field"><label for="m-email">Email *</label>
           <input id="m-email" name="email" type="email" autocomplete="email"
           required maxlength="120"></div>
-        <div class="m-field"><label for="m-phone">Phone *</label>
+        <div class="m-field"><label for="m-phone">Phone</label>
           <input id="m-phone" name="phone" type="tel" autocomplete="tel"
-          inputmode="tel" required maxlength="20" value="+91 "
+          inputmode="tel" maxlength="20" value="+91 "
           placeholder="+91 98765 43210"></div>
       </div>
       <button type="button" class="locbtn" id="m-loc">&#128205; Use my current
@@ -4731,6 +4738,9 @@ var FRAC={"24K":24/24,"22K":22/24,"18K":18/24,"14K":14/24};
     mok.style.display='none'; merr.style.display='none';
     mbtn.disabled=false; mbtn.textContent='Subscribe';
     overlay.classList.add('open');
+    /* carry over the email if they already used the quick-subscribe banner */
+    var qe=document.getElementById('qs-email');
+    if(qe&&qe.value.trim())document.getElementById('m-email').value=qe.value.trim();
     document.getElementById('m-name').focus();
   }
   function closeModal(){overlay.classList.remove('open');
@@ -4789,6 +4799,37 @@ var FRAC={"24K":24/24,"22K":22/24,"18K":18/24,"14K":14/24};
       mbtn.disabled=false;mbtn.textContent='Subscribe';
     });
   });
+
+  /* ---- quick-subscribe (single email field, no modal) ---- */
+  (function(){
+    var qform=document.getElementById('qs-form');
+    if(!qform)return;
+    var qemail=document.getElementById('qs-email'),
+        qbtn=document.getElementById('qs-btn'),
+        qok=document.getElementById('qs-ok'), qerr=document.getElementById('qs-err');
+    try{if(localStorage.getItem('gr_sub')==='1'){
+      qform.hidden=true;qok.style.display='block';
+      qok.innerHTML='You\\'re already subscribed - see you tomorrow morning.';
+    }}catch(e){}
+    qform.addEventListener('submit',function(e){
+      e.preventDefault();
+      qok.style.display='none';qerr.style.display='none';
+      var email=(qemail.value||'').trim();
+      if(!email)return;
+      if(!SB_KEY){qerr.textContent='Subscriptions open shortly - please check back soon.';
+        qerr.style.display='block';return;}
+      qbtn.disabled=true;qbtn.textContent='Subscribing...';
+      var payload={email:email,signup_source:'quick_banner'};
+      var save=window.GR_SAVE?window.GR_SAVE(payload):send(payload,false);
+      save.then(function(){
+        qok.style.display='block';qbtn.textContent='Subscribed';
+        try{localStorage.setItem('gr_sub','1');}catch(e){}
+      }).catch(function(){
+        qerr.style.display='block';
+        qbtn.disabled=false;qbtn.textContent='Get Free Alerts';
+      });
+    });
+  })();
 
   /* ---- visitor hit counter ---- */
   (function(){
