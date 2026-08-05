@@ -6,108 +6,125 @@ on:
 jobs:
   diag:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install requests
-      - name: BlueStone price-breakup section dump + extractor test
+      - name: BlueStone MC extract + scale
         run: |
           python - <<'PY'
-          import re, requests
+          import re, time, statistics, requests
 
-          PRODUCTS = [
-            ("Bangle",   "https://www.bluestone.com/bangles/the-orrale-round-bangle~79884.html"),
-            ("Bangle",   "https://www.bluestone.com/bangles/the-estrella-oval-bangle~34771.html"),
-            ("Ring",     "https://www.bluestone.com/preset+solitaire+rings/the-aphaea-ring-for-him~83508.html"),
-            ("Ring",     "https://www.bluestone.com/rings/the-petillante-ring~86191.html"),
-            ("Ring",     "https://www.bluestone.com/rings/the-dimas-textured-band-for-her~81692.html"),
-            ("Earrings", "https://www.bluestone.com/earrings/the-mathilda-drop-earrings~8976.html"),
-            ("Earrings", "https://www.bluestone.com/earrings/the-marianna-stud-earrings~67286.html"),
-            ("Earrings", "https://www.bluestone.com/earrings/the-rua-stud-earrings~60693.html"),
-          ]
+          # Category listing/search pages (user-provided)
+          LISTINGS = {
+            "Bangle":      "https://www.bluestone.com/search?orderby=position&search_category=regular&search_type=search&_eventId=searched_for_product&orderway=desc&search_query=Bangles",
+            "Ring":        "https://www.bluestone.com/search?orderby=position&search_category=regular&search_type=search&_eventId=searched_for_product&orderway=desc&search_query=Rings",
+            "Earrings":    "https://www.bluestone.com/search?search_category=suggestion-click&search_query=Earrings&search_type=auto-suggestion&_eventId=searched_for_product",
+            "Mangalsutra": "https://www.bluestone.com/search?search_category=suggestion-click&search_query=Mangalsutra&search_type=auto-suggestion&_eventId=searched_for_product",
+          }
+          # Known-good seeds so a category still yields data if discovery is thin
+          SEEDS = {
+            "Bangle": ["https://www.bluestone.com/bangles/the-orrale-round-bangle~79884.html",
+                       "https://www.bluestone.com/bangles/the-estrella-oval-bangle~34771.html"],
+            "Ring":   ["https://www.bluestone.com/preset+solitaire+rings/the-aphaea-ring-for-him~83508.html",
+                       "https://www.bluestone.com/rings/the-petillante-ring~86191.html",
+                       "https://www.bluestone.com/rings/the-dimas-textured-band-for-her~81692.html"],
+            "Earrings":["https://www.bluestone.com/earrings/the-mathilda-drop-earrings~8976.html",
+                        "https://www.bluestone.com/earrings/the-marianna-stud-earrings~67286.html",
+                        "https://www.bluestone.com/earrings/the-rua-stud-earrings~60693.html"],
+            "Mangalsutra": [],
+          }
+          # BlueStone product URL: /<cat>/the-<slug>~<digits>.html
+          PRODUCT_RE = re.compile(r'href="(https://www\.bluestone\.com/[^"]+?~\d+\.html)"', re.I)
+          # Keep only URLs whose path segment matches the category we're filling
+          CAT_HINT = {
+            "Bangle": ("bangle",), "Ring": ("ring",),
+            "Earrings": ("earring",), "Mangalsutra": ("mangalsutra",),
+          }
+
+          SECTION_RE = re.compile(r'<section id="section-price-breakup".*?</section>', re.I | re.S)
+          GOLD_RE    = re.compile(r'\bGold\b[^0-9]{0,20}?(?:Rs\.?|₹|INR)\.?\s*([\d,]+(?:\.\d+)?)', re.I)
+          MAKING_RE  = re.compile(r'Making\s*Charges?\b[^0-9]{0,20}?(?:Rs\.?|₹|INR)\.?\s*([\d,]+(?:\.\d+)?)', re.I)
 
           sess = requests.Session()
           sess.headers.update({"User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
             "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"})
 
-          # BlueStone renders the breakup as an HTML table inside
-          # <section id="section-price-breakup">, with values in
-          # <span id="XxxCost_b">12,345</span> cells.
-          SECTION_RE = re.compile(
-            r'<section id="section-price-breakup".*?</section>', re.I | re.S)
-          # id -> amount, e.g. goldCost_b -> 79,234
-          COST_RE = re.compile(
-            r'id="([A-Za-z_]+?Cost_b)"[^>]*>\s*([\d,]+(?:\.\d+)?)', re.I)
-          # row label -> amount, as a fallback if the ids change
-          ROW_RE = re.compile(
-            r'<td[^>]*item-type-title"?[^>]*>\s*([^<]{2,40}?)\s*</td>.*?'
-            r'([\d,]+(?:\.\d+)?)\s*</span>', re.I | re.S)
-
-          def strip_tags(s):
-            return re.sub(r"<[^>]+>", " ", s)
-
-          rows = []
-          for i, (cat, url) in enumerate(PRODUCTS, 1):
-            short = url.rsplit("/",1)[-1][:50]
+          def get(url):
             try:
               r = sess.get(url, timeout=25)
-              html = r.text if r.status_code == 200 else None
-            except Exception as e:
-              html = None
-            if not html:
-              print(f"\n[{i}] {cat} {short}: FETCH FAIL"); continue
+              if r.status_code == 200 and len(r.text) > 500:
+                return r.text
+            except Exception:
+              pass
+            return None
 
+          def making_pct(html):
+            """Parse the Price Breakup section as plain text.
+
+            Only goldCost_b carries an element id; Making Charges / GST / Total
+            rows do not, so tag-stripping the section and reading the labelled
+            amounts is the reliable route.
+            """
             sec = SECTION_RE.search(html)
             if not sec:
-              print(f"\n[{i}] {cat} {short}: no price-breakup section")
-              rows.append((cat, short, "NO_SECTION", {})); continue
-            block = sec.group(0)
-
-            costs = {m.group(1): m.group(2) for m in COST_RE.finditer(block)}
-            labels = {}
-            for m in ROW_RE.finditer(block):
-              lab = m.group(1).strip().lower()
-              if lab and lab not in labels:
-                labels[lab] = m.group(2)
-
-            print(f"\n[{i}] {cat} {short}: section len={len(block)}")
-            print(f"    cost ids: {costs}")
-            print(f"    row labels: {labels}")
-
-            # On the first product, show the section as plain text so the
-            # exact row order/wording is visible for writing the extractor.
-            if i == 1:
-              txt = re.sub(r"\s+", " ", strip_tags(block)).strip()
-              print(f"    PLAINTEXT: {txt[:700]}")
-
-            # Try to compute making% from whatever we found
-            def pick(d, *keys):
-              for k in keys:
-                for dk, dv in d.items():
-                  if k in dk.lower():
-                    return dv
               return None
+            txt = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", sec.group(0)))
+            g, m = GOLD_RE.search(txt), MAKING_RE.search(txt)
+            if not (g and m):
+              return None
+            try:
+              gold = float(g.group(1).replace(",", ""))
+              mk   = float(m.group(1).replace(",", ""))
+            except ValueError:
+              return None
+            if gold > 0 and 0 < mk / gold <= 1.0:
+              return round(mk / gold * 100, 1)
+            return None
 
-            gold   = pick(costs, "gold") or pick(labels, "gold")
-            making = pick(costs, "making") or pick(labels, "making")
-            pct = None
-            if gold and making:
-              try:
-                g = float(gold.replace(",","")); mk = float(making.replace(",",""))
-                if g > 0 and 0 < mk/g <= 1.0:
-                  pct = round(mk/g*100, 1)
-              except ValueError: pass
-            print(f"    gold={gold} making={making} -> making% = {pct}")
-            rows.append((cat, short, "OK" if pct else "MISS",
-                          {"gold": gold, "making": making, "pct": pct}))
+          results, stats = {}, {"fetch": 0, "fail": 0}
+          for cat, listing in LISTINGS.items():
+            print(f"\n=== {cat} ===")
+            urls = list(SEEDS.get(cat, []))
+            html = get(listing)
+            stats["fetch"] += 1
+            if html:
+              hints = CAT_HINT[cat]
+              found = {u for u in PRODUCT_RE.findall(html)
+                       if any(h in u.lower() for h in hints)}
+              new = [u for u in sorted(found) if u not in urls]
+              urls += new
+              print(f"  listing ok (len={len(html)}), +{len(new)} discovered, {len(urls)} total")
+            else:
+              print(f"  listing FETCH FAIL; using {len(urls)} seed(s) only")
 
-          print("\n\n============ BLUESTONE SUMMARY ============")
-          for cat, short, status, d in rows:
-            print(f"{cat:<10} {status:<11} {str(d)[:70]}")
-          ok = sum(1 for r in rows if r[2] == "OK")
-          print(f"\nBlueStone: {ok}/{len(rows)} products yielded a making %")
+            pcts = []
+            for i, u in enumerate(urls[:25], 1):
+              phtml = get(u)
+              stats["fetch"] += 1
+              if not phtml:
+                stats["fail"] += 1
+                print(f"    {i:2d}. FAIL: {u.rsplit('/',1)[-1][:52]}")
+                continue
+              p = making_pct(phtml)
+              if p is None:
+                print(f"    {i:2d}. NO PCT: {u.rsplit('/',1)[-1][:52]}")
+                continue
+              pcts.append(p)
+              print(f"    {i:2d}. {p}%: {u.rsplit('/',1)[-1][:52]}")
+              time.sleep(0.3)
+            results[cat] = pcts
+
+          print("\n\n============ BLUESTONE MC SUMMARY ============")
+          print(f"{'Category':<14} {'Items':<7} {'Median':<8} {'Min':<7} {'Max':<7}")
+          for cat, p in results.items():
+            if not p:
+              print(f"{cat:<14} {'0':<7} {'-':<8} {'-':<7} {'-':<7}")
+            else:
+              print(f"{cat:<14} {len(p):<7} {statistics.median(p):<8} {min(p):<7} {max(p):<7}")
+          print(f"\nFetches: {stats['fetch']} (fail {stats['fail']}), all direct - no proxy used")
           PY
