@@ -25,47 +25,105 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 PER_CAT = 20           # products sampled per category per brand
 TOTAL_CAP = 280        # hard cap on product fetches per brand
 
-# slug keyword -> category (order matters; earring before ring)
+# slug keyword -> category. v1 categories only (Bangles, Rings, Earrings,
+# Mangalsutra) - user explicitly deferred Chain, Necklace, Bracelet, Pendant,
+# Coin to v2. Order matters (earring must come before ring).
 CAT_RULES = [
-    ("mangalsutra", "Mangalsutra"), ("earring", "Earrings"),
-    ("jhumk", "Earrings"), ("stud", "Earrings"), ("chain", "Chain"),
-    ("necklace", "Necklace"), ("haar", "Necklace"), ("bangle", "Bangle"),
-    ("kada", "Bangle"), ("bracelet", "Bracelet"), ("pendant", "Pendant"),
-    ("coin", "Coin"), ("ring", "Ring"),
+    ("mangalsutra", "Mangalsutra"),
+    ("earring", "Earrings"), ("jhumk", "Earrings"), ("stud", "Earrings"),
+    ("bangle", "Bangle"), ("kada", "Bangle"),
+    ("ring", "Ring"),
 ]
 
+# All 7 brands verified feasible via diag-making workflow. Direct fetch is
+# tried first for every brand; the proxy waterfall is only invoked when direct
+# fails - so brands that DO respond direct (Senco/Kisna/ORRA/PN Gadgil) never
+# spend a proxy request. proxy_hint=True on the remaining 3 (BlueStone/
+# CaratLane/WHP) is cosmetic - it just documents that we've seen those need
+# proxy in practice; fetch() ignores it.
 DISCOVER = [
     {"brand": "Senco Gold",
      "sitemaps": ["https://sencogoldanddiamonds.com/sitemap-product.xml"]},
-    # Bot-walled brands -> fetched through Zyte (proxy=True). Best-effort:
-    # only rows where a clean making % is found are kept.
-    {"brand": "CaratLane", "proxy": True,
+    {"brand": "CaratLane", "proxy_hint": True,
      "sitemaps": ["https://www.caratlane.com/sitemap-products.xml",
                   "https://www.caratlane.com/sitemap.xml"]},
-    {"brand": "BlueStone", "proxy": True,
+    {"brand": "BlueStone", "proxy_hint": True,
      "sitemaps": ["https://www.bluestone.com/sitemap.xml"]},
-    {"brand": "Candere", "proxy": True,
-     "sitemaps": ["https://www.candere.com/sitemap.xml"]},
-    {"brand": "Vaibhav Jewellers", "proxy": True,
-     "sitemaps": ["https://www.vaibhavjewellers.com/sitemap.xml"]},
+    {"brand": "Waman Hari Pethe", "proxy_hint": True,
+     "sitemaps": ["https://whpjewellers.com/sitemap.xml"]},
+    {"brand": "Kisna",
+     "sitemaps": ["https://www.kisna.com/sitemap.xml"]},
+    {"brand": "ORRA",
+     "sitemaps": ["https://www.orra.co.in/sitemap.xml"]},
+    {"brand": "PN Gadgil",
+     "sitemaps": ["https://www.pngjewellers.com/sitemap.xml"]},
 ]
-CURATED = [
-    {"brand": "ORRA", "cat": "Pendant",
-     "url": "https://www.orra.co.in/product/round-diamond-crown-star-pendant-set-in-rose-gold-osp20029-m300x0b"},
-]
+CURATED = []
 
 
-def get(sess, url, proxy=False, timeout=25):
-    """Fetch a URL, optionally via Zyte to bypass bot walls."""
-    if proxy and ZYTE_KEY:
-        r = sess.post("https://api.zyte.com/v3/extract",
-                      auth=(ZYTE_KEY, ""),
-                      json={"url": url, "httpResponseBody": True},
-                      timeout=60)
-        r.raise_for_status()
-        return base64.b64decode(r.json()["httpResponseBody"]).decode(
-            "utf-8", "replace")
-    return sess.get(url, timeout=timeout).text
+# Ordered proxy waterfall (free tiers first, Zyte last if paid key exists).
+# fetch() tries each in turn until one returns >=500 bytes at HTTP 200.
+def _proxy_attempts(url):
+    for key_env, name, url_tpl, params in [
+        ("SCRAPERAPI_KEY", "scraperapi", "http://api.scraperapi.com",
+         {"url": url, "render": "true", "country_code": "in"}),
+        ("SCRAPINGBEE_KEY", "scrapingbee", "https://app.scrapingbee.com/api/v1/",
+         {"url": url, "render_js": "true", "wait": "3000"}),
+        ("ZENROWS_KEY", "zenrows", "https://api.zenrows.com/v1/",
+         {"url": url, "js_render": "true", "wait": "3000"}),
+        ("CRAWLBASE_KEY", "crawlbase", "https://api.crawlbase.com/",
+         {"url": url}),
+    ]:
+        key = os.environ.get(key_env)
+        if not key:
+            continue
+        p = dict(params)
+        p["api_key" if name != "crawlbase" else "token"] = key
+        if name == "zenrows":
+            p["apikey"] = p.pop("api_key")
+        yield name, url_tpl, p
+
+
+def fetch(sess, url, allow_proxy=True, timeout=25):
+    """Direct first (free), proxy waterfall only if direct fails.
+
+    Honors the 'avoid proxy where possible' rule. Sitemap fetches pass
+    allow_proxy=False - they're always static XML that direct handles.
+    Returns (html, source) or (None, err).
+    """
+    try:
+        r = sess.get(url, timeout=timeout)
+        if r.status_code == 200 and len(r.text) > 500:
+            return r.text, "direct"
+        direct_err = f"direct/{r.status_code}"
+    except Exception as e:
+        direct_err = f"direct/{type(e).__name__}"
+
+    if not allow_proxy:
+        return None, direct_err
+
+    for name, u, p in _proxy_attempts(url):
+        try:
+            r = sess.get(u, params=p, timeout=60)
+            if r.status_code == 200 and len(r.text) > 500:
+                return r.text, name
+        except Exception:
+            continue
+
+    # Zyte as absolute last resort (paid).
+    if ZYTE_KEY:
+        try:
+            r = sess.post("https://api.zyte.com/v3/extract",
+                          auth=(ZYTE_KEY, ""),
+                          json={"url": url, "httpResponseBody": True},
+                          timeout=60)
+            r.raise_for_status()
+            return base64.b64decode(r.json()["httpResponseBody"]).decode(
+                "utf-8", "replace"), "zyte"
+        except Exception:
+            pass
+
+    return None, "all-proxies-failed"
 
 
 def categorize(url):
@@ -99,7 +157,8 @@ def making_pct(html):
     return None
 
 
-def discover_urls(sess, sitemaps, proxy=False):
+def discover_urls(sess, sitemaps):
+    """Walk sitemap(s). Sitemaps are static XML - direct fetch only, no proxy."""
     urls, seen = [], set()
     queue = list(sitemaps)
     while queue and len(seen) < 12:
@@ -107,10 +166,9 @@ def discover_urls(sess, sitemaps, proxy=False):
         if sm in seen:
             continue
         seen.add(sm)
-        try:
-            t = get(sess, sm, proxy=proxy)
-        except Exception as e:
-            print("  sitemap error:", sm, type(e).__name__)
+        t, src = fetch(sess, sm, allow_proxy=False)
+        if not t:
+            print("  sitemap fail:", sm, src)
             continue
         locs = re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", t)
         for loc in locs:
@@ -128,14 +186,13 @@ def main():
     agg = {}          # (brand, cat) -> [pct,...]
 
     for d in DISCOVER:
-        proxy = d.get("proxy", False)
-        urls = discover_urls(sess, d["sitemaps"], proxy)
+        urls = discover_urls(sess, d["sitemaps"])
         buckets = {}
         for u in urls:
             c = categorize(u)
             if c:
                 buckets.setdefault(c, []).append(u)
-        fetched = hits = 0
+        fetched = hits = proxy_hits = 0
         dead = False
         for cat, us in buckets.items():
             if dead:
@@ -144,29 +201,31 @@ def main():
                 if fetched >= TOTAL_CAP:
                     break
                 fetched += 1
-                try:
-                    p = making_pct(get(sess, u, proxy=proxy, timeout=20))
-                except Exception:
-                    p = None
+                html, src = fetch(sess, u, allow_proxy=True, timeout=25)
+                if src and src != "direct" and src != "all-proxies-failed":
+                    proxy_hits += 1
+                p = making_pct(html) if html else None
                 if p is not None:
                     hits += 1
                     agg.setdefault((d["brand"], cat), []).append(p)
-                # Bail early on bot-walled / JS-rendered brands: no % in the
-                # first 10 fetched products means the breakup isn't in the HTML.
-                if proxy and fetched >= 10 and hits == 0:
-                    print(f"  {d['brand']}: no making % in HTML, skipping")
+                # Bail early if the first 10 fetches yielded no marker at all:
+                # the breakup shape probably isn't in this brand's HTML today,
+                # so keep hammering only wastes fetches.
+                if fetched >= 10 and hits == 0:
+                    print(f"  {d['brand']}: no making % in first 10 items,"
+                          " skipping remaining categories")
                     dead = True
                     break
-                if not proxy:
-                    time.sleep(0.3)
-        print(f"{d['brand']}: fetched {fetched}, "
-              f"cats {[(c, len(v)) for (b, c), v in agg.items() if b == d['brand']]}")
+                if src == "direct":
+                    time.sleep(0.3)     # be polite to origins we hit direct
+        cat_summary = [(c, len(v)) for (b, c), v in agg.items()
+                       if b == d["brand"]]
+        print(f"{d['brand']}: fetched {fetched} ({proxy_hits} via proxy), "
+              f"cats {cat_summary}")
 
     for p in CURATED:
-        try:
-            pct = making_pct(sess.get(p["url"], timeout=25).text)
-        except Exception:
-            pct = None
+        html, _ = fetch(sess, p["url"], allow_proxy=True, timeout=25)
+        pct = making_pct(html) if html else None
         if pct is not None:
             agg.setdefault((p["brand"], p["cat"]), []).append(pct)
             print(f"{p['brand']} {p['cat']}: {pct}%")
