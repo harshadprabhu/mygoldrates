@@ -1,0 +1,105 @@
+name: diag-caratlane
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Fetch CaratLane coin page via each proxy, inspect raw HTML
+        env:
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
+          ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
+          CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
+        run: |
+          python - <<'PY'
+          import os, requests
+
+          URL = "https://www.caratlane.com/gold-coins/1g-24kt-lakshmi-gold-coin-gc00001-4y0000.html"
+
+          def inspect(name, text):
+              print(f"\n=== {name}: len={len(text)} ===")
+              has_pb = "price_breakup" in text
+              has_995 = "995 Kt" in text or "995\\u00a0Kt" in text
+              print(f"  has 'price_breakup': {has_pb}")
+              print(f"  has '995 Kt': {has_995}")
+              idx = text.find("price_breakup")
+              if idx >= 0:
+                  print("  snippet:", text[max(0, idx-50):idx+400])
+              else:
+                  # show a snippet near '16,081' or '16081' (the grand total) for context
+                  for needle in ("16,081", "16081", "Grand Total", "Price Breakup", "gold_total"):
+                      j = text.find(needle)
+                      if j >= 0:
+                          print(f"  (no price_breakup) snippet near '{needle}':",
+                                text[max(0, j-80):j+150])
+                          break
+                  else:
+                      print("  (no price_breakup, no recognizable price markers either)")
+                      print("  first 300 chars:", text[:300])
+
+          tried_any = False
+
+          key = os.environ.get("SCRAPERAPI_KEY")
+          if key:
+              tried_any = True
+              try:
+                  r = requests.get("http://api.scraperapi.com",
+                      params={"api_key": key, "url": URL, "render": "true", "country_code": "in"},
+                      timeout=90)
+                  print(f"ScraperAPI status={r.status_code}")
+                  if r.status_code == 200:
+                      inspect("ScraperAPI (render=true)", r.text)
+              except Exception as e:
+                  print("ScraperAPI error:", e)
+
+          key = os.environ.get("SCRAPINGBEE_KEY")
+          if key:
+              tried_any = True
+              try:
+                  r = requests.get("https://app.scrapingbee.com/api/v1/",
+                      params={"api_key": key, "url": URL, "render_js": "true", "wait": "3000"},
+                      timeout=90)
+                  print(f"ScrapingBee status={r.status_code}")
+                  if r.status_code == 200:
+                      inspect("ScrapingBee (render_js=true, wait=3000)", r.text)
+              except Exception as e:
+                  print("ScrapingBee error:", e)
+
+          key = os.environ.get("ZENROWS_KEY")
+          if key:
+              tried_any = True
+              try:
+                  r = requests.get("https://api.zenrows.com/v1/",
+                      params={"apikey": key, "url": URL, "js_render": "true", "wait": "3000"},
+                      timeout=90)
+                  print(f"ZenRows status={r.status_code}")
+                  if r.status_code == 200:
+                      inspect("ZenRows (js_render=true, wait=3000)", r.text)
+              except Exception as e:
+                  print("ZenRows error:", e)
+
+          key = os.environ.get("CRAWLBASE_KEY")
+          if key:
+              tried_any = True
+              try:
+                  r = requests.get("https://api.crawlbase.com/",
+                      params={"token": key, "url": URL},
+                      timeout=90)
+                  print(f"Crawlbase status={r.status_code}")
+                  if r.status_code == 200:
+                      inspect("Crawlbase", r.text)
+              except Exception as e:
+                  print("Crawlbase error:", e)
+
+          if not tried_any:
+              print("No proxy keys available in this environment.")
+          PY
