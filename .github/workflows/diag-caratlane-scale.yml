@@ -1,0 +1,157 @@
+name: diag-caratlane-scale
+
+on:
+  workflow_dispatch:
+
+jobs:
+  scale:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Scale CaratLane MC to 20+ per category
+        env:
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
+          ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
+          CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
+        run: |
+          python - <<'PY'
+          import os, re, time, statistics, requests
+
+          # Category listings user provided
+          CAT_LISTINGS = {
+            "Bangle":      "https://www.caratlane.com/jewellery/bangles.html",
+            "Ring":        "https://www.caratlane.com/jewellery/rings.html",
+            "Earrings":    "https://www.caratlane.com/jewellery/earrings.html",
+            "Mangalsutra": "https://www.caratlane.com/jewellery/mangalsutra.html",
+          }
+          # Category pages we don't want mistaken as products (they end .html too)
+          NON_PRODUCT = {"bangles","rings","earrings","mangalsutra","chains","pendants",
+                          "necklaces","bracelets","gold-coins","gifts"}
+
+          # CaratLane product URL: /jewellery/<slug>-<2-letter-prefix><5+digits>-<code>.html
+          # e.g. gilded-classic-22kt-gold-bangle-kb00931-2y0000.html
+          PRODUCT_RE = re.compile(
+              r'/jewellery/([a-z0-9][a-z0-9-]{4,}?-[a-z]{2}\d{4,}-[0-9a-z]{5,})\.html',
+              re.I)
+
+          # CaratLane extractor (verified 8/8 in prior POC)
+          CL_MAKING_RE = re.compile(
+            r'"making"\s*:\s*\[\s*\{[^}]*?"value"\s*:\s*"'
+            r'(?:Rs\.?|\\u20b9|₹|INR)\.?\s*([\d,]+(?:\.\d+)?)"', re.I)
+          CL_GOLDTOT_RE = re.compile(
+            r'"gold_total"\s*:\s*\[\s*\{[^}]*?"value"\s*:\s*"'
+            r'(?:Rs\.?|\\u20b9|₹|INR)\.?\s*([\d,]+(?:\.\d+)?)"', re.I)
+
+          sess = requests.Session()
+          sess.headers.update({"User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"})
+
+          def _proxies(url):
+            for k_env, name, u, p in [
+              ("SCRAPERAPI_KEY","scraperapi","http://api.scraperapi.com",
+                {"url":url,"render":"true","country_code":"in"}),
+              ("SCRAPINGBEE_KEY","scrapingbee","https://app.scrapingbee.com/api/v1/",
+                {"url":url,"render_js":"true","wait":"3000"}),
+              ("ZENROWS_KEY","zenrows","https://api.zenrows.com/v1/",
+                {"url":url,"js_render":"true","wait":"3000"}),
+              ("CRAWLBASE_KEY","crawlbase","https://api.crawlbase.com/",{"url":url}),
+            ]:
+              k = os.environ.get(k_env)
+              if not k: continue
+              p2 = dict(p); p2["api_key" if name != "crawlbase" else "token"] = k
+              if name == "zenrows": p2["apikey"] = p2.pop("api_key")
+              yield name, u, p2
+
+          def fetch(url):
+            try:
+              r = sess.get(url, timeout=25)
+              if r.status_code == 200 and len(r.text) > 500:
+                return r.text, "direct"
+            except Exception: pass
+            for name, u, p in _proxies(url):
+              try:
+                r = sess.get(u, params=p, timeout=60)
+                if r.status_code == 200 and len(r.text) > 500:
+                  return r.text, name
+              except Exception: continue
+            return None, "all-failed"
+
+          def extract_pct(html):
+            mm, gm = CL_MAKING_RE.search(html), CL_GOLDTOT_RE.search(html)
+            if not (mm and gm): return None
+            try:
+              m = float(mm.group(1).replace(",",""))
+              g = float(gm.group(1).replace(",",""))
+              if g > 0 and 0 < m/g <= 0.8:
+                return round(m/g * 100, 1)
+            except ValueError: pass
+            return None
+
+          results = {}   # cat -> [pct,...]
+          fetch_stats = {"direct": 0, "proxy": 0, "fail": 0}
+
+          for cat, listing_url in CAT_LISTINGS.items():
+            print(f"\n=== {cat} ===")
+            print(f"  listing: {listing_url}")
+            html, src = fetch(listing_url)
+            if not html:
+              print(f"  LISTING FETCH FAIL ({src})"); continue
+            print(f"  listing fetched via {src}, len={len(html)}")
+
+            # find product URLs
+            found = set()
+            for m in PRODUCT_RE.finditer(html):
+              slug = m.group(1)
+              if any(np in slug for np in NON_PRODUCT):
+                continue
+              full = f"https://www.caratlane.com/jewellery/{slug}.html"
+              found.add(full)
+
+            urls = sorted(found)[:25]   # allow a few extras in case some fail
+            print(f"  discovered {len(found)} unique products, will fetch up to {len(urls)}")
+            if len(urls) < 5:
+              # dump 200 chars near first '/jewellery/' to help diagnose
+              i = html.find("/jewellery/")
+              print(f"  low count; context near /jewellery/: ...{html[max(0,i-40):i+200]}...")
+
+            pcts = []
+            for i, u in enumerate(urls, 1):
+              phtml, psrc = fetch(u)
+              if psrc == "direct":
+                fetch_stats["direct"] += 1
+              elif phtml:
+                fetch_stats["proxy"] += 1
+              else:
+                fetch_stats["fail"] += 1
+              if not phtml:
+                print(f"    {i:2d}. FAIL ({psrc}): {u.rsplit('/',1)[-1][:60]}")
+                continue
+              p = extract_pct(phtml)
+              if p is None:
+                print(f"    {i:2d}. NO PCT: {u.rsplit('/',1)[-1][:60]}")
+                continue
+              pcts.append(p)
+              print(f"    {i:2d}. {p}%: {u.rsplit('/',1)[-1][:60]}")
+              if psrc == "direct":
+                time.sleep(0.3)
+
+            results[cat] = pcts
+
+          print(f"\n\n============ CARATLANE MC SUMMARY ============")
+          print(f"{'Category':<14} {'Items':<7} {'Median':<8} {'Min':<7} {'Max':<7}")
+          for cat, pcts in results.items():
+            if not pcts:
+              print(f"{cat:<14} 0       -        -       -       ")
+              continue
+            print(f"{cat:<14} {len(pcts):<7} {statistics.median(pcts):<8} "
+                  f"{min(pcts):<7} {max(pcts):<7}")
+          print(f"\nFetches: direct={fetch_stats['direct']} "
+                f"proxy={fetch_stats['proxy']} fail={fetch_stats['fail']}")
+          PY
