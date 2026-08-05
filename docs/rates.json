@@ -17,7 +17,7 @@
     "rate_per_gram_inr": 14426.0
   },
   "ibja_reference_24k_999_per_gram_inr": 14557.7,
-  "akgsma_south_india_22k_per_gram_inr": null,
+  "akgsma_south_india_22k_per_gram_inr": 13460.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
