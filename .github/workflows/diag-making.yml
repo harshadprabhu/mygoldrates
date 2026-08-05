@@ -1,0 +1,155 @@
+name: diag-making
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Making-charges feasibility diagnostic
+        env:
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
+          ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
+          CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
+        run: |
+          python - <<'PY'
+          import os, re, requests
+
+          # (brand, sample product URL, needs_proxy)
+          CANDIDATES = [
+            ("Senco Gold",       "https://sencogoldanddiamonds.com/jewellery/sleek-n-stylish-gold-mens-chain", False),
+            ("BlueStone",        "https://www.bluestone.com/chains/the-shravya-gold-chain~59380.html",         True),
+            ("CaratLane",        "https://www.caratlane.com/gold-coins/1g-24kt-lakshmi-gold-coin-gc00001-4y0000.html", True),
+            ("Waman Hari Pethe", "https://whpjewellers.com/products/whp-24kt-999-10-gm-gold-coin",             True),
+            ("Kisna",            "https://www.kisna.com/products/elysian-diamond-ring",                        False),
+            ("ORRA",             "https://www.orra.co.in/product/round-diamond-crown-star-pendant-set-in-rose-gold-osp20029-m300x0b", False),
+            ("PN Gadgil",        "https://www.pngjewellers.com/products/10-gram-24-kt-995-laxmi-shree-gold-coin", False),
+          ]
+
+          # Markers we'd want to find in the raw HTML to feed the making-charge
+          # extractor.  Broken into "structured" (JSON field) and "visible"
+          # (human-readable line in the DOM) so we can tell the two failure
+          # modes apart.
+          STRUCTURED = [
+            r'"making_charge"', r'"making_charges"', r'"makingCharge"',
+            r'"making_charge_value"', r'"making_charge_type"',
+            r'"metal_price"', r'"metal_value"', r'"metalValue"',
+            r'"gold_value"', r'"goldValue"', r'"gold_amount"',
+            r'"price_breakup"',
+          ]
+          VISIBLE = [
+            r'making\s+charges?', r'value\s+addition',
+            r'metal\s+(?:price|value)', r'gold\s+(?:price|value)',
+            r'price\s+break[- ]?up',
+          ]
+
+          sess = requests.Session()
+          sess.headers.update({"User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"})
+
+          def via_proxy(url):
+            """Try each free-tier proxy in turn.  Returns (html, note) or (None, note)."""
+            key = os.environ.get("SCRAPERAPI_KEY")
+            if key:
+              try:
+                r = sess.get("http://api.scraperapi.com",
+                    params={"api_key": key, "url": url, "render": "true", "country_code": "in"},
+                    timeout=60)
+                if r.status_code == 200 and len(r.text) > 500:
+                  return r.text, "scraperapi"
+              except Exception as e:
+                print("    scraperapi error:", type(e).__name__)
+            key = os.environ.get("SCRAPINGBEE_KEY")
+            if key:
+              try:
+                r = sess.get("https://app.scrapingbee.com/api/v1/",
+                    params={"api_key": key, "url": url, "render_js": "true", "wait": "3000"},
+                    timeout=60)
+                if r.status_code == 200 and len(r.text) > 500:
+                  return r.text, "scrapingbee"
+              except Exception as e:
+                print("    scrapingbee error:", type(e).__name__)
+            key = os.environ.get("ZENROWS_KEY")
+            if key:
+              try:
+                r = sess.get("https://api.zenrows.com/v1/",
+                    params={"apikey": key, "url": url, "js_render": "true", "wait": "3000"},
+                    timeout=60)
+                if r.status_code == 200 and len(r.text) > 500:
+                  return r.text, "zenrows"
+              except Exception as e:
+                print("    zenrows error:", type(e).__name__)
+            key = os.environ.get("CRAWLBASE_KEY")
+            if key:
+              try:
+                r = sess.get("https://api.crawlbase.com/",
+                    params={"token": key, "url": url}, timeout=60)
+                if r.status_code == 200 and len(r.text) > 500:
+                  return r.text, "crawlbase"
+              except Exception as e:
+                print("    crawlbase error:", type(e).__name__)
+            return None, "all-proxies-failed"
+
+          def direct(url):
+            try:
+              r = sess.get(url, timeout=25)
+              if r.status_code == 200 and len(r.text) > 500:
+                return r.text, f"direct/{r.status_code}"
+              return None, f"direct/{r.status_code}"
+            except Exception as e:
+              return None, f"direct/err:{type(e).__name__}"
+
+          rows = []
+          for brand, url, need_proxy in CANDIDATES:
+            print(f"\n=== {brand} ===")
+            print(f"  {url}")
+            html, src = (via_proxy(url) if need_proxy else direct(url))
+            if not html:
+              # fall back to proxy if direct failed
+              if not need_proxy:
+                print(f"  direct failed ({src}); retrying via proxy waterfall")
+                html, src = via_proxy(url)
+            if not html:
+              print(f"  FETCH FAIL ({src})")
+              rows.append((brand, "FETCH_FAIL", src, [], []))
+              continue
+
+            print(f"  fetched via {src}, len={len(html)}")
+            struct_hits = [p for p in STRUCTURED if re.search(p, html, re.I)]
+            vis_hits    = [p for p in VISIBLE   if re.search(p, html, re.I)]
+
+            # For any structured hit, show 200 chars of context so we can see
+            # the exact JSON shape (this is what actually shapes the extractor)
+            for p in struct_hits[:3]:
+              m = re.search(p, html, re.I)
+              if m:
+                s = max(0, m.start() - 30)
+                e = min(len(html), m.end() + 200)
+                print(f"  STRUCT '{p}' @ {m.start()}: ...{html[s:e]}...")
+
+            # Ditto one visible-hit context if no structured hit
+            if not struct_hits and vis_hits:
+              for p in vis_hits[:2]:
+                m = re.search(p, html, re.I)
+                if m:
+                  s = max(0, m.start() - 40)
+                  e = min(len(html), m.end() + 160)
+                  print(f"  VISIBLE '{p}' @ {m.start()}: ...{html[s:e]}...")
+
+            rows.append((brand, "OK" if (struct_hits or vis_hits) else "NO_MARKERS",
+                         src, struct_hits, vis_hits))
+
+          print("\n\n============================ SUMMARY ============================")
+          print(f"{'Brand':<20} {'Status':<12} {'Source':<12} {'#Struct':<8} {'#Visible':<8}")
+          for brand, status, src, sh, vh in rows:
+            print(f"{brand:<20} {status:<12} {src:<12} {len(sh):<8} {len(vh):<8}")
+          PY
