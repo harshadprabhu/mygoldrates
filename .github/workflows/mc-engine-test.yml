@@ -1,0 +1,22 @@
+name: mc-engine-test
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "mc_engine.py"
+      - ".github/workflows/mc-engine-test.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -c "import ast;ast.parse(open('mc_engine.py',encoding='utf-8').read());print('OK ast')"
+      - name: Self-test (offline fixtures, no network)
+        run: python mc_engine.py --selftest
