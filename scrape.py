@@ -205,16 +205,20 @@ def extract_product_breakup(html):
 
 # CaratLane coin/product pages embed a "price_breakup" JSON blob straight in
 # the HTML (React page-state, present before any click/JS execution), e.g.
-# {"title":"995 Kt Yellow Gold","rate":"Rs. 14729\/g",...} - a coin's own
+# {"title":"995 Kt Yellow Gold","rate":"Rs. 14729/g",...} - a coin's own
 # per-gram gold cost, closely tracking the market (unlike their digital-gold
-# page, which quotes ~8% above median). JSON-escapes the slash as \/, so the
-# backslash before it is optional. Fineness (995/999/916/750/583), not a
-# literal "24K"/"22K" label, so it needs its own karat mapping.
+# page, which quotes ~8% above median). Their JSON serialiser escapes the
+# slash as the unicode sequence / (verified live against ScraperAPI/
+# ScrapingBee/ZenRows/Crawlbase output - NOT the backslash-slash \/ a plain
+# browser DOM read shows), so both forms are matched. Fineness
+# (995/999/916/750/583), not a literal "24K"/"22K" label, so it needs its
+# own karat mapping.
 _FINENESS_TO_KARAT = {"999": "24K", "995": "24K", "916": "22K",
                        "750": "18K", "583": "14K"}
 _JSON_PRICE_BREAKUP_RE = re.compile(
     r'"title"\s*:\s*"(\d{3})\s*Kt\s+Yellow\s+Gold"[^}]{0,200}?'
-    r'"rate"\s*:\s*"(?:Rs\.?|₹|INR)\.?\s*([\d,]+(?:\.\d{1,2})?)\s*\\?/g"',
+    r'"rate"\s*:\s*"(?:Rs\.?|₹|INR)\.?\s*([\d,]+(?:\.\d{1,2})?)\s*'
+    r'(?:\\?/|\\u002[Ff])g"',
     re.I)
 
 
