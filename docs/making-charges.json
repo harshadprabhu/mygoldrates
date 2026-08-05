@@ -1,37 +1,144 @@
 {
-  "updated": "2026-08-05T23:07:01.436220+05:30",
+  "updated": "2026-08-06T00:15:38.589593+05:30",
   "note": "Making charge as % of gold value, median across multiple real products per category from each jeweller's public price breakup. Indicative - varies by specific design.",
   "brands": [
+    {
+      "brand": "BlueStone",
+      "categories": [
+        {
+          "category": "Bangle",
+          "items": 2,
+          "making_pct_median": 37.4,
+          "making_pct_min": 30.2,
+          "making_pct_max": 44.6,
+          "confidence": "low",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.bluestone.com/bangles/the-orrale-round-bangle~79884.html",
+              "pct": 30.2
+            },
+            {
+              "url": "https://www.bluestone.com/bangles/the-estrella-oval-bangle~34771.html",
+              "pct": 44.6
+            }
+          ]
+        },
+        {
+          "category": "Earrings",
+          "items": 3,
+          "making_pct_median": 44.6,
+          "making_pct_min": 40.8,
+          "making_pct_max": 44.6,
+          "confidence": "low",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.bluestone.com/earrings/the-marianna-stud-earrings~67286.html",
+              "pct": 44.6
+            },
+            {
+              "url": "https://www.bluestone.com/earrings/the-rua-stud-earrings~60693.html",
+              "pct": 44.6
+            },
+            {
+              "url": "https://www.bluestone.com/earrings/the-mathilda-drop-earrings~8976.html",
+              "pct": 40.8
+            }
+          ]
+        },
+        {
+          "category": "Mangalsutra",
+          "items": 2,
+          "making_pct_median": 44.1,
+          "making_pct_min": 43.6,
+          "making_pct_max": 44.6,
+          "confidence": "low",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.bluestone.com/mangalsutra+chains/the-yosni-mangalsutra~81520.html",
+              "pct": 44.6
+            },
+            {
+              "url": "https://www.bluestone.com/mangalsutra/the-karnika-mangalsutra-pendant~69986.html",
+              "pct": 43.6
+            }
+          ]
+        },
+        {
+          "category": "Ring",
+          "items": 3,
+          "making_pct_median": 46.6,
+          "making_pct_min": 34.9,
+          "making_pct_max": 52.6,
+          "confidence": "low",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.bluestone.com/preset+solitaire+rings/the-aphaea-ring-for-him~83508.html",
+              "pct": 46.6
+            },
+            {
+              "url": "https://www.bluestone.com/rings/the-petillante-ring~86191.html",
+              "pct": 52.6
+            },
+            {
+              "url": "https://www.bluestone.com/rings/the-dimas-textured-band-for-her~81692.html",
+              "pct": 34.9
+            }
+          ]
+        }
+      ]
+    },
     {
       "brand": "Senco Gold",
       "categories": [
         {
-          "category": "Bangle",
-          "items": 20,
-          "making_pct_median": 27.0,
-          "making_pct_min": 22.2,
-          "making_pct_max": 30.0
-        },
-        {
           "category": "Earrings",
-          "items": 20,
-          "making_pct_median": 19.9,
-          "making_pct_min": 19.3,
-          "making_pct_max": 40.0
-        },
-        {
-          "category": "Mangalsutra",
-          "items": 20,
-          "making_pct_median": 27.0,
-          "making_pct_min": 17.5,
-          "making_pct_max": 27.0
+          "items": 17,
+          "making_pct_median": 11.5,
+          "making_pct_min": 8.5,
+          "making_pct_max": 16.9,
+          "confidence": "high",
+          "rejected_outliers": 3,
+          "examples": [
+            {
+              "url": "https://sencogoldanddiamonds.com/jewellery/rose-gold-droplet-diamond-studs",
+              "pct": 8.7
+            },
+            {
+              "url": "https://sencogoldanddiamonds.com/jewellery/little-heart-diamond-studs",
+              "pct": 11.5
+            },
+            {
+              "url": "https://sencogoldanddiamonds.com/jewellery/love-birds-diamond-studs",
+              "pct": 13.1
+            }
+          ]
         },
         {
           "category": "Ring",
-          "items": 20,
-          "making_pct_median": 30.0,
-          "making_pct_min": 17.9,
-          "making_pct_max": 35.0
+          "items": 11,
+          "making_pct_median": 0.1,
+          "making_pct_min": 0.0,
+          "making_pct_max": 0.2,
+          "confidence": "medium",
+          "rejected_outliers": 9,
+          "examples": [
+            {
+              "url": "https://sencogoldanddiamonds.com/jewellery/lovey-dovey-gold-ring",
+              "pct": 0.1
+            },
+            {
+              "url": "https://sencogoldanddiamonds.com/jewellery/diversity-of-love-gold-ring",
+              "pct": 0.1
+            },
+            {
+              "url": "https://sencogoldanddiamonds.com/jewellery/spring-smile-diamond-pendant",
+              "pct": 15.0
+            }
+          ]
         }
       ]
     }
