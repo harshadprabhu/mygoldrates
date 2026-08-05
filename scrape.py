@@ -290,6 +290,29 @@ def extract_value_then_karat(text):
     return buckets
 
 
+# CaratLane's dedicated /gold-rate page labels purity as "22ct" rather than
+# "22K"/"22KT" ("Rs 14528" ... "/Gram (22ct)") - a suffix none of the other
+# extractors above recognise, so this page fell through the whole chain
+# ("proxy:no values") until this was added. The value and the "(NNct)" label
+# sit in separate DOM blocks, so the gap is generous and DOTALL-safe.
+_VALUE_THEN_CT_RE = re.compile(
+    r"(?:₹|Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?)"
+    r"[\s\S]{0,80}?/\s*(?:g|gm|gram)\s*\(\s*(\d{2})\s*ct\s*\)",
+    re.I)
+
+
+def extract_value_then_ct(text):
+    buckets = {}
+    for m in _VALUE_THEN_CT_RE.finditer(text):
+        karat = f"{m.group(2)}K"
+        if karat not in PURITY_FRACTION:
+            continue
+        pg = _per_gram(_f(m.group(1)))
+        if pg:
+            buckets.setdefault(karat, []).append(pg)
+    return buckets
+
+
 # The gold portion's value, with the weight either inline (Kisna:
 # 'Gold1.880 g RS 15,874') or in a separate field (BlueStone: 'Gold Rs.
 # 1,61,615' + 'Weight 11.97 gram'). Gap after 'Gold' is spaces/colons only
@@ -353,6 +376,7 @@ def extract(html):
         text = soup.get_text(" ", strip=True)
         for fn, name in ((extract_labeled_rates, "labeled"),
                          (extract_value_then_karat, "valuekarat"),
+                         (extract_value_then_ct, "valuect"),
                          (extract_pregst_rate, "pregst"),
                          (extract_gold_value_breakup, "goldvalue"),
                          (extract_headline_rate, "headline"),
