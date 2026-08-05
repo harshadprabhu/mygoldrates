@@ -47,7 +47,9 @@ CAT_RULES = [
 # CaratLane/WHP) is cosmetic - it just documents that we've seen those need
 # proxy in practice; fetch() ignores it.
 _CL = "https://www.caratlane.com/jewellery/"
-_CL_PROD = r'/jewellery/([a-z0-9][a-z0-9-]{4,}?-[a-z]{1,3}\d{4,}-[0-9a-z]{4,})\.html'
+# Capture the FULL path including .html - capturing only the slug produced
+# extension-less URLs after urljoin(), which 404'd and zeroed out this brand.
+_CL_PROD = r'(/jewellery/[a-z0-9][a-z0-9-]{4,}?-[a-z]{1,3}\d{4,}-[0-9a-z]{4,}\.html)'
 _BS_PROD = r'href="(https://www\.bluestone\.com/[^"]+?~\d+\.html)"'
 
 DISCOVER = [
@@ -116,16 +118,20 @@ def _proxy_attempts(url):
         yield name, url_tpl, p
 
 
-def fetch(sess, url, allow_proxy=True, timeout=25):
+def fetch(sess, url, allow_proxy=True, timeout=25, min_len=500):
     """Direct first (free), proxy waterfall only if direct fails.
 
     Honors the 'avoid proxy where possible' rule. Sitemap fetches pass
     allow_proxy=False - they're always static XML that direct handles.
+
+    min_len guards against bot-wall stub pages, but sitemap INDEX files are
+    legitimately tiny (a handful of <loc> entries), so callers fetching those
+    pass a smaller floor - otherwise valid indexes are discarded as failures.
     Returns (html, source) or (None, err).
     """
     try:
         r = sess.get(url, timeout=timeout)
-        if r.status_code == 200 and len(r.text) > 500:
+        if r.status_code == 200 and len(r.text) > min_len:
             return r.text, "direct"
         direct_err = f"direct/{r.status_code}"
     except Exception as e:
@@ -137,7 +143,7 @@ def fetch(sess, url, allow_proxy=True, timeout=25):
     for name, u, p in _proxy_attempts(url):
         try:
             r = sess.get(u, params=p, timeout=60)
-            if r.status_code == 200 and len(r.text) > 500:
+            if r.status_code == 200 and len(r.text) > min_len:
                 return r.text, name
         except Exception:
             continue
@@ -191,7 +197,8 @@ def discover_urls(sess, sitemaps):
         if sm in seen:
             continue
         seen.add(sm)
-        t, src = fetch(sess, sm, allow_proxy=False)
+        # min_len=120: sitemap indexes are often only a few hundred bytes
+        t, src = fetch(sess, sm, allow_proxy=False, min_len=120)
         if not t:
             print("  sitemap fail:", sm, src)
             continue
