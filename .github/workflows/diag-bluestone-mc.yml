@@ -13,21 +13,14 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install requests
-      - name: BlueStone making-charge discovery
-        env:
-          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
-          SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
-          ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
-          CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
+      - name: BlueStone price-breakup section dump + extractor test
         run: |
           python - <<'PY'
-          import os, re, requests
+          import re, requests
 
-          # Product URLs the user supplied (bracelet is v2 cat - kept to compare shapes)
           PRODUCTS = [
             ("Bangle",   "https://www.bluestone.com/bangles/the-orrale-round-bangle~79884.html"),
             ("Bangle",   "https://www.bluestone.com/bangles/the-estrella-oval-bangle~34771.html"),
-            ("Bracelet", "https://www.bluestone.com/bracelets/the-leoneil-bracelet~63773.html"),
             ("Ring",     "https://www.bluestone.com/preset+solitaire+rings/the-aphaea-ring-for-him~83508.html"),
             ("Ring",     "https://www.bluestone.com/rings/the-petillante-ring~86191.html"),
             ("Ring",     "https://www.bluestone.com/rings/the-dimas-textured-band-for-her~81692.html"),
@@ -41,101 +34,80 @@ jobs:
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
             "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"})
 
-          def _proxies(url):
-            for k_env, name, u, p in [
-              ("SCRAPERAPI_KEY","scraperapi","http://api.scraperapi.com",
-                {"url":url,"render":"true","country_code":"in"}),
-              ("SCRAPINGBEE_KEY","scrapingbee","https://app.scrapingbee.com/api/v1/",
-                {"url":url,"render_js":"true","wait":"3000"}),
-              ("ZENROWS_KEY","zenrows","https://api.zenrows.com/v1/",
-                {"url":url,"js_render":"true","wait":"3000"}),
-              ("CRAWLBASE_KEY","crawlbase","https://api.crawlbase.com/",{"url":url}),
-            ]:
-              k = os.environ.get(k_env)
-              if not k: continue
-              p2 = dict(p); p2["api_key" if name != "crawlbase" else "token"] = k
-              if name == "zenrows": p2["apikey"] = p2.pop("api_key")
-              yield name, u, p2
+          # BlueStone renders the breakup as an HTML table inside
+          # <section id="section-price-breakup">, with values in
+          # <span id="XxxCost_b">12,345</span> cells.
+          SECTION_RE = re.compile(
+            r'<section id="section-price-breakup".*?</section>', re.I | re.S)
+          # id -> amount, e.g. goldCost_b -> 79,234
+          COST_RE = re.compile(
+            r'id="([A-Za-z_]+?Cost_b)"[^>]*>\s*([\d,]+(?:\.\d+)?)', re.I)
+          # row label -> amount, as a fallback if the ids change
+          ROW_RE = re.compile(
+            r'<td[^>]*item-type-title"?[^>]*>\s*([^<]{2,40}?)\s*</td>.*?'
+            r'([\d,]+(?:\.\d+)?)\s*</span>', re.I | re.S)
 
-          def fetch(url):
-            try:
-              r = sess.get(url, timeout=25)
-              if r.status_code == 200 and len(r.text) > 500:
-                return r.text, "direct"
-            except Exception: pass
-            for name, u, p in _proxies(url):
-              try:
-                r = sess.get(u, params=p, timeout=60)
-                if r.status_code == 200 and len(r.text) > 500:
-                  return r.text, name
-              except Exception: continue
-            return None, "all-failed"
-
-          # Money-ish tokens to hunt for near making-charge words
-          RUPEE = r'(?:Rs\.?|\\u20b9|₹|INR)\.?\s*([\d,]+(?:\.\d+)?)'
-
-          # Candidate label->value patterns (label first, then a rupee amount
-          # within a short window that may include HTML tags)
-          LABELS = [
-            ("making",     r'(?:making\s*charges?|makingcharge)'),
-            ("metal",      r'(?:metal\s*(?:value|price|cost)|gold\s*(?:value|price|cost))'),
-            ("stone",      r'(?:stone\s*(?:value|price|cost)|diamond\s*(?:value|price|cost))'),
-            ("gst",        r'(?:gst|tax)'),
-            ("total",      r'(?:grand\s*total|total\s*(?:price|amount))'),
-          ]
-
-          def probe(html):
-            """Report every label we can find with a nearby rupee amount."""
-            out = {}
-            for name, lab in LABELS:
-              m = re.search(lab + r'[\s\S]{0,300}?' + RUPEE, html, re.I)
-              if m:
-                out[name] = m.group(1)
-            return out
-
-          def ctx_dump(html, pat, width=260, label=""):
-            m = re.search(pat, html, re.I)
-            if not m:
-              return f"    [{label}] not found"
-            s = max(0, m.start()-60); e = min(len(html), m.end()+width)
-            snippet = html[s:e].replace("\n", " ")
-            return f"    [{label}] @{m.start()}: ...{snippet}..."
+          def strip_tags(s):
+            return re.sub(r"<[^>]+>", " ", s)
 
           rows = []
           for i, (cat, url) in enumerate(PRODUCTS, 1):
-            short = url.rsplit("/",1)[-1][:52]
-            html, src = fetch(url)
+            short = url.rsplit("/",1)[-1][:50]
+            try:
+              r = sess.get(url, timeout=25)
+              html = r.text if r.status_code == 200 else None
+            except Exception as e:
+              html = None
             if not html:
-              print(f"\n[{i}] {cat} {short}: FETCH FAIL ({src})")
-              rows.append((cat, short, "FETCH_FAIL", {}, src)); continue
+              print(f"\n[{i}] {cat} {short}: FETCH FAIL"); continue
 
-            vals = probe(html)
+            sec = SECTION_RE.search(html)
+            if not sec:
+              print(f"\n[{i}] {cat} {short}: no price-breakup section")
+              rows.append((cat, short, "NO_SECTION", {})); continue
+            block = sec.group(0)
+
+            costs = {m.group(1): m.group(2) for m in COST_RE.finditer(block)}
+            labels = {}
+            for m in ROW_RE.finditer(block):
+              lab = m.group(1).strip().lower()
+              if lab and lab not in labels:
+                labels[lab] = m.group(2)
+
+            print(f"\n[{i}] {cat} {short}: section len={len(block)}")
+            print(f"    cost ids: {costs}")
+            print(f"    row labels: {labels}")
+
+            # On the first product, show the section as plain text so the
+            # exact row order/wording is visible for writing the extractor.
+            if i == 1:
+              txt = re.sub(r"\s+", " ", strip_tags(block)).strip()
+              print(f"    PLAINTEXT: {txt[:700]}")
+
+            # Try to compute making% from whatever we found
+            def pick(d, *keys):
+              for k in keys:
+                for dk, dv in d.items():
+                  if k in dk.lower():
+                    return dv
+              return None
+
+            gold   = pick(costs, "gold") or pick(labels, "gold")
+            making = pick(costs, "making") or pick(labels, "making")
             pct = None
-            if "making" in vals and "metal" in vals:
+            if gold and making:
               try:
-                mk = float(vals["making"].replace(",",""))
-                mt = float(vals["metal"].replace(",",""))
-                if mt > 0 and 0 < mk/mt <= 1.0:
-                  pct = round(mk/mt*100, 1)
+                g = float(gold.replace(",","")); mk = float(making.replace(",",""))
+                if g > 0 and 0 < mk/g <= 1.0:
+                  pct = round(mk/g*100, 1)
               except ValueError: pass
-
-            print(f"\n[{i}] {cat} {short}: via {src}, len={len(html)}")
-            print(f"    labels found: {vals}  -> making% = {pct}")
-
-            # On the first couple of products, dump raw context so I can see
-            # the real DOM/JSON shape and write a precise extractor.
-            if i <= 2:
-              print(ctx_dump(html, r'making\s*charges?', label="making"))
-              print(ctx_dump(html, r'metal\s*(?:value|price)', label="metal"))
-              print(ctx_dump(html, r'price\s*break', label="pricebreak"))
-              print(ctx_dump(html, r'"priceBreakup"|"price_breakup"|priceBreakUp',
-                             label="jsonbreakup"))
-            rows.append((cat, short, "OK" if pct else "MISS", vals, src))
+            print(f"    gold={gold} making={making} -> making% = {pct}")
+            rows.append((cat, short, "OK" if pct else "MISS",
+                          {"gold": gold, "making": making, "pct": pct}))
 
           print("\n\n============ BLUESTONE SUMMARY ============")
-          print(f"{'Cat':<10} {'Status':<10} {'Labels':<40} {'Src':<12}")
-          for cat, short, status, vals, src in rows:
-            print(f"{cat:<10} {status:<10} {str(sorted(vals))[:38]:<40} {src:<12}")
+          for cat, short, status, d in rows:
+            print(f"{cat:<10} {status:<11} {str(d)[:70]}")
           ok = sum(1 for r in rows if r[2] == "OK")
           print(f"\nBlueStone: {ok}/{len(rows)} products yielded a making %")
           PY
