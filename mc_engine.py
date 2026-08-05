@@ -179,11 +179,13 @@ def _finish(strategy: str, fields: dict[str, float], notes: str = "") -> Extract
         return ExtractionResult(strategy, None, 0.0, fields, notes or "missing gold/making")
 
     ratio = making / gold
-    # Plausibility gate: making charge is a fraction of metal value. Above ~120%
-    # we are almost certainly reading a total or a stone value by mistake.
-    if not (0 < ratio <= 1.2):
+    # Plausibility gate. Upper bound: above ~120% we are almost certainly
+    # reading a total or a stone value by mistake. Lower bound: no jeweller
+    # crafts for under ~2% - a tiny ratio means a unit mismatch (e.g. reading a
+    # percentage as a rupee amount), which previously published "Ring 0.1%".
+    if not (0.02 <= ratio <= 1.2):
         return ExtractionResult(strategy, None, 0.0, fields,
-                                f"implausible ratio {ratio:.2f}")
+                                f"implausible ratio {ratio:.4f}")
 
     conf = 0.55
     if fields.get("total"):
@@ -212,12 +214,42 @@ def _finish(strategy: str, fields: dict[str, float], notes: str = "") -> Extract
 # Each strategy takes raw html and returns an ExtractionResult. They are tried
 # in registry order; every one that succeeds is scored and the best wins.
 
+def s_json_typed_percent(html: str) -> ExtractionResult:
+    """Brands that publish the making charge as a PERCENTAGE in JSON.
+
+    Senco ships {"making_charge_type":"percentage","making_charge":27} - the 27
+    is already a percent, not rupees. Treating it as an amount and dividing by
+    gold value yields nonsense (27/50000 = 0.05%), which is exactly the
+    regression this strategy exists to prevent. Must run before the flat-key
+    strategy so the typed case wins.
+    """
+    tm = re.search(r'"(?:making_charge_type|making_charges_type|mc_type)"\s*:\s*'
+                   r'"([a-z%]+)"', html, re.I)
+    if not tm or "percent" not in tm.group(1).lower():
+        return ExtractionResult("json_typed_percent", None, 0.0, {})
+    vm = re.search(r'"(?:making_charge|making_charges|mc_value)"\s*:\s*"?'
+                   r'([\d.]+)"?', html, re.I)
+    pct = _num(vm.group(1)) if vm else None
+    if pct is None or not (0 < pct <= 60):
+        return ExtractionResult("json_typed_percent", None, 0.0, {},
+                                "typed percent out of range")
+    return ExtractionResult("json_typed_percent", round(pct, 1), 0.9,
+                            {"making_pct_direct": pct})
+
+
 def s_json_flat_keys(html: str) -> ExtractionResult:
     """JSON key/value pairs anywhere in the page state.
 
     Matches e.g.  "making_charges":1200 , "gold_value":"14729"
     Keys are fuzzy-matched, so a brand inventing "labourCost" still resolves.
     """
+    # If the page declares the making charge as a percentage, the numeric
+    # value is NOT a rupee amount - defer to s_json_typed_percent.
+    tm = re.search(r'"(?:making_charge_type|making_charges_type|mc_type)"\s*:\s*'
+                   r'"([a-z%]+)"', html, re.I)
+    if tm and "percent" in tm.group(1).lower():
+        return ExtractionResult("json_flat_keys", None, 0.0, {},
+                                "deferred: typed percentage")
     fields: dict[str, float] = {}
     for m in re.finditer(r'"([A-Za-z_][A-Za-z0-9_ ]{2,40})"\s*:\s*"?'
                          r'(?:₹|Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?)"?', html):
@@ -330,6 +362,7 @@ def s_direct_percent(html: str) -> ExtractionResult:
 
 
 STRATEGIES: list[tuple[str, Callable[[str], ExtractionResult]]] = [
+    ("json_typed_percent", s_json_typed_percent),   # must precede flat_keys
     ("json_breakup_arrays", s_json_breakup_arrays),
     ("json_flat_keys", s_json_flat_keys),
     ("dom_breakup_section", s_dom_breakup_section),
@@ -524,6 +557,13 @@ _FIXTURES = [
      <tr><td>Value Addition</td><td>Rs. 10,000</td></tr>
      <tr><td>Total</td><td>Rs. 60,000</td></tr></table></div>""",
      20.0, None),
+
+    # REGRESSION GUARD (Senco): making_charge is a PERCENTAGE, not rupees.
+    # Reading 27 as an amount and dividing by gold value shipped "Ring 0.1%"
+    # to production. The typed-percent strategy must win here.
+    ("SencoTyped", """{"variant":{"gold_value":"52000","making_charge_type":
+     "percentage","making_charge":27,"gst":1560}}""",
+     27.0, "json_typed_percent"),
 ]
 
 
@@ -548,6 +588,17 @@ def _selftest() -> int:
     r = eng.extract(junk, brand="JunkBrand")
     ok = not r.ok
     print(f"  {'PASS' if ok else 'FAIL'}  got={r.making_pct} ({r.notes})")
+    failures += 0 if ok else 1
+
+    print("\n== plausibility floor (unit-mismatch guard) ==")
+    # gold 50000 + making 27 -> 0.054%, physically impossible; must be rejected
+    r = _finish("test", {"gold_value": 50000.0, "making_charge": 27.0})
+    ok = not r.ok
+    print(f"  {'PASS' if ok else 'FAIL'}  0.05% rejected -> {r.making_pct} ({r.notes})")
+    failures += 0 if ok else 1
+    r = _finish("test", {"gold_value": 50000.0, "making_charge": 15000.0})
+    ok = r.ok and abs(r.making_pct - 30.0) < 0.1
+    print(f"  {'PASS' if ok else 'FAIL'}  30% accepted -> {r.making_pct}")
     failures += 0 if ok else 1
 
     print("\n== fuzzy concept matching ==")
