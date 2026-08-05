@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-06T00:25:29.630557+05:30",
+  "updated": "2026-08-06T00:40:48.271174+05:30",
   "note": "Making charge as % of gold value, median across multiple real products per category from each jeweller's public price breakup. Indicative - varies by specific design.",
   "brands": [
     {
@@ -135,8 +135,8 @@
               "pct": 82.3
             },
             {
-              "url": "https://www.caratlane.com/jewellery/star-gaze-kids-gold-stud-earrings-ue06535-1y0000.html",
-              "pct": 83.1
+              "url": "https://www.caratlane.com/jewellery/sparkling-butterfly-9kt-diamond-stud-earrings-je12946-8ys300.html",
+              "pct": 55.0
             }
           ]
         },
@@ -192,6 +192,29 @@
       "brand": "Senco Gold",
       "categories": [
         {
+          "category": "Bangle",
+          "items": 20,
+          "making_pct_median": 20.6,
+          "making_pct_min": 20.6,
+          "making_pct_max": 27.0,
+          "confidence": "high",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://sencogoldanddiamonds.com/jewellery/twin-leaf-diamond-noa-bangle",
+              "pct": 22.3
+            },
+            {
+              "url": "https://sencogoldanddiamonds.com/jewellery/pride-peacock-diamond-noa-bangle",
+              "pct": 22.2
+            },
+            {
+              "url": "https://sencogoldanddiamonds.com/jewellery/knot-of-life-diamond-noa-bangle",
+              "pct": 22.4
+            }
+          ]
+        },
+        {
           "category": "Earrings",
           "items": 17,
           "making_pct_median": 11.5,
@@ -201,39 +224,62 @@
           "rejected_outliers": 3,
           "examples": [
             {
-              "url": "https://sencogoldanddiamonds.com/jewellery/rose-gold-droplet-diamond-studs",
-              "pct": 8.7
+              "url": "https://sencogoldanddiamonds.com/jewellery/stylish-reflection-gold-earrings",
+              "pct": 30.0
             },
             {
-              "url": "https://sencogoldanddiamonds.com/jewellery/little-heart-diamond-studs",
-              "pct": 11.5
+              "url": "https://sencogoldanddiamonds.com/jewellery/sacred-vision-gold-drop-earrings",
+              "pct": 30.0
             },
             {
-              "url": "https://sencogoldanddiamonds.com/jewellery/love-birds-diamond-studs",
-              "pct": 13.1
+              "url": "https://sencogoldanddiamonds.com/jewellery/dhanush-ban-gold-earrings",
+              "pct": 40.0
+            }
+          ]
+        },
+        {
+          "category": "Mangalsutra",
+          "items": 20,
+          "making_pct_median": 27.0,
+          "making_pct_min": 10.4,
+          "making_pct_max": 27.0,
+          "confidence": "high",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://sencogoldanddiamonds.com/jewellery/heritage-art-gold-mangalsutra",
+              "pct": 27.0
+            },
+            {
+              "url": "https://sencogoldanddiamonds.com/jewellery/traditional-radiance-gold-mangalsutra",
+              "pct": 27.0
+            },
+            {
+              "url": "https://sencogoldanddiamonds.com/jewellery/a-faithful-gold-mangalsutra",
+              "pct": 27.0
             }
           ]
         },
         {
           "category": "Ring",
-          "items": 11,
-          "making_pct_median": 0.1,
-          "making_pct_min": 0.0,
-          "making_pct_max": 0.2,
-          "confidence": "medium",
-          "rejected_outliers": 9,
+          "items": 20,
+          "making_pct_median": 30.0,
+          "making_pct_min": 9.9,
+          "making_pct_max": 35.0,
+          "confidence": "high",
+          "rejected_outliers": 0,
           "examples": [
             {
               "url": "https://sencogoldanddiamonds.com/jewellery/lovey-dovey-gold-ring",
-              "pct": 0.1
+              "pct": 30.0
             },
             {
               "url": "https://sencogoldanddiamonds.com/jewellery/diversity-of-love-gold-ring",
-              "pct": 0.1
+              "pct": 35.0
             },
             {
-              "url": "https://sencogoldanddiamonds.com/jewellery/spring-smile-diamond-pendant",
-              "pct": 15.0
+              "url": "https://sencogoldanddiamonds.com/jewellery/divine-shree-gold-ring",
+              "pct": 30.0
             }
           ]
         }
