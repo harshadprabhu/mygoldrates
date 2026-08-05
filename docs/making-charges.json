@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-06T00:15:38.589593+05:30",
+  "updated": "2026-08-06T00:25:29.630557+05:30",
   "note": "Making charge as % of gold value, median across multiple real products per category from each jeweller's public price breakup. Indicative - varies by specific design.",
   "brands": [
     {
@@ -86,6 +86,103 @@
             {
               "url": "https://www.bluestone.com/rings/the-dimas-textured-band-for-her~81692.html",
               "pct": 34.9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "CaratLane",
+      "categories": [
+        {
+          "category": "Bangle",
+          "items": 20,
+          "making_pct_median": 30.0,
+          "making_pct_min": 19.0,
+          "making_pct_max": 43.0,
+          "confidence": "high",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.caratlane.com/jewellery/daily-dazzle-gold-bangle-ub00947-yg0000.html",
+              "pct": 30.0
+            },
+            {
+              "url": "https://www.caratlane.com/jewellery/aarini-22kt-gold-bangle-kb00816-2y0000.html",
+              "pct": 26.0
+            },
+            {
+              "url": "https://www.caratlane.com/jewellery/stylish-statement-22kt-gold-mens-kada-kb00903-2y0000.html",
+              "pct": 22.0
+            }
+          ]
+        },
+        {
+          "category": "Earrings",
+          "items": 20,
+          "making_pct_median": 52.4,
+          "making_pct_min": 11.6,
+          "making_pct_max": 87.0,
+          "confidence": "high",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.caratlane.com/jewellery/bright-bloomy-diamond-stud-earrings-je08111-ygs300.html",
+              "pct": 67.0
+            },
+            {
+              "url": "https://www.caratlane.com/jewellery/alor-gold-stud-earrings-for-kids-ue07183-yg0000.html",
+              "pct": 82.3
+            },
+            {
+              "url": "https://www.caratlane.com/jewellery/star-gaze-kids-gold-stud-earrings-ue06535-1y0000.html",
+              "pct": 83.1
+            }
+          ]
+        },
+        {
+          "category": "Mangalsutra",
+          "items": 18,
+          "making_pct_median": 37.0,
+          "making_pct_min": 33.0,
+          "making_pct_max": 39.0,
+          "confidence": "high",
+          "rejected_outliers": 2,
+          "examples": [
+            {
+              "url": "https://www.caratlane.com/jewellery/forever-love-diamond-gemstone-mangalsutra-js02241-1yp9se.html",
+              "pct": 34.0
+            },
+            {
+              "url": "https://www.caratlane.com/jewellery/amaya-diamond-mangalsutra-js00527-1ys300.html",
+              "pct": 39.0
+            },
+            {
+              "url": "https://www.caratlane.com/jewellery/tania-diamond-mangalsutra-js00519-1ys300.html",
+              "pct": 38.0
+            }
+          ]
+        },
+        {
+          "category": "Ring",
+          "items": 20,
+          "making_pct_median": 64.0,
+          "making_pct_min": 23.0,
+          "making_pct_max": 90.1,
+          "confidence": "high",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.caratlane.com/jewellery/little-mermaid-diamond-with-pearl-ring-jr08692-1ys3p0.html",
+              "pct": 34.0
+            },
+            {
+              "url": "https://www.caratlane.com/jewellery/red-amour-9kt-gemstone-ring-jr12091-8ys3si.html",
+              "pct": 61.2
+            },
+            {
+              "url": "https://www.caratlane.com/jewellery/rectangular-streak-gemstone-ring-jr07941-1ys3se.html",
+              "pct": 68.3
             }
           ]
         }
