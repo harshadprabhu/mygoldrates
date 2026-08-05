@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-01T12:12:00.774606+05:30",
+  "updated": "2026-08-05T23:07:01.436220+05:30",
   "note": "Making charge as % of gold value, median across multiple real products per category from each jeweller's public price breakup. Indicative - varies by specific design.",
   "brands": [
     {
@@ -9,63 +9,28 @@
           "category": "Bangle",
           "items": 20,
           "making_pct_median": 27.0,
-          "making_pct_min": 22.5,
+          "making_pct_min": 22.2,
           "making_pct_max": 30.0
-        },
-        {
-          "category": "Bracelet",
-          "items": 20,
-          "making_pct_median": 32.5,
-          "making_pct_min": 18.1,
-          "making_pct_max": 40.0
-        },
-        {
-          "category": "Chain",
-          "items": 20,
-          "making_pct_median": 27.0,
-          "making_pct_min": 21.8,
-          "making_pct_max": 27.0
-        },
-        {
-          "category": "Coin",
-          "items": 9,
-          "making_pct_median": 5.0,
-          "making_pct_min": 5.0,
-          "making_pct_max": 27.0
         },
         {
           "category": "Earrings",
           "items": 20,
-          "making_pct_median": 20.2,
-          "making_pct_min": 19.6,
+          "making_pct_median": 19.9,
+          "making_pct_min": 19.3,
           "making_pct_max": 40.0
         },
         {
           "category": "Mangalsutra",
           "items": 20,
           "making_pct_median": 27.0,
-          "making_pct_min": 17.7,
+          "making_pct_min": 17.5,
           "making_pct_max": 27.0
-        },
-        {
-          "category": "Necklace",
-          "items": 20,
-          "making_pct_median": 27.0,
-          "making_pct_min": 27.0,
-          "making_pct_max": 30.0
-        },
-        {
-          "category": "Pendant",
-          "items": 14,
-          "making_pct_median": 40.9,
-          "making_pct_min": 30.0,
-          "making_pct_max": 60.0
         },
         {
           "category": "Ring",
           "items": 20,
           "making_pct_median": 30.0,
-          "making_pct_min": 18.1,
+          "making_pct_min": 17.9,
           "making_pct_max": 35.0
         }
       ]
