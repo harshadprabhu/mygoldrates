@@ -1,0 +1,147 @@
+name: diag-caratlane-mc
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: CaratLane making-charge extractor POC
+        env:
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
+          ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
+          CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
+        run: |
+          python - <<'PY'
+          import os, re, requests
+
+          # 8 product URLs user provided (skip category listing pages)
+          URLS = [
+            ("Bangle", "https://www.caratlane.com/jewellery/gilded-classic-22kt-gold-bangle-kb00931-2y0000.html"),
+            ("Bangle", "https://www.caratlane.com/jewellery/everlasting-grace-22kt-gold-bangle-kb00932-2y0000.html"),
+            ("Bangle", "https://www.caratlane.com/jewellery/koyna-22kt-gold-bangles-kb00894-2y0000.html"),
+            ("Ring",   "https://www.caratlane.com/jewellery/grandeur-diamond-ring-for-men-jr12413-1ys300.html"),
+            ("Ring",   "https://www.caratlane.com/jewellery/jovithra-22kt-gold-band-kr01799-2y0000.html"),
+            ("Earrings","https://www.caratlane.com/jewellery/diya-22kt-gold-hoop-earrings-ke05164-2y0000.html"),
+            ("Earrings","https://www.caratlane.com/jewellery/esha-22kt-gold-hoop-earrings-ke05165-2y0000.html"),
+            ("Mangalsutra","https://www.caratlane.com/jewellery/parisian-knot-diamond-mangalsutra-js02968-1ys300.html"),
+          ]
+
+          sess = requests.Session()
+          sess.headers.update({"User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"})
+
+          def fetch(url):
+            # direct first, then free proxies
+            try:
+              r = sess.get(url, timeout=25)
+              if r.status_code == 200 and len(r.text) > 500:
+                return r.text, "direct"
+            except Exception:
+              pass
+            for key_env, name, u, p in [
+              ("SCRAPERAPI_KEY","scraperapi","http://api.scraperapi.com",
+                {"url": url, "render":"true","country_code":"in"}),
+              ("SCRAPINGBEE_KEY","scrapingbee","https://app.scrapingbee.com/api/v1/",
+                {"url": url, "render_js":"true","wait":"3000"}),
+              ("ZENROWS_KEY","zenrows","https://api.zenrows.com/v1/",
+                {"url": url, "js_render":"true","wait":"3000"}),
+              ("CRAWLBASE_KEY","crawlbase","https://api.crawlbase.com/",
+                {"url": url}),
+            ]:
+              k = os.environ.get(key_env)
+              if not k: continue
+              p2 = dict(p)
+              p2["api_key" if name != "crawlbase" else "token"] = k
+              if name == "zenrows":
+                p2["apikey"] = p2.pop("api_key")
+              try:
+                r = sess.get(u, params=p2, timeout=60)
+                if r.status_code == 200 and len(r.text) > 500:
+                  return r.text, name
+              except Exception:
+                continue
+            return None, "all-failed"
+
+          # ---- HYPOTHESIZED CaratLane-specific extractor ----
+          # Their price_breakup JSON shape (verified for RATES earlier):
+          #   "gold_total":[{...,"value":"Rs. 14729",...}]
+          #   "making":[{...,"value":"Rs. 884",...}]
+          # Compute making% = making/gold_total * 100
+          CL_MAKING_RE = re.compile(
+            r'"making"\s*:\s*\[\s*\{[^}]*?"value"\s*:\s*"'
+            r'(?:Rs\.?|\\u20b9|₹|INR)\.?\s*([\d,]+(?:\.\d+)?)"', re.I)
+          CL_GOLDTOT_RE = re.compile(
+            r'"gold_total"\s*:\s*\[\s*\{[^}]*?"value"\s*:\s*"'
+            r'(?:Rs\.?|\\u20b9|₹|INR)\.?\s*([\d,]+(?:\.\d+)?)"', re.I)
+
+          def caratlane_making_pct(html):
+              mm = CL_MAKING_RE.search(html)
+              gm = CL_GOLDTOT_RE.search(html)
+              if not (mm and gm): return None, mm, gm
+              try:
+                  making = float(mm.group(1).replace(",",""))
+                  gold   = float(gm.group(1).replace(",",""))
+                  if gold > 0 and 0 < making/gold <= 0.8:
+                      return round(making/gold * 100, 1), mm, gm
+              except ValueError: pass
+              return None, mm, gm
+
+          # ---- current GENERIC extractor (from scrape_charges.py) ----
+          def generic_making_pct(html):
+              mt = re.search(r'"making_charge_type"\s*:\s*"([a-z]+)"', html)
+              mv = re.search(r'"making_charge"\s*:\s*"?([0-9.]+)', html)
+              if mt and mv and "percent" in mt.group(1).lower():
+                  p = float(mv.group(1))
+                  if 0 < p <= 60: return round(p, 1)
+              mval = re.search(r'"(?:making_charge_value|making_charges?|makingCharge|labour|wastage)"\s*:\s*"?([0-9,.]+)', html, re.I)
+              gval = re.search(r'"(?:gold_value|metal_value|metal_price|gold_amount|goldValue|metalValue)"\s*:\s*"?([0-9,.]+)', html, re.I)
+              if mval and gval:
+                  m = float(mval.group(1).replace(",",""))
+                  g = float(gval.group(1).replace(",",""))
+                  if g > 0 and 0 < m/g <= 0.6: return round(m/g * 100, 1)
+              m = re.search(r'(?:making\s*charges?|value\s*addition|wastage)'
+                            r'[^%<0-9]{0,40}([0-9]{1,2}(?:\.[0-9])?)\s*%', html, re.I)
+              if m and 0 < float(m.group(1)) <= 60: return round(float(m.group(1)), 1)
+              return None
+
+          rows = []
+          for cat, u in URLS:
+              html, src = fetch(u)
+              short = u.split("/")[-1][:50]
+              if not html:
+                  print(f"[{cat}] {short}: FETCH FAIL ({src})")
+                  rows.append((cat, "FETCH_FAIL", None, None, src))
+                  continue
+              generic = generic_making_pct(html)
+              cl_pct, mm, gm = caratlane_making_pct(html)
+              tag = f"CL={cl_pct}" if cl_pct else "CL=none"
+              tag += f" gen={generic}" if generic else " gen=none"
+              print(f"[{cat}] {short}: via {src}, {tag}")
+              # for failures, show what markers were found nearby
+              if cl_pct is None:
+                  ctx = ""
+                  for k in ('"making"', '"gold_total"', '"price_breakup"'):
+                      i = html.find(k)
+                      if i >= 0:
+                          ctx += f"\n    {k} @ {i}: ...{html[i:i+180]}..."
+                  print(f"    ctx:{ctx if ctx else ' none of price_breakup markers found'}")
+              rows.append((cat, "OK" if cl_pct else "MISS", cl_pct, generic, src))
+
+          print("\n============ SUMMARY ============")
+          print(f"{'Cat':<12} {'Status':<10} {'CL%':<8} {'Gen%':<8} {'Src':<12}")
+          for cat, status, cl, gen, src in rows:
+              print(f"{cat:<12} {status:<10} {str(cl):<8} {str(gen):<8} {src:<12}")
+
+          okcount = sum(1 for _,s,_,_,_ in rows if s == "OK")
+          print(f"\nCaratLane extractor success: {okcount}/{len(rows)} URLs")
+          PY
