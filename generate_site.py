@@ -2284,12 +2284,15 @@ def main():
                 dash[nm] = {"rates": rate_by_brand[nm], "mc": cats_d}
         dash_cats = sorted({c for v in dash.values() for c in v["mc"]})
 
+        # __DATA__ lives in the JS block, the rest in the HTML block - keep the
+        # substitutions on their own strings or the page ships a literal
+        # "var D = __DATA__" and the whole dashboard silently fails to render.
         mc_body = MC_DASH_HTML \
-            .replace("__DATA__", json.dumps({"brands": dash,
-                                             "cats": dash_cats})) \
             .replace("__UPDATED__", mc.get("updated", "")[:10]) \
             .replace("__NBRANDS__", str(len(dash))) \
             .replace("__SITE__", SITE_URL)
+        mc_js = MC_DASH_JS.replace(
+            "__DATA__", json.dumps({"brands": dash, "cats": dash_cats}))
 
         render_content(
             "making-charges-comparison",
@@ -2298,7 +2301,7 @@ def main():
             "each jeweller - gold value, making charge and GST broken out, "
             "ranked cheapest first.",
             crumbs(("Making Charges", None)) + mc_body,
-            extra_js=MC_DASH_JS)
+            extra_js=mc_js)
         extra_urls.append(("making-charges-comparison", "monthly", "0.6"))
 
     # ---- News: auto daily market recap from the rate history ----
