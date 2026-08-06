@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-06",
-  "last_updated": "2026-08-06T13:01:19.149854+05:30",
+  "last_updated": "2026-08-06T14:09:58.312452+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14975.36,
-    "22k": 13727.42,
-    "18k": 11231.52
+    "24k": 14978.0,
+    "22k": 13729.83,
+    "18k": 11233.5
   },
   "lowest_24k": {
     "jeweller": "Candere",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 149406.0,
-      "change_pct": 0.61
+      "price_per_10g_inr": 149538.0,
+      "change_pct": 0.7
     },
     {
       "contract": "GOLDM",
       "expiry": "04SEP2026",
-      "price_per_10g_inr": 148101.0,
-      "change_pct": 0.62
+      "price_per_10g_inr": 148203.0,
+      "change_pct": 0.69
     }
   ],
   "jewellers": [
@@ -50,12 +50,6 @@
       "rate_24k_per_gram_inr": 14636.0,
       "rate_22k_per_gram_inr": 13416.33,
       "rate_18k_per_gram_inr": 10977.0
-    },
-    {
-      "jeweller": "ORRA",
-      "rate_24k_per_gram_inr": 14716.71,
-      "rate_22k_per_gram_inr": 13490.32,
-      "rate_18k_per_gram_inr": 11037.53
     },
     {
       "jeweller": "Kalyan Jewellers",
@@ -94,10 +88,22 @@
       "rate_18k_per_gram_inr": 11229.75
     },
     {
+      "jeweller": "ORRA",
+      "rate_24k_per_gram_inr": 14974.27,
+      "rate_22k_per_gram_inr": 13726.41,
+      "rate_18k_per_gram_inr": 11230.7
+    },
+    {
       "jeweller": "Jos Alukkas",
       "rate_24k_per_gram_inr": 14978.0,
       "rate_22k_per_gram_inr": 13729.83,
       "rate_18k_per_gram_inr": 11233.5
+    },
+    {
+      "jeweller": "Bhima Jewels",
+      "rate_24k_per_gram_inr": 14979.0,
+      "rate_22k_per_gram_inr": 13730.75,
+      "rate_18k_per_gram_inr": 11234.25
     },
     {
       "jeweller": "Vummidi Bangaru",
@@ -118,12 +124,6 @@
       "rate_18k_per_gram_inr": 11266.36
     },
     {
-      "jeweller": "Ranka Jewellers",
-      "rate_24k_per_gram_inr": 15040.0,
-      "rate_22k_per_gram_inr": 13786.67,
-      "rate_18k_per_gram_inr": 11280.0
-    },
-    {
       "jeweller": "Kisna",
       "rate_24k_per_gram_inr": 15068.39,
       "rate_22k_per_gram_inr": 13812.69,
@@ -140,9 +140,15 @@
       "rate_24k_per_gram_inr": 15131.0,
       "rate_22k_per_gram_inr": 13870.08,
       "rate_18k_per_gram_inr": 11348.25
+    },
+    {
+      "jeweller": "Ranka Jewellers",
+      "rate_24k_per_gram_inr": 15265.0,
+      "rate_22k_per_gram_inr": 13992.92,
+      "rate_18k_per_gram_inr": 11448.75
     }
   ],
-  "jeweller_count": 18,
+  "jeweller_count": 19,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
