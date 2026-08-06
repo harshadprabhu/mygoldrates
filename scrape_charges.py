@@ -87,7 +87,8 @@ DISCOVER = [
      "sitemaps": ["https://whpjewellers.com/sitemap.xml"]},
 
     # Shopify. Listings + pagination verified good; seeds cover the gap.
-    {"brand": "Kisna", "product_re": r'href="(/products/[a-z0-9][a-z0-9-]*)(?:\?[^"]*)?"',
+    {"brand": "Kisna", "pagination": "page",
+     "product_re": r'href="(/products/[a-z0-9][a-z0-9-]*)(?:\?[^"]*)?"',
      "listings": {"Ring": "https://www.kisna.com/jewellery/rings+18kt",
                   "Earrings": "https://www.kisna.com/jewellery/earrings+24kt+18kt",
                   "Mangalsutra": "https://www.kisna.com/jewellery/mangalsutra",
@@ -260,10 +261,22 @@ def collect_urls(sess, d):
             add(c, u)
 
     prod_re = d.get("product_re")
+    # Pagination style varies by platform - guessing wrong silently caps
+    # discovery at page 1 + hand-supplied seeds, which is nowhere near
+    # PER_CAT and would make the category median unfair (few items = one
+    # unusual design skews the whole number). Each brand declares its style:
+    #   "baseOffset" (CaratLane): ?baseOffset=20,40,60,...
+    #   "page"       (Shopify, e.g. Kisna): ?page=2,3,4,...
+    pag_style = d.get("pagination", "baseOffset")
     for cat, listing in (d.get("listings") or {}).items():
-        offset, page = 0, 0
-        while page < 5 and len(buckets.get(cat, [])) < PER_CAT:
-            url = listing if offset == 0 else f"{listing}?baseOffset={offset}"
+        page_num = 1
+        while page_num <= 6 and len(buckets.get(cat, [])) < PER_CAT:
+            if page_num == 1:
+                url = listing
+            elif pag_style == "page":
+                url = f"{listing}?page={page_num}"
+            else:
+                url = f"{listing}?baseOffset={(page_num - 1) * 20}"
             html, _ = fetch(sess, url, allow_proxy=True, timeout=25)
             if not html:
                 break
@@ -274,9 +287,9 @@ def collect_urls(sess, d):
                     cand = urljoin(listing, cand)
                 if categorize(cand) == cat:
                     add(cat, cand)
-            if len(buckets.get(cat, [])) == before:
+            if len(buckets.get(cat, [])) == before and page_num > 1:
                 break                  # page yielded nothing new
-            offset += 20
+            page_num += 1
             page += 1
             time.sleep(0.3)
     return buckets
