@@ -2259,39 +2259,46 @@ def main():
         brs = [b["brand"] for b in mc["brands"]]
         look = {(b["brand"], c["category"]): c
                 for b in mc["brands"] for c in b["categories"]}
-        head = "".join(f"<th>{b}</th>" for b in brs)
-        rows_html = ""
-        for cat in cats:
-            vals = [look[(b, cat)]["making_pct_median"]
-                    for b in brs if (b, cat) in look]
-            lo = min(vals) if vals else None
-            cells = ""
-            for b in brs:
-                if (b, cat) in look:
-                    v = look[(b, cat)]["making_pct_median"]
-                    cells += (f'<td class="{"up" if v == lo else ""}">{v}%</td>')
-                else:
-                    cells += "<td>-</td>"
-            rows_html += f"<tr><td>{cat}</td>{cells}</tr>"
+        # ---- interactive "what would it actually cost me" dashboard ----
+        # Join making-charge medians with each brand's live per-gram rate, so
+        # the page can price a real item (category + weight + karat) end to end.
+        # The insight this unlocks: the cheapest RATE is often not the cheapest
+        # TOTAL once making charges are added - which is the whole point.
+        rate_by_brand = {}
+        for r in live:
+            nm = r["brands"]["name"]
+            lad = ladder(r["canonical_24k_pre_gst"])
+            rate_by_brand[nm] = {"24": round(lad["24K"], 2),
+                                 "22": round(lad["22K"], 2),
+                                 "18": round(lad["18K"], 2)}
+        dash = {}
+        for b in mc["brands"]:
+            nm = b["brand"]
+            if nm not in rate_by_brand:
+                continue          # no live rate today -> cannot price it
+            cats_d = {c["category"]: {"pct": c["making_pct_median"],
+                                      "n": c.get("items", 0),
+                                      "conf": c.get("confidence", "")}
+                      for c in b["categories"]}
+            if cats_d:
+                dash[nm] = {"rates": rate_by_brand[nm], "mc": cats_d}
+        dash_cats = sorted({c for v in dash.values() for c in v["mc"]})
+
+        mc_body = MC_DASH_HTML \
+            .replace("__DATA__", json.dumps({"brands": dash,
+                                             "cats": dash_cats})) \
+            .replace("__UPDATED__", mc.get("updated", "")[:10]) \
+            .replace("__NBRANDS__", str(len(dash))) \
+            .replace("__SITE__", SITE_URL)
+
         render_content(
             "making-charges-comparison",
-            "Gold Making Charges Comparison by Category (India) | MyGoldRates",
-            "Compare gold jewellery making charges by category - chain, ring, "
-            "bangle, coin & more - as a % of gold value across jewellers.",
-            crumbs(("Making Charges", None)) +
-            "<h1>Gold Making Charges Comparison</h1>"
-            "<p>Making charge as a percentage of gold value, by category, taken "
-            "from each jeweller's published product price breakup - the median "
-            "across multiple real products. Lower means cheaper to craft. "
-            f"Updated {mc.get('updated', '')[:10]}.</p>"
-            '<div class="tablecard" style="overflow:auto"><table class="dtable">'
-            f"<thead><tr><th>Category</th>{head}</tr></thead>"
-            f"<tbody>{rows_html}</tbody></table></div>"
-            '<p class="dnote">Indicative only - making charges vary by specific '
-            "design and negotiation. Coins carry the lowest making charge; "
-            "ornate pieces the highest. GST (3%) is extra. Use the "
-            f'<a href="{SITE_URL}/making-charges-calculator">making charges '
-            "calculator</a> to estimate a billed price.</p>")
+            "Gold Making Charge Calculator - Compare Real Prices | MyGoldRates",
+            "See what a bangle, ring, earrings or mangalsutra actually costs at "
+            "each jeweller - gold value, making charge and GST broken out, "
+            "ranked cheapest first.",
+            crumbs(("Making Charges", None)) + mc_body,
+            extra_js=MC_DASH_JS)
         extra_urls.append(("making-charges-comparison", "monthly", "0.6"))
 
     # ---- News: auto daily market recap from the rate history ----
@@ -5298,6 +5305,284 @@ $nav
 </body>
 </html>
 """)
+
+
+# =====================================================================
+# Interactive making-charge dashboard (docs/making-charges-comparison.html).
+# Plain strings + str.replace() placeholders (NOT f-string/Template) so the
+# embedded JS braces and $ stay literal. __DATA__ carries the brand join.
+# =====================================================================
+MC_DASH_HTML = r"""
+<h1>What will it actually cost you?</h1>
+<p class="mc-lede">Two jewellers can quote the same gold rate and still bill you
+thousands apart &mdash; the difference is the <strong>making charge</strong>.
+Pick what you want to buy and see the real, all-in price at each jeweller,
+broken down to the rupee. Rates are today's; making charges are the median from
+their own published price breakups. Updated __UPDATED__.</p>
+
+<div class="mc-panel">
+  <div class="mc-controls">
+    <div class="mc-field">
+      <label>What are you buying?</label>
+      <div class="mc-seg" id="mc-cats"></div>
+    </div>
+    <div class="mc-field">
+      <label>Weight <span class="mc-hint">grams</span></label>
+      <input type="number" id="mc-weight" min="1" max="200" step="0.5" value="10">
+      <div class="mc-chips" id="mc-wchips"></div>
+    </div>
+    <div class="mc-field">
+      <label>Purity</label>
+      <div class="mc-seg" id="mc-karats"></div>
+    </div>
+  </div>
+</div>
+
+<div id="mc-headline" class="mc-headline" hidden></div>
+<div id="mc-insight" class="mc-insight" hidden></div>
+<div id="mc-results"></div>
+
+<p class="dnote" id="mc-note"></p>
+<p class="dnote">Making charge is the median across real products we read from
+each jeweller's own price breakup, so it is indicative &mdash; a specific design
+(especially stone-set pieces) can sit well above or below it. GST is 3% on gold
+plus making. Hallmarking and stone costs are not included. Always confirm the
+billed price in store. See the
+<a href="__SITE__/making-charges-calculator">making charges calculator</a> to
+price a specific quote.</p>
+"""
+
+MC_DASH_JS = r"""
+<style>
+.mc-lede{font-size:15px;line-height:1.7;color:var(--ink-2);max-width:70ch}
+.mc-panel{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px 20px;margin:20px 0}
+.mc-controls{display:grid;grid-template-columns:1.4fr .9fr .9fr;gap:20px}
+@media(max-width:720px){.mc-controls{grid-template-columns:1fr;gap:16px}}
+.mc-field label{display:block;font:600 11px/1 "IBM Plex Sans",sans-serif;
+  text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin-bottom:8px}
+.mc-hint{text-transform:none;letter-spacing:0;font-weight:400;opacity:.7}
+.mc-seg{display:flex;flex-wrap:wrap;gap:6px}
+.mc-seg button{font:600 13px/1 "IBM Plex Sans",sans-serif;padding:9px 13px;
+  border:1px solid var(--line);background:var(--paper);color:var(--ink-2);
+  border-radius:9px;cursor:pointer;transition:all .15s}
+.mc-seg button:hover{border-color:var(--gold)}
+.mc-seg button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);
+  color:#231a02}
+#mc-weight{width:100%;padding:10px 12px;border:1px solid var(--line);
+  border-radius:9px;background:var(--paper);color:var(--ink);
+  font:600 16px/1 "IBM Plex Mono",monospace}
+.mc-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.mc-chips button{font:500 11.5px/1 "IBM Plex Sans",sans-serif;padding:5px 9px;
+  border:1px solid var(--line);background:transparent;color:var(--ink-3);
+  border-radius:20px;cursor:pointer}
+.mc-chips button:hover{border-color:var(--gold);color:var(--gold)}
+
+.mc-headline{background:linear-gradient(160deg,var(--board),var(--board-2));
+  border:1px solid rgba(217,178,74,.35);border-radius:16px;padding:20px 22px;
+  margin:18px 0;color:#EDE9DD}
+.mc-headline .mh-k{font:600 11px/1 "IBM Plex Sans",sans-serif;
+  text-transform:uppercase;letter-spacing:.08em;color:#B9C2B4}
+.mc-headline .mh-v{font-family:"IBM Plex Mono",monospace;font-size:clamp(24px,5vw,34px);
+  font-weight:700;color:#F6F1E3;margin:6px 0 2px}
+.mc-headline .mh-sub{font-size:14px;color:#B9C2B4}
+.mc-headline b{color:var(--gold)}
+
+.mc-insight{border-radius:14px;padding:14px 16px;margin:14px 0;font-size:14.5px;
+  line-height:1.6;border:1px solid}
+.mc-insight.warn{background:color-mix(in srgb,var(--warm) 10%,transparent);
+  border-color:color-mix(in srgb,var(--warm) 40%,transparent);color:var(--ink)}
+.mc-insight.good{background:color-mix(in srgb,var(--emerald) 10%,transparent);
+  border-color:color-mix(in srgb,var(--emerald) 40%,transparent);color:var(--ink)}
+
+.mc-row{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:16px 18px;margin:10px 0;transition:border-color .15s}
+.mc-row.best{border-color:var(--gold);box-shadow:0 2px 16px rgba(217,178,74,.13)}
+.mc-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.mc-rank{font:700 12px/1 "IBM Plex Mono",monospace;color:var(--ink-3);min-width:20px}
+.mc-brand{font-weight:600;font-size:16px;color:var(--ink)}
+.mc-badge{font:600 10px/1 "IBM Plex Sans",sans-serif;text-transform:uppercase;
+  letter-spacing:.06em;padding:4px 8px;border-radius:20px;
+  background:var(--gold);color:#231a02}
+.mc-badge.soft{background:transparent;border:1px solid var(--line);color:var(--ink-3)}
+.mc-total{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:20px;
+  font-weight:700;color:var(--ink)}
+.mc-delta{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--warm);
+  margin-left:8px}
+.mc-bar{display:flex;height:9px;border-radius:6px;overflow:hidden;margin:12px 0 9px;
+  background:var(--line)}
+.mc-bar i{display:block;height:100%}
+.mc-bar .b-gold{background:linear-gradient(90deg,#E3BF63,#B07E12)}
+.mc-bar .b-mc{background:var(--warm)}
+.mc-bar .b-gst{background:var(--ink-3);opacity:.55}
+.mc-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--ink-2)}
+.mc-legend span{display:inline-flex;align-items:center;gap:5px}
+.mc-legend i{width:9px;height:9px;border-radius:3px;display:inline-block}
+.mc-legend b{font-family:"IBM Plex Mono",monospace;color:var(--ink);font-weight:600}
+.mc-empty{color:var(--ink-3);padding:26px 4px;text-align:center;font-size:14px}
+</style>
+<script>
+(function(){
+  var D = __DATA__;
+  var GST = 0.03;
+  var WEIGHTS = [
+    {g:2,  label:"2g · studs"},
+    {g:5,  label:"5g · ring"},
+    {g:8,  label:"8g · chain"},
+    {g:10, label:"10g · bangle"},
+    {g:20, label:"20g · pair"},
+    {g:50, label:"50g · set"}
+  ];
+  var KARATS = [["22","22K (916)"],["24","24K (999)"],["18","18K (750)"]];
+
+  var state = { cat: (D.cats[0]||""), weight: 10, karat: "22" };
+
+  function $(id){ return document.getElementById(id); }
+  function inr(n){
+    if(n==null||isNaN(n)) return "-";
+    return "₹" + Math.round(n).toLocaleString("en-IN");
+  }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+
+  function seg(host, items, cur, onPick){
+    host.innerHTML = "";
+    items.forEach(function(it){
+      var val = it[0], lab = it[1];
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = lab;
+      b.setAttribute("aria-pressed", val === cur ? "true" : "false");
+      b.onclick = function(){ onPick(val); };
+      host.appendChild(b);
+    });
+  }
+
+  function compute(){
+    var out = [];
+    Object.keys(D.brands).forEach(function(name){
+      var b = D.brands[name];
+      var mc = b.mc[state.cat];
+      var rate = b.rates[state.karat];
+      if(!mc || !rate) return;
+      var gold   = rate * state.weight;
+      var making = gold * (mc.pct/100);
+      var gst    = (gold + making) * GST;
+      out.push({ name:name, rate:rate, pct:mc.pct, n:mc.n, conf:mc.conf,
+                 gold:gold, making:making, gst:gst,
+                 total: gold + making + gst });
+    });
+    out.sort(function(a,b){ return a.total - b.total; });
+    return out;
+  }
+
+  function render(){
+    var rows = compute();
+    var host = $("mc-results");
+    var head = $("mc-headline"), ins = $("mc-insight");
+
+    if(!rows.length){
+      host.innerHTML = '<div class="mc-empty">No jeweller in our making-charge '
+        + 'sample stocks this combination yet.</div>';
+      head.hidden = true; ins.hidden = true; $("mc-note").textContent = "";
+      return;
+    }
+
+    var best = rows[0], worst = rows[rows.length-1];
+    var item = state.weight + "g " + state.cat.toLowerCase();
+
+    head.hidden = false;
+    head.innerHTML =
+      '<div class="mh-k">Cheapest for a ' + esc(item) + ' in ' + state.karat + 'K</div>'
+      + '<div class="mh-v">' + inr(best.total) + ' &middot; <b>' + esc(best.name) + '</b></div>'
+      + '<div class="mh-sub">All-in: gold + making charge + 3% GST.'
+      + (rows.length > 1
+          ? ' You would pay ' + inr(worst.total - best.total)
+            + ' more at ' + esc(worst.name) + '.'
+          : '')
+      + '</div>';
+
+    // The headline insight: lowest per-gram rate is often NOT the best deal.
+    var byRate = rows.slice().sort(function(a,b){ return a.rate - b.rate; });
+    var cheapRate = byRate[0];
+    if(rows.length > 1 && cheapRate.name !== best.name){
+      var diff = cheapRate.total - best.total;
+      ins.hidden = false;
+      ins.className = "mc-insight warn";
+      ins.innerHTML = "⚠️ <strong>" + esc(cheapRate.name) + " has the lowest gold rate ("
+        + inr(cheapRate.rate) + "/g) but is not the cheapest overall.</strong> Its "
+        + cheapRate.pct + "% making charge on this piece makes it " + inr(diff)
+        + " dearer than " + esc(best.name) + ". This is exactly the trap a rate-only "
+        + "comparison hides.";
+    } else if(rows.length > 1){
+      ins.hidden = false;
+      ins.className = "mc-insight good";
+      ins.innerHTML = "✓ <strong>" + esc(best.name) + " wins on both counts</strong> — "
+        + "lowest gold rate (" + inr(best.rate) + "/g) and the lowest all-in price "
+        + "for this piece, helped by a " + best.pct + "% making charge.";
+    } else { ins.hidden = true; }
+
+    host.innerHTML = rows.map(function(r, i){
+      var gp = r.gold/r.total*100, mp = r.making/r.total*100, sp = r.gst/r.total*100;
+      var confLab = r.conf === "high" ? "" :
+        '<span class="mc-badge soft">' + (r.n||0) + ' item' + (r.n===1?'':'s') + '</span>';
+      return '<div class="mc-row' + (i===0?' best':'') + '">'
+        + '<div class="mc-top">'
+          + '<span class="mc-rank">' + (i+1) + '</span>'
+          + '<span class="mc-brand">' + esc(r.name) + '</span>'
+          + (i===0 ? '<span class="mc-badge">Best price</span>' : '')
+          + confLab
+          + '<span class="mc-total">' + inr(r.total)
+          + (i>0 ? '<span class="mc-delta">+' + inr(r.total-best.total) + '</span>' : '')
+          + '</span>'
+        + '</div>'
+        + '<div class="mc-bar">'
+          + '<i class="b-gold" style="width:' + gp.toFixed(1) + '%"></i>'
+          + '<i class="b-mc" style="width:' + mp.toFixed(1) + '%"></i>'
+          + '<i class="b-gst" style="width:' + sp.toFixed(1) + '%"></i>'
+        + '</div>'
+        + '<div class="mc-legend">'
+          + '<span><i class="b-gold" style="background:linear-gradient(90deg,#E3BF63,#B07E12)"></i>'
+            + 'Gold <b>' + inr(r.gold) + '</b> <span style="opacity:.6">@'
+            + inr(r.rate) + '/g</span></span>'
+          + '<span><i style="background:var(--warm)"></i>Making <b>' + inr(r.making)
+            + '</b> <span style="opacity:.6">' + r.pct + '%</span></span>'
+          + '<span><i style="background:var(--ink-3);opacity:.55"></i>GST <b>'
+            + inr(r.gst) + '</b></span>'
+        + '</div>'
+      + '</div>';
+    }).join("");
+
+    $("mc-note").textContent = "Comparing " + rows.length + " jeweller"
+      + (rows.length===1?"":"s") + " we have verified making-charge data for. "
+      + "Badges show how many real products the median is based on.";
+  }
+
+  // ---- build controls ----
+  function build(){
+    seg($("mc-cats"), D.cats.map(function(c){ return [c,c]; }), state.cat,
+        function(v){ state.cat = v; build(); });
+    seg($("mc-karats"), KARATS, state.karat,
+        function(v){ state.karat = v; build(); });
+    render();
+  }
+
+  var chips = $("mc-wchips");
+  WEIGHTS.forEach(function(w){
+    var b = document.createElement("button");
+    b.type = "button"; b.textContent = w.label;
+    b.onclick = function(){ state.weight = w.g; $("mc-weight").value = w.g; render(); };
+    chips.appendChild(b);
+  });
+  $("mc-weight").addEventListener("input", function(){
+    var v = parseFloat(this.value);
+    if(!isNaN(v) && v > 0){ state.weight = v; render(); }
+  });
+
+  build();
+})();
+</script>
+"""
 
 
 # =====================================================================
