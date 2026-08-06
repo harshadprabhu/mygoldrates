@@ -238,8 +238,9 @@ def collect_urls(sess, d):
 
     Three routes, unioned (a brand may use any combination):
       sitemaps - walk XML sitemap(s)
-      listings - {category: listing_url}, with ?baseOffset pagination when a
-                 category comes up short (verified on CaratLane)
+      listings - {category: listing_url}, paginated per the brand's declared
+                 "pagination" style (?baseOffset= or ?page=) until PER_CAT
+                 items are found or pages run out
       seeds    - {category: [product_url, ...]} hand-verified fallbacks for
                  brands whose listings are client-rendered (e.g. BlueStone)
     Returns {category: [url, ...]}.
@@ -290,7 +291,6 @@ def collect_urls(sess, d):
             if len(buckets.get(cat, [])) == before and page_num > 1:
                 break                  # page yielded nothing new
             page_num += 1
-            page += 1
             time.sleep(0.3)
     return buckets
 
