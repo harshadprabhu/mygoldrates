@@ -274,11 +274,11 @@ footer p{margin:6px 0;max-width:80ch}
 <article class="page">
 <p class="crumbs"><a href="https://mygoldrates.com/">Home</a> &rsaquo; Making Charges</p>
 <h1>What will it actually cost you?</h1>
-<p class="mc-lede">Two jewellers can quote the same gold rate and still bill you
-thousands apart &mdash; the difference is the <strong>making charge</strong>.
-Pick what you want to buy and see the real, all-in price at each jeweller,
-broken down to the rupee. Rates are today's; making charges are the median from
-their own published price breakups. Updated 2026-08-06.</p>
+<p class="mc-lede">Two jewellers can quote you the same gold rate and still bill
+you thousands apart. The difference is the <strong>making charge</strong> &mdash;
+and almost nobody compares it before walking into a store. Choose what you want
+to buy below and see the true, all-in price at each jeweller, broken down to the
+last rupee. Updated 2026-08-06.</p>
 
 <div class="mc-panel">
   <div class="mc-controls">
@@ -303,13 +303,26 @@ their own published price breakups. Updated 2026-08-06.</p>
 <div id="mc-results"></div>
 
 <p class="dnote" id="mc-note"></p>
-<p class="dnote">Making charge is the median across real products we read from
-each jeweller's own price breakup, so it is indicative &mdash; a specific design
-(especially stone-set pieces) can sit well above or below it. GST is 3% on gold
-plus making. Hallmarking and stone costs are not included. Always confirm the
-billed price in store. See the
-<a href="https://mygoldrates.com/making-charges-calculator">making charges calculator</a> to
-price a specific quote.</p>
+<div class="mc-method">
+  <h2>How we work out these making charges</h2>
+  <p>We do not take a jeweller's word for it, and we do not use a single
+  headline figure. For every brand we <strong>manually review and verify each
+  category</strong>, then read the published price breakup of many real products
+  on that jeweller's own website &mdash; the same breakup you would see at
+  checkout. From those we take the <strong>median</strong>, so one unusually
+  ornate or unusually plain design cannot distort the result.</p>
+  <p><strong>Please treat these figures as indicative.</strong> A making charge
+  is not a fixed number: it varies by design, by weight, by season and by how
+  well you negotiate. Stone-set and highly detailed pieces routinely sit above
+  the median, while plain bands sit below it. The badge on each row shows how
+  many real products that brand's median is based on &mdash; the more items, the
+  more reliable the figure.</p>
+  <p>Prices shown include <strong>3% GST</strong> on gold plus making charges.
+  They exclude hallmarking fees, stone or diamond value, and any store-specific
+  discount. Always confirm the final billed amount with the jeweller before you
+  buy. To price a quote you have already been given, use our
+  <a href="https://mygoldrates.com/making-charges-calculator">making charges calculator</a>.</p>
+</div>
 
 </article>
 <footer>
@@ -393,6 +406,39 @@ price a specific quote.</p>
 .mc-legend i{width:9px;height:9px;border-radius:3px;display:inline-block}
 .mc-legend b{font-family:"IBM Plex Mono",monospace;color:var(--ink);font-weight:600}
 .mc-empty{color:var(--ink-3);padding:26px 4px;text-align:center;font-size:14px}
+.mc-method{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:18px 20px;margin:26px 0 18px}
+.mc-method h2{font-size:17px;margin:0 0 10px}
+.mc-method p{font-size:14px;line-height:1.7;color:var(--ink-2);margin:0 0 10px}
+.mc-method p:last-child{margin-bottom:0}
+
+/* ---- motion: results animate in, bars grow, winner pulses once ---- */
+@keyframes mcRise{from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}}
+@keyframes mcGrow{from{width:0}}
+@keyframes mcGlow{0%{box-shadow:0 2px 16px rgba(217,178,74,0)}
+  55%{box-shadow:0 2px 26px rgba(217,178,74,.4)}
+  100%{box-shadow:0 2px 16px rgba(217,178,74,.13)}}
+@keyframes mcPop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+.mc-row{animation:mcRise .38s cubic-bezier(.2,.7,.3,1) both}
+.mc-row:nth-child(2){animation-delay:.06s}
+.mc-row:nth-child(3){animation-delay:.12s}
+.mc-row:nth-child(4){animation-delay:.18s}
+.mc-row:nth-child(5){animation-delay:.24s}
+.mc-row.best{animation:mcRise .38s cubic-bezier(.2,.7,.3,1) both,
+  mcGlow 1.1s ease-out .3s both}
+.mc-bar i{animation:mcGrow .55s cubic-bezier(.2,.7,.3,1) both;animation-delay:.15s}
+.mc-headline{animation:mcRise .4s cubic-bezier(.2,.7,.3,1) both}
+.mc-insight{animation:mcPop .38s cubic-bezier(.2,.7,.3,1) both;animation-delay:.1s}
+.mc-total{transition:color .2s}
+.mc-row:hover{border-color:var(--gold)}
+.mc-row:hover .mc-total{color:var(--gold)}
+.mc-seg button{transform:translateZ(0)}
+.mc-seg button[aria-pressed="true"]{animation:mcPop .22s ease-out}
+@media(prefers-reduced-motion:reduce){
+  .mc-row,.mc-row.best,.mc-bar i,.mc-headline,.mc-insight,
+  .mc-seg button[aria-pressed="true"]{animation:none}
+}
 </style>
 <script>
 (function(){
