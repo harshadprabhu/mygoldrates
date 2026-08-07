@@ -421,13 +421,46 @@ def extract_gold_value_breakup(text):
     return {karat: [pg]} if pg else {}
 
 
+# Candere's live rate cards on /gold-rate-today/india: the same numbers shown
+# to end users in their popup and hero. The page ALSO carries a "Last 7 Days"
+# and other historical tables that extract_rows was locking onto instead,
+# giving us a rate about 2-3% stale. Value is per-10gm and needs a /10.
+# Matches only when both the rate and karat <p> tags sit next to each other,
+# so it silently no-ops on every other jeweller.
+_CANDERE_CARD_RE = re.compile(
+    r'<p class="goldCard--rate">\s*(?:&#8377;|₹|Rs\.?|INR)?\s*'
+    r'([\d,]+)\s*<span>\s*/\s*10\s*gm\s*</span>\s*</p>\s*'
+    r'<p class="goldCard--karat">\s*(\d{2})\s*Karat\s*</p>',
+    re.I)
+
+
+def extract_candere_cards(html):
+    buckets = {}
+    for m in _CANDERE_CARD_RE.finditer(html):
+        karat = f"{m.group(2)}K"
+        if karat not in PURITY_FRACTION:
+            continue
+        raw = _f(m.group(1))
+        if not raw:
+            continue
+        pg = _per_gram(raw / 10.0)   # per-10gm -> per-gram, then sanity gate
+        if pg:
+            buckets.setdefault(karat, []).append(pg)
+    return buckets
+
+
 def extract(html):
     """-> (found, counts, how). Table -> product -> headline -> proximity."""
     soup = BeautifulSoup(html, "html.parser")
     for t in soup(["script", "style", "noscript"]):
         t.decompose()
 
-    buckets, how = extract_rows(soup), "rows"
+    # Brand-specific card patterns first: they hit only one page shape each
+    # (silent no-op elsewhere), and win over the generic <table> reader that
+    # otherwise grabs stale/historical columns on the same page.
+    buckets, how = extract_candere_cards(html), "candere-card"
+    if not buckets:
+        buckets, how = extract_rows(soup), "rows"
     if not buckets:
         buckets, how = extract_product_breakup(html), "product"
     if not buckets:
