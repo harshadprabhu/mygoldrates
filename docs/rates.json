@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-07",
-  "last_updated": "2026-08-07T14:08:23.686676+05:30",
+  "last_updated": "2026-08-07T14:45:37.913746+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 150800.0,
-      "change_pct": 1.3
+      "price_per_10g_inr": 150852.0,
+      "change_pct": 1.34
     },
     {
       "contract": "GOLDM",
       "expiry": "04SEP2026",
-      "price_per_10g_inr": 149424.0,
-      "change_pct": 1.29
+      "price_per_10g_inr": 149454.0,
+      "change_pct": 1.31
     }
   ],
   "jewellers": [
@@ -46,16 +46,16 @@
       "rate_18k_per_gram_inr": 11148.75
     },
     {
-      "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 14900.0,
-      "rate_22k_per_gram_inr": 13658.33,
-      "rate_18k_per_gram_inr": 11175.0
-    },
-    {
       "jeweller": "Senco Gold",
       "rate_24k_per_gram_inr": 14935.73,
       "rate_22k_per_gram_inr": 13691.09,
       "rate_18k_per_gram_inr": 11201.8
+    },
+    {
+      "jeweller": "Chandukaka Saraf",
+      "rate_24k_per_gram_inr": 14970.0,
+      "rate_22k_per_gram_inr": 13722.5,
+      "rate_18k_per_gram_inr": 11227.5
     },
     {
       "jeweller": "Kalyan Jewellers",
