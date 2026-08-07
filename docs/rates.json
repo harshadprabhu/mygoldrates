@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-07",
-  "last_updated": "2026-08-07T11:36:11.807561+05:30",
+  "last_updated": "2026-08-07T12:03:10.328158+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -16,20 +16,20 @@
     "jeweller": "Candere",
     "rate_per_gram_inr": 14606.9
   },
-  "ibja_reference_24k_999_per_gram_inr": null,
+  "ibja_reference_24k_999_per_gram_inr": 14902.0,
   "akgsma_south_india_22k_per_gram_inr": 13740.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 149988.0,
-      "change_pct": 0.76
+      "price_per_10g_inr": 150021.0,
+      "change_pct": 0.78
     },
     {
       "contract": "GOLDM",
       "expiry": "04SEP2026",
-      "price_per_10g_inr": 148718.0,
-      "change_pct": 0.81
+      "price_per_10g_inr": 148800.0,
+      "change_pct": 0.87
     }
   ],
   "jewellers": [
