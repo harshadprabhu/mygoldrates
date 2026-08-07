@@ -1137,6 +1137,7 @@ def main():
     base = national or live
     median24 = statistics.median(r["canonical_24k_pre_gst"] for r in base)
     lowest = min(base, key=lambda r: r["canonical_24k_pre_gst"])
+    highest = max(base, key=lambda r: r["canonical_24k_pre_gst"])
     now_ist = datetime.now(IST)
     display_date = now_ist.strftime("%d %B %Y")
     display_time = now_ist.strftime("%I:%M %p IST").lstrip("0")
@@ -1864,6 +1865,12 @@ def main():
         low24_raw=f"{ladder(lowest['canonical_24k_pre_gst'])['24K']:,.0f}",
         low24_num=f"{ladder(lowest['canonical_24k_pre_gst'])['24K']:.0f}",
         low_brand=lowest["brands"]["name"],
+        # Per-gram 24K spread between the priciest and cheapest brand on the
+        # board today. Powers the "Save up to Rs N/g" tag in the hero, which
+        # used to be a hard-coded 128 - meaningless when the actual gap moved.
+        spread24=inr(round(ladder(highest['canonical_24k_pre_gst'])['24K']
+                            - ladder(lowest['canonical_24k_pre_gst'])['24K'])),
+        high_brand=highest["brands"]["name"],
         low_logo=low_logo,
         ibja_tiles=ibja_tiles, ibja_section=ibja_section, ads_unit=ads_unit,
         calc_brands=json.dumps(calc_brands),
@@ -4245,7 +4252,7 @@ $nav
     <h1 style="margin:0">Gold Rate Today $where</h1>
   </div>
   <div class="board-meta">
-    <span class="signal">&#128994; Favorable &middot; Save up to &#8377;128/g vs highest</span>
+    <span class="signal">&#128994; Save up to &#8377;$spread24/g by picking the cheapest jeweller</span>
     <span class="low-note">Lowest: <strong style="color:#F4E3A6">$low_brand &#8377;$low24_raw/g</strong></span>
     <span>$n_brands brands compared</span>
   </div>

@@ -11,9 +11,10 @@ act = [r for r in rows if r["active"]]
 ina = [r for r in rows if not r["active"]]
 print(f"=== ACTIVE ({len(act)}) ===")
 for r in sorted(act, key=lambda x: x["name"]):
-    print(f"{r['name']:26} | {r.get('domain') or '?':30} | "
-          f"{r.get('rate_url') or ''}")
+    print(f"{r['name']:26} | {r.get('slug') or '?':14} | "
+          f"{r.get('domain') or '?':30} | {r.get('rate_url') or ''}")
 print(f"\n=== PARKED/INACTIVE ({len(ina)}) ===")
 for r in sorted(ina, key=lambda x: x["name"]):
-    print(f"{r['name']:26} | {r.get('domain') or '?':30}")
+    print(f"{r['name']:26} | {r.get('slug') or '?':14} | "
+          f"{r.get('domain') or '?':30}")
 print(f"\ntotal {len(rows)}")
