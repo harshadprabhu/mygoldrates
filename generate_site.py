@@ -2114,6 +2114,9 @@ def main():
 
     # ---- Calculators hub ----
     tools = [
+        ("budget-gold-calculator", "Gold for My Budget",
+         "Fix a rupee amount and see grams you'd get from each jeweller "
+         "(and your own quote)."),
         ("gold-loan-calculator", "Gold Loan Calculator",
          "Check how much loan your gold can fetch and the monthly EMI."),
         ("gold-sip-calculator", "Gold SIP Calculator",
@@ -2303,6 +2306,28 @@ def main():
             crumbs(("Making Charges", None)) + mc_body,
             extra_js=mc_js)
         extra_urls.append(("making-charges-comparison", "monthly", "0.6"))
+
+        # ---- Budget calculator: how many grams for a fixed rupee amount ----
+        # Reuses the same brand/rate join. All-in cost per gram = rate +
+        # rate*mc% + (rate + rate*mc%)*3% GST, so grams = budget / cost_per_g.
+        # A "your jeweller" row lets the user paste a custom quote and see
+        # whether it beats the best brand on the board.
+        budget_body = BUDGET_HTML \
+            .replace("__UPDATED__", mc.get("updated", "")[:10]) \
+            .replace("__SITE__", SITE_URL)
+        budget_js = BUDGET_JS.replace(
+            "__DATA__", json.dumps({"brands": dash, "cats": dash_cats}))
+
+        render_content(
+            "budget-gold-calculator",
+            "Gold for My Budget - How Many Grams Can I Buy | MyGoldRates",
+            "Fix your budget and see how many grams of gold you can actually "
+            "take home from each jeweller after making charges and 3% GST - "
+            "and check if your own jeweller's quote beats them.",
+            crumbs(("Calculators", f"{SITE_URL}/calculators"),
+                   ("Budget Calculator", None)) + budget_body,
+            extra_js=budget_js)
+        extra_urls.append(("budget-gold-calculator", "weekly", "0.7"))
 
     # ---- News: auto daily market recap from the rate history ----
     os.makedirs("docs/news/recap", exist_ok=True)
@@ -5315,6 +5340,317 @@ $nav
 # Plain strings + str.replace() placeholders (NOT f-string/Template) so the
 # embedded JS braces and $ stay literal. __DATA__ carries the brand join.
 # =====================================================================
+# ============================================================================
+# Budget calculator: reverse of the MC dashboard. Fix a rupee amount, show the
+# grams user would actually take home from each jeweller after making + GST,
+# with a "your jeweller" row so a real-world quote can be scored against the
+# board. Same __DATA__ / __UPDATED__ / __SITE__ replacement pattern as the MC
+# dashboard - do NOT convert to f-string, the embedded JS uses { } freely.
+# ============================================================================
+BUDGET_HTML = r"""
+<h1>How much gold can I get for my budget?</h1>
+<p class="mc-lede">Fix an amount you want to spend and see how many grams of
+gold you would actually take home from each jeweller &mdash; after making
+charges and 3% GST. Then paste your own jeweller's quote to check whether
+they beat the board or overcharge on the making. Updated __UPDATED__.</p>
+
+<div class="mc-panel">
+  <div class="mc-controls">
+    <div class="mc-field">
+      <label>Your budget</label>
+      <div class="bg-amt">
+        <span class="bg-cur">&#8377;</span>
+        <input type="number" id="bg-budget" min="1000" step="500" value="100000" inputmode="numeric">
+      </div>
+      <div class="mc-chips" id="bg-chips"></div>
+    </div>
+    <div class="mc-field">
+      <label>Purity</label>
+      <div class="mc-seg" id="bg-karats"></div>
+    </div>
+    <div class="mc-field">
+      <label>What are you buying?</label>
+      <div class="mc-seg" id="bg-cats"></div>
+    </div>
+  </div>
+</div>
+
+<div id="bg-headline" class="mc-headline" hidden></div>
+
+<div class="mc-panel bg-quote">
+  <div class="bg-quote-head">
+    <div>
+      <div class="bg-quote-eyebrow">Your jeweller's quote</div>
+      <div class="bg-quote-title">Score their number against the board</div>
+    </div>
+    <label class="bg-toggle">
+      <input type="checkbox" id="bg-usemine">
+      <span>Compare</span>
+    </label>
+  </div>
+  <div class="bg-quote-fields" id="bg-mine-fields" hidden>
+    <div class="mc-field">
+      <label>Their gold rate (per gram)</label>
+      <div class="bg-amt">
+        <span class="bg-cur">&#8377;</span>
+        <input type="number" id="bg-mine-rate" min="100" step="10" value="13500" inputmode="numeric">
+      </div>
+    </div>
+    <div class="mc-field">
+      <label>Their making charge (%)</label>
+      <div class="bg-amt">
+        <input type="number" id="bg-mine-mc" min="0" max="60" step="0.5" value="18" inputmode="decimal">
+        <span class="bg-cur bg-cur-r">%</span>
+      </div>
+    </div>
+    <div class="mc-field">
+      <label>Jeweller name (optional)</label>
+      <input type="text" id="bg-mine-name" maxlength="40" placeholder="e.g. Local jeweller" class="bg-text">
+    </div>
+  </div>
+</div>
+
+<div id="bg-results"></div>
+
+<p class="dnote" id="bg-note"></p>
+<div class="mc-method">
+  <h2>How the grams are worked out</h2>
+  <p>For each jeweller we compute what one gram would actually cost you:
+  today's per-gram rate, plus our verified median making charge for the
+  category, plus 3% GST on the whole thing. Divide your budget by that number
+  and you get the grams. That's the same maths a jeweller's bill uses, just
+  run in reverse.</p>
+  <p><strong>Your quote is scored the same way</strong> &mdash; whatever rate
+  and making percentage you paste, we add 3% GST and compare the grams-per-rupee
+  side by side. If a brand delivers more gold for the same money, they win by
+  that gap; if your jeweller wins, hold on to that quote.</p>
+  <p>Making charges we show are medians &mdash; individual pieces vary,
+  especially ornate or stone-set designs. Hallmarking, stone value and any
+  store-specific discount are not included. Always confirm the final bill in
+  store. For a bill you already have, use our
+  <a href="__SITE__/making-charges-calculator">making charges calculator</a>.</p>
+</div>
+"""
+
+BUDGET_JS = r"""
+<style>
+.bg-amt{display:flex;align-items:stretch;border:1px solid var(--line);
+  border-radius:9px;background:var(--paper);overflow:hidden;transition:border-color .2s}
+.bg-amt:focus-within{border-color:var(--gold)}
+.bg-amt .bg-cur{display:flex;align-items:center;padding:0 12px;
+  background:color-mix(in srgb,var(--gold) 8%,transparent);color:var(--ink-2);
+  font:600 15px/1 "IBM Plex Mono",monospace}
+.bg-amt .bg-cur-r{border-left:1px solid var(--line);border-right:0}
+.bg-amt input{flex:1;border:0;background:transparent;color:var(--ink);
+  padding:11px 12px;font:600 17px/1 "IBM Plex Mono",monospace;outline:0;
+  min-width:0;font-variant-numeric:tabular-nums}
+.bg-text{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;
+  background:var(--paper);color:var(--ink);font:500 14.5px/1 "IBM Plex Sans",sans-serif;outline:0}
+.bg-text:focus{border-color:var(--gold)}
+
+.bg-quote{margin-top:14px}
+.bg-quote-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.bg-quote-eyebrow{font:600 11px/1 "IBM Plex Sans",sans-serif;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--gold);margin-bottom:4px}
+.bg-quote-title{font-weight:600;color:var(--ink);font-size:15px}
+.bg-toggle{display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+  font:600 13px/1 "IBM Plex Sans",sans-serif;color:var(--ink-2);
+  padding:8px 14px;border:1px solid var(--line);border-radius:999px;
+  background:var(--paper);transition:all .15s}
+.bg-toggle:hover{border-color:var(--gold);color:var(--ink)}
+.bg-toggle input{accent-color:var(--gold);width:14px;height:14px}
+.bg-quote-fields{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:18px;margin-top:18px}
+@media(max-width:720px){.bg-quote-fields{grid-template-columns:1fr}}
+
+/* result rows are same shape as the MC dashboard, but the value shown is
+   GRAMS, not rupees - and the delta is "less gold for the same money" */
+.bg-row .mc-total .bg-g{font-size:22px}
+.bg-row .mc-total .bg-unit{font-size:12px;color:var(--ink-3);margin-left:6px;
+  font-family:"IBM Plex Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.bg-row .mc-delta{color:var(--warm)}
+.bg-row .mc-legend b{color:var(--ink)}
+.bg-row.mine{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 5%,var(--card))}
+.bg-row.mine .mc-brand::after{content:"YOUR QUOTE";margin-left:10px;font:600 10px/1 "IBM Plex Sans",sans-serif;
+  letter-spacing:.08em;padding:3px 7px;border-radius:5px;background:var(--gold);color:#231a02;vertical-align:2px}
+</style>
+<script>
+(function(){
+  var D = __DATA__;
+  var GST = 0.03;
+
+  var BUDGETS = [
+    {v:50000,  label:"₹50k"},
+    {v:100000, label:"₹1 lakh"},
+    {v:200000, label:"₹2 lakh"},
+    {v:500000, label:"₹5 lakh"},
+    {v:1000000,label:"₹10 lakh"}
+  ];
+  var KARATS = [["22","22K"],["24","24K"],["18","18K"]];
+
+  var state = { budget: 100000, karat: "22", cat: (D.cats[0]||""),
+                useMine: false, mineRate: 13500, mineMc: 18, mineName: "" };
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+  function inr(n){
+    if(n==null||isNaN(n)) return "-";
+    return "₹" + Math.round(n).toLocaleString("en-IN");
+  }
+  function g(n){
+    if(n==null||isNaN(n)) return "-";
+    return n < 10 ? n.toFixed(2) : n.toFixed(1);
+  }
+
+  function seg(host, items, cur, onPick){
+    host.innerHTML = "";
+    items.forEach(function(it){
+      var val = it[0], lab = it[1];
+      var b = document.createElement("button");
+      b.type = "button"; b.textContent = lab;
+      b.setAttribute("aria-pressed", val === cur ? "true" : "false");
+      b.onclick = function(){ onPick(val); };
+      host.appendChild(b);
+    });
+  }
+
+  // cost of 1 gram, all-in
+  function perGramCost(rate, mcPct){
+    var gold = rate;
+    var making = gold * (mcPct/100);
+    return (gold + making) * (1 + GST);
+  }
+
+  function compute(){
+    var out = [];
+    Object.keys(D.brands).forEach(function(name){
+      var b = D.brands[name];
+      var mc = b.mc[state.cat];
+      var rate = b.rates[state.karat];
+      if(!mc || !rate) return;
+      var cpg = perGramCost(rate, mc.pct);
+      var grams = state.budget / cpg;
+      out.push({ name:name, rate:rate, pct:mc.pct, n:mc.n, conf:mc.conf,
+                 cpg:cpg, grams:grams, gold:rate*grams,
+                 making:rate*grams*(mc.pct/100),
+                 gst:(rate*grams + rate*grams*(mc.pct/100))*GST,
+                 mine:false });
+    });
+    if(state.useMine && state.mineRate > 0){
+      var cpg2 = perGramCost(state.mineRate, state.mineMc);
+      var grams2 = state.budget / cpg2;
+      out.push({ name: state.mineName.trim() || "Your jeweller",
+                 rate:state.mineRate, pct:state.mineMc, n:1, conf:"user",
+                 cpg:cpg2, grams:grams2, gold:state.mineRate*grams2,
+                 making:state.mineRate*grams2*(state.mineMc/100),
+                 gst:(state.mineRate*grams2 + state.mineRate*grams2*(state.mineMc/100))*GST,
+                 mine:true });
+    }
+    out.sort(function(a,b){ return b.grams - a.grams; });
+    return out;
+  }
+
+  function render(){
+    var rows = compute();
+    var host = $("bg-results");
+    var head = $("bg-headline");
+
+    if(!rows.length){
+      host.innerHTML = '<div class="mc-empty">No jeweller in our making-charge '
+        + 'sample stocks this combination yet.</div>';
+      head.hidden = true; $("bg-note").textContent = ""; return;
+    }
+
+    var best = rows[0], worst = rows[rows.length-1];
+    var mine = rows.filter(function(r){return r.mine;})[0];
+    var lead = state.karat + "K " + state.cat.toLowerCase();
+
+    head.hidden = false;
+    var msg = '<div class="mh-k">Most grams for ' + inr(state.budget) + ' on ' + esc(lead) + '</div>'
+      + '<div class="mh-v">' + g(best.grams) + '<span style="font-size:.5em;opacity:.75;margin-left:8px">g &middot; <b>' + esc(best.name) + '</b></span></div>';
+    if(rows.length > 1){
+      msg += '<div class="mh-sub">' + esc(worst.name) + ' would give you '
+        + g(worst.grams) + 'g &mdash; <b>' + g(best.grams - worst.grams) + 'g less</b> for the same money.';
+      if(mine && mine !== best){
+        var deficit = best.grams - mine.grams;
+        msg += ' Your jeweller gives you <b>' + g(deficit)
+          + 'g less</b> than ' + esc(best.name) + '.';
+      } else if(mine && mine === best){
+        msg += ' Your jeweller <b>beats every listed brand</b> &mdash; keep that quote.';
+      }
+      msg += '</div>';
+    }
+    head.innerHTML = msg;
+
+    host.innerHTML = rows.map(function(r, i){
+      var deficit = best.grams - r.grams;
+      return '<div class="mc-row bg-row' + (i===0?' best':'') + (r.mine?' mine':'') + '">'
+        + '<div class="mc-top">'
+          + '<span class="mc-rank">' + (i+1) + '</span>'
+          + '<span class="mc-brand">' + esc(r.name) + '</span>'
+          + (i===0 && !r.mine ? '<span class="mc-badge">Best value</span>' : '')
+          + (r.mine ? '' : (r.conf !== "high"
+              ? '<span class="mc-badge soft">' + (r.n||0) + ' item'
+                + (r.n===1?'':'s') + '</span>' : ''))
+          + '<span class="mc-total"><span class="bg-g">' + g(r.grams) + '</span><span class="bg-unit">grams</span>'
+          + (i>0 ? '<span class="mc-delta">&minus;' + g(deficit) + 'g</span>' : '')
+          + '</span>'
+        + '</div>'
+        + '<div class="mc-legend" style="margin-top:12px">'
+          + '<span>Cost/g <b>' + inr(r.cpg) + '</b></span>'
+          + '<span>Rate <b>' + inr(r.rate) + '/g</b></span>'
+          + '<span>Making <b>' + r.pct + '%</b></span>'
+          + '<span>GST <b>3%</b></span>'
+        + '</div>'
+      + '</div>';
+    }).join("");
+
+    $("bg-note").textContent = "Comparing " + (rows.length - (mine?1:0))
+      + " jeweller" + (rows.length - (mine?1:0)===1?"":"s")
+      + " we have verified making-charge data for" + (mine?" plus your quote":"")
+      + ". Grams are before hallmarking / stone charges.";
+  }
+
+  function build(){
+    seg($("bg-cats"), D.cats.map(function(c){ return [c,c]; }), state.cat,
+        function(v){ state.cat = v; build(); });
+    seg($("bg-karats"), KARATS, state.karat,
+        function(v){ state.karat = v; build(); });
+    render();
+  }
+
+  // budget chips
+  var chips = $("bg-chips");
+  BUDGETS.forEach(function(b){
+    var btn = document.createElement("button"); btn.type = "button"; btn.textContent = b.label;
+    btn.onclick = function(){ state.budget = b.v; $("bg-budget").value = b.v; render(); };
+    chips.appendChild(btn);
+  });
+  $("bg-budget").addEventListener("input", function(){
+    var v = parseFloat(this.value); if(!isNaN(v) && v > 0){ state.budget = v; render(); }
+  });
+
+  // "your jeweller" toggle + inputs
+  var mineFields = $("bg-mine-fields"), useMine = $("bg-usemine");
+  useMine.addEventListener("change", function(){
+    state.useMine = this.checked;
+    mineFields.hidden = !state.useMine;
+    render();
+  });
+  $("bg-mine-rate").addEventListener("input", function(){
+    var v = parseFloat(this.value); if(!isNaN(v) && v > 0){ state.mineRate = v; render(); }
+  });
+  $("bg-mine-mc").addEventListener("input", function(){
+    var v = parseFloat(this.value); if(!isNaN(v) && v >= 0 && v <= 60){ state.mineMc = v; render(); }
+  });
+  $("bg-mine-name").addEventListener("input", function(){ state.mineName = this.value; render(); });
+
+  build();
+})();
+</script>
+"""
+
+
 MC_DASH_HTML = r"""
 <h1>What will it actually cost you?</h1>
 <p class="mc-lede">Two jewellers can quote you the same gold rate and still bill
