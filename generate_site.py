@@ -1665,6 +1665,11 @@ def main():
         </div></div>
       <div class="field"><label for="gc-brand">Brand rate</label>
         <select id="gc-brand"></select></div>
+      <div class="field" id="gc-custom-row" hidden>
+        <label for="gc-custom">Your jeweller's <span id="gc-custom-k">24K</span> rate (&#8377;/g)</label>
+        <input id="gc-custom" type="number" inputmode="decimal" min="0" step="1" value="14000">
+        <div style="margin-top:6px;font-size:11px;color:#8E9A8C">Rate is treated as the price for your selected purity.</div>
+      </div>
       <div class="field"><label for="gc-m">Making charge (%)</label>
         <input id="gc-m" type="number" inputmode="decimal" min="0" max="60" step="0.5" value="18"></div>
       <div class="field"><label id="gc-g-label">GST</label>
@@ -4680,22 +4685,44 @@ var FRAC={"24K":24/24,"22K":22/24,"18K":18/24,"14K":14/24};
      is where our verified per-brand medians drive the picture. */
   var gcSel=document.getElementById('gc-brand'),
       gcBudget=document.getElementById('gc-b'),
-      gcMc=document.getElementById('gc-m');
+      gcMc=document.getElementById('gc-m'),
+      gcCustomRow=document.getElementById('gc-custom-row'),
+      gcCustom=document.getElementById('gc-custom'),
+      gcCustomK=document.getElementById('gc-custom-k');
   if(gcSel && typeof BRANDS !== 'undefined' && BRANDS.length){
     BRANDS.forEach(function(b,i){
       var o=document.createElement('option');
       o.value=i;o.textContent=b.name;gcSel.appendChild(o);
     });
+    /* Custom-rate option: user's own jeweller quote, not on our tracked list.
+       The rate is treated as the price for whatever purity is selected, so we
+       infer the 24K anchor by dividing by the purity fraction - keeps the
+       downstream maths identical to a normal BRANDS entry. */
+    var oc=document.createElement('option');
+    oc.value='__custom__';oc.textContent='✎ Custom rate (your jeweller)';
+    gcSel.appendChild(oc);
   }
   var gcPurity='24K', gcGst=true;
+  var FRAC_GC={'24K':24/24,'22K':22/24,'18K':18/24,'14K':14/24};
   function gcCalc(){
-    if(!gcBudget || !gcSel || typeof BRANDS === 'undefined' || !BRANDS.length) return;
+    if(!gcBudget || !gcSel) return;
+    var isCustom=gcSel.value==='__custom__';
     var budget=parseFloat(gcBudget.value)||0;
     var mcPct=Math.max(0, Math.min(60, parseFloat(gcMc.value)||0));
-    var idx=parseInt(gcSel.value,10)||0;
-    var b=BRANDS[idx]||BRANDS[0];
-    if(!b || budget<=0) return;
-    var rate=b.r24*({'24K':24/24,'22K':22/24,'18K':18/24,'14K':14/24}[gcPurity]||1.0);
+    var frac=FRAC_GC[gcPurity]||1.0;
+    var r24, brandName;
+    if(isCustom){
+      var custom=parseFloat(gcCustom.value)||0;
+      if(custom<=0){return;}
+      r24=custom/frac; brandName='Your quote';
+    } else {
+      if(typeof BRANDS==='undefined'||!BRANDS.length)return;
+      var idx=parseInt(gcSel.value,10)||0;
+      var b=BRANDS[idx]||BRANDS[0]; if(!b)return;
+      r24=b.r24; brandName=b.name;
+    }
+    if(budget<=0) return;
+    var rate=r24*frac;
     var cpg=rate*(1+mcPct/100)*(gcGst?1.03:1);
     var grams=cpg>0?budget/cpg:0;
     var goldVal=rate*grams;
@@ -4708,7 +4735,7 @@ var FRAC={"24K":24/24,"22K":22/24,"18K":18/24,"14K":14/24};
         gv=document.getElementById('gc-gold'),
         mv=document.getElementById('gc-mc'),
         gs=document.getElementById('gc-gst');
-    if(t)t.textContent='₹'+Math.round(budget).toLocaleString('en-IN')+' · '+gcPurity+' · '+b.name;
+    if(t)t.textContent='₹'+Math.round(budget).toLocaleString('en-IN')+' · '+gcPurity+' · '+brandName;
     if(gr)gr.textContent=(grams<10?grams.toFixed(2):grams.toFixed(1))+' g';
     if(ba)ba.textContent=(gcGst?'incl. 3% GST':'pre-GST')+', making @ '+mcPct+'%';
     if(rt)rt.textContent=fmt(rate)+'/g';
@@ -4716,13 +4743,22 @@ var FRAC={"24K":24/24,"22K":22/24,"18K":18/24,"14K":14/24};
     if(mv)mv.textContent=mcPct>0?fmt(mcVal):'not applied';
     if(gs)gs.textContent=gcGst?fmt(gstVal):'not applied';
   }
+  /* Reveal the custom-rate input only when 'Custom rate' is selected, and
+     mirror the current purity into the input's label so the user sees exactly
+     which karat they're typing for ('Your jeweller's 22K rate'). */
+  function gcSyncCustom(){
+    var isCustom=gcSel && gcSel.value==='__custom__';
+    if(gcCustomRow) gcCustomRow.hidden=!isCustom;
+    if(gcCustomK) gcCustomK.textContent=gcPurity;
+  }
   if(gcBudget)gcBudget.addEventListener('input',gcCalc);
   if(gcMc)gcMc.addEventListener('input',gcCalc);
-  if(gcSel)gcSel.addEventListener('change',gcCalc);
+  if(gcCustom)gcCustom.addEventListener('input',gcCalc);
+  if(gcSel)gcSel.addEventListener('change',function(){gcSyncCustom();gcCalc();});
   document.querySelectorAll('[data-gp]').forEach(function(b){
     b.addEventListener('click',function(){
       document.querySelectorAll('[data-gp]').forEach(function(x){x.setAttribute('aria-pressed','false');});
-      b.setAttribute('aria-pressed','true');gcPurity=b.dataset.gp;gcCalc();
+      b.setAttribute('aria-pressed','true');gcPurity=b.dataset.gp;gcSyncCustom();gcCalc();
     });
   });
   document.querySelectorAll('[data-gg]').forEach(function(b){
@@ -4738,6 +4774,7 @@ var FRAC={"24K":24/24,"22K":22/24,"18K":18/24,"14K":14/24};
       if(gcBudget){gcBudget.value=b.dataset.gb;gcCalc();}
     });
   });
+  gcSyncCustom();
   gcCalc();
 
   /* ---- Middle Class Persona: Jewellery Final Bill Estimator JS ---- */
