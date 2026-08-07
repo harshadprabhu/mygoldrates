@@ -1263,7 +1263,8 @@ def main():
 
     # ---------------------------------------------------------- table rows
     body_rows = []
-    for r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):
+    for rank, r in enumerate(
+            sorted(live, key=lambda x: x["canonical_24k_pre_gst"]), start=1):
         b = r["brands"]
         lad = ladder(r["canonical_24k_pre_gst"])
         ddiff = r["canonical_24k_pre_gst"] - median24
@@ -1289,7 +1290,9 @@ def main():
                     if dom else "")
         body_rows.append(
             f'<tr data-states="{data_states}" data-brand="{b["name"]}" '
-            f'data-logo="{logo_src}"><th scope="row">'
+            f'data-logo="{logo_src}" data-rank="{rank}">'
+            f'<td class="col-rank" data-v="{rank}">{rank}</td>'
+            f'<th scope="row">'
             f'<span class="bcell">{logo}'
             f'<span>{b["name"]}{best}{est}{region_badge}</span></span></th>'
             f'<td class="num col-24" data-v="{lad["24K"]:.2f}">{inr(lad["24K"])}</td>'
@@ -4114,6 +4117,13 @@ tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
   color:var(--ink-3);font-size:12px;letter-spacing:.08em}
 
 /* brand logos */
+/* rank column: subordinate to brand name (monospace, ink-3) so the eye reads
+   brand first. Kept narrow so the table doesn't lose horizontal room. */
+.col-rank{width:36px;text-align:center;
+  font:600 12.5px/1 "IBM Plex Mono",monospace;color:var(--ink-3);
+  font-variant-numeric:tabular-nums}
+tbody tr:first-child .col-rank{color:var(--gold);font-weight:700}
+@media(max-width:640px){.col-rank{width:24px;font-size:11.5px;padding-left:6px!important;padding-right:6px!important}}
 .bcell{display:inline-flex;align-items:center;gap:10px}
 .blogo{width:20px;height:20px;border-radius:5px;object-fit:contain;
   background:#fff;border:1px solid var(--line);padding:1px;flex:0 0 20px}
@@ -4273,6 +4283,7 @@ $local_intro
   <div class="tablecard">
   <table id="rates">
     <thead><tr>
+      <th scope="col" class="col-rank" aria-label="Rank">#</th>
       <th scope="col">Jeweller</th>
       <th scope="col" class="col-24" aria-sort="ascending">24K / g</th>
       <th scope="col" class="col-22">22K / g</th>
@@ -4465,11 +4476,19 @@ var FRAC={"24K":24/24,"22K":22/24,"18K":18/24,"14K":14/24};
   function sortBy(i,dir){
     if(!body)return;
     var rows=[].slice.call(body.rows);
+    /* col 0 = rank (numeric data-v), col 1 = Jeweller name (localeCompare),
+       cols 2..N = numeric data-v. After sort, renumber the rank cells so
+       the "#" column always reflects the CURRENT ordering (e.g. sorting by
+       22K makes rank 1 = cheapest 22K, not the original 24K rank). */
     rows.sort(function(a,b){
-      if(i===0){return a.cells[0].textContent.localeCompare(b.cells[0].textContent)*dir;}
+      if(i===1){return a.cells[1].textContent.localeCompare(b.cells[1].textContent)*dir;}
       return (parseFloat(a.cells[i].dataset.v)-parseFloat(b.cells[i].dataset.v))*dir;
     });
     rows.forEach(function(r){body.appendChild(r);});
+    rows.forEach(function(r,idx){
+      var rc=r.cells[0];
+      if(rc){rc.textContent=idx+1; rc.dataset.v=idx+1;}
+    });
   }
   if(heads){
     [].forEach.call(heads,function(h,i){
