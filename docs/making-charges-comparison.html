@@ -348,21 +348,51 @@ last rupee. Updated 2026-08-06.</p>
 .mc-field label{display:block;font:600 11px/1 "IBM Plex Sans",sans-serif;
   text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin-bottom:8px}
 .mc-hint{text-transform:none;letter-spacing:0;font-weight:400;opacity:.7}
-.mc-seg{display:flex;flex-wrap:wrap;gap:6px}
-.mc-seg button{font:600 13px/1 "IBM Plex Sans",sans-serif;padding:9px 13px;
+/* segment + chip styles: shared across MC dashboard, budget calc, karat tabs.
+   Warm-preview aesthetic: hairline border on parchment, soft lift on hover,
+   two-stop gold gradient on the active state with an inset highlight for
+   coin-like depth. Every button becomes a small tactile object. */
+.mc-seg{display:flex;flex-wrap:wrap;gap:8px}
+.mc-seg button{font:600 13px/1 "IBM Plex Sans",sans-serif;padding:10px 16px;
   border:1px solid var(--line);background:var(--paper);color:var(--ink-2);
-  border-radius:9px;cursor:pointer;transition:all .15s}
-.mc-seg button:hover{border-color:var(--gold)}
-.mc-seg button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);
-  color:#231a02}
-#mc-weight{width:100%;padding:10px 12px;border:1px solid var(--line);
-  border-radius:9px;background:var(--paper);color:var(--ink);
-  font:600 16px/1 "IBM Plex Mono",monospace}
-.mc-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
-.mc-chips button{font:500 11.5px/1 "IBM Plex Sans",sans-serif;padding:5px 9px;
-  border:1px solid var(--line);background:transparent;color:var(--ink-3);
-  border-radius:20px;cursor:pointer}
-.mc-chips button:hover{border-color:var(--gold);color:var(--gold)}
+  border-radius:10px;cursor:pointer;position:relative;
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 1px 2px rgba(74,53,36,.05);
+  transition:transform .18s cubic-bezier(.2,.7,.3,1),
+    box-shadow .18s ease, border-color .18s ease, color .18s ease,
+    background .18s ease}
+.mc-seg button:hover{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));
+  color:var(--ink);transform:translateY(-1px);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset,
+    0 4px 14px -6px rgba(184,134,46,.35), 0 1px 2px rgba(74,53,36,.06)}
+.mc-seg button:active{transform:translateY(0)}
+.mc-seg button[aria-pressed="true"]{
+  background:linear-gradient(140deg,#E4C070 0%,#B8862E 55%,#7A5A1A 100%);
+  border-color:#7A5A1A;color:#231a02;font-weight:700;
+  box-shadow:0 1px 0 rgba(255,255,255,.35) inset,
+    0 0 0 1px rgba(122,90,26,.35) inset,
+    0 6px 16px -6px rgba(184,134,46,.55)}
+.mc-seg button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+#mc-weight{width:100%;padding:12px 14px;border:1px solid var(--line);
+  border-radius:10px;background:var(--paper);color:var(--ink);
+  font:600 16px/1 "IBM Plex Mono",monospace;
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset;
+  transition:border-color .18s ease, box-shadow .18s ease}
+#mc-weight:focus{outline:0;border-color:var(--gold);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 22%,transparent)}
+
+.mc-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.mc-chips button{font:500 11.5px/1 "IBM Plex Sans",sans-serif;
+  padding:6px 12px;border:1px solid var(--line);background:var(--paper);
+  color:var(--ink-3);border-radius:999px;cursor:pointer;
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset;
+  transition:transform .18s cubic-bezier(.2,.7,.3,1),
+    border-color .18s ease, color .18s ease, background .18s ease,
+    box-shadow .18s ease}
+.mc-chips button:hover{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));
+  color:var(--ink);background:color-mix(in srgb,var(--gold) 6%,var(--paper));
+  transform:translateY(-1px)}
+.mc-chips button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
 .mc-headline{background:linear-gradient(160deg,var(--board),var(--board-2));
   border:1px solid rgba(217,178,74,.35);border-radius:16px;padding:20px 22px;
