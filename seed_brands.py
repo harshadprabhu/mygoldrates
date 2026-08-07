@@ -62,6 +62,13 @@ REGIONAL_BRANDS = [
     {"name": "Joyalukkas", "slug": "joyalukkas", "domain": "joyalukkas.in",
      "rate_url": "https://www.joyalukkas.in/goldrate",
      "active": True, "includes_gst": False},
+    # PN Gadgil (pngjewellers.com) - upsert by slug 'png' to REPLACE the old
+    # rate_url (which pointed to a single coin product page and missed today's
+    # canonical rate). The /pages/metal-rates page is the brand's own daily
+    # rate board and is what the site should be reading.
+    {"name": "PN Gadgil", "slug": "png", "domain": "www.pngjewellers.com",
+     "rate_url": "https://www.pngjewellers.com/pages/metal-rates",
+     "active": True, "includes_gst": False},
     # Novel Jewels (Aditya Birla). Homepage footer banner text:
     # "Today's Gold Rate is Rs.13735 per gm (22kt)". Only 22K published in
     # raw HTML - the extract_value_per_gm_karat pattern picks it up, and
