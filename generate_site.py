@@ -2308,15 +2308,32 @@ def main():
         extra_urls.append(("making-charges-comparison", "monthly", "0.6"))
 
         # ---- Budget calculator: how many grams for a fixed rupee amount ----
-        # Reuses the same brand/rate join. All-in cost per gram = rate +
-        # rate*mc% + (rate + rate*mc%)*3% GST, so grams = budget / cost_per_g.
-        # A "your jeweller" row lets the user paste a custom quote and see
-        # whether it beats the best brand on the board.
+        # Widen coverage vs the MC dashboard: EVERY brand with a live rate is
+        # scored, not just the 3 with verified MC medians. For the extras we
+        # fall back to the category median across brands that DO have MC data
+        # - clearly flagged in-row as an estimate so users know it's not the
+        # brand's own published number. Rate-only comparison hides the making
+        # gap and this exists precisely to expose it, so a fallback is better
+        # than dropping the brand entirely.
+        cat_medians = {}
+        for c in dash_cats:
+            vals = [b["mc"][c]["pct"] for b in dash.values() if c in b["mc"]]
+            if vals:
+                cat_medians[c] = round(statistics.median(vals), 1)
+        budget_brands = dict(dash)                # start from real MC data
+        for name, rates in rate_by_brand.items():
+            if name in budget_brands:
+                continue                           # already has real MC
+            budget_brands[name] = {
+                "rates": rates,
+                "mc": {c: {"pct": p, "n": 0, "conf": "estimate"}
+                       for c, p in cat_medians.items()}}
         budget_body = BUDGET_HTML \
             .replace("__UPDATED__", mc.get("updated", "")[:10]) \
             .replace("__SITE__", SITE_URL)
         budget_js = BUDGET_JS.replace(
-            "__DATA__", json.dumps({"brands": dash, "cats": dash_cats}))
+            "__DATA__", json.dumps({"brands": budget_brands,
+                                     "cats": dash_cats}))
 
         render_content(
             "budget-gold-calculator",
@@ -5461,25 +5478,42 @@ BUDGET_JS = r"""
 
 .bg-toggles{display:flex;flex-wrap:wrap;gap:10px;align-items:center;
   margin-top:20px;padding-top:18px;border-top:1px dashed var(--line)}
-.bg-toggle-inline{display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+.bg-toggle-inline{display:inline-flex;align-items:center;gap:9px;cursor:pointer;
   font:600 13px/1 "IBM Plex Sans",sans-serif;color:var(--ink-2);
-  padding:8px 14px;border:1px solid var(--line);border-radius:999px;
-  background:var(--paper);transition:all .15s;user-select:none}
-.bg-toggle-inline:hover{border-color:var(--gold);color:var(--ink)}
+  padding:9px 16px;border:1px solid var(--line);border-radius:999px;
+  background:var(--paper);user-select:none;
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 1px 2px rgba(74,53,36,.05);
+  transition:transform .18s cubic-bezier(.2,.7,.3,1),
+    box-shadow .18s ease, border-color .18s ease, color .18s ease, background .18s ease}
+.bg-toggle-inline:hover{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));
+  color:var(--ink);transform:translateY(-1px);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset,
+    0 4px 14px -6px rgba(184,134,46,.35), 0 1px 2px rgba(74,53,36,.06)}
 .bg-toggle-inline input{accent-color:var(--gold);width:14px;height:14px;cursor:pointer}
-.bg-toggle-inline:has(input:checked){background:color-mix(in srgb,var(--gold) 12%,var(--paper));
-  border-color:color-mix(in srgb,var(--gold) 50%,var(--line));color:var(--ink)}
+.bg-toggle-inline:has(input:checked){
+  background:linear-gradient(140deg,
+    color-mix(in srgb,var(--gold) 14%,var(--paper)) 0%,
+    color-mix(in srgb,var(--gold) 6%,var(--paper)) 100%);
+  border-color:color-mix(in srgb,var(--gold) 60%,var(--line));color:var(--ink);
+  box-shadow:0 1px 0 rgba(255,255,255,.5) inset,
+    0 0 0 1px color-mix(in srgb,var(--gold) 25%,transparent) inset}
 .bg-toggle-hint{font-size:12.5px;color:var(--ink-3);flex:1;min-width:200px}
 .bg-quote{margin-top:14px}
 .bg-quote-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .bg-quote-eyebrow{font:600 11px/1 "IBM Plex Sans",sans-serif;text-transform:uppercase;
   letter-spacing:.07em;color:var(--gold);margin-bottom:4px}
 .bg-quote-title{font-weight:600;color:var(--ink);font-size:15px}
-.bg-toggle{display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+.bg-toggle{display:inline-flex;align-items:center;gap:9px;cursor:pointer;
   font:600 13px/1 "IBM Plex Sans",sans-serif;color:var(--ink-2);
-  padding:8px 14px;border:1px solid var(--line);border-radius:999px;
-  background:var(--paper);transition:all .15s}
-.bg-toggle:hover{border-color:var(--gold);color:var(--ink)}
+  padding:9px 16px;border:1px solid var(--line);border-radius:999px;
+  background:var(--paper);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 1px 2px rgba(74,53,36,.05);
+  transition:transform .18s cubic-bezier(.2,.7,.3,1),
+    box-shadow .18s ease, border-color .18s ease, color .18s ease}
+.bg-toggle:hover{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));
+  color:var(--ink);transform:translateY(-1px);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset,
+    0 4px 14px -6px rgba(184,134,46,.35), 0 1px 2px rgba(74,53,36,.06)}
 .bg-toggle input{accent-color:var(--gold);width:14px;height:14px}
 .bg-quote-fields{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:18px;margin-top:18px}
 @media(max-width:720px){.bg-quote-fields{grid-template-columns:1fr}}
@@ -5622,9 +5656,12 @@ BUDGET_JS = r"""
           + '<span class="mc-rank">' + (i+1) + '</span>'
           + '<span class="mc-brand">' + esc(r.name) + '</span>'
           + (i===0 && !r.mine ? '<span class="mc-badge">Best value</span>' : '')
-          + (r.mine ? '' : (r.conf !== "high"
-              ? '<span class="mc-badge soft">' + (r.n||0) + ' item'
-                + (r.n===1?'':'s') + '</span>' : ''))
+          + (r.mine ? ''
+              : r.conf === "estimate"
+                ? '<span class="mc-badge soft">Est. making %</span>'
+              : r.conf !== "high"
+                ? '<span class="mc-badge soft">' + (r.n||0) + ' item'
+                  + (r.n===1?'':'s') + '</span>' : '')
           + '<span class="mc-total"><span class="bg-g">' + g(r.grams) + '</span><span class="bg-unit">grams</span>'
           + (i>0 ? '<span class="mc-delta">&minus;' + g(deficit) + 'g</span>' : '')
           + '</span>'
@@ -5638,10 +5675,18 @@ BUDGET_JS = r"""
       + '</div>';
     }).join("");
 
-    $("bg-note").textContent = "Comparing " + (rows.length - (mine?1:0))
-      + " jeweller" + (rows.length - (mine?1:0)===1?"":"s")
-      + " we have verified making-charge data for" + (mine?" plus your quote":"")
-      + ". Grams are before hallmarking / stone charges.";
+    var totalBrands = rows.length - (mine?1:0);
+    var estBrands = rows.filter(function(r){return !r.mine && r.conf === "estimate";}).length;
+    var note = "Comparing " + totalBrands + " jeweller" + (totalBrands===1?"":"s");
+    if(estBrands > 0){
+      note += " (" + estBrands + " use a market-median making % as an estimate; "
+        + "the rest are verified from that jeweller's own price breakups)";
+    } else {
+      note += " with verified making-charge data";
+    }
+    if(mine) note += " plus your quote";
+    note += ". Grams shown are before hallmarking or stone charges.";
+    $("bg-note").textContent = note;
   }
 
   function build(){
@@ -5768,21 +5813,51 @@ MC_DASH_JS = r"""
 .mc-field label{display:block;font:600 11px/1 "IBM Plex Sans",sans-serif;
   text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin-bottom:8px}
 .mc-hint{text-transform:none;letter-spacing:0;font-weight:400;opacity:.7}
-.mc-seg{display:flex;flex-wrap:wrap;gap:6px}
-.mc-seg button{font:600 13px/1 "IBM Plex Sans",sans-serif;padding:9px 13px;
+/* segment + chip styles: shared across MC dashboard, budget calc, karat tabs.
+   Warm-preview aesthetic: hairline border on parchment, soft lift on hover,
+   two-stop gold gradient on the active state with an inset highlight for
+   coin-like depth. Every button becomes a small tactile object. */
+.mc-seg{display:flex;flex-wrap:wrap;gap:8px}
+.mc-seg button{font:600 13px/1 "IBM Plex Sans",sans-serif;padding:10px 16px;
   border:1px solid var(--line);background:var(--paper);color:var(--ink-2);
-  border-radius:9px;cursor:pointer;transition:all .15s}
-.mc-seg button:hover{border-color:var(--gold)}
-.mc-seg button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);
-  color:#231a02}
-#mc-weight{width:100%;padding:10px 12px;border:1px solid var(--line);
-  border-radius:9px;background:var(--paper);color:var(--ink);
-  font:600 16px/1 "IBM Plex Mono",monospace}
-.mc-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
-.mc-chips button{font:500 11.5px/1 "IBM Plex Sans",sans-serif;padding:5px 9px;
-  border:1px solid var(--line);background:transparent;color:var(--ink-3);
-  border-radius:20px;cursor:pointer}
-.mc-chips button:hover{border-color:var(--gold);color:var(--gold)}
+  border-radius:10px;cursor:pointer;position:relative;
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 1px 2px rgba(74,53,36,.05);
+  transition:transform .18s cubic-bezier(.2,.7,.3,1),
+    box-shadow .18s ease, border-color .18s ease, color .18s ease,
+    background .18s ease}
+.mc-seg button:hover{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));
+  color:var(--ink);transform:translateY(-1px);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset,
+    0 4px 14px -6px rgba(184,134,46,.35), 0 1px 2px rgba(74,53,36,.06)}
+.mc-seg button:active{transform:translateY(0)}
+.mc-seg button[aria-pressed="true"]{
+  background:linear-gradient(140deg,#E4C070 0%,#B8862E 55%,#7A5A1A 100%);
+  border-color:#7A5A1A;color:#231a02;font-weight:700;
+  box-shadow:0 1px 0 rgba(255,255,255,.35) inset,
+    0 0 0 1px rgba(122,90,26,.35) inset,
+    0 6px 16px -6px rgba(184,134,46,.55)}
+.mc-seg button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+#mc-weight{width:100%;padding:12px 14px;border:1px solid var(--line);
+  border-radius:10px;background:var(--paper);color:var(--ink);
+  font:600 16px/1 "IBM Plex Mono",monospace;
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset;
+  transition:border-color .18s ease, box-shadow .18s ease}
+#mc-weight:focus{outline:0;border-color:var(--gold);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 22%,transparent)}
+
+.mc-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.mc-chips button{font:500 11.5px/1 "IBM Plex Sans",sans-serif;
+  padding:6px 12px;border:1px solid var(--line);background:var(--paper);
+  color:var(--ink-3);border-radius:999px;cursor:pointer;
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset;
+  transition:transform .18s cubic-bezier(.2,.7,.3,1),
+    border-color .18s ease, color .18s ease, background .18s ease,
+    box-shadow .18s ease}
+.mc-chips button:hover{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));
+  color:var(--ink);background:color-mix(in srgb,var(--gold) 6%,var(--paper));
+  transform:translateY(-1px)}
+.mc-chips button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
 .mc-headline{background:linear-gradient(160deg,var(--board),var(--board-2));
   border:1px solid rgba(217,178,74,.35);border-radius:16px;padding:20px 22px;
