@@ -62,6 +62,13 @@ REGIONAL_BRANDS = [
     {"name": "Joyalukkas", "slug": "joyalukkas", "domain": "joyalukkas.in",
      "rate_url": "https://www.joyalukkas.in/goldrate",
      "active": True, "includes_gst": False},
+    # Novel Jewels (Aditya Birla). Homepage footer banner text:
+    # "Today's Gold Rate is Rs.13735 per gm (22kt)". Only 22K published in
+    # raw HTML - the extract_value_per_gm_karat pattern picks it up, and
+    # the site derives the 24K/18K ladder from the 22K anchor as usual.
+    {"name": "Indriya", "slug": "indriya", "domain": "indriya.com",
+     "rate_url": "https://www.indriya.com",
+     "active": True, "includes_gst": False},
 ]
 
 

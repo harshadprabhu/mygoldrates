@@ -332,6 +332,33 @@ _VALUE_THEN_CT_RE = re.compile(
     re.I)
 
 
+# Indriya-style banner: "Today's Gold Rate is Rs.13735 per gm (22kt)".
+# Value THEN karat, but karat labelled "22kt" (no fineness), NO leading slash
+# before g/gm (so _VALUE_THEN_KARAT_RE misses it). Guardrails:
+#   * value must be >=4 digits, so a stray "Rs 500 off (22kt chain)" won't hit
+#   * gap capped at 40 chars and constrained not to jump past 'per' word
+# We keep this AFTER the fineness-anchored patterns so pages that DO carry a
+# proper (916)/(999) code are still preferred.
+_VALUE_PER_GM_KARAT_RE = re.compile(
+    r"(?:Rs\.?|₹|INR)\s*"
+    r"((?:\d{1,3}(?:,\d{3})+|\d{4,})(?:\.\d{1,2})?)"
+    r"\s*(?:per\s*)?(?:g|gm|gram)\b"
+    r"[^0-9(]{0,40}?\(?\s*(\d{2})\s*[kK][tT]\b",
+    re.I)
+
+
+def extract_value_per_gm_karat(text):
+    buckets = {}
+    for m in _VALUE_PER_GM_KARAT_RE.finditer(text):
+        karat = f"{m.group(2)}K"
+        if karat not in PURITY_FRACTION:
+            continue
+        pg = _per_gram(_f(m.group(1)))
+        if pg:
+            buckets.setdefault(karat, []).append(pg)
+    return buckets
+
+
 def extract_value_then_ct(text):
     buckets = {}
     for m in _VALUE_THEN_CT_RE.finditer(text):
@@ -410,6 +437,7 @@ def extract(html):
         for fn, name in ((extract_labeled_rates, "labeled"),
                          (extract_value_then_karat, "valuekarat"),
                          (extract_value_then_ct, "valuect"),
+                         (extract_value_per_gm_karat, "valuepergm"),
                          (extract_pregst_rate, "pregst"),
                          (extract_gold_value_breakup, "goldvalue"),
                          (extract_headline_rate, "headline"),
