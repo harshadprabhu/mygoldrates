@@ -298,6 +298,17 @@ they beat the board or overcharge on the making. Updated 2026-08-06.</p>
       <div class="mc-seg" id="bg-cats"></div>
     </div>
   </div>
+  <div class="bg-toggles" role="group" aria-label="What to include in cost">
+    <label class="bg-toggle-inline">
+      <input type="checkbox" id="bg-incmc" checked>
+      <span>Include making charge</span>
+    </label>
+    <label class="bg-toggle-inline">
+      <input type="checkbox" id="bg-incgst" checked>
+      <span>Include 3% GST</span>
+    </label>
+    <span class="bg-toggle-hint" id="bg-mode-hint"></span>
+  </div>
 </div>
 
 <div id="bg-headline" class="mc-headline" hidden></div>
@@ -386,6 +397,17 @@ they beat the board or overcharge on the making. Updated 2026-08-06.</p>
   background:var(--paper);color:var(--ink);font:500 14.5px/1 "IBM Plex Sans",sans-serif;outline:0}
 .bg-text:focus{border-color:var(--gold)}
 
+.bg-toggles{display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  margin-top:20px;padding-top:18px;border-top:1px dashed var(--line)}
+.bg-toggle-inline{display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+  font:600 13px/1 "IBM Plex Sans",sans-serif;color:var(--ink-2);
+  padding:8px 14px;border:1px solid var(--line);border-radius:999px;
+  background:var(--paper);transition:all .15s;user-select:none}
+.bg-toggle-inline:hover{border-color:var(--gold);color:var(--ink)}
+.bg-toggle-inline input{accent-color:var(--gold);width:14px;height:14px;cursor:pointer}
+.bg-toggle-inline:has(input:checked){background:color-mix(in srgb,var(--gold) 12%,var(--paper));
+  border-color:color-mix(in srgb,var(--gold) 50%,var(--line));color:var(--ink)}
+.bg-toggle-hint{font-size:12.5px;color:var(--ink-3);flex:1;min-width:200px}
 .bg-quote{margin-top:14px}
 .bg-quote-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .bg-quote-eyebrow{font:600 11px/1 "IBM Plex Sans",sans-serif;text-transform:uppercase;
@@ -426,6 +448,7 @@ they beat the board or overcharge on the making. Updated 2026-08-06.</p>
   var KARATS = [["22","22K"],["24","24K"],["18","18K"]];
 
   var state = { budget: 100000, karat: "22", cat: (D.cats[0]||""),
+                incMc: true, incGst: true,
                 useMine: false, mineRate: 13500, mineMc: 18, mineName: "" };
 
   function $(id){ return document.getElementById(id); }
@@ -452,11 +475,14 @@ they beat the board or overcharge on the making. Updated 2026-08-06.</p>
     });
   }
 
-  // cost of 1 gram, all-in
+  // cost of 1 gram, honouring the two toggles.
+  // Both ON = billed price a jeweller would charge (default).
+  // GST off = user's budget is pre-GST (e.g. company invoicing).
+  // Making off = pure metal/coin-equivalent view, no craftsmanship.
+  // Both off = spot gold, useful sanity check ("if I paid rate only, X grams").
   function perGramCost(rate, mcPct){
-    var gold = rate;
-    var making = gold * (mcPct/100);
-    return (gold + making) * (1 + GST);
+    var withMc = state.incMc ? (rate + rate * (mcPct/100)) : rate;
+    return state.incGst ? withMc * (1 + GST) : withMc;
   }
 
   function compute(){
@@ -468,20 +494,22 @@ they beat the board or overcharge on the making. Updated 2026-08-06.</p>
       if(!mc || !rate) return;
       var cpg = perGramCost(rate, mc.pct);
       var grams = state.budget / cpg;
+      var gold = rate * grams;
+      var making = state.incMc ? gold * (mc.pct/100) : 0;
+      var gst = state.incGst ? (gold + making) * GST : 0;
       out.push({ name:name, rate:rate, pct:mc.pct, n:mc.n, conf:mc.conf,
-                 cpg:cpg, grams:grams, gold:rate*grams,
-                 making:rate*grams*(mc.pct/100),
-                 gst:(rate*grams + rate*grams*(mc.pct/100))*GST,
+                 cpg:cpg, grams:grams, gold:gold, making:making, gst:gst,
                  mine:false });
     });
     if(state.useMine && state.mineRate > 0){
       var cpg2 = perGramCost(state.mineRate, state.mineMc);
       var grams2 = state.budget / cpg2;
+      var gold2 = state.mineRate * grams2;
+      var making2 = state.incMc ? gold2 * (state.mineMc/100) : 0;
+      var gst2 = state.incGst ? (gold2 + making2) * GST : 0;
       out.push({ name: state.mineName.trim() || "Your jeweller",
                  rate:state.mineRate, pct:state.mineMc, n:1, conf:"user",
-                 cpg:cpg2, grams:grams2, gold:state.mineRate*grams2,
-                 making:state.mineRate*grams2*(state.mineMc/100),
-                 gst:(state.mineRate*grams2 + state.mineRate*grams2*(state.mineMc/100))*GST,
+                 cpg:cpg2, grams:grams2, gold:gold2, making:making2, gst:gst2,
                  mine:true });
     }
     out.sort(function(a,b){ return b.grams - a.grams; });
@@ -502,9 +530,14 @@ they beat the board or overcharge on the making. Updated 2026-08-06.</p>
     var best = rows[0], worst = rows[rows.length-1];
     var mine = rows.filter(function(r){return r.mine;})[0];
     var lead = state.karat + "K " + state.cat.toLowerCase();
+    var modeTag;
+    if(state.incMc && state.incGst) modeTag = " (billed price)";
+    else if(!state.incMc && !state.incGst) modeTag = " (spot gold only)";
+    else if(!state.incMc) modeTag = " (no making charge)";
+    else modeTag = " (pre-GST)";
 
     head.hidden = false;
-    var msg = '<div class="mh-k">Most grams for ' + inr(state.budget) + ' on ' + esc(lead) + '</div>'
+    var msg = '<div class="mh-k">Most grams for ' + inr(state.budget) + ' on ' + esc(lead) + modeTag + '</div>'
       + '<div class="mh-v">' + g(best.grams) + '<span style="font-size:.5em;opacity:.75;margin-left:8px">g &middot; <b>' + esc(best.name) + '</b></span></div>';
     if(rows.length > 1){
       msg += '<div class="mh-sub">' + esc(worst.name) + ' would give you '
@@ -537,8 +570,8 @@ they beat the board or overcharge on the making. Updated 2026-08-06.</p>
         + '<div class="mc-legend" style="margin-top:12px">'
           + '<span>Cost/g <b>' + inr(r.cpg) + '</b></span>'
           + '<span>Rate <b>' + inr(r.rate) + '/g</b></span>'
-          + '<span>Making <b>' + r.pct + '%</b></span>'
-          + '<span>GST <b>3%</b></span>'
+          + '<span>Making <b>' + (state.incMc ? r.pct + '%' : 'excluded') + '</b></span>'
+          + '<span>GST <b>' + (state.incGst ? '3%' : 'excluded') + '</b></span>'
         + '</div>'
       + '</div>';
     }).join("");
@@ -582,6 +615,27 @@ they beat the board or overcharge on the making. Updated 2026-08-06.</p>
     var v = parseFloat(this.value); if(!isNaN(v) && v >= 0 && v <= 60){ state.mineMc = v; render(); }
   });
   $("bg-mine-name").addEventListener("input", function(){ state.mineName = this.value; render(); });
+
+  // include-in-cost toggles
+  function refreshModeHint(){
+    var h = $("bg-mode-hint");
+    if(state.incMc && state.incGst){
+      h.textContent = "Billed price a jeweller would charge you.";
+    } else if(!state.incMc && state.incGst){
+      h.textContent = "Making charge excluded (bullion / coin-style pricing).";
+    } else if(state.incMc && !state.incGst){
+      h.textContent = "Pre-GST view (budget is before 3% tax).";
+    } else {
+      h.textContent = "Spot gold only - no making charge, no GST.";
+    }
+  }
+  $("bg-incmc").addEventListener("change", function(){
+    state.incMc = this.checked; refreshModeHint(); render();
+  });
+  $("bg-incgst").addEventListener("change", function(){
+    state.incGst = this.checked; refreshModeHint(); render();
+  });
+  refreshModeHint();
 
   build();
 })();
