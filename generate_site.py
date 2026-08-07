@@ -1640,6 +1640,55 @@ def main():
       </div>
     </div>
   </div>
+  <h3>Gold Calculator</h3>
+  <p class="dnote">Fix your budget and see how many grams you can take home
+  at each jeweller. Enter making charge from their quote &mdash; every jeweller
+  charges differently.</p>
+  <div class="calc calc-drawer">
+    <div class="calc-fields">
+      <div class="field"><label for="gc-b">Your budget (&#8377;)</label>
+        <div class="quick-weights" role="group" aria-label="Quick budgets">
+          <button type="button" class="qw-pill" data-gb="25000">&#8377;25k</button>
+          <button type="button" class="qw-pill" data-gb="50000">&#8377;50k</button>
+          <button type="button" class="qw-pill active" data-gb="100000">&#8377;1L</button>
+          <button type="button" class="qw-pill" data-gb="200000">&#8377;2L</button>
+          <button type="button" class="qw-pill" data-gb="500000">&#8377;5L</button>
+          <button type="button" class="qw-pill" data-gb="1000000">&#8377;10L</button>
+        </div>
+        <input id="gc-b" type="number" inputmode="numeric" min="1000" step="500" value="100000"></div>
+      <div class="field"><label id="gc-p-label">Purity</label>
+        <div class="seg" role="group" aria-labelledby="gc-p-label">
+          <button data-gp="24K" aria-pressed="true">24K</button>
+          <button data-gp="22K" aria-pressed="false">22K</button>
+          <button data-gp="18K" aria-pressed="false">18K</button>
+          <button data-gp="14K" aria-pressed="false">14K</button>
+        </div></div>
+      <div class="field"><label for="gc-brand">Brand rate</label>
+        <select id="gc-brand"></select></div>
+      <div class="field"><label for="gc-m">Making charge (%)</label>
+        <input id="gc-m" type="number" inputmode="decimal" min="0" max="60" step="0.5" value="18"></div>
+      <div class="field"><label id="gc-g-label">GST</label>
+        <div class="seg" role="group" aria-labelledby="gc-g-label">
+          <button data-gg="1" aria-pressed="true">Incl. 3% GST</button>
+          <button data-gg="0" aria-pressed="false">Excl. GST</button>
+        </div></div>
+    </div>
+    <div class="calc-out" aria-live="polite">
+      <div class="k" id="gc-title">&#8377;1,00,000 &middot; 24K</div>
+      <div class="v" id="gc-grams">-</div>
+      <div class="sub" id="gc-basis">-</div>
+      <div class="split">
+        <div><span>Rate per gram</span><span class="amt" id="gc-rate">-</span></div>
+        <div><span>Gold value</span><span class="amt" id="gc-gold">-</span></div>
+        <div><span>Making charge</span><span class="amt" id="gc-mc">-</span></div>
+        <div><span>GST</span><span class="amt" id="gc-gst">-</span></div>
+      </div>
+      <div style="margin-top:12px;padding-top:10px;border-top:1px dashed rgba(224,186,86,.2);font-size:12px;color:#8E9A8C;text-align:center">
+        <a href="{SITE_URL}/budget-gold-calculator" style="color:#E0BA56;text-decoration:none">Compare across every jeweller &rarr;</a>
+      </div>
+    </div>
+  </div>
+
   <h3>More calculators</h3>
   <a class="toolcard" href="{SITE_URL}/gold-loan-calculator"><b>Gold Loan
     Calculator</b><span>Eligibility &amp; EMI</span></a>
@@ -4623,6 +4672,73 @@ var FRAC={"24K":24/24,"22K":22/24,"18K":18/24,"14K":14/24};
       b.setAttribute('aria-pressed','true');gst=b.dataset.g==='1';calc();
     });
   });
+
+  /* ---- Gold Calculator (reverse: budget in, grams out) ---- */
+  /* Same BRANDS list as the price calc, scored the other way:
+     grams = budget / (rate * (1 + making%) * (1 + GST_if_on)). Making %
+     is user-typed - the multi-brand comparison at /budget-gold-calculator
+     is where our verified per-brand medians drive the picture. */
+  var gcSel=document.getElementById('gc-brand'),
+      gcBudget=document.getElementById('gc-b'),
+      gcMc=document.getElementById('gc-m');
+  if(gcSel && typeof BRANDS !== 'undefined' && BRANDS.length){
+    BRANDS.forEach(function(b,i){
+      var o=document.createElement('option');
+      o.value=i;o.textContent=b.name;gcSel.appendChild(o);
+    });
+  }
+  var gcPurity='24K', gcGst=true;
+  function gcCalc(){
+    if(!gcBudget || !gcSel || typeof BRANDS === 'undefined' || !BRANDS.length) return;
+    var budget=parseFloat(gcBudget.value)||0;
+    var mcPct=Math.max(0, Math.min(60, parseFloat(gcMc.value)||0));
+    var idx=parseInt(gcSel.value,10)||0;
+    var b=BRANDS[idx]||BRANDS[0];
+    if(!b || budget<=0) return;
+    var rate=b.r24*({'24K':24/24,'22K':22/24,'18K':18/24,'14K':14/24}[gcPurity]||1.0);
+    var cpg=rate*(1+mcPct/100)*(gcGst?1.03:1);
+    var grams=cpg>0?budget/cpg:0;
+    var goldVal=rate*grams;
+    var mcVal=goldVal*(mcPct/100);
+    var gstVal=gcGst?(goldVal+mcVal)*0.03:0;
+    var t=document.getElementById('gc-title'),
+        gr=document.getElementById('gc-grams'),
+        ba=document.getElementById('gc-basis'),
+        rt=document.getElementById('gc-rate'),
+        gv=document.getElementById('gc-gold'),
+        mv=document.getElementById('gc-mc'),
+        gs=document.getElementById('gc-gst');
+    if(t)t.textContent='₹'+Math.round(budget).toLocaleString('en-IN')+' · '+gcPurity+' · '+b.name;
+    if(gr)gr.textContent=(grams<10?grams.toFixed(2):grams.toFixed(1))+' g';
+    if(ba)ba.textContent=(gcGst?'incl. 3% GST':'pre-GST')+', making @ '+mcPct+'%';
+    if(rt)rt.textContent=fmt(rate)+'/g';
+    if(gv)gv.textContent=fmt(goldVal);
+    if(mv)mv.textContent=mcPct>0?fmt(mcVal):'not applied';
+    if(gs)gs.textContent=gcGst?fmt(gstVal):'not applied';
+  }
+  if(gcBudget)gcBudget.addEventListener('input',gcCalc);
+  if(gcMc)gcMc.addEventListener('input',gcCalc);
+  if(gcSel)gcSel.addEventListener('change',gcCalc);
+  document.querySelectorAll('[data-gp]').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('[data-gp]').forEach(function(x){x.setAttribute('aria-pressed','false');});
+      b.setAttribute('aria-pressed','true');gcPurity=b.dataset.gp;gcCalc();
+    });
+  });
+  document.querySelectorAll('[data-gg]').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('[data-gg]').forEach(function(x){x.setAttribute('aria-pressed','false');});
+      b.setAttribute('aria-pressed','true');gcGst=b.dataset.gg==='1';gcCalc();
+    });
+  });
+  document.querySelectorAll('[data-gb]').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('[data-gb]').forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active');
+      if(gcBudget){gcBudget.value=b.dataset.gb;gcCalc();}
+    });
+  });
+  gcCalc();
 
   /* ---- Middle Class Persona: Jewellery Final Bill Estimator JS ---- */
   var bcKarat=document.getElementById('bc-karat'),
