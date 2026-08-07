@@ -8,16 +8,16 @@
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14990.43,
-    "22k": 13741.23,
-    "18k": 11242.82
+    "24k": 14994.0,
+    "22k": 13744.5,
+    "18k": 11245.5
   },
   "lowest_24k": {
-    "jeweller": "Candere",
-    "rate_per_gram_inr": 14606.9
+    "jeweller": "PN Gadgil",
+    "rate_per_gram_inr": 14865.0
   },
   "ibja_reference_24k_999_per_gram_inr": 14902.0,
-  "akgsma_south_india_22k_per_gram_inr": null,
+  "akgsma_south_india_22k_per_gram_inr": 13740.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
@@ -38,12 +38,6 @@
       "rate_24k_per_gram_inr": 14420.0,
       "rate_22k_per_gram_inr": 13218.33,
       "rate_18k_per_gram_inr": 10815.0
-    },
-    {
-      "jeweller": "Candere",
-      "rate_24k_per_gram_inr": 14606.9,
-      "rate_22k_per_gram_inr": 13389.66,
-      "rate_18k_per_gram_inr": 10955.17
     },
     {
       "jeweller": "PN Gadgil",
@@ -119,6 +113,12 @@
     },
     {
       "jeweller": "Vummidi Bangaru",
+      "rate_24k_per_gram_inr": 15000.0,
+      "rate_22k_per_gram_inr": 13750.0,
+      "rate_18k_per_gram_inr": 11250.0
+    },
+    {
+      "jeweller": "Candere",
       "rate_24k_per_gram_inr": 15000.0,
       "rate_22k_per_gram_inr": 13750.0,
       "rate_18k_per_gram_inr": 11250.0
