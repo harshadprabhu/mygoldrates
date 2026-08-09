@@ -8,9 +8,9 @@
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 15239.5,
-    "22k": 13969.54,
-    "18k": 11429.62
+    "24k": 15237.5,
+    "22k": 13967.71,
+    "18k": 11428.12
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -64,6 +64,12 @@
       "rate_18k_per_gram_inr": 11423.1
     },
     {
+      "jeweller": "Bhima Jewels",
+      "rate_24k_per_gram_inr": 15234.55,
+      "rate_22k_per_gram_inr": 13965.0,
+      "rate_18k_per_gram_inr": 11425.91
+    },
+    {
       "jeweller": "GRT Jewellers",
       "rate_24k_per_gram_inr": 15234.55,
       "rate_22k_per_gram_inr": 13965.0,
@@ -88,10 +94,10 @@
       "rate_18k_per_gram_inr": 11426.25
     },
     {
-      "jeweller": "Bhima Jewels",
-      "rate_24k_per_gram_inr": 15239.0,
-      "rate_22k_per_gram_inr": 13969.08,
-      "rate_18k_per_gram_inr": 11429.25
+      "jeweller": "Vaibhav Jewellers",
+      "rate_24k_per_gram_inr": 15235.0,
+      "rate_22k_per_gram_inr": 13965.42,
+      "rate_18k_per_gram_inr": 11426.25
     },
     {
       "jeweller": "Jos Alukkas",
