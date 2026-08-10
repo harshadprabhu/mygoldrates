@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-10",
-  "last_updated": "2026-08-10T14:06:18.222214+05:30",
+  "last_updated": "2026-08-10T16:10:17.517642+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 152649.0,
-      "change_pct": 0.55
+      "price_per_10g_inr": 152296.0,
+      "change_pct": 0.31
     },
     {
       "contract": "GOLDM",
       "expiry": "04SEP2026",
-      "price_per_10g_inr": 151550.0,
-      "change_pct": 0.72
+      "price_per_10g_inr": 151252.0,
+      "change_pct": 0.52
     }
   ],
   "jewellers": [
@@ -77,9 +77,9 @@
     },
     {
       "jeweller": "Bhima Jewels",
-      "rate_24k_per_gram_inr": 15196.36,
-      "rate_22k_per_gram_inr": 13930.0,
-      "rate_18k_per_gram_inr": 11397.27
+      "rate_24k_per_gram_inr": 15199.0,
+      "rate_22k_per_gram_inr": 13932.42,
+      "rate_18k_per_gram_inr": 11399.25
     },
     {
       "jeweller": "Jos Alukkas",
