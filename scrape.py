@@ -61,9 +61,8 @@ PURITY_FRACTION = {"24K": 24 / 24, "22K": 22 / 24, "18K": 18 / 24, "14K": 14 / 2
 
 # Brands behind anti-bot walls only reachable through Zyte API (needs the
 # ZYTE_API_KEY secret) instead of a direct request; keyed by brand slug so no
-# DB schema change is needed. caratlane (Titan, like tanishq) serves its
-# product price-breakup only to real browsers.
-NEEDS_PROXY = {"tanishq", "caratlane", "whp", "joyalukkas"}
+# DB schema change is needed.
+NEEDS_PROXY = set()
 
 # Browser actions Zyte runs before returning HTML, per slug (CaratLane reads
 # from its digital-gold page and needs no interaction; other slugs absent
@@ -632,6 +631,41 @@ def render(url, wait_selector=None):
         return None
 
 
+_JOYALUKKAS_GQL = ("https://www.joyalukkas.in/graphql"
+                    "?query=query+getgoldrates{getgoldrates{Status+Data{"
+                    "GOLD_14KT_RATE+GOLD_18KT_RATE+GOLD_22KT_RATE+GOLD_24KT_RATE}}}"
+                    "&operationName=getgoldrates&variables={}")
+
+_JOY_FIELDS = {"GOLD_14KT_RATE": "14K", "GOLD_18KT_RATE": "18K",
+               "GOLD_22KT_RATE": "22K", "GOLD_24KT_RATE": "24K"}
+
+
+def _fetch_joyalukkas_graphql(session):
+    try:
+        r = session.get(_JOYALUKKAS_GQL, timeout=15,
+                        headers={"User-Agent": UA})
+        if r.status_code != 200:
+            return None
+        data = r.json().get("data", {}).get("getgoldrates", {})
+        if data.get("Status") != 200:
+            return None
+        entries = data.get("Data") or []
+        if not entries:
+            return None
+        row = entries[0]
+        found, counts = {}, {}
+        for field, purity in _JOY_FIELDS.items():
+            val = _f(row.get(field, ""))
+            if val:
+                pg = _per_gram(val)
+                if pg:
+                    found[purity] = pg
+                    counts[purity] = 1
+        return (found, counts) if found else None
+    except Exception:
+        return None
+
+
 ZYTE_ENDPOINT = "https://api.zyte.com/v1/extract"
 
 
@@ -808,6 +842,16 @@ def scrape_brand(b, session):
     tried, blocked = [], False
     slug = b.get("slug")
     ws = WAIT_SELECTOR.get(slug)
+
+    # Joyalukkas exposes an open GraphQL endpoint — faster and more reliable
+    # than rendering their React SPA.
+    if slug == "joyalukkas":
+        hit = _fetch_joyalukkas_graphql(session)
+        if hit:
+            found, counts = hit
+            ok, why = ordering_sane(found)
+            if ok:
+                return (b.get("rate_url") or "graphql"), found, counts, "api/graphql", "ok"
 
     # Try the configured URL first, then fall back to path discovery on the
     # same domain so a stale rate_url can recover itself automatically.
