@@ -8,9 +8,9 @@
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 15211.25,
-    "22k": 13943.65,
-    "18k": 11408.44
+    "24k": 15207.0,
+    "22k": 13939.75,
+    "18k": 11405.25
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -34,12 +34,6 @@
   ],
   "jewellers": [
     {
-      "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 15060.0,
-      "rate_22k_per_gram_inr": 13805.0,
-      "rate_18k_per_gram_inr": 11295.0
-    },
-    {
       "jeweller": "PN Gadgil",
       "rate_24k_per_gram_inr": 15075.0,
       "rate_22k_per_gram_inr": 13818.75,
@@ -59,6 +53,12 @@
     },
     {
       "jeweller": "Vaibhav Jewellers",
+      "rate_24k_per_gram_inr": 15196.0,
+      "rate_22k_per_gram_inr": 13929.67,
+      "rate_18k_per_gram_inr": 11397.0
+    },
+    {
+      "jeweller": "Malabar Gold",
       "rate_24k_per_gram_inr": 15196.0,
       "rate_22k_per_gram_inr": 13929.67,
       "rate_18k_per_gram_inr": 11397.0
@@ -130,6 +130,12 @@
       "rate_18k_per_gram_inr": 11437.39
     },
     {
+      "jeweller": "Chandukaka Saraf",
+      "rate_24k_per_gram_inr": 15350.0,
+      "rate_22k_per_gram_inr": 14070.83,
+      "rate_18k_per_gram_inr": 11512.5
+    },
+    {
       "jeweller": "BlueStone",
       "rate_24k_per_gram_inr": 15390.5,
       "rate_22k_per_gram_inr": 14107.96,
@@ -148,7 +154,7 @@
       "rate_18k_per_gram_inr": 11587.5
     }
   ],
-  "jeweller_count": 19,
+  "jeweller_count": 20,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
