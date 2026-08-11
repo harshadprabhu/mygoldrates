@@ -65,9 +65,23 @@ PURITY_FRACTION = {"24K": 24 / 24, "22K": 22 / 24, "18K": 18 / 24, "14K": 14 / 2
 # product price-breakup only to real browsers.
 NEEDS_PROXY = {"tanishq", "malabar", "caratlane", "whp", "joyalukkas"}
 
-# Browser actions Zyte runs before returning HTML, per slug (none currently;
-# CaratLane reads from its digital-gold page, which needs no interaction).
-ZYTE_ACTIONS = {}
+# Browser actions Zyte runs before returning HTML, per slug (CaratLane reads
+# from its digital-gold page and needs no interaction; other slugs absent
+# from this dict get none). Malabar is a React SPA (#spa-root) whose rate
+# cards render into <h3> tags well after initial load — the waterfall's
+# plain render=true fetches were returning the page before hydration
+# finished, so extraction saw no price text at all. Waiting for that
+# selector before returning HTML fixes it.
+ZYTE_ACTIONS = {
+    "malabar": [{"action": "waitForSelector",
+                 "selector": {"type": "css", "value": "#spa-root h3"},
+                 "timeout": 15}],
+}
+
+# Same hydration problem, cheaper fix: the free-tier waterfall providers
+# (tried before Zyte) also support a wait-for-selector param, so give
+# Malabar a chance to resolve there first instead of always paying for Zyte.
+WAIT_SELECTOR = {"malabar": "#spa-root h3"}
 
 # Method tag for estimated rows: a brand with no live source gets the day's
 # market median so no brand is ever missing. Excluded from the median itself,
@@ -616,7 +630,28 @@ def render(url):
 ZYTE_ENDPOINT = "https://api.zyte.com/v1/extract"
 
 
-def fetch_via_proxy_waterfall(url, session, actions=None):
+def fetch_via_zyte(url, session, actions=None):
+    """Zyte's browserHtml extract API — full residential-proxy render, with
+    optional pre-extraction browser actions (e.g. waitForSelector, click)."""
+    key = os.environ.get("ZYTE_API_KEY")
+    if not key:
+        return None, "no zyte key"
+    payload = {"url": url, "browserHtml": True}
+    if actions:
+        payload["actions"] = actions
+    try:
+        r = session.post(ZYTE_ENDPOINT, json=payload, auth=(key, ""), timeout=60)
+        if r.status_code == 200:
+            html = r.json().get("browserHtml")
+            if html and len(html) > 500:
+                return html, "ok:zyte"
+            return None, "zyte:empty"
+        return None, f"zyte:{r.status_code}"
+    except Exception as e:
+        return None, f"zyte:{type(e).__name__}"
+
+
+def fetch_via_proxy_waterfall(url, session, actions=None, wait_selector=None):
     """Multi-proxy failover waterfall:
     1. ScraperAPI (5,000 free req/mo)
     2. ScrapingBee (1,000 free req/mo)
@@ -624,14 +659,20 @@ def fetch_via_proxy_waterfall(url, session, actions=None):
     4. Crawlbase (1,000 free req/mo)
     5. Zyte (Paid/Final Fallback)
     -> (html, note)
+
+    wait_selector: a CSS selector to wait for before the provider returns
+    HTML, for pages that hydrate client-side well after initial render
+    (e.g. Malabar's React SPA never has price text in a plain render=true
+    snapshot).
     """
     # 1. ScraperAPI
     key = os.environ.get("SCRAPERAPI_KEY")
     if key:
         try:
-            r = session.get("http://api.scraperapi.com",
-                            params={"api_key": key, "url": url, "render": "true", "country_code": "in"},
-                            timeout=45)
+            params = {"api_key": key, "url": url, "render": "true", "country_code": "in"}
+            if wait_selector:
+                params["wait_for_selector"] = wait_selector
+            r = session.get("http://api.scraperapi.com", params=params, timeout=45)
             if r.status_code == 200 and len(r.text) > 500:
                 return r.text, "ok:scraperapi"
         except Exception:
@@ -641,9 +682,10 @@ def fetch_via_proxy_waterfall(url, session, actions=None):
     key = os.environ.get("SCRAPINGBEE_KEY")
     if key:
         try:
-            r = session.get("https://app.scrapingbee.com/api/v1/",
-                            params={"api_key": key, "url": url, "render_js": "true"},
-                            timeout=45)
+            params = {"api_key": key, "url": url, "render_js": "true"}
+            if wait_selector:
+                params["wait_for"] = wait_selector
+            r = session.get("https://app.scrapingbee.com/api/v1/", params=params, timeout=45)
             if r.status_code == 200 and len(r.text) > 500:
                 return r.text, "ok:scrapingbee"
         except Exception:
@@ -653,9 +695,10 @@ def fetch_via_proxy_waterfall(url, session, actions=None):
     key = os.environ.get("ZENROWS_KEY")
     if key:
         try:
-            r = session.get("https://api.zenrows.com/v1/",
-                            params={"apikey": key, "url": url, "js_render": "true"},
-                            timeout=45)
+            params = {"apikey": key, "url": url, "js_render": "true"}
+            if wait_selector:
+                params["wait_for"] = wait_selector
+            r = session.get("https://api.zenrows.com/v1/", params=params, timeout=45)
             if r.status_code == 200 and len(r.text) > 500:
                 return r.text, "ok:zenrows"
         except Exception:
@@ -665,9 +708,10 @@ def fetch_via_proxy_waterfall(url, session, actions=None):
     key = os.environ.get("CRAWLBASE_KEY")
     if key:
         try:
-            r = session.get("https://api.crawlbase.com/",
-                            params={"token": key, "url": url},
-                            timeout=45)
+            params = {"token": key, "url": url}
+            if wait_selector:
+                params["page_wait"] = 6000
+            r = session.get("https://api.crawlbase.com/", params=params, timeout=45)
             if r.status_code == 200 and len(r.text) > 500:
                 return r.text, "ok:crawlbase"
         except Exception:
@@ -780,7 +824,8 @@ def scrape_brand(b, session):
 
         if proxied:
             zhtml, zreason = fetch_via_proxy_waterfall(url, session,
-                                                    ZYTE_ACTIONS.get(b.get("slug")))
+                                                    ZYTE_ACTIONS.get(b.get("slug")),
+                                                    WAIT_SELECTOR.get(b.get("slug")))
             if zhtml:
                 found, counts, how, note = try_html(zhtml)
                 if found:
