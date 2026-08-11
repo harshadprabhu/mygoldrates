@@ -1,0 +1,161 @@
+name: diag-malabar
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Fetch Malabar live-gold-rate via each proxy, inspect raw HTML
+        env:
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
+          ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
+          CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
+          ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os, json, requests, re
+
+          URL = "https://www.malabargoldanddiamonds.com/in/pan-india/en/live-gold-rate.html"
+          WAIT_SEL = "#spa-root h3"
+
+          def inspect(name, text):
+              print(f"\n=== {name}: len={len(text)} ===")
+              has_spa = "spa-root" in text
+              has_inr = "INR/gms" in text
+              has_h3 = "<h3" in text
+              print(f"  has 'spa-root': {has_spa}")
+              print(f"  has 'INR/gms': {has_inr}")
+              print(f"  has '<h3': {has_h3}")
+
+              # Check for rate values
+              rate_pat = re.compile(r'[\d,]+\.\d+\s*INR/gms')
+              rates = rate_pat.findall(text)
+              print(f"  rate matches: {rates}")
+
+              # Check for karat labels
+              karat_pat = re.compile(r'\d+k\s*\(\d+\)')
+              karats = karat_pat.findall(text)
+              print(f"  karat matches: {karats}")
+
+              # Check for blocking / captcha signs
+              for marker in ("captcha", "blocked", "Access Denied", "403", "challenge",
+                             "cf-browser-verification", "Just a moment"):
+                  if marker.lower() in text.lower():
+                      print(f"  WARNING: found blocking marker '{marker}'")
+
+              if has_inr:
+                  idx = text.find("INR/gms")
+                  print("  snippet near INR/gms:", text[max(0, idx-100):idx+100])
+              elif has_h3:
+                  idx = text.find("<h3")
+                  print("  snippet near first <h3>:", text[max(0, idx):idx+300])
+              else:
+                  print("  first 500 chars:", text[:500])
+
+          tried_any = False
+
+          key = os.environ.get("SCRAPERAPI_KEY")
+          if key:
+              tried_any = True
+              try:
+                  r = requests.get("http://api.scraperapi.com",
+                      params={"api_key": key, "url": URL, "render": "true",
+                              "country_code": "in", "wait_for_selector": WAIT_SEL},
+                      timeout=90)
+                  print(f"ScraperAPI status={r.status_code}")
+                  if r.status_code == 200:
+                      inspect("ScraperAPI (render+waitFor)", r.text)
+                  else:
+                      print(f"ScraperAPI error body: {r.text[:300]}")
+              except Exception as e:
+                  print("ScraperAPI error:", e)
+
+          key = os.environ.get("SCRAPINGBEE_KEY")
+          if key:
+              tried_any = True
+              try:
+                  r = requests.get("https://app.scrapingbee.com/api/v1/",
+                      params={"api_key": key, "url": URL, "render_js": "true",
+                              "wait_for": WAIT_SEL},
+                      timeout=90)
+                  print(f"ScrapingBee status={r.status_code}")
+                  if r.status_code == 200:
+                      inspect("ScrapingBee (render+waitFor)", r.text)
+                  else:
+                      print(f"ScrapingBee error body: {r.text[:300]}")
+              except Exception as e:
+                  print("ScrapingBee error:", e)
+
+          key = os.environ.get("ZENROWS_KEY")
+          if key:
+              tried_any = True
+              try:
+                  r = requests.get("https://api.zenrows.com/v1/",
+                      params={"apikey": key, "url": URL, "js_render": "true",
+                              "wait_for": WAIT_SEL},
+                      timeout=90)
+                  print(f"ZenRows status={r.status_code}")
+                  if r.status_code == 200:
+                      inspect("ZenRows (render+waitFor)", r.text)
+                  else:
+                      print(f"ZenRows error body: {r.text[:300]}")
+              except Exception as e:
+                  print("ZenRows error:", e)
+
+          key = os.environ.get("CRAWLBASE_KEY")
+          if key:
+              tried_any = True
+              try:
+                  r = requests.get("https://api.crawlbase.com/",
+                      params={"token": key, "url": URL, "page_wait": "6000"},
+                      timeout=90)
+                  print(f"Crawlbase status={r.status_code}")
+                  if r.status_code == 200:
+                      inspect("Crawlbase (page_wait=6000)", r.text)
+                  else:
+                      print(f"Crawlbase error body: {r.text[:300]}")
+              except Exception as e:
+                  print("Crawlbase error:", e)
+
+          key = os.environ.get("ZYTE_API_KEY")
+          if key:
+              tried_any = True
+              try:
+                  payload = {
+                      "url": URL,
+                      "browserHtml": True,
+                      "actions": [
+                          {"action": "waitForSelector",
+                           "selector": {"type": "css", "value": WAIT_SEL},
+                           "timeout": 15}
+                      ]
+                  }
+                  r = requests.post("https://api.zyte.com/v1/extract",
+                      auth=(key, ""),
+                      json=payload,
+                      timeout=90)
+                  print(f"Zyte status={r.status_code}")
+                  if r.status_code == 200:
+                      data = r.json()
+                      html = data.get("browserHtml", "")
+                      inspect("Zyte (browserHtml+waitForSelector)", html)
+                      if not html:
+                          print("  Zyte response keys:", list(data.keys()))
+                          print("  Zyte response snippet:", str(data)[:500])
+                  else:
+                      print(f"Zyte error body: {r.text[:500]}")
+              except Exception as e:
+                  print("Zyte error:", e)
+
+          if not tried_any:
+              print("No proxy keys available in this environment.")
+          PY

@@ -63,7 +63,7 @@ PURITY_FRACTION = {"24K": 24 / 24, "22K": 22 / 24, "18K": 18 / 24, "14K": 14 / 2
 # ZYTE_API_KEY secret) instead of a direct request; keyed by brand slug so no
 # DB schema change is needed. caratlane (Titan, like tanishq) serves its
 # product price-breakup only to real browsers.
-NEEDS_PROXY = {"tanishq", "malabar", "caratlane", "whp", "joyalukkas"}
+NEEDS_PROXY = {"tanishq", "caratlane", "whp", "joyalukkas"}
 
 # Browser actions Zyte runs before returning HTML, per slug (CaratLane reads
 # from its digital-gold page and needs no interaction; other slugs absent
@@ -75,7 +75,7 @@ NEEDS_PROXY = {"tanishq", "malabar", "caratlane", "whp", "joyalukkas"}
 ZYTE_ACTIONS = {
     "malabar": [{"action": "waitForSelector",
                  "selector": {"type": "css", "value": "#spa-root h3"},
-                 "timeout": 15}],
+                 "timeout": 30}],
 }
 
 # Same hydration problem, cheaper fix: the free-tier waterfall providers
@@ -574,7 +574,7 @@ _STEALTH = (
 )
 
 
-def render(url):
+def render(url, wait_selector=None):
     """Headless fetch, hardened for bot-detection and JS-injected rates.
 
     Beyond a plain load this masks the common headless tells, scrolls to
@@ -601,6 +601,11 @@ def render(url):
                 pg.wait_for_load_state("networkidle", timeout=10_000)
             except Exception:
                 pass
+            if wait_selector:
+                try:
+                    pg.wait_for_selector(wait_selector, timeout=15_000)
+                except Exception:
+                    pass
             # Nudge lazy-loaded rate widgets, then let them settle.
             try:
                 for frac in (0.3, 0.6, 1.0):
@@ -640,7 +645,7 @@ def fetch_via_zyte(url, session, actions=None):
     if actions:
         payload["actions"] = actions
     try:
-        r = session.post(ZYTE_ENDPOINT, json=payload, auth=(key, ""), timeout=60)
+        r = session.post(ZYTE_ENDPOINT, json=payload, auth=(key, ""), timeout=90)
         if r.status_code == 200:
             html = r.json().get("browserHtml")
             if html and len(html) > 500:
@@ -801,6 +806,8 @@ def discover_products(b, session, limit=3):
 def scrape_brand(b, session):
     started = time.monotonic()
     tried, blocked = [], False
+    slug = b.get("slug")
+    ws = WAIT_SELECTOR.get(slug)
 
     # Try the configured URL first, then fall back to path discovery on the
     # same domain so a stale rate_url can recover itself automatically.
@@ -809,7 +816,7 @@ def scrape_brand(b, session):
         urls.append(b["rate_url"])
     # Proxy brands cost credits per request, so hit only their configured URL;
     # everyone else also gets same-domain path discovery as a fallback.
-    proxied = b.get("slug") in NEEDS_PROXY
+    proxied = slug in NEEDS_PROXY
     if b.get("domain") and not proxied:
         base = b["domain"] if b["domain"].startswith("http") else f"https://{b['domain']}"
         for p in CANDIDATE_PATHS:
@@ -824,13 +831,23 @@ def scrape_brand(b, session):
 
         if proxied:
             zhtml, zreason = fetch_via_proxy_waterfall(url, session,
-                                                    ZYTE_ACTIONS.get(b.get("slug")),
-                                                    WAIT_SELECTOR.get(b.get("slug")))
+                                                    ZYTE_ACTIONS.get(slug), ws)
             if zhtml:
                 found, counts, how, note = try_html(zhtml)
                 if found:
                     return url, found, counts, f"proxy/{how}", note
                 tried.append("proxy:" + note)
+                if note == "no values" and slug in ZYTE_ACTIONS:
+                    longer = [dict(a, timeout=45) if a.get("action") == "waitForSelector"
+                              else a for a in ZYTE_ACTIONS[slug]]
+                    rhtml, rreason = fetch_via_zyte(url, session, actions=longer)
+                    if rhtml:
+                        rf, rc, rh, rn = try_html(rhtml)
+                        if rf:
+                            return url, rf, rc, f"proxy-retry/{rh}", rn
+                        tried.append("proxy-retry:" + rn)
+                    else:
+                        tried.append(rreason)
             else:
                 tried.append(zreason)
             continue
@@ -852,7 +869,7 @@ def scrape_brand(b, session):
             static_hit = (found, counts, how, note) if found else None
             if not found:
                 tried.append(note)
-            rhtml = render(url)
+            rhtml = render(url, wait_selector=ws)
             if rhtml:
                 rf, rc, rh, rn = try_html(rhtml)
                 if rf and (rh != "proximity" or static_hit is None):
@@ -865,7 +882,7 @@ def scrape_brand(b, session):
 
         if reason.startswith("blocked"):
             blocked = True
-            rhtml = render(url)
+            rhtml = render(url, wait_selector=ws)
             if rhtml:
                 found, counts, how, note = try_html(rhtml)
                 if found:
@@ -889,7 +906,7 @@ def scrape_brand(b, session):
             found, counts, how, note = try_html(html)
             if found:
                 return url, found, counts, f"discovered/static/{how}", note
-            rhtml = render(url)
+            rhtml = render(url, wait_selector=ws)
             if rhtml:
                 found, counts, how, note = try_html(rhtml)
                 if found:

@@ -14,7 +14,7 @@
 -- all rows already have a token. Requires pgcrypto's gen_random_uuid (default
 -- on Supabase).
 update public.inquiries
-   set unsub_token = gen_random_uuid()::text
+   set unsub_token = gen_random_uuid()
  where unsub_token is null and email is not null;
 
 -- Re-include everyone for the next send.
