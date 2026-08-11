@@ -957,6 +957,31 @@ def scrape_brand(b, session):
                     return url, found, counts, f"discovered/rendered/{how}", note
             tried.append("disc:" + note)
 
+    # Last-resort proxy fallback: if all direct methods failed and the brand
+    # has a configured rate_url, try the proxy waterfall before giving up.
+    if b.get("rate_url") and os.environ.get("ZYTE_API_KEY"):
+        purl = b["rate_url"]
+        zhtml, zreason = fetch_via_proxy_waterfall(
+            purl, session, ZYTE_ACTIONS.get(slug), ws)
+        if zhtml:
+            found, counts, how, note = try_html(zhtml)
+            if found:
+                return purl, found, counts, f"proxy-fallback/{how}", note
+            tried.append("proxy-fallback:" + note)
+            if note == "no values" and slug in ZYTE_ACTIONS:
+                longer = [dict(a, timeout=45) if a.get("action") == "waitForSelector"
+                          else a for a in ZYTE_ACTIONS[slug]]
+                rhtml, rreason = fetch_via_zyte(purl, session, actions=longer)
+                if rhtml:
+                    rf, rc, rh, rn = try_html(rhtml)
+                    if rf:
+                        return purl, rf, rc, f"proxy-retry/{rh}", rn
+                    tried.append("proxy-retry:" + rn)
+                else:
+                    tried.append(rreason)
+        else:
+            tried.append(zreason)
+
     uniq = []
     for t in tried:
         if t not in uniq:
