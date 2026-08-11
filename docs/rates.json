@@ -46,10 +46,10 @@
       "rate_18k_per_gram_inr": 11437.39
     },
     {
-      "jeweller": "PN Gadgil",
-      "rate_24k_per_gram_inr": 15255.0,
-      "rate_22k_per_gram_inr": 13983.75,
-      "rate_18k_per_gram_inr": 11441.25
+      "jeweller": "Kalyan Jewellers",
+      "rate_24k_per_gram_inr": 15289.0,
+      "rate_22k_per_gram_inr": 14014.92,
+      "rate_18k_per_gram_inr": 11466.75
     },
     {
       "jeweller": "Kalyan Jewellers",
@@ -154,7 +154,7 @@
       "rate_18k_per_gram_inr": 11767.5
     }
   ],
-  "jeweller_count": 20,
+  "jeweller_count": 21,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
