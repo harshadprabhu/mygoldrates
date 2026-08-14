@@ -39,14 +39,23 @@ PER_CAT_LARGE = 150    # pool of 500+ candidates (sitemap-scale) - once a
                        # instead so the median reflects the actual catalogue
 TOTAL_CAP = 600        # hard cap on product fetches per brand (4 categories
                        # at PER_CAT_LARGE, with headroom)
-FETCH_WORKERS = 10     # concurrent product-page fetches per brand. Product
+FETCH_WORKERS = 6      # concurrent product-page fetches per brand. Product
                        # pages were fetched one at a time - fine at
                        # PER_CAT=20, but a serial killer once samples run into
                        # the hundreds (BlueStone/Kisna). A brand's fetches
                        # only ever hit that one brand's domain, so bounding
                        # concurrency here is also what keeps this polite -
                        # a fixed pool of parallel connections, not an
-                       # unbounded burst.
+                       # unbounded burst. Dialed back from 10: a production
+                       # run showed some brands' smaller sites (e.g. Waman
+                       # Hari Pethe) slow to a crawl and start timing out
+                       # under 10 concurrent connections, which silently
+                       # looked like "no data for this category" rather than
+                       # what it actually was - the site couldn't keep up.
+FETCH_RETRIES = 1      # retries for a failed fetch (no html / timeout) before
+                       # giving up on that URL - a fetch failure under
+                       # concurrent load is often transient (the origin
+                       # momentarily overloaded), not permanent.
 
 
 def sample_size(pool_size):
@@ -434,16 +443,37 @@ def fetch_batch(sess, engine, brand, items):
     fetches/FETCH_WORKERS instead of fetches - and IS the politeness control
     now, in place of the per-request sleep (a fixed number of concurrent
     connections to one brand's domain, not an unbounded burst).
+
+    A first pass at FETCH_WORKERS, then up to FETCH_RETRIES more passes (at
+    half the concurrency) retrying only the fetches that came back empty.
+    A smaller origin can start timing out once several hundred fetches for
+    one brand are in flight - without a retry, that silently reads as "no
+    making % on these pages" instead of what it is, a transient failure
+    under load - so a URL only counts as a real miss once a retry at gentler
+    concurrency has also failed on it.
+
     Returns a list of (cat, url, ExtractionResult|None, src).
     """
+    fetched = [None] * len(items)   # (html, src) per item, filled in below
+
+    def run_pass(indices, workers):
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            futs = {ex.submit(fetch, sess, items[i][1], True, 25): i for i in indices}
+            for fut in as_completed(futs):
+                fetched[futs[fut]] = fut.result()
+
+    run_pass(range(len(items)), FETCH_WORKERS)
+    for _ in range(FETCH_RETRIES):
+        failed = [i for i, r in enumerate(fetched) if not r[0]]
+        if not failed:
+            break
+        run_pass(failed, max(2, FETCH_WORKERS // 2))
+
     out = []
-    with ThreadPoolExecutor(max_workers=FETCH_WORKERS) as ex:
-        futs = {ex.submit(fetch, sess, u, True, 25): (cat, u) for cat, u in items}
-        for fut in as_completed(futs):
-            cat, u = futs[fut]
-            html, src = fut.result()
-            res = engine.extract(html, brand=brand) if html else None
-            out.append((cat, u, res, src))
+    for i, (cat, u) in enumerate(items):
+        html, src = fetched[i]
+        res = engine.extract(html, brand=brand) if html else None
+        out.append((cat, u, res, src))
     return out
 
 
