@@ -75,7 +75,13 @@ DISCOVER = [
     # Search/listing pages are client-rendered (0 links in server HTML), so
     # this brand runs on hand-verified seeds until a server-rendered listing
     # is found. Extraction itself is solid: 8/8 on these URLs.
+    # robots.txt (not the plain /sitemap.xml, which is a short manual index
+    # that doesn't mention it) links products-sitemap.xml - 10,700+ real
+    # product URLs, versus the ~10 hand-picked seeds this brand relied on
+    # before because its listing/search pages are client-rendered. The
+    # seeds are kept as a fallback if the sitemap route ever breaks.
     {"brand": "BlueStone", "product_re": _BS_PROD,
+     "sitemaps": ["https://www.bluestone.com/products-sitemap.xml"],
      "seeds": {
         "Bangle": ["https://www.bluestone.com/bangles/the-orrale-round-bangle~79884.html",
                    "https://www.bluestone.com/bangles/the-estrella-oval-bangle~34771.html"],
@@ -93,7 +99,14 @@ DISCOVER = [
      "sitemaps": ["https://whpjewellers.com/sitemap.xml"]},
 
     # Shopify. Listings + pagination verified good; seeds cover the gap.
+    # products-sitemap.xml (found via the plain /sitemap.xml index - not
+    # listed among the site's category/collection sitemaps, easy to miss)
+    # carries 5700+ real product URLs, dwarfing the old listings+seeds route
+    # which only ever found the hand-picked seeds (listing pages are
+    # client-rendered, same as the pricing data - see rsc_price_breakup in
+    # mc_engine.py). Kept listings+seeds as a fallback.
     {"brand": "Kisna", "pagination": "page",
+     "sitemaps": ["https://www.kisna.com/products-sitemap.xml"],
      "product_re": r'href="(/products/[a-z0-9][a-z0-9-]*)(?:\?[^"]*)?"',
      "listings": {"Ring": "https://www.kisna.com/jewellery/rings+18kt",
                   "Earrings": "https://www.kisna.com/jewellery/earrings+24kt+18kt",
@@ -130,11 +143,25 @@ DISCOVER = [
     # re-serialized as an escaped string (see escaped_json_block in
     # mc_engine.py) - verified across ring/earring products, 15.7-21.1%,
     # 0.99 confidence (every component reconciles against the stated total).
+    # Each listing page shows ~12 items via an internal REST query
+    # (page_size:12, seen in the page's own embedded state) with no
+    # fetchable pagination - ?p=2 just serves a client-only shell with no
+    # product grid at all, so a single listing page plateaus well under
+    # PER_CAT regardless of retries. The site exposes several distinct
+    # listing pages per category (a "gold jewellery" view + a broader
+    # "all jewellery" view) that turned out to show different products
+    # (spot-checked: /all-jewellery/ring.html's 11 products share zero SKUs
+    # with /jewellery/gold-jewellery/gold-rings.html's) - unioning them is
+    # the only way to get past ~12 items/category from this brand.
     {"brand": "GRT Jewellers", "product_re": _GRT_PROD,
-     "listings": {"Ring": "https://www.grtjewels.com/jewellery/gold-jewellery/gold-rings.html",
-                  "Earrings": "https://www.grtjewels.com/jewellery/gold-jewellery/gold-earrings.html",
-                  "Bangle": "https://www.grtjewels.com/jewellery/gold-jewellery/bangles-and-bracelets.html",
-                  "Mangalsutra": "https://www.grtjewels.com/jewellery/gold-jewellery/mangalsutras.html"}},
+     "listings": {"Ring": ["https://www.grtjewels.com/jewellery/gold-jewellery/gold-rings.html",
+                           "https://www.grtjewels.com/all-jewellery/ring.html"],
+                  "Earrings": ["https://www.grtjewels.com/jewellery/gold-jewellery/gold-earrings.html",
+                              "https://www.grtjewels.com/all-jewellery/earrings.html"],
+                  "Bangle": ["https://www.grtjewels.com/jewellery/gold-jewellery/bangles-and-bracelets.html",
+                            "https://www.grtjewels.com/all-jewellery/bangles-bracelets.html"],
+                  "Mangalsutra": ["https://www.grtjewels.com/jewellery/gold-jewellery/mangalsutras.html",
+                                 "https://www.grtjewels.com/all-jewellery/mangalsutra.html"]}},
 ]
 CURATED = []
 
@@ -269,9 +296,12 @@ def collect_urls(sess, d):
 
     Three routes, unioned (a brand may use any combination):
       sitemaps - walk XML sitemap(s)
-      listings - {category: listing_url}, paginated per the brand's declared
-                 "pagination" style (?baseOffset= or ?page=) until PER_CAT
-                 items are found or pages run out
+      listings - {category: listing_url or [listing_url, ...]}, each
+                 paginated per the brand's declared "pagination" style
+                 (?baseOffset= or ?page=) until PER_CAT items are found or
+                 pages run out - a list unions several distinct listing
+                 pages for the same category (useful when no single one
+                 both shows enough items and actually paginates)
       seeds    - {category: [product_url, ...]} hand-verified fallbacks for
                  brands whose listings are client-rendered (e.g. BlueStone)
     Returns {category: [url, ...]}.
@@ -301,28 +331,36 @@ def collect_urls(sess, d):
     #   "page"       (Shopify, e.g. Kisna): ?page=2,3,4,...
     pag_style = d.get("pagination", "baseOffset")
     for cat, listing in (d.get("listings") or {}).items():
-        page_num = 1
-        while page_num <= 6 and len(buckets.get(cat, [])) < PER_CAT:
-            if page_num == 1:
-                url = listing
-            elif pag_style == "page":
-                url = f"{listing}?page={page_num}"
-            else:
-                url = f"{listing}?baseOffset={(page_num - 1) * 20}"
-            html, _ = fetch(sess, url, allow_proxy=True, timeout=25)
-            if not html:
-                break
-            before = len(buckets.get(cat, []))
-            for m in re.finditer(prod_re, html) if prod_re else []:
-                cand = m.group(0) if not m.groups() else m.group(1)
-                if not cand.startswith("http"):
-                    cand = urljoin(listing, cand)
-                if categorize(cand) == cat:
-                    add(cat, cand)
-            if len(buckets.get(cat, [])) == before and page_num > 1:
-                break                  # page yielded nothing new
-            page_num += 1
-            time.sleep(0.3)
+        # A category value may be one URL (str) or several (list) - some
+        # storefronts show only ~12 items per listing with no working
+        # pagination (GRT: a client-side "load more" the static fetch can't
+        # trigger), so distinct listing URLs for the same category (a
+        # brand-wide catalogue view alongside a gold-only one, say) are the
+        # only way to reach more than one page's worth of real products.
+        listing_urls = listing if isinstance(listing, list) else [listing]
+        for base_listing in listing_urls:
+            page_num = 1
+            while page_num <= 6 and len(buckets.get(cat, [])) < PER_CAT:
+                if page_num == 1:
+                    url = base_listing
+                elif pag_style == "page":
+                    url = f"{base_listing}?page={page_num}"
+                else:
+                    url = f"{base_listing}?baseOffset={(page_num - 1) * 20}"
+                html, _ = fetch(sess, url, allow_proxy=True, timeout=25)
+                if not html:
+                    break
+                before = len(buckets.get(cat, []))
+                for m in re.finditer(prod_re, html) if prod_re else []:
+                    cand = m.group(0) if not m.groups() else m.group(1)
+                    if not cand.startswith("http"):
+                        cand = urljoin(base_listing, cand)
+                    if categorize(cand) == cat:
+                        add(cat, cand)
+                if len(buckets.get(cat, [])) == before and page_num > 1:
+                    break              # page yielded nothing new
+                page_num += 1
+                time.sleep(0.3)
     return buckets
 
 
