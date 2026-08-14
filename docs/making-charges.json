@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-15T00:44:19.939403+05:30",
+  "updated": "2026-08-15T01:56:25.693034+05:30",
   "note": "Making charge as % of gold value, median across multiple real products per category from each jeweller's public price breakup. Indicative - varies by specific design.",
   "brands": [
     {
@@ -23,8 +23,8 @@
               "pct": 22.6
             },
             {
-              "url": "https://www.bluestone.com/bangles/the-gwyneth-bangle~1866.html",
-              "pct": 22.6
+              "url": "https://www.bluestone.com/bangles/the-natalie-bangle~1747.html",
+              "pct": 23.6
             }
           ]
         },
@@ -61,15 +61,15 @@
           "rejected_outliers": 1,
           "examples": [
             {
-              "url": "https://www.bluestone.com/mangalsutra/the-dhanishta-mangalsutra-pendant~4365.html",
-              "pct": 23.6
-            },
-            {
               "url": "https://www.bluestone.com/mangalsutra/the-kavya-mangalsutra-pendant~4358.html",
               "pct": 25.6
             },
             {
-              "url": "https://www.bluestone.com/mangalsutra/the-rujula-mangalsutra-pendant~4377.html",
+              "url": "https://www.bluestone.com/mangalsutra/the-dhanishta-mangalsutra-pendant~4365.html",
+              "pct": 23.6
+            },
+            {
+              "url": "https://www.bluestone.com/mangalsutra/the-krithika-mangalsutra-pendant~4373.html",
               "pct": 23.6
             }
           ]
@@ -112,12 +112,12 @@
           "rejected_outliers": 0,
           "examples": [
             {
-              "url": "https://www.candere.com/trisha-diamomd-bangle.html",
-              "pct": 18.9
-            },
-            {
               "url": "https://www.candere.com/shambhavi-diamomd-bangle.html",
               "pct": 21.0
+            },
+            {
+              "url": "https://www.candere.com/trisha-diamomd-bangle.html",
+              "pct": 18.9
             }
           ]
         },
@@ -131,16 +131,16 @@
           "rejected_outliers": 0,
           "examples": [
             {
+              "url": "https://www.candere.com/triluxediamond-earrings.html",
+              "pct": 16.9
+            },
+            {
               "url": "https://www.candere.com/aurelinediamond-earrings.html",
               "pct": 18.0
             },
             {
               "url": "https://www.candere.com/elysian-arcdiamond-earrings.html",
               "pct": 34.4
-            },
-            {
-              "url": "https://www.candere.com/golden-wavediamond-earrings.html",
-              "pct": 17.2
             }
           ]
         },
@@ -154,28 +154,24 @@
           "rejected_outliers": 0,
           "examples": [
             {
-              "url": "https://www.candere.com/maanavika-gold-mangalsutra.html",
-              "pct": 34.2
-            },
-            {
               "url": "https://www.candere.com/raavee-gold-mangalsutra.html",
               "pct": 21.7
+            },
+            {
+              "url": "https://www.candere.com/maanavika-gold-mangalsutra.html",
+              "pct": 34.2
             }
           ]
         },
         {
           "category": "Ring",
-          "items": 4,
-          "making_pct_median": 33.0,
+          "items": 5,
+          "making_pct_median": 32.9,
           "making_pct_min": 27.8,
           "making_pct_max": 35.1,
-          "confidence": "low",
+          "confidence": "medium",
           "rejected_outliers": 0,
           "examples": [
-            {
-              "url": "https://www.candere.com/leena-infinity-gold-ring.html",
-              "pct": 33.0
-            },
             {
               "url": "https://www.candere.com/tetris-gold-thumb-ring.html",
               "pct": 32.9
@@ -183,6 +179,10 @@
             {
               "url": "https://www.candere.com/caitlin-infinity-gold-ring.html",
               "pct": 27.8
+            },
+            {
+              "url": "https://www.candere.com/yutika-hearts-gold-ring.html",
+              "pct": 27.9
             }
           ]
         }
@@ -205,11 +205,11 @@
               "pct": 24.0
             },
             {
-              "url": "https://www.caratlane.com/jewellery/noor-kanak-22kt-gold-mangalsutra-ks00524-2y0000.html",
+              "url": "https://www.caratlane.com/jewellery/kanak-kamal-22kt-gold-mangalsutra-ks00523-2y0000.html",
               "pct": 24.0
             },
             {
-              "url": "https://www.caratlane.com/jewellery/svar-22kt-gold-mangalsutra-ks00528-2y0000.html",
+              "url": "https://www.caratlane.com/jewellery/noor-kanak-22kt-gold-mangalsutra-ks00524-2y0000.html",
               "pct": 24.0
             }
           ]
@@ -224,15 +224,15 @@
           "rejected_outliers": 7,
           "examples": [
             {
-              "url": "https://www.caratlane.com/jewellery/travese-22kt-gold-ring-kr02118-2y0000.html",
-              "pct": 23.0
+              "url": "https://www.caratlane.com/jewellery/classic-9kt-gold-vanki-ring-ur02452-8y0000.html",
+              "pct": 50.0
             },
             {
-              "url": "https://www.caratlane.com/jewellery/brisaya-22kt-gold-ring-kr01803-2y0000.html",
-              "pct": 24.0
+              "url": "https://www.caratlane.com/jewellery/bold-square-gold-ring-for-men-ur02371-yg0000.html",
+              "pct": 35.0
             },
             {
-              "url": "https://www.caratlane.com/jewellery/kaushiki-22kt-gold-ring-kr01823-2y0000.html",
+              "url": "https://www.caratlane.com/jewellery/pranati-22kt-gold-ring-kr01967-2y0000.html",
               "pct": 24.0
             }
           ]
@@ -260,7 +260,7 @@
               "pct": 17.0
             },
             {
-              "url": "https://www.grtjewels.com/all-jewellery/bangles-bracelets/cute-gold-unicorn-design-bracelet-rb-v786a.html",
+              "url": "https://www.grtjewels.com/all-jewellery/bangles-bracelets/exquisite-bloom-gold-bangle-bracelet-rl-ro03a.html",
               "pct": 15.7
             }
           ]
@@ -275,16 +275,16 @@
           "rejected_outliers": 0,
           "examples": [
             {
+              "url": "https://www.grtjewels.com/all-jewellery/earrings/graceful-gold-blossom-stud-earrings-nt-1r01z.html",
+              "pct": 21.1
+            },
+            {
               "url": "https://www.grtjewels.com/all-jewellery/earrings/meticulous-oval-shape-gold-earrings-1028aa949406.html",
               "pct": 21.1
             },
             {
               "url": "https://www.grtjewels.com/all-jewellery/earrings/luminous-gilded-bloom-gold-earrings-760a0002881.html",
               "pct": 27.1
-            },
-            {
-              "url": "https://www.grtjewels.com/all-jewellery/earrings/graceful-gold-blossom-stud-earrings-nt-1r01z.html",
-              "pct": 21.1
             }
           ]
         },
@@ -298,16 +298,16 @@
           "rejected_outliers": 0,
           "examples": [
             {
+              "url": "https://www.grtjewels.com/all-jewellery/mangalsutra/twisted-gold-mogappu-mangalsutra-cl-mh08a.html",
+              "pct": 23.1
+            },
+            {
               "url": "https://www.grtjewels.com/all-jewellery/mangalsutra/gold-leaf-mogappu-mangalsutra-cl-sk45z.html",
               "pct": 23.1
             },
             {
-              "url": "https://www.grtjewels.com/all-jewellery/mangalsutra/chic-textured-gold-mangalsutra-760a011678-1.html",
-              "pct": 30.3
-            },
-            {
-              "url": "https://www.grtjewels.com/all-jewellery/mangalsutra/faceted-gold-thirumangalyam-40ab103047.html",
-              "pct": 19.8
+              "url": "https://www.grtjewels.com/all-jewellery/mangalsutra/gold-sphere-accent-mangalsutra-cl-sk04a.html",
+              "pct": 23.1
             }
           ]
         },
@@ -341,30 +341,30 @@
       "categories": [
         {
           "category": "Bangle",
-          "items": 20,
+          "items": 15,
           "making_pct_median": 62.2,
-          "making_pct_min": 40.0,
+          "making_pct_min": 62.2,
           "making_pct_max": 62.2,
           "confidence": "high",
           "rejected_outliers": 0,
           "examples": [
             {
-              "url": "https://www.kisna.com/products/bloomira-gold-bangle",
+              "url": "https://www.kisna.com/products/floriance-heart-filigree-gold-bangle",
+              "pct": 62.2
+            },
+            {
+              "url": "https://www.kisna.com/products/lovecuff-flexible-gold-bangle",
               "pct": 62.2
             },
             {
               "url": "https://www.kisna.com/products/fleuroria-flexible-gold-bangle",
-              "pct": 62.2
-            },
-            {
-              "url": "https://www.kisna.com/products/floriance-heart-filigree-gold-bangle",
               "pct": 62.2
             }
           ]
         },
         {
           "category": "Earrings",
-          "items": 56,
+          "items": 50,
           "making_pct_median": 62.2,
           "making_pct_min": 32.8,
           "making_pct_max": 98.8,
@@ -372,39 +372,39 @@
           "rejected_outliers": 0,
           "examples": [
             {
-              "url": "https://www.kisna.com/products/hexa-lineage-gold-earring",
-              "pct": 40.0
+              "url": "https://www.kisna.com/products/sunshine-blossom-gold--earring",
+              "pct": 62.2
+            },
+            {
+              "url": "https://www.kisna.com/products/florafanatic-gold-earring",
+              "pct": 62.2
             },
             {
               "url": "https://www.kisna.com/products/delicate-blossom-gold-earring",
               "pct": 62.2
-            },
-            {
-              "url": "https://www.kisna.com/products/classic-flower-kids-earring",
-              "pct": 40.5
             }
           ]
         },
         {
           "category": "Mangalsutra",
-          "items": 19,
+          "items": 13,
           "making_pct_median": 38.0,
           "making_pct_min": 27.9,
-          "making_pct_max": 51.0,
+          "making_pct_max": 41.9,
           "confidence": "high",
-          "rejected_outliers": 1,
+          "rejected_outliers": 0,
           "examples": [
-            {
-              "url": "https://www.kisna.com/products/somana-mangalsutra",
-              "pct": 41.9
-            },
-            {
-              "url": "https://www.kisna.com/products/venika-hamsa-mangalsutra-bracelet",
-              "pct": 30.4
-            },
             {
               "url": "https://www.kisna.com/products/crescent-bloom-mangalsutra-with-chain",
               "pct": 40.2
+            },
+            {
+              "url": "https://www.kisna.com/products/devaki-mangalsutra",
+              "pct": 41.9
+            },
+            {
+              "url": "https://www.kisna.com/products/somana-mangalsutra",
+              "pct": 41.9
             }
           ]
         },
@@ -418,16 +418,16 @@
           "rejected_outliers": 2,
           "examples": [
             {
-              "url": "https://www.kisna.com/products/bea-ring",
-              "pct": 40.2
+              "url": "https://www.kisna.com/products/embrace-love-gold-ring",
+              "pct": 62.2
             },
             {
-              "url": "https://www.kisna.com/products/nikea-ring",
-              "pct": 35.8
+              "url": "https://www.kisna.com/products/taisna-ring",
+              "pct": 47.5
             },
             {
-              "url": "https://www.kisna.com/products/sairose-ring",
-              "pct": 29.0
+              "url": "https://www.kisna.com/products/andelise-ring",
+              "pct": 26.8
             }
           ]
         }
@@ -450,11 +450,11 @@
               "pct": 19.1
             },
             {
-              "url": "https://www.pngjewellers.com/products/sleek-pebble-gold-dangler-earring-for-woman",
+              "url": "https://www.pngjewellers.com/products/twilight-rose-gold-stud-earring-for-woman",
               "pct": 19.1
             },
             {
-              "url": "https://www.pngjewellers.com/products/twilight-rose-gold-stud-earring-for-woman",
+              "url": "https://www.pngjewellers.com/products/orion-crest-gold-stud-earring-for-woman",
               "pct": 19.1
             }
           ]
@@ -482,7 +482,7 @@
               "pct": 27.0
             },
             {
-              "url": "https://sencogoldanddiamonds.com/jewellery/traditional-radiance-gold-chur-bangle",
+              "url": "https://sencogoldanddiamonds.com/jewellery/floral-charisma-gold-mukh-bangle",
               "pct": 27.0
             }
           ]
@@ -501,12 +501,12 @@
               "pct": 30.0
             },
             {
-              "url": "https://sencogoldanddiamonds.com/jewellery/dhanush-ban-gold-earrings",
-              "pct": 40.0
-            },
-            {
               "url": "https://sencogoldanddiamonds.com/jewellery/sacred-vision-gold-drop-earrings",
               "pct": 30.0
+            },
+            {
+              "url": "https://sencogoldanddiamonds.com/jewellery/dhanush-ban-gold-earrings",
+              "pct": 40.0
             }
           ]
         },
@@ -543,15 +543,15 @@
           "rejected_outliers": 0,
           "examples": [
             {
+              "url": "https://sencogoldanddiamonds.com/jewellery/lovey-dovey-gold-ring",
+              "pct": 30.0
+            },
+            {
               "url": "https://sencogoldanddiamonds.com/jewellery/diversity-of-love-gold-ring",
               "pct": 35.0
             },
             {
-              "url": "https://sencogoldanddiamonds.com/jewellery/unstoppable-water-wave-gold-ring",
-              "pct": 30.0
-            },
-            {
-              "url": "https://sencogoldanddiamonds.com/jewellery/spiritual-om-gold-ring",
+              "url": "https://sencogoldanddiamonds.com/jewellery/divine-shree-gold-ring",
               "pct": 30.0
             }
           ]
@@ -563,24 +563,47 @@
       "categories": [
         {
           "category": "Earrings",
-          "items": 53,
+          "items": 55,
           "making_pct_median": 22.6,
           "making_pct_min": 21.6,
           "making_pct_max": 23.3,
           "confidence": "high",
-          "rejected_outliers": 8,
+          "rejected_outliers": 9,
           "examples": [
             {
               "url": "https://whpjewellers.com/products/shining-enigmatic-18k-gold-studs",
               "pct": 22.7
             },
             {
-              "url": "https://whpjewellers.com/products/enigmatic-golden-shinning-studs-18k",
-              "pct": 22.3
-            },
-            {
               "url": "https://whpjewellers.com/products/18k-modern-minimalism-gold-studs",
               "pct": 21.6
+            },
+            {
+              "url": "https://whpjewellers.com/products/petite-honey-comb-charm-gold-studs-18k",
+              "pct": 23.2
+            }
+          ]
+        },
+        {
+          "category": "Ring",
+          "items": 3,
+          "making_pct_median": 21.3,
+          "making_pct_min": 21.1,
+          "making_pct_max": 22.1,
+          "confidence": "low",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://whpjewellers.com/products/exclusive-motif-gold-ring",
+              "pct": 21.3
+            },
+            {
+              "url": "https://whpjewellers.com/products/intricate-shimmer-ring-for-women",
+              "pct": 21.1
+            },
+            {
+              "url": "https://whpjewellers.com/products/modern-chic-gold-womenring",
+              "pct": 22.1
             }
           ]
         }
