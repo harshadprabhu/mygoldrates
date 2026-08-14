@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-14",
-  "last_updated": "2026-08-14T13:04:14.548297+05:30",
+  "last_updated": "2026-08-14T14:05:50.598934+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 15297.5,
-    "22k": 14022.71,
-    "18k": 11473.12
+    "24k": 15292.05,
+    "22k": 14017.71,
+    "18k": 11469.03
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 152750.0,
-      "change_pct": -0.47
+      "price_per_10g_inr": 153032.0,
+      "change_pct": -0.28
     },
     {
       "contract": "GOLDM",
       "expiry": "04SEP2026",
-      "price_per_10g_inr": 151558.0,
-      "change_pct": -0.5
+      "price_per_10g_inr": 151816.0,
+      "change_pct": -0.33
     }
   ],
   "jewellers": [
@@ -50,6 +50,12 @@
       "rate_24k_per_gram_inr": 15229.24,
       "rate_22k_per_gram_inr": 13960.14,
       "rate_18k_per_gram_inr": 11421.93
+    },
+    {
+      "jeweller": "ORRA",
+      "rate_24k_per_gram_inr": 15273.23,
+      "rate_22k_per_gram_inr": 14000.46,
+      "rate_18k_per_gram_inr": 11454.92
     },
     {
       "jeweller": "Indriya",
@@ -130,16 +136,16 @@
       "rate_18k_per_gram_inr": 11503.64
     },
     {
-      "jeweller": "ORRA",
-      "rate_24k_per_gram_inr": 15437.85,
-      "rate_22k_per_gram_inr": 14151.36,
-      "rate_18k_per_gram_inr": 11578.39
-    },
-    {
       "jeweller": "Waman Hari Pethe",
       "rate_24k_per_gram_inr": 15505.0,
       "rate_22k_per_gram_inr": 14212.92,
       "rate_18k_per_gram_inr": 11628.75
+    },
+    {
+      "jeweller": "BlueStone",
+      "rate_24k_per_gram_inr": 15520.98,
+      "rate_22k_per_gram_inr": 14227.56,
+      "rate_18k_per_gram_inr": 11640.74
     },
     {
       "jeweller": "Kisna",
@@ -152,12 +158,6 @@
       "rate_24k_per_gram_inr": 15595.0,
       "rate_22k_per_gram_inr": 14295.42,
       "rate_18k_per_gram_inr": 11696.25
-    },
-    {
-      "jeweller": "BlueStone",
-      "rate_24k_per_gram_inr": 15768.6,
-      "rate_22k_per_gram_inr": 14454.55,
-      "rate_18k_per_gram_inr": 11826.45
     }
   ],
   "jeweller_count": 21,
