@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-15T01:56:25.693034+05:30",
+  "updated": "2026-08-15T02:36:33.577609+05:30",
   "note": "Making charge as % of gold value, median across multiple real products per category from each jeweller's public price breakup. Indicative - varies by specific design.",
   "brands": [
     {
@@ -341,9 +341,9 @@
       "categories": [
         {
           "category": "Bangle",
-          "items": 15,
+          "items": 20,
           "making_pct_median": 62.2,
-          "making_pct_min": 62.2,
+          "making_pct_min": 40.0,
           "making_pct_max": 62.2,
           "confidence": "high",
           "rejected_outliers": 0,
@@ -353,18 +353,18 @@
               "pct": 62.2
             },
             {
-              "url": "https://www.kisna.com/products/lovecuff-flexible-gold-bangle",
+              "url": "https://www.kisna.com/products/bloomira-gold-bangle",
               "pct": 62.2
             },
             {
-              "url": "https://www.kisna.com/products/fleuroria-flexible-gold-bangle",
+              "url": "https://www.kisna.com/products/lovecuff-flexible-gold-bangle",
               "pct": 62.2
             }
           ]
         },
         {
           "category": "Earrings",
-          "items": 50,
+          "items": 56,
           "making_pct_median": 62.2,
           "making_pct_min": 32.8,
           "making_pct_max": 98.8,
@@ -387,23 +387,23 @@
         },
         {
           "category": "Mangalsutra",
-          "items": 13,
+          "items": 19,
           "making_pct_median": 38.0,
           "making_pct_min": 27.9,
-          "making_pct_max": 41.9,
+          "making_pct_max": 51.0,
           "confidence": "high",
-          "rejected_outliers": 0,
+          "rejected_outliers": 1,
           "examples": [
+            {
+              "url": "https://www.kisna.com/products/venika-hamsa-mangalsutra-bracelet",
+              "pct": 30.4
+            },
             {
               "url": "https://www.kisna.com/products/crescent-bloom-mangalsutra-with-chain",
               "pct": 40.2
             },
             {
               "url": "https://www.kisna.com/products/devaki-mangalsutra",
-              "pct": 41.9
-            },
-            {
-              "url": "https://www.kisna.com/products/somana-mangalsutra",
               "pct": 41.9
             }
           ]
@@ -437,8 +437,31 @@
       "brand": "PN Gadgil",
       "categories": [
         {
+          "category": "Bangle",
+          "items": 17,
+          "making_pct_median": 21.0,
+          "making_pct_min": 16.1,
+          "making_pct_max": 25.0,
+          "confidence": "high",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.pngjewellers.com/products/rose-grid-gold-bangles",
+              "pct": 21.0
+            },
+            {
+              "url": "https://www.pngjewellers.com/products/barrel-blush-gold-bangles",
+              "pct": 21.0
+            },
+            {
+              "url": "https://www.pngjewellers.com/products/daisy-orbit-gold-bangles",
+              "pct": 21.0
+            }
+          ]
+        },
+        {
           "category": "Earrings",
-          "items": 27,
+          "items": 17,
           "making_pct_median": 21.0,
           "making_pct_min": 19.1,
           "making_pct_max": 21.0,
@@ -456,6 +479,52 @@
             {
               "url": "https://www.pngjewellers.com/products/orion-crest-gold-stud-earring-for-woman",
               "pct": 19.1
+            }
+          ]
+        },
+        {
+          "category": "Mangalsutra",
+          "items": 17,
+          "making_pct_median": 14.7,
+          "making_pct_min": 10.5,
+          "making_pct_max": 20.4,
+          "confidence": "high",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.pngjewellers.com/products/golden-thread-22-karat-916-yellow-gold-modern-mangalsutra-for-women",
+              "pct": 10.5
+            },
+            {
+              "url": "https://www.pngjewellers.com/products/pink-serenity-yellow-gold-modern-mangalsutra-for-women",
+              "pct": 10.5
+            },
+            {
+              "url": "https://www.pngjewellers.com/products/tassel-gold-modern-mangalsutra-for-women",
+              "pct": 10.5
+            }
+          ]
+        },
+        {
+          "category": "Ring",
+          "items": 15,
+          "making_pct_median": 18.9,
+          "making_pct_min": 18.0,
+          "making_pct_max": 20.2,
+          "confidence": "high",
+          "rejected_outliers": 2,
+          "examples": [
+            {
+              "url": "https://www.pngjewellers.com/products/glittering-links-yellow-gold-chain-for-unisex",
+              "pct": 18.0
+            },
+            {
+              "url": "https://www.pngjewellers.com/products/shringar-yellow-gold-thushi-necklace-for-woman",
+              "pct": 22.9
+            },
+            {
+              "url": "https://www.pngjewellers.com/products/mirage-22-karat-916-yellow-gold-band-ring-for-women",
+              "pct": 18.0
             }
           ]
         }
@@ -563,12 +632,12 @@
       "categories": [
         {
           "category": "Earrings",
-          "items": 55,
-          "making_pct_median": 22.6,
+          "items": 17,
+          "making_pct_median": 22.7,
           "making_pct_min": 21.6,
-          "making_pct_max": 23.3,
+          "making_pct_max": 23.9,
           "confidence": "high",
-          "rejected_outliers": 9,
+          "rejected_outliers": 1,
           "examples": [
             {
               "url": "https://whpjewellers.com/products/shining-enigmatic-18k-gold-studs",
@@ -585,25 +654,44 @@
           ]
         },
         {
-          "category": "Ring",
-          "items": 3,
-          "making_pct_median": 21.3,
-          "making_pct_min": 21.1,
-          "making_pct_max": 22.1,
+          "category": "Mangalsutra",
+          "items": 2,
+          "making_pct_median": 22.2,
+          "making_pct_min": 21.9,
+          "making_pct_max": 22.5,
           "confidence": "low",
           "rejected_outliers": 0,
           "examples": [
             {
-              "url": "https://whpjewellers.com/products/exclusive-motif-gold-ring",
+              "url": "https://whpjewellers.com/products/enchanting-dazzle-short-mangalsutra-18k",
+              "pct": 21.9
+            },
+            {
+              "url": "https://whpjewellers.com/products/dazzling-glow-18k-heart-mangalsutra-bracelet",
+              "pct": 22.5
+            }
+          ]
+        },
+        {
+          "category": "Ring",
+          "items": 15,
+          "making_pct_median": 21.9,
+          "making_pct_min": 20.9,
+          "making_pct_max": 23.6,
+          "confidence": "high",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://whpjewellers.com/products/shimmering-enigmatic-18k-danglers",
               "pct": 21.3
             },
             {
-              "url": "https://whpjewellers.com/products/intricate-shimmer-ring-for-women",
-              "pct": 21.1
+              "url": "https://whpjewellers.com/products/dainty-shimmer-ring-for-women",
+              "pct": 22.1
             },
             {
-              "url": "https://whpjewellers.com/products/modern-chic-gold-womenring",
-              "pct": 22.1
+              "url": "https://whpjewellers.com/products/graceful-charm-ring-for-women",
+              "pct": 22.2
             }
           ]
         }
