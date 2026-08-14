@@ -11,6 +11,7 @@ import json
 import os
 import re
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
 from urllib.parse import urljoin, urlsplit
 
@@ -38,6 +39,14 @@ PER_CAT_LARGE = 150    # pool of 500+ candidates (sitemap-scale) - once a
                        # instead so the median reflects the actual catalogue
 TOTAL_CAP = 600        # hard cap on product fetches per brand (4 categories
                        # at PER_CAT_LARGE, with headroom)
+FETCH_WORKERS = 10     # concurrent product-page fetches per brand. Product
+                       # pages were fetched one at a time - fine at
+                       # PER_CAT=20, but a serial killer once samples run into
+                       # the hundreds (BlueStone/Kisna). A brand's fetches
+                       # only ever hit that one brand's domain, so bounding
+                       # concurrency here is also what keeps this polite -
+                       # a fixed pool of parallel connections, not an
+                       # unbounded burst.
 
 
 def sample_size(pool_size):
@@ -415,9 +424,55 @@ def collect_urls(sess, d):
     return buckets
 
 
+def fetch_batch(sess, engine, brand, items):
+    """Fetch + extract a batch of (cat, url) candidates concurrently.
+
+    Replaces the old one-at-a-time loop (with a 0.3s sleep after every direct
+    fetch) - fine when a brand only needed 20 fetches, but a serial killer
+    once samples run into the hundreds. Network I/O dominates a fetch, so a
+    bounded thread pool (FETCH_WORKERS) turns wall-clock time into roughly
+    fetches/FETCH_WORKERS instead of fetches - and IS the politeness control
+    now, in place of the per-request sleep (a fixed number of concurrent
+    connections to one brand's domain, not an unbounded burst).
+    Returns a list of (cat, url, ExtractionResult|None, src).
+    """
+    out = []
+    with ThreadPoolExecutor(max_workers=FETCH_WORKERS) as ex:
+        futs = {ex.submit(fetch, sess, u, True, 25): (cat, u) for cat, u in items}
+        for fut in as_completed(futs):
+            cat, u = futs[fut]
+            html, src = fut.result()
+            res = engine.extract(html, brand=brand) if html else None
+            out.append((cat, u, res, src))
+    return out
+
+
+def record_results(agg, detail, brand, results):
+    """Fold a fetch_batch() result list into agg/detail. Returns (hits, proxy_hits)."""
+    hits = proxy_hits = 0
+    for cat, u, res, src in results:
+        if src and src not in ("direct", "all-proxies-failed"):
+            proxy_hits += 1
+        if res and res.ok:
+            hits += 1
+            agg.setdefault((brand, cat), []).append(res.making_pct)
+            detail.setdefault((brand, cat), []).append({
+                "url": u, "pct": res.making_pct,
+                "confidence": res.confidence,
+                "strategy": res.strategy, "fields": res.fields})
+    return hits, proxy_hits
+
+
 def main():
     sess = requests.Session()
     sess.headers.update({"User-Agent": UA})
+    # Default pool_maxsize (10) undersells FETCH_WORKERS concurrent fetches -
+    # bump it so the pool doesn't start dropping/reopening connections once
+    # requests are actually running in parallel.
+    adapter = requests.adapters.HTTPAdapter(pool_connections=FETCH_WORKERS,
+                                            pool_maxsize=FETCH_WORKERS * 2)
+    sess.mount("https://", adapter)
+    sess.mount("http://", adapter)
     engine = Engine.load(PROFILE_PATH)
     agg = {}          # (brand, cat) -> [pct,...]
     detail = {}       # (brand, cat) -> [{url, pct, conf, fields}, ...]
@@ -425,37 +480,32 @@ def main():
     for d in DISCOVER:
         brand = d["brand"]
         buckets = collect_urls(sess, d)
-        fetched = hits = proxy_hits = 0
+        candidates = []
         for cat, us in buckets.items():
             target = sample_size(len(us))
-            for u in us[:target]:
-                if fetched >= TOTAL_CAP:
-                    break
-                fetched += 1
-                html, src = fetch(sess, u, allow_proxy=True, timeout=25)
-                if src and src not in ("direct", "all-proxies-failed"):
-                    proxy_hits += 1
-                res = engine.extract(html, brand=brand) if html else None
-                if res and res.ok:
-                    hits += 1
-                    agg.setdefault((brand, cat), []).append(res.making_pct)
-                    detail.setdefault((brand, cat), []).append({
-                        "url": u, "pct": res.making_pct,
-                        "confidence": res.confidence,
-                        "strategy": res.strategy, "fields": res.fields})
-                # Bail early only when nothing at all is landing - the engine
-                # has already tried every strategy on those pages. Threshold
-                # raised from 10 to 25: with the plain-gold-only stone gate,
-                # a brand whose catalogue leans studded can legitimately go
-                # several fetches between hits (a real, working brand), not
-                # just a broken one - 10 was too quick to give up on those.
-                if fetched >= 25 and hits == 0:
-                    print(f"  {brand}: no making % in first 25 items, skipping")
-                    break
-                if src == "direct":
-                    time.sleep(0.3)     # be polite to origins we hit direct
-            if fetched >= 25 and hits == 0:
-                break
+            candidates.extend((cat, u) for u in us[:target])
+        candidates = candidates[:TOTAL_CAP]
+
+        # Probe phase first, fetched concurrently: bail on the whole brand
+        # only if that first batch lands zero hits - the engine has already
+        # tried every strategy on those pages. Threshold is 25, not 10: with
+        # the plain-gold-only stone gate, a brand whose catalogue leans
+        # studded can legitimately go several fetches between hits (a real,
+        # working brand), not just a broken one.
+        probe, rest = candidates[:25], candidates[25:]
+        results = fetch_batch(sess, engine, brand, probe)
+        hits, proxy_hits = record_results(agg, detail, brand, results)
+        fetched = len(results)
+
+        if fetched >= 25 and hits == 0:
+            print(f"  {brand}: no making % in first 25 items, skipping")
+        elif rest:
+            results = fetch_batch(sess, engine, brand, rest)
+            h2, p2 = record_results(agg, detail, brand, results)
+            hits += h2
+            proxy_hits += p2
+            fetched += len(results)
+
         cat_summary = [(c, len(v)) for (b, c), v in agg.items() if b == brand]
         print(f"{brand}: fetched {fetched} ({proxy_hits} via proxy), "
               f"cats {cat_summary}")
