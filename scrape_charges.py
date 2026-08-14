@@ -13,6 +13,7 @@ import re
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
+from itertools import zip_longest
 from urllib.parse import urljoin, urlsplit
 
 import base64
@@ -510,10 +511,20 @@ def main():
     for d in DISCOVER:
         brand = d["brand"]
         buckets = collect_urls(sess, d)
-        candidates = []
+        # Interleave categories round-robin instead of one full category
+        # block at a time, so a brand's largest category doesn't consume
+        # the whole probe (and a disproportionate share of the run) before
+        # the others get a look-in. If a brand's origin ever degrades
+        # partway through a run (rate limiting, a slow spell), every
+        # category has already gotten a proportional slice by then, instead
+        # of whichever categories happen to be enumerated last getting
+        # nothing at all.
+        per_cat = []
         for cat, us in buckets.items():
             target = sample_size(len(us))
-            candidates.extend((cat, u) for u in us[:target])
+            per_cat.append([(cat, u) for u in us[:target]])
+        candidates = [item for row in zip_longest(*per_cat) for item in row
+                      if item is not None]
         candidates = candidates[:TOTAL_CAP]
 
         # Probe phase first, fetched concurrently: bail on the whole brand
