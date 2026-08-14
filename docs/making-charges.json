@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-14T15:17:17.062582+05:30",
+  "updated": "2026-08-14T15:49:00.920870+05:30",
   "note": "Making charge as % of gold value, median across multiple real products per category from each jeweller's public price breakup. Indicative - varies by specific design.",
   "brands": [
     {
@@ -157,8 +157,8 @@
         },
         {
           "category": "Ring",
-          "items": 20,
-          "making_pct_median": 24.1,
+          "items": 15,
+          "making_pct_median": 21.3,
           "making_pct_min": 7.1,
           "making_pct_max": 35.3,
           "confidence": "high",
@@ -185,69 +185,69 @@
       "categories": [
         {
           "category": "Bangle",
-          "items": 19,
-          "making_pct_median": 30.0,
-          "making_pct_min": 19.0,
-          "making_pct_max": 43.0,
+          "items": 16,
+          "making_pct_median": 37.5,
+          "making_pct_min": 24.0,
+          "making_pct_max": 45.0,
           "confidence": "high",
           "rejected_outliers": 0,
           "examples": [
             {
-              "url": "https://www.caratlane.com/jewellery/daily-dazzle-gold-bangle-ub00947-yg0000.html",
-              "pct": 30.0
+              "url": "https://www.caratlane.com/jewellery/glorious-orb-diamond-bangle-jb01116-wyp900.html",
+              "pct": 40.0
             },
             {
-              "url": "https://www.caratlane.com/jewellery/blush-clover-diamond-bangle-jb01103-rgs300.html",
+              "url": "https://www.caratlane.com/jewellery/glittering-florid-diamond-bangle-jb01117-wyp600.html",
               "pct": 43.0
             },
             {
-              "url": "https://www.caratlane.com/jewellery/ether-link-diamond-bangle-jb01554-1ys300.html",
-              "pct": 38.0
+              "url": "https://www.caratlane.com/jewellery/floret-diamond-bangle-jb01102-1rp900.html",
+              "pct": 42.0
             }
           ]
         },
         {
           "category": "Earrings",
-          "items": 13,
-          "making_pct_median": 54.7,
-          "making_pct_min": 24.0,
-          "making_pct_max": 79.8,
+          "items": 12,
+          "making_pct_median": 39.5,
+          "making_pct_min": 34.0,
+          "making_pct_max": 48.0,
           "confidence": "high",
-          "rejected_outliers": 0,
+          "rejected_outliers": 1,
           "examples": [
             {
-              "url": "https://www.caratlane.com/jewellery/bright-bloomy-diamond-stud-earrings-je08111-ygs300.html",
-              "pct": 67.0
+              "url": "https://www.caratlane.com/jewellery/fern-foliage-diamond-stud-earrings-je09386-1ys300.html",
+              "pct": 64.0
             },
             {
-              "url": "https://www.caratlane.com/jewellery/alor-gold-stud-earrings-for-kids-ue07183-yg0000.html",
-              "pct": 79.0
+              "url": "https://www.caratlane.com/jewellery/sara-sleek-diamond-hoop-earrings-je06999-ygs300.html",
+              "pct": 43.0
             },
             {
-              "url": "https://www.caratlane.com/jewellery/star-gaze-kids-gold-stud-earrings-ue06535-1y0000.html",
-              "pct": 79.8
+              "url": "https://www.caratlane.com/jewellery/lattice-diamond-sui-dhaga-earrings-je05495-1ys300.html",
+              "pct": 39.0
             }
           ]
         },
         {
           "category": "Mangalsutra",
-          "items": 13,
+          "items": 17,
           "making_pct_median": 37.0,
           "making_pct_min": 33.0,
-          "making_pct_max": 39.0,
+          "making_pct_max": 38.0,
           "confidence": "high",
-          "rejected_outliers": 2,
+          "rejected_outliers": 0,
           "examples": [
-            {
-              "url": "https://www.caratlane.com/jewellery/swaying-emerald-gemstone-mangalsutra-js02238-1yp9se.html",
-              "pct": 34.0
-            },
             {
               "url": "https://www.caratlane.com/jewellery/raisha-diamond-mangalsutra-js01046-ygs300.html",
               "pct": 36.0
             },
             {
               "url": "https://www.caratlane.com/jewellery/akira-infinity-diamond-mangalsutra-bracelet-jt00581-rgp900.html",
+              "pct": 38.0
+            },
+            {
+              "url": "https://www.caratlane.com/jewellery/mabel-diamond-mangalsutra-js01454-ygs300.html",
               "pct": 38.0
             }
           ]
@@ -272,6 +272,196 @@
             {
               "url": "https://www.caratlane.com/jewellery/heart-veil-9kt-diamond-ring-jr12162-8ys300.html",
               "pct": 80.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "GRT Jewellers",
+      "categories": [
+        {
+          "category": "Bangle",
+          "items": 9,
+          "making_pct_median": 15.7,
+          "making_pct_min": 15.7,
+          "making_pct_max": 19.5,
+          "confidence": "medium",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/bangles-bracelets/floral-leaf-18kt-gold-bangle-bracelet-rl-yg31a.html",
+              "pct": 15.7
+            },
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/bangles-bracelets/refined-square-accent-gold-bracelet-br-pc09z.html",
+              "pct": 17.0
+            },
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/bangles-bracelets/exquisite-bloom-gold-bangle-bracelet-rl-ro03a.html",
+              "pct": 15.7
+            }
+          ]
+        },
+        {
+          "category": "Earrings",
+          "items": 6,
+          "making_pct_median": 19.8,
+          "making_pct_min": 15.7,
+          "making_pct_max": 21.1,
+          "confidence": "medium",
+          "rejected_outliers": 1,
+          "examples": [
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/earrings/graceful-gold-blossom-stud-earrings-nt-1r01z.html",
+              "pct": 21.1
+            },
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/earrings/intricate-gold-jhumkas-with-multicolor-stone-design-ej-pa01a.html",
+              "pct": 19.5
+            },
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/earrings/sinuous-floral-swirl-gold-earrings-137a101777.html",
+              "pct": 19.8
+            }
+          ]
+        },
+        {
+          "category": "Mangalsutra",
+          "items": 7,
+          "making_pct_median": 23.1,
+          "making_pct_min": 19.8,
+          "making_pct_max": 30.3,
+          "confidence": "medium",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/mangalsutra/twisted-gold-mogappu-mangalsutra-cl-mh08a.html",
+              "pct": 23.1
+            },
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/mangalsutra/gold-leaf-mogappu-mangalsutra-cl-sk45z.html",
+              "pct": 23.1
+            },
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/mangalsutra/gold-sphere-accent-mangalsutra-cl-sk04a.html",
+              "pct": 23.1
+            }
+          ]
+        },
+        {
+          "category": "Ring",
+          "items": 5,
+          "making_pct_median": 17.0,
+          "making_pct_min": 15.7,
+          "making_pct_max": 21.1,
+          "confidence": "medium",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/ring/regal-gold-black-onyx-ring-fl-yc55a.html",
+              "pct": 21.1
+            },
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/ring/engraved-floral-22kt-gold-men-s-ring-fg-lj008.html",
+              "pct": 15.7
+            },
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/ring/prosperity-gold-leaf-design-ring-fg-lj017.html",
+              "pct": 16.9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Kisna",
+      "categories": [
+        {
+          "category": "Bangle",
+          "items": 4,
+          "making_pct_median": 44.5,
+          "making_pct_min": 26.8,
+          "making_pct_max": 62.2,
+          "confidence": "low",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.kisna.com/products/floriance-heart-filigree-gold-bangle",
+              "pct": 62.2
+            },
+            {
+              "url": "https://www.kisna.com/products/starbloom-emerald-diamond-bangle",
+              "pct": 26.8
+            },
+            {
+              "url": "https://www.kisna.com/products/pink-amour-diamond-bangle",
+              "pct": 26.8
+            }
+          ]
+        },
+        {
+          "category": "Earrings",
+          "items": 3,
+          "making_pct_median": 62.2,
+          "making_pct_min": 62.2,
+          "making_pct_max": 62.2,
+          "confidence": "low",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.kisna.com/products/sunshine-blossom-gold--earring",
+              "pct": 62.2
+            },
+            {
+              "url": "https://www.kisna.com/products/florafanatic-gold-earring",
+              "pct": 62.2
+            },
+            {
+              "url": "https://www.kisna.com/products/delicate-blossom-gold-earring",
+              "pct": 62.2
+            }
+          ]
+        },
+        {
+          "category": "Mangalsutra",
+          "items": 2,
+          "making_pct_median": 35.2,
+          "making_pct_min": 28.6,
+          "making_pct_max": 41.9,
+          "confidence": "low",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.kisna.com/products/narcia-diamond-mangalsutra-with-chain",
+              "pct": 28.6
+            },
+            {
+              "url": "https://www.kisna.com/products/linked-squarelet-diamond-mangalsutra-with-chain",
+              "pct": 41.9
+            }
+          ]
+        },
+        {
+          "category": "Ring",
+          "items": 4,
+          "making_pct_median": 40.1,
+          "making_pct_min": 26.8,
+          "making_pct_max": 62.2,
+          "confidence": "low",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.kisna.com/products/embrace-love-gold-ring",
+              "pct": 62.2
+            },
+            {
+              "url": "https://www.kisna.com/products/taisna-ring",
+              "pct": 47.5
+            },
+            {
+              "url": "https://www.kisna.com/products/andelise-ring",
+              "pct": 26.8
             }
           ]
         }
