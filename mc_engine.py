@@ -395,6 +395,90 @@ def s_weight_rate_join(html: str) -> ExtractionResult:
     return _finish("weight_rate_join", fields)
 
 
+def s_escaped_json_block(html: str) -> ExtractionResult:
+    """A named JSON object embedded as an ESCAPED STRING inside a larger payload.
+
+    e.g. GRT: \\"product_price_details\\":{\\"metal_value\\":20952.425,
+    \\"making_charge\\":4442.755,\\"making_charge_with_discount\\":3554.204,
+    \\"gst_with_discount\\":735.199,...} - a whole nested JSON object
+    re-serialized as a string (backslash before every quote), sitting inside
+    the page's own bootstrap JSON. None of the other strategies' `"key":`
+    patterns can match this at all - it isn't a different data shape, the
+    escaping just breaks literal quote-matching. Locate the named block by
+    brace-balancing (values are flat, so no nested braces to worry about),
+    unescape, and parse it directly instead of re-deriving field positions.
+
+    A product page repeats this block once per size/variant, and the FIRST
+    occurrence is typically an unselected placeholder (metal_value: null,
+    making_charge: 0) rather than real data - skip those and take the first
+    block with an actual gold value.
+
+    making_charge_with_discount (post-discount) is preferred over the flat
+    making_charge field, matching every other brand seen so far where the
+    discounted figure is what a customer actually pays.
+    """
+    for m in re.finditer(r'\\"product_price_details\\"\s*:\s*\{', html):
+        start = m.end() - 1
+        depth, end = 0, None
+        for i in range(start, min(start + 2000, len(html))):
+            c = html[i]
+            if c == "{":
+                depth += 1
+            elif c == "}":
+                depth -= 1
+                if depth == 0:
+                    end = i + 1
+                    break
+        if end is None:
+            continue
+        try:
+            obj = json.loads(html[start:end].replace('\\"', '"'))
+        except (json.JSONDecodeError, ValueError):
+            continue
+        gold = obj.get("metal_value") or obj.get("final_metal_value")
+        making = obj.get("making_charge_with_discount") or obj.get("making_charge")
+        if not gold or not making:
+            continue          # placeholder block - keep scanning
+        fields = {"gold_value": gold, "making_charge": making}
+        if obj.get("stone_amount"):
+            fields["stone_value"] = obj["stone_amount"]
+        gst = obj.get("gst_with_discount") or obj.get("gst_without_discount")
+        if gst:
+            fields["gst"] = gst
+        total = obj.get("grand_total_with_discount") or obj.get("total_with_discount")
+        if total:
+            fields["total"] = total
+        return _finish("escaped_json_block", fields)
+    return ExtractionResult("escaped_json_block", None, 0.0, {}, "no valid product_price_details block")
+
+
+def s_rsc_price_breakup(html: str) -> ExtractionResult:
+    """Next.js App Router RSC streaming payload with priceType-tagged line items.
+
+    e.g. Kisna: `self.__next_f.push([1,"...f6:{\\"price\\":13062,
+    \\"weight\\":2.27,\\"priceType\\":\\"metalPrice\\",\\"metalType\\":
+    \\"gold\\",...}\\nf7:{\\"price\\":8127,\\"priceType\\":\\"makingCharge\\",
+    \\"extraChargeType\\":\\"Making Charges\\",...}..."])`. This looked like a
+    brand with genuinely zero static pricing on first pass - the price
+    panel's initial DOM is an empty skeleton, and there's no `__NEXT_DATA__`
+    tag (App Router doesn't use one). The real numbers are there, just
+    streamed as escaped JSON fragments keyed by a distinct `priceType`
+    rather than nested under one named object - each line item is found by
+    its own tag instead of brace-balancing a single block.
+    """
+    gm = re.search(r'\\"price\\"\s*:\s*([\d.]+)\s*,\s*\\"weight\\"\s*:\s*[\d.]+\s*,\s*'
+                   r'\\"priceType\\"\s*:\s*\\"metalPrice\\"', html)
+    mm = re.search(r'\\"price\\"\s*:\s*([\d.]+)\s*,\s*\\"priceType\\"\s*:\s*\\"makingCharge\\"', html)
+    if not gm or not mm:
+        return ExtractionResult("rsc_price_breakup", None, 0.0, {}, "no metalPrice/makingCharge pair")
+    fields = {"gold_value": _num(gm.group(1)), "making_charge": _num(mm.group(1))}
+    sm = re.search(r'\\"price\\"\s*:\s*([\d.]+)\s*,\s*\\"weight\\"\s*:\s*[\d.]+\s*,\s*'
+                   r'\\"priceType\\"\s*:\s*\\"stonePrice\\"', html)
+    if sm:
+        fields["stone_value"] = _num(sm.group(1))
+    return _finish("rsc_price_breakup", fields)
+
+
 def s_json_breakup_arrays(html: str) -> ExtractionResult:
     """Nested breakup arrays: "making":[{... "value":"Rs. 884" ...}].
 
@@ -502,6 +586,8 @@ def s_direct_percent(html: str) -> ExtractionResult:
 STRATEGIES: list[tuple[str, Callable[[str], ExtractionResult]]] = [
     ("json_typed_percent", s_json_typed_percent),   # must precede flat_keys
     ("weight_rate_join", s_weight_rate_join),       # specific join, try early
+    ("escaped_json_block", s_escaped_json_block),
+    ("rsc_price_breakup", s_rsc_price_breakup),
     ("json_breakup_arrays", s_json_breakup_arrays),
     ("json_flat_keys", s_json_flat_keys),
     ("js_object_literal", s_js_object_literal),
