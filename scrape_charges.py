@@ -27,8 +27,28 @@ IST = timezone(timedelta(hours=5, minutes=30))
 ZYTE_KEY = os.environ.get("ZYTE_API_KEY", "").strip()
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
-PER_CAT = 20           # products sampled per category per brand
-TOTAL_CAP = 280        # hard cap on product fetches per brand
+PER_CAT = 20           # sample size for a small discovery pool (curated
+                       # seeds, a thin listing page) - sampling more than
+                       # what's realistically available is meaningless
+PER_CAT_MED = 60       # pool of 100-500 candidates (a partial category page)
+PER_CAT_LARGE = 150    # pool of 500+ candidates (sitemap-scale) - once a
+                       # brand's real catalogue is in the thousands, a
+                       # 20-item sample is one unusual design away from
+                       # skewing the whole category median; sample hundreds
+                       # instead so the median reflects the actual catalogue
+TOTAL_CAP = 600        # hard cap on product fetches per brand (4 categories
+                       # at PER_CAT_LARGE, with headroom)
+
+
+def sample_size(pool_size):
+    """How many candidate URLs to actually fetch for a category, given how
+    many were discovered. Scales up only when the pool genuinely supports
+    it - small pools already get everything they have."""
+    if pool_size >= 500:
+        return PER_CAT_LARGE
+    if pool_size >= 100:
+        return PER_CAT_MED
+    return PER_CAT
 
 # slug keyword -> category. v1 categories only (Bangles, Rings, Earrings,
 # Mangalsutra) - user explicitly deferred Chain, Necklace, Bracelet, Pendant,
@@ -239,6 +259,24 @@ def fetch(sess, url, allow_proxy=True, timeout=25, min_len=500):
 # not be comparable, so drop them at the URL stage.
 _NON_GOLD_RE = re.compile(r"\b(silver|platinum|titanium|steel)\b", re.I)
 
+# Studded/diamond pieces discount the making charge against the stone's own
+# markup, so their making-% is not representative of a plain gold item (see
+# the stone_value gate in mc_engine._finish, which catches whatever slips
+# past this). Filtering by slug here is the cheaper, earlier cut: most
+# brands name the stone right in the product URL ("...-diamond-bangle",
+# "...-solitaire-ring"), so skipping those candidates before ever fetching
+# them means the sample we DO fetch is overwhelmingly plain gold, instead of
+# spending a large chunk of a big sample on pages that just get excluded
+# after the fact. Deliberately excludes "stud"/"studs" - that word means the
+# earring style (stud earrings), not gem-studded, and is one of the
+# CAT_RULES category keywords.
+_STUDDED_RE = re.compile(
+    r"\b(diamond|diamonds|solitaire|studded|gemstone|gemstones|kundan|polki|"
+    r"pearl|pearls|ruby|rubies|emerald|emeralds|sapphire|sapphires|"
+    r"american[- ]?diamond|americandiamond|cz|zircon|zirconia|topaz|"
+    r"garnet|onyx|opal|turquoise|moissanite|navratna|navratra|stone|stones|"
+    r"gem|gems)\b", re.I)
+
 
 def categorize(url):
     """Map a product URL to a v1 category, or None to skip it.
@@ -249,9 +287,11 @@ def categorize(url):
     yielded zero items. Non-gold items are excluded explicitly instead, and
     anything that slips through is caught later: the engine only returns a
     making % when it finds a gold/metal value in the breakup.
+
+    Studded/diamond items are excluded the same way - see _STUDDED_RE.
     """
     s = url.lower()
-    if _NON_GOLD_RE.search(s):
+    if _NON_GOLD_RE.search(s) or _STUDDED_RE.search(s):
         return None
     for kw, cat in CAT_RULES:
         if kw in s:
@@ -315,6 +355,12 @@ def collect_urls(sess, d):
 
     for cat, urls in (d.get("seeds") or {}).items():
         for u in urls:
+            # Seeds are hand-picked per category already, so they skip
+            # categorize() - but still route through the same non-gold /
+            # studded filters, in case a hand-picked seed turns out to be a
+            # diamond piece.
+            if _NON_GOLD_RE.search(u.lower()) or _STUDDED_RE.search(u.lower()):
+                continue
             add(cat, u)
 
     for u in discover_urls(sess, d.get("sitemaps") or []):
@@ -340,7 +386,12 @@ def collect_urls(sess, d):
         listing_urls = listing if isinstance(listing, list) else [listing]
         for base_listing in listing_urls:
             page_num = 1
-            while page_num <= 6 and len(buckets.get(cat, [])) < PER_CAT:
+            # Cap raised from 6 to 25 pages / PER_CAT to PER_CAT_LARGE so a
+            # listing-only brand with a genuinely deep catalogue (no sitemap
+            # route) isn't stopped short of a large sample - the "page
+            # yielded nothing new" break below already ends the loop early
+            # for brands whose real catalogue is much smaller than that.
+            while page_num <= 25 and len(buckets.get(cat, [])) < PER_CAT_LARGE:
                 if page_num == 1:
                     url = base_listing
                 elif pag_style == "page":
@@ -376,7 +427,8 @@ def main():
         buckets = collect_urls(sess, d)
         fetched = hits = proxy_hits = 0
         for cat, us in buckets.items():
-            for u in us[:PER_CAT]:
+            target = sample_size(len(us))
+            for u in us[:target]:
                 if fetched >= TOTAL_CAP:
                     break
                 fetched += 1
@@ -392,13 +444,17 @@ def main():
                         "confidence": res.confidence,
                         "strategy": res.strategy, "fields": res.fields})
                 # Bail early only when nothing at all is landing - the engine
-                # has already tried every strategy on those 10 pages.
-                if fetched >= 10 and hits == 0:
-                    print(f"  {brand}: no making % in first 10 items, skipping")
+                # has already tried every strategy on those pages. Threshold
+                # raised from 10 to 25: with the plain-gold-only stone gate,
+                # a brand whose catalogue leans studded can legitimately go
+                # several fetches between hits (a real, working brand), not
+                # just a broken one - 10 was too quick to give up on those.
+                if fetched >= 25 and hits == 0:
+                    print(f"  {brand}: no making % in first 25 items, skipping")
                     break
                 if src == "direct":
                     time.sleep(0.3)     # be polite to origins we hit direct
-            if fetched >= 10 and hits == 0:
+            if fetched >= 25 and hits == 0:
                 break
         cat_summary = [(c, len(v)) for (b, c), v in agg.items() if b == brand]
         print(f"{brand}: fetched {fetched} ({proxy_hits} via proxy), "
