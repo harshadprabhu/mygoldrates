@@ -187,19 +187,19 @@ def _finish(strategy: str, fields: dict[str, float], notes: str = "") -> Extract
         return ExtractionResult(strategy, None, 0.0, fields,
                                 f"implausible ratio {ratio:.4f}")
 
-    # Diamond/stone-dominated pieces are excluded, not just down-weighted.
-    # Making charge as %-of-GOLD-value only means "what a plain gold piece in
-    # this category costs to make" when gold is actually the item's main
-    # cost. Once the stone value matches or exceeds the gold value, the
-    # making-charge line item stops being representative of that - several
-    # brands apply steep (sometimes near-total) making-charge discounts
-    # specifically on diamond jewellery, since the stone markup already
-    # covers labour. Averaging those into a category median would quietly
-    # understate what a real gold-only purchase costs to make.
+    # Any real stone/diamond content excludes a piece, not just a dominant
+    # one. Making charge as %-of-GOLD-value only means "what a plain gold
+    # piece in this category costs to make" when the piece actually IS plain
+    # gold - several brands apply steep (sometimes near-total) making-charge
+    # discounts on studded jewellery, since the stone markup already covers
+    # labour, so even a modest accent stone quietly understates what a real
+    # gold-only purchase costs to make. The threshold (3% of gold value, floor
+    # ₹200) exists only to tolerate float/rounding noise on genuinely plain
+    # items that carry a stray stone_value: 0 field, not to admit real stones.
     stone = fields.get("stone_value")
-    if stone and stone >= gold:
+    if stone and stone > max(0.03 * gold, 200):
         return ExtractionResult(strategy, None, 0.0, fields,
-                                f"diamond-heavy (stone {stone:.0f} >= gold {gold:.0f}), excluded")
+                                f"studded/diamond (stone {stone:.0f}), excluded")
 
     conf = 0.55
     if fields.get("total"):
@@ -827,21 +827,30 @@ def _selftest() -> int:
     print(f"  {'PASS' if ok else 'FAIL'}  30% accepted -> {r.making_pct}")
     failures += 0 if ok else 1
 
-    print("\n== diamond-heavy exclusion ==")
+    print("\n== studded/diamond exclusion (plain gold only) ==")
     # Stone value >= gold value: a diamond-dominated piece where the making
     # charge isn't representative of a plain gold item - must be rejected
     # even though the ratio itself (10%) is perfectly plausible on its own.
     r = _finish("test", {"gold_value": 5000.0, "making_charge": 500.0,
                           "stone_value": 45000.0})
-    ok = not r.ok and "diamond-heavy" in r.notes
-    print(f"  {'PASS' if ok else 'FAIL'}  diamond-heavy rejected -> "
+    ok = not r.ok and "studded" in r.notes
+    print(f"  {'PASS' if ok else 'FAIL'}  diamond-dominated rejected -> "
           f"{r.making_pct} ({r.notes})")
     failures += 0 if ok else 1
-    # A modest accent stone (well under the gold value) must still pass.
+    # A modest accent stone, well under the gold value, is still a real
+    # stone - the comparison is plain-gold-only, so it must be rejected too.
     r = _finish("test", {"gold_value": 50000.0, "making_charge": 10000.0,
                           "stone_value": 8000.0})
+    ok = not r.ok and "studded" in r.notes
+    print(f"  {'PASS' if ok else 'FAIL'}  modest accent stone rejected -> "
+          f"{r.making_pct} ({r.notes})")
+    failures += 0 if ok else 1
+    # A negligible/rounding-noise stone_value (well under the tolerance
+    # floor) must not disqualify an otherwise plain gold item.
+    r = _finish("test", {"gold_value": 50000.0, "making_charge": 10000.0,
+                          "stone_value": 50.0})
     ok = r.ok and abs(r.making_pct - 20.0) < 0.1
-    print(f"  {'PASS' if ok else 'FAIL'}  modest stone accepted -> {r.making_pct}")
+    print(f"  {'PASS' if ok else 'FAIL'}  negligible stone accepted -> {r.making_pct}")
     failures += 0 if ok else 1
 
     print("\n== fuzzy concept matching ==")
