@@ -12,7 +12,7 @@ import os
 import re
 import time
 from datetime import datetime, timezone, timedelta
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 
 import base64
 
@@ -51,6 +51,11 @@ _CL = "https://www.caratlane.com/jewellery/"
 # extension-less URLs after urljoin(), which 404'd and zeroed out this brand.
 _CL_PROD = r'(/jewellery/[a-z0-9][a-z0-9-]{4,}?-[a-z]{1,3}\d{4,}-[0-9a-z]{4,}\.html)'
 _BS_PROD = r'href="(https://www\.bluestone\.com/[^"]+?~\d+\.html)"'
+# Candere's own category listings are thin server-side; its Magento search
+# results page is not (30+ product links per query from page 1 alone) and
+# needs no discovery route beyond a plain category-keyword search - product
+# pages already extract cleanly with the existing json_flat_keys strategy.
+_CD_PROD = r'href="(https://www\.candere\.com/[a-z0-9][a-z0-9-]+\.html)"'
 
 DISCOVER = [
     # Sitemap route works well here (80 items in the last full run).
@@ -108,10 +113,18 @@ DISCOVER = [
                    "https://www.kisna.com/products/pink-amour-diamond-bangle",
                    "https://www.kisna.com/products/bloomira-gold-bangle"],
      }},
+    # robots.txt advertises /sitemap.xml, which 404s (Magento's real default
+    # location is /media/sitemap/sitemap.xml) - that wrong path is why this
+    # brand previously discovered zero URLs at all.
     {"brand": "ORRA",
-     "sitemaps": ["https://www.orra.co.in/sitemap.xml"]},
+     "sitemaps": ["https://www.orra.co.in/media/sitemap/sitemap.xml"]},
     {"brand": "PN Gadgil",
      "sitemaps": ["https://www.pngjewellers.com/sitemap.xml"]},
+    {"brand": "Candere", "product_re": _CD_PROD,
+     "listings": {"Bangle": "https://www.candere.com/catalogsearch/result/?q=bangle",
+                  "Ring": "https://www.candere.com/catalogsearch/result/?q=ring",
+                  "Earrings": "https://www.candere.com/catalogsearch/result/?q=earrings",
+                  "Mangalsutra": "https://www.candere.com/catalogsearch/result/?q=mangalsutra"}},
 ]
 CURATED = []
 
@@ -213,7 +226,7 @@ def discover_urls(sess, sitemaps):
     """Walk sitemap(s). Sitemaps are static XML - direct fetch only, no proxy."""
     urls, seen = [], set()
     queue = list(sitemaps)
-    while queue and len(seen) < 12:
+    while queue and len(seen) < 18:
         sm = queue.pop(0)
         if sm in seen:
             continue
@@ -225,8 +238,16 @@ def discover_urls(sess, sitemaps):
             continue
         locs = re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", t)
         for loc in locs:
-            if loc.endswith(".xml") and ("product" in loc.lower()
-                                          or "sitemap" in loc.lower()):
+            # Shopify's own nested product sitemaps carry a cursor query
+            # string (…/sitemap_products_1.xml?from=X&to=Y), so the raw URL
+            # never ends in ".xml" - only its path does. Checking the full
+            # URL here silently treated every nested sitemap as a dead-end
+            # "product" URL instead of recursing into it, which is why WHP
+            # and PN Gadgil (both Shopify) previously yielded zero products:
+            # every real product URL lives one level down, inside those
+            # cursor-paginated sub-sitemaps.
+            path = urlsplit(loc).path.lower()
+            if path.endswith(".xml") and ("product" in path or "sitemap" in path):
                 queue.append(loc)          # nested sitemap
             else:
                 urls.append(loc)

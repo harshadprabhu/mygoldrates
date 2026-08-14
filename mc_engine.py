@@ -187,6 +187,20 @@ def _finish(strategy: str, fields: dict[str, float], notes: str = "") -> Extract
         return ExtractionResult(strategy, None, 0.0, fields,
                                 f"implausible ratio {ratio:.4f}")
 
+    # Diamond/stone-dominated pieces are excluded, not just down-weighted.
+    # Making charge as %-of-GOLD-value only means "what a plain gold piece in
+    # this category costs to make" when gold is actually the item's main
+    # cost. Once the stone value matches or exceeds the gold value, the
+    # making-charge line item stops being representative of that - several
+    # brands apply steep (sometimes near-total) making-charge discounts
+    # specifically on diamond jewellery, since the stone markup already
+    # covers labour. Averaging those into a category median would quietly
+    # understate what a real gold-only purchase costs to make.
+    stone = fields.get("stone_value")
+    if stone and stone >= gold:
+        return ExtractionResult(strategy, None, 0.0, fields,
+                                f"diamond-heavy (stone {stone:.0f} >= gold {gold:.0f}), excluded")
+
     conf = 0.55
     if fields.get("total"):
         parts = sum(v for k, v in fields.items()
@@ -263,6 +277,122 @@ def s_json_flat_keys(html: str) -> ExtractionResult:
         # with the canonical block; later repeats are per-variant duplicates)
         fields.setdefault(concept, val)
     return _finish("json_flat_keys", fields)
+
+
+def s_js_object_literal(html: str) -> ExtractionResult:
+    """Unquoted JS object-literal keys: `metal_price: 20605.0, making_charges: 2375.0`.
+
+    Some Shopify themes emit a plain JS object (not JSON-quoted) for the
+    per-variant price breakup, e.g.
+        const variantsData = {"123": {metal_price: 20605.0,
+        making_charges: 2375.0, price: 2825400, ...}};
+    json_flat_keys requires quoted `"key":` and misses this shape entirely -
+    seen on PN Gadgil, where it previously yielded zero items even though
+    the exact rupee breakup is sitting in the page.
+
+    Pairing is done by PROXIMITY, not "first occurrence per concept" (what
+    json_flat_keys does): a large real page has plenty of unrelated
+    label-like-token-followed-by-number pairs (e.g. a CSS custom property
+    `--colors-price: 255, 255, 255;` fuzzy-matches the "gold_value" concept
+    via the bare word "price"). Taking the document-wide first match per
+    concept let that CSS value win the "gold_value" slot ahead of the real,
+    co-located variant block further down the page, silently producing no
+    result (the ratio against the real making charge was implausible and
+    got rejected) even though the correct pair was sitting right there.
+    Requiring the two labels to be near each other - the way they actually
+    appear together inside one variant object - fixes that.
+    """
+    tm = re.search(r'\b(?:making_charge_type|making_charges_type|mc_type)\s*:\s*'
+                   r'[\'"]([a-z%]+)[\'"]', html, re.I)
+    if tm and "percent" in tm.group(1).lower():
+        return ExtractionResult("js_object_literal", None, 0.0, {},
+                                "deferred: typed percentage")
+    matches: list[tuple[int, str, float]] = []
+    for m in re.finditer(r'\b([A-Za-z_][A-Za-z0-9_]{2,40})\s*:\s*'
+                         r'(?:[\'"]\s*)?(?:₹|Rs\.?|INR)?\s*(-?[\d,]+(?:\.\d{1,4})?)\b',
+                         html):
+        concept, score = match_concept(m.group(1))
+        if not concept or score < 0.9:
+            continue
+        val = _num(m.group(2))
+        if val is None or val <= 0:
+            continue
+        matches.append((m.start(), concept, val))
+
+    window = 400
+    for pos, concept, val in matches:
+        if concept != "making_charge":
+            continue
+        # Try every nearby gold_value candidate, closest first, instead of
+        # committing to the single nearest one - a generic label like bare
+        # "price" fuzzy-matches gold_value too (it's a whole word inside
+        # "gold price"/"metal price") and can sit closer than the real
+        # "metal_price" field while pairing with an implausible ratio (e.g.
+        # the sibling total-price-in-paise field). Falling through to the
+        # next candidate on an implausible ratio recovers the real pairing.
+        candidates = sorted(
+            (abs(pos2 - pos), val2)
+            for pos2, concept2, val2 in matches
+            if concept2 == "gold_value" and abs(pos2 - pos) <= window)
+        for _, gold_val in candidates:
+            fields = {"gold_value": gold_val, "making_charge": val}
+            for pos2, concept2, val2 in matches:
+                if concept2 in ("stone_value", "gst", "total") and abs(pos2 - pos) <= window:
+                    fields.setdefault(concept2, val2)
+            res = _finish("js_object_literal", fields)
+            if res.ok:
+                return res
+    return ExtractionResult("js_object_literal", None, 0.0, {}, "no nearby pair")
+
+
+def s_weight_rate_join(html: str) -> ExtractionResult:
+    """Join a per-karat gold RATE table with a variant's weight + flat making charge.
+
+    Some brands publish these as two separate static objects instead of a
+    precomputed gold value, because the final price is meant to be assembled
+    client-side: a per-karat ₹/gram table (e.g. WHP's `metalPriceConfig =
+    {"gold_price_18k":12161,...}`) plus a variant's `metal_weight` (grams),
+    `purity` (karat) and flat `making_charges` (₹). Both pieces are present in
+    static HTML - the only thing missing is the multiplication, which we do
+    here instead of needing a browser to run the page's own JS.
+    """
+    rm = re.search(r'metalPriceConfig\s*=\s*(\{.*?\})\s*(?:\|\|\s*\{\})?;', html, re.S)
+    if not rm:
+        return ExtractionResult("weight_rate_join", None, 0.0, {}, "no rate table")
+    try:
+        rates = json.loads(rm.group(1))
+    except (json.JSONDecodeError, ValueError):
+        return ExtractionResult("weight_rate_join", None, 0.0, {}, "bad rate JSON")
+
+    vm = re.search(
+        r'"metal_type"\s*:\s*"gold"\s*,\s*"purity"\s*:\s*"(\d+)K?"\s*,\s*'
+        r'"metal_weight"\s*:\s*([\d.]+)\s*,\s*"diamond_charges"\s*:\s*(null|[\d.]+)'
+        r'.{0,400}?"making_charges"\s*:\s*([\d.]+)(.{0,300}?)(?:\}|$)',
+        html, re.I | re.S)
+    if not vm:
+        return ExtractionResult("weight_rate_join", None, 0.0, {}, "no variant match")
+    # Not every variant means "making_charges" as a flat rupee amount - a
+    # sibling "remarks" field says so explicitly ("fixed" vs "percentage").
+    # Seen on a WHP plain-gold kada: making_charges:200 with remarks:
+    # "percentage" is NOT ₹200, and blindly dividing it by gold value like
+    # the normal (rupee) case produced a nonsense >100% "rate". Rather than
+    # guess the right scale for the percentage variant, skip it - the
+    # regular (fixed-rupee) variants cover most of the catalogue anyway.
+    tail = vm.group(5)
+    rm2 = re.search(r'"remarks"\s*:\s*"(fixed|percentage)"', tail, re.I)
+    if rm2 and rm2.group(1).lower() == "percentage":
+        return ExtractionResult("weight_rate_join", None, 0.0, {},
+                                "making_charges is percentage-typed, not rupees")
+    purity, weight = vm.group(1), _num(vm.group(2))
+    diamond, making = _num(vm.group(3)), _num(vm.group(4))
+    rate = rates.get(f"gold_price_{purity}k")
+    if not rate or not weight or not making:
+        return ExtractionResult("weight_rate_join", None, 0.0, {}, "missing join fields")
+    gold_value = rate * weight
+    fields = {"gold_value": round(gold_value, 2), "making_charge": making}
+    if diamond:
+        fields["stone_value"] = diamond
+    return _finish("weight_rate_join", fields)
 
 
 def s_json_breakup_arrays(html: str) -> ExtractionResult:
@@ -346,11 +476,19 @@ def _labelled_text_scan(fragment: str, strategy: str) -> ExtractionResult:
 
 
 def s_direct_percent(html: str) -> ExtractionResult:
-    """Brands that publish the making charge as a percentage outright."""
+    """Brands that publish the making charge as a percentage outright.
+
+    The gap between label and "%" is deliberately short and excludes other
+    line-item words (gst/tax/discount/...) - a wide gap previously let e.g.
+    "Making Charges Discount GST (3%)" bind the GST row's percentage to the
+    making-charge label (seen on WHP: shipped 3.0% via this row when the
+    real figure, computable from the page's own weight+rate data, is 22.9%).
+    """
     text = re.sub(r"<[^>]+>", " ", html)
     text = re.sub(r"\s+", " ", text)
     for m in re.finditer(r"(making\s*charges?|value\s*addition|wastage)"
-                         r"[^%\d]{0,40}?(\d{1,2}(?:\.\d)?)\s*%", text, re.I):
+                         r"(?![^%\d]*?\b(?:gst|tax|cgst|sgst|discount|off|save[ds]?)\b)"
+                         r"[^%\d]{0,20}?(\d{1,2}(?:\.\d)?)\s*%", text, re.I):
         window = text[max(0, m.start() - 60):m.start()]
         if _NEGATIVE_CONTEXT.search(window):
             continue
@@ -363,8 +501,10 @@ def s_direct_percent(html: str) -> ExtractionResult:
 
 STRATEGIES: list[tuple[str, Callable[[str], ExtractionResult]]] = [
     ("json_typed_percent", s_json_typed_percent),   # must precede flat_keys
+    ("weight_rate_join", s_weight_rate_join),       # specific join, try early
     ("json_breakup_arrays", s_json_breakup_arrays),
     ("json_flat_keys", s_json_flat_keys),
+    ("js_object_literal", s_js_object_literal),
     ("dom_breakup_section", s_dom_breakup_section),
     ("direct_percent", s_direct_percent),
     ("labelled_text", s_labelled_text),
@@ -599,6 +739,23 @@ def _selftest() -> int:
     r = _finish("test", {"gold_value": 50000.0, "making_charge": 15000.0})
     ok = r.ok and abs(r.making_pct - 30.0) < 0.1
     print(f"  {'PASS' if ok else 'FAIL'}  30% accepted -> {r.making_pct}")
+    failures += 0 if ok else 1
+
+    print("\n== diamond-heavy exclusion ==")
+    # Stone value >= gold value: a diamond-dominated piece where the making
+    # charge isn't representative of a plain gold item - must be rejected
+    # even though the ratio itself (10%) is perfectly plausible on its own.
+    r = _finish("test", {"gold_value": 5000.0, "making_charge": 500.0,
+                          "stone_value": 45000.0})
+    ok = not r.ok and "diamond-heavy" in r.notes
+    print(f"  {'PASS' if ok else 'FAIL'}  diamond-heavy rejected -> "
+          f"{r.making_pct} ({r.notes})")
+    failures += 0 if ok else 1
+    # A modest accent stone (well under the gold value) must still pass.
+    r = _finish("test", {"gold_value": 50000.0, "making_charge": 10000.0,
+                          "stone_value": 8000.0})
+    ok = r.ok and abs(r.making_pct - 20.0) < 0.1
+    print(f"  {'PASS' if ok else 'FAIL'}  modest stone accepted -> {r.making_pct}")
     failures += 0 if ok else 1
 
     print("\n== fuzzy concept matching ==")
