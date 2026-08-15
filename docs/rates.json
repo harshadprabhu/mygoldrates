@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-15",
-  "last_updated": "2026-08-15T17:05:32.494555+05:30",
+  "last_updated": "2026-08-15T17:26:45.940941+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -13,8 +13,8 @@
     "18k": 11636.62
   },
   "lowest_24k": {
-    "jeweller": "Kisna",
-    "rate_per_gram_inr": 15342.86
+    "jeweller": "PN Gadgil",
+    "rate_per_gram_inr": 15315.0
   },
   "ibja_reference_24k_999_per_gram_inr": null,
   "akgsma_south_india_22k_per_gram_inr": 14220.0,
@@ -40,16 +40,16 @@
       "rate_18k_per_gram_inr": 11466.75
     },
     {
+      "jeweller": "PN Gadgil",
+      "rate_24k_per_gram_inr": 15315.0,
+      "rate_22k_per_gram_inr": 14038.75,
+      "rate_18k_per_gram_inr": 11486.25
+    },
+    {
       "jeweller": "Kisna",
       "rate_24k_per_gram_inr": 15342.86,
       "rate_22k_per_gram_inr": 14064.29,
       "rate_18k_per_gram_inr": 11507.15
-    },
-    {
-      "jeweller": "PN Gadgil",
-      "rate_24k_per_gram_inr": 15357.0,
-      "rate_22k_per_gram_inr": 14077.25,
-      "rate_18k_per_gram_inr": 11517.75
     },
     {
       "jeweller": "Chandukaka Saraf",
