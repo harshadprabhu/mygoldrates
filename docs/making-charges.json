@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-15T02:36:33.577609+05:30",
+  "updated": "2026-08-16T10:35:14.765054+05:30",
   "note": "Making charge as % of gold value, median across multiple real products per category from each jeweller's public price breakup. Indicative - varies by specific design.",
   "brands": [
     {
@@ -7,80 +7,45 @@
       "categories": [
         {
           "category": "Bangle",
-          "items": 18,
-          "making_pct_median": 23.6,
-          "making_pct_min": 21.6,
-          "making_pct_max": 26.7,
-          "confidence": "high",
-          "rejected_outliers": 7,
+          "items": 1,
+          "making_pct_median": 30.2,
+          "making_pct_min": 30.2,
+          "making_pct_max": 30.2,
+          "confidence": "low",
+          "rejected_outliers": 0,
           "examples": [
             {
               "url": "https://www.bluestone.com/bangles/the-orrale-round-bangle~79884.html",
               "pct": 30.2
-            },
-            {
-              "url": "https://www.bluestone.com/bangles/the-monica-bangle~1645.html",
-              "pct": 22.6
-            },
-            {
-              "url": "https://www.bluestone.com/bangles/the-natalie-bangle~1747.html",
-              "pct": 23.6
             }
           ]
         },
         {
           "category": "Earrings",
-          "items": 10,
-          "making_pct_median": 33.6,
-          "making_pct_min": 25.6,
+          "items": 2,
+          "making_pct_median": 36.1,
+          "making_pct_min": 31.4,
           "making_pct_max": 40.8,
-          "confidence": "medium",
-          "rejected_outliers": 2,
+          "confidence": "low",
+          "rejected_outliers": 0,
           "examples": [
             {
               "url": "https://www.bluestone.com/earrings/the-antevorta-earrings~621.html",
               "pct": 31.4
             },
             {
-              "url": "https://www.bluestone.com/earrings/the-brynna-earrings~745.html",
-              "pct": 38.4
-            },
-            {
-              "url": "https://www.bluestone.com/earrings/the-padmalakshmi-drop-earrings~2061.html",
-              "pct": 23.6
-            }
-          ]
-        },
-        {
-          "category": "Mangalsutra",
-          "items": 5,
-          "making_pct_median": 23.6,
-          "making_pct_min": 23.6,
-          "making_pct_max": 25.6,
-          "confidence": "medium",
-          "rejected_outliers": 1,
-          "examples": [
-            {
-              "url": "https://www.bluestone.com/mangalsutra/the-kavya-mangalsutra-pendant~4358.html",
-              "pct": 25.6
-            },
-            {
-              "url": "https://www.bluestone.com/mangalsutra/the-dhanishta-mangalsutra-pendant~4365.html",
-              "pct": 23.6
-            },
-            {
-              "url": "https://www.bluestone.com/mangalsutra/the-krithika-mangalsutra-pendant~4373.html",
-              "pct": 23.6
+              "url": "https://www.bluestone.com/earrings/the-mathilda-drop-earrings~8976.html",
+              "pct": 40.8
             }
           ]
         },
         {
           "category": "Ring",
-          "items": 16,
-          "making_pct_median": 31.9,
-          "making_pct_min": 24.6,
-          "making_pct_max": 39.6,
-          "confidence": "high",
+          "items": 2,
+          "making_pct_median": 34.8,
+          "making_pct_min": 34.6,
+          "making_pct_max": 34.9,
+          "confidence": "low",
           "rejected_outliers": 0,
           "examples": [
             {
@@ -88,12 +53,8 @@
               "pct": 34.9
             },
             {
-              "url": "https://www.bluestone.com/rings/the-true-love-band-for-him~687.html",
-              "pct": 25.6
-            },
-            {
-              "url": "https://www.bluestone.com/rings/the-olavi-ring~688.html",
-              "pct": 30.2
+              "url": "https://www.bluestone.com/rings/the-regal-rose-ring~442.html",
+              "pct": 34.6
             }
           ]
         }
@@ -123,10 +84,10 @@
         },
         {
           "category": "Earrings",
-          "items": 7,
-          "making_pct_median": 18.0,
+          "items": 8,
+          "making_pct_median": 22.6,
           "making_pct_min": 8.8,
-          "making_pct_max": 34.4,
+          "making_pct_max": 34.3,
           "confidence": "medium",
           "rejected_outliers": 0,
           "examples": [
@@ -140,41 +101,41 @@
             },
             {
               "url": "https://www.candere.com/elysian-arcdiamond-earrings.html",
-              "pct": 34.4
+              "pct": 34.3
             }
           ]
         },
         {
           "category": "Mangalsutra",
           "items": 2,
-          "making_pct_median": 28.0,
-          "making_pct_min": 21.7,
-          "making_pct_max": 34.2,
+          "making_pct_median": 27.9,
+          "making_pct_min": 21.6,
+          "making_pct_max": 34.1,
           "confidence": "low",
           "rejected_outliers": 0,
           "examples": [
             {
               "url": "https://www.candere.com/raavee-gold-mangalsutra.html",
-              "pct": 21.7
+              "pct": 21.6
             },
             {
               "url": "https://www.candere.com/maanavika-gold-mangalsutra.html",
-              "pct": 34.2
+              "pct": 34.1
             }
           ]
         },
         {
           "category": "Ring",
           "items": 5,
-          "making_pct_median": 32.9,
+          "making_pct_median": 32.8,
           "making_pct_min": 27.8,
-          "making_pct_max": 35.1,
+          "making_pct_max": 35.0,
           "confidence": "medium",
           "rejected_outliers": 0,
           "examples": [
             {
               "url": "https://www.candere.com/tetris-gold-thumb-ring.html",
-              "pct": 32.9
+              "pct": 32.8
             },
             {
               "url": "https://www.candere.com/caitlin-infinity-gold-ring.html",
@@ -182,7 +143,7 @@
             },
             {
               "url": "https://www.candere.com/yutika-hearts-gold-ring.html",
-              "pct": 27.9
+              "pct": 27.8
             }
           ]
         }
@@ -216,10 +177,10 @@
         },
         {
           "category": "Ring",
-          "items": 12,
-          "making_pct_median": 23.5,
+          "items": 13,
+          "making_pct_median": 23.0,
           "making_pct_min": 21.0,
-          "making_pct_max": 25.0,
+          "making_pct_max": 24.7,
           "confidence": "high",
           "rejected_outliers": 7,
           "examples": [
@@ -232,8 +193,8 @@
               "pct": 35.0
             },
             {
-              "url": "https://www.caratlane.com/jewellery/pranati-22kt-gold-ring-kr01967-2y0000.html",
-              "pct": 24.0
+              "url": "https://www.caratlane.com/jewellery/heart-trail-gold-ring-ur02498-1y0000.html",
+              "pct": 50.0
             }
           ]
         }
@@ -357,17 +318,17 @@
               "pct": 62.2
             },
             {
-              "url": "https://www.kisna.com/products/lovecuff-flexible-gold-bangle",
+              "url": "https://www.kisna.com/products/florivine-flexible-gold-bangle",
               "pct": 62.2
             }
           ]
         },
         {
           "category": "Earrings",
-          "items": 56,
+          "items": 54,
           "making_pct_median": 62.2,
-          "making_pct_min": 32.8,
-          "making_pct_max": 98.8,
+          "making_pct_min": 31.3,
+          "making_pct_max": 104.8,
           "confidence": "high",
           "rejected_outliers": 0,
           "examples": [
@@ -387,35 +348,35 @@
         },
         {
           "category": "Mangalsutra",
-          "items": 19,
-          "making_pct_median": 38.0,
-          "making_pct_min": 27.9,
-          "making_pct_max": 51.0,
+          "items": 17,
+          "making_pct_median": 40.0,
+          "making_pct_min": 30.4,
+          "making_pct_max": 48.6,
           "confidence": "high",
-          "rejected_outliers": 1,
+          "rejected_outliers": 3,
           "examples": [
             {
-              "url": "https://www.kisna.com/products/venika-hamsa-mangalsutra-bracelet",
-              "pct": 30.4
-            },
-            {
-              "url": "https://www.kisna.com/products/crescent-bloom-mangalsutra-with-chain",
-              "pct": 40.2
-            },
-            {
-              "url": "https://www.kisna.com/products/devaki-mangalsutra",
+              "url": "https://www.kisna.com/products/somana-mangalsutra",
               "pct": 41.9
+            },
+            {
+              "url": "https://www.kisna.com/products/ensar-evil-eye-detachable-mangalsutra-bracelet",
+              "pct": 40.0
+            },
+            {
+              "url": "https://www.kisna.com/products/riveria-mangalsutra-chain",
+              "pct": 40.0
             }
           ]
         },
         {
           "category": "Ring",
-          "items": 148,
+          "items": 150,
           "making_pct_median": 38.0,
           "making_pct_min": 26.8,
-          "making_pct_max": 72.5,
+          "making_pct_max": 63.6,
           "confidence": "high",
-          "rejected_outliers": 2,
+          "rejected_outliers": 0,
           "examples": [
             {
               "url": "https://www.kisna.com/products/embrace-love-gold-ring",
@@ -438,7 +399,7 @@
       "categories": [
         {
           "category": "Bangle",
-          "items": 17,
+          "items": 16,
           "making_pct_median": 21.0,
           "making_pct_min": 16.1,
           "making_pct_max": 25.0,
@@ -461,7 +422,7 @@
         },
         {
           "category": "Earrings",
-          "items": 17,
+          "items": 18,
           "making_pct_median": 21.0,
           "making_pct_min": 19.1,
           "making_pct_max": 21.0,
@@ -484,8 +445,8 @@
         },
         {
           "category": "Mangalsutra",
-          "items": 17,
-          "making_pct_median": 14.7,
+          "items": 18,
+          "making_pct_median": 15.8,
           "making_pct_min": 10.5,
           "making_pct_max": 20.4,
           "confidence": "high",
@@ -507,7 +468,7 @@
         },
         {
           "category": "Ring",
-          "items": 15,
+          "items": 16,
           "making_pct_median": 18.9,
           "making_pct_min": 18.0,
           "making_pct_max": 20.2,
@@ -632,12 +593,12 @@
       "categories": [
         {
           "category": "Earrings",
-          "items": 17,
-          "making_pct_median": 22.7,
-          "making_pct_min": 21.6,
-          "making_pct_max": 23.9,
+          "items": 22,
+          "making_pct_median": 22.6,
+          "making_pct_min": 21.2,
+          "making_pct_max": 24.3,
           "confidence": "high",
-          "rejected_outliers": 1,
+          "rejected_outliers": 0,
           "examples": [
             {
               "url": "https://whpjewellers.com/products/shining-enigmatic-18k-gold-studs",
@@ -679,7 +640,7 @@
           "making_pct_min": 20.9,
           "making_pct_max": 23.6,
           "confidence": "high",
-          "rejected_outliers": 0,
+          "rejected_outliers": 1,
           "examples": [
             {
               "url": "https://whpjewellers.com/products/shimmering-enigmatic-18k-danglers",
