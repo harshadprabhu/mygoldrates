@@ -173,7 +173,7 @@ DISCOVER = [
      "sitemaps": ["https://www.orra.co.in/media/sitemap/sitemap.xml"]},
     {"brand": "PN Gadgil",
      "sitemaps": ["https://www.pngjewellers.com/sitemap.xml"]},
-    {"brand": "Candere", "product_re": _CD_PROD,
+    {"brand": "Candere", "product_re": _CD_PROD, "pagination": "p",
      "listings": {"Bangle": "https://www.candere.com/catalogsearch/result/?q=bangle",
                   "Ring": "https://www.candere.com/catalogsearch/result/?q=ring",
                   "Earrings": "https://www.candere.com/catalogsearch/result/?q=earrings",
@@ -394,6 +394,11 @@ def collect_urls(sess, d):
     # unusual design skews the whole number). Each brand declares its style:
     #   "baseOffset" (CaratLane): ?baseOffset=20,40,60,...
     #   "page"       (Shopify, e.g. Kisna): ?page=2,3,4,...
+    #   "p"          (Magento search results, e.g. Candere): &p=2,3,4,...
+    #                (verified live: Candere's ?q=ring&p=2 surfaces a
+    #                different ~40 products than page 1, not a repeat of it -
+    #                the old default ("baseOffset", a no-op param on this
+    #                platform) silently capped this brand at page 1 forever)
     pag_style = d.get("pagination", "baseOffset")
     for cat, listing in (d.get("listings") or {}).items():
         # A category value may be one URL (str) or several (list) - some
@@ -405,6 +410,10 @@ def collect_urls(sess, d):
         listing_urls = listing if isinstance(listing, list) else [listing]
         for base_listing in listing_urls:
             page_num = 1
+            # Some listing URLs already carry a query string (Candere's
+            # ?q=ring) - a page param has to join with "&", not a second
+            # "?", or the whole query string after the first "?" is invalid.
+            sep = "&" if "?" in base_listing else "?"
             # Cap raised from 6 to 25 pages / PER_CAT to PER_CAT_LARGE so a
             # listing-only brand with a genuinely deep catalogue (no sitemap
             # route) isn't stopped short of a large sample - the "page
@@ -414,21 +423,33 @@ def collect_urls(sess, d):
                 if page_num == 1:
                     url = base_listing
                 elif pag_style == "page":
-                    url = f"{base_listing}?page={page_num}"
+                    url = f"{base_listing}{sep}page={page_num}"
+                elif pag_style == "p":
+                    url = f"{base_listing}{sep}p={page_num}"
                 else:
-                    url = f"{base_listing}?baseOffset={(page_num - 1) * 20}"
+                    url = f"{base_listing}{sep}baseOffset={(page_num - 1) * 20}"
                 html, _ = fetch(sess, url, allow_proxy=True, timeout=25)
                 if not html:
                     break
-                before = len(buckets.get(cat, []))
+                raw_matches = 0
                 for m in re.finditer(prod_re, html) if prod_re else []:
+                    raw_matches += 1
                     cand = m.group(0) if not m.groups() else m.group(1)
                     if not cand.startswith("http"):
                         cand = urljoin(base_listing, cand)
                     if categorize(cand) == cat:
                         add(cat, cand)
-                if len(buckets.get(cat, [])) == before and page_num > 1:
-                    break              # page yielded nothing new
+                # Stop only when the page truly has no product links left -
+                # NOT when none of this page's links happened to survive
+                # categorize()/the studded filter for THIS category. A page
+                # that's mostly diamond pieces for this query can legitimately
+                # add zero new items while a later page still has plenty;
+                # stopping on that used to cut pagination short right when
+                # the studded filter (added for plain-gold-only sampling)
+                # had a bad page, silently capping brands like Candere well
+                # under their real catalogue size.
+                if raw_matches == 0 and page_num > 1:
+                    break
                 page_num += 1
                 time.sleep(0.3)
     return buckets
