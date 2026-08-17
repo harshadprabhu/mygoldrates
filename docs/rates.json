@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-17",
-  "last_updated": "2026-08-17T08:41:38.236441+05:30",
+  "last_updated": "2026-08-17T09:43:25.977829+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -17,19 +17,19 @@
     "rate_per_gram_inr": 15342.86
   },
   "ibja_reference_24k_999_per_gram_inr": null,
-  "akgsma_south_india_22k_per_gram_inr": 14220.0,
+  "akgsma_south_india_22k_per_gram_inr": 14270.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 154590.0,
-      "change_pct": 0.73
+      "price_per_10g_inr": 155224.0,
+      "change_pct": 0.46
     },
     {
       "contract": "GOLDM",
       "expiry": "04SEP2026",
-      "price_per_10g_inr": 153180.0,
-      "change_pct": -0.01
+      "price_per_10g_inr": 153955.0,
+      "change_pct": 0.5
     }
   ],
   "jewellers": [
@@ -52,16 +52,16 @@
       "rate_18k_per_gram_inr": 11508.0
     },
     {
-      "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 15365.0,
-      "rate_22k_per_gram_inr": 14084.58,
-      "rate_18k_per_gram_inr": 11523.75
-    },
-    {
       "jeweller": "ORRA",
       "rate_24k_per_gram_inr": 15403.51,
       "rate_22k_per_gram_inr": 14119.88,
       "rate_18k_per_gram_inr": 11552.63
+    },
+    {
+      "jeweller": "Chandukaka Saraf",
+      "rate_24k_per_gram_inr": 15410.0,
+      "rate_22k_per_gram_inr": 14125.83,
+      "rate_18k_per_gram_inr": 11557.5
     },
     {
       "jeweller": "Indriya",
@@ -148,16 +148,16 @@
       "rate_18k_per_gram_inr": 11763.0
     },
     {
-      "jeweller": "BlueStone",
-      "rate_24k_per_gram_inr": 15728.67,
-      "rate_22k_per_gram_inr": 14417.95,
-      "rate_18k_per_gram_inr": 11796.5
-    },
-    {
       "jeweller": "Ranka Jewellers",
       "rate_24k_per_gram_inr": 15830.0,
       "rate_22k_per_gram_inr": 14510.83,
       "rate_18k_per_gram_inr": 11872.5
+    },
+    {
+      "jeweller": "BlueStone",
+      "rate_24k_per_gram_inr": 16092.8,
+      "rate_22k_per_gram_inr": 14751.73,
+      "rate_18k_per_gram_inr": 12069.6
     }
   ],
   "jeweller_count": 21,
