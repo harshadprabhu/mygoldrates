@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-17",
-  "last_updated": "2026-08-17T10:55:07.875207+05:30",
+  "last_updated": "2026-08-17T11:05:45.225780+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -17,19 +17,19 @@
     "rate_per_gram_inr": 15342.86
   },
   "ibja_reference_24k_999_per_gram_inr": null,
-  "akgsma_south_india_22k_per_gram_inr": null,
+  "akgsma_south_india_22k_per_gram_inr": 14270.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 155202.0,
-      "change_pct": 0.45
+      "price_per_10g_inr": 155182.0,
+      "change_pct": 0.44
     },
     {
       "contract": "GOLDM",
       "expiry": "04SEP2026",
-      "price_per_10g_inr": 153874.0,
-      "change_pct": 0.45
+      "price_per_10g_inr": 153894.0,
+      "change_pct": 0.46
     }
   ],
   "jewellers": [
@@ -76,12 +76,6 @@
       "rate_18k_per_gram_inr": 11634.56
     },
     {
-      "jeweller": "Kalyan Jewellers",
-      "rate_24k_per_gram_inr": 15513.0,
-      "rate_22k_per_gram_inr": 14220.25,
-      "rate_18k_per_gram_inr": 11634.75
-    },
-    {
       "jeweller": "Bhima Jewels",
       "rate_24k_per_gram_inr": 15519.0,
       "rate_22k_per_gram_inr": 14225.75,
@@ -94,10 +88,10 @@
       "rate_18k_per_gram_inr": 11641.93
     },
     {
-      "jeweller": "Vummidi Bangaru",
-      "rate_24k_per_gram_inr": 15524.0,
-      "rate_22k_per_gram_inr": 14230.33,
-      "rate_18k_per_gram_inr": 11643.0
+      "jeweller": "Kalyan Jewellers",
+      "rate_24k_per_gram_inr": 15540.0,
+      "rate_22k_per_gram_inr": 14245.0,
+      "rate_18k_per_gram_inr": 11655.0
     },
     {
       "jeweller": "Tanishq",
@@ -131,6 +125,12 @@
     },
     {
       "jeweller": "Candere",
+      "rate_24k_per_gram_inr": 15579.0,
+      "rate_22k_per_gram_inr": 14280.75,
+      "rate_18k_per_gram_inr": 11684.25
+    },
+    {
+      "jeweller": "Vummidi Bangaru",
       "rate_24k_per_gram_inr": 15579.0,
       "rate_22k_per_gram_inr": 14280.75,
       "rate_18k_per_gram_inr": 11684.25

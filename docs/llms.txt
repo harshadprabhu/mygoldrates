@@ -11,8 +11,8 @@
 - 18K (750) median: ₹11,673 per gram (pre-GST)
 - Lowest 24K today: ₹15,343 per gram at Kisna
 
-- MCX gold futures (05OCT2026): ₹155,202 per 10g (995), +0.45%
-- Last updated: 2026-08-17T10:55:07.875207+05:30
+- MCX gold futures (05OCT2026): ₹155,182 per 10g (995), +0.44%
+- Last updated: 2026-08-17T11:05:45.225780+05:30
 
 ## Key pages
 - Home / today's rates: https://mygoldrates.com/
