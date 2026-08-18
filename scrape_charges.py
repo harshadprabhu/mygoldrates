@@ -53,10 +53,20 @@ FETCH_WORKERS = 6      # concurrent product-page fetches per brand. Product
                        # under 10 concurrent connections, which silently
                        # looked like "no data for this category" rather than
                        # what it actually was - the site couldn't keep up.
-FETCH_RETRIES = 1      # retries for a failed fetch (no html / timeout) before
+FETCH_RETRIES = 2      # retries for a failed fetch (no html / timeout) before
                        # giving up on that URL - a fetch failure under
                        # concurrent load is often transient (the origin
-                       # momentarily overloaded), not permanent.
+                       # momentarily overloaded), not permanent. Raised from
+                       # 1: BlueStone and CaratLane both had at least one
+                       # production run collapse to near-zero across every
+                       # category (BlueStone: 1/2/2 items) despite fine
+                       # results on other runs with identical code - a
+                       # single retry wasn't enough to ride out whichever
+                       # brand's origin was struggling that day.
+RETRY_BACKOFF = 3      # seconds to wait before each retry pass - gives an
+                       # origin that was struggling under the first pass'
+                       # concurrency a moment to recover, instead of
+                       # re-hitting it at the same rate immediately.
 
 
 def sample_size(pool_size):
@@ -105,7 +115,12 @@ DISCOVER = [
     # Sitemaps 404; category listings + ?baseOffset pagination verified good
     # (25 bangles / 16 rings / 8 earrings). Mangalsutra grid is client-side,
     # so it stays thin until seeds are added.
-    {"brand": "CaratLane", "product_re": _CL_PROD,
+    # fetch_workers=3: this brand's origin has repeatedly collapsed to
+    # near-zero hits on a production run (0/0/0/0, then recovered to
+    # 19/20/12 on the next run with identical code) while other brands ran
+    # fine at the default concurrency the same day - it can't reliably
+    # sustain that many simultaneous connections.
+    {"brand": "CaratLane", "product_re": _CL_PROD, "fetch_workers": 3,
      "listings": {"Bangle": _CL + "bangles.html",
                   "Ring": _CL + "rings.html",
                   "Earrings": _CL + "earrings.html",
@@ -119,7 +134,11 @@ DISCOVER = [
     # product URLs, versus the ~10 hand-picked seeds this brand relied on
     # before because its listing/search pages are client-rendered. The
     # seeds are kept as a fallback if the sitemap route ever breaks.
-    {"brand": "BlueStone", "product_re": _BS_PROD,
+    # fetch_workers=3: same reasoning as CaratLane's override - a production
+    # run collapsed this brand to 1/2/2 items across every category despite
+    # a huge discovery pool (10,700+ URLs) and other brands running fine at
+    # the default concurrency the same day.
+    {"brand": "BlueStone", "product_re": _BS_PROD, "fetch_workers": 3,
      "sitemaps": ["https://www.bluestone.com/products-sitemap.xml"],
      "seeds": {
         "Bangle": ["https://www.bluestone.com/bangles/the-orrale-round-bangle~79884.html",
@@ -455,41 +474,45 @@ def collect_urls(sess, d):
     return buckets
 
 
-def fetch_batch(sess, engine, brand, items):
+def fetch_batch(sess, engine, brand, items, workers=None):
     """Fetch + extract a batch of (cat, url) candidates concurrently.
 
     Replaces the old one-at-a-time loop (with a 0.3s sleep after every direct
     fetch) - fine when a brand only needed 20 fetches, but a serial killer
     once samples run into the hundreds. Network I/O dominates a fetch, so a
-    bounded thread pool (FETCH_WORKERS) turns wall-clock time into roughly
-    fetches/FETCH_WORKERS instead of fetches - and IS the politeness control
-    now, in place of the per-request sleep (a fixed number of concurrent
-    connections to one brand's domain, not an unbounded burst).
+    bounded thread pool (workers, default FETCH_WORKERS) turns wall-clock
+    time into roughly fetches/workers instead of fetches - and IS the
+    politeness control now, in place of the per-request sleep (a fixed
+    number of concurrent connections to one brand's domain, not an
+    unbounded burst). A brand whose origin can't sustain the default (see
+    DISCOVER's per-brand "fetch_workers" override) passes a lower value here.
 
-    A first pass at FETCH_WORKERS, then up to FETCH_RETRIES more passes (at
-    half the concurrency) retrying only the fetches that came back empty.
-    A smaller origin can start timing out once several hundred fetches for
-    one brand are in flight - without a retry, that silently reads as "no
-    making % on these pages" instead of what it is, a transient failure
-    under load - so a URL only counts as a real miss once a retry at gentler
-    concurrency has also failed on it.
+    A first pass at `workers`, then up to FETCH_RETRIES more passes (at half
+    the concurrency, after a short backoff) retrying only the fetches that
+    came back empty. A smaller origin can start timing out once several
+    hundred fetches for one brand are in flight - without a retry, that
+    silently reads as "no making % on these pages" instead of what it is, a
+    transient failure under load - so a URL only counts as a real miss once
+    retries at gentler concurrency have also failed on it.
 
     Returns a list of (cat, url, ExtractionResult|None, src).
     """
+    workers = workers or FETCH_WORKERS
     fetched = [None] * len(items)   # (html, src) per item, filled in below
 
-    def run_pass(indices, workers):
-        with ThreadPoolExecutor(max_workers=workers) as ex:
+    def run_pass(indices, n_workers):
+        with ThreadPoolExecutor(max_workers=n_workers) as ex:
             futs = {ex.submit(fetch, sess, items[i][1], True, 25): i for i in indices}
             for fut in as_completed(futs):
                 fetched[futs[fut]] = fut.result()
 
-    run_pass(range(len(items)), FETCH_WORKERS)
+    run_pass(range(len(items)), workers)
     for _ in range(FETCH_RETRIES):
         failed = [i for i, r in enumerate(fetched) if not r[0]]
         if not failed:
             break
-        run_pass(failed, max(2, FETCH_WORKERS // 2))
+        time.sleep(RETRY_BACKOFF)
+        run_pass(failed, max(2, workers // 2))
 
     out = []
     for i, (cat, u) in enumerate(items):
@@ -555,14 +578,15 @@ def main():
         # studded can legitimately go several fetches between hits (a real,
         # working brand), not just a broken one.
         probe, rest = candidates[:25], candidates[25:]
-        results = fetch_batch(sess, engine, brand, probe)
+        brand_workers = d.get("fetch_workers")
+        results = fetch_batch(sess, engine, brand, probe, workers=brand_workers)
         hits, proxy_hits = record_results(agg, detail, brand, results)
         fetched = len(results)
 
         if fetched >= 25 and hits == 0:
             print(f"  {brand}: no making % in first 25 items, skipping")
         elif rest:
-            results = fetch_batch(sess, engine, brand, rest)
+            results = fetch_batch(sess, engine, brand, rest, workers=brand_workers)
             h2, p2 = record_results(agg, detail, brand, results)
             hits += h2
             proxy_hits += p2
