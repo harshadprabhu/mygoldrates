@@ -511,6 +511,7 @@ def s_dom_breakup_section(html: str) -> ExtractionResult:
     block first is what stops promo banners ("5% off on Making Charges") from
     being mistaken for the real line item.
     """
+    signal = re.compile(r"making\s*charge|value\s*addition", re.I)
     block = None
     for pat in (r'<section[^>]*id="[^"]*price-?breakup[^"]*".*?</section>',
                 r'<div[^>]*(?:id|class)="[^"]*price-?break-?up[^"]*".*?</div>\s*</div>',
@@ -518,12 +519,62 @@ def s_dom_breakup_section(html: str) -> ExtractionResult:
                 r'(?:making\s*charge|value\s*addition)'
                 r'(?:(?!</table>).){0,4000}?</table>'):
         m = re.search(pat, html, re.I | re.S)
-        if m:
+        # A match alone isn't enough to accept the block: the div pattern's
+        # ".*?</div></div>" is a lazy, arbitrary stopping point on deeply
+        # nested markup - it can "successfully" match a wrong, truncated
+        # chunk (e.g. an unrelated cart widget) that closes two divs before
+        # the real breakup content ever appears. Without a content check,
+        # that wrong match short-circuits the loop before it ever tries the
+        # table pattern below, which would have matched correctly - verified
+        # live on C Krishniah Chetty, whose real breakup table sits right
+        # after a "price-breakup" div wrapper deep enough to fool the div
+        # pattern. Require the same making-charge/value-addition signal
+        # inside the match before accepting it, same bar every candidate
+        # pattern already has to clear on its own.
+        if m and signal.search(m.group(0)):
             block = m.group(0)
             break
     if not block:
         return ExtractionResult("dom_breakup_section", None, 0.0, {}, "no breakup block")
     return _labelled_text_scan(block, "dom_breakup_section")
+
+
+def s_table_row_columns(html: str) -> ExtractionResult:
+    """A price-breakup table with extra columns between label and value.
+
+    _labelled_text_scan requires the currency amount right after the label
+    (only a colon/dash and whitespace in between) - correct for a plain
+    "Making Charges: Rs.1,234" row, but it breaks on a table that has a
+    weight/quantity column in the middle, e.g. C Krishniah Chetty's
+    Component | Approx. Weight | Value | Final Value rows ("18Kt Gold |
+    3.078 Grams | Rs.36,390.18 | Rs.36,390.18") - "3.078 Grams" between the
+    label and the amount stops the label-adjacent-amount pattern from
+    matching at all, so gold_value never gets picked up even though making_
+    charge (whose row has no weight column) does. Read row by row instead:
+    first <td> is the label, the LAST <td> containing a currency amount in
+    that row is its value (the final/total column, not an interim weight).
+    """
+    fields: dict[str, float] = {}
+    for row_m in re.finditer(r"<tr[^>]*>(.*?)</tr>", html, re.I | re.S):
+        cells = re.findall(r"<td[^>]*>(.*?)</td>", row_m.group(1), re.I | re.S)
+        if len(cells) < 2:
+            continue
+        label = re.sub(r"<[^>]+>", " ", cells[0])
+        label = re.sub(r"\s+", " ", label).strip()
+        if not label or _NEGATIVE_CONTEXT.search(label):
+            continue
+        concept, score = match_concept(label)
+        if not concept or score < 0.9:
+            continue
+        amount = None
+        for cell in cells[1:]:
+            text = re.sub(r"<[^>]+>", " ", cell)
+            m = re.search(_CUR + r"\s*" + _AMT, text)
+            if m:
+                amount = _num(m.group(1))
+        if amount and amount > 0:
+            fields.setdefault(concept, amount)
+    return _finish("table_row_columns", fields)
 
 
 def s_labelled_text(html: str) -> ExtractionResult:
@@ -592,6 +643,7 @@ STRATEGIES: list[tuple[str, Callable[[str], ExtractionResult]]] = [
     ("json_flat_keys", s_json_flat_keys),
     ("js_object_literal", s_js_object_literal),
     ("dom_breakup_section", s_dom_breakup_section),
+    ("table_row_columns", s_table_row_columns),
     ("direct_percent", s_direct_percent),
     ("labelled_text", s_labelled_text),
 ]

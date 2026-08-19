@@ -106,6 +106,12 @@ _BS_PROD = r'href="(https://www\.bluestone\.com/[^"]+?~\d+\.html)"'
 # pages already extract cleanly with the existing json_flat_keys strategy.
 _CD_PROD = r'href="(https://www\.candere\.com/[a-z0-9][a-z0-9-]+\.html)"'
 _GRT_PROD = r'href="(/all-jewellery/[a-z-]+/[a-z0-9-]+\.html)"'
+# C Krishniah Chetty (Salesforce Commerce Cloud): category/browse pages and
+# the sitemap both render an empty product grid server-side (AJAX-loaded) -
+# only the site's own /search endpoint server-renders real product tiles.
+# No homepage/session pre-fetch needed - verified the search endpoint
+# returns real results on a fresh, cookie-less request.
+_CKC_PROD = r'href="(/en_IN/[a-z0-9][a-z0-9-]+-CKCJ_\d+\.html)"'
 
 DISCOVER = [
     # Sitemap route works well here (80 items in the last full run).
@@ -220,6 +226,36 @@ DISCOVER = [
                             "https://www.grtjewels.com/all-jewellery/bangles-bracelets.html"],
                   "Mangalsutra": ["https://www.grtjewels.com/jewellery/gold-jewellery/mangalsutras.html",
                                  "https://www.grtjewels.com/all-jewellery/mangalsutra.html"]}},
+
+    # Ranka Jewellers investigated and NOT added: extraction works fine on
+    # a single product (verified 18.9% via dom_breakup_section), but there
+    # is no reliable discovery route for our 4 tracked categories. The
+    # site's own sitemap_products chunk is almost entirely silver
+    # coins/bars/rakhis with a handful of gold "nath" (nose-ring) items -
+    # not one of our tracked categories; its Shopify collection pages
+    # (e.g. /collections/gold-rings) are inconsistently curated (that
+    # collection's own first listed item is a silver rakhi, not a ring).
+    # No amount of URL-pattern-matching fixes a catalogue whose own
+    # front-end mixes categories - this would need a different, noisier
+    # discovery approach with no confidence in what it would actually turn
+    # up, so it's left out rather than guessed at.
+
+    # Salesforce Commerce Cloud. Category/browse pages AND the sitemap both
+    # render an empty product grid server-side (AJAX-loaded) - only the
+    # site's own /search endpoint server-renders real product tiles, no
+    # session/cookie needed first (verified on a fresh, cookie-less
+    # request). Pagination is &start=N&sz=21 (verified live: 21 genuinely
+    # new products per page). Extraction needed a new strategy
+    # (table_row_columns in mc_engine.py): its price-breakup table has an
+    # "Approx. Weight" column between the label and the value column
+    # ("18Kt Gold | 3.078 Grams | Rs.36,390.18 | Rs.36,390.18"), which the
+    # existing label-immediately-followed-by-amount scan can't parse -
+    # verified live, 19.7-21.3% across 4 real plain-gold rings.
+    {"brand": "C Krishniah Chetty", "product_re": _CKC_PROD, "pagination": "start_sz",
+     "listings": {"Bangle": "https://www.ckcjewellers.com/en_IN/search?q=gold+bangle",
+                  "Ring": "https://www.ckcjewellers.com/en_IN/search?q=gold+ring",
+                  "Earrings": "https://www.ckcjewellers.com/en_IN/search?q=gold+earrings",
+                  "Mangalsutra": "https://www.ckcjewellers.com/en_IN/search?q=gold+mangalsutra"}},
 ]
 CURATED = []
 
@@ -362,7 +398,22 @@ def discover_urls(sess, sitemaps):
             # every real product URL lives one level down, inside those
             # cursor-paginated sub-sitemaps.
             path = urlsplit(loc).path.lower()
-            if path.endswith(".xml") and ("product" in path or "sitemap" in path):
+            # Shopify's own sitemap index lists sitemap_pages_N.xml,
+            # sitemap_collections_N.xml and sitemap_blogs_N.xml alongside
+            # sitemap_products_N.xml, all matching "sitemap" in path -
+            # recursing into those too used to add category/collection/blog
+            # URLs straight into the flat product-URL list. Harmless on a
+            # large catalogue (a handful of stray URLs get lost in
+            # thousands), but on Ranka Jewellers' much smaller catalogue it
+            # let collection pages like /collections/bangles-bracelets
+            # (categorize()'s keyword match doesn't know the difference)
+            # swamp the real product URLs almost entirely - verified live:
+            # every "Bangle"/"Ring"/etc. candidate discovered was a
+            # collection or guide page, zero were real products.
+            non_product = any(x in path for x in
+                               ("page", "collection", "blog", "author", "news"))
+            if path.endswith(".xml") and not non_product and (
+                    "product" in path or "sitemap" in path):
                 queue.append(loc)          # nested sitemap
             else:
                 urls.append(loc)
@@ -418,6 +469,9 @@ def collect_urls(sess, d):
     #                different ~40 products than page 1, not a repeat of it -
     #                the old default ("baseOffset", a no-op param on this
     #                platform) silently capped this brand at page 1 forever)
+    #   "start_sz"   (Salesforce Commerce Cloud search, e.g. C Krishniah
+    #                Chetty): &start=0,21,42,...&sz=21 - verified live,
+    #                21 genuinely new products per page, no repeats.
     pag_style = d.get("pagination", "baseOffset")
     for cat, listing in (d.get("listings") or {}).items():
         # A category value may be one URL (str) or several (list) - some
@@ -445,6 +499,8 @@ def collect_urls(sess, d):
                     url = f"{base_listing}{sep}page={page_num}"
                 elif pag_style == "p":
                     url = f"{base_listing}{sep}p={page_num}"
+                elif pag_style == "start_sz":
+                    url = f"{base_listing}{sep}start={(page_num - 1) * 21}&sz=21"
                 else:
                     url = f"{base_listing}{sep}baseOffset={(page_num - 1) * 20}"
                 html, _ = fetch(sess, url, allow_proxy=True, timeout=25)
