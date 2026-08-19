@@ -28,5 +28,12 @@ jobs:
             echo "unchanged"
           else
             git commit -m "charges: refresh making-charges.json"
+            git fetch origin main
+            git rebase -X ours origin/main || {
+              git rebase --abort
+              git reset --soft origin/main
+              git add docs/making-charges.json
+              git commit -m "charges: refresh making-charges.json"
+            }
             git push
           fi
