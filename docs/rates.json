@@ -2,8 +2,8 @@
   "source": "MyGoldRates.com",
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
-  "date": "2026-08-18",
-  "last_updated": "2026-08-18T17:31:28.378776+05:30",
+  "date": "2026-08-19",
+  "last_updated": "2026-08-19T09:38:56.477024+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -16,23 +16,29 @@
     "jeweller": "PN Gadgil",
     "rate_per_gram_inr": 15415.0
   },
-  "ibja_reference_24k_999_per_gram_inr": 15416.2,
-  "akgsma_south_india_22k_per_gram_inr": 14290.0,
+  "ibja_reference_24k_999_per_gram_inr": null,
+  "akgsma_south_india_22k_per_gram_inr": 14205.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 155320.0,
-      "change_pct": -0.4
+      "price_per_10g_inr": 153945.0,
+      "change_pct": -0.21
     },
     {
       "contract": "GOLDM",
       "expiry": "04SEP2026",
-      "price_per_10g_inr": 153994.0,
-      "change_pct": -0.37
+      "price_per_10g_inr": 152675.0,
+      "change_pct": -0.27
     }
   ],
   "jewellers": [
+    {
+      "jeweller": "Chandukaka Saraf",
+      "rate_24k_per_gram_inr": 15360.0,
+      "rate_22k_per_gram_inr": 14080.0,
+      "rate_18k_per_gram_inr": 11520.0
+    },
     {
       "jeweller": "PN Gadgil",
       "rate_24k_per_gram_inr": 15415.0,
@@ -40,16 +46,10 @@
       "rate_18k_per_gram_inr": 11561.25
     },
     {
-      "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 15430.0,
-      "rate_22k_per_gram_inr": 14144.17,
-      "rate_18k_per_gram_inr": 11572.5
-    },
-    {
       "jeweller": "ORRA",
-      "rate_24k_per_gram_inr": 15551.99,
-      "rate_22k_per_gram_inr": 14255.99,
-      "rate_18k_per_gram_inr": 11663.99
+      "rate_24k_per_gram_inr": 15567.13,
+      "rate_22k_per_gram_inr": 14269.87,
+      "rate_18k_per_gram_inr": 11675.35
     },
     {
       "jeweller": "Kalyan Jewellers",
@@ -112,13 +112,13 @@
       "rate_18k_per_gram_inr": 11699.25
     },
     {
-      "jeweller": "Vummidi Bangaru",
+      "jeweller": "Candere",
       "rate_24k_per_gram_inr": 15600.0,
       "rate_22k_per_gram_inr": 14300.0,
       "rate_18k_per_gram_inr": 11700.0
     },
     {
-      "jeweller": "Candere",
+      "jeweller": "Vummidi Bangaru",
       "rate_24k_per_gram_inr": 15600.0,
       "rate_22k_per_gram_inr": 14300.0,
       "rate_18k_per_gram_inr": 11700.0
