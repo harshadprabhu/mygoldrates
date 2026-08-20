@@ -6461,12 +6461,27 @@ td.path{color:var(--accent);word-break:break-all}
       TOKEN=(location.hash ? decodeURIComponent(location.hash.slice(1)) : "");
   var $=function(id){return document.getElementById(id);};
   function nfmt(n){try{return Number(n).toLocaleString('en-IN');}catch(e){return n;}}
-  function iso(d){return d.toISOString().slice(0,10);}
+  // toISOString() renders in UTC, not IST - for the ~5.5h window between
+  // midnight IST and midnight UTC (00:00-05:30 IST), that made "Today"
+  // still show yesterday's date, out of step with the server's `day`
+  // column (generated as IST calendar date). en-CA locale formats as
+  // YYYY-MM-DD, giving an ISO-shaped string in the zone we actually want.
+  function iso(d){
+    return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(d);
+  }
+  // A Date pinned to IST-midnight-as-UTC, so getUTCDate()/setUTCDate() day
+  // arithmetic is immune to the visitor's own browser timezone - getDate()/
+  // setDate() read local time, which would silently disagree with iso()'s
+  // IST-based formatting again for any visitor not set to IST.
+  function todayIST(){
+    var p=iso(new Date()).split('-');
+    return new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));
+  }
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
   // default range: today only
-  var today=new Date();
+  var today=todayIST();
   $('from').value=iso(today); $('to').value=iso(today);
 
   // friendly names for click labels (raw element ids -> readable actions)
@@ -6575,11 +6590,11 @@ td.path{color:var(--accent);word-break:break-all}
   }
 
   $('apply').onclick=load;
-  $('today').onclick=function(){var a=new Date();
+  $('today').onclick=function(){var a=todayIST();
     $('from').value=iso(a);$('to').value=iso(a);load();};
-  $('quick7').onclick=function(){var a=new Date(),b=new Date();b.setDate(a.getDate()-6);
+  $('quick7').onclick=function(){var a=todayIST(),b=todayIST();b.setUTCDate(b.getUTCDate()-6);
     $('from').value=iso(b);$('to').value=iso(a);load();};
-  $('quick30').onclick=function(){var a=new Date(),b=new Date();b.setDate(a.getDate()-29);
+  $('quick30').onclick=function(){var a=todayIST(),b=todayIST();b.setUTCDate(b.getUTCDate()-29);
     $('from').value=iso(b);$('to').value=iso(a);load();};
   $('page').onchange=load;
   load();
