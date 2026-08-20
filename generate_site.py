@@ -2156,7 +2156,8 @@ def main():
     # ================= content pages: calculators / news / learn =========
     extra_urls = []          # (loc, changefreq, priority) added to sitemap
 
-    def render_content(slug, title, desc, body, extra_js="", jsonld_block=""):
+    def render_content(slug, title, desc, body, extra_js="", jsonld_block="",
+                        robots="index, follow, max-image-preview:large"):
         path = f"docs/{slug}.html"
         d = os.path.dirname(path)
         if d and d != "docs":
@@ -2165,7 +2166,7 @@ def main():
             fp.write(CONTENT_TEMPLATE.substitute(
                 title=title, desc=desc, canonical=f"{SITE_URL}/{slug}",
                 body=body, extra_js=extra_js, jsonld_block=jsonld_block,
-                **common))
+                robots=robots, **common))
 
     rate24 = round(median24, 2)
     rate_str = inr(med["24K"])
@@ -2411,6 +2412,17 @@ def main():
         extra_urls.append(("budget-gold-calculator", "weekly", "0.7"))
 
     # ---- News: auto daily market recap from the rate history ----
+    # RECAP_INDEX_DAYS: a recap has real, standalone reference value (one
+    # page per day, genuinely distinct content - not the same-day
+    # near-duplication daily city pages have, see gen_daily below), so it
+    # stays indexed far longer than a daily page. Still finite though - an
+    # unbounded, ever-growing set of indexed near-identical "recap for date
+    # X" pages is exactly the kind of thin-content-at-scale pattern that
+    # drags down Search Console's view of the whole site, so recaps past
+    # this window are noindexed (content stays live, just stops being
+    # advertised for indexing) rather than left indexed forever.
+    RECAP_INDEX_DAYS = 90
+    recap_cutoff = now_ist.date() - timedelta(days=RECAP_INDEX_DAYS)
     os.makedirs("docs/news/recap", exist_ok=True)
     recaps = []              # (slug, date_obj, disp, med24, move, pct)
     for i in range(1, len(trend)):
@@ -2441,14 +2453,20 @@ def main():
             f"<p>All figures are per gram, pre-GST, across {len(live)} "
             f"jewellers. Add 3% GST for the billed price. Compare live rates on "
             f'the <a href="{SITE_URL}/">gold rate today</a> page.</p>')
+        recap_fresh = dt.date() >= recap_cutoff
         render_content(f"news/recap/{slug}",
                        f"Gold Rate Daily Recap - {disp} | MyGoldRates",
                        f"Gold price recap for {disp}: 24K median {inr(m24)}/g, "
                        f"{sign}{abs(pct):.2f}% vs the previous session. 22K, 18K "
                        "and jeweller medians.",
-                       body)
+                       body,
+                       robots=("index, follow, max-image-preview:large"
+                               if recap_fresh else "noindex, follow"))
         recaps.append((slug, dt, disp, m24, move, pct))
-        extra_urls.append((f"news/recap/{slug}", "monthly", "0.5"))
+        # Keep noindexed recaps out of the sitemap too - no point advertising
+        # a URL for indexing that's explicitly told not to be indexed.
+        if recap_fresh:
+            extra_urls.append((f"news/recap/{slug}", "monthly", "0.5"))
 
     recaps.sort(key=lambda x: x[1], reverse=True)
 
@@ -2623,6 +2641,55 @@ def main():
                f"{dd.strftime('%d %B %Y') if dd else ''}")
         daily_meta.append((f"news/daily/{stem}", dd, ttl))
 
+    # DAILY_INDEX_DAYS: a daily page has essentially zero query relevance
+    # once it's not "today" any more, and unlike recaps (one per day) it's
+    # also duplicated ~13x on the SAME day - national jewellery chains quote
+    # one board rate everywhere, so 12 of the 13 city pages differ from each
+    # other only by the city name, not the actual content. Left indexed
+    # forever (the old behaviour: gen_daily writes today's page once, it
+    # persists on disk untouched, and every past page was globbed straight
+    # into sitemap.xml with no expiry), this compounds daily into a fast-
+    # growing mass of thin/duplicate pages - a well-documented cause of a
+    # site's overall pages being flagged "Crawled - currently not indexed"
+    # or "Duplicate, Google chose different canonical" in Search Console,
+    # which can drag down how the whole site is perceived, not just these
+    # pages. Window matches the 2-day Google News cutoff below plus a day
+    # of buffer, not the longer recap window - these pages need it.
+    DAILY_INDEX_DAYS = 3
+    daily_index_cutoff = now_ist.date() - timedelta(days=DAILY_INDEX_DAYS)
+    # Daily pages, unlike recaps, are NOT rewritten by render_content() once
+    # written (gen_daily only ever runs for "today"), so past ones can't be
+    # noindexed by passing a robots= kwarg at generation time - they have to
+    # be patched in place, on disk, as they age past the cutoff on a later
+    # run. Idempotent (skips files already patched) and safe to run every
+    # build.
+    for pth, dd, _ in daily_meta:
+        if not dd or dd >= daily_index_cutoff:
+            continue
+        fpath = f"docs/{pth}.html"
+        with open(fpath, encoding="utf-8") as f:
+            html = f.read()
+        if 'name="robots" content="noindex' in html:
+            continue
+        if 'name="robots" content="index, follow, max-image-preview:large">' in html:
+            new_html = html.replace(
+                '<meta name="robots" content="index, follow, '
+                'max-image-preview:large">',
+                '<meta name="robots" content="noindex, follow">', 1)
+        else:
+            # Pages written before this fix have no robots tag at all
+            # (CONTENT_TEMPLATE didn't emit one) - insert one after viewport.
+            new_html = html.replace(
+                '<meta name="viewport" content="width=device-width, '
+                'initial-scale=1">',
+                '<meta name="viewport" content="width=device-width, '
+                'initial-scale=1">\n'
+                '<meta name="robots" content="noindex, follow">', 1)
+        if new_html == html:
+            continue          # unexpected head shape - don't guess, skip
+        with open(fpath, "w", encoding="utf-8") as f:
+            f.write(new_html)
+
     # ---- Google News sitemap: recaps + daily pages from the last 2 days ----
     cutoff = datetime.now(IST).date() - timedelta(days=2)
     news_urls = "".join(
@@ -2677,7 +2744,12 @@ def main():
                     f"{(dd or now_ist.date()).isoformat()}</lastmod>"
                     "<changefreq>monthly</changefreq><priority>0.6</priority>"
                     "</url>\n"
-                    for loc, dd, ttl in daily_meta)
+                    # Only advertise daily pages still within the indexing
+                    # window (see DAILY_INDEX_DAYS above) - no point listing
+                    # a URL in the sitemap that the page itself now says not
+                    # to index.
+                    for loc, dd, ttl in daily_meta
+                    if dd and dd >= daily_index_cutoff)
                 + "</urlset>\n")
 
     # ---- IndexNow: instantly notify Bing/Yandex/Seznam of fresh URLs ----
@@ -5344,6 +5416,7 @@ CONTENT_TEMPLATE = Template("""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>$title</title>
 <meta name="description" content="$desc">
+<meta name="robots" content="$robots">
 <link rel="canonical" href="$canonical">
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="96x96" href="$site_url/icon-96.png">
