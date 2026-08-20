@@ -201,7 +201,7 @@
       body:JSON.stringify(row)}).catch(function(){});
   }
   post('page_views',{page:location.pathname,referrer:document.referrer||null,
-    session_id:SID});
+    session_id:SID,host:location.hostname});
 
   /* delegated click tracking on interactive elements, de-duped per target */
   var lastTarget=null,lastAt=0;
