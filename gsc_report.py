@@ -127,7 +127,37 @@ def main():
             print(f"  {u}\n    ERROR: {e}")
     print()
 
-    # ---- 4. Manual actions ----
+    # ---- 4. Sitemap processing status ----
+    # Read-only (sitemaps.list/get) - the service account's Search Console
+    # role is "Restricted" (read-only), so sitemaps.submit() would fail
+    # regardless of OAuth scope. Google discovers sitemaps via robots.txt
+    # automatically either way; explicit submission mostly just gives GSC UI
+    # visibility and a mild nudge to reprocess sooner - not required for
+    # indexing to happen, so not worth another permission round-trip unless
+    # this check shows something actually wrong.
+    print("=== Sitemap processing status ===")
+    try:
+        sm = svc.sitemaps().list(siteUrl=site).execute()
+        entries = sm.get("sitemap", [])
+        if not entries:
+            print("  No sitemaps registered with Search Console at all.")
+        for e in entries:
+            print(f"  {e.get('path')}")
+            print(f"    lastSubmitted={e.get('lastSubmitted', 'never')}  "
+                  f"lastDownloaded={e.get('lastDownloaded', 'never')}  "
+                  f"isPending={e.get('isPending')}  isSitemapsIndex={e.get('isSitemapsIndex')}")
+            warnings = e.get("warnings", "0")
+            errors = e.get("errors", "0")
+            print(f"    warnings={warnings}  errors={errors}")
+            for content in e.get("contents", []):
+                print(f"    type={content.get('type')}  "
+                      f"submitted={content.get('submitted')}  "
+                      f"indexed={content.get('indexed')}")
+    except Exception as ex:
+        print(f"  ERROR fetching sitemap status: {ex}")
+    print()
+
+    # ---- 5. Manual actions ----
     print("=== Note: Manual Actions has no API - check this yourself at ===")
     print("    https://search.google.com/search-console/manual-actions")
     print("    (a manual action is a different, more severe class of "
