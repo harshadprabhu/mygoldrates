@@ -3,42 +3,36 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-20",
-  "last_updated": "2026-08-20T08:37:20.155509+05:30",
+  "last_updated": "2026-08-20T09:38:09.596239+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 15517.88,
-    "22k": 14224.72,
-    "18k": 11638.41
+    "24k": 15536.6,
+    "22k": 14241.88,
+    "18k": 11652.45
   },
   "lowest_24k": {
     "jeweller": "Indriya",
     "rate_per_gram_inr": 15490.91
   },
   "ibja_reference_24k_999_per_gram_inr": null,
-  "akgsma_south_india_22k_per_gram_inr": null,
+  "akgsma_south_india_22k_per_gram_inr": 14600.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 158078.0,
-      "change_pct": 0.05
+      "price_per_10g_inr": 158412.0,
+      "change_pct": 0.26
     },
     {
       "contract": "GOLDM",
       "expiry": "04SEP2026",
-      "price_per_10g_inr": 156636.0,
-      "change_pct": 0.04
+      "price_per_10g_inr": 157063.0,
+      "change_pct": 0.31
     }
   ],
   "jewellers": [
-    {
-      "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 15360.0,
-      "rate_22k_per_gram_inr": 14080.0,
-      "rate_18k_per_gram_inr": 11520.0
-    },
     {
       "jeweller": "Indriya",
       "rate_24k_per_gram_inr": 15490.91,
@@ -83,15 +77,9 @@
     },
     {
       "jeweller": "Bhima Jewels",
-      "rate_24k_per_gram_inr": 15496.36,
-      "rate_22k_per_gram_inr": 14205.0,
-      "rate_18k_per_gram_inr": 11622.27
-    },
-    {
-      "jeweller": "Jos Alukkas",
-      "rate_24k_per_gram_inr": 15501.0,
-      "rate_22k_per_gram_inr": 14209.25,
-      "rate_18k_per_gram_inr": 11625.75
+      "rate_24k_per_gram_inr": 15499.0,
+      "rate_22k_per_gram_inr": 14207.42,
+      "rate_18k_per_gram_inr": 11624.25
     },
     {
       "jeweller": "Candere",
@@ -154,10 +142,22 @@
       "rate_18k_per_gram_inr": 11749.88
     },
     {
+      "jeweller": "Chandukaka Saraf",
+      "rate_24k_per_gram_inr": 15780.0,
+      "rate_22k_per_gram_inr": 14465.0,
+      "rate_18k_per_gram_inr": 11835.0
+    },
+    {
       "jeweller": "Ranka Jewellers",
       "rate_24k_per_gram_inr": 15860.0,
       "rate_22k_per_gram_inr": 14538.33,
       "rate_18k_per_gram_inr": 11895.0
+    },
+    {
+      "jeweller": "Jos Alukkas",
+      "rate_24k_per_gram_inr": 15932.0,
+      "rate_22k_per_gram_inr": 14604.33,
+      "rate_18k_per_gram_inr": 11949.0
     }
   ],
   "jeweller_count": 21,
