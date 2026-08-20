@@ -3296,7 +3296,7 @@ SIGNUP_JS = r"""(function(){
       body:JSON.stringify(row)}).catch(function(){});
   }
   post('page_views',{page:location.pathname,referrer:document.referrer||null,
-    session_id:SID});
+    session_id:SID,host:location.hostname});
 
   /* delegated click tracking on interactive elements, de-duped per target */
   var lastTarget=null,lastAt=0;
@@ -6443,7 +6443,10 @@ td.path{color:var(--accent);word-break:break-all}
     <div class="card"><h2>Most-clicked elements</h2><div id="clicks"></div></div>
   </div>
 
-  <div class="card"><h2>Traffic sources (referrers)</h2><div id="refs"></div></div>
+  <div class="grid2">
+    <div class="card"><h2>Traffic sources (referrers)</h2><div id="refs"></div></div>
+    <div class="card"><h2>Traffic by host (www vs apex)</h2><div id="hosts"></div></div>
+  </div>
 
   <p class="foot" id="foot"></p>
 </div>
@@ -6559,6 +6562,8 @@ td.path{color:var(--accent);word-break:break-all}
       renderTable($('clicks'),d.top_clicks,[{h:'Action',k:'target'},
         {h:'Clicks',k:'clicks',num:true}]);
       renderTable($('refs'),d.top_referrers,[{h:'Referrer',k:'referrer',path:true},
+        {h:'Views',k:'views',num:true}]);
+      renderTable($('hosts'),d.top_hosts,[{h:'Host',k:'host'},
         {h:'Views',k:'views',num:true}]);
       fillPages(d.pages_list);
       $('foot').textContent='Range '+d.from+' to '+d.to+
