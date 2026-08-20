@@ -22,6 +22,16 @@ create table if not exists public.page_views (
 create index if not exists page_views_day_idx  on public.page_views(day);
 create index if not exists page_views_page_idx on public.page_views(page);
 
+-- host: added to verify the www->apex redirect (cf-redirect.yml) is actually
+-- working - before the redirect, both mygoldrates.com and www.mygoldrates.com
+-- served live content with no canonicalizing redirect between them, which is
+-- exactly the kind of split GSC's "Duplicate, Google chose different
+-- canonical" status flags. Watch this column: www hits should drop to ~0
+-- once the redirect is live and browsers/crawlers stop landing on it
+-- directly. Nullable/backfill-free - older rows just show null, harmless.
+alter table public.page_views add column if not exists host text;
+create index if not exists page_views_host_idx on public.page_views(host);
+
 -- ---------- click_events ----------
 create table if not exists public.click_events (
   id          bigint generated always as identity primary key,

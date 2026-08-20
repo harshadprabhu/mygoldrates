@@ -1,0 +1,75 @@
+name: cf-redirect
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "inspect (read-only) or apply (add the www->apex redirect rule)"
+        default: "inspect"
+
+jobs:
+  redirect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manage www -> apex redirect rule
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          MODE: ${{ inputs.mode }}
+        run: |
+          set -u
+          api="https://api.cloudflare.com/client/v4"
+          auth=(-H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/json")
+
+          echo "### token verify"
+          curl -s "${auth[@]}" "$api/user/tokens/verify" | jq '{success, status:.result.status}'
+
+          echo "### zone lookup"
+          zid=$(curl -s "${auth[@]}" "$api/zones?name=mygoldrates.com" | jq -r '.result[0].id // empty')
+          echo "zone_id=${zid:-<none>}"
+          if [ -z "$zid" ]; then
+            echo "!! token has no Zone access - cannot manage redirect rules."
+            exit 1
+          fi
+
+          echo "### current entrypoint ruleset for http_request_dynamic_redirect phase"
+          existing=$(curl -s "${auth[@]}" \
+            "$api/zones/$zid/rulesets/phases/http_request_dynamic_redirect/entrypoint")
+          echo "$existing" | jq '{success, id:.result.id, rules:(.result.rules // [] | map({description,expression,enabled}))}'
+
+          if [ "$MODE" != "apply" ]; then
+            echo "### inspect mode - no changes made"
+            exit 0
+          fi
+
+          # Preserve any pre-existing rules in this phase; only add ours if not
+          # already present (idempotent - re-running apply won't duplicate it).
+          already=$(echo "$existing" | jq -r \
+            '[.result.rules // [] | .[] | select(.description=="www to apex 301")] | length')
+          if [ "$already" != "0" ]; then
+            echo "### redirect rule already present - nothing to do"
+            exit 0
+          fi
+
+          new_rule='{
+            "expression": "(http.host eq \"www.mygoldrates.com\")",
+            "description": "www to apex 301",
+            "action": "redirect",
+            "action_parameters": {
+              "from_value": {
+                "status_code": 301,
+                "target_url": {
+                  "expression": "concat(\"https://mygoldrates.com\", http.request.uri.path)"
+                },
+                "preserve_query_string": true
+              }
+            }
+          }'
+
+          combined_rules=$(echo "$existing" | jq --argjson nr "$new_rule" \
+            '(.result.rules // []) + [$nr]')
+
+          echo "### applying: existing rules + new www->apex rule"
+          resp=$(curl -s "${auth[@]}" -X PUT \
+            "$api/zones/$zid/rulesets/phases/http_request_dynamic_redirect/entrypoint" \
+            -d "{\"rules\": $combined_rules}")
+          echo "$resp" | jq '{success, errors:(.errors // []), rules:(.result.rules // [] | map({description,expression,enabled}))}'

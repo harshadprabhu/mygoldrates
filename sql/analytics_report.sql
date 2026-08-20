@@ -86,6 +86,18 @@ begin
         group by 1 order by count(*) desc limit 20
       ) t
     ),
+    -- Verifies the www->apex redirect (cf-redirect.yml): www hits should
+    -- trend to ~0 once it's live and being respected by browsers/crawlers.
+    'top_hosts', (
+      select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
+        select coalesce(nullif(host, ''), '(unknown)') as host,
+               count(*) as views
+        from page_views
+        where day between v_from and v_to
+          and (p_page is null or page = p_page)
+        group by 1 order by count(*) desc limit 10
+      ) t
+    ),
     'pages_list', (
       select coalesce(json_agg(page order by page), '[]'::json) from (
         select distinct page from page_views where day between v_from and v_to
