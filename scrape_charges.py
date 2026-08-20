@@ -77,7 +77,18 @@ def sample_size(pool_size):
         return PER_CAT_LARGE
     if pool_size >= 100:
         return PER_CAT_MED
-    return PER_CAT
+    # A truly tiny pool (a handful of curated seeds) already gets everything
+    # it has at PER_CAT=20. But a pool of, say, 40 - a brand's category-page
+    # snapshot with no real pagination - used to be silently truncated to
+    # the same flat 20 regardless, discarding real already-discovered
+    # candidates for free (no extra discovery requests, just fetching more
+    # of what collect_urls() already found) and capping the category well
+    # under the 20-30+ target even on brands with a heavy studded-item
+    # rejection rate that needs the larger pool to net enough plain-gold
+    # hits (BlueStone: 37-44 candidates/category, ~50-80% excluded as
+    # studded, so PER_CAT=20 could never clear ~20 real hits no matter how
+    # good discovery got).
+    return max(PER_CAT, min(pool_size, PER_CAT_MED))
 
 # slug keyword -> category. v1 categories only (Bangles, Rings, Earrings,
 # Mangalsutra) - user explicitly deferred Chain, Necklace, Bracelet, Pendant,
@@ -99,7 +110,9 @@ _CL = "https://www.caratlane.com/jewellery/"
 # Capture the FULL path including .html - capturing only the slug produced
 # extension-less URLs after urljoin(), which 404'd and zeroed out this brand.
 _CL_PROD = r'(/jewellery/[a-z0-9][a-z0-9-]{4,}?-[a-z]{1,3}\d{4,}-[0-9a-z]{4,}\.html)'
-_BS_PROD = r'href="(https://www\.bluestone\.com/[^"]+?~\d+\.html)"'
+# Relative on category-listing pages (href="/rings/the-...~76539.html"),
+# absolute on the old sitemap route - accept either.
+_BS_PROD = r'href="((?:https://www\.bluestone\.com)?/[a-z0-9+]+/[a-z0-9][a-z0-9-]*~\d+\.html)"'
 # Candere's own category listings are thin server-side; its Magento search
 # results page is not (30+ product links per query from page 1 alone) and
 # needs no discovery route beyond a plain category-keyword search - product
@@ -132,20 +145,45 @@ DISCOVER = [
                   "Earrings": _CL + "earrings.html",
                   "Mangalsutra": _CL + "mangalsutra.html"}},
 
-    # Search/listing pages are client-rendered (0 links in server HTML), so
-    # this brand runs on hand-verified seeds until a server-rendered listing
-    # is found. Extraction itself is solid: 8/8 on these URLs.
-    # robots.txt (not the plain /sitemap.xml, which is a short manual index
-    # that doesn't mention it) links products-sitemap.xml - 10,700+ real
-    # product URLs, versus the ~10 hand-picked seeds this brand relied on
-    # before because its listing/search pages are client-rendered. The
-    # seeds are kept as a fallback if the sitemap route ever breaks.
-    # fetch_workers=3: same reasoning as CaratLane's override - a production
-    # run collapsed this brand to 1/2/2 items across every category despite
-    # a huge discovery pool (10,700+ URLs) and other brands running fine at
-    # the default concurrency the same day.
+    # products-sitemap.xml (the old discovery route) is specifically
+    # blocked/throttled - the domain root loads in ~1s but that one path
+    # times out completely (confirmed both directly and via curl, no proxy
+    # involved), matching the 503 seen on a real run. robots.txt lists 4
+    # OTHER sitemaps on this domain; productscats-sitemap.xml (not blocked)
+    # is a small index of category pages, not products, but those category
+    # pages themselves ARE server-rendered with real product links - just
+    # not paginated (?p=2 silently returns byte-different but
+    # product-identical HTML - a cached/SSR'd first page, not a real next
+    # page), so multiple distinct listing URLs per category (the plain-gold
+    # and metal-only filtered views from productsfilter-sitemap.xml, which
+    # rank a different top-N into their own snapshot) are the only way to
+    # get more than one page's worth. Verified live: this brand's catalogue
+    # is heavily diamond/gemstone-accented even on rings/earrings/
+    # mangalsutra pages whose URLs don't say so, so the studded filter (see
+    # _STUDDED_RE) rejects the majority of candidates after fetch - the
+    # extra listing URLs per category exist to compensate for that, not
+    # because any one listing is thin. max_pages=1: pagination is a no-op
+    # here (confirmed above), so trying pages 2-25 would just be 96 wasted
+    # requests per run against a domain that already blocks one of its own
+    # sitemap paths.
+    # fetch_workers=3: this brand's origin has repeatedly collapsed to
+    # near-zero hits on a production run (0/0/0/0, then recovered to
+    # 19/20/12 on the next run with identical code) while other brands ran
+    # fine at the default concurrency the same day - it can't reliably
+    # sustain that many simultaneous connections.
     {"brand": "BlueStone", "product_re": _BS_PROD, "fetch_workers": 3,
-     "sitemaps": ["https://www.bluestone.com/products-sitemap.xml"],
+     "max_pages": 1,
+     "listings": {
+        "Ring": ["https://www.bluestone.com/jewellery/rings.html",
+                 "https://www.bluestone.com/jewellery/plain+gold-rings.html",
+                 "https://www.bluestone.com/jewellery/only+metal-rings.html"],
+        "Bangle": ["https://www.bluestone.com/jewellery/bangles.html",
+                   "https://www.bluestone.com/jewellery/plain+gold-bangles.html"],
+        "Earrings": ["https://www.bluestone.com/jewellery/earrings.html",
+                     "https://www.bluestone.com/jewellery/plain+gold-earrings.html"],
+        "Mangalsutra": ["https://www.bluestone.com/jewellery/mangalsutra.html",
+                        "https://www.bluestone.com/jewellery/plain+gold-mangalsutra.html"],
+     },
      "seeds": {
         "Bangle": ["https://www.bluestone.com/bangles/the-orrale-round-bangle~79884.html",
                    "https://www.bluestone.com/bangles/the-estrella-oval-bangle~34771.html"],
@@ -194,7 +232,15 @@ DISCOVER = [
     # robots.txt advertises /sitemap.xml, which 404s (Magento's real default
     # location is /media/sitemap/sitemap.xml) - that wrong path is why this
     # brand previously discovered zero URLs at all.
-    {"brand": "ORRA",
+    # require_path: this sitemap is one flat file with every URL type mixed
+    # together - real products live under /product/<slug>-<sku>, but
+    # /rings, /offers/.../rings etc. all match the "Ring" category keyword
+    # too and vastly outnumber real products (~93% of raw "Ring" hits were
+    # non-product pages), starving the probe phase and getting the whole
+    # brand skipped as "no making % found" despite real products being
+    # present the whole time. Verified live: /product/ narrows it to real
+    # product detail pages only.
+    {"brand": "ORRA", "require_path": "/product/",
      "sitemaps": ["https://www.orra.co.in/media/sitemap/sitemap.xml"]},
     {"brand": "PN Gadgil",
      "sitemaps": ["https://www.pngjewellers.com/sitemap.xml"]},
@@ -452,7 +498,22 @@ def collect_urls(sess, d):
                 continue
             add(cat, u)
 
+    # A sitemap can be one flat file mixing every URL type (ORRA: category
+    # pages like /rings and /offers/... sit right alongside real products
+    # like /product/<slug>-<sku>, and categorize()'s keyword match can't
+    # tell them apart - "rings" matches the CAT_RULES keyword same as a
+    # real product slug does). require_path lets a brand declare the one
+    # substring its real product URLs actually have, so junk listing/offer
+    # pages that happen to match a category keyword don't get treated as
+    # products - on ORRA this was severe enough (~93% of "Ring" candidates
+    # were non-product pages) that the probe phase's first 25 fetches could
+    # land on nothing but junk and the whole brand got skipped as "no
+    # making % found", even though real products were sitting in the same
+    # sitemap the whole time.
+    require_path = d.get("require_path")
     for u in discover_urls(sess, d.get("sitemaps") or []):
+        if require_path and require_path not in u:
+            continue
         c = categorize(u)
         if c:
             add(c, u)
@@ -473,6 +534,11 @@ def collect_urls(sess, d):
     #                Chetty): &start=0,21,42,...&sz=21 - verified live,
     #                21 genuinely new products per page, no repeats.
     pag_style = d.get("pagination", "baseOffset")
+    # A brand whose pagination param is a confirmed no-op (BlueStone: ?p=2
+    # returns byte-different but product-identical HTML - a cached first-page
+    # snapshot, not a real next page) declares max_pages=1 so the loop below
+    # doesn't burn 24 more requests per listing URL proving that every time.
+    max_pages = d.get("max_pages", 25)
     for cat, listing in (d.get("listings") or {}).items():
         # A category value may be one URL (str) or several (list) - some
         # storefronts show only ~12 items per listing with no working
@@ -492,7 +558,7 @@ def collect_urls(sess, d):
             # route) isn't stopped short of a large sample - the "page
             # yielded nothing new" break below already ends the loop early
             # for brands whose real catalogue is much smaller than that.
-            while page_num <= 25 and len(buckets.get(cat, [])) < PER_CAT_LARGE:
+            while page_num <= max_pages and len(buckets.get(cat, [])) < PER_CAT_LARGE:
                 if page_num == 1:
                     url = base_listing
                 elif pag_style == "page":

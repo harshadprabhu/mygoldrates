@@ -115,8 +115,19 @@ def _num(s: str | None) -> float | None:
 
 
 def _norm_label(s: str) -> str:
-    """Lowercase, strip punctuation/underscores, collapse whitespace."""
-    s = re.sub(r"[_\-]+", " ", str(s or "").lower())
+    """Split camelCase, lowercase, strip punctuation/underscores, collapse whitespace.
+
+    The camelCase split must happen before lowercasing (it needs the case
+    boundary) - without it, a concatenated JSON key like "makingChargePrice"
+    normalizes to "makingchargeprice", a single token whose SequenceMatcher
+    ratio against "making charge" (0.80) falls just short of match_concept's
+    0.82 floor. Splitting it to "making Charge Price" first lets the
+    whole-word-containment path find "making charge" as a substring and score
+    it correctly - seen on BlueStone, whose product-page JSON uses exactly
+    this convention (goldPrice/makingChargePrice/diamondPrice).
+    """
+    s = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", str(s or ""))
+    s = re.sub(r"[_\-]+", " ", s.lower())
     s = re.sub(r"[^a-z0-9%\s]+", " ", s)
     return re.sub(r"\s+", " ", s).strip()
 
@@ -265,6 +276,7 @@ def s_json_flat_keys(html: str) -> ExtractionResult:
         return ExtractionResult("json_flat_keys", None, 0.0, {},
                                 "deferred: typed percentage")
     fields: dict[str, float] = {}
+    best_score: dict[str, float] = {}
     for m in re.finditer(r'"([A-Za-z_][A-Za-z0-9_ ]{2,40})"\s*:\s*"?'
                          r'(?:₹|Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?)"?', html):
         concept, score = match_concept(m.group(1))
@@ -273,10 +285,49 @@ def s_json_flat_keys(html: str) -> ExtractionResult:
         val = _num(m.group(2))
         if val is None or val <= 0:
             continue
-        # keep the first plausible hit per concept (page state usually leads
-        # with the canonical block; later repeats are per-variant duplicates)
-        fields.setdefault(concept, val)
+        # Keep the BEST-matching key per concept, not merely the first one -
+        # a bare generic key like "price" whole-word-matches "gold value"'s
+        # "gold price" phrase (score 0.96) and can appear earlier in the page
+        # than the real "goldPrice" field (an exact match, score 1.0), which
+        # used to win on first-occurrence alone and silently pull in the
+        # wrong number (BlueStone: a top-level "price" - the total selling
+        # price - beat the real goldPrice for the gold_value slot).
+        if concept not in best_score or score > best_score[concept]:
+            fields[concept] = val
+            best_score[concept] = score
     return _finish("json_flat_keys", fields)
+
+
+def s_id_tagged_spans(html: str) -> ExtractionResult:
+    """A price-breakup row rendered as `<span id="ConceptName">1,234.00</span>`.
+
+    Seen on ORRA: a static, server-rendered `id="pdp-price-breakup"` block
+    (hidden by CSS behind a client-side tab toggle, but the markup itself is
+    plain HTML) where each row's amount lives in a semantically-named span
+    id (MetalValue, DiamondValue, MakingCharges, SubTotal, GrandTotal) rather
+    than in adjacent label text or a JSON blob - none of the other
+    strategies target `id=` attributes at all, so this brand extracted
+    nothing despite the breakup being sitting in the static HTML the whole
+    time. Same best-score-per-concept logic as json_flat_keys, for the same
+    reason: a generic id like "GoldRateGrams" (a rate, not a value)
+    whole-word-matches "gold value" too, and must lose to the real
+    "MetalValue" (exact match) rather than whichever happens to appear
+    first in the page.
+    """
+    fields: dict[str, float] = {}
+    best_score: dict[str, float] = {}
+    for m in re.finditer(r'id="([A-Za-z][A-Za-z0-9]*)"\s*>\s*'
+                         r'(?:₹|Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?)\s*</span>', html):
+        concept, score = match_concept(m.group(1))
+        if not concept or score < 0.9:
+            continue
+        val = _num(m.group(2))
+        if val is None or val <= 0:
+            continue
+        if concept not in best_score or score > best_score[concept]:
+            fields[concept] = val
+            best_score[concept] = score
+    return _finish("id_tagged_spans", fields)
 
 
 def s_js_object_literal(html: str) -> ExtractionResult:
@@ -641,6 +692,7 @@ STRATEGIES: list[tuple[str, Callable[[str], ExtractionResult]]] = [
     ("rsc_price_breakup", s_rsc_price_breakup),
     ("json_breakup_arrays", s_json_breakup_arrays),
     ("json_flat_keys", s_json_flat_keys),
+    ("id_tagged_spans", s_id_tagged_spans),
     ("js_object_literal", s_js_object_literal),
     ("dom_breakup_section", s_dom_breakup_section),
     ("table_row_columns", s_table_row_columns),
