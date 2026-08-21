@@ -6,13 +6,13 @@
 > every day. All rates are per gram in Indian Rupees (INR), pre-GST.
 
 ## Today's gold rate in India (21 August 2026)
-- 24K (999) median: ₹16,047 per gram (pre-GST)
-- 22K (916) median: ₹14,710 per gram (pre-GST)
-- 18K (750) median: ₹12,035 per gram (pre-GST)
-- Lowest 24K today: ₹15,874 per gram at ORRA
+- 24K (999) median: ₹16,050 per gram (pre-GST)
+- 22K (916) median: ₹14,713 per gram (pre-GST)
+- 18K (750) median: ₹12,038 per gram (pre-GST)
+- Lowest 24K today: ₹15,954 per gram at PN Gadgil
 - IBJA 24K (999) reference: ₹15,950 per gram (pre-GST)
-- MCX gold futures (05OCT2026): ₹160,858 per 10g (995), +0.90%
-- Last updated: 2026-08-21T12:24:53.146196+05:30
+- MCX gold futures (05OCT2026): ₹161,338 per 10g (995), +1.20%
+- Last updated: 2026-08-21T14:05:36.987679+05:30
 
 ## Key pages
 - Home / today's rates: https://mygoldrates.com/
