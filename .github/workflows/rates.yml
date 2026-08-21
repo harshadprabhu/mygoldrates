@@ -102,18 +102,24 @@ jobs:
             --commit-dirty=true
 
       - name: Send daily alert emails
-        # Fire on the 4 morning-window crons and manual runs (with alerts=true),
-        # and even if an earlier step failed. The last_emailed guard keeps it to
-        # ONE email per subscriber per day - later morning retries are no-ops for
-        # already-sent subscribers and only retry those that failed.
+        # Fire ONLY on an explicit alerts=true dispatch (the Cloudflare
+        # Worker's precisely-timed 11:00 IST cron, or a manual run with the
+        # alerts input set) - and even if an earlier step failed.
+        #
+        # This used to ALSO fire on any of the 4 native GitHub "morning
+        # window" schedule crons below, regardless of what was actually
+        # requested - a redundancy built for when this repo was private,
+        # since GitHub delays private-repo scheduled workflows by 30-120+
+        # minutes and multiple staggered attempts were needed as a catch-up.
+        # Now that the repo is public, GitHub's native scheduler runs far
+        # more reliably, so several of those 4 crons started actually firing
+        # close to on-time on the same morning - and since the condition
+        # didn't care WHICH one fired first, the daily email started going
+        # out at whichever of 07:33/08:53/10:13/11:33 IST happened to
+        # complete first that day, instead of predictably at 11:00. Tying
+        # this to the Worker's explicit signal alone restores that.
         if: >
-          !cancelled() && (
-            github.event.inputs.alerts == 'true' ||
-            github.event.schedule == '3 2 * * *' ||
-            github.event.schedule == '23 3 * * *' ||
-            github.event.schedule == '43 4 * * *' ||
-            github.event.schedule == '3 6 * * *'
-          )
+          !cancelled() && github.event.inputs.alerts == 'true'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
