@@ -3812,13 +3812,58 @@ GATE_JS = r"""
     },1500);
   });
 
+  /* ---- subscribe popup, once per browser, right after One Tap concludes ----
+     Reuses the existing full modal (openModal, further down this file) -
+     it was previously auto-opened by the hard sign-in gate, which analytics
+     showed drove ~79% of visitors to just close it and leave, so that gate
+     was removed. This is a softer re-introduction: it only ever fires once
+     per browser (gr_otp_seen), never for an already-subscribed visitor, and
+     never on top of the enrich-details modal that already opens when
+     someone actually signs in via One Tap - it waits for One Tap's own
+     moment to conclude (shown-and-dismissed, skipped, or never displayed at
+     all - e.g. no Google session, cooldown, third-party cookies blocked)
+     before deciding whether to show anything, so the two never compete for
+     the same moment on screen. */
+  function maybeShowSubscribePopup(){
+    if(isAuthed())return;   // signed in via One Tap - enrich modal owns this moment
+    try{if(localStorage.getItem('gr_sub')==='1')return;}catch(e){}      // already subscribed
+    try{if(localStorage.getItem('gr_otp_seen'))return;}catch(e){}       // already shown once, ever
+    try{if(sessionStorage.getItem('gr_dismissed'))return;}catch(e){}    // dismissed something already, this session
+    // openModal() lives in a separate top-level IIFE further down this
+    // script (the "daily-alerts modal" section) - not reachable by normal
+    // closure from here, same reason this codebase already exposes
+    // GR_OPENGATE globally for cross-section reuse. GR_OPENMODAL follows
+    // that same pattern; it may not exist yet this early in page load, so
+    // poll briefly instead of giving up after one failed check.
+    var tries=0;
+    (function tryOpen(){
+      if(window.GR_OPENMODAL){
+        try{localStorage.setItem('gr_otp_seen','1');}catch(e){}
+        if(!isAuthed())window.GR_OPENMODAL();
+      }else if(tries++<40){setTimeout(tryOpen,150);}
+    })();
+  }
+
   /* ---- auto One Tap on page load ---- */
   (function autoOneTap(){
-    if(!GCID||isAuthed())return;
+    if(!GCID||isAuthed()){maybeShowSubscribePopup();return;}
     var tries=0;
     (function tryG(){
-      if(initIdClient()){try{google.accounts.id.prompt();}catch(e){}}
+      if(initIdClient()){
+        try{
+          google.accounts.id.prompt(function(n){
+            var concluded=false;
+            try{
+              if(typeof n.isNotDisplayed==='function'&&n.isNotDisplayed())concluded=true;
+              if(typeof n.isSkippedMoment==='function'&&n.isSkippedMoment())concluded=true;
+              if(typeof n.isDismissedMoment==='function'&&n.isDismissedMoment())concluded=true;
+            }catch(e){concluded=true;}
+            if(concluded)maybeShowSubscribePopup();
+          });
+        }catch(e){maybeShowSubscribePopup();}
+      }
       else if(tries++<40){setTimeout(tryG,150);}
+      else{maybeShowSubscribePopup();}   // GSI never loaded at all - still offer it
     })();
   })();
 
@@ -5046,6 +5091,9 @@ var FRAC={"24K":24/24,"22K":22/24,"18K":18/24,"14K":14/24};
     if(qe&&qe.value.trim())document.getElementById('m-email').value=qe.value.trim();
     document.getElementById('m-name').focus();
   }
+  // Exposed for the auto-popup-after-One-Tap hook (separate top-level IIFE,
+  // earlier in this script - same reason GR_OPENGATE exists).
+  window.GR_OPENMODAL=openModal;
   function closeModal(){overlay.classList.remove('open');
     try{sessionStorage.setItem('gr_dismissed','1');}catch(e){}}
   document.getElementById('m-close').addEventListener('click',closeModal);

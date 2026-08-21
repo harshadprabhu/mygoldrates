@@ -6,12 +6,15 @@
  * dispatches the `fetch-rates` workflow via the GitHub API at the exact IST
  * times, and tells the morning run to send the daily email.
  *
- * Secret required:  GH_PAT  (fine-grained token, repo goldrates,
+ * Secret required:  GH_PAT  (fine-grained token, repo mygoldrates,
  *                            Actions: Read and write)
  * Crons (UTC) are declared in wrangler.toml.
  */
 const OWNER = "harshadprabhu";
-const REPO = "goldrates";
+// Renamed from "goldrates" - GitHub redirects the old name for now, but
+// that's not something to depend on, especially now that this dispatch is
+// the SOLE trigger for the daily alert email (see rates.yml).
+const REPO = "mygoldrates";
 const WORKFLOW = "rates.yml"; // the workflow FILE name (not its display name)
 const MORNING_CRON = "30 5 * * *"; // 11:00 IST -> this run emails the digest
 
