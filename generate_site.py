@@ -3289,11 +3289,24 @@ SIGNUP_JS = r"""(function(){
       localStorage.setItem('gr_sid',SID);
     }
   }catch(e){SID='';}
-  function post(table,row){
+  function post(table,row,retried){
     fetch(SB+'/rest/v1/'+table,{method:'POST',
       headers:{'Content-Type':'application/json','apikey':KEY,
                'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify(row)}).catch(function(){});
+      body:JSON.stringify(row)}).then(function(r){
+        // A schema mismatch (e.g. a column added to the client before the
+        // matching migration has actually been run against the live DB)
+        // returns a normal, non-throwing HTTP error here - fetch() only
+        // rejects on a network failure, so a bare .catch() alone silently
+        // drops every single insert with no sign anything is wrong. Same
+        // graceful-degradation shape as send()'s retry-without-newer-fields
+        // above: if this looks like exactly that case, retry once with the
+        // newer field stripped rather than losing the whole pageview.
+        if(!r.ok&&!retried&&row.host!==undefined){
+          var row2={};for(var k in row){if(k!=='host')row2[k]=row[k];}
+          post(table,row2,true);
+        }
+      }).catch(function(){});
   }
   post('page_views',{page:location.pathname,referrer:document.referrer||null,
     session_id:SID,host:location.hostname});
