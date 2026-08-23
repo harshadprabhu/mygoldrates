@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-23",
-  "last_updated": "2026-08-23T12:19:17.760125+05:30",
+  "last_updated": "2026-08-23T14:09:02.271385+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -46,6 +46,12 @@
       "rate_18k_per_gram_inr": 12105.0
     },
     {
+      "jeweller": "Bhima Jewels",
+      "rate_24k_per_gram_inr": 16299.0,
+      "rate_22k_per_gram_inr": 14940.75,
+      "rate_18k_per_gram_inr": 12224.25
+    },
+    {
       "jeweller": "Indriya",
       "rate_24k_per_gram_inr": 16303.64,
       "rate_22k_per_gram_inr": 14945.0,
@@ -83,12 +89,6 @@
     },
     {
       "jeweller": "GRT Jewellers",
-      "rate_24k_per_gram_inr": 16309.09,
-      "rate_22k_per_gram_inr": 14950.0,
-      "rate_18k_per_gram_inr": 12231.82
-    },
-    {
-      "jeweller": "Bhima Jewels",
       "rate_24k_per_gram_inr": 16309.09,
       "rate_22k_per_gram_inr": 14950.0,
       "rate_18k_per_gram_inr": 12231.82
