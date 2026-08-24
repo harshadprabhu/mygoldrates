@@ -2,15 +2,15 @@
   "source": "MyGoldRates.com",
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
-  "date": "2026-08-23",
-  "last_updated": "2026-08-23T17:29:56.210751+05:30",
+  "date": "2026-08-24",
+  "last_updated": "2026-08-24T08:44:45.307774+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 16315.0,
-    "22k": 14955.42,
-    "18k": 12236.25
+    "24k": 16312.05,
+    "22k": 14952.71,
+    "18k": 12234.03
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -64,6 +64,12 @@
       "rate_18k_per_gram_inr": 12231.75
     },
     {
+      "jeweller": "Kalyan Jewellers",
+      "rate_24k_per_gram_inr": 16309.0,
+      "rate_22k_per_gram_inr": 14949.92,
+      "rate_18k_per_gram_inr": 12231.75
+    },
+    {
       "jeweller": "Malabar Gold",
       "rate_24k_per_gram_inr": 16309.0,
       "rate_22k_per_gram_inr": 14949.92,
@@ -100,13 +106,13 @@
       "rate_18k_per_gram_inr": 12236.25
     },
     {
-      "jeweller": "Candere",
+      "jeweller": "Vummidi Bangaru",
       "rate_24k_per_gram_inr": 16321.0,
       "rate_22k_per_gram_inr": 14960.92,
       "rate_18k_per_gram_inr": 12240.75
     },
     {
-      "jeweller": "Vummidi Bangaru",
+      "jeweller": "Candere",
       "rate_24k_per_gram_inr": 16321.0,
       "rate_22k_per_gram_inr": 14960.92,
       "rate_18k_per_gram_inr": 12240.75
@@ -154,7 +160,7 @@
       "rate_18k_per_gram_inr": 12438.75
     }
   ],
-  "jeweller_count": 20,
+  "jeweller_count": 21,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
