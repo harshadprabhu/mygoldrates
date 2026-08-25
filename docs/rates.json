@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-25",
-  "last_updated": "2026-08-25T08:39:25.448387+05:30",
+  "last_updated": "2026-08-25T09:39:02.210590+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -17,33 +17,33 @@
     "rate_per_gram_inr": 16284.0
   },
   "ibja_reference_24k_999_per_gram_inr": null,
-  "akgsma_south_india_22k_per_gram_inr": 15030.0,
+  "akgsma_south_india_22k_per_gram_inr": 15010.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 163100.0,
-      "change_pct": -0.08
+      "price_per_10g_inr": 163110.0,
+      "change_pct": -0.07
     },
     {
       "contract": "GOLDM",
       "expiry": "04SEP2026",
-      "price_per_10g_inr": 161911.0,
-      "change_pct": 0.62
+      "price_per_10g_inr": 161900.0,
+      "change_pct": -0.05
     }
   ],
   "jewellers": [
+    {
+      "jeweller": "Chandukaka Saraf",
+      "rate_24k_per_gram_inr": 16180.0,
+      "rate_22k_per_gram_inr": 14831.67,
+      "rate_18k_per_gram_inr": 12135.0
+    },
     {
       "jeweller": "PN Gadgil",
       "rate_24k_per_gram_inr": 16284.0,
       "rate_22k_per_gram_inr": 14927.0,
       "rate_18k_per_gram_inr": 12213.0
-    },
-    {
-      "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 16310.0,
-      "rate_22k_per_gram_inr": 14950.83,
-      "rate_18k_per_gram_inr": 12232.5
     },
     {
       "jeweller": "Kalyan Jewellers",
@@ -89,9 +89,9 @@
     },
     {
       "jeweller": "Bhima Jewels",
-      "rate_24k_per_gram_inr": 16399.0,
-      "rate_22k_per_gram_inr": 15032.42,
-      "rate_18k_per_gram_inr": 12299.25
+      "rate_24k_per_gram_inr": 16396.36,
+      "rate_22k_per_gram_inr": 15030.0,
+      "rate_18k_per_gram_inr": 12297.27
     },
     {
       "jeweller": "Jos Alukkas",
