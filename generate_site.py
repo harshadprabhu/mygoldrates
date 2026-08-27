@@ -521,6 +521,107 @@ def fetch_mcx():
     return None
 
 
+# International spot references + FX rate. These are the same open,
+# CORS-friendly APIs the site's client-side rates fetch already uses; here
+# we ALSO pull them server-side so the Markets drawer paints correct global
+# numbers on first byte (SEO + first-paint), matching how IBJA/MCX tiles
+# render today. Powers the Market Pulse tiles: gold spot USD/oz, silver
+# spot USD/oz, USD/INR, and a derived silver INR/kg.
+OZ_TO_G = 31.1034768
+OZ_PER_KG = 32.1507466  # troy oz per kg (silver is quoted per kg in India)
+SILVER_INDIA_PREMIUM = 0.12  # duty + local markup vs XAG spot, under gold
+
+
+def fetch_gold_spot_usd():
+    """International spot gold, USD per troy oz. Returns float or None."""
+    try:
+        r = requests.get("https://api.gold-api.com/price/XAU",
+                         headers={"User-Agent": UA}, timeout=15)
+        v = float(r.json().get("price") or 0)
+        if 500 <= v <= 20000:
+            print(f"gold-spot: XAU=${v:.2f}/oz")
+            return v
+    except Exception as e:
+        print("gold-spot: fetch failed:", type(e).__name__, str(e)[:80])
+    return None
+
+
+def fetch_silver_spot_usd():
+    """International spot silver, USD per troy oz. Returns float or None."""
+    try:
+        r = requests.get("https://api.gold-api.com/price/XAG",
+                         headers={"User-Agent": UA}, timeout=15)
+        v = float(r.json().get("price") or 0)
+        if 5 <= v <= 500:
+            print(f"silver-spot: XAG=${v:.2f}/oz")
+            return v
+    except Exception as e:
+        print("silver-spot: fetch failed:", type(e).__name__, str(e)[:80])
+    return None
+
+
+def fetch_usdinr():
+    """USD/INR reference from open.er-api.com. Returns float or None."""
+    try:
+        r = requests.get("https://open.er-api.com/v6/latest/USD",
+                         headers={"User-Agent": UA}, timeout=15)
+        v = float(((r.json() or {}).get("rates") or {}).get("INR") or 0)
+        if 40 <= v <= 200:
+            print(f"usdinr: 1 USD = ₹{v:.2f}")
+            return v
+    except Exception as e:
+        print("usdinr: fetch failed:", type(e).__name__, str(e)[:80])
+    return None
+
+
+def fetch_bullion_news(limit=8):
+    """Gold + silver + bullion headlines via Google News RSS. Broadens
+    fetch_news's gold-only query so the Markets drawer's Bullion News block
+    covers both metals."""
+    url = ("https://news.google.com/rss/search?q="
+           "gold%20OR%20silver%20OR%20bullion%20India%20when:3d"
+           "&hl=en-IN&gl=IN&ceid=IN:en")
+    try:
+        r = requests.get(url, headers={"User-Agent": UA}, timeout=20)
+        items = re.findall(r"<item>(.*?)</item>", r.text, re.S)
+
+        def field(block, tag):
+            m = re.search(r"<" + tag + r"[^>]*>(.*?)</" + tag + ">",
+                          block, re.S)
+            return m.group(1).strip() if m else ""
+
+        keep = re.compile(r"(gold|silver|bullion|xau|xag|mcx|ibja)", re.I)
+        out, seen = [], set()
+        for it in items:
+            title = _html.unescape(re.sub(r"<[^>]+>", "", field(it, "title")))
+            link = _html.unescape(field(it, "link"))
+            src = _html.unescape(re.sub(r"<[^>]+>", "", field(it, "source")))
+            if src and title.endswith(" - " + src):
+                title = title[:-(len(src) + 3)].strip()
+            if not (title and link) or len(title) < 15:
+                continue
+            if not keep.search(title):
+                continue
+            key = title.lower()
+            if key in seen:
+                continue
+            try:
+                dt = datetime.strptime(field(it, "pubDate")[:25].strip(),
+                                       "%a, %d %b %Y %H:%M:%S")
+            except Exception:
+                dt = None
+            out.append({"title": title, "link": link, "source": src, "dt": dt})
+            seen.add(key)
+            if len(out) >= limit:
+                break
+        print(f"bullion-news: {len(out)} gold+silver headlines fetched")
+        return out
+    except Exception as e:
+        print("bullion-news: fetch failed:",
+              type(e).__name__, str(e)[:100])
+        return []
+
+
 def trend_chart(trend):
     """Inline SVG line chart of (iso_date, median) points; grows with history."""
     if len(trend) < 2:
@@ -1174,13 +1275,17 @@ def main():
     # --------------------------------------------------- MCX gold futures
     mcx = fetch_mcx()
     mcx_tile = ""
+    mcx_expiry_for_js = ""
     if mcx:
         g = next((c for c in mcx if c["symbol"] == "GOLD"), mcx[0])
+        mcx_expiry_for_js = g["expiry"]
         mcx_tile = (
-            f'<div class="rtile"><div class="k">MCX Gold Futures</div>'
-            f'<div class="v">{inr(g["ltp"])}</div>'
+            f'<div class="rtile" data-mk="mcx-gold">'
+            f'<div class="k">MCX Gold Futures</div>'
+            f'<div class="v" data-mk-v>{inr(g["ltp"])}</div>'
             f'<div class="u">per 10g (995) · {g["expiry"]} · '
-            f'{g["pchg"]:+.2f}%</div></div>')
+            f'<span data-mk-u-pct>{g["pchg"]:+.2f}%</span></div>'
+            f'<div class="rtile-d flat" data-mk-d>± ₹0</div></div>')
 
     # ----------------------------------------- AKGSMA (South India benchmark)
     akgsma = fetch_akgsma()
@@ -1188,9 +1293,11 @@ def main():
     if akgsma:
         ak24, ak22, ak18 = akgsma
         akgsma_tile = (
-            f'<div class="rtile"><div class="k">AKGSMA · South India 24K</div>'
-            f'<div class="v">{inr(ak24)}</div>'
-            f'<div class="u">per gram · 22K {inr(ak22)}</div></div>')
+            f'<div class="rtile" data-mk="akgsma-24k">'
+            f'<div class="k">AKGSMA · South India 24K</div>'
+            f'<div class="v" data-mk-v>{inr(ak24)}</div>'
+            f'<div class="u">per gram · 22K <span data-mk-u2>{inr(ak22)}</span></div>'
+            f'<div class="rtile-d flat" data-mk-d>± ₹0</div></div>')
 
     # --------------------------------------------------------------- IBJA
     ibja = fetch_ibja()
@@ -1205,13 +1312,18 @@ def main():
   (national) and the AKGSMA South-India association rate, pre-GST, alongside
   the exchange-traded gold futures quote.</p>
   <div class="ref-tiles">
-    <div class="rtile"><div class="k">IBJA 999 Fine · 24K</div>
-      <div class="v">{inr(r999)}</div><div class="u">per gram, pre-GST</div></div>
+    <div class="rtile" data-mk="ibja-999">
+      <div class="k">IBJA 999 Fine · 24K</div>
+      <div class="v" data-mk-v>{inr(r999)}</div>
+      <div class="u">per gram, pre-GST</div>
+      <div class="rtile-d flat" data-mk-d>± ₹0</div></div>
     {akgsma_tile}
     {mcx_tile}
-    <div class="rtile prem"><div class="k">Jeweller premium</div>
-      <div class="v">{premium_med:+.1f}%</div>
-      <div class="u">median vs bullion, today</div></div>
+    <div class="rtile prem" data-mk="jeweller-premium">
+      <div class="k">Jeweller premium</div>
+      <div class="v" data-mk-v>{premium_med:+.1f}%</div>
+      <div class="u">median vs bullion, today</div>
+      <div class="rtile-d flat" data-mk-d>± 0.00pp</div></div>
   </div>
 </section>'''
         # Premium-over-bullion bars: IBJA 999 is the zero baseline.
@@ -1519,6 +1631,248 @@ def main():
     hist_table = "".join(
         f'<tr><td>{datetime.fromisoformat(d).strftime("%d %b %Y")}</td>'
         f'<td>{inr(v)}</td></tr>' for d, v in reversed(trend[-10:]))
+
+    # ---------------------------------------- Global Market (spot + FX)
+    # Emits four tiles for the Market Pulse strip in the drawer: gold spot
+    # USD/oz, silver spot USD/oz, USD/INR, and a derived Silver 999 INR/kg
+    # for the Indian buyer. All values come from open, CORS-friendly APIs
+    # at build time; the drawer renders whichever tiles came back and
+    # silently drops the rest, so a single upstream miss never breaks the
+    # layout.
+    gold_usd = fetch_gold_spot_usd()
+    silver_usd = fetch_silver_spot_usd()
+    usdinr = fetch_usdinr()
+    global_tiles = []
+    if gold_usd:
+        global_tiles.append(
+            f'<div class="rtile" data-mk="gold-usd">'
+            f'<div class="k">Gold Spot &middot; XAU/USD</div>'
+            f'<div class="v" data-mk-v>${gold_usd:,.2f}</div>'
+            f'<div class="u">per troy oz &middot; international spot</div>'
+            f'<div class="rtile-d flat" data-mk-d>± $0.00</div></div>')
+    if silver_usd:
+        global_tiles.append(
+            f'<div class="rtile" data-mk="silver-usd">'
+            f'<div class="k">Silver Spot &middot; XAG/USD</div>'
+            f'<div class="v" data-mk-v>${silver_usd:,.2f}</div>'
+            f'<div class="u">per troy oz &middot; international spot</div>'
+            f'<div class="rtile-d flat" data-mk-d>± $0.00</div></div>')
+    if usdinr:
+        global_tiles.append(
+            f'<div class="rtile" data-mk="usdinr">'
+            f'<div class="k">USD / INR</div>'
+            f'<div class="v" data-mk-v>&#8377;{usdinr:.2f}</div>'
+            f'<div class="u">reference FX &middot; live</div>'
+            f'<div class="rtile-d flat" data-mk-d>± &#8377;0.00</div></div>')
+    if silver_usd and usdinr:
+        silver_inr_kg = silver_usd * OZ_PER_KG * usdinr * (1 + SILVER_INDIA_PREMIUM)
+        global_tiles.append(
+            f'<div class="rtile" data-mk="silver-inr">'
+            f'<div class="k">Silver 999 &middot; INR/kg</div>'
+            f'<div class="v" data-mk-v>{inr(silver_inr_kg)}</div>'
+            f'<div class="u">per kg &middot; spot + India premium</div>'
+            f'<div class="rtile-d flat" data-mk-d>± &#8377;0</div></div>')
+    if global_tiles:
+        global_market_block = (
+            '<section class="ibja-ref" aria-labelledby="gmh">'
+            '<p class="eyebrow">International Spot &amp; FX</p>'
+            '<h2 id="gmh">Global Market</h2>'
+            '<p class="hint">International spot gold and silver alongside the '
+            'USD/INR reference. The Silver 999 INR figure is derived from XAG '
+            'spot, FX and India duty premium.</p>'
+            f'<div class="ref-tiles">{"".join(global_tiles)}</div>'
+            '</section>')
+    else:
+        global_market_block = ""
+
+    # ---------------------------------------- Bullion News (gold + silver)
+    bullion_items = fetch_bullion_news()
+    if bullion_items:
+        bnews_cards = "".join(news_card(n) for n in bullion_items[:6])
+        bullion_news_block = (
+            '<h3>Bullion News</h3>'
+            '<p class="dnote">Gold, silver and bullion headlines refreshed '
+            'through the day from India news sources.</p>'
+            f'<div class="newscards">{bnews_cards}</div>')
+    else:
+        bullion_news_block = ""
+
+    # ---- Live-refresh anchors ---------------------------------------------
+    # Every 60s the browser re-fetches XAU + XAG + USD/INR + MCX Gold Futures
+    # from CORS-open upstreams (gold-api.com, open.er-api.com,
+    # priceapi.moneycontrol.com — all confirmed *) and recomputes the
+    # derived Indian-rupee tiles. We anchor the derived tiles (IBJA 999,
+    # AKGSMA 24K) to today's server-side snapshot via a scale factor
+    # instead of a fixed percentage — that way IBJA/AKGSMA move in lock-
+    # step with spot without needing us to know today's exact premium.
+    # If a required anchor input is missing we simply omit that tile
+    # from the live-update set; nothing else breaks.
+    mk_anchors = {
+        "silverPremiumPct": SILVER_INDIA_PREMIUM,
+        "ozToG": OZ_TO_G,
+        "ozPerKg": OZ_PER_KG,
+        "mcxSymbol": "GOLD",
+        "mcxExpiry": mcx_expiry_for_js,  # "" if MCX fetch failed
+        "buildTs": datetime.now(IST).isoformat(timespec="seconds"),
+    }
+    spot_inr_build = None
+    if gold_usd and usdinr:
+        spot_inr_build = (gold_usd / OZ_TO_G) * usdinr
+        mk_anchors["goldUsdBuild"] = gold_usd
+        mk_anchors["usdinrBuild"] = usdinr
+        mk_anchors["spotInrBuild"] = spot_inr_build
+    if silver_usd:
+        mk_anchors["silverUsdBuild"] = silver_usd
+    if ibja and spot_inr_build:
+        r999_b, _ = ibja
+        mk_anchors["ibjaFactor"] = r999_b / spot_inr_build
+        mk_anchors["ibja999Build"] = r999_b
+    if akgsma and spot_inr_build:
+        ak24_b = akgsma[0]
+        mk_anchors["akgsmaFactor"] = ak24_b / spot_inr_build
+        mk_anchors["akgsma24Build"] = ak24_b
+    # Median 24K jeweller board rate today — the "Jeweller premium" tile is
+    # median24 / ibja_999_live - 1, so as IBJA moves live the % drifts too.
+    try:
+        mk_anchors["median24"] = float(median24)
+    except Exception:
+        pass
+    mk_anchors_json = json.dumps(mk_anchors)
+
+    market_live_script = f'''
+<script>
+(function(){{
+  var A = window.__MK_INIT__ = {mk_anchors_json};
+  var prev = {{}};
+  function $(sel, root){{ return (root||document).querySelector(sel); }}
+  function fmtUSD(v, dec){{ dec = dec==null?2:dec;
+    return '$'+Number(v).toLocaleString('en-US',{{minimumFractionDigits:dec,maximumFractionDigits:dec}}); }}
+  function fmtINR(v, dec){{ dec = dec||0;
+    return '\\u20B9'+Number(v).toLocaleString('en-IN',{{minimumFractionDigits:dec,maximumFractionDigits:dec}}); }}
+  function fmtPct(v){{ return (v>=0?'+':'')+v.toFixed(1)+'%'; }}
+  function paintTile(key, val, unit, dec){{
+    var el = document.querySelector('[data-mk="'+key+'"]'); if(!el||val==null) return;
+    var vNode = el.querySelector('[data-mk-v]');
+    var dNode = el.querySelector('[data-mk-d]');
+    var fmt = unit==='USD' ? function(x){{return fmtUSD(x,dec);}}
+            : unit==='INR' ? function(x){{return fmtINR(x,dec);}}
+            : unit==='INR2' ? function(x){{return fmtINR(x,2);}}
+            : function(x){{return fmtPct(x);}};
+    if(vNode) vNode.textContent = fmt(val);
+    var p = prev[key];
+    if(dNode){{
+      if(p==null){{ dNode.className='rtile-d flat'; dNode.textContent='\\u2500 live'; }}
+      else {{
+        var d = val - p;
+        if(unit==='USD'){{
+          if(Math.abs(d)<0.005){{ dNode.className='rtile-d flat'; dNode.textContent='\\u00b1 $0.00'; }}
+          else {{ dNode.className='rtile-d '+(d<0?'dn':'up');
+            dNode.textContent = (d<0?'\\u25BC \\u2212':'\\u25B2 +')+'$'+Math.abs(d).toFixed(2); }}
+        }} else if(unit==='INR' || unit==='INR2'){{
+          var precise = unit==='INR2';
+          var eps = precise?0.005:0.5;
+          if(Math.abs(d)<eps){{ dNode.className='rtile-d flat'; dNode.textContent='\\u00b1 \\u20B90'; }}
+          else {{ dNode.className='rtile-d '+(d<0?'dn':'up');
+            var body = precise ? Math.abs(d).toFixed(2)
+                               : Math.round(Math.abs(d)).toLocaleString('en-IN');
+            dNode.textContent = (d<0?'\\u25BC \\u2212':'\\u25B2 +')+'\\u20B9'+body; }}
+        }} else {{ // PCT
+          if(Math.abs(d)<0.005){{ dNode.className='rtile-d flat'; dNode.textContent='\\u00b1 0.00pp'; }}
+          else {{ dNode.className='rtile-d '+(d<0?'dn':'up');
+            dNode.textContent = (d<0?'\\u25BC \\u2212':'\\u25B2 +')+Math.abs(d).toFixed(2)+'pp'; }}
+        }}
+        el.classList.remove('pulse-up','pulse-dn');
+        void el.offsetWidth;
+        if(Math.abs(d)>0) el.classList.add(d<0?'pulse-dn':'pulse-up');
+        setTimeout(function(){{ el.classList.remove('pulse-up','pulse-dn'); }}, 900);
+      }}
+    }}
+    prev[key] = val;
+  }}
+  function setStatus(state, note){{
+    var badge = document.getElementById('mkLiveBadge');
+    var noteEl = document.getElementById('mkLiveNote');
+    if(badge){{
+      badge.style.color = state==='ok' ? '#5BBB93' : state==='warn' ? '#D9A441' : '#C9524B';
+      badge.style.background = state==='ok' ? 'rgba(30,92,70,.28)' : state==='warn' ? 'rgba(153,110,40,.24)' : 'rgba(120,40,40,.24)';
+      badge.style.borderColor = state==='ok' ? 'rgba(91,187,147,.45)' : state==='warn' ? 'rgba(217,164,65,.45)' : 'rgba(201,82,75,.45)';
+      var dot = badge.querySelector('.live-dot');
+      if(dot){{
+        dot.style.background = state==='ok' ? '#5BBB93' : state==='warn' ? '#D9A441' : '#C9524B';
+        dot.style.boxShadow = '0 0 8px '+(state==='ok'?'#5BBB93':state==='warn'?'#D9A441':'#C9524B');
+      }}
+      var txt = badge.querySelector('.live-txt');
+      if(txt) txt.textContent = state==='ok' ? 'LIVE' : state==='warn' ? 'DELAYED' : 'STALLED';
+    }}
+    if(noteEl) noteEl.textContent = note || '';
+  }}
+  function agoTxt(ms){{
+    var s = Math.round((Date.now()-ms)/1000);
+    if(s<5) return 'just now'; if(s<60) return s+'s ago';
+    return Math.round(s/60)+'m ago';
+  }}
+  var lastOkTs = null;
+  function repaintNote(){{
+    if(lastOkTs!=null){{
+      var el = document.getElementById('mkLiveNote');
+      if(el) el.textContent = 'Updated '+agoTxt(lastOkTs);
+    }}
+  }}
+  function fetchJson(url){{ return fetch(url).then(function(r){{ return r.json(); }}); }}
+  function tick(){{
+    var mcxUrl = A.mcxExpiry
+      ? 'https://priceapi.moneycontrol.com/pricefeed/mcx/commodityfuture/'+A.mcxSymbol+'?expiry='+A.mcxExpiry
+      : null;
+    var jobs = [
+      fetchJson('https://api.gold-api.com/price/XAU').catch(function(){{return null;}}),
+      fetchJson('https://api.gold-api.com/price/XAG').catch(function(){{return null;}}),
+      fetchJson('https://open.er-api.com/v6/latest/USD').catch(function(){{return null;}}),
+      mcxUrl ? fetchJson(mcxUrl).catch(function(){{return null;}}) : Promise.resolve(null),
+    ];
+    Promise.all(jobs).then(function(res){{
+      var gJ=res[0], sJ=res[1], fJ=res[2], mJ=res[3];
+      var goldUsd = gJ && +gJ.price;
+      var silverUsd = sJ && +sJ.price;
+      var usdinr = fJ && fJ.rates && +fJ.rates.INR;
+      var mcxLtp = mJ && mJ.data && +mJ.data.pricecurrent;
+      var mcxPct = mJ && mJ.data && +mJ.data.pricepercentchange;
+      var okCore = goldUsd && usdinr;
+      if(goldUsd) paintTile('gold-usd', goldUsd, 'USD', 2);
+      if(silverUsd) paintTile('silver-usd', silverUsd, 'USD', 2);
+      if(usdinr) paintTile('usdinr', usdinr, 'INR2');
+      if(silverUsd && usdinr) paintTile('silver-inr', silverUsd*A.ozPerKg*usdinr*(1+A.silverPremiumPct), 'INR', 0);
+      var spotInr = okCore ? (goldUsd/A.ozToG)*usdinr : null;
+      if(spotInr && A.ibjaFactor){{
+        var ibja = spotInr * A.ibjaFactor;
+        paintTile('ibja-999', ibja, 'INR', 0);
+        if(A.median24){{
+          paintTile('jeweller-premium', (A.median24/ibja - 1)*100, 'PCT');
+        }}
+      }}
+      if(spotInr && A.akgsmaFactor){{
+        paintTile('akgsma-24k', spotInr*A.akgsmaFactor, 'INR', 0);
+      }}
+      if(mcxLtp){{
+        paintTile('mcx-gold', mcxLtp, 'INR', 0);
+        // also refresh the pct next to the expiry
+        var mcxTile = document.querySelector('[data-mk="mcx-gold"]');
+        if(mcxTile){{
+          var u = mcxTile.querySelector('[data-mk-u-pct]');
+          if(u && !isNaN(mcxPct)) u.textContent = (mcxPct>=0?'+':'')+mcxPct.toFixed(2)+'%';
+        }}
+      }}
+      if(okCore){{ lastOkTs = Date.now(); setStatus('ok','Updated just now'); }}
+      else setStatus('warn','Feed partially available');
+    }}).catch(function(){{ setStatus('bad','Feed stalled'); }});
+  }}
+  // Only wire when the drawer is present.
+  if(!document.getElementById('mdrawer')) return;
+  tick();
+  setInterval(tick, 60000);
+  setInterval(repaintNote, 15000);
+}})();
+</script>'''
+
     drawer = f'''
 <button class="drawer-tab" id="drtab" aria-controls="mdrawer"
   aria-expanded="false">Markets &#9670;</button>
@@ -1528,7 +1882,13 @@ def main():
   <div class="drawer-head"><h2>Gold Markets</h2>
     <button class="drawer-x" id="drx" aria-label="Close panel">&times;</button>
   </div>
+  <div class="mk-live">
+    <span class="live-badge" id="mkLiveBadge">
+      <span class="live-dot"></span><span class="live-txt">LIVE</span></span>
+    <span class="mk-live-note" id="mkLiveNote">Connecting&hellip;</span>
+  </div>
   {ibja_tiles}
+  {global_market_block}
   {mcx_block}
   <h3>Gold Rate Trend</h3>
   <p class="dnote">Median 24K jeweller board rate per gram, pre-GST, by day.</p>
@@ -1540,6 +1900,8 @@ def main():
   date, so they usually sit below retail jeweller board rates, which add
   sourcing and hallmarking premiums. Watching both tells you where retail
   prices are likely headed.</p>
+  {bullion_news_block}
+  {market_live_script}
 </aside>'''
 
     calcdrawer = f'''
@@ -3973,6 +4335,24 @@ $gate_css
 .rtile .u{font-size:12px;color:var(--ink-3)}
 .rtile.prem::before{background:var(--emerald)}
 .rtile.prem .v{color:var(--emerald)}
+
+/* live rate-change chip under each tile value + brief flash on update */
+.rtile{transition:background-color .35s ease,border-color .35s ease}
+.rtile-d{display:inline-flex;align-items:center;gap:3px;
+  font:700 11px/1 "IBM Plex Mono",monospace;letter-spacing:.04em;
+  padding:3px 8px;border-radius:999px;margin-top:6px;
+  color:var(--ink-3);background:transparent;min-height:16px}
+.rtile-d.up{color:#2E9F70;background:rgba(46,159,112,.13)}
+.rtile-d.dn{color:#C9524B;background:rgba(201,82,75,.13)}
+.rtile-d.flat{color:var(--ink-3);background:rgba(150,150,150,.08)}
+.rtile.pulse-up{background:color-mix(in srgb,#2E9F70 8%,var(--card));
+  border-color:color-mix(in srgb,#2E9F70 30%,var(--line))}
+.rtile.pulse-dn{background:color-mix(in srgb,#C9524B 8%,var(--card));
+  border-color:color-mix(in srgb,#C9524B 30%,var(--line))}
+.mk-live{display:flex;align-items:center;gap:8px;margin:8px 0 4px}
+.mk-live .live-badge{margin:0}
+.mk-live-note{font:500 11px/1.3 "IBM Plex Mono",monospace;color:var(--ink-3);
+  letter-spacing:.04em}
 
 /* live market pulse badge */
 .live-badge{display:inline-flex;align-items:center;gap:7px;font:700 10.5px/1 "IBM Plex Mono",monospace;
