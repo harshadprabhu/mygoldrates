@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-08-28",
-  "last_updated": "2026-08-28T17:07:08.372808+05:30",
+  "last_updated": "2026-08-28T19:49:01.309201+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,28 +22,28 @@
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 159432.0,
-      "change_pct": 0.27
+      "price_per_10g_inr": 158659.0,
+      "change_pct": -0.21
     },
     {
       "contract": "GOLDM",
       "expiry": "04SEP2026",
-      "price_per_10g_inr": 158910.0,
-      "change_pct": 0.43
+      "price_per_10g_inr": 158534.0,
+      "change_pct": 0.19
     }
   ],
   "jewellers": [
-    {
-      "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 15920.0,
-      "rate_22k_per_gram_inr": 14593.33,
-      "rate_18k_per_gram_inr": 11940.0
-    },
     {
       "jeweller": "PN Gadgil",
       "rate_24k_per_gram_inr": 15959.0,
       "rate_22k_per_gram_inr": 14629.08,
       "rate_18k_per_gram_inr": 11969.25
+    },
+    {
+      "jeweller": "Chandukaka Saraf",
+      "rate_24k_per_gram_inr": 15960.0,
+      "rate_22k_per_gram_inr": 14630.0,
+      "rate_18k_per_gram_inr": 11970.0
     },
     {
       "jeweller": "ORRA",
@@ -64,12 +64,6 @@
       "rate_18k_per_gram_inr": 12027.59
     },
     {
-      "jeweller": "Bhima Jewels",
-      "rate_24k_per_gram_inr": 16079.0,
-      "rate_22k_per_gram_inr": 14739.08,
-      "rate_18k_per_gram_inr": 12059.25
-    },
-    {
       "jeweller": "CaratLane",
       "rate_24k_per_gram_inr": 16082.0,
       "rate_22k_per_gram_inr": 14741.83,
@@ -80,6 +74,12 @@
       "rate_24k_per_gram_inr": 16088.5,
       "rate_22k_per_gram_inr": 14747.79,
       "rate_18k_per_gram_inr": 12066.38
+    },
+    {
+      "jeweller": "BlueStone",
+      "rate_24k_per_gram_inr": 16094.69,
+      "rate_22k_per_gram_inr": 14753.47,
+      "rate_18k_per_gram_inr": 12071.02
     },
     {
       "jeweller": "Indriya",
