@@ -1,0 +1,37 @@
+/*
+  Last-Modified: Sun, 30 Aug 2026 18:33:48 GMT
+  Cache-Control: public, max-age=300, s-maxage=600, must-revalidate
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Robots-Tag: index, follow, max-image-preview:large
+
+/*.html
+  Last-Modified: Sun, 30 Aug 2026 18:33:48 GMT
+  Cache-Control: public, max-age=300, s-maxage=600, must-revalidate
+
+/sitemap.xml
+  Last-Modified: Sun, 30 Aug 2026 18:33:48 GMT
+  Cache-Control: public, max-age=0, must-revalidate
+
+/sitemap_news.xml
+  Last-Modified: Sun, 30 Aug 2026 18:33:48 GMT
+  Cache-Control: public, max-age=0, must-revalidate
+
+/rates.json
+  Last-Modified: Sun, 30 Aug 2026 18:33:48 GMT
+  Cache-Control: public, max-age=60, must-revalidate
+
+/robots.txt
+  Cache-Control: public, max-age=3600
+
+/*.png
+  Cache-Control: public, max-age=604800, immutable
+
+/*.svg
+  Cache-Control: public, max-age=604800, immutable
+
+/*.ico
+  Cache-Control: public, max-age=604800, immutable
+
+/*.js
+  Cache-Control: public, max-age=86400, must-revalidate
