@@ -291,6 +291,12 @@ async function handleNews() {
 // Each dealer carries hostCandidates (probed in order until one answers
 // with any rows). Multiple host guesses let us survive dealers whose
 // bcast subdomain doesn't follow the dealer-domain convention.
+//
+// Subrequest budget note: Cloudflare Workers cap outbound subrequests
+// per invocation (50 on the free plan). With N dealers × H hosts × T
+// templates parallel per host, the worst case is N·H·T. We keep totals
+// under ~30 by capping most dealers at 2 hosts × 3 templates. When we
+// bail early on the first responding host, cost is much lower.
 const VOTS_DEALERS = [
   { id: 'arihant',  name: 'Arihant Spot',    city: 'Mumbai',    zone: 'West',
     hostCandidates: ['bcast.arihantspot.in'],
@@ -301,34 +307,17 @@ const VOTS_DEALERS = [
     templates: ['safari', 'safaricoins', 'safarisilver'],
     site: 'https://www.safaribullion.com/' },
   { id: 'parker',   name: 'Parker Bullion',  city: 'Ahmedabad', zone: 'West',
-    hostCandidates: ['bcast.parkerbullion.in', 'bcast.parkerbullions.com',
-                     'bcast.parker.in', 'bcast.parkerbullion.com'],
-    templates: ['parker', 'parkerbullion', 'parkercoins', 'parkersilver'],
+    hostCandidates: ['bcast.parkerbullion.in', 'bcast.parkerbullions.com'],
+    templates: ['parker', 'parkercoins', 'parkersilver'],
     site: 'https://parkerbullion.in/' },
   { id: 'rsbl',     name: 'RSBL',            city: 'Mumbai',    zone: 'West',
-    hostCandidates: ['bcast.rsbl.co.in', 'bcast.rsbl.in',
-                     'bcast.rsblbullion.com', 'stream.rsbl.co.in'],
+    hostCandidates: ['bcast.rsbl.co.in', 'bcast.rsblbullion.com'],
     templates: ['rsbl', 'rsblcoins', 'rsblsilver'],
     site: 'https://www.rsbl.co.in/' },
   { id: 'amrapali', name: 'Amrapali Spot',   city: 'Ahmedabad', zone: 'West',
-    hostCandidates: ['bcast.amrapalispot.com', 'bcast.amrapalispot.in',
-                     'bcast.amrapali.in'],
-    templates: ['amrapali', 'amrapalispot', 'amrapalicoins', 'amrapalisilver'],
+    hostCandidates: ['bcast.amrapalispot.com', 'bcast.amrapalispot.in'],
+    templates: ['amrapali', 'amrapalicoins', 'amrapalisilver'],
     site: 'https://www.amrapalispot.com/' },
-  // Extra dealers from the shared ticker.csstech.co.in service — best-
-  // effort host guesses; whichever respond enrich the vendor table.
-  { id: 'adinath',  name: 'Adinath Spot',    city: 'Ahmedabad', zone: 'West',
-    hostCandidates: ['bcast.adinathspot.in', 'bcast.adinathspot.com'],
-    templates: ['adinathspot', 'adinathspotsilver', 'adinathspotcoin'],
-    site: 'https://ticker.csstech.co.in/bullion/adinathspot/' },
-  { id: 'bombay',   name: 'Bombay Bullion',  city: 'Mumbai',    zone: 'West',
-    hostCandidates: ['bcast.bombaybullion.in', 'bcast.bombaybullion.com'],
-    templates: ['bombaybullion', 'bombaybulliongoldcoin', 'bombaybullionsilvercoin'],
-    site: 'https://ticker.csstech.co.in/bullion/bombaybullion/' },
-  { id: 'raj',      name: 'Raj Bullion',     city: 'Ahmedabad', zone: 'West',
-    hostCandidates: ['bcast.rajbullion.in', 'bcast.rajbullion.com'],
-    templates: ['rajbullion', 'rajbullionsilver', 'rajbullioncoin'],
-    site: 'https://ticker.csstech.co.in/bullion/rajbullion/' },
 ];
 
 // Parse a VOTS tab-delimited body into { code, name, buy, sell, high, low } rows.
@@ -471,10 +460,12 @@ async function fetchIbja() {
 }
 
 async function handleVendors() {
-  const [ibja, ...dealers] = await Promise.all([
-    fetchIbja(),
-    ...VOTS_DEALERS.map(fetchOneDealer),
-  ]);
+  // Wrap each dealer's call in a per-dealer try so ONE dealer's error
+  // (e.g. hitting the subrequest ceiling or a runtime abort) can't take
+  // down the whole response. Same for IBJA.
+  const safeIbja = fetchIbja().catch(() => null);
+  const safeDealers = VOTS_DEALERS.map(d => fetchOneDealer(d).catch(() => null));
+  const [ibja, ...dealers] = await Promise.all([safeIbja, ...safeDealers]);
   const vendors = [];
   if (ibja) vendors.push(ibja);
   for (const d of dealers) if (d) vendors.push(d);
