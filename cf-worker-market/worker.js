@@ -266,37 +266,168 @@ async function handleNews() {
 }
 
 // ─── /vendors ───────────────────────────────────────────────────────────
-// India's National Bullion Reference Rates from IBJA (ibjarates.com).
-// The site is server-rendered HTML with no JSON endpoint, so we scrape.
-// Per-city dealer rates (Amrapali, Parker, etc.) would require a
-// site-specific parser per dealer and cannot land in this same file.
-async function handleVendors() {
+// Live bullion vendor rates. Two data planes wired in parallel:
+//
+//   * VOTS Broadcast Streaming — a shared bullion-industry price streaming
+//     stack (bcast.<dealer>.<tld>/VOTSBroadcastStreaming/Services/xml/
+//     GetLiveRateByTemplateID/<templateId>). Response is newline-separated,
+//     tab-delimited rows: script_code \t script_name \t buy \t sell \t
+//     high \t low. Multiple bullion dealers publish through this service —
+//     we probe the known ones (Arihant, Safari, Parker) and use whichever
+//     answer this tick. This is the same underlying data finmetpulse.com
+//     surfaces in its dealer rate tables.
+//
+//   * IBJA HTML scrape — national bullion reference rate, kept as a
+//     "national" scope row so users see a benchmark alongside the dealers.
+//
+// Each dealer is queried independently and soft-fails; a single dealer
+// down never blocks the others. Row shape is normalized so app-test can
+// render one table across sources.
+const VOTS_DEALERS = [
+  { id: 'arihant',  name: 'Arihant Spot',    city: 'Mumbai',    zone: 'West',
+    host: 'bcast.arihantspot.in',
+    templates: ['arihant', 'arihantcoins', 'arihantsilver'],
+    site: 'https://www.arihantspot.in/' },
+  { id: 'safari',   name: 'Safari Bullion',  city: 'Mumbai',    zone: 'West',
+    host: 'bcast.safaribullions.com',
+    templates: ['safari', 'safaricoins', 'safarisilver'],
+    site: 'https://www.safaribullion.com/' },
+  { id: 'parker',   name: 'Parker Bullion',  city: 'Ahmedabad', zone: 'West',
+    host: 'bcast.parkerbullion.in',
+    templates: ['parker', 'parkercoins', 'parkersilver'],
+    site: 'https://parkerbullion.in/' },
+  { id: 'rsbl',     name: 'RSBL',            city: 'Mumbai',    zone: 'West',
+    host: 'bcast.rsbl.co.in',
+    templates: ['rsbl', 'rsblcoins', 'rsblsilver'],
+    site: 'https://www.rsbl.co.in/' },
+  { id: 'amrapali', name: 'Amrapali Spot',   city: 'Ahmedabad', zone: 'West',
+    host: 'bcast.amrapalispot.com',
+    templates: ['amrapali', 'amrapalicoins', 'amrapalisilver'],
+    site: 'https://www.amrapalispot.com/' },
+];
+
+// Parse a VOTS tab-delimited body into { code, name, buy, sell, high, low } rows.
+// Empty / hyphen fields become null. Skips header noise & malformed lines.
+function parseVots(text) {
+  if (!text || text === 'Not Found.') return [];
+  const out = [];
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.replace(/^\t/, '').trim();
+    if (!line) continue;
+    const cols = line.split('\t').map(s => s.trim());
+    if (cols.length < 4) continue;
+    const num = v => {
+      if (!v || v === '-' || v === '' || v === '0') return null;
+      const n = parseFloat(v.replace(/,/g, ''));
+      return isFinite(n) && n > 0 ? n : null;
+    };
+    const code = cols[0], name = cols[1];
+    if (!code || !name) continue;
+    if (name.toLowerCase() === 'script name') continue;
+    out.push({
+      code, name,
+      buy:  num(cols[2]),
+      sell: num(cols[3]),
+      high: num(cols[4]),
+      low:  num(cols[5]),
+    });
+  }
+  return out;
+}
+
+// Reduce a dealer's raw rows into headline gold_999 / gold_995 / silver_999
+// numbers by matching common phrasing patterns from their script names.
+function extractHeadlineRates(rows) {
+  const pick = (predicate, prefer) => {
+    const matches = rows.filter(r => predicate(r.name));
+    if (!matches.length) return null;
+    // Prefer 1kg IND-BIS if available, then any with a sell price.
+    const preferred = matches.find(r => prefer.test(r.name) && (r.sell || r.buy));
+    const first = preferred || matches.find(r => r.sell || r.buy);
+    if (!first) return null;
+    return { commodity: first.name, price: first.sell || first.buy };
+  };
+  const gold999 = pick(n => /999/.test(n) && /GOLD/i.test(n), /1\s*kg|IND-?BIS/i);
+  const gold995 = pick(n => /995/.test(n) && /GOLD/i.test(n), /1\s*kg|IND-?BIS/i);
+  const silver999 = pick(n => /SILVER/i.test(n) && !/COST|GST/i.test(n), /1\s*kg|IND-?BIS|IMPORTED/i);
+  return { gold_999: gold999, gold_995: gold995, silver_999: silver999 };
+}
+
+async function fetchOneDealer(d) {
+  // Fire all templates in parallel, merge rows.
+  const results = await Promise.all(
+    d.templates.map(t =>
+      safeFetchText(
+        `https://${d.host}/VOTSBroadcastStreaming/Services/xml/GetLiveRateByTemplateID/${t}`,
+        { accept: 'text/plain', cacheTtl: 5, timeoutMs: 6000 }
+      )
+    )
+  );
+  const rows = [];
+  for (const body of results) rows.push(...parseVots(body));
+  if (!rows.length) return null;
+  const headline = extractHeadlineRates(rows);
+  return {
+    dealer_id: d.id,
+    dealer: d.name,
+    city: d.city,
+    zone: d.zone,
+    site: d.site,
+    gold_999: headline.gold_999,
+    gold_995: headline.gold_995,
+    silver_999: headline.silver_999,
+    all_rows: rows,      // full grid available for a "show all rates" view
+    row_count: rows.length,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+async function fetchIbja() {
   const html = await safeFetchText('https://ibjarates.com/', { accept: 'text/html', cacheTtl: 60 });
-  if (!html) return jsonErr('IBJA upstream unavailable', 502);
+  if (!html) return null;
   const text = html.replace(/<[^>]+>/g, ' ');
   const grab = purity => {
     const re = new RegExp(purity + '\\D{0,60}?([\\d,]{6,7})');
     const m = text.match(re);
     if (!m) return null;
     const v = parseFloat(m[1].replace(/,/g, '')) / 10;
-    if (!(v >= 8000 && v <= 22000)) return null;
-    return v;
+    return v >= 8000 && v <= 22000 ? v : null;
   };
   const r999 = grab('999');
   const r916 = grab('916');
+  if (!r999 || !r916) return null;
+  return {
+    dealer_id: 'ibja',
+    dealer: 'IBJA',
+    city: 'National',
+    zone: 'National',
+    site: 'https://ibjarates.com/',
+    gold_999: { commodity: 'IBJA 999 24K', price: r999 },
+    gold_995: null,
+    silver_999: null,
+    all_rows: [
+      { code: 'IBJA999', name: 'IBJA 999 24K', buy: null, sell: r999, high: null, low: null },
+      { code: 'IBJA916', name: 'IBJA 916 22K', buy: null, sell: r916, high: null, low: null },
+    ],
+    row_count: 2,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+async function handleVendors() {
+  const [ibja, ...dealers] = await Promise.all([
+    fetchIbja(),
+    ...VOTS_DEALERS.map(fetchOneDealer),
+  ]);
   const vendors = [];
-  if (r999 && r916) {
-    vendors.push({
-      vendor: 'IBJA',
-      name: 'India Bullion & Jewellers Association',
-      scope: 'National',
-      gold_999: r999,
-      gold_916: r916,
-      source_url: 'https://ibjarates.com/',
-      timestamp: new Date().toISOString(),
-    });
-  }
-  return json({ vendors, note: vendors.length ? null : 'IBJA parse returned no rows this tick', updated_at: new Date().toISOString() });
+  if (ibja) vendors.push(ibja);
+  for (const d of dealers) if (d) vendors.push(d);
+  return json({
+    vendors,
+    count: vendors.length,
+    note: vendors.length ? null : 'No vendor feeds responded this tick',
+    updated_at: new Date().toISOString(),
+  });
 }
 
 // ─── router ─────────────────────────────────────────────────────────────
