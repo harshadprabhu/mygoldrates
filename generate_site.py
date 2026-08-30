@@ -17,6 +17,7 @@ import os
 import re
 import statistics
 from datetime import datetime, timezone, timedelta
+from email.utils import formatdate
 from string import Template
 
 import requests
@@ -2174,8 +2175,18 @@ def main():
     sig_ver = hashlib.md5(SIGNUP_JS.encode()).hexdigest()[:8]
     gate_html = GATE_HTML if gclient else ""
     gate_js   = GATE_JS   if gclient else ""
+    # Freshness signals for Google / social crawlers. updated_http is an
+    # RFC-1123 GMT string suitable for the Last-Modified HTTP header and its
+    # HTML equivalent; updated_iso is the ISO-8601 form used by JSON-LD
+    # dateModified, og:updated_time, and article:modified_time; updated_epoch
+    # is the unix seconds the on-page "refreshed X ago" ticker counts up from.
+    updated_http = formatdate(now_ist.timestamp(), usegmt=True)
+    updated_iso = now_ist.isoformat(timespec="seconds")
+    updated_epoch = str(int(now_ist.timestamp()))
     common = dict(site_url=SITE_URL, date=display_date, time=display_time,
                   iso_now=now_ist.isoformat(), year=str(now_ist.year),
+                  updated_http=updated_http, updated_iso=updated_iso,
+                  updated_epoch=updated_epoch,
                   base_css=BASE_CSS, ads_head=ads_head,
                   gclient=gclient, gsi=gsi, google_btn="",
                   sig_ver=sig_ver, nav=NAV,
@@ -3113,6 +3124,60 @@ def main():
                     for loc, dd, ttl in daily_meta
                     if dd and dd >= daily_index_cutoff)
                 + "</urlset>\n")
+
+    # ---- Cloudflare Pages _headers: freshness + edge caching --------------
+    # Two things wrangler's pages-deploy upload flow strips that Google
+    # cares about: file mtime (so no Last-Modified goes on the wire) and
+    # a validator that lets Googlebot conditionally re-fetch. We rebuild
+    # both here in a per-path _headers file that CF Pages honours. HTML
+    # gets a short edge TTL (5 min, must-revalidate) with today's build
+    # time as Last-Modified so Googlebot's If-Modified-Since either
+    # returns 304 (cheap crawl budget) or 200 with a fresher timestamp
+    # (freshness signal preserved). Static assets get an aggressive
+    # immutable cache. sitemap.xml + rates.json opt out of edge caching
+    # so IndexNow pings and RSS pulls always see the newest build.
+    headers_lm = updated_http
+    with open("docs/_headers", "w", encoding="utf-8") as f:
+        f.write(
+            "/*\n"
+            f"  Last-Modified: {headers_lm}\n"
+            "  Cache-Control: public, max-age=300, s-maxage=600, must-revalidate\n"
+            "  X-Content-Type-Options: nosniff\n"
+            "  Referrer-Policy: strict-origin-when-cross-origin\n"
+            "  X-Robots-Tag: index, follow, max-image-preview:large\n"
+            "\n"
+            "/*.html\n"
+            f"  Last-Modified: {headers_lm}\n"
+            "  Cache-Control: public, max-age=300, s-maxage=600, must-revalidate\n"
+            "\n"
+            "/sitemap.xml\n"
+            f"  Last-Modified: {headers_lm}\n"
+            "  Cache-Control: public, max-age=0, must-revalidate\n"
+            "\n"
+            "/sitemap_news.xml\n"
+            f"  Last-Modified: {headers_lm}\n"
+            "  Cache-Control: public, max-age=0, must-revalidate\n"
+            "\n"
+            "/rates.json\n"
+            f"  Last-Modified: {headers_lm}\n"
+            "  Cache-Control: public, max-age=60, must-revalidate\n"
+            "\n"
+            "/robots.txt\n"
+            "  Cache-Control: public, max-age=3600\n"
+            "\n"
+            "/*.png\n"
+            "  Cache-Control: public, max-age=604800, immutable\n"
+            "\n"
+            "/*.svg\n"
+            "  Cache-Control: public, max-age=604800, immutable\n"
+            "\n"
+            "/*.ico\n"
+            "  Cache-Control: public, max-age=604800, immutable\n"
+            "\n"
+            "/*.js\n"
+            "  Cache-Control: public, max-age=86400, must-revalidate\n"
+        )
+    print(f"_headers: written with Last-Modified {headers_lm}")
 
     # ---- IndexNow: instantly notify Bing/Yandex/Seznam of fresh URLs ----
     INDEXNOW_KEY = "b7f3c9a1e04d4f6a8c2b5d9e1f0a3c7d"
@@ -4290,6 +4355,9 @@ TEMPLATE = Template("""<!DOCTYPE html>
 <meta name="theme-color" content="#0B0805">
 <meta name="author" content="MyGoldRates.com">
 <meta name="geo.region" content="IN">
+<meta name="last-modified" content="$updated_http">
+<meta http-equiv="last-modified" content="$updated_http">
+<meta name="revisit-after" content="1 day">
 <link rel="canonical" href="$canonical_url">
 <link rel="alternate" type="application/json" title="Gold rates JSON feed" href="$site_url/rates.json">
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
@@ -4307,6 +4375,9 @@ TEMPLATE = Template("""<!DOCTYPE html>
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="MyGoldRates.com - India's gold rate comparison platform">
+<meta property="og:updated_time" content="$updated_iso">
+<meta property="article:modified_time" content="$updated_iso">
+<meta property="article:published_time" content="2026-07-20T00:00:00+05:30">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Gold Rate Today $where - Compare Top Jewellers">
 <meta name="twitter:description" content="24 carat gold rate $med24/g, 22K $med22/g today. Compare jewellers, check the bullion premium, calculate prices.">
@@ -4317,6 +4388,7 @@ TEMPLATE = Template("""<!DOCTYPE html>
 $gsi
 $ads_head
 <script type="application/ld+json">$jsonld</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","url":"$canonical_url","name":"Gold Rate Today $where","inLanguage":"en-IN","isPartOf":{"@type":"WebSite","url":"$site_url/","name":"MyGoldRates.com"},"about":{"@type":"Thing","name":"Gold rate today $where"},"dateModified":"$updated_iso","datePublished":"2026-07-20T00:00:00+05:30","primaryImageOfPage":{"@type":"ImageObject","url":"$site_url/og.png"}}</script>
 <style>
 $base_css
 $gate_css
@@ -4749,7 +4821,7 @@ $nav
   <button class="navtog" id="navtog" aria-label="Open menu" aria-expanded="false">&#9776;</button>
   <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
   <div class="topright">
-    <span class="updated">Updated $date, $time</span>
+    <span class="updated" data-updated-epoch="$updated_epoch"><time datetime="$updated_iso">Updated $date, $time</time> &middot; <span class="refreshed-ago">just now</span></span>
     <span class="hauth" id="hauth" hidden></span>
     <a class="wa-share-btn" href="https://api.whatsapp.com/send?text=Check%20today%27s%20live%2024K%20and%2022K%20gold%20rates%20across%20all%20top%20jewellers%20on%20https%3A%2F%2Fmygoldrates.com" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.485 1.332 5.001l-1.417 5.176 5.297-1.39c1.464.798 3.116 1.218 4.775 1.219h.004c5.505 0 9.988-4.478 9.989-9.984 0-2.667-1.038-5.174-2.924-7.06-1.886-1.886-4.393-2.925-7.061-2.925zm0 1.666c4.588 0 8.324 3.736 8.325 8.324 0 2.224-.866 4.314-2.439 5.888-1.573 1.574-3.663 2.44-5.887 2.44h-.003c-1.428 0-2.834-.378-4.066-1.094l-.291-.17-3.142.823.838-3.061-.186-.296c-.787-1.252-1.202-2.7-1.202-4.185.001-4.588 3.737-8.325 8.326-8.326z"/></svg> Share</a>
     <a class="btn btn-lite" href="#cmp">Compare jewellers</a>
@@ -4758,7 +4830,7 @@ $nav
 
 <section class="board" aria-label="Today's gold rate summary">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <div class="live-badge"><span class="live-dot"></span> LIVE &middot; $date</div>
+    <div class="live-badge" data-updated-epoch="$updated_epoch"><span class="live-dot"></span> <span>LIVE</span> &middot; <time datetime="$updated_iso">$date, $time</time> &middot; <span class="refreshed-ago">just now</span></div>
     <h1 style="margin:0">Gold Rate Today $where</h1>
   </div>
   <div class="board-meta">
@@ -4775,7 +4847,7 @@ $nav
     <div class="tile"><div class="k">18K &middot; $low_brand</div>
       <div class="v">$low18</div></div>
   </div>
-  <div class="board-pregst">All rates per gram &middot; pre-GST &middot; $date</div>
+  <div class="board-pregst">All rates per gram &middot; pre-GST &middot; <time datetime="$updated_iso">$date at $time</time></div>
 </section>
 
 $local_intro
@@ -5596,6 +5668,34 @@ var FRAC={"24K":24/24,"22K":22/24,"18K":18/24,"14K":14/24};
 </script>
 <script>window.GR_GCID="$gclient";window.GR_SB_URL="$supabase_url";window.GR_SB_KEY="$anon_key";</script>
 <script src="signup.js?v=$sig_ver" defer></script>
+<script>
+// Live "refreshed X ago" ticker attached to every element that carries a
+// data-updated-epoch attribute. Reads the build time straight from the DOM
+// so it stays correct across CDN caches, and updates every 15s so users
+// see the number counting up in place — a low-cost signal that the rates
+// are actually being maintained.
+(function(){
+  function agoStr(sec){
+    if(sec<45) return 'just now';
+    if(sec<90) return '1 min ago';
+    if(sec<3600) return Math.round(sec/60)+' min ago';
+    if(sec<5400) return '1 hour ago';
+    if(sec<86400) return Math.round(sec/3600)+' hours ago';
+    var d=Math.round(sec/86400); return d===1?'1 day ago':d+' days ago';
+  }
+  function tick(){
+    var now=Date.now()/1000|0;
+    document.querySelectorAll('[data-updated-epoch]').forEach(function(el){
+      var e=parseInt(el.getAttribute('data-updated-epoch')||'0',10);
+      if(!e) return;
+      var slot=el.querySelector('.refreshed-ago');
+      if(slot) slot.textContent=agoStr(Math.max(0,now-e));
+    });
+  }
+  tick();
+  setInterval(tick,15000);
+})();
+</script>
 $gate_html
 $gate_js
 </body>
@@ -5793,7 +5893,12 @@ PAGE_TEMPLATE = Template("""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>$title</title>
 <meta name="description" content="$desc">
+<meta name="last-modified" content="$updated_http">
+<meta http-equiv="last-modified" content="$updated_http">
+<meta property="og:updated_time" content="$updated_iso">
+<meta property="article:modified_time" content="$updated_iso">
 <link rel="canonical" href="$canonical">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","url":"$canonical","name":"$title","inLanguage":"en-IN","isPartOf":{"@type":"WebSite","url":"$site_url/","name":"MyGoldRates.com"},"dateModified":"$updated_iso"}</script>
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="96x96" href="$site_url/icon-96.png">
 <link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
