@@ -160,32 +160,37 @@ async function findMcx(symbol, expiries) {
 }
 
 // ─── /ohlc ──────────────────────────────────────────────────────────────
-// 90-day daily OHLC from Stooq (free, no auth). We use their CSV endpoint
-// and parse in the worker so the browser gets clean JSON with a compact
-// [{t,o,h,l,c}] shape.
+// Daily OHLC from Yahoo Finance's chart API (free, no auth). Stooq used
+// to work but added a JS-challenge in mid-2026; Yahoo remains open from
+// server-side clients. GC=F (gold futures) and SI=F (silver futures) are
+// the most liquid daily bars for XAU / XAG.
 async function handleOhlc(url) {
   const sym = (url.searchParams.get('sym') || 'XAU').toUpperCase();
   const range = parseInt(url.searchParams.get('range') || '90', 10);
-  const map = { XAU: 'xauusd', XAG: 'xagusd' };
-  const stooqSym = map[sym];
-  if (!stooqSym) return jsonErr(`unsupported sym: ${sym}`, 400);
-  const now = new Date();
-  const past = new Date(now.getTime() - range * 86400000);
-  const fmt = d => d.toISOString().slice(0, 10).replace(/-/g, '');
-  const stooqUrl = `https://stooq.com/q/d/l/?s=${stooqSym}&d1=${fmt(past)}&d2=${fmt(now)}&i=d`;
-  const csv = await safeFetchText(stooqUrl, { accept: 'text/csv', cacheTtl: 21600 });
-  if (!csv || csv.startsWith('No data')) return jsonErr('ohlc upstream returned no data', 502);
-  const lines = csv.trim().split(/\r?\n/);
-  const header = lines.shift();
-  if (!/^Date,Open,High,Low,Close/i.test(header || '')) return jsonErr('ohlc upstream format changed', 502);
+  const yahoo = { XAU: 'GC=F', XAG: 'SI=F' };
+  const ticker = yahoo[sym];
+  if (!ticker) return jsonErr(`unsupported sym: ${sym}`, 400);
+  const yRange = range <= 32 ? '1mo' : range <= 95 ? '3mo' : '6mo';
+  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=${yRange}&interval=1d`;
+  const raw = await safeFetchJson(yahooUrl, { cacheTtl: 21600, timeoutMs: 10000 });
+  const result = raw && raw.chart && raw.chart.result && raw.chart.result[0];
+  if (!result) return jsonErr('ohlc upstream returned no result', 502);
+  const timestamps = result.timestamp || [];
+  const quote = result.indicators && result.indicators.quote && result.indicators.quote[0];
+  if (!quote) return jsonErr('ohlc upstream missing quote block', 502);
+  const cutoff = Math.floor((Date.now() - range * 86400000) / 1000);
   const out = [];
-  for (const ln of lines) {
-    const [date, o, h, l, c] = ln.split(',');
-    if (!date || !c) continue;
-    const t = Math.floor(new Date(date + 'T00:00:00Z').getTime() / 1000);
+  for (let i = 0; i < timestamps.length; i++) {
+    const t = timestamps[i];
+    const o = quote.open ? quote.open[i] : null;
+    const h = quote.high ? quote.high[i] : null;
+    const l = quote.low ? quote.low[i] : null;
+    const c = quote.close ? quote.close[i] : null;
+    if (t == null || c == null) continue;
+    if (t < cutoff) continue;
     out.push({ t, o: +o, h: +h, l: +l, c: +c });
   }
-  return json({ symbol: sym, range_days: range, candles: out, updated_at: new Date().toISOString() });
+  return json({ symbol: sym, ticker, range_days: range, candles: out, updated_at: new Date().toISOString() });
 }
 
 // ─── /calendar ──────────────────────────────────────────────────────────
@@ -283,27 +288,47 @@ async function handleNews() {
 // Each dealer is queried independently and soft-fails; a single dealer
 // down never blocks the others. Row shape is normalized so app-test can
 // render one table across sources.
+// Each dealer carries hostCandidates (probed in order until one answers
+// with any rows). Multiple host guesses let us survive dealers whose
+// bcast subdomain doesn't follow the dealer-domain convention.
 const VOTS_DEALERS = [
   { id: 'arihant',  name: 'Arihant Spot',    city: 'Mumbai',    zone: 'West',
-    host: 'bcast.arihantspot.in',
+    hostCandidates: ['bcast.arihantspot.in'],
     templates: ['arihant', 'arihantcoins', 'arihantsilver'],
     site: 'https://www.arihantspot.in/' },
   { id: 'safari',   name: 'Safari Bullion',  city: 'Mumbai',    zone: 'West',
-    host: 'bcast.safaribullions.com',
+    hostCandidates: ['bcast.safaribullions.com', 'bcast.safaribullion.com'],
     templates: ['safari', 'safaricoins', 'safarisilver'],
     site: 'https://www.safaribullion.com/' },
   { id: 'parker',   name: 'Parker Bullion',  city: 'Ahmedabad', zone: 'West',
-    host: 'bcast.parkerbullion.in',
-    templates: ['parker', 'parkercoins', 'parkersilver'],
+    hostCandidates: ['bcast.parkerbullion.in', 'bcast.parkerbullions.com',
+                     'bcast.parker.in', 'bcast.parkerbullion.com'],
+    templates: ['parker', 'parkerbullion', 'parkercoins', 'parkersilver'],
     site: 'https://parkerbullion.in/' },
   { id: 'rsbl',     name: 'RSBL',            city: 'Mumbai',    zone: 'West',
-    host: 'bcast.rsbl.co.in',
+    hostCandidates: ['bcast.rsbl.co.in', 'bcast.rsbl.in',
+                     'bcast.rsblbullion.com', 'stream.rsbl.co.in'],
     templates: ['rsbl', 'rsblcoins', 'rsblsilver'],
     site: 'https://www.rsbl.co.in/' },
   { id: 'amrapali', name: 'Amrapali Spot',   city: 'Ahmedabad', zone: 'West',
-    host: 'bcast.amrapalispot.com',
-    templates: ['amrapali', 'amrapalicoins', 'amrapalisilver'],
+    hostCandidates: ['bcast.amrapalispot.com', 'bcast.amrapalispot.in',
+                     'bcast.amrapali.in'],
+    templates: ['amrapali', 'amrapalispot', 'amrapalicoins', 'amrapalisilver'],
     site: 'https://www.amrapalispot.com/' },
+  // Extra dealers from the shared ticker.csstech.co.in service — best-
+  // effort host guesses; whichever respond enrich the vendor table.
+  { id: 'adinath',  name: 'Adinath Spot',    city: 'Ahmedabad', zone: 'West',
+    hostCandidates: ['bcast.adinathspot.in', 'bcast.adinathspot.com'],
+    templates: ['adinathspot', 'adinathspotsilver', 'adinathspotcoin'],
+    site: 'https://ticker.csstech.co.in/bullion/adinathspot/' },
+  { id: 'bombay',   name: 'Bombay Bullion',  city: 'Mumbai',    zone: 'West',
+    hostCandidates: ['bcast.bombaybullion.in', 'bcast.bombaybullion.com'],
+    templates: ['bombaybullion', 'bombaybulliongoldcoin', 'bombaybullionsilvercoin'],
+    site: 'https://ticker.csstech.co.in/bullion/bombaybullion/' },
+  { id: 'raj',      name: 'Raj Bullion',     city: 'Ahmedabad', zone: 'West',
+    hostCandidates: ['bcast.rajbullion.in', 'bcast.rajbullion.com'],
+    templates: ['rajbullion', 'rajbullionsilver', 'rajbullioncoin'],
+    site: 'https://ticker.csstech.co.in/bullion/rajbullion/' },
 ];
 
 // Parse a VOTS tab-delimited body into { code, name, buy, sell, high, low } rows.
@@ -337,47 +362,78 @@ function parseVots(text) {
 
 // Reduce a dealer's raw rows into headline gold_999 / gold_995 / silver_999
 // numbers by matching common phrasing patterns from their script names.
+// Every headline pick requires an INR-magnitude price so we don't grab
+// a dealer's raw USD/oz spot row (some dealers list it as literally
+// "GOLD" or "SILVER" at a two-decimal number) as an INR silver price.
 function extractHeadlineRates(rows) {
-  const pick = (predicate, prefer) => {
-    const matches = rows.filter(r => predicate(r.name));
-    if (!matches.length) return null;
-    // Prefer 1kg IND-BIS if available, then any with a sell price.
-    const preferred = matches.find(r => prefer.test(r.name) && (r.sell || r.buy));
-    const first = preferred || matches.find(r => r.sell || r.buy);
-    if (!first) return null;
-    return { commodity: first.name, price: first.sell || first.buy };
+  const pick = (predicate, prefer, minPrice) => {
+    const priceOf = r => (r.sell != null && r.sell > 0) ? r.sell
+                        : (r.buy != null && r.buy > 0) ? r.buy : null;
+    const withPrice = rows
+      .filter(r => predicate(r.name))
+      .map(r => ({ r, price: priceOf(r) }))
+      .filter(x => x.price != null && x.price >= minPrice);
+    if (!withPrice.length) return null;
+    // Prefer 1kg IND-BIS phrasing; otherwise take the first INR-scale match.
+    const preferred = withPrice.find(x => prefer.test(x.r.name));
+    const chosen = preferred || withPrice[0];
+    return { commodity: chosen.r.name, price: chosen.price };
   };
-  const gold999 = pick(n => /999/.test(n) && /GOLD/i.test(n), /1\s*kg|IND-?BIS/i);
-  const gold995 = pick(n => /995/.test(n) && /GOLD/i.test(n), /1\s*kg|IND-?BIS/i);
-  const silver999 = pick(n => /SILVER/i.test(n) && !/COST|GST/i.test(n), /1\s*kg|IND-?BIS|IMPORTED/i);
+  // Gold 999 / 995 per 10g in INR run ~130k–200k today; 50000 is a safe
+  // floor that tolerates a market crash but rejects a USD/oz spot number.
+  const gold999 = pick(n => /999/.test(n) && /GOLD/i.test(n),
+                      /1\s*kg|IND-?BIS/i, 50000);
+  const gold995 = pick(n => /995/.test(n) && /GOLD/i.test(n),
+                      /1\s*kg|IND-?BIS/i, 50000);
+  // Silver 999 per kg in INR runs ~150k–300k. Two-pass: first pass avoids
+  // COST/GST-adjusted rows; if that returns nothing, allow COSTING so
+  // dealers who only list "SILVER COSTING" as their INR silver number
+  // (Safari does this) still surface a value.
+  const silver999 =
+    pick(n => /SILVER/i.test(n) && !/COST|GST/i.test(n),
+         /1\s*kg|IND-?BIS|IMPORTED/i, 50000) ||
+    pick(n => /SILVER/i.test(n) && !/GST/i.test(n),
+         /COSTING|1\s*kg|IMPORTED/i, 50000);
   return { gold_999: gold999, gold_995: gold995, silver_999: silver999 };
 }
 
 async function fetchOneDealer(d) {
-  // Fire all templates in parallel, merge rows.
-  const results = await Promise.all(
-    d.templates.map(t =>
-      safeFetchText(
-        `https://${d.host}/VOTSBroadcastStreaming/Services/xml/GetLiveRateByTemplateID/${t}`,
-        { accept: 'text/plain', cacheTtl: 5, timeoutMs: 6000 }
+  const hosts = d.hostCandidates || (d.host ? [d.host] : []);
+  // Walk hostCandidates until one returns at least one usable row.
+  // Once a host answers, all templates run in parallel against it.
+  let usedHost = null;
+  let mergedRows = [];
+  for (const host of hosts) {
+    const results = await Promise.all(
+      d.templates.map(t =>
+        safeFetchText(
+          `https://${host}/VOTSBroadcastStreaming/Services/xml/GetLiveRateByTemplateID/${t}`,
+          { accept: 'text/plain', cacheTtl: 5, timeoutMs: 5000 }
+        )
       )
-    )
-  );
-  const rows = [];
-  for (const body of results) rows.push(...parseVots(body));
-  if (!rows.length) return null;
-  const headline = extractHeadlineRates(rows);
+    );
+    const rows = [];
+    for (const body of results) rows.push(...parseVots(body));
+    if (rows.length) {
+      usedHost = host;
+      mergedRows = rows;
+      break;
+    }
+  }
+  if (!mergedRows.length) return null;
+  const headline = extractHeadlineRates(mergedRows);
   return {
     dealer_id: d.id,
     dealer: d.name,
     city: d.city,
     zone: d.zone,
     site: d.site,
+    host: usedHost,
     gold_999: headline.gold_999,
     gold_995: headline.gold_995,
     silver_999: headline.silver_999,
-    all_rows: rows,      // full grid available for a "show all rates" view
-    row_count: rows.length,
+    all_rows: mergedRows,      // full grid available for "show all rates" view
+    row_count: mergedRows.length,
     timestamp: new Date().toISOString(),
   };
 }
