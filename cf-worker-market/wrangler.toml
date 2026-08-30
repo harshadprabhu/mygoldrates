@@ -1,0 +1,11 @@
+name = "mygoldrates-market-api"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# No cron triggers — this is a request-driven worker (proxy + edge cache).
+# Deploy via .github/workflows/deploy-market-worker.yml (workflow_dispatch);
+# the deployed URL is https://mygoldrates-market-api.<account>.workers.dev
+# plus any custom route bound in the CF dashboard.
+
+[observability]
+enabled = true
