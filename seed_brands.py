@@ -76,6 +76,20 @@ REGIONAL_BRANDS = [
     {"name": "Indriya", "slug": "indriya", "domain": "indriya.com",
      "rate_url": "https://www.indriya.com",
      "active": True, "includes_gst": False},
+    # ORRA - diamond-jewellery-only brand. The previous rate_url pointed
+    # to a specific product (round-diamond-crown-star-pendant-set-in-rose-
+    # gold-osp20029) that started 404-ing around 28 Aug 2026, retiring the
+    # brand's live scrape and dropping it to `estimated` daily (market
+    # median filler, which generate_site.py filters out). ORRA also
+    # doesn't publish a per-gram rate on any /gold-rate-today path so
+    # scrape.py's path-discovery couldn't rescue it either. Anchor on a
+    # bestseller product page - every ORRA product page renders the per-
+    # gram gold rate straight into HTML in <span class="GoldRateGrams">
+    # ...</span>. Verified live: this earrings URL currently yields
+    # {'18K': 11611.72}, which the ladder converts to 24K ~ Rs 15,482/g.
+    {"name": "ORRA", "slug": "orra", "domain": "www.orra.co.in",
+     "rate_url": "https://www.orra.co.in/product/elegance-of-circle-astra-earrings-asn25a03-d900r1b",
+     "active": True, "includes_gst": False},
 ]
 
 
