@@ -1868,9 +1868,25 @@ def main():
   }}
   // Only wire when the drawer is present.
   if(!document.getElementById('mdrawer')) return;
+  // Live-tick every 3s so numbers visibly refresh — matches finmetpulse's
+  // felt cadence. Upstreams tick faster than that (Moneycontrol MCX
+  // pricefeed and gold-api both update every ~5-10s in practice), so a
+  // 3s poll actually surfaces changes; nothing is lost by not going
+  // faster. Pause when the tab is hidden so we don't drain battery or
+  // hammer the upstreams while the page is offscreen — a single tick
+  // fires on visibility restore so the display never shows stale
+  // values on tab-return. repaintNote runs 1s so the "Xs ago" counter
+  // and the mini pulse of the LIVE dot advance smoothly.
+  var LIVE_MS = 3000;
+  var pollTimer = null;
+  function startPolling(){{ if(!pollTimer){{ pollTimer = setInterval(tick, LIVE_MS); }} }}
+  function stopPolling(){{ if(pollTimer){{ clearInterval(pollTimer); pollTimer = null; }} }}
+  document.addEventListener('visibilitychange', function(){{
+    if(document.hidden){{ stopPolling(); }} else {{ tick(); startPolling(); }}
+  }});
   tick();
-  setInterval(tick, 60000);
-  setInterval(repaintNote, 15000);
+  startPolling();
+  setInterval(repaintNote, 1000);
 }})();
 </script>'''
 
