@@ -1887,6 +1887,135 @@ def main():
   tick();
   startPolling();
   setInterval(repaintNote, 1000);
+
+  // ─── Dealer rates, economic calendar, and 90-day OHLC ────────────────
+  // All three go through the mygoldrates-market-api Cloudflare Worker,
+  // which does the fetching + parsing + edge caching. See cf-worker-
+  // market/worker.js for the endpoints and their upstream sources.
+  var MK_API = 'https://mygoldrates-market-api.harshads-priority.workers.dev';
+  var metalTab = 'gold';
+  var vendorPrev = {{}};
+  function esc(s){{ return (s==null?'':String(s)).replace(/[<>&]/g,function(c){{return {{'<':'&lt;','>':'&gt;','&':'&amp;'}}[c]}}); }}
+  function fmtIn(n){{ if(n==null||!isFinite(n)) return '—'; return '\\u20B9'+Math.round(n).toLocaleString('en-IN'); }}
+  function paintVendors(vendors){{
+    var body = document.getElementById('vendorRows'); if(!body) return;
+    if(!vendors || !vendors.length){{
+      body.innerHTML = '<div class="v-empty">No dealer feeds responded this tick.</div>';
+      return;
+    }}
+    var rows = vendors.map(function(v){{
+      var slot = metalTab === 'silver' ? v.silver_999 : (v.gold_999 || v.gold_995);
+      var commodity = (slot && slot.commodity) || '—';
+      var price = slot && slot.price != null ? fmtIn(slot.price) : '—';
+      var dim = price === '—' ? ' dim' : '';
+      return '<div class="vrow" data-dealer="'+esc(v.dealer_id)+'">'+
+        '<div class="vrow-dealer">'+esc(v.dealer)+'</div>'+
+        '<div class="vrow-commodity">'+esc(commodity)+'</div>'+
+        '<div class="vrow-price'+dim+'">'+price+'</div>'+
+        '<div class="vrow-city">'+esc(v.city||'')+'</div></div>';
+    }}).join('');
+    body.innerHTML = rows;
+    vendors.forEach(function(v){{
+      var slot = metalTab === 'silver' ? v.silver_999 : (v.gold_999 || v.gold_995);
+      var now = slot && slot.price;
+      var prevKey = metalTab + ':' + v.dealer_id;
+      var prev = vendorPrev[prevKey];
+      if(prev != null && now != null && Math.abs(now - prev) >= 1){{
+        var row = body.querySelector('[data-dealer="'+v.dealer_id+'"]');
+        if(row){{
+          row.classList.remove('pulse-up','pulse-dn');
+          void row.offsetWidth;
+          row.classList.add(now > prev ? 'pulse-up' : 'pulse-dn');
+          setTimeout(function(){{ row.classList.remove('pulse-up','pulse-dn'); }}, 1200);
+        }}
+      }}
+      if(now != null) vendorPrev[prevKey] = now;
+    }});
+  }}
+  var lastVendors = [];
+  function fetchVendors(){{
+    fetch(MK_API + '/vendors').then(function(r){{return r.json()}}).then(function(j){{
+      lastVendors = (j && j.vendors) || [];
+      paintVendors(lastVendors);
+    }}).catch(function(){{ paintVendors([]); }});
+  }}
+  document.querySelectorAll('#mkMetalTabs .mk-metal-tab').forEach(function(btn){{
+    btn.addEventListener('click', function(){{
+      document.querySelectorAll('#mkMetalTabs .mk-metal-tab').forEach(function(b){{b.classList.remove('active')}});
+      btn.classList.add('active');
+      metalTab = btn.getAttribute('data-metal');
+      paintVendors(lastVendors);
+    }});
+  }});
+
+  // Economic calendar
+  function paintCalendar(events){{
+    var el = document.getElementById('calList'); if(!el) return;
+    if(!events || !events.length){{ el.innerHTML = '<div class="v-empty">No events this week.</div>'; return; }}
+    // Filter Medium + High only, USD country only, next 10.
+    var filtered = events.filter(function(e){{
+      var imp = (e.impact||'').toLowerCase();
+      var c = (e.country||'').toUpperCase();
+      return (imp==='medium'||imp==='high') && (c==='USD'||c==='US'||c==='');
+    }}).slice(0, 12);
+    if(!filtered.length){{ el.innerHTML = '<div class="v-empty">No Medium/High-impact USD events this week.</div>'; return; }}
+    el.innerHTML = filtered.map(function(e){{
+      var imp = (e.impact||'low').toLowerCase();
+      var d = e.date || ''; var t = e.time || '';
+      return '<div class="cal-item">'+
+        '<div class="cal-title">'+esc(e.title||'')+'</div>'+
+        '<div class="cal-time">'+esc(d)+' &middot; '+esc(t)+'</div>'+
+        '<span class="cal-impact '+imp+'">'+esc(e.impact||'')+'</span></div>';
+    }}).join('');
+  }}
+  function fetchCalendar(){{
+    fetch(MK_API + '/calendar').then(function(r){{return r.json()}}).then(function(j){{
+      paintCalendar((j && j.events) || []);
+    }}).catch(function(){{ paintCalendar([]); }});
+  }}
+
+  // 90-day OHLC sparkline (gold or silver via toggle)
+  var ohlcSym = 'XAU';
+  function paintOhlc(candles){{
+    var svg = document.getElementById('mkOhlcSvg'); if(!svg) return;
+    if(!candles || !candles.length){{ svg.innerHTML = ''; return; }}
+    var closes = candles.map(function(c){{ return c.c; }});
+    var lo = Math.min.apply(null, closes), hi = Math.max.apply(null, closes);
+    var w = 600, h = 120, pad = 4;
+    var pts = closes.map(function(v, i){{
+      var x = pad + (i / (closes.length - 1)) * (w - 2*pad);
+      var y = h - pad - ((v - lo) / (hi - lo || 1)) * (h - 2*pad);
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    }}).join(' ');
+    var fillPts = pts + ' ' + (w-pad) + ',' + (h-pad) + ' ' + pad + ',' + (h-pad);
+    var gold = ohlcSym === 'XAG' ? '#C0C0C0' : '#E3BF63';
+    svg.innerHTML =
+      '<polygon fill="'+gold+'" fill-opacity="0.14" points="'+fillPts+'" />' +
+      '<polyline fill="none" stroke="'+gold+'" stroke-width="1.4" points="'+pts+'" />';
+    var fmt = function(v){{ return ohlcSym==='XAG' ? '$'+v.toFixed(2) : '$'+Math.round(v).toLocaleString('en-US'); }};
+    var loEl = document.getElementById('mkOhlcLo'); if(loEl) loEl.textContent = 'Low '+fmt(lo);
+    var hiEl = document.getElementById('mkOhlcHi'); if(hiEl) hiEl.textContent = 'High '+fmt(hi);
+  }}
+  function fetchOhlc(){{
+    fetch(MK_API + '/ohlc?sym=' + ohlcSym + '&range=90').then(function(r){{return r.json()}}).then(function(j){{
+      paintOhlc((j && j.candles) || []);
+    }}).catch(function(){{ paintOhlc([]); }});
+  }}
+  document.querySelectorAll('#mkOhlcTabs .mk-ohlc-tab').forEach(function(btn){{
+    btn.addEventListener('click', function(){{
+      document.querySelectorAll('#mkOhlcTabs .mk-ohlc-tab').forEach(function(b){{b.classList.remove('active')}});
+      btn.classList.add('active');
+      ohlcSym = btn.getAttribute('data-sym');
+      fetchOhlc();
+    }});
+  }});
+
+  // Kick off the worker-fed blocks. Vendors polls at 15s (worker edge-
+  // caches 60s so most hits are free). Calendar/OHLC are much less
+  // volatile, so poll once at open and every hour thereafter.
+  fetchVendors(); setInterval(function(){{ if(!document.hidden) fetchVendors(); }}, 15000);
+  fetchCalendar(); setInterval(function(){{ if(!document.hidden) fetchCalendar(); }}, 3600000);
+  fetchOhlc();     setInterval(function(){{ if(!document.hidden) fetchOhlc(); }}, 3600000);
 }})();
 </script>'''
 
@@ -1917,6 +2046,37 @@ def main():
   date, so they usually sit below retail jeweller board rates, which add
   sourcing and hallmarking premiums. Watching both tells you where retail
   prices are likely headed.</p>
+
+  <h3>Live Dealer Rates</h3>
+  <p class="dnote">Live prices from bullion trading dealers via the shared
+  VOTS broadcast stream. Switch between metals; the table refreshes every
+  ~15 seconds.</p>
+  <div class="mk-metal-tabs" id="mkMetalTabs">
+    <button class="mk-metal-tab active" data-metal="gold">Gold</button>
+    <button class="mk-metal-tab" data-metal="silver">Silver</button>
+  </div>
+  <div class="vtable" id="vendorTable">
+    <div class="vtable-hd"><div>Dealer</div><div>Commodity</div><div>Price</div><div>City</div></div>
+    <div id="vendorRows"><div class="v-empty">Loading dealer rates&hellip;</div></div>
+  </div>
+
+  <h3>Spot Gold (XAU/USD) &middot; Last 90 Sessions</h3>
+  <p class="dnote">International spot gold price, daily close. Fed live
+  through the market API from Yahoo Finance's GC=F chart.</p>
+  <div class="mk-ohlc"><svg id="mkOhlcSvg" viewBox="0 0 600 120" preserveAspectRatio="none"><path fill="none"/></svg>
+    <div class="mk-ohlc-meta"><span id="mkOhlcLo">&mdash;</span><span id="mkOhlcHi">&mdash;</span></div>
+  </div>
+  <div class="mk-ohlc-tabs" id="mkOhlcTabs">
+    <button class="mk-ohlc-tab active" data-sym="XAU">Gold</button>
+    <button class="mk-ohlc-tab" data-sym="XAG">Silver</button>
+  </div>
+
+  <h3>Economic Calendar &middot; USD, Medium &amp; High Impact</h3>
+  <p class="dnote">Upcoming US macro releases pulled live from ForexFactory
+  through the market API. High-impact prints (NFP, CPI, FOMC) typically move
+  XAU/USD within minutes.</p>
+  <div class="cal-list" id="calList"><div class="v-empty">Loading US calendar&hellip;</div></div>
+
   {bullion_news_block}
   {market_live_script}
 </aside>'''
@@ -4441,6 +4601,55 @@ $gate_css
 .mk-live .live-badge{margin:0}
 .mk-live-note{font:500 11px/1.3 "IBM Plex Mono",monospace;color:var(--ink-3);
   letter-spacing:.04em}
+
+/* dealer / vendor rate table (worker-fed) */
+.mk-metal-tabs{display:inline-flex;gap:4px;margin:14px 0 8px;background:var(--card);
+  border:1px solid var(--line);border-radius:99px;padding:3px}
+.mk-metal-tab{background:transparent;border:none;font:700 11px "IBM Plex Mono",monospace;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);padding:6px 14px;border-radius:99px;cursor:pointer}
+.mk-metal-tab.active{background:var(--gold);color:#1a0e00}
+.vtable{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px}
+.vtable-hd{display:grid;grid-template-columns:1.3fr 1.6fr 1fr .7fr;gap:8px;
+  padding:9px 12px;font:700 10px "IBM Plex Mono",monospace;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);background:color-mix(in srgb,var(--gold-foil) 8%,var(--card));
+  border-bottom:1px solid var(--line)}
+.vrow{display:grid;grid-template-columns:1.3fr 1.6fr 1fr .7fr;gap:8px;padding:11px 12px;
+  border-bottom:1px solid var(--line);align-items:center;font-size:13px;
+  transition:background-color .4s ease}
+.vrow:last-child{border-bottom:none}
+.vrow-dealer{font-weight:700;color:var(--ink)}
+.vrow-commodity{color:var(--ink-2);font-size:12px;font-family:"IBM Plex Mono",monospace}
+.vrow-price{font-family:"IBM Plex Mono",monospace;font-weight:700;color:var(--gold);letter-spacing:-.2px}
+.vrow-price.dim{color:var(--ink-3);font-weight:500}
+.vrow-city{color:var(--ink-3);font-size:12px}
+.vrow.pulse-up{background:color-mix(in srgb,#2E9F70 10%,transparent)}
+.vrow.pulse-dn{background:color-mix(in srgb,#C9524B 10%,transparent)}
+.v-empty{padding:16px;text-align:center;color:var(--ink-3);font-size:12px}
+.mk-title{font:700 11px "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);margin:20px 0 6px}
+
+/* economic calendar strip */
+.cal-list{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.cal-item{display:grid;grid-template-columns:1.7fr 1fr .6fr;gap:8px;padding:10px 12px;
+  background:var(--card);border:1px solid var(--line);border-radius:10px;align-items:center;font-size:12.5px}
+.cal-title{color:var(--ink);line-height:1.35}
+.cal-time{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-2)}
+.cal-impact{display:inline-flex;padding:2px 8px;border-radius:99px;font:700 9.5px "IBM Plex Mono",monospace;
+  letter-spacing:.14em;text-transform:uppercase;justify-self:end}
+.cal-impact.high{color:#C9524B;background:rgba(201,82,75,.12)}
+.cal-impact.medium{color:#D9A441;background:rgba(217,164,65,.13)}
+.cal-impact.low{color:var(--ink-3);background:rgba(150,150,150,.08)}
+
+/* 90-day OHLC sparkline */
+.mk-ohlc{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:14px;margin-top:8px}
+.mk-ohlc svg{width:100%;height:120px;display:block}
+.mk-ohlc-meta{display:flex;justify-content:space-between;margin-top:6px;
+  font:600 10.5px "IBM Plex Mono",monospace;color:var(--ink-3);letter-spacing:.06em}
+.mk-ohlc-tabs{display:inline-flex;gap:4px;margin-top:12px}
+.mk-ohlc-tab{background:var(--card);border:1px solid var(--line);color:var(--ink-3);
+  padding:4px 12px;border-radius:99px;cursor:pointer;font:700 10.5px "IBM Plex Mono",monospace;letter-spacing:.14em}
+.mk-ohlc-tab.active{background:var(--gold);color:#1a0e00;border-color:var(--gold)}
 
 /* live market pulse badge */
 .live-badge{display:inline-flex;align-items:center;gap:7px;font:700 10.5px/1 "IBM Plex Mono",monospace;
