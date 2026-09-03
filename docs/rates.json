@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-03",
-  "last_updated": "2026-09-03T19:09:35.108908+05:30",
+  "last_updated": "2026-09-03T20:44:29.771670+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 15542.73,
-    "22k": 14247.5,
-    "18k": 11657.04
+    "24k": 15541.95,
+    "22k": 14246.79,
+    "18k": 11656.47
   },
   "lowest_24k": {
     "jeweller": "Kalyan Jewellers",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 155205.0,
-      "change_pct": 1.84
+      "price_per_10g_inr": 155925.0,
+      "change_pct": 2.31
     },
     {
       "contract": "GOLDM",
       "expiry": "04SEP2026",
-      "price_per_10g_inr": 154600.0,
-      "change_pct": 1.74
+      "price_per_10g_inr": 154989.0,
+      "change_pct": 2.0
     }
   ],
   "jewellers": [
@@ -100,6 +100,12 @@
       "rate_18k_per_gram_inr": 11655.0
     },
     {
+      "jeweller": "ORRA",
+      "rate_24k_per_gram_inr": 15543.91,
+      "rate_22k_per_gram_inr": 14248.58,
+      "rate_18k_per_gram_inr": 11657.93
+    },
+    {
       "jeweller": "Senco Gold",
       "rate_24k_per_gram_inr": 15545.45,
       "rate_22k_per_gram_inr": 14250.0,
@@ -116,12 +122,6 @@
       "rate_24k_per_gram_inr": 15546.0,
       "rate_22k_per_gram_inr": 14250.5,
       "rate_18k_per_gram_inr": 11659.5
-    },
-    {
-      "jeweller": "ORRA",
-      "rate_24k_per_gram_inr": 15547.95,
-      "rate_22k_per_gram_inr": 14252.29,
-      "rate_18k_per_gram_inr": 11660.96
     },
     {
       "jeweller": "Tanishq",
@@ -148,16 +148,16 @@
       "rate_18k_per_gram_inr": 11740.53
     },
     {
-      "jeweller": "Waman Hari Pethe",
-      "rate_24k_per_gram_inr": 15736.0,
-      "rate_22k_per_gram_inr": 14424.67,
-      "rate_18k_per_gram_inr": 11802.0
-    },
-    {
       "jeweller": "Ranka Jewellers",
       "rate_24k_per_gram_inr": 15865.0,
       "rate_22k_per_gram_inr": 14542.92,
       "rate_18k_per_gram_inr": 11898.75
+    },
+    {
+      "jeweller": "Waman Hari Pethe",
+      "rate_24k_per_gram_inr": 15869.0,
+      "rate_22k_per_gram_inr": 14546.58,
+      "rate_18k_per_gram_inr": 11901.75
     }
   ],
   "jeweller_count": 21,
