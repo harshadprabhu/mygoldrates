@@ -1,24 +1,24 @@
 /*
-  Last-Modified: Thu, 03 Sep 2026 09:15:32 GMT
+  Last-Modified: Thu, 03 Sep 2026 10:55:23 GMT
   Cache-Control: public, max-age=300, s-maxage=600, must-revalidate
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Robots-Tag: index, follow, max-image-preview:large
 
 /*.html
-  Last-Modified: Thu, 03 Sep 2026 09:15:32 GMT
+  Last-Modified: Thu, 03 Sep 2026 10:55:23 GMT
   Cache-Control: public, max-age=300, s-maxage=600, must-revalidate
 
 /sitemap.xml
-  Last-Modified: Thu, 03 Sep 2026 09:15:32 GMT
+  Last-Modified: Thu, 03 Sep 2026 10:55:23 GMT
   Cache-Control: public, max-age=0, must-revalidate
 
 /sitemap_news.xml
-  Last-Modified: Thu, 03 Sep 2026 09:15:32 GMT
+  Last-Modified: Thu, 03 Sep 2026 10:55:23 GMT
   Cache-Control: public, max-age=0, must-revalidate
 
 /rates.json
-  Last-Modified: Thu, 03 Sep 2026 09:15:32 GMT
+  Last-Modified: Thu, 03 Sep 2026 10:55:23 GMT
   Cache-Control: public, max-age=60, must-revalidate
 
 /robots.txt
