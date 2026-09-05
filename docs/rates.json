@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-05",
-  "last_updated": "2026-09-05T17:05:46.468137+05:30",
+  "last_updated": "2026-09-05T18:16:59.210886+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 15487.0,
-    "22k": 14196.42,
-    "18k": 11615.25
+    "24k": 15482.5,
+    "22k": 14192.29,
+    "18k": 11611.88
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -82,6 +82,12 @@
       "rate_18k_per_gram_inr": 11610.0
     },
     {
+      "jeweller": "Bhima Jewels",
+      "rate_24k_per_gram_inr": 15480.0,
+      "rate_22k_per_gram_inr": 14190.0,
+      "rate_18k_per_gram_inr": 11610.0
+    },
+    {
       "jeweller": "Joyalukkas",
       "rate_24k_per_gram_inr": 15480.0,
       "rate_22k_per_gram_inr": 14190.0,
@@ -98,12 +104,6 @@
       "rate_24k_per_gram_inr": 15485.0,
       "rate_22k_per_gram_inr": 14194.58,
       "rate_18k_per_gram_inr": 11613.75
-    },
-    {
-      "jeweller": "Bhima Jewels",
-      "rate_24k_per_gram_inr": 15489.0,
-      "rate_22k_per_gram_inr": 14198.25,
-      "rate_18k_per_gram_inr": 11616.75
     },
     {
       "jeweller": "Vummidi Bangaru",
