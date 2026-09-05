@@ -3,21 +3,21 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-05",
-  "last_updated": "2026-09-05T12:26:43.448729+05:30",
+  "last_updated": "2026-09-05T13:19:35.499844+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 15550.8,
-    "22k": 14254.9,
-    "18k": 11663.1
+    "24k": 15507.05,
+    "22k": 14214.79,
+    "18k": 11630.28
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
     "rate_per_gram_inr": 15315.0
   },
   "ibja_reference_24k_999_per_gram_inr": null,
-  "akgsma_south_india_22k_per_gram_inr": null,
+  "akgsma_south_india_22k_per_gram_inr": 14190.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
@@ -88,6 +88,12 @@
       "rate_18k_per_gram_inr": 11610.0
     },
     {
+      "jeweller": "Indriya",
+      "rate_24k_per_gram_inr": 15480.0,
+      "rate_22k_per_gram_inr": 14190.0,
+      "rate_18k_per_gram_inr": 11610.0
+    },
+    {
       "jeweller": "Jos Alukkas",
       "rate_24k_per_gram_inr": 15485.0,
       "rate_22k_per_gram_inr": 14194.58,
@@ -124,12 +130,6 @@
       "rate_18k_per_gram_inr": 11696.38
     },
     {
-      "jeweller": "Indriya",
-      "rate_24k_per_gram_inr": 15665.45,
-      "rate_22k_per_gram_inr": 14360.0,
-      "rate_18k_per_gram_inr": 11749.09
-    },
-    {
       "jeweller": "Bhima Jewels",
       "rate_24k_per_gram_inr": 15669.0,
       "rate_22k_per_gram_inr": 14363.25,
@@ -142,16 +142,16 @@
       "rate_18k_per_gram_inr": 11757.75
     },
     {
-      "jeweller": "Ranka Jewellers",
-      "rate_24k_per_gram_inr": 15710.0,
-      "rate_22k_per_gram_inr": 14400.83,
-      "rate_18k_per_gram_inr": 11782.5
-    },
-    {
       "jeweller": "Kisna",
       "rate_24k_per_gram_inr": 15720.36,
       "rate_22k_per_gram_inr": 14410.33,
       "rate_18k_per_gram_inr": 11790.27
+    },
+    {
+      "jeweller": "Ranka Jewellers",
+      "rate_24k_per_gram_inr": 15780.0,
+      "rate_22k_per_gram_inr": 14465.0,
+      "rate_18k_per_gram_inr": 11835.0
     },
     {
       "jeweller": "Waman Hari Pethe",
