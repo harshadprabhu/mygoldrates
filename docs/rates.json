@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-07",
-  "last_updated": "2026-09-07T14:03:52.627314+05:30",
+  "last_updated": "2026-09-07T15:17:55.531408+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 15434.45,
-    "22k": 14148.25,
-    "18k": 11575.84
+    "24k": 15420.5,
+    "22k": 14135.46,
+    "18k": 11565.38
   },
   "lowest_24k": {
     "jeweller": "Senco Gold",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 153135.0,
-      "change_pct": 0.24
+      "price_per_10g_inr": 152830.0,
+      "change_pct": 0.04
     },
     {
       "contract": "GOLDM",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 153320.0,
-      "change_pct": 0.27
+      "price_per_10g_inr": 153005.0,
+      "change_pct": 0.06
     }
   ],
   "jewellers": [
@@ -46,16 +46,22 @@
       "rate_18k_per_gram_inr": 11401.42
     },
     {
-      "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 15270.0,
-      "rate_22k_per_gram_inr": 13997.5,
-      "rate_18k_per_gram_inr": 11452.5
-    },
-    {
       "jeweller": "PN Gadgil",
       "rate_24k_per_gram_inr": 15275.0,
       "rate_22k_per_gram_inr": 14002.08,
       "rate_18k_per_gram_inr": 11456.25
+    },
+    {
+      "jeweller": "Chandukaka Saraf",
+      "rate_24k_per_gram_inr": 15310.0,
+      "rate_22k_per_gram_inr": 14034.17,
+      "rate_18k_per_gram_inr": 11482.5
+    },
+    {
+      "jeweller": "Bhima Jewels",
+      "rate_24k_per_gram_inr": 15414.55,
+      "rate_22k_per_gram_inr": 14130.0,
+      "rate_18k_per_gram_inr": 11560.91
     },
     {
       "jeweller": "Indriya",
@@ -128,12 +134,6 @@
       "rate_24k_per_gram_inr": 15468.69,
       "rate_22k_per_gram_inr": 14179.63,
       "rate_18k_per_gram_inr": 11601.52
-    },
-    {
-      "jeweller": "Bhima Jewels",
-      "rate_24k_per_gram_inr": 15489.0,
-      "rate_22k_per_gram_inr": 14198.25,
-      "rate_18k_per_gram_inr": 11616.75
     },
     {
       "jeweller": "CaratLane",
