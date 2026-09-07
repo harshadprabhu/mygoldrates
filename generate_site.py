@@ -3250,8 +3250,58 @@ def main():
                           "name": "Home", "item": home_url}]},
                 ]}, ensure_ascii=False)
             + "</script>\n")
+        # Analytics tracker: fires a page_views insert on load and delegated
+        # click_events inserts on interactive clicks (dedup 2s per label).
+        # Same table + shape as the classic TEMPLATE pages use via signup.js,
+        # so /compare and / write into the same page_views stream and the
+        # dashboard sums them together. pulse_app.html has no signup.js
+        # dependency, so we inline the tracker directly here - no extra JS
+        # file to load, no gate/modal/OTP code to conflict with the app's
+        # own Google Identity Services flow.
+        analytics_js = (
+            '<script>window.GR_SB_URL=' + json.dumps(supabase_url)
+            + ';window.GR_SB_KEY=' + json.dumps(anon_key) + ';</script>\n'
+            '<script>(function(){\n'
+            '  var SB=window.GR_SB_URL||"",KEY=window.GR_SB_KEY||"";\n'
+            '  if(!SB||!KEY)return;\n'
+            '  var SID;\n'
+            '  try{\n'
+            '    SID=localStorage.getItem("gr_sid");\n'
+            '    if(!SID){\n'
+            '      SID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():\n'
+            '        (Date.now().toString(36)+Math.random().toString(36).slice(2));\n'
+            '      localStorage.setItem("gr_sid",SID);\n'
+            '    }\n'
+            '  }catch(e){SID="";}\n'
+            '  function post(table,row,retried){\n'
+            '    fetch(SB+"/rest/v1/"+table,{method:"POST",\n'
+            '      headers:{"Content-Type":"application/json","apikey":KEY,\n'
+            '               "Authorization":"Bearer "+KEY,"Prefer":"return=minimal"},\n'
+            '      body:JSON.stringify(row)}).then(function(r){\n'
+            '        if(!r.ok&&!retried&&row.host!==undefined){\n'
+            '          var row2={};for(var k in row){if(k!=="host")row2[k]=row[k];}\n'
+            '          post(table,row2,true);\n'
+            '        }\n'
+            '      }).catch(function(){});\n'
+            '  }\n'
+            '  post("page_views",{page:location.pathname,referrer:document.referrer||null,\n'
+            '    session_id:SID,host:location.hostname});\n'
+            '  var lastTarget=null,lastAt=0;\n'
+            '  document.addEventListener("click",function(e){\n'
+            '    var el=e.target&&e.target.closest?\n'
+            '      e.target.closest("a[href],button,input[type=\\"submit\\"],[role=\\"button\\"]"):null;\n'
+            '    if(!el)return;\n'
+            '    var label=el.id||el.getAttribute("data-track")||\n'
+            '      (el.textContent||"").trim().slice(0,60)||el.tagName.toLowerCase();\n'
+            '    if(!label)return;\n'
+            '    var now=Date.now();\n'
+            '    if(label===lastTarget&&now-lastAt<2000)return;\n'
+            '    lastTarget=label;lastAt=now;\n'
+            '    post("click_events",{page:location.pathname,target:label,session_id:SID});\n'
+            '  },true);\n'
+            '})();</script>\n')
         pulse_html = pulse_html.replace(
-            "</head>", extra_ld + "</head>", 1)
+            "</head>", extra_ld + analytics_js + "</head>", 1)
         # Homepage now lives at docs/index.html - overwrites what TEMPLATE
         # used to write (that content is at docs/compare.html now).
         with open("docs/index.html", "w", encoding="utf-8") as f:
@@ -7410,6 +7460,8 @@ td.path{color:var(--accent);word-break:break-all}
     <button class="btn ghost" id="today">Today</button>
     <button class="btn ghost" id="quick7">Last 7d</button>
     <button class="btn ghost" id="quick30">Last 30d</button>
+    <button class="btn ghost" id="quick90">Last 90d</button>
+    <button class="btn ghost" id="alltime">All time</button>
     <span class="status" id="status"></span>
   </div>
 
@@ -7462,9 +7514,14 @@ td.path{color:var(--accent);word-break:break-all}
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
-  // default range: today only
+  // default range: last 30 days (was today only, which made the KPIs read
+  // as if the site had only ever had today's traffic - a bad first-look
+  // impression when the site has hundreds of pageviews/day for months).
+  // 30d is a common default across analytics tools; users can drop back
+  // to Today or extend to All time with the buttons below.
   var today=todayIST();
-  $('from').value=iso(today); $('to').value=iso(today);
+  var d30=todayIST(); d30.setUTCDate(d30.getUTCDate()-29);
+  $('from').value=iso(d30); $('to').value=iso(today);
 
   // friendly names for click labels (raw element ids -> readable actions)
   var CLICK_LABELS={
@@ -7578,6 +7635,13 @@ td.path{color:var(--accent);word-break:break-all}
     $('from').value=iso(b);$('to').value=iso(a);load();};
   $('quick30').onclick=function(){var a=todayIST(),b=todayIST();b.setUTCDate(b.getUTCDate()-29);
     $('from').value=iso(b);$('to').value=iso(a);load();};
+  $('quick90').onclick=function(){var a=todayIST(),b=todayIST();b.setUTCDate(b.getUTCDate()-89);
+    $('from').value=iso(b);$('to').value=iso(a);load();};
+  // All time: earliest possible - the site launched mid-2026, but pick a
+  // date safely earlier so no history is chopped off if analytics landed
+  // sooner than expected.
+  $('alltime').onclick=function(){var a=todayIST();
+    $('from').value='2024-01-01';$('to').value=iso(a);load();};
   $('page').onchange=load;
   load();
 })();
