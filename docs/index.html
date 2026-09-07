@@ -538,7 +538,47 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   .site-calc-body{grid-template-columns:1fr}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://mygoldrates.com/#webpage", "url": "https://mygoldrates.com/", "name": "Gold Rate Today in India - Live 24K, 22K, 18K Rates from 14+ Jewellers | MyGoldRates", "description": "Live gold rate today across 14+ Indian jewellers, with MCX gold/silver futures, IBJA reference and real-time market data updated every 3 seconds. Compare 24K, 22K and 18K per-gram prices pre-GST.", "inLanguage": "en-IN", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/", "name": "MyGoldRates.com"}, "dateModified": "2026-09-07T17:29:43.016438+05:30", "primaryImageOfPage": "https://mygoldrates.com/og.png", "significantLink": ["https://mygoldrates.com/compare", "https://mygoldrates.com/news", "https://mygoldrates.com/calculators"]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://mygoldrates.com/#webpage", "url": "https://mygoldrates.com/", "name": "Gold Rate Today in India - Live 24K, 22K, 18K Rates from 14+ Jewellers | MyGoldRates", "description": "Live gold rate today across 14+ Indian jewellers, with MCX gold/silver futures, IBJA reference and real-time market data updated every 3 seconds. Compare 24K, 22K and 18K per-gram prices pre-GST.", "inLanguage": "en-IN", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/", "name": "MyGoldRates.com"}, "dateModified": "2026-09-07T19:50:39.852569+05:30", "primaryImageOfPage": "https://mygoldrates.com/og.png", "significantLink": ["https://mygoldrates.com/compare", "https://mygoldrates.com/news", "https://mygoldrates.com/calculators"]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}]}]}</script>
+<script>window.GR_SB_URL="https://opwrfflzzowhobesysmr.supabase.co";window.GR_SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE";</script>
+<script>(function(){
+  var SB=window.GR_SB_URL||"",KEY=window.GR_SB_KEY||"";
+  if(!SB||!KEY)return;
+  var SID;
+  try{
+    SID=localStorage.getItem("gr_sid");
+    if(!SID){
+      SID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():
+        (Date.now().toString(36)+Math.random().toString(36).slice(2));
+      localStorage.setItem("gr_sid",SID);
+    }
+  }catch(e){SID="";}
+  function post(table,row,retried){
+    fetch(SB+"/rest/v1/"+table,{method:"POST",
+      headers:{"Content-Type":"application/json","apikey":KEY,
+               "Authorization":"Bearer "+KEY,"Prefer":"return=minimal"},
+      body:JSON.stringify(row)}).then(function(r){
+        if(!r.ok&&!retried&&row.host!==undefined){
+          var row2={};for(var k in row){if(k!=="host")row2[k]=row[k];}
+          post(table,row2,true);
+        }
+      }).catch(function(){});
+  }
+  post("page_views",{page:location.pathname,referrer:document.referrer||null,
+    session_id:SID,host:location.hostname});
+  var lastTarget=null,lastAt=0;
+  document.addEventListener("click",function(e){
+    var el=e.target&&e.target.closest?
+      e.target.closest("a[href],button,input[type=\"submit\"],[role=\"button\"]"):null;
+    if(!el)return;
+    var label=el.id||el.getAttribute("data-track")||
+      (el.textContent||"").trim().slice(0,60)||el.tagName.toLowerCase();
+    if(!label)return;
+    var now=Date.now();
+    if(label===lastTarget&&now-lastAt<2000)return;
+    lastTarget=label;lastAt=now;
+    post("click_events",{page:location.pathname,target:label,session_id:SID});
+  },true);
+})();</script>
 </head>
 <body>
 

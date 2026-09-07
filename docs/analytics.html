@@ -66,6 +66,8 @@ td.path{color:var(--accent);word-break:break-all}
     <button class="btn ghost" id="today">Today</button>
     <button class="btn ghost" id="quick7">Last 7d</button>
     <button class="btn ghost" id="quick30">Last 30d</button>
+    <button class="btn ghost" id="quick90">Last 90d</button>
+    <button class="btn ghost" id="alltime">All time</button>
     <span class="status" id="status"></span>
   </div>
 
@@ -118,9 +120,14 @@ td.path{color:var(--accent);word-break:break-all}
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
-  // default range: today only
+  // default range: last 30 days (was today only, which made the KPIs read
+  // as if the site had only ever had today's traffic - a bad first-look
+  // impression when the site has hundreds of pageviews/day for months).
+  // 30d is a common default across analytics tools; users can drop back
+  // to Today or extend to All time with the buttons below.
   var today=todayIST();
-  $('from').value=iso(today); $('to').value=iso(today);
+  var d30=todayIST(); d30.setUTCDate(d30.getUTCDate()-29);
+  $('from').value=iso(d30); $('to').value=iso(today);
 
   // friendly names for click labels (raw element ids -> readable actions)
   var CLICK_LABELS={
@@ -234,6 +241,13 @@ td.path{color:var(--accent);word-break:break-all}
     $('from').value=iso(b);$('to').value=iso(a);load();};
   $('quick30').onclick=function(){var a=todayIST(),b=todayIST();b.setUTCDate(b.getUTCDate()-29);
     $('from').value=iso(b);$('to').value=iso(a);load();};
+  $('quick90').onclick=function(){var a=todayIST(),b=todayIST();b.setUTCDate(b.getUTCDate()-89);
+    $('from').value=iso(b);$('to').value=iso(a);load();};
+  // All time: earliest possible - the site launched mid-2026, but pick a
+  // date safely earlier so no history is chopped off if analytics landed
+  // sooner than expected.
+  $('alltime').onclick=function(){var a=todayIST();
+    $('from').value='2024-01-01';$('to').value=iso(a);load();};
   $('page').onchange=load;
   load();
 })();
