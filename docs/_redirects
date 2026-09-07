@@ -1,0 +1,3 @@
+# Legacy /pulse redirects to / (homepage is Market Pulse since Sep 2026).
+/pulse    /    301
+/pulse/   /    301

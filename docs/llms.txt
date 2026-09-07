@@ -1,22 +1,22 @@
 # MyGoldRates.com
 
 > India's daily gold rate comparison platform. We publish today's 24K, 22K
-> and 18K gold rates compared across 14 of India's leading
+> and 18K gold rates compared across 21 of India's leading
 > jewellers, with the IBJA bullion reference and MCX gold futures, updated
 > every day. All rates are per gram in Indian Rupees (INR), pre-GST.
 
 ## Today's gold rate in India (07 September 2026)
-- 24K (999) median: ₹15,464 per gram (pre-GST)
-- 22K (916) median: ₹14,175 per gram (pre-GST)
-- 18K (750) median: ₹11,598 per gram (pre-GST)
-- Lowest 24K today: ₹15,354 per gram at Senco Gold
+- 24K (999) median: ₹15,475 per gram (pre-GST)
+- 22K (916) median: ₹14,185 per gram (pre-GST)
+- 18K (750) median: ₹11,606 per gram (pre-GST)
+- Lowest 24K today: ₹15,275 per gram at PN Gadgil
 
-- MCX gold futures (05OCT2026): ₹152,599 per 10g (995), -0.11%
-- Last updated: 2026-09-07T11:05:35.541076+05:30
+- MCX gold futures (05OCT2026): ₹152,530 per 10g (995), -0.16%
+- Last updated: 2026-09-07T11:13:13.291795+05:30
 
 ## Key pages
-- Home / today's rates: https://mygoldrates.com/
-- Market Pulse (live, ticking every 3s - gold/silver spot, MCX futures, vendor rates, OHLC, economic calendar): https://mygoldrates.com/pulse
+- Home (Market Pulse - live, ticking every 3s: gold/silver spot, MCX futures, IBJA reference, vendor rates, 90-day OHLC, economic calendar): https://mygoldrates.com/
+- Detailed jeweller comparison (14+ brands, per-gram 24K/22K/18K, lowest-first, GST toggle, FAQ): https://mygoldrates.com/compare
 - Market news & daily recap: https://mygoldrates.com/news
 - Machine-readable JSON feed: https://mygoldrates.com/rates.json
 - Daily email alerts: https://mygoldrates.com/inquiry
@@ -33,7 +33,7 @@
 - Bullion news feed: /news
 
 ## About the data
-- Coverage: 14 major Indian jewellers plus the IBJA bullion benchmark and MCX gold futures.
+- Coverage: 21 major Indian jewellers plus the IBJA bullion benchmark and MCX gold futures.
 - Purities: 24K (99.9% / 999), 22K (91.6% / 916), 18K (75.0% / 750).
 - Unit & currency: per gram, Indian Rupees (INR).
 - GST: rates shown are pre-GST; add 3% GST for the billed price. Making charges are extra and vary by design.
