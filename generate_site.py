@@ -3152,6 +3152,106 @@ def main():
         f.write(analytics_page)
     print("analytics dashboard: wrote docs/analytics.html (token via URL hash)")
 
+    # ---- /pulse: Market Pulse single-page experience (from app-test) ------
+    # We ship the app-test single-file HTML as a first-class production
+    # section at /pulse. Keeps the fast-iterating live-market UI shippable
+    # without touching generate_site.py's rendering, and gives Google a rich,
+    # engagement-heavy page to reward on freshness signals (all its rates
+    # tick every 3s via the CF worker at /market, /vendors, /ohlc, ...).
+    # We rewrite canonical + og:url + title + description + JSON-LD so it
+    # doesn't duplicate the homepage.
+    try:
+        with open("pulse_app.html", encoding="utf-8") as f:
+            pulse_html = f.read()
+        pulse_title = ("Market Pulse - Live Gold & Silver Rates, MCX Futures, "
+                       "Vendor Prices | MyGoldRates")
+        pulse_desc = ("Live gold and silver rates, MCX gold/silver futures, "
+                      "IBJA reference, jeweller vendor prices, 90-day OHLC "
+                      "charts and the week's economic calendar - all "
+                      "updating live every 3 seconds. India's real-time "
+                      "bullion market pulse.")
+        pulse_canonical = f"{SITE_URL}/pulse"
+        pulse_url = f"{SITE_URL}/pulse"
+        replacements = [
+            # canonical + og:url + twitter -> /pulse
+            ('<link rel="canonical" href="https://mygoldrates.com/">',
+             f'<link rel="canonical" href="{pulse_canonical}">'),
+            ('<meta property="og:url" content="https://mygoldrates.com/">',
+             f'<meta property="og:url" content="{pulse_url}">'),
+            # title + description tuned to /pulse (unique so Google doesn't
+            # dedupe against the homepage)
+            ("<title>Gold Rate Today in India - Compare 14+ Jewellers | "
+             "MyGoldRates</title>",
+             f"<title>{pulse_title}</title>"),
+            ('<meta name="description" content="Live 24K, 22K & 18K gold '
+             'rates from 14+ Indian jewellers, updated daily. Pre-GST '
+             'prices, calculators (loan, SIP, making charges, budget) '
+             'and market pulse — MyGoldRates.">',
+             f'<meta name="description" content="{pulse_desc}">'),
+            # OG title/description
+            ('<meta property="og:title" content="Gold Rate Today in India '
+             '- Compare 14+ Jewellers">',
+             '<meta property="og:title" content="Market Pulse - Live Gold, '
+             'Silver, MCX Futures | MyGoldRates">'),
+            ('<meta property="og:description" content="Live 24K, 22K & 18K '
+             'gold rates from 14+ Indian jewellers, updated daily.">',
+             f'<meta property="og:description" content="{pulse_desc[:160]}">'),
+            # twitter card
+            ('<meta name="twitter:title" content="Gold Rate Today in India '
+             '- Compare Jewellers">',
+             '<meta name="twitter:title" content="Market Pulse - Live Gold '
+             '& Silver | MyGoldRates">'),
+            ('<meta name="twitter:description" content="Live 24K, 22K & '
+             '18K gold rates from 14+ Indian jewellers, updated daily.">',
+             f'<meta name="twitter:description" content="{pulse_desc[:160]}">'),
+        ]
+        pulse_missing = []
+        for old, new in replacements:
+            if old not in pulse_html:
+                pulse_missing.append(old[:60])
+                continue
+            pulse_html = pulse_html.replace(old, new, 1)
+        if pulse_missing:
+            # Fail loudly rather than ship a page pointing at the homepage
+            # canonical - a duplicate canonical is worse than no /pulse.
+            raise RuntimeError("pulse_app.html header changed - patch these: "
+                               + ", ".join(pulse_missing))
+        # Inject an extra JSON-LD block with Breadcrumb + WebPage that
+        # anchors the page at /pulse in Google's index. Placed just after
+        # the existing app-test JSON-LD graph so both coexist.
+        extra_ld = (
+            '<script type="application/ld+json">'
+            + json.dumps({
+                "@context": "https://schema.org",
+                "@graph": [
+                    {"@type": "WebPage", "url": pulse_url,
+                     "name": pulse_title,
+                     "description": pulse_desc,
+                     "inLanguage": "en-IN",
+                     "isPartOf": {"@type": "WebSite",
+                                  "url": f"{SITE_URL}/",
+                                  "name": "MyGoldRates.com"},
+                     "dateModified": now_ist.isoformat(),
+                     "primaryImageOfPage": f"{SITE_URL}/og.png"},
+                    {"@type": "BreadcrumbList",
+                     "itemListElement": [
+                         {"@type": "ListItem", "position": 1,
+                          "name": "Home", "item": f"{SITE_URL}/"},
+                         {"@type": "ListItem", "position": 2,
+                          "name": "Market Pulse", "item": pulse_url}]},
+                ]}, ensure_ascii=False)
+            + "</script>\n")
+        pulse_html = pulse_html.replace(
+            "</head>", extra_ld + "</head>", 1)
+        os.makedirs("docs/pulse", exist_ok=True)
+        with open("docs/pulse/index.html", "w", encoding="utf-8") as f:
+            f.write(pulse_html)
+        print(f"pulse: wrote docs/pulse/index.html "
+              f"({len(pulse_html):,} bytes)")
+    except FileNotFoundError:
+        print("pulse: pulse_app.html not found in repo root - skipping "
+              "/pulse build")
+
     with open("docs/robots.txt", "w", encoding="utf-8") as f:
         # Explicitly welcome AI/LLM crawlers so generative engines (ChatGPT,
         # AI assistants, Perplexity, Gemini/AI Overviews, etc.) can index and cite us.
@@ -3164,7 +3264,14 @@ def main():
         for bot in ai_bots:
             f.write(f"User-agent: {bot}\nAllow: /\n\n")
         f.write(f"User-agent: *\nAllow: /\nDisallow: /analytics\nDisallow: /analytics.html\n\n"
+                # sitemap.xml is a sitemap-index that references the four
+                # per-section sub-sitemaps (main, cities, daily, news).
+                # Listing every one here as well is redundant but harmless
+                # and gives Google an extra discovery path.
                 f"Sitemap: {SITE_URL}/sitemap.xml\n"
+                f"Sitemap: {SITE_URL}/sitemap_main.xml\n"
+                f"Sitemap: {SITE_URL}/sitemap_cities.xml\n"
+                f"Sitemap: {SITE_URL}/sitemap_daily.xml\n"
                 f"Sitemap: {SITE_URL}/sitemap_news.xml\n"
                 f"# AI summary: {SITE_URL}/llms.txt\n"
                 f"# Machine-readable rates: {SITE_URL}/rates.json\n")
@@ -3264,42 +3371,73 @@ def main():
                 '        xmlns:news="http://www.google.com/schemas/'
                 'sitemap-news/0.9">\n'
                 + news_urls + "</urlset>\n")
-    with open("docs/sitemap.xml", "w", encoding="utf-8") as f:
+    # W3C-datetime lastmod (with the actual build time) is a stronger
+    # freshness signal to Google than a bare date, and matches what our
+    # Last-Modified HTTP header serves - so IMS conditional GETs line up.
+    lastmod_full = now_ist.strftime("%Y-%m-%dT%H:%M:%S+05:30")
+
+    # Split into per-section sub-sitemaps + a sitemap-index root so Google
+    # can process them independently, spot per-section drops, and requeue
+    # a single section without invalidating the rest.
+    def _url(loc, lm, cf, pr):
+        return (f"  <url><loc>{SITE_URL}/{loc}</loc>"
+                f"<lastmod>{lm}</lastmod>"
+                f"<changefreq>{cf}</changefreq>"
+                f"<priority>{pr:.1f}</priority></url>\n")
+
+    # main: home + Market Pulse + evergreen (calculators, learn, inquiry)
+    main_urls = (
+        _url("", lastmod_full, "hourly", 1.0)
+        + _url("pulse", lastmod_full, "hourly", 0.95)
+        + _url("news", lastmod_full, "hourly", 0.85)
+        + _url("inquiry", lastmod_full, "monthly", 0.6)
+        + "".join(_url(p, today, "monthly", 0.4)
+                  for p in ("about", "contact", "privacy", "methodology"))
+        + "".join(_url(loc, today, cf, float(pr))
+                  for loc, cf, pr in extra_urls)
+    )
+    with open("docs/sitemap_main.xml", "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-                f"  <url><loc>{SITE_URL}/</loc><lastmod>{today}</lastmod>"
-                "<changefreq>daily</changefreq><priority>1.0</priority></url>\n"
-                f"  <url><loc>{SITE_URL}/inquiry</loc>"
-                f"<lastmod>{today}</lastmod>"
-                "<changefreq>monthly</changefreq><priority>0.6</priority></url>\n"
-                + "".join(
-                    f"  <url><loc>{SITE_URL}/{p}</loc><lastmod>{today}"
-                    "</lastmod><changefreq>monthly</changefreq>"
-                    "<priority>0.4</priority></url>\n"
-                    for p in ("about", "contact", "privacy"))
-                + "".join(
-                    f"  <url><loc>{SITE_URL}/gold-rate-today-in-"
-                    f"{loc_slug(nm)}</loc><lastmod>{today}</lastmod>"
-                    "<changefreq>daily</changefreq>"
-                    "<priority>0.7</priority></url>\n"
-                    for nm in LOCATIONS)
-                + "".join(
-                    f"  <url><loc>{SITE_URL}/{loc}</loc><lastmod>{today}"
-                    f"</lastmod><changefreq>{cf}</changefreq>"
-                    f"<priority>{pr}</priority></url>\n"
-                    for loc, cf, pr in extra_urls)
-                + "".join(
-                    f"  <url><loc>{SITE_URL}/{loc}</loc><lastmod>"
-                    f"{(dd or now_ist.date()).isoformat()}</lastmod>"
-                    "<changefreq>monthly</changefreq><priority>0.6</priority>"
-                    "</url>\n"
-                    # Only advertise daily pages still within the indexing
-                    # window (see DAILY_INDEX_DAYS above) - no point listing
-                    # a URL in the sitemap that the page itself now says not
-                    # to index.
-                    for loc, dd, ttl in daily_meta
-                    if dd and dd >= daily_index_cutoff)
+                + main_urls
                 + "</urlset>\n")
+
+    # cities: state + city rate pages, refreshed hourly (rates re-fetch
+    # multiple times per day)
+    city_urls = "".join(
+        _url(f"gold-rate-today-in-{loc_slug(nm)}", lastmod_full,
+             "hourly", 0.8)
+        for nm in LOCATIONS)
+    with open("docs/sitemap_cities.xml", "w", encoding="utf-8") as f:
+        f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
+                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+                + city_urls
+                + "</urlset>\n")
+
+    # daily archive: only pages still inside the indexing window
+    daily_urls = "".join(
+        _url(loc, (dd or now_ist.date()).isoformat(), "monthly", 0.6)
+        for loc, dd, ttl in daily_meta
+        if dd and dd >= daily_index_cutoff)
+    with open("docs/sitemap_daily.xml", "w", encoding="utf-8") as f:
+        f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
+                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+                + daily_urls
+                + "</urlset>\n")
+
+    # sitemap.xml is now the INDEX; sitemap_news.xml is written above and
+    # referenced here so Google finds it via one canonical entry point.
+    subs = ["sitemap_main.xml", "sitemap_cities.xml",
+            "sitemap_daily.xml", "sitemap_news.xml"]
+    with open("docs/sitemap.xml", "w", encoding="utf-8") as f:
+        f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
+                '<sitemapindex xmlns="http://www.sitemaps.org/schemas/'
+                'sitemap/0.9">\n'
+                + "".join(
+                    f"  <sitemap><loc>{SITE_URL}/{s}</loc>"
+                    f"<lastmod>{lastmod_full}</lastmod></sitemap>\n"
+                    for s in subs)
+                + "</sitemapindex>\n")
 
     # ---- Cloudflare Pages _headers: freshness + edge caching --------------
     # Two things wrangler's pages-deploy upload flow strips that Google
@@ -3327,6 +3465,18 @@ def main():
             "  Cache-Control: public, max-age=300, s-maxage=600, must-revalidate\n"
             "\n"
             "/sitemap.xml\n"
+            f"  Last-Modified: {headers_lm}\n"
+            "  Cache-Control: public, max-age=0, must-revalidate\n"
+            "\n"
+            "/sitemap_main.xml\n"
+            f"  Last-Modified: {headers_lm}\n"
+            "  Cache-Control: public, max-age=0, must-revalidate\n"
+            "\n"
+            "/sitemap_cities.xml\n"
+            f"  Last-Modified: {headers_lm}\n"
+            "  Cache-Control: public, max-age=0, must-revalidate\n"
+            "\n"
+            "/sitemap_daily.xml\n"
             f"  Last-Modified: {headers_lm}\n"
             "  Cache-Control: public, max-age=0, must-revalidate\n"
             "\n"
@@ -3360,7 +3510,8 @@ def main():
     with open(f"docs/{INDEXNOW_KEY}.txt", "w", encoding="utf-8") as f:
         f.write(INDEXNOW_KEY)
     try:
-        fresh_now = [f"{SITE_URL}/", f"{SITE_URL}/news"]
+        fresh_now = [f"{SITE_URL}/", f"{SITE_URL}/pulse",
+                     f"{SITE_URL}/news"]
         fresh_now += [f"{SITE_URL}/{loc}" for loc, dd, _ in daily_meta
                       if dd == now_ist.date()]
         if recaps and recaps[0][1].date() == now_ist.date():
@@ -3455,12 +3606,25 @@ per gram at {lowest['brands']['name']}
 
 ## Key pages
 - Home / today's rates: {SITE_URL}/
+- Market Pulse (live, ticking every 3s - gold/silver spot, MCX futures, \
+vendor rates, OHLC, economic calendar): {SITE_URL}/pulse
+- Market news & daily recap: {SITE_URL}/news
 - Machine-readable JSON feed: {SITE_URL}/rates.json
 - Daily email alerts: {SITE_URL}/inquiry
 - About: {SITE_URL}/about
+- Methodology: {SITE_URL}/methodology
 - Contact: {SITE_URL}/contact
 - City & state pages: {SITE_URL}/gold-rate-today-in-<city> \
 (e.g. mumbai, delhi, hyderabad, chennai, bengaluru, pune, kolkata)
+
+## Live market APIs (open, CORS-friendly)
+- Real-time gold + silver spot, MCX futures, IBJA reference: \
+{SITE_URL}/pulse (browser); underlying feed via the CF Worker at \
+https://mygoldrates-market-api.harshads-priority.workers.dev/market
+- Vendor (bullion dealer) rates: same worker, /vendors
+- 90-day OHLC history (gold + silver futures): /ohlc?symbol=GC=F
+- This week's economic calendar (gold-relevant events): /calendar
+- Bullion news feed: /news
 
 ## About the data
 - Coverage: {len(live)} major Indian jewellers plus the IBJA bullion \
@@ -3500,6 +3664,7 @@ NAV = f"""<div class="nav-ov" id="nav-ov" hidden></div>
   <nav>
     <p class="nav-grp">Gold Rates</p>
     <a href="{SITE_URL}/">Gold Rate Today</a>
+    <a href="{SITE_URL}/pulse">Market Pulse (Live)</a>
     <a href="{SITE_URL}/#cmp">Compare Jewellers</a>
     <a href="{SITE_URL}/#cityh">Gold Rate by City &amp; State</a>
     <a href="{SITE_URL}/calculators">Price Calculator</a>
