@@ -1497,7 +1497,7 @@ def main():
                         "bullion reference and MCX gold futures.",
          "dateModified": now_ist.isoformat(),
          "datePublished": "2026-07-20", "url": SITE_URL,
-         "license": f"{SITE_URL}/#terms",
+         "license": f"{SITE_URL}/compare#terms",
          "isAccessibleForFree": True,
          "keywords": ["gold rate", "gold rate today", "24 carat gold rate",
                       "22K gold rate", "gold price India", "IBJA gold rate",
@@ -2426,9 +2426,15 @@ def main():
         rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld,
         seo_content=seo_content, drawer=drawer, calcdrawer=calcdrawer,
         coindrawer=coindrawer, news_home=news_home, **common)
+    # As of the Sep-2026 IA swap, the app-test Market Pulse HTML is written
+    # to docs/index.html by the /pulse builder further down. What used to be
+    # the homepage (this SEO-rich comparison page with the Dataset+FAQPage
+    # graph and 14+ jeweller cards) is preserved as /compare so nothing
+    # loses its content or its schema.org anchor.
     html = TEMPLATE.substitute(
         where="in India", where_note="", local_intro="",
-        canonical_url=f"{SITE_URL}/", city_links=city_cloud(), **tvars)
+        canonical_url=f"{SITE_URL}/compare",
+        city_links=city_cloud(), **tvars)
     inquiry = INQUIRY_TEMPLATE.substitute(**common)
     unsub = UNSUB_TEMPLATE.substitute(**common)
 
@@ -2436,7 +2442,7 @@ def main():
     build_og_image()
     build_favicons()
     build_email_logo()
-    with open("docs/index.html", "w", encoding="utf-8") as f:
+    with open("docs/compare.html", "w", encoding="utf-8") as f:
         f.write(html)
     with open("docs/signup.js", "w", encoding="utf-8") as f:
         f.write(SIGNUP_JS)
@@ -3152,58 +3158,61 @@ def main():
         f.write(analytics_page)
     print("analytics dashboard: wrote docs/analytics.html (token via URL hash)")
 
-    # ---- /pulse: Market Pulse single-page experience (from app-test) ------
-    # We ship the app-test single-file HTML as a first-class production
-    # section at /pulse. Keeps the fast-iterating live-market UI shippable
-    # without touching generate_site.py's rendering, and gives Google a rich,
-    # engagement-heavy page to reward on freshness signals (all its rates
-    # tick every 3s via the CF worker at /market, /vendors, /ohlc, ...).
-    # We rewrite canonical + og:url + title + description + JSON-LD so it
-    # doesn't duplicate the homepage.
+    # ---- HOMEPAGE: Market Pulse (from app-test) --------------------------
+    # As of the Sep-2026 IA swap, the app-test single-file Market Pulse HTML
+    # is the site's homepage - written to docs/index.html with canonical /.
+    # The previous SEO-rich comparison page (with the Dataset + FAQPage +
+    # 14 jeweller cards) is preserved at /compare (docs/compare.html
+    # emitted above). Both keep their content and schema.org anchors;
+    # neither serves duplicate content.
+    #
+    # /pulse is served as a redirect (see docs/_redirects further down)
+    # so old bookmarks and any inbound links to /pulse land on / with a
+    # 301 - keeps link equity, avoids duplicate-content dilution.
     try:
         with open("pulse_app.html", encoding="utf-8") as f:
             pulse_html = f.read()
-        pulse_title = ("Market Pulse - Live Gold & Silver Rates, MCX Futures, "
-                       "Vendor Prices | MyGoldRates")
-        pulse_desc = ("Live gold and silver rates, MCX gold/silver futures, "
-                      "IBJA reference, jeweller vendor prices, 90-day OHLC "
-                      "charts and the week's economic calendar - all "
-                      "updating live every 3 seconds. India's real-time "
-                      "bullion market pulse.")
-        pulse_canonical = f"{SITE_URL}/pulse"
-        pulse_url = f"{SITE_URL}/pulse"
+        # Homepage title/description stay tuned to what search intent for
+        # "gold rate today india" actually rewards - literal, factual, with
+        # the number of jewellers and karat coverage - rather than the
+        # /pulse-specific "Market Pulse" phrasing. Google matches queries
+        # to page title tokens before it looks at anything else.
+        home_title = ("Gold Rate Today in India - Live 24K, 22K, 18K "
+                      "Rates from 14+ Jewellers | MyGoldRates")
+        home_desc = ("Live gold rate today across 14+ Indian jewellers, "
+                     "with MCX gold/silver futures, IBJA reference and "
+                     "real-time market data updated every 3 seconds. "
+                     "Compare 24K, 22K and 18K per-gram prices pre-GST.")
+        home_canonical = f"{SITE_URL}/"
+        home_url = f"{SITE_URL}/"
         replacements = [
-            # canonical + og:url + twitter -> /pulse
+            # canonical stays / - already there, no-op replacement is fine
             ('<link rel="canonical" href="https://mygoldrates.com/">',
-             f'<link rel="canonical" href="{pulse_canonical}">'),
+             f'<link rel="canonical" href="{home_canonical}">'),
             ('<meta property="og:url" content="https://mygoldrates.com/">',
-             f'<meta property="og:url" content="{pulse_url}">'),
-            # title + description tuned to /pulse (unique so Google doesn't
-            # dedupe against the homepage)
+             f'<meta property="og:url" content="{home_url}">'),
             ("<title>Gold Rate Today in India - Compare 14+ Jewellers | "
              "MyGoldRates</title>",
-             f"<title>{pulse_title}</title>"),
+             f"<title>{home_title}</title>"),
             ('<meta name="description" content="Live 24K, 22K & 18K gold '
              'rates from 14+ Indian jewellers, updated daily. Pre-GST '
              'prices, calculators (loan, SIP, making charges, budget) '
              'and market pulse — MyGoldRates.">',
-             f'<meta name="description" content="{pulse_desc}">'),
-            # OG title/description
+             f'<meta name="description" content="{home_desc}">'),
             ('<meta property="og:title" content="Gold Rate Today in India '
              '- Compare 14+ Jewellers">',
-             '<meta property="og:title" content="Market Pulse - Live Gold, '
-             'Silver, MCX Futures | MyGoldRates">'),
+             '<meta property="og:title" content="Gold Rate Today in India '
+             '- Live from 14+ Jewellers">'),
             ('<meta property="og:description" content="Live 24K, 22K & 18K '
              'gold rates from 14+ Indian jewellers, updated daily.">',
-             f'<meta property="og:description" content="{pulse_desc[:160]}">'),
-            # twitter card
+             f'<meta property="og:description" content="{home_desc[:160]}">'),
             ('<meta name="twitter:title" content="Gold Rate Today in India '
              '- Compare Jewellers">',
-             '<meta name="twitter:title" content="Market Pulse - Live Gold '
-             '& Silver | MyGoldRates">'),
+             '<meta name="twitter:title" content="Gold Rate Today in India '
+             '- Live Jeweller Rates | MyGoldRates">'),
             ('<meta name="twitter:description" content="Live 24K, 22K & '
              '18K gold rates from 14+ Indian jewellers, updated daily.">',
-             f'<meta name="twitter:description" content="{pulse_desc[:160]}">'),
+             f'<meta name="twitter:description" content="{home_desc[:160]}">'),
         ]
         pulse_missing = []
         for old, new in replacements:
@@ -3212,45 +3221,64 @@ def main():
                 continue
             pulse_html = pulse_html.replace(old, new, 1)
         if pulse_missing:
-            # Fail loudly rather than ship a page pointing at the homepage
-            # canonical - a duplicate canonical is worse than no /pulse.
             raise RuntimeError("pulse_app.html header changed - patch these: "
                                + ", ".join(pulse_missing))
-        # Inject an extra JSON-LD block with Breadcrumb + WebPage that
-        # anchors the page at /pulse in Google's index. Placed just after
-        # the existing app-test JSON-LD graph so both coexist.
+        # Extra JSON-LD: WebPage + BreadcrumbList + a "See detailed
+        # comparison" pointer that carries the schema.org relationship
+        # between / and /compare so Google understands the IA split.
         extra_ld = (
             '<script type="application/ld+json">'
             + json.dumps({
                 "@context": "https://schema.org",
                 "@graph": [
-                    {"@type": "WebPage", "url": pulse_url,
-                     "name": pulse_title,
-                     "description": pulse_desc,
+                    {"@type": "WebPage", "@id": f"{SITE_URL}/#webpage",
+                     "url": home_url, "name": home_title,
+                     "description": home_desc,
                      "inLanguage": "en-IN",
                      "isPartOf": {"@type": "WebSite",
                                   "url": f"{SITE_URL}/",
                                   "name": "MyGoldRates.com"},
                      "dateModified": now_ist.isoformat(),
-                     "primaryImageOfPage": f"{SITE_URL}/og.png"},
+                     "primaryImageOfPage": f"{SITE_URL}/og.png",
+                     "significantLink": [
+                         f"{SITE_URL}/compare",
+                         f"{SITE_URL}/news",
+                         f"{SITE_URL}/calculators"]},
                     {"@type": "BreadcrumbList",
                      "itemListElement": [
                          {"@type": "ListItem", "position": 1,
-                          "name": "Home", "item": f"{SITE_URL}/"},
-                         {"@type": "ListItem", "position": 2,
-                          "name": "Market Pulse", "item": pulse_url}]},
+                          "name": "Home", "item": home_url}]},
                 ]}, ensure_ascii=False)
             + "</script>\n")
         pulse_html = pulse_html.replace(
             "</head>", extra_ld + "</head>", 1)
-        os.makedirs("docs/pulse", exist_ok=True)
-        with open("docs/pulse/index.html", "w", encoding="utf-8") as f:
+        # Homepage now lives at docs/index.html - overwrites what TEMPLATE
+        # used to write (that content is at docs/compare.html now).
+        with open("docs/index.html", "w", encoding="utf-8") as f:
             f.write(pulse_html)
-        print(f"pulse: wrote docs/pulse/index.html "
-              f"({len(pulse_html):,} bytes)")
+        print(f"homepage: wrote docs/index.html "
+              f"({len(pulse_html):,} bytes, from pulse_app.html)")
+        # Remove any leftover /pulse/index.html from previous builds so it
+        # doesn't compete with / for the same content in the index.
+        old_pulse = "docs/pulse/index.html"
+        if os.path.exists(old_pulse):
+            os.remove(old_pulse)
+            try:
+                os.rmdir("docs/pulse")
+            except OSError:
+                pass  # not empty, leave it
+            print("homepage: removed old docs/pulse/index.html")
     except FileNotFoundError:
-        print("pulse: pulse_app.html not found in repo root - skipping "
-              "/pulse build")
+        print("homepage: pulse_app.html not found in repo root - falling "
+              "back to TEMPLATE-generated docs/index.html")
+        # Fall-back: re-emit the classic homepage at / so the site never
+        # ships broken. Overwrite docs/index.html (compare.html already
+        # has the same content and stays).
+        fallback_html = TEMPLATE.substitute(
+            where="in India", where_note="", local_intro="",
+            canonical_url=f"{SITE_URL}/", city_links=city_cloud(), **tvars)
+        with open("docs/index.html", "w", encoding="utf-8") as f:
+            f.write(fallback_html)
 
     with open("docs/robots.txt", "w", encoding="utf-8") as f:
         # Explicitly welcome AI/LLM crawlers so generative engines (ChatGPT,
@@ -3385,10 +3413,15 @@ def main():
                 f"<changefreq>{cf}</changefreq>"
                 f"<priority>{pr:.1f}</priority></url>\n")
 
-    # main: home + Market Pulse + evergreen (calculators, learn, inquiry)
+    # main: home (Market Pulse) + /compare (SEO comparison) + evergreen.
+    # /pulse is deliberately absent - it 301-redirects to / (see
+    # docs/_redirects), so keeping it in the sitemap would advertise a
+    # URL Google should not crawl on its own. The classic SEO comparison
+    # page lives at /compare and gets its own sitemap entry so it retains
+    # its Dataset/FAQPage schema anchor.
     main_urls = (
         _url("", lastmod_full, "hourly", 1.0)
-        + _url("pulse", lastmod_full, "hourly", 0.95)
+        + _url("compare", lastmod_full, "hourly", 0.9)
         + _url("news", lastmod_full, "hourly", 0.85)
         + _url("inquiry", lastmod_full, "monthly", 0.6)
         + "".join(_url(p, today, "monthly", 0.4)
@@ -3505,12 +3538,24 @@ def main():
         )
     print(f"_headers: written with Last-Modified {headers_lm}")
 
+    # ---- _redirects: 301 legacy /pulse -> / after the IA swap -----------
+    # /pulse used to serve the Market Pulse app. As of the Sep-2026 swap,
+    # the same content is at /. Cloudflare Pages honours _redirects
+    # (Netlify syntax): "from  to  status". A 301 keeps link equity on
+    # anything Google or humans have already bookmarked as /pulse.
+    with open("docs/_redirects", "w", encoding="utf-8") as f:
+        f.write("# Legacy /pulse redirects to / (homepage is Market Pulse "
+                "since Sep 2026).\n"
+                "/pulse    /    301\n"
+                "/pulse/   /    301\n")
+    print("_redirects: /pulse -> / (301)")
+
     # ---- IndexNow: instantly notify Bing/Yandex/Seznam of fresh URLs ----
     INDEXNOW_KEY = "b7f3c9a1e04d4f6a8c2b5d9e1f0a3c7d"
     with open(f"docs/{INDEXNOW_KEY}.txt", "w", encoding="utf-8") as f:
         f.write(INDEXNOW_KEY)
     try:
-        fresh_now = [f"{SITE_URL}/", f"{SITE_URL}/pulse",
+        fresh_now = [f"{SITE_URL}/", f"{SITE_URL}/compare",
                      f"{SITE_URL}/news"]
         fresh_now += [f"{SITE_URL}/{loc}" for loc, dd, _ in daily_meta
                       if dd == now_ist.date()]
@@ -3577,7 +3622,7 @@ def main():
                       "published prices, and can change during the day. "
                       "Confirm with the jeweller before purchase. Not "
                       "investment advice.",
-        "license": f"{SITE_URL}/#terms",
+        "license": f"{SITE_URL}/compare#terms",
     }
     with open("docs/rates.json", "w", encoding="utf-8") as f:
         json.dump(rates_feed, f, ensure_ascii=False, indent=2)
@@ -3605,9 +3650,11 @@ per gram at {lowest['brands']['name']}
 {mcx_line}- Last updated: {now_ist.isoformat()}
 
 ## Key pages
-- Home / today's rates: {SITE_URL}/
-- Market Pulse (live, ticking every 3s - gold/silver spot, MCX futures, \
-vendor rates, OHLC, economic calendar): {SITE_URL}/pulse
+- Home (Market Pulse - live, ticking every 3s: gold/silver spot, MCX \
+futures, IBJA reference, vendor rates, 90-day OHLC, economic calendar): \
+{SITE_URL}/
+- Detailed jeweller comparison (14+ brands, per-gram 24K/22K/18K, \
+lowest-first, GST toggle, FAQ): {SITE_URL}/compare
 - Market news & daily recap: {SITE_URL}/news
 - Machine-readable JSON feed: {SITE_URL}/rates.json
 - Daily email alerts: {SITE_URL}/inquiry
@@ -3663,10 +3710,9 @@ NAV = f"""<div class="nav-ov" id="nav-ov" hidden></div>
   </div>
   <nav>
     <p class="nav-grp">Gold Rates</p>
-    <a href="{SITE_URL}/">Gold Rate Today</a>
-    <a href="{SITE_URL}/pulse">Market Pulse (Live)</a>
-    <a href="{SITE_URL}/#cmp">Compare Jewellers</a>
-    <a href="{SITE_URL}/#cityh">Gold Rate by City &amp; State</a>
+    <a href="{SITE_URL}/">Live Market Pulse (Home)</a>
+    <a href="{SITE_URL}/compare">Detailed Jeweller Comparison</a>
+    <a href="{SITE_URL}/compare#cityh">Gold Rate by City &amp; State</a>
     <a href="{SITE_URL}/calculators">Price Calculator</a>
     <p class="nav-grp">Calculators</p>
     <a href="{SITE_URL}/calculators">All Calculators</a>
