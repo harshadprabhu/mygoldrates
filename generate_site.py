@@ -3201,9 +3201,15 @@ def main():
             pulse_brands.append({
                 "n": _b.get("name") or _slug,
                 "d": _dom,
-                # nat=True if the brand is genuinely national (not one of the
-                # region-restricted regional jewellers in REGION_MAP)
-                "nat": _slug not in REGION_MAP,
+                # nat drives pulse's DEFAULT-VIEW visibility, not "is this
+                # brand national". /compare renders every row in `live`
+                # (REGION_MAP there only picks the median/lowest baseline,
+                # it never hides a row), so gating on REGION_MAP here made
+                # / show 16 of 21 brands while /compare showed all 21 -
+                # the two surfaces disagreed on the same board. Everything
+                # in `live` is published for today, so everything is shown.
+                # The region tag below still drives the "Near me" filter.
+                "nat": True,
                 # region tag drives the pulse-side "Near me" filter; default
                 # 'all' for national brands and any regional we don't have a
                 # mapping for (harmless - just always visible in Near-me).
@@ -3358,8 +3364,38 @@ def main():
             '    post("click_events",{page:location.pathname,target:label,session_id:SID});\n'
             '  },true);\n'
             '})();</script>\n')
+        # -- Lifetime visit counter: bump the `hits` table ------------------
+        # `hits` (read via the hits_count RPC, incremented via bump_hits) is
+        # the site's REAL lifetime visit counter - the ~6.4k number. It is a
+        # different table from page_views (which is the per-pageview log the
+        # analytics dashboard charts). The classic TEMPLATE has always called
+        # bump_hits from its inline counter script; pulse_app.html never did.
+        # So from the moment the IA swap made pulse the homepage, the site's
+        # highest-traffic page stopped incrementing the real counter and the
+        # number went flat. Same once-per-session semantics as the classic
+        # page: bump_hits on a fresh session, hits_count on a repeat view.
+        hits_js = (
+            '<script>(function(){\n'
+            '  var SB=window.GR_SB_URL||"",KEY=window.GR_SB_KEY||"";\n'
+            '  if(!SB||!KEY)return;\n'
+            '  var counted=false;\n'
+            '  try{counted=!!sessionStorage.getItem("gr_hit");}catch(e){}\n'
+            '  var fn=counted?"hits_count":"bump_hits";\n'
+            '  fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",\n'
+            '    headers:{"Content-Type":"application/json","apikey":KEY,\n'
+            '             "Authorization":"Bearer "+KEY},body:"{}"})\n'
+            '    .then(function(r){return r.ok?r.json():Promise.reject(r.status);})\n'
+            '    .then(function(n){\n'
+            '      try{sessionStorage.setItem("gr_hit","1");}catch(e){}\n'
+            '      var el=document.getElementById("hitcount");\n'
+            '      if(el&&!isNaN(Number(n)))el.textContent=Number(n).toLocaleString("en-IN");\n'
+            '    })\n'
+            '    .catch(function(e){\n'
+            '      if(console&&console.warn)console.warn("[gr-hits] "+fn+" failed",e);\n'
+            '    });\n'
+            '})();</script>\n')
         pulse_html = pulse_html.replace(
-            "</head>", extra_ld + analytics_js + "</head>", 1)
+            "</head>", extra_ld + analytics_js + hits_js + "</head>", 1)
         # Homepage now lives at docs/index.html - overwrites what TEMPLATE
         # used to write (that content is at docs/compare.html now).
         with open("docs/index.html", "w", encoding="utf-8") as f:
@@ -7613,12 +7649,39 @@ td.path{color:var(--accent);word-break:break-all}
       body:JSON.stringify(body)}).then(function(r){return r.json();});
   }
 
+  // LIFETIME visits come from a DIFFERENT table than everything else on
+  // this page. `hits` is the site's original visit counter (bumped once
+  // per session via the bump_hits RPC from every page); `page_views` is
+  // the newer per-pageview log that powers the charts and tables below.
+  // They are not interchangeable and page_views is NOT a superset - it
+  // only started collecting later. Showing only page_views totals made
+  // the dashboard read ~164 when the real lifetime figure was ~6,400.
+  // hits_count is a public RPC (anon may call it), so no secret needed
+  // and no date range applies - it is always all-time.
+  var LIFETIME=null;
+  function loadLifetime(){
+    return fetch(SB+'/rest/v1/rpc/hits_count',{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY,
+        'Authorization':'Bearer '+KEY},body:'{}'})
+      .then(function(r){return r.ok?r.json():Promise.reject(r.status);})
+      .then(function(n){if(!isNaN(Number(n)))LIFETIME=Number(n);})
+      .catch(function(){/* leave null - tile renders as an em dash */});
+  }
+
   function renderKPIs(t){
     var k=$('kpis');
-    var items=[['Page views',t.views],['Unique visitors',t.visitors],['Clicks',t.clicks]];
+    var items=[
+      ['Total visits (all time)',LIFETIME,'hits'],
+      ['Page views',t.views,'range'],
+      ['Unique visitors',t.visitors,'range'],
+      ['Clicks',t.clicks,'range']];
     k.innerHTML=items.map(function(it){
-      return '<div class="kpi"><div class="n">'+nfmt(it[1]||0)+
-        '</div><div class="l">'+it[0]+'</div></div>';}).join('');
+      var val=(it[1]==null)?'&mdash;':nfmt(it[1]||0);
+      var note=(it[2]==='hits')
+        ? '<div class="l" style="font-size:10px;opacity:.65;text-transform:none;letter-spacing:0">from hits table &middot; ignores date filter</div>'
+        : '';
+      return '<div class="kpi"><div class="n">'+val+
+        '</div><div class="l">'+it[0]+'</div>'+note+'</div>';}).join('');
   }
 
   function renderChart(daily){
@@ -7701,7 +7764,9 @@ td.path{color:var(--accent);word-break:break-all}
   $('alltime').onclick=function(){var a=todayIST();
     $('from').value='2024-01-01';$('to').value=iso(a);load();};
   $('page').onchange=load;
-  load();
+  // Fetch the lifetime hits total first so the KPI row renders complete on
+  // first paint; load() runs regardless of whether that call succeeds.
+  loadLifetime().then(load,load);
 })();
 </script>
 </body>
