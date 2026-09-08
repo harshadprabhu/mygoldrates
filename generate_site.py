@@ -3172,6 +3172,64 @@ def main():
     try:
         with open("pulse_app.html", encoding="utf-8") as f:
             pulse_html = f.read()
+
+        # -- Hydrate the BRANDS array with LIVE Supabase rates -------------
+        # pulse_app.html ships a hardcoded BRANDS array (snapshot from when
+        # app-test was built) with stale per-brand rates that only re-scale
+        # with live spot - it never re-reads Supabase, so brands added or
+        # removed from the DB after that snapshot were mis-represented
+        # (missing, wrong price, wrong ordering). We replace that literal
+        # array at build time with the same `live` rows the classic /compare
+        # page renders, keyed on brand slug + domain + region (national vs
+        # regional). Result: pulse's brand comparison drops in with the same
+        # 21+ jeweller board that /compare shows, updated daily by the
+        # scraper, and applyLive() then scales it against live spot.
+        _region_pulse = {  # DB slug -> pulse-side region tag
+            "vaibhav": "south", "vummidi": "south", "lalithaa": "south",
+            "kirtilals": "south", "josco": "south", "srikumaran": "south",
+            "ckc": "south", "joyalukkas": "south",
+            "pngsons": "west", "ranka": "west", "rbz": "west",
+            "chandukaka": "west", "bhindi": "west",
+        }
+        pulse_brands = []
+        for _r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):
+            _b = _r.get("brands") or {}
+            _slug = (_b.get("slug") or "").lower()
+            _dom = ((_b.get("domain") or "")
+                    .replace("https://", "").replace("http://", "")
+                    .split("/")[0]).lstrip("www.")
+            pulse_brands.append({
+                "n": _b.get("name") or _slug,
+                "d": _dom,
+                # nat=True if the brand is genuinely national (not one of the
+                # region-restricted regional jewellers in REGION_MAP)
+                "nat": _slug not in REGION_MAP,
+                # region tag drives the pulse-side "Near me" filter; default
+                # 'all' for national brands and any regional we don't have a
+                # mapping for (harmless - just always visible in Near-me).
+                "r": _region_pulse.get(_slug, "all"),
+                # 24K per-gram pre-GST INR - same value classic /compare uses
+                "rate": round(float(_r["canonical_24k_pre_gst"]), 2),
+            })
+        # Regex-replace the whole hardcoded BRANDS=[...]; block. DOTALL so
+        # the multi-line literal collapses. Fail loudly if the block shape
+        # changed - a silent no-op would ship stale rates again.
+        import re as _re
+        _brands_json = json.dumps(pulse_brands, ensure_ascii=False)
+        _new_pulse_html, _n = _re.subn(
+            r"var BRANDS=\[.*?\n\s*\];",
+            f"var BRANDS={_brands_json};",
+            pulse_html, count=1, flags=_re.DOTALL)
+        if _n != 1:
+            raise RuntimeError(
+                "pulse_app.html: BRANDS array literal not found - patch the "
+                "hydration regex or the source file has drifted")
+        pulse_html = _new_pulse_html
+        print(f"pulse: hydrated BRANDS with {len(pulse_brands)} live jewellers "
+              f"({pulse_brands[0]['n']} lowest at "
+              f"₹{pulse_brands[0]['rate']:,.2f}/g)")
+        # --------------------------------------------------------------------
+
         # Homepage title/description stay tuned to what search intent for
         # "gold rate today india" actually rewards - literal, factual, with
         # the number of jewellers and karat coverage - rather than the
