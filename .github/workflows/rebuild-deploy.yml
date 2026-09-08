@@ -32,6 +32,21 @@ jobs:
           ANALYTICS_TOKEN: ${{ secrets.ANALYTICS_TOKEN }}
         run: python generate_site.py
 
+      - name: Analytics RLS health check
+        # Verifies anon can still INSERT into page_views + click_events.
+        # On 2026-09-07 we discovered page_views INSERTs had been silently
+        # failing with a missing RLS policy; the browser tracker's .catch()
+        # swallowed every 401 and the dashboard read as if the site had no
+        # traffic. This step surfaces that class of break loudly in the
+        # build log so the fix (sql/fix_page_views_rls_2026_09_07.sql) hits
+        # the ops window instead of accumulating for weeks. Non-blocking -
+        # a broken policy MUST NOT break the deploy.
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: python analytics_health.py
+
       - name: Commit regenerated site
         run: |
           git config user.name "github-actions[bot]"
