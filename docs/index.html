@@ -538,7 +538,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   .site-calc-body{grid-template-columns:1fr}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://mygoldrates.com/#webpage", "url": "https://mygoldrates.com/", "name": "Gold Rate Today in India - Live 24K, 22K, 18K Rates from 14+ Jewellers | MyGoldRates", "description": "Live gold rate today across 14+ Indian jewellers, with MCX gold/silver futures, IBJA reference and real-time market data updated every 3 seconds. Compare 24K, 22K and 18K per-gram prices pre-GST.", "inLanguage": "en-IN", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/", "name": "MyGoldRates.com"}, "dateModified": "2026-09-08T19:13:06.768564+05:30", "primaryImageOfPage": "https://mygoldrates.com/og.png", "significantLink": ["https://mygoldrates.com/compare", "https://mygoldrates.com/news", "https://mygoldrates.com/calculators"]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://mygoldrates.com/#webpage", "url": "https://mygoldrates.com/", "name": "Gold Rate Today in India - Live 24K, 22K, 18K Rates from 14+ Jewellers | MyGoldRates", "description": "Live gold rate today across 14+ Indian jewellers, with MCX gold/silver futures, IBJA reference and real-time market data updated every 3 seconds. Compare 24K, 22K and 18K per-gram prices pre-GST.", "inLanguage": "en-IN", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/", "name": "MyGoldRates.com"}, "dateModified": "2026-09-08T20:52:42.903606+05:30", "primaryImageOfPage": "https://mygoldrates.com/og.png", "significantLink": ["https://mygoldrates.com/compare", "https://mygoldrates.com/news", "https://mygoldrates.com/calculators"]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}]}]}</script>
 <script>window.GR_SB_URL="https://opwrfflzzowhobesysmr.supabase.co";window.GR_SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE";</script>
 <script>(function(){
   var SB=window.GR_SB_URL||"",KEY=window.GR_SB_KEY||"";
@@ -1202,34 +1202,7 @@ function handleCredentialResponse(resp){
   window.addEventListener('scroll',onScroll);
 
   // ─── Brand catalogue: national vs regional (region only used for Near-me matching) ───
-  var BRANDS=[
-    // National (default view)
-    {n:'PN Gadgil',d:'pngjewellers.com',nat:true,r:'north',rate:15075},
-    {n:'Senco Gold',d:'sencogoldanddiamonds.com',nat:true,r:'east',rate:15147},
-    {n:'Indriya',d:'indriya.com',nat:true,r:'all',rate:15191},
-    {n:'GRT Jewellers',d:'grtjewels.com',nat:true,r:'south',rate:15196},
-    {n:'Bhima Jewels',d:'bhima.com',nat:true,r:'south',rate:15199},
-    {n:'Jos Alukkas',d:'josalukkasonline.com',nat:true,r:'south',rate:15201},
-    {n:'Candere',d:'candere.com',nat:true,r:'all',rate:15207},
-    {n:'Kalyan Jewellers',d:'kalyanjewellers.net',nat:true,r:'south',rate:15216},
-    {n:'ORRA',d:'orra.co.in',nat:true,r:'west',rate:15222},
-    {n:'CaratLane',d:'caratlane.com',nat:true,r:'all',rate:15241},
-    {n:'Tanishq',d:'tanishq.co.in',nat:true,r:'all',rate:15245},
-    {n:'Kisna',d:'kisna.com',nat:true,r:'all',rate:15250},
-    {n:'BlueStone',d:'bluestone.com',nat:true,r:'all',rate:15390},
-    {n:'Waman Hari Pethe',d:'whpjewellers.com',nat:true,r:'west',rate:15438},
-    // Regional (only shown when Near me is on + region matches)
-    {n:'Vaibhav Jewellers',d:'vaibhavjewellers.com',nat:false,r:'south',rate:15098},
-    {n:'PN Gadgil & Sons',d:'pngadgilandsons.com',nat:false,r:'west',rate:15112},
-    {n:'Vummidi Bangaru',d:'vummidi.com',nat:false,r:'south',rate:15165},
-    {n:'Ranka Jewellers',d:'rankajewellers.in',nat:false,r:'west',rate:15185},
-    {n:'Joyalukkas',d:'joyalukkas.in',nat:false,r:'south',rate:15188},
-    {n:'C Krishniah Chetty',d:'ckcjewellers.com',nat:false,r:'south',rate:15210},
-    {n:'Chandukaka Saraf',d:'chandukakasaraf.in',nat:false,r:'west',rate:15220},
-    {n:'Malabar Gold',d:'malabargoldanddiamonds.com',nat:false,r:'south',rate:15228},
-    {n:'Josco Jewellers',d:'joscogroup.com',nat:false,r:'south',rate:15234},
-    {n:'Bhindi Jewellers',d:'bhindi.com',nat:false,r:'west',rate:15268}
-  ];
+  var BRANDS=[{"n": "Senco Gold", "d": "sencogoldanddiamonds.com", "nat": true, "r": "all", "rate": 15230.2}, {"n": "Chandukaka Saraf", "d": "chandukakasaraf.in", "nat": false, "r": "west", "rate": 15305.0}, {"n": "PN Gadgil", "d": "pngjewellers.com", "nat": true, "r": "all", "rate": 15415.0}, {"n": "Vummidi Bangaru", "d": "vummidi.com", "nat": false, "r": "south", "rate": 15426.0}, {"n": "ORRA", "d": "orra.co.in", "nat": true, "r": "all", "rate": 15470.17}, {"n": "Kalyan Jewellers", "d": "store.kalyanjewellers.net", "nat": true, "r": "all", "rate": 15475.0}, {"n": "C Krishniah Chetty", "d": "ckcjewellers.com", "nat": false, "r": "south", "rate": 15534.55}, {"n": "GRT Jewellers", "d": "grtjewels.com", "nat": true, "r": "all", "rate": 15534.55}, {"n": "Indriya", "d": "indriya.com", "nat": true, "r": "all", "rate": 15534.55}, {"n": "Malabar Gold", "d": "malabargoldanddiamonds.com", "nat": true, "r": "all", "rate": 15535.0}, {"n": "Joyalukkas", "d": "joyalukkas.in", "nat": true, "r": "south", "rate": 15535.0}, {"n": "Vaibhav Jewellers", "d": "vaibhavjewellers.com", "nat": false, "r": "south", "rate": 15535.0}, {"n": "Bhima Jewels", "d": "bhimagold.com", "nat": true, "r": "all", "rate": 15539.0}, {"n": "Jos Alukkas", "d": "josalukkasonline.com", "nat": true, "r": "all", "rate": 15540.0}, {"n": "Candere", "d": "candere.com", "nat": true, "r": "all", "rate": 15546.0}, {"n": "Tanishq", "d": "tanishq.co.in", "nat": true, "r": "all", "rate": 15583.64}, {"n": "Kisna", "d": "kisna.com", "nat": true, "r": "all", "rate": 15589.06}, {"n": "BlueStone", "d": "bluestone.com", "nat": true, "r": "all", "rate": 15595.17}, {"n": "CaratLane", "d": "caratlane.com", "nat": true, "r": "all", "rate": 15635.0}, {"n": "Waman Hari Pethe", "d": "hpjewellers.com", "nat": true, "r": "all", "rate": 15664.0}, {"n": "Ranka Jewellers", "d": "rankajewellers.in", "nat": false, "r": "west", "rate": 15740.0}];
   var PURITY={'24K':1,'22K':22/24,'18K':18/24,'14K':14/24,'9K':9/24};
 
   // ─── Live gold rate feed ───
