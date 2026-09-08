@@ -161,12 +161,39 @@ td.path{color:var(--accent);word-break:break-all}
       body:JSON.stringify(body)}).then(function(r){return r.json();});
   }
 
+  // LIFETIME visits come from a DIFFERENT table than everything else on
+  // this page. `hits` is the site's original visit counter (bumped once
+  // per session via the bump_hits RPC from every page); `page_views` is
+  // the newer per-pageview log that powers the charts and tables below.
+  // They are not interchangeable and page_views is NOT a superset - it
+  // only started collecting later. Showing only page_views totals made
+  // the dashboard read ~164 when the real lifetime figure was ~6,400.
+  // hits_count is a public RPC (anon may call it), so no secret needed
+  // and no date range applies - it is always all-time.
+  var LIFETIME=null;
+  function loadLifetime(){
+    return fetch(SB+'/rest/v1/rpc/hits_count',{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY,
+        'Authorization':'Bearer '+KEY},body:'{}'})
+      .then(function(r){return r.ok?r.json():Promise.reject(r.status);})
+      .then(function(n){if(!isNaN(Number(n)))LIFETIME=Number(n);})
+      .catch(function(){/* leave null - tile renders as an em dash */});
+  }
+
   function renderKPIs(t){
     var k=$('kpis');
-    var items=[['Page views',t.views],['Unique visitors',t.visitors],['Clicks',t.clicks]];
+    var items=[
+      ['Total visits (all time)',LIFETIME,'hits'],
+      ['Page views',t.views,'range'],
+      ['Unique visitors',t.visitors,'range'],
+      ['Clicks',t.clicks,'range']];
     k.innerHTML=items.map(function(it){
-      return '<div class="kpi"><div class="n">'+nfmt(it[1]||0)+
-        '</div><div class="l">'+it[0]+'</div></div>';}).join('');
+      var val=(it[1]==null)?'&mdash;':nfmt(it[1]||0);
+      var note=(it[2]==='hits')
+        ? '<div class="l" style="font-size:10px;opacity:.65;text-transform:none;letter-spacing:0">from hits table &middot; ignores date filter</div>'
+        : '';
+      return '<div class="kpi"><div class="n">'+val+
+        '</div><div class="l">'+it[0]+'</div>'+note+'</div>';}).join('');
   }
 
   function renderChart(daily){
@@ -249,7 +276,9 @@ td.path{color:var(--accent);word-break:break-all}
   $('alltime').onclick=function(){var a=todayIST();
     $('from').value='2024-01-01';$('to').value=iso(a);load();};
   $('page').onchange=load;
-  load();
+  // Fetch the lifetime hits total first so the KPI row renders complete on
+  // first paint; load() runs regardless of whether that call succeeds.
+  loadLifetime().then(load,load);
 })();
 </script>
 </body>
