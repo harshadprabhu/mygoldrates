@@ -254,7 +254,11 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
 .mc-l{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-top:2px}
 .mc-r{font-family:'Playfair Display',Georgia,serif;font-size:18px;font-weight:700;color:var(--text);margin-top:2px}
 .mc-s{font-size:9px;color:var(--text3);margin-top:1px}
-.mc-d{font-size:10px;font-weight:700;margin-top:3px;display:inline-flex;align-items:center;gap:2px;padding:2px 6px;border-radius:5px}
+/* .mc-d had NO color of its own, so the "no change" state (where the .up/.dn
+   classes are removed) inherited an unset colour and rendered near-black on
+   the dark card - effectively invisible. Neutral state is now explicitly
+   near-white; .up/.dn below still override it green/red when a value moves. */
+.mc-d{font-size:10px;font-weight:700;margin-top:3px;display:inline-flex;align-items:center;gap:2px;padding:2px 6px;border-radius:5px;color:#F2EDE3;background:rgba(255,255,255,0.07)}
 .mc-d.up{color:var(--mint);background:var(--mint-soft)}.mc-d.dn{color:var(--rose);background:var(--rose-soft)}
 .mcard{transition:background-color .4s ease,border-color .4s ease,box-shadow .4s ease}
 .mcard.pulse-up{background:color-mix(in srgb,var(--mint) 12%,var(--glass2));border-color:color-mix(in srgb,var(--mint) 45%,var(--glass-border));box-shadow:0 0 0 1px color-mix(in srgb,var(--mint) 30%,transparent),0 4px 18px color-mix(in srgb,var(--mint) 22%,transparent)}
@@ -1635,15 +1639,50 @@ function handleCredentialResponse(resp){
     // Silver spot + MCX are soft-fails: if either errors, we still paint the
     // gold + FX + IBJA path and the affected tiles stay on their last-known
     // value. All four calls run in parallel so the tick is one round-trip.
-    var xagP = fetch('https://api.gold-api.com/price/XAG').then(function(r){return r.json()}).catch(function(){return null});
-    var mcxP = fetchMcxLive().catch(function(){return null});
-    Promise.all([
-      fetch('https://api.gold-api.com/price/XAU').then(function(r){return r.json()}),
-      fetch('https://open.er-api.com/v6/latest/USD').then(function(r){return r.json()}),
-      xagP, mcxP
-    ]).then(function(res){
-      var usdOz=res[0]&&res[0].price,usdinr=res[1]&&res[1].rates&&res[1].rates.INR;
-      var silverUsdOz=res[2]&&res[2].price;
+    // Single pipeline: everything comes from OUR worker (/market), which is
+    // the same edge-cached proxy that fronts gold-api.com (XAU/XAG),
+    // open.er-api.com (USD/INR) and Moneycontrol (MCX futures). Calling
+    // those upstreams straight from the browser as well meant two
+    // independent pipelines could disagree - the worker would report one
+    // spot price while the page painted another, and upstream rate-limits
+    // or CORS hiccups hit visitors directly instead of being absorbed at
+    // the edge. Direct calls are kept only as a fallback if /market fails.
+    Promise.resolve(
+      fetch(MARKET_API_BASE+'/market').then(function(r){
+        if(!r.ok)throw new Error('/market '+r.status);return r.json();})
+    ).then(function(m){
+      // fetchMcxLive() normally populates LIVE.mcx* as a side effect and
+      // paintMarket() reads from there. On the worker path we never call it,
+      // so mirror the same assignments (including the delta vs the previous
+      // tick) or the MCX tiles would freeze on their last direct-fetch value.
+      if(m.mcx_gold&&m.mcx_gold.ltp!=null){
+        var pg=LIVE.mcxGold;
+        LIVE.deltaMcxGold=pg!=null?Math.round(m.mcx_gold.ltp-pg):0;
+        LIVE.mcxGold=m.mcx_gold.ltp;LIVE.mcxGoldExpiry=m.mcx_gold.expiry;
+      }
+      if(m.mcx_silver&&m.mcx_silver.ltp!=null){
+        var ps=LIVE.mcxSilver;
+        LIVE.deltaMcxSilver=ps!=null?Math.round(m.mcx_silver.ltp-ps):0;
+        LIVE.mcxSilver=m.mcx_silver.ltp;LIVE.mcxSilverExpiry=m.mcx_silver.expiry;
+      }
+      return {usdOz:m.gold_usd,usdinr:m.usd_inr,silverUsdOz:m.silver_usd,mcx:m};
+    }).catch(function(e){
+      console.warn('[gr-market] worker /market failed, falling back to direct upstreams',e);
+      var xagP=fetch('https://api.gold-api.com/price/XAG').then(function(r){return r.json()}).catch(function(){return null});
+      var mcxP=fetchMcxLive().catch(function(){return null});
+      return Promise.all([
+        fetch('https://api.gold-api.com/price/XAU').then(function(r){return r.json()}),
+        fetch('https://open.er-api.com/v6/latest/USD').then(function(r){return r.json()}),
+        xagP, mcxP
+      ]).then(function(res){
+        return {usdOz:res[0]&&res[0].price,
+                usdinr:res[1]&&res[1].rates&&res[1].rates.INR,
+                silverUsdOz:res[2]&&res[2].price,
+                mcx:res[3]};
+      });
+    }).then(function(res){
+      var usdOz=res.usdOz,usdinr=res.usdinr;
+      var silverUsdOz=res.silverUsdOz;
       if(!usdOz||!usdinr)throw new Error('bad payload');
       applyLive(usdOz,usdinr,silverUsdOz);
       LIVE.ts=Date.now();LIVE.ok=true;LIVE.source='live';
@@ -1662,30 +1701,57 @@ function handleCredentialResponse(resp){
       paintLiveChip(currentDotState());paintLiveStrip();
     });
   }
-  // ─── Hit counter (daily + total), via a free public counter API ───
-  function todayKeyIST(){
-    return new Date(Date.now()+5.5*3600*1000).toISOString().slice(0,10);
-  }
+  // ─── Hit counter — Supabase `hits` table (the site's real counter) ───
+  // Previously this read countapi.mileshilliard.com with the key
+  // 'mygoldrates-app-hits-total-v1'. That is a free third-party counter
+  // that was only ever counting the app-test deployment - it is NOT the
+  // site's data. Production's real lifetime visit counter is the Supabase
+  // `hits` table: incremented via the bump_hits RPC (once per session) and
+  // read via hits_count. The classic /compare page has always used it; this
+  // page was pointed at the wrong source, which is why / displayed a few
+  // hundred views while the real figure was several thousand.
+  //
+  // Single code path: bump_hits on a fresh session returns the NEW total,
+  // hits_count on a repeat view returns the current total without bumping -
+  // so one call both records the visit and gives us the number to paint.
   function paintHits(text){
     var el=document.getElementById('hitsTxt'),elS=document.getElementById('hitsTxtS');
     if(el)el.textContent=text;
     if(elS)elS.textContent=text;
   }
+  function sbRpc(fn){
+    var base=(window.GR_SB_URL||SUPABASE_URL||'').replace(/\/$/,'');
+    var key=window.GR_SB_KEY||SUPABASE_ANON_KEY||'';
+    if(!base||!key)return Promise.reject(new Error('no supabase config'));
+    return fetch(base+'/rest/v1/rpc/'+fn,{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':key,
+               'Authorization':'Bearer '+key},body:'{}'})
+      .then(function(r){return r.ok?r.json():Promise.reject(new Error(fn+' '+r.status))});
+  }
   function loadHits(){
-    var totalKey='mygoldrates-app-hits-total-v1';
-    var dailyKey='mygoldrates-app-hits-daily-'+todayKeyIST();
-    Promise.all([
-      fetch('https://countapi.mileshilliard.com/api/v1/hit/'+totalKey).then(function(r){return r.json()}),
-      fetch('https://countapi.mileshilliard.com/api/v1/hit/'+dailyKey).then(function(r){return r.json()})
-    ]).then(function(res){
-      var total=res[0]&&res[0].value,daily=res[1]&&res[1].value;
-      if(total==null||daily==null)throw new Error('bad payload');
-      paintHits(Number(total).toLocaleString('en-IN')+' total views · '+Number(daily).toLocaleString('en-IN')+' today');
+    var counted=false;
+    try{counted=!!sessionStorage.getItem('gr_hit');}catch(e){}
+    // bump_hits both increments and returns the new total; hits_count only
+    // reads. Same once-per-session semantics the classic page uses, so / and
+    // /compare can't double-count the same visitor.
+    var totalP=sbRpc(counted?'hits_count':'bump_hits').then(function(n){
+      try{sessionStorage.setItem('gr_hit','1');}catch(e){}
+      return Number(n);
+    });
+    // hits_today is optional - if the RPC isn't deployed yet we still show
+    // the lifetime total rather than falling back to a device-local number.
+    var dailyP=sbRpc('hits_today').then(function(n){return Number(n)})
+      .catch(function(){return null});
+    Promise.all([totalP,dailyP]).then(function(res){
+      var total=res[0],daily=res[1];
+      if(total==null||isNaN(total))throw new Error('bad payload');
+      var txt=total.toLocaleString('en-IN')+' total views';
+      if(daily!=null&&!isNaN(daily))txt+=' · '+daily.toLocaleString('en-IN')+' today';
+      paintHits(txt);
     }).catch(function(err){
-      console.warn('Hit counter unavailable, using local fallback',err);
-      var local=0;
-      try{local=(parseInt(localStorage.getItem('mgr_local_hits'))||0)+1;localStorage.setItem('mgr_local_hits',local)}catch(e){}
-      paintHits(local.toLocaleString('en-IN')+' views on this device (offline)');
+      // No silent swallow - a broken counter should be visible in devtools.
+      console.warn('[gr-hits] Supabase hits unavailable',err);
+      paintHits('');
     });
   }
 
@@ -2429,7 +2495,12 @@ function handleCredentialResponse(resp){
   // low. The live-status chip repaints every 3s so the "Xs ago" number
   // counts up smoothly even between actual fetches.
   fetchLiveRates();
-  setInterval(fetchLiveRates,10000);
+  // 3s, matching what production's market drawer already used. At 10s the
+  // board looked frozen - upstream spot moves every couple of seconds, so a
+  // 10s tick threw away most of the movement the pulse UI exists to show.
+  // The worker edge-caches /market for ~5s, so this costs no extra upstream
+  // calls; it just stops the page sitting on stale values between ticks.
+  setInterval(fetchLiveRates,3000);
   setInterval(function(){paintLiveChip(currentDotState());paintLiveStrip();},3000);
   fetchNews();
   setInterval(fetchNews,15*60*1000);

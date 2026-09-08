@@ -1,0 +1,35 @@
+name: market-snapshot
+
+# Persists Market Pulse data into Supabase (market_ticks, vendor_rates,
+# ohlc_history, market_news, economic_calendar). The live homepage still
+# reads the Cloudflare worker directly for sub-second freshness - this is
+# the durable record behind it, so there is history to audit and analyse.
+#
+# Every 15 min during Indian market hours (09:00-23:59 IST = 03:30-18:29
+# UTC), plus manual dispatch. Not every 3s - the page is the real-time
+# surface; this is the archive.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 3-18 * * 1-5"   # weekdays, 03:30-18:29 UTC ~ IST market hours
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Snapshot market data into Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python market_snapshot.py
