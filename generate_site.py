@@ -3364,38 +3364,16 @@ def main():
             '    post("click_events",{page:location.pathname,target:label,session_id:SID});\n'
             '  },true);\n'
             '})();</script>\n')
-        # -- Lifetime visit counter: bump the `hits` table ------------------
-        # `hits` (read via the hits_count RPC, incremented via bump_hits) is
-        # the site's REAL lifetime visit counter - the ~6.4k number. It is a
-        # different table from page_views (which is the per-pageview log the
-        # analytics dashboard charts). The classic TEMPLATE has always called
-        # bump_hits from its inline counter script; pulse_app.html never did.
-        # So from the moment the IA swap made pulse the homepage, the site's
-        # highest-traffic page stopped incrementing the real counter and the
-        # number went flat. Same once-per-session semantics as the classic
-        # page: bump_hits on a fresh session, hits_count on a repeat view.
-        hits_js = (
-            '<script>(function(){\n'
-            '  var SB=window.GR_SB_URL||"",KEY=window.GR_SB_KEY||"";\n'
-            '  if(!SB||!KEY)return;\n'
-            '  var counted=false;\n'
-            '  try{counted=!!sessionStorage.getItem("gr_hit");}catch(e){}\n'
-            '  var fn=counted?"hits_count":"bump_hits";\n'
-            '  fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",\n'
-            '    headers:{"Content-Type":"application/json","apikey":KEY,\n'
-            '             "Authorization":"Bearer "+KEY},body:"{}"})\n'
-            '    .then(function(r){return r.ok?r.json():Promise.reject(r.status);})\n'
-            '    .then(function(n){\n'
-            '      try{sessionStorage.setItem("gr_hit","1");}catch(e){}\n'
-            '      var el=document.getElementById("hitcount");\n'
-            '      if(el&&!isNaN(Number(n)))el.textContent=Number(n).toLocaleString("en-IN");\n'
-            '    })\n'
-            '    .catch(function(e){\n'
-            '      if(console&&console.warn)console.warn("[gr-hits] "+fn+" failed",e);\n'
-            '    });\n'
-            '})();</script>\n')
+        # NOTE: no hits/bump_hits injection here. pulse_app.html's own
+        # loadHits() now calls bump_hits / hits_count against Supabase
+        # directly (it used to read the third-party countapi counter, which
+        # is what made / display a few hundred views instead of the real
+        # figure). Injecting a second bump here as well would double-count
+        # every fresh session, so the page owns that call outright and this
+        # builder only supplies the GR_SB_URL / GR_SB_KEY globals via
+        # analytics_js above, which loadHits() reads.
         pulse_html = pulse_html.replace(
-            "</head>", extra_ld + analytics_js + hits_js + "</head>", 1)
+            "</head>", extra_ld + analytics_js + "</head>", 1)
         # Homepage now lives at docs/index.html - overwrites what TEMPLATE
         # used to write (that content is at docs/compare.html now).
         with open("docs/index.html", "w", encoding="utf-8") as f:
