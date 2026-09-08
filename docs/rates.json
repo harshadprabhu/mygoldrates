@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-08",
-  "last_updated": "2026-09-08T16:24:58.108590+05:30",
+  "last_updated": "2026-09-08T17:07:30.104804+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 152937.0,
-      "change_pct": 0.08
+      "price_per_10g_inr": 153026.0,
+      "change_pct": 0.14
     },
     {
       "contract": "GOLDM",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 153100.0,
-      "change_pct": 0.09
+      "price_per_10g_inr": 153250.0,
+      "change_pct": 0.19
     }
   ],
   "jewellers": [
@@ -52,12 +52,6 @@
       "rate_18k_per_gram_inr": 11561.25
     },
     {
-      "jeweller": "Bhima Jewels",
-      "rate_24k_per_gram_inr": 15419.0,
-      "rate_22k_per_gram_inr": 14134.08,
-      "rate_18k_per_gram_inr": 11564.25
-    },
-    {
       "jeweller": "Vummidi Bangaru",
       "rate_24k_per_gram_inr": 15426.0,
       "rate_22k_per_gram_inr": 14140.5,
@@ -68,6 +62,12 @@
       "rate_24k_per_gram_inr": 15475.0,
       "rate_22k_per_gram_inr": 14185.42,
       "rate_18k_per_gram_inr": 11606.25
+    },
+    {
+      "jeweller": "Bhima Jewels",
+      "rate_24k_per_gram_inr": 15534.55,
+      "rate_22k_per_gram_inr": 14240.0,
+      "rate_18k_per_gram_inr": 11650.91
     },
     {
       "jeweller": "C Krishniah Chetty",
