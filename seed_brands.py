@@ -122,6 +122,35 @@ REGIONAL_BRANDS = [
     #
     # Prefer the 1g 999.9 coin: smallest denomination, highest purity, so
     # the breakup is the cleanest possible expression of the board rate.
+    # Waman Hari Pethe - DEACTIVATED 2026-09-09: publishing a fabricated
+    # number. rate_url pointed at /products/whp-24kt-999-10-gm, a product
+    # handle that no longer exists. The scraper's own fetch() correctly
+    # calls that a 404, but the row was written by the RENDER path
+    # (method was `rendered/rows`), which renders whatever the browser is
+    # served - including the error page - without re-checking status. The
+    # shell page carries no rate table, no "today's gold rate" text and no
+    # purity-labelled rows, just scattered product prices (15808, 14041,
+    # 14718, 16946...), and `rows` matched one of them. Stored 15,664.00
+    # was therefore a product price, not a gold rate. It sat only +0.83%
+    # off median, which is why no drift gate ever flagged it.
+    #
+    # No valid replacement found. WHP publishes no gold-rate page
+    # (/pages/gold-rate, /pages/todays-gold-rate, /gold-rate,
+    # /pages/gold-rate-today, /pages/metal-rates all 404), and their live
+    # coin pages quote retail, not the board rate: the real
+    # /products/whp-24kt-999-1-gm-gold-coin extracts {'24K': 17112.0},
+    # ~10% over the market median - a 1g coin's minting premium, not a
+    # per-gram metal rate. (Senco's coin page works because it exposes a
+    # gold-value BREAKUP separating metal from making/GST; WHP's exposes
+    # only the retail price, so coin pages are not universally safe.)
+    #
+    # Effect: falls to `estimated` and is filtered out of the published
+    # board. Re-enable only against a source that quotes a pre-GST metal
+    # rate - a rate page, or a coin page with a metal/making breakup.
+    {"name": "Waman Hari Pethe", "slug": "whp",
+     "domain": "whpjewellers.com",
+     "rate_url": "https://whpjewellers.com/products/whp-24kt-999-1-gm-gold-coin",
+     "active": False, "includes_gst": False},
     {"name": "Senco Gold", "slug": "senco",
      "domain": "sencogoldanddiamonds.com",
      "rate_url": "https://sencogoldanddiamonds.com/jewellery/24k-1-g-9999-pure-gold-coin",
