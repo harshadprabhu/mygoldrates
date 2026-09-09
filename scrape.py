@@ -28,7 +28,7 @@ import re
 import statistics
 import time
 from datetime import datetime, timezone
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 from urllib.robotparser import RobotFileParser
 
 import requests
@@ -562,7 +562,57 @@ def fetch(url, session, timeout):
         return None, "404"
     if r.status_code >= 400:
         return None, str(r.status_code)
+    if _is_soft_404(r, session, timeout):
+        return None, "soft-404"
     return r.text, "ok"
+
+
+# Cache of per-host soft-404 fingerprints so we probe each host at most once
+# per run: host -> length of the body served for a URL that cannot exist.
+_SOFT404_FP = {}
+
+
+def _is_soft_404(r, session, timeout):
+    """True if this 200 response is really the host's not-found page.
+
+    Some storefronts answer an unknown path with HTTP 200 and their error
+    page rather than a 404. The status check above cannot see that, so the
+    scraper happily extracts whatever numbers the error page happens to
+    carry - product prices, promo figures - and publishes them as a board
+    rate. Waman Hari Pethe did exactly this: rate_url pointed at a product
+    handle that no longer exists, the host returned 200 with a ~1.04 MB
+    storefront shell, and 'rows' matched a product price. The result looked
+    plausible (+0.83% off median) so no drift gate caught it, but the number
+    was not a gold rate at all.
+
+    Detection is by comparison, not by guessing at content: fetch a sibling
+    URL on the same host that cannot exist, and if the real page's body is
+    the same size as that, the real page IS the error page. Deterministic
+    and content-agnostic - no keyword lists, no length thresholds picked out
+    of the air. Exact match only, so a genuine page that merely resembles
+    the 404 in size is never rejected.
+
+    Costs one extra request per host per run, cached in _SOFT404_FP.
+    Fails open: if the probe errors we assume the page is real, because a
+    flaky probe must never suppress a good rate.
+    """
+    try:
+        parts = urlsplit(r.url)
+        host = parts.netloc
+        if host not in _SOFT404_FP:
+            probe = urlunsplit((
+                parts.scheme, host,
+                "/mygoldrates-probe-404-do-not-exist", "", ""))
+            pr = session.get(probe, timeout=timeout, allow_redirects=True)
+            # Only a 200 probe is meaningful. A host that correctly 404s the
+            # probe has no soft-404 behaviour to detect, so record None and
+            # skip the comparison for every page on it.
+            _SOFT404_FP[host] = (len(pr.text)
+                                 if pr.status_code == 200 else None)
+        fp = _SOFT404_FP[host]
+        return fp is not None and len(r.text) == fp
+    except Exception:
+        return False
 
 
 _STEALTH = (
