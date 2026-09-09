@@ -3158,6 +3158,15 @@ def main():
         f.write(analytics_page)
     print("analytics dashboard: wrote docs/analytics.html (token via URL hash)")
 
+    # Raw international spot in INR per gram at THIS build - the companion
+    # to the IBJA anchor injected into the homepage below. The page divides
+    # live spot by this to get an intraday movement ratio and applies it to
+    # the real IBJA figure, so the India reference tracks the market without
+    # inventing a premium. Zero if either upstream was unavailable, in which
+    # case the page keeps its old spot x (1 + INDIA_PREMIUM) estimate.
+    _ibja_anchor_spot = ((gold_usd / 31.1034768) * usdinr
+                         if gold_usd and usdinr else 0)
+
     # ---- HOMEPAGE: Market Pulse (from app-test) --------------------------
     # As of the Sep-2026 IA swap, the app-test single-file Market Pulse HTML
     # is the site's homepage - written to docs/index.html with canonical /.
@@ -3287,6 +3296,18 @@ def main():
             ("__RATES_EPOCH__", str(int(now_ist.timestamp()))),
             ("__RATES_WHEN__",
              f"{display_date}, {display_time}"),
+            # Real IBJA 24K anchor + the raw spot INR/g at this build, so the
+            # page's India reference tracks intraday movement from a TRUE
+            # published figure. It previously used spot x (1 + 0.14), a
+            # guessed premium that sat ~43/g under the actual IBJA rate and
+            # - worse - was also used to rebuild every BRAND price, which
+            # discarded the scraped values and inflated the whole board by
+            # ~25/g. Both are "0" when a fetch failed; the page then falls
+            # back to the old estimate for the tile only.
+            ("__IBJA_ANCHOR_24__",
+             f"{r999:.4f}" if ibja and r999 else "0"),
+            ("__IBJA_ANCHOR_SPOT__",
+             f"{_ibja_anchor_spot:.4f}" if _ibja_anchor_spot else "0"),
         ]
         pulse_missing = []
         for old, new in replacements:
