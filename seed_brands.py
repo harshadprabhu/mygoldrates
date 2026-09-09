@@ -90,6 +90,59 @@ REGIONAL_BRANDS = [
     {"name": "ORRA", "slug": "orra", "domain": "www.orra.co.in",
      "rate_url": "https://www.orra.co.in/product/elegance-of-circle-astra-earrings-asn25a03-d900r1b",
      "active": True, "includes_gst": False},
+    # Senco Gold - DEACTIVATED 2026-09-09: the live scrape was publishing a
+    # materially wrong rate and there is no scrapeable replacement source.
+    #
+    # What was happening: rate_url pointed at a single product page
+    #   /jewellery/sleek-n-stylish-gold-mens-chain
+    # which is a 22K Yellow Gold chain. It carries gross_weight values but
+    # no metal_price/net_weight pair, so extract() fell through to the
+    # 'goldvalue' path and pulled ONE 22K data point - 13,961.01/g - off
+    # that one chain's gold-value breakup. derive_ladder then scaled it
+    # 22K -> 24K (x 24/22), giving 15,230.20, which the site published as
+    # Senco's 24K board rate.
+    #
+    # Senco's own calculator (sencogoldanddiamonds.com/gold-price-calculator)
+    # showed 24K 99.99 = 15,503.00/g at 2026-09-08 12:38:27, so we were
+    # 272.80/g LOW (-1.76%). Because that made Senco the cheapest number on
+    # the board it was also carrying the "lowest today" badge, steering
+    # buyers there on a false premise (~5,456 misstated on a 20g purchase).
+    # Drift was 1.96% off median - under OUTLIER_TOLERANCE (4%) - so the
+    # existing quarantine gate never fired.
+    #
+    # Why no replacement URL: Senco publishes no static pre-GST board rate.
+    #   - /gold-rate-today, /gold-rate, /gold-price[-today], /todays-gold-rate
+    #     and similar all 404.
+    #   - The calculator is a client-rendered Next.js page; extract() on its
+    #     served HTML returns {} (the rate only exists after hydration, as an
+    #     input value React computes).
+    #   - Its data comes from api.sencogoldanddiamonds.com/calculator/list,
+    #     which returns 401 Unauthorized; CORS advertises allowed headers
+    #     x-store-id,token - i.e. it needs a real session token. Not a public
+    #     feed, so we don't go around it.
+    #   - The gold-coin listing does carry prices (~16,684/g for 24K) but
+    #     that is retail INCLUDING GST and a minting premium; backing a
+    #     pre-GST metal rate out of it needs invented constants, which is not
+    #     a defensible basis for a board rate.
+    #
+    # Effect of active=False: no live row is written, so scrape.py's
+    # placeholder path marks Senco `estimated` (market median) and
+    # generate_site.py filters estimated rows out of the published board.
+    # Senco drops off the comparison rather than showing a wrong price -
+    # the intended trade: a missing brand beats a wrong "cheapest" badge.
+    #
+    # To re-enable: wire a render path that loads the calculator and
+    # intercepts the calculator/list XHR the page itself makes (the page
+    # authenticates itself - no key lifting), then read the 99.99 entry.
+    # scrape.py already has render() via Playwright and a Zyte fallback, so
+    # the plumbing exists; it needs the response shape confirmed against a
+    # real render, which could not be done from the dev sandbox (its proxy
+    # resets Chromium's connections to this host; curl works, the browser
+    # does not).
+    {"name": "Senco Gold", "slug": "senco",
+     "domain": "sencogoldanddiamonds.com",
+     "rate_url": "https://sencogoldanddiamonds.com/gold-price-calculator",
+     "active": False, "includes_gst": False},
 ]
 
 
