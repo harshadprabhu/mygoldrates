@@ -3277,6 +3277,16 @@ def main():
             ('<meta name="twitter:description" content="Live 24K, 22K & '
              '18K gold rates from 14+ Indian jewellers, updated daily.">',
              f'<meta name="twitter:description" content="{home_desc[:160]}">'),
+            # Last-updated stamp for the JEWELLER board rates. Distinct from
+            # the live chip, which tracks the spot/MCX feed refreshing every
+            # 3s - visitors were being shown a permanently "live" badge with
+            # no way to tell how fresh the jeweller comparison itself was.
+            # The epoch drives a client-side "x ago" ticker (below), so the
+            # figure stays honest across CDN caching rather than freezing at
+            # whatever the build time happened to be.
+            ("__RATES_EPOCH__", str(int(now_ist.timestamp()))),
+            ("__RATES_WHEN__",
+             f"{display_date}, {display_time}"),
         ]
         pulse_missing = []
         for old, new in replacements:
@@ -3372,8 +3382,34 @@ def main():
         # every fresh session, so the page owns that call outright and this
         # builder only supplies the GR_SB_URL / GR_SB_KEY globals via
         # analytics_js above, which loadHits() reads.
+        # Live "x ago" next to the rates stamp. Reads the epoch off the DOM
+        # rather than baking a string, so a CDN-cached copy still counts up
+        # correctly instead of insisting the rates are "just now" hours
+        # later. Ticks every 30s - the scrape itself runs every 30 min.
+        stamp_js = (
+            '<script>(function(){\n'
+            '  function ago(s){\n'
+            '    if(s<60)return "just now";\n'
+            '    if(s<120)return "1 min ago";\n'
+            '    if(s<3600)return Math.round(s/60)+" min ago";\n'
+            '    if(s<7200)return "1 hour ago";\n'
+            '    if(s<86400)return Math.round(s/3600)+" hours ago";\n'
+            '    var d=Math.round(s/86400);return d===1?"1 day ago":d+" days ago";\n'
+            '  }\n'
+            '  function tick(){\n'
+            '    var el=document.getElementById("ratesStamp");\n'
+            '    if(!el)return;\n'
+            '    var e=parseInt(el.getAttribute("data-rates-epoch")||"0",10);\n'
+            '    if(!e)return;\n'
+            '    var out=document.getElementById("ratesStampAgo");\n'
+            '    if(out)out.textContent=ago(Math.max(0,(Date.now()/1000|0)-e));\n'
+            '  }\n'
+            '  if(document.readyState==="loading")'
+            'document.addEventListener("DOMContentLoaded",tick);else tick();\n'
+            '  setInterval(tick,30000);\n'
+            '})();</script>\n')
         pulse_html = pulse_html.replace(
-            "</head>", extra_ld + analytics_js + "</head>", 1)
+            "</head>", extra_ld + analytics_js + stamp_js + "</head>", 1)
         # Homepage now lives at docs/index.html - overwrites what TEMPLATE
         # used to write (that content is at docs/compare.html now).
         with open("docs/index.html", "w", encoding="utf-8") as f:

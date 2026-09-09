@@ -2,16 +2,20 @@ name: fetch-rates
 
 on:
   schedule:
-    # GitHub delays scheduled runs on private repos (often 30-120+ min) and
-    # :00/:30 are the most congested minutes - so we use odd minutes and
-    # schedule the MORNING runs early with several attempts, so fresh rates
-    # are up well before ~11 IST even after a delay. Times UTC (IST=UTC+5:30).
-    - cron: "3 2 * * *"     # 07:33 IST  (morning window)
-    - cron: "23 3 * * *"    # 08:53 IST
-    - cron: "43 4 * * *"    # 10:13 IST
-    - cron: "3 6 * * *"     # 11:33 IST  (catch-up if earlier ones were dropped)
-    - cron: "17 9 * * *"    # 14:47 IST  (afternoon revision)
-    - cron: "41 11 * * *"   # 17:11 IST  (late revision)
+    # Every 30 minutes. Scraping volume is no longer the constraint, so the
+    # board tracks intraday revisions continuously instead of catching six
+    # fixed windows - a jeweller who revises at 12:40 IST now shows within
+    # the half hour rather than waiting for the old 14:47 slot.
+    #
+    # Offset to :07/:37 rather than :00/:30 deliberately: GitHub delays
+    # scheduled runs on private repos and the on-the-hour and on-the-half
+    # minutes are the most congested, so odd minutes get picked up sooner.
+    # A dropped tick is harmless - the next is 30 minutes out and every run
+    # re-scrapes all brands from scratch, so nothing accumulates.
+    #
+    # `concurrency` below (group without cancel-in-progress) already keeps
+    # two runs from overlapping if one is slow.
+    - cron: "7,37 * * * *"
   workflow_dispatch:        # manual runs + the Cloudflare Worker cron
     inputs:
       alerts:
