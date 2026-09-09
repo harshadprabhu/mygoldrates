@@ -144,3 +144,50 @@ def test_ratio_check_rejects_inconsistent_purities():
     # 22K quoted far off the 22/24 ratio against the 24K on the same page.
     ok, _ = scrape.basis_confirmed({"24K": 15685.35, "22K": 9000.0})
     assert not ok
+
+
+# --------------------------------------------------------------------------
+# GRT Jewellers, 2026-09-09.
+#
+# GRT ships every purity as JSON inside a <script> and renders only the
+# currently selected one - the visible header reads
+# "GOLD 22 KT/1g - Rs 14145" while the page data also carries 24 KT at
+# 15442. extract() strips <script> before reading text, so only the default
+# row was ever seen and 24K was laddered up from the 22K: 15,430.91 against
+# a published 15,442.
+#
+# Same class as the CKC bug - the brand DOES publish 24K, we just could not
+# see it. PLATINUM and SILVER sit in the same array and must be ignored.
+# --------------------------------------------------------------------------
+GRT_RATE_JSON = r'''
+<script>window.__DATA__ = {"gold_rate":[
+{"type":"GOLD","weight":1,"unit":"G","purity":"24 KT","amount":15442,"default":false},
+{"type":"GOLD","weight":1,"unit":"G","purity":"22 KT","amount":14145,"default":true},
+{"type":"GOLD","weight":1,"unit":"G","purity":"18 KT","amount":11582,"default":false},
+{"type":"GOLD","weight":1,"unit":"G","purity":"14 KT","amount":9008,"default":false},
+{"type":"PLATINUM","weight":1,"unit":"G","purity":null,"amount":7450,"default":false},
+{"type":"SILVER","weight":1,"unit":"G","purity":null,"amount":255,"default":false}]};</script>
+<div>GOLD 22 KT/1g - &#8377; 14145</div>
+'''
+
+
+def test_script_json_rate_table_beats_the_visible_default_row():
+    found, _, how = scrape.extract(GRT_RATE_JSON)
+    assert how == "ratejson", f"expected the JSON reader, got {how}"
+    assert found.get("24K") == 15442.0, (
+        "must read the 24K row from the script JSON, not ladder it up from "
+        "the visible 22K default")
+    assert found.get("22K") == 14145.0
+    assert found.get("18K") == 11582.0
+
+
+def test_rate_json_ignores_platinum_and_silver():
+    found, _, _ = scrape.extract(GRT_RATE_JSON)
+    assert 7450.0 not in found.values(), "platinum leaked into gold purities"
+    assert 255.0 not in found.values(), "silver leaked into gold purities"
+
+
+def test_rate_json_purities_confirm_the_basis():
+    found, _, _ = scrape.extract(GRT_RATE_JSON)
+    ok, why = scrape.basis_confirmed(found)
+    assert ok, f"GRT's four purities should cross-validate, got: {why}"

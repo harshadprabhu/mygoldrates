@@ -477,6 +477,53 @@ def extract_candere_cards(html):
     return buckets
 
 
+def extract_rate_json(html):
+    """Rate tables shipped as JSON in a <script>, not rendered as text.
+
+    GRT publishes every purity this way and renders only the currently
+    selected one - the visible header says "GOLD 22 KT/1g - Rs 14145" while
+    the page data carries:
+
+        "gold_rate":[
+          {"type":"GOLD","weight":1,"unit":"G","purity":"24 KT","amount":15442,...},
+          {"type":"GOLD","weight":1,"unit":"G","purity":"22 KT","amount":14145,"default":true},
+          ...]
+
+    extract() strips <script> before reading text, so only the default row
+    was ever seen and 24K got laddered up from the 22K instead - 15,430.91
+    against a published 15,442. Same class as the CKC fineness-code bug:
+    the brand DOES publish 24K, we just could not see it.
+
+    Parsed off the raw HTML, tolerating backslash-escaped quotes (the blob
+    is usually a JSON string nested inside another). Gold only - PLATINUM
+    and SILVER entries sit in the same array. Non-gram units and multi-gram
+    weights are normalised to per-gram, and anything that isn't a plain
+    per-gram gold row is skipped rather than guessed at.
+    """
+    buckets = {}
+    for m in re.finditer(r"\{[^{}]{0,400}\}", html):
+        chunk = m.group(0)
+        if not re.search(r'\\?"type\\?"\s*:\s*\\?"GOLD\\?"', chunk, re.I):
+            continue
+        pm = re.search(r'\\?"purity\\?"\s*:\s*\\?"\s*(\d{2})\s*K', chunk, re.I)
+        am = re.search(r'\\?"amount\\?"\s*:\s*"?([\d,]+(?:\.\d+)?)"?', chunk)
+        if not (pm and am):
+            continue
+        karat = f"{pm.group(1)}K"
+        if karat not in PURITY_FRACTION:
+            continue
+        wm = re.search(r'\\?"weight\\?"\s*:\s*"?([\d.]+)"?', chunk)
+        um = re.search(r'\\?"unit\\?"\s*:\s*\\?"([A-Za-z]+)\\?"', chunk)
+        weight = float(wm.group(1)) if wm else 1.0
+        unit = (um.group(1) if um else "G").upper()
+        if unit not in ("G", "GM", "GMS", "GRAM", "GRAMS") or weight <= 0:
+            continue
+        pg = _per_gram(_f(am.group(1)) / weight)
+        if pg:
+            buckets.setdefault(karat, []).append(pg)
+    return buckets
+
+
 def extract(html):
     """-> (found, counts, how). Table -> product -> headline -> proximity."""
     soup = BeautifulSoup(html, "html.parser")
@@ -493,6 +540,11 @@ def extract(html):
         buckets, how = extract_product_breakup(html), "product"
     if not buckets:
         buckets, how = extract_json_price_breakup(html), "jsonbreakup"
+    if not buckets:
+        # Before the text fallbacks: a page that ships its full rate table
+        # as script JSON renders only the selected purity, so the text
+        # readers below would see one row and ladder the rest.
+        buckets, how = extract_rate_json(html), "ratejson"
     if not buckets:
         text = soup.get_text(" ", strip=True)
         for fn, name in ((extract_labeled_rates, "labeled"),
