@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-09",
-  "last_updated": "2026-09-09T14:04:43.419745+05:30",
+  "last_updated": "2026-09-09T16:46:24.508364+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -14,7 +14,7 @@
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
-    "rate_per_gram_inr": 15295.0
+    "rate_per_gram_inr": 15354.0
   },
   "ibja_reference_24k_999_per_gram_inr": 15343.2,
   "akgsma_south_india_22k_per_gram_inr": 14145.0,
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 153355.0,
+      "price_per_10g_inr": 153351.0,
       "change_pct": 0.51
     },
     {
       "contract": "GOLDM",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 153513.0,
-      "change_pct": 0.5
+      "price_per_10g_inr": 153506.0,
+      "change_pct": 0.49
     }
   ],
   "jewellers": [
@@ -41,9 +41,9 @@
     },
     {
       "jeweller": "PN Gadgil",
-      "rate_24k_per_gram_inr": 15295.0,
-      "rate_22k_per_gram_inr": 14020.42,
-      "rate_18k_per_gram_inr": 11471.25
+      "rate_24k_per_gram_inr": 15354.0,
+      "rate_22k_per_gram_inr": 14074.5,
+      "rate_18k_per_gram_inr": 11515.5
     },
     {
       "jeweller": "Vummidi Bangaru",
@@ -142,19 +142,13 @@
       "rate_18k_per_gram_inr": 11691.8
     },
     {
-      "jeweller": "BlueStone",
-      "rate_24k_per_gram_inr": 15597.78,
-      "rate_22k_per_gram_inr": 14297.97,
-      "rate_18k_per_gram_inr": 11698.34
-    },
-    {
       "jeweller": "Ranka Jewellers",
       "rate_24k_per_gram_inr": 15790.0,
       "rate_22k_per_gram_inr": 14474.17,
       "rate_18k_per_gram_inr": 11842.5
     }
   ],
-  "jeweller_count": 20,
+  "jeweller_count": 19,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
