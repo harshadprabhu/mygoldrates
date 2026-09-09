@@ -1218,19 +1218,41 @@ function handleCredentialResponse(resp){
   var OZ_PER_KG=32.1507466; // troy oz per kg — silver quoted per kg locally
   var INDIA_PREMIUM=0.14; // approx import duty + dealer markup over raw LBMA spot, tuned to typical IBJA vs XAU/INR gap
   var SILVER_INDIA_PREMIUM=0.12; // silver import duty + local markup vs XAG spot, slightly under gold
-  var seedMin=Math.min.apply(null,BRANDS.map(function(b){return b.rate}));
-  BRANDS.forEach(function(b){b.premiumPct=b.rate/seedMin-1});
+  // BRANDS[].rate is the rate actually scraped from each jeweller and is
+  // rendered as-is. It is deliberately NOT rescaled against a spot-derived
+  // anchor: this page used to rebuild every brand price every 3s from
+  // (spot x 1.14), which threw the scraped values away and inflated the
+  // whole board by ~25/g - a jeweller's board rate is their own margin
+  // decision, not a fixed premium over LBMA, which is precisely why each
+  // one is scraped separately. Board rates refresh when the scraper runs
+  // (every 30 min), not on the 3s spot tick; spot, silver, FX and MCX
+  // tiles below still tick live because those genuinely move that fast.
+  //
+  // Real IBJA 24K/22K per gram, scraped from ibjarates.com at build, plus
+  // the raw spot INR/g at that moment so the tile can track intraday
+  // movement from a TRUE anchor instead of a guessed premium. Zero when
+  // the IBJA fetch failed - applyLive falls back to the old estimate then.
+  var IBJA_ANCHOR_24=Number("__IBJA_ANCHOR_24__")||0;
+  var IBJA_ANCHOR_SPOT=Number("__IBJA_ANCHOR_SPOT__")||0;
   var LIVE={ibja24:null,ibja22:null,deltaIbja24:0,ts:null,ok:false,source:'static',
     goldUsdOz:null,silverUsdOz:null,usdinr:null,silverInrKg:null,
     deltaGoldUsd:0,deltaSilverUsd:0,deltaUsdInr:0,deltaSilverInr:0};
 
   function applyLive(usdOz,usdinr,silverUsdOz){
     var spotRaw=(usdOz/OZ_TO_G)*usdinr;
-    var ibja24=spotRaw*(1+INDIA_PREMIUM);
+    // Anchor on the REAL IBJA rate scraped at build and track intraday
+    // movement by the ratio of spot now to spot then. The old
+    // spotRaw*(1+0.14) was a guessed premium and sat ~43/g under the
+    // published IBJA figure. Falls back to that estimate only when the
+    // build-time IBJA fetch failed.
+    var ibja24=(IBJA_ANCHOR_24&&IBJA_ANCHOR_SPOT)
+      ? IBJA_ANCHOR_24*(spotRaw/IBJA_ANCHOR_SPOT)
+      : spotRaw*(1+INDIA_PREMIUM);
     var prev=LIVE.ibja24;
     LIVE.deltaIbja24=prev?Math.round(ibja24-prev):0;
     LIVE.ibja24=ibja24;LIVE.ibja22=ibja24*PURITY['22K'];
-    BRANDS.forEach(function(b){b.rate=ibja24*(1+b.premiumPct)});
+    // NOTE: brand rates are intentionally not touched here - see the
+    // comment on IBJA_ANCHOR_24. They are what the scraper read.
     // Global Market tiles
     LIVE.deltaGoldUsd=LIVE.goldUsdOz?+(usdOz-LIVE.goldUsdOz).toFixed(2):0;
     LIVE.deltaUsdInr=LIVE.usdinr?+(usdinr-LIVE.usdinr).toFixed(2):0;
