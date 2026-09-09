@@ -1063,6 +1063,33 @@ def main():
     brands = sb.table("brands").select("*").eq("active", True).execute().data
     today = datetime.now(timezone.utc).date().isoformat()
 
+    # Retract any rate still published for a brand that has since been
+    # deactivated. Setting active=False only stops FUTURE scrapes - a row
+    # already written earlier today stays `published` and keeps appearing
+    # on the board, so a brand switched off because its source was found to
+    # be wrong goes on showing that wrong number until the date rolls over.
+    # That is exactly what happened with Waman Hari Pethe: it was
+    # deactivated for publishing a price scraped off a 404 page, but the
+    # row written before the change kept it on the board at 15,664.
+    #
+    # `retracted` (not deleted) so the history stays auditable, and
+    # generate_site.py already filters to status == "published".
+    inactive_ids = [b["id"] for b in
+                    sb.table("brands").select("id")
+                      .eq("active", False).execute().data]
+    if inactive_ids:
+        stale = sb.table("rates").select("brand_id") \
+                  .eq("rate_date", today).eq("status", "published") \
+                  .in_("brand_id", inactive_ids).execute().data
+        for row in stale:
+            sb.table("rates").update({
+                "status": "retracted",
+                "basis_note": "brand deactivated - source withdrawn",
+            }).eq("brand_id", row["brand_id"]).eq("rate_date", today).execute()
+        if stale:
+            print(f"retracted {len(stale)} rate(s) for deactivated brands: "
+                  f"{[r['brand_id'] for r in stale]}")
+
     # Every scheduled run re-scrapes ALL brands so intraday board revisions
     # (jewellers often revise on volatile days) are captured at 11:05, 14:00
     # and 17:00 IST. A failed re-scrape simply keeps the stored rate - the
