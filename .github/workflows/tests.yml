@@ -1,0 +1,42 @@
+name: tests
+
+# Guards the rate extractors. Every case in tests/test_extract.py is a real
+# failure that reached production and put a wrong rate on the public board,
+# so this runs on any change to the scraper or the tests - the point is that
+# the patterns can be edited freely without the same brands silently
+# breaking again.
+
+on:
+  push:
+    paths:
+      - "scrape.py"
+      - "tests/**"
+      - ".github/workflows/tests.yml"
+  pull_request:
+    paths:
+      - "scrape.py"
+      - "tests/**"
+      - ".github/workflows/tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        # scrape.py imports these at module load, so they are needed even
+        # though the extractor tests never touch the network or the DB.
+        run: pip install pytest requests beautifulsoup4 supabase
+
+      - name: Run extractor regression tests
+        run: python -m pytest tests/ -q

@@ -106,6 +106,14 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
 
 /* ─── Top bar ─── */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 4px;flex-shrink:0}
+/* When the jeweller board rates were last scraped - distinct from the live
+   chip, which tracks the 3s spot feed. Sits directly under the topbar so it
+   is the first thing read after the brand. */
+.rates-stamp{flex-shrink:0;padding:2px 16px 6px;font-family:'DM Sans',sans-serif;
+  font-size:11px;color:var(--text3);letter-spacing:.01em}
+.rates-stamp b{color:var(--text2);font-weight:600}
+.rates-stamp #ratesStampAgo{color:var(--text3)}
+.rates-stamp #ratesStampAgo:not(:empty)::before{content:" \00b7 "}
 .logo{font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;color:var(--text);text-shadow:0 1px 8px rgba(0,0,0,0.5)}
 .logo .g{background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .top-right{display:flex;align-items:center;gap:6px}
@@ -557,6 +565,13 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
     <div class="live-chip" id="liveChip" title="Tap to refresh live gold rate"><div class="live-dot" id="liveDot"></div><span id="liveChipTxt">Connecting…</span></div>
   </div>
 </header>
+
+<!-- When the JEWELLER board rates were last scraped. Distinct from the live
+     chip above, which tracks the spot/MCX feed refreshing every 3s. Values
+     are substituted at build time by generate_site.py. -->
+<div class="rates-stamp" id="ratesStamp" data-rates-epoch="__RATES_EPOCH__">
+  Jeweller rates updated <b>__RATES_WHEN__</b><span id="ratesStampAgo"></span>
+</div>
 
 <!-- Google One Tap (uses Google Identity Services) -->
 <div id="g_id_onload"
