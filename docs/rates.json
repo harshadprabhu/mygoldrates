@@ -64,6 +64,12 @@
       "rate_18k_per_gram_inr": 11573.18
     },
     {
+      "jeweller": "Vaibhav Jewellers",
+      "rate_24k_per_gram_inr": 15431.0,
+      "rate_22k_per_gram_inr": 14145.08,
+      "rate_18k_per_gram_inr": 11573.25
+    },
+    {
       "jeweller": "Joyalukkas",
       "rate_24k_per_gram_inr": 15431.0,
       "rate_22k_per_gram_inr": 14145.08,
@@ -116,12 +122,6 @@
       "rate_24k_per_gram_inr": 15534.55,
       "rate_22k_per_gram_inr": 14240.0,
       "rate_18k_per_gram_inr": 11650.91
-    },
-    {
-      "jeweller": "Vaibhav Jewellers",
-      "rate_24k_per_gram_inr": 15535.0,
-      "rate_22k_per_gram_inr": 14240.42,
-      "rate_18k_per_gram_inr": 11651.25
     },
     {
       "jeweller": "Candere",
