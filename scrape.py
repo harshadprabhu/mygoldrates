@@ -289,8 +289,23 @@ def extract_headline_rate(text):
 # "Gold (" or "Yellow Gold", then the per-gram rate ending in /g. Covers
 # banners ("24 KT (999) : RS 14,429/g"), breakup lines ("18KT Gold
 # (RS 10,835 / g)"), and CaratLane's "14 Kt Yellow Gold RS 8,463 / g".
+# The gap between the karat label and the rate is normally non-digit, but
+# a jeweller who prints the fineness code alongside the karat - "24Kt Gold
+# (999) : Rs 15685.35 /Gram" - puts digits in it, and the row is then
+# silently skipped. C Krishniah Chetty publishes exactly that: 24K carries
+# "(999)" while its 22K and 18K rows do not, so the 24K was the ONE row we
+# dropped, and the ladder inferred 24K from the 22K instead (15,534.55
+# against a published 15,685.35 - 150.80/g low, because CKC prices 22K
+# below the flat 22/24 ratio). Allowing a parenthesised fineness inside the
+# gap fixes it. Only the recognised codes are permitted, never an arbitrary
+# number, so this cannot swallow an unrelated figure standing between a
+# karat label and a price.
+_FINENESS = r"999|995|990|916|875|750|585|583|375"
 _LABELED_RE = re.compile(
-    r"(\d{2})\s*K(?:T|ARAT)?\b[^0-9\n]{0,35}?(?:₹|Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?)\s*(?:/\s*(?:g|gm|gram)|per\s*gram)\b",
+    r"(\d{2})\s*K(?:T|ARAT)?\b"
+    r"(?:[^0-9\n]|\(\s*(?:" + _FINENESS + r")\s*\)){0,35}?"
+    r"(?:₹|Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?)"
+    r"\s*(?:/\s*(?:g|gm|gram)|per\s*gram)\b",
     re.I)
 
 
