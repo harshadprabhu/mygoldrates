@@ -191,3 +191,46 @@ def test_rate_json_purities_confirm_the_basis():
     found, _, _ = scrape.extract(GRT_RATE_JSON)
     ok, why = scrape.basis_confirmed(found)
     assert ok, f"GRT's four purities should cross-validate, got: {why}"
+
+
+# --------------------------------------------------------------------------
+# Indriya, 2026-09-09.
+#
+# Same family as GRT, two extra wrinkles. The rate object lives in an HTML
+# ATTRIBUTE and is entity-encoded (&#34;), so a plain text or JSON grep sees
+# nothing. And the purity is the KEY, with the 24K key carrying a fineness
+# suffix its siblings lack:
+#
+#   data-goldrate="{"24KT 999":{...,"today":"15426.7","yesterday":"15530.3"},
+#                   "22KT":{...,"today":"14145",...},
+#                   "18KT":{...}}"
+#
+# So requiring a bare "24KT" key dropped exactly the 24K row - the same
+# asymmetry as CKC's "(999)" label - and 24K was laddered from the 22K:
+# 15,430.91 against a published 15,426.7.
+#
+# "yesterday" sits in the same object and must never be read as today's rate.
+# --------------------------------------------------------------------------
+INDRIYA_ATTR_JSON = (
+    '<div class="nj-calculator__field" data-rate-last-updated-time="09/09/2026 11:00 AM" '
+    'data-goldrate="{&#34;24KT 999&#34;:{&#34;rate_difference&#34;:&#34;-103.6&#34;,'
+    '&#34;today&#34;:&#34;15426.7&#34;,&#34;yesterday&#34;:&#34;15530.3&#34;},'
+    '&#34;22KT&#34;:{&#34;rate_difference&#34;:&#34;-95&#34;,'
+    '&#34;today&#34;:&#34;14145&#34;,&#34;yesterday&#34;:&#34;14240&#34;}}">'
+    "</div><p>Today's Gold Rate is Rs.14145 per gm (22kt).</p>"
+)
+
+
+def test_entity_encoded_attribute_json_is_read():
+    found, _, how = scrape.extract(INDRIYA_ATTR_JSON)
+    assert how == "ratejson", f"expected the JSON reader, got {how}"
+    assert found.get("24K") == 15426.7, (
+        "24K key carrying a fineness suffix ('24KT 999') must still match - "
+        "otherwise 24K gets laddered from the visible 22K")
+    assert found.get("22K") == 14145.0
+
+
+def test_yesterday_is_never_read_as_todays_rate():
+    found, _, _ = scrape.extract(INDRIYA_ATTR_JSON)
+    assert 15530.3 not in found.values(), "read yesterday's rate as today's"
+    assert 14240.0 not in found.values(), "read yesterday's 22K as today's"

@@ -22,6 +22,7 @@ THE FIX - two layers:
 
 from __future__ import annotations
 
+import html as _html
 import json
 import os
 import re
@@ -500,7 +501,37 @@ def extract_rate_json(html):
     weights are normalised to per-gram, and anything that isn't a plain
     per-gram gold row is skipped rather than guessed at.
     """
+    # Quotes may be backslash-escaped (JSON nested in JSON) or HTML-entity
+    # encoded (&#34; / &quot;) when the blob is written into an attribute.
+    # Normalise both before matching, or the payload is invisible - which is
+    # how Indriya's 24K hid: its whole rate object sits in a &#34;-encoded
+    # attribute, so a plain text or JSON grep finds nothing.
+    html = _html.unescape(html) if "&#3" in html or "&quot;" in html else html
+
     buckets = {}
+
+    # Shape B: purity as the KEY, current value under "today".
+    #   "24KT 999":{"rate_difference":"-103.6","today":"15426.7",
+    #               "yesterday":"15530.3"}
+    # The key may carry a fineness suffix - Indriya writes "24KT 999" while
+    # its 22KT and 18KT keys are bare, so requiring a bare key silently drops
+    # exactly the 24K row (the same asymmetry as CKC's "(999)" label).
+    # "yesterday" sits in the same object and must never be taken.
+    for m in re.finditer(
+            r'\\?"(\d{2})\s*KT?(?:\s*[-\s]\s*(?:' + _FINENESS + r'))?\\?"'
+            r'\s*:\s*\{[^{}]{0,200}?'
+            r'\\?"today\\?"\s*:\s*\\?"?([\d,]+(?:\.\d+)?)',
+            html, re.I):
+        karat = f"{m.group(1)}K"
+        if karat not in PURITY_FRACTION:
+            continue
+        pg = _per_gram(_f(m.group(2)))
+        if pg:
+            buckets.setdefault(karat, []).append(pg)
+    if buckets:
+        return buckets
+
+    # Shape A: one object per purity, carrying its own type/purity/amount.
     for m in re.finditer(r"\{[^{}]{0,400}\}", html):
         chunk = m.group(0)
         if not re.search(r'\\?"type\\?"\s*:\s*\\?"GOLD\\?"', chunk, re.I):
