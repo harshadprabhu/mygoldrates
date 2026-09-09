@@ -550,7 +550,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   .site-calc-body{grid-template-columns:1fr}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://mygoldrates.com/#webpage", "url": "https://mygoldrates.com/", "name": "Gold Rate Today in India - Live 24K, 22K, 18K Rates from 14+ Jewellers | MyGoldRates", "description": "Live gold rate today across 14+ Indian jewellers, with MCX gold/silver futures, IBJA reference and real-time market data updated every 3 seconds. Compare 24K, 22K and 18K per-gram prices pre-GST.", "inLanguage": "en-IN", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/", "name": "MyGoldRates.com"}, "dateModified": "2026-09-09T11:25:41.924223+05:30", "primaryImageOfPage": "https://mygoldrates.com/og.png", "significantLink": ["https://mygoldrates.com/compare", "https://mygoldrates.com/news", "https://mygoldrates.com/calculators"]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://mygoldrates.com/#webpage", "url": "https://mygoldrates.com/", "name": "Gold Rate Today in India - Live 24K, 22K, 18K Rates from 14+ Jewellers | MyGoldRates", "description": "Live gold rate today across 14+ Indian jewellers, with MCX gold/silver futures, IBJA reference and real-time market data updated every 3 seconds. Compare 24K, 22K and 18K per-gram prices pre-GST.", "inLanguage": "en-IN", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/", "name": "MyGoldRates.com"}, "dateModified": "2026-09-09T12:25:48.457280+05:30", "primaryImageOfPage": "https://mygoldrates.com/og.png", "significantLink": ["https://mygoldrates.com/compare", "https://mygoldrates.com/news", "https://mygoldrates.com/calculators"]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}]}]}</script>
 <script>window.GR_SB_URL="https://opwrfflzzowhobesysmr.supabase.co";window.GR_SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE";</script>
 <script>(function(){
   var SB=window.GR_SB_URL||"",KEY=window.GR_SB_KEY||"";
@@ -630,8 +630,8 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 <!-- When the JEWELLER board rates were last scraped. Distinct from the live
      chip above, which tracks the spot/MCX feed refreshing every 3s. Values
      are substituted at build time by generate_site.py. -->
-<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1788933341">
-  Jeweller rates updated <b>09 September 2026, 11:25 AM IST</b><span id="ratesStampAgo"></span>
+<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1788936948">
+  Jeweller rates updated <b>09 September 2026, 12:25 PM IST</b><span id="ratesStampAgo"></span>
 </div>
 
 <!-- Google One Tap (uses Google Identity Services) -->
@@ -1252,19 +1252,41 @@ function handleCredentialResponse(resp){
   var OZ_PER_KG=32.1507466; // troy oz per kg — silver quoted per kg locally
   var INDIA_PREMIUM=0.14; // approx import duty + dealer markup over raw LBMA spot, tuned to typical IBJA vs XAU/INR gap
   var SILVER_INDIA_PREMIUM=0.12; // silver import duty + local markup vs XAG spot, slightly under gold
-  var seedMin=Math.min.apply(null,BRANDS.map(function(b){return b.rate}));
-  BRANDS.forEach(function(b){b.premiumPct=b.rate/seedMin-1});
+  // BRANDS[].rate is the rate actually scraped from each jeweller and is
+  // rendered as-is. It is deliberately NOT rescaled against a spot-derived
+  // anchor: this page used to rebuild every brand price every 3s from
+  // (spot x 1.14), which threw the scraped values away and inflated the
+  // whole board by ~25/g - a jeweller's board rate is their own margin
+  // decision, not a fixed premium over LBMA, which is precisely why each
+  // one is scraped separately. Board rates refresh when the scraper runs
+  // (every 30 min), not on the 3s spot tick; spot, silver, FX and MCX
+  // tiles below still tick live because those genuinely move that fast.
+  //
+  // Real IBJA 24K/22K per gram, scraped from ibjarates.com at build, plus
+  // the raw spot INR/g at that moment so the tile can track intraday
+  // movement from a TRUE anchor instead of a guessed premium. Zero when
+  // the IBJA fetch failed - applyLive falls back to the old estimate then.
+  var IBJA_ANCHOR_24=Number("15343.2000")||0;
+  var IBJA_ANCHOR_SPOT=Number("13422.3143")||0;
   var LIVE={ibja24:null,ibja22:null,deltaIbja24:0,ts:null,ok:false,source:'static',
     goldUsdOz:null,silverUsdOz:null,usdinr:null,silverInrKg:null,
     deltaGoldUsd:0,deltaSilverUsd:0,deltaUsdInr:0,deltaSilverInr:0};
 
   function applyLive(usdOz,usdinr,silverUsdOz){
     var spotRaw=(usdOz/OZ_TO_G)*usdinr;
-    var ibja24=spotRaw*(1+INDIA_PREMIUM);
+    // Anchor on the REAL IBJA rate scraped at build and track intraday
+    // movement by the ratio of spot now to spot then. The old
+    // spotRaw*(1+0.14) was a guessed premium and sat ~43/g under the
+    // published IBJA figure. Falls back to that estimate only when the
+    // build-time IBJA fetch failed.
+    var ibja24=(IBJA_ANCHOR_24&&IBJA_ANCHOR_SPOT)
+      ? IBJA_ANCHOR_24*(spotRaw/IBJA_ANCHOR_SPOT)
+      : spotRaw*(1+INDIA_PREMIUM);
     var prev=LIVE.ibja24;
     LIVE.deltaIbja24=prev?Math.round(ibja24-prev):0;
     LIVE.ibja24=ibja24;LIVE.ibja22=ibja24*PURITY['22K'];
-    BRANDS.forEach(function(b){b.rate=ibja24*(1+b.premiumPct)});
+    // NOTE: brand rates are intentionally not touched here - see the
+    // comment on IBJA_ANCHOR_24. They are what the scraper read.
     // Global Market tiles
     LIVE.deltaGoldUsd=LIVE.goldUsdOz?+(usdOz-LIVE.goldUsdOz).toFixed(2):0;
     LIVE.deltaUsdInr=LIVE.usdinr?+(usdinr-LIVE.usdinr).toFixed(2):0;
