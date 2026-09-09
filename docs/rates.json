@@ -88,6 +88,12 @@
       "rate_18k_per_gram_inr": 11577.0
     },
     {
+      "jeweller": "Candere",
+      "rate_24k_per_gram_inr": 15442.0,
+      "rate_22k_per_gram_inr": 14155.17,
+      "rate_18k_per_gram_inr": 11581.5
+    },
+    {
       "jeweller": "ORRA",
       "rate_24k_per_gram_inr": 15470.17,
       "rate_22k_per_gram_inr": 14180.99,
@@ -110,12 +116,6 @@
       "rate_24k_per_gram_inr": 15531.0,
       "rate_22k_per_gram_inr": 14236.75,
       "rate_18k_per_gram_inr": 11648.25
-    },
-    {
-      "jeweller": "Bhima Jewels",
-      "rate_24k_per_gram_inr": 15534.55,
-      "rate_22k_per_gram_inr": 14240.0,
-      "rate_18k_per_gram_inr": 11650.91
     },
     {
       "jeweller": "C Krishniah Chetty",
