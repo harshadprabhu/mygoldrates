@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-12",
-  "last_updated": "2026-09-12T17:06:03.816036+05:30",
+  "last_updated": "2026-09-12T19:54:21.469081+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -130,16 +130,16 @@
       "rate_18k_per_gram_inr": 11612.92
     },
     {
+      "jeweller": "Kisna",
+      "rate_24k_per_gram_inr": 15484.19,
+      "rate_22k_per_gram_inr": 14193.84,
+      "rate_18k_per_gram_inr": 11613.14
+    },
+    {
       "jeweller": "Tanishq",
       "rate_24k_per_gram_inr": 15490.91,
       "rate_22k_per_gram_inr": 14200.0,
       "rate_18k_per_gram_inr": 11618.18
-    },
-    {
-      "jeweller": "Kisna",
-      "rate_24k_per_gram_inr": 15496.05,
-      "rate_22k_per_gram_inr": 14204.71,
-      "rate_18k_per_gram_inr": 11622.04
     },
     {
       "jeweller": "C Krishniah Chetty",
