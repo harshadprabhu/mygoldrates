@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-12",
-  "last_updated": "2026-09-12T11:05:18.380201+05:30",
+  "last_updated": "2026-09-12T12:00:17.189675+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -17,7 +17,7 @@
     "rate_per_gram_inr": 15275.0
   },
   "ibja_reference_24k_999_per_gram_inr": null,
-  "akgsma_south_india_22k_per_gram_inr": 14015.0,
+  "akgsma_south_india_22k_per_gram_inr": null,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
@@ -62,12 +62,6 @@
       "rate_24k_per_gram_inr": 15389.0,
       "rate_22k_per_gram_inr": 14106.58,
       "rate_18k_per_gram_inr": 11541.75
-    },
-    {
-      "jeweller": "C Krishniah Chetty",
-      "rate_24k_per_gram_inr": 15437.51,
-      "rate_22k_per_gram_inr": 14151.05,
-      "rate_18k_per_gram_inr": 11578.13
     },
     {
       "jeweller": "Indriya",
@@ -148,10 +142,16 @@
       "rate_18k_per_gram_inr": 11622.04
     },
     {
+      "jeweller": "C Krishniah Chetty",
+      "rate_24k_per_gram_inr": 15591.71,
+      "rate_22k_per_gram_inr": 14292.4,
+      "rate_18k_per_gram_inr": 11693.78
+    },
+    {
       "jeweller": "Ranka Jewellers",
-      "rate_24k_per_gram_inr": 15665.0,
-      "rate_22k_per_gram_inr": 14359.58,
-      "rate_18k_per_gram_inr": 11748.75
+      "rate_24k_per_gram_inr": 15730.0,
+      "rate_22k_per_gram_inr": 14419.17,
+      "rate_18k_per_gram_inr": 11797.5
     }
   ],
   "jeweller_count": 20,
