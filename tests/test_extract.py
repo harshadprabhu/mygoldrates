@@ -234,3 +234,41 @@ def test_yesterday_is_never_read_as_todays_rate():
     found, _, _ = scrape.extract(INDRIYA_ATTR_JSON)
     assert 15530.3 not in found.values(), "read yesterday's rate as today's"
     assert 14240.0 not in found.values(), "read yesterday's 22K as today's"
+
+
+# --------------------------------------------------------------------------
+# Homepage "Include brands near me" gating.
+#
+# The pulse board hides region-restricted jewellers until the visitor turns
+# that control on - a Maharashtra-only jeweller is noise to a buyer in
+# Chennai. generate_site.py sets each brand's `nat` flag from REGION_MAP,
+# and pulse_app.html renders nat:false rows only when near-me is active.
+#
+# This was briefly forced to True for every brand on the theory that / and
+# /compare must show identical counts. They must not: /compare is a full
+# comparison table, / is a personalised board with an explicit toggle.
+# Forcing it did not unhide anything - it removed the filter, so regional
+# brands showed to everyone by default.
+# --------------------------------------------------------------------------
+def _nat_flag(slug):
+    """Mirror of the rule generate_site.py applies when hydrating BRANDS."""
+    import generate_site
+    return slug not in generate_site.REGION_MAP
+
+
+def test_region_restricted_brands_are_not_national():
+    for slug in ("vaibhav", "vummidi", "ranka", "chandukaka", "ckc"):
+        assert not _nat_flag(slug), (
+            f"{slug} is region-restricted and must be hidden until "
+            '"Include brands near me" is on')
+
+
+def test_national_brands_are_visible_by_default():
+    for slug in ("tanishq", "senco", "caratlane", "kalyan", "grt", "indriya"):
+        assert _nat_flag(slug), f"{slug} is national and must show by default"
+
+
+def test_region_map_is_not_empty():
+    """A cleared REGION_MAP would silently make every brand national."""
+    import generate_site
+    assert len(generate_site.REGION_MAP) >= 5

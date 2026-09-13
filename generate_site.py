@@ -3210,15 +3210,21 @@ def main():
             pulse_brands.append({
                 "n": _b.get("name") or _slug,
                 "d": _dom,
-                # nat drives pulse's DEFAULT-VIEW visibility, not "is this
-                # brand national". /compare renders every row in `live`
-                # (REGION_MAP there only picks the median/lowest baseline,
-                # it never hides a row), so gating on REGION_MAP here made
-                # / show 16 of 21 brands while /compare showed all 21 -
-                # the two surfaces disagreed on the same board. Everything
-                # in `live` is published for today, so everything is shown.
-                # The region tag below still drives the "Near me" filter.
-                "nat": True,
+                # nat drives pulse's DEFAULT-VIEW visibility. National
+                # brands show immediately; region-restricted jewellers
+                # (REGION_MAP) appear only once the visitor turns on
+                # "Include brands near me", which is the whole point of
+                # that control - a Maharashtra-only jeweller is noise to
+                # a buyer in Chennai.
+                #
+                # This was briefly forced to True on the theory that /
+                # and /compare must show identical brand counts. They
+                # must not: /compare is a full comparison table and
+                # renders every row, while / is a personalised board with
+                # an explicit near-me toggle. Making everything national
+                # did not "unhide" anything - it removed the filter, so
+                # regional brands showed to everyone by default.
+                "nat": _slug not in REGION_MAP,
                 # region tag drives the pulse-side "Near me" filter; default
                 # 'all' for national brands and any regional we don't have a
                 # mapping for (harmless - just always visible in Near-me).
