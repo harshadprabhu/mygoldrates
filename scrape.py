@@ -531,6 +531,27 @@ def extract_rate_json(html):
     if buckets:
         return buckets
 
+    # Shape C: a flat rates object keyed by purity name.
+    #   {"rates":{"goldPrice24K":15320,"goldPrice24K995":15290,
+    #             "goldPrice22K":14094,"goldPrice18K":11873,...}}
+    # PN Gadgil & Sons renders its table from exactly this, fetched live -
+    # the numbers baked into the served HTML are a stale fallback the page
+    # overwrites on load, and scraping them gave a rate 870/g (5.7%) out of
+    # date. The closing quote after the karat is required so the suffixed
+    # variants (goldPrice24K995, ...995GW) never bind to 24K: those are the
+    # 995 rate, and mixing them in would drag the 999 figure down.
+    for m in re.finditer(
+            r'\\?"gold_?[Pp]rice(\d{1,2})K\\?"\s*:\s*"?([\d,]+(?:\.\d+)?)',
+            html):
+        karat = f"{m.group(1)}K"
+        if karat not in PURITY_FRACTION:
+            continue          # 9K etc. - no fraction defined, skip
+        pg = _per_gram(_f(m.group(2)))
+        if pg:
+            buckets.setdefault(karat, []).append(pg)
+    if buckets:
+        return buckets
+
     # Shape A: one object per purity, carrying its own type/purity/amount.
     for m in re.finditer(r"\{[^{}]{0,400}\}", html):
         chunk = m.group(0)
