@@ -57,6 +57,16 @@ jobs:
           CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
         run: python scrape.py
 
+      # Reports brands whose configured rate_url has gone dead and are
+      # publishing off path discovery instead. Never fails the run - a
+      # stale pin must be visible, not blocking. See pin_health.py.
+      - name: Pin health
+        if: ${{ !cancelled() }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: python pin_health.py
+
       - name: Build site
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

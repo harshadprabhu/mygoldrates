@@ -52,8 +52,26 @@ REGIONAL_BRANDS = [
      "domain": "pngadgilandsons.com",
      "rate_url": "https://goldpriceeditor.droidinfinity.com/api/external/metal-prices/1085",
      "active": True, "includes_gst": False},
+    # 2026-09-13: rate_url was a 404. /gold-rate-today (and /gold-rate,
+    # /metal-rates, /todays-metal-rates) all return HTTP 404 on a fully
+    # themed error page. Ranka renders "Today's Metal Rates" as a SITE-WIDE
+    # header strip, so that strip is present on the 404 page too - which is
+    # why extract_rows kept returning a real, correct ladder
+    # (24K 15730 / 22K 14630 / 18K 12585) and the brand never looked broken.
+    #
+    # That is the WHP failure mode with a happy ending: reading a rate off a
+    # page the server is calling "not found". WHP's 404 shell had no rate
+    # strip, so `rows` grabbed a product price and we published a fabricated
+    # number; Ranka's does, so we got lucky. Not a distinction to depend on.
+    # Pin the homepage instead - HTTP 200, same header strip, same numbers,
+    # verified identical: {'24K': 15730.0, '22K': 14630.0, '18K': 12585.0}.
+    #
+    # Their 22K sits at 0.930 of 24K rather than the flat 0.9167, so
+    # basis_confirmed stays False - that is Ranka's own pricing (the strip
+    # is explicitly labelled "Rates Applicable for online store Only"), not
+    # an extraction fault. +1.8% off median, inside OUTLIER_TOLERANCE.
     {"name": "Ranka Jewellers", "slug": "ranka", "domain": "rankajewellers.in",
-     "rate_url": "https://www.rankajewellers.in/gold-rate-today",
+     "rate_url": "https://www.rankajewellers.in/",
      "active": True, "includes_gst": False},
     {"name": "Josco Jewellers", "slug": "josco", "domain": "joscogroup.com",
      "rate_url": "https://www.joscogroup.com/gold-rate",
@@ -172,9 +190,32 @@ REGIONAL_BRANDS = [
      "domain": "whpjewellers.com",
      "rate_url": "https://whpjewellers.com/products/whp-24kt-999-1-gm-gold-coin",
      "active": False, "includes_gst": False},
+    # 2026-09-13: handle RENAMED, pin repaired. Senco renormalised their
+    # product slugs and `24k-1-g-9999-pure-gold-coin` began returning a hard
+    # 404. Their sitemap-product.xml carries the new handle - the only change
+    # is a dot: `24k-1-g-999.9-pure-gold-coin`.
+    #
+    # Nothing broke loudly, which is the part worth noting. fetch() rejected
+    # the 404 correctly, CANDIDATE_PATHS all 404'd too, and scrape_brand fell
+    # through to discover_products(), which landed on
+    #   /jewellery/22k-1g-916-pure-gold-bar
+    # and published off its breakup as `discovered/static/goldvalue` - a
+    # single 22K point laddered up to 24K, basis_confirmed False. That is
+    # precisely the 22K-inference path the coin pin was introduced to
+    # eliminate, silently reinstated. It landed at 15,460.36 against the coin's true 15,460.00, so
+    # no drift gate could ever have caught it: the fallback was accurate, just
+    # unpinned and free to wander. See pin_health.py, added with this change,
+    # which now reports any brand publishing from a `discovered/` method.
+    #
+    # Re-verified against all three current coin handles:
+    #   /jewellery/24k-1-g-999.9-pure-gold-coin  -> {'24K': 15460.0}
+    #   /jewellery/24k-2-g-999.9-pure-gold-coin  -> {'24K': 15460.0}
+    #   /jewellery/1g-24k-(995)-...-precious-coin -> {'24K': 15385.0}
+    # 1g and 2g agreeing confirms a per-gram rate, not a product price, and
+    # 15385/15460 = 0.99515 ~ 995/999.9 confirms the purity ladder reads true.
     {"name": "Senco Gold", "slug": "senco",
      "domain": "sencogoldanddiamonds.com",
-     "rate_url": "https://sencogoldanddiamonds.com/jewellery/24k-1-g-9999-pure-gold-coin",
+     "rate_url": "https://sencogoldanddiamonds.com/jewellery/24k-1-g-999.9-pure-gold-coin",
      "active": True, "includes_gst": False},
 ]
 
