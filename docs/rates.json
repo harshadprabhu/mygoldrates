@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-13",
-  "last_updated": "2026-09-13T22:32:11.129474+05:30",
+  "last_updated": "2026-09-14T00:02:19.403788+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -44,6 +44,12 @@
       "rate_24k_per_gram_inr": 15280.0,
       "rate_22k_per_gram_inr": 14006.67,
       "rate_18k_per_gram_inr": 11460.0
+    },
+    {
+      "jeweller": "PN Gadgil & Sons",
+      "rate_24k_per_gram_inr": 15320.0,
+      "rate_22k_per_gram_inr": 14043.33,
+      "rate_18k_per_gram_inr": 11490.0
     },
     {
       "jeweller": "CaratLane",
@@ -154,7 +160,7 @@
       "rate_18k_per_gram_inr": 11797.5
     }
   ],
-  "jeweller_count": 20,
+  "jeweller_count": 21,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
