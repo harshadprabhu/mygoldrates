@@ -272,3 +272,52 @@ def test_region_map_is_not_empty():
     """A cleared REGION_MAP would silently make every brand national."""
     import generate_site
     assert len(generate_site.REGION_MAP) >= 5
+
+
+# --------------------------------------------------------------------------
+# PN Gadgil & Sons, 2026-09-13.
+#
+# Their /gold-rates/ page renders its table from a live API; the numbers
+# baked into the served HTML are a stale fallback the page overwrites on
+# load. We were scraping the fallback: 24K at 14,450 when the live rate was
+# 15,320 - 870/g, 5.7% out of date. That tripped both the purity-ratio check
+# and the 6.5%-off-median outlier gate, so the brand was quarantined and
+# vanished from the board entirely.
+#
+# The quarantine was RIGHT - it stopped a stale rate publishing. The fix is
+# to read the live source.
+#
+# The suffixed keys (goldPrice24K995, ...995GW) are the 995 rate and must
+# never bind to 24K, or they drag the 999 figure down. 9K has no entry in
+# PURITY_FRACTION, and silver/platinum are not gold.
+# --------------------------------------------------------------------------
+PNGS_API = (
+    '{"success":true,"timestamp":"2026-09-13T05:09:23.866Z","rates":'
+    '{"goldPrice24K":15320,"goldPrice24K995":15290,"goldPrice24K995GW":15290,'
+    '"goldPrice22K":14094,"goldPrice18K":11873,"goldPrice14K":9192,'
+    '"goldPrice9K":6128,"silverPrice":232,"silverBarPrice":235,'
+    '"platinumPrice":7500}}'
+)
+
+
+def test_flat_rates_object_is_read():
+    found, _, how = scrape.extract(PNGS_API)
+    assert how == "ratejson", f"expected the JSON reader, got {how}"
+    assert found.get("24K") == 15320.0
+    assert found.get("22K") == 14094.0
+    assert found.get("18K") == 11873.0
+    assert found.get("14K") == 9192.0
+
+
+def test_995_variant_keys_never_bind_to_24k():
+    found, _, _ = scrape.extract(PNGS_API)
+    assert found["24K"] == 15320.0, (
+        "goldPrice24K995/995GW must not be averaged into the 999 rate")
+    assert 15290.0 not in found.values()
+
+
+def test_non_gold_and_undefined_purities_are_skipped():
+    found, _, _ = scrape.extract(PNGS_API)
+    assert 6128.0 not in found.values(), "9K has no PURITY_FRACTION entry"
+    assert 232.0 not in found.values(), "silver leaked in"
+    assert 7500.0 not in found.values(), "platinum leaked in"

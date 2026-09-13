@@ -27,9 +27,30 @@ REGIONAL_BRANDS = [
     {"name": "Kirtilals", "slug": "kirtilals", "domain": "kirtilals.com",
      "rate_url": "https://www.kirtilals.com/gold-rate",
      "active": False, "includes_gst": False},
+    # PN Gadgil & Sons - rate_url is the LIVE API, not the rate page.
+    #
+    # /gold-rates/ renders its table from
+    #   goldpriceeditor.droidinfinity.com/api/external/metal-prices/1085
+    # and the numbers baked into the served HTML are a stale fallback the
+    # page overwrites on load. Scraping the page gave 24K = 14,450 while the
+    # API returned 15,320 - 870/g, 5.7% out of date. That tripped the
+    # purity-ratio check AND the 6.5%-off-median outlier gate, so the brand
+    # was quarantined and disappeared from the board entirely.
+    #
+    # The quarantine was correct - it stopped a stale rate publishing. The
+    # fix is to read the source the page itself reads. Public endpoint, no
+    # auth, clean JSON, and extract_rate_json's Shape C parses it:
+    #   {"rates":{"goldPrice24K":15320,"goldPrice22K":14094,...}}
+    # The suffixed keys (goldPrice24K995/995GW) are the 995 rate and are
+    # deliberately excluded so they cannot drag the 999 figure down.
+    #
+    # Note their lower karats sit above the flat ratio (18K is +3.3% over
+    # 24K x 0.75), so basis_confirmed stays False - that is their real
+    # pricing, not an extraction fault. Drift from median is only -0.8%,
+    # well inside OUTLIER_TOLERANCE, so it publishes normally.
     {"name": "PN Gadgil & Sons", "slug": "pngsons",
      "domain": "pngadgilandsons.com",
-     "rate_url": "https://pngadgilandsons.com/gold-rates/",
+     "rate_url": "https://goldpriceeditor.droidinfinity.com/api/external/metal-prices/1085",
      "active": True, "includes_gst": False},
     {"name": "Ranka Jewellers", "slug": "ranka", "domain": "rankajewellers.in",
      "rate_url": "https://www.rankajewellers.in/gold-rate-today",
