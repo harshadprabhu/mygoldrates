@@ -3308,6 +3308,17 @@ def main():
              f"{r999:.4f}" if ibja and r999 else "0"),
             ("__IBJA_ANCHOR_SPOT__",
              f"{_ibja_anchor_spot:.4f}" if _ibja_anchor_spot else "0"),
+            # Google One Tap. pulse_app.html shipped the literal placeholder
+            # "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com", so every
+            # sign-in from the homepage hit Google's
+            #   Error 401: invalid_client - The OAuth client was not found
+            # /compare and /inquiry substitute the real id through $gclient
+            # and have always worked; this page was never wired to it. With
+            # no secret configured we emit an empty id and the One Tap block
+            # is stripped below, rather than shipping a broken client.
+            ('data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"',
+             f'data-client_id="{_html.escape(gclient, quote=True)}"'
+             if gclient else 'data-client_id=""'),
         ]
         pulse_missing = []
         for old, new in replacements:
@@ -3429,6 +3440,21 @@ def main():
             'document.addEventListener("DOMContentLoaded",tick);else tick();\n'
             '  setInterval(tick,30000);\n'
             '})();</script>\n')
+        # No GOOGLE_CLIENT_ID configured: remove the One Tap block outright.
+        # Leaving it with an empty client_id makes the GSI library initialise
+        # against nothing and fail on click - the same dead end the literal
+        # placeholder produced. The classic templates already go dormant this
+        # way; this brings the homepage in line.
+        if not gclient:
+            pulse_html = re.sub(
+                r'<div id="g_id_onload".*?</div>',
+                "<!-- Google One Tap disabled: GOOGLE_CLIENT_ID not set -->",
+                pulse_html, count=1, flags=re.DOTALL)
+            pulse_html = pulse_html.replace(
+                '<script src="https://accounts.google.com/gsi/client" '
+                'async defer></script>',
+                "<!-- GSI client not loaded: GOOGLE_CLIENT_ID not set -->", 1)
+
         pulse_html = pulse_html.replace(
             "</head>", extra_ld + analytics_js + stamp_js + "</head>", 1)
         # Homepage now lives at docs/index.html - overwrites what TEMPLATE
