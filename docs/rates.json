@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-14",
-  "last_updated": "2026-09-14T14:07:27.840004+05:30",
+  "last_updated": "2026-09-14T17:06:02.966661+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,28 +22,28 @@
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 152655.0,
-      "change_pct": -0.08
+      "price_per_10g_inr": 151000.0,
+      "change_pct": -1.17
     },
     {
       "contract": "GOLDM",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 152900.0,
-      "change_pct": 0.25
+      "price_per_10g_inr": 151204.0,
+      "change_pct": -1.16
     }
   ],
   "jewellers": [
+    {
+      "jeweller": "Chandukaka Saraf",
+      "rate_24k_per_gram_inr": 15105.0,
+      "rate_22k_per_gram_inr": 13846.25,
+      "rate_18k_per_gram_inr": 11328.75
+    },
     {
       "jeweller": "PN Gadgil & Sons",
       "rate_24k_per_gram_inr": 15250.0,
       "rate_22k_per_gram_inr": 13979.17,
       "rate_18k_per_gram_inr": 11437.5
-    },
-    {
-      "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 15265.0,
-      "rate_22k_per_gram_inr": 13992.92,
-      "rate_18k_per_gram_inr": 11448.75
     },
     {
       "jeweller": "PN Gadgil",
@@ -130,12 +130,6 @@
       "rate_18k_per_gram_inr": 11595.0
     },
     {
-      "jeweller": "BlueStone",
-      "rate_24k_per_gram_inr": 15483.89,
-      "rate_22k_per_gram_inr": 14193.57,
-      "rate_18k_per_gram_inr": 11612.92
-    },
-    {
       "jeweller": "Kisna",
       "rate_24k_per_gram_inr": 15484.19,
       "rate_22k_per_gram_inr": 14193.84,
@@ -155,12 +149,12 @@
     },
     {
       "jeweller": "Ranka Jewellers",
-      "rate_24k_per_gram_inr": 15730.0,
-      "rate_22k_per_gram_inr": 14419.17,
-      "rate_18k_per_gram_inr": 11797.5
+      "rate_24k_per_gram_inr": 15690.0,
+      "rate_22k_per_gram_inr": 14382.5,
+      "rate_18k_per_gram_inr": 11767.5
     }
   ],
-  "jeweller_count": 21,
+  "jeweller_count": 20,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
