@@ -663,12 +663,26 @@ def fetch_usdinr():
 
 
 def fetch_bullion_news(limit=8):
-    """Gold + silver + bullion headlines via Google News RSS. Broadens
-    fetch_news's gold-only query so the Markets drawer's Bullion News block
-    covers both metals."""
+    """Gold + silver + bullion PRICE headlines via Google News RSS.
+
+    The query asks for the metals in a price/rate context rather than the
+    bare words. A plain "gold OR silver India" search returns medals: the
+    rail was shipping "Women's cricket at the Asian Games" and "India
+    women's kabaddi team targets Asian Games gold" alongside the rate
+    stories, because in Indian news those words are far more often about
+    sport than about bullion.
+
+    Two defences, because neither is sufficient alone. The query pins the
+    metals to price/rate wording, and DROP below removes anything that
+    still arrives wearing a medal - a headline can match "gold price" in a
+    sports-sponsorship story, and Google's matching is fuzzy enough that
+    the query alone does not hold.
+    """
     url = ("https://news.google.com/rss/search?q="
-           "gold%20OR%20silver%20OR%20bullion%20India%20when:3d"
-           "&hl=en-IN&gl=IN&ceid=IN:en")
+           + requests.utils.quote(
+               '"gold price" OR "gold rate" OR "silver price" OR '
+               '"silver rate" OR "bullion market" India when:3d')
+           + "&hl=en-IN&gl=IN&ceid=IN:en")
     try:
         r = requests.get(url, headers={"User-Agent": UA}, timeout=20)
         items = re.findall(r"<item>(.*?)</item>", r.text, re.S)
@@ -679,6 +693,11 @@ def fetch_bullion_news(limit=8):
             return m.group(1).strip() if m else ""
 
         keep = re.compile(r"(gold|silver|bullion|xau|xag|mcx|ibja)", re.I)
+        # Medals, not metals.
+        DROP = re.compile(
+            r"(asian games|olympic|commonwealth games|world cup|medal|"
+            r"kabaddi|cricket|hockey|badminton|wrestl|athletic|"
+            r"championship|tournament|sprint|relay|podium)", re.I)
         out, seen = [], set()
         for it in items:
             title = _html.unescape(re.sub(r"<[^>]+>", "", field(it, "title")))
@@ -687,6 +706,8 @@ def fetch_bullion_news(limit=8):
             if src and title.endswith(" - " + src):
                 title = title[:-(len(src) + 3)].strip()
             if not (title and link) or len(title) < 15:
+                continue
+            if DROP.search(title):
                 continue
             if not keep.search(title):
                 continue
@@ -3251,6 +3272,14 @@ def main():
     # the real IBJA figure, so the India reference tracks the market without
     # inventing a premium. Zero if either upstream was unavailable, in which
     # case the page keeps its old spot x (1 + INDIA_PREMIUM) estimate.
+    # Reuse the headlines already fetched above for the /compare page,
+    # reshaped to the keys the homepage rail renders.
+    _news_json = [{"title": n["title"], "url": n["link"],
+                   "source": n["source"] or "Google News",
+                   "published": n["dt"].isoformat() if n.get("dt") else ""}
+                  for n in bullion_items]
+    print(f"news: {len(_news_json)} headlines embedded for the homepage rail")
+
     _calendar_events = fetch_calendar()
     print(f"calendar: {len(_calendar_events)} US events this week")
 
@@ -3411,6 +3440,14 @@ def main():
             # back to the worker and, failing that, renders nothing.
             ("__CALENDAR_JSON__", json.dumps(_calendar_events,
                                              separators=(",", ":"))),
+            # Bullion headlines, baked in at build time for the same reason
+            # as the calendar: the worker cannot reach news.google.com, so
+            # its /news answered with an empty list and the rail rendered
+            # "no headlines right now" every day. This is the SAME
+            # fetch_bullion_news() the /compare page already uses
+            # successfully - CI reaches the feed without trouble.
+            ("__NEWS_JSON__", json.dumps(_news_json,
+                                         separators=(",", ":"))),
             # Google One Tap. pulse_app.html shipped the literal placeholder
             # "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com", so every
             # sign-in from the homepage hit Google's
