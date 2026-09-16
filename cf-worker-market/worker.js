@@ -5,7 +5,8 @@
  * Endpoints (all GET, all Access-Control-Allow-Origin: *):
  *
  *   /market            — bundled { gold_usd, silver_usd, usd_inr,
- *                        mcx_gold, mcx_silver, updated_at } in one call
+ *                        *_prev (previous close for each), mcx_gold,
+ *                        mcx_silver, updated_at } in one call
  *   /ohlc?sym=XAU      — 90-day daily OHLC candles for XAU or XAG (Stooq)
  *   /calendar          — this week's US economic events (ForexFactory)
  *   /news              — filtered gold + silver headlines (Moneycontrol RSS)
@@ -108,23 +109,94 @@ async function withCache(request, ttlSeconds, computeFn) {
 // Bundles the four calls app-test currently makes in parallel into one
 // server-side round-trip. Reduces per-tick browser traffic and lets us
 // share the same 5s edge cache across every viewer.
+//
+// Also serves a PREVIOUS CLOSE for every metric (`*_prev`). The page used
+// to compute each tile's "change" as the difference between consecutive
+// 3-second polls, which is structurally ~zero: spot moves cents in three
+// seconds, MCX ticks in whole rupees on a 10g contract, and USD/INR from
+// open.er-api.com refreshes ONCE A DAY, so its tick-delta was 0.00 always.
+// A market tile's "change" universally means change against the previous
+// close, so that is what we serve, from the most authoritative source
+// available for each metric.
 async function handleMarket() {
   const mcxExpiries = mcxCandidateExpiries();
-  const [xau, xag, fx, mcxG, mcxS] = await Promise.all([
+  const [xau, xag, fx, mcxG, mcxS, refs] = await Promise.all([
     safeFetchJson('https://api.gold-api.com/price/XAU'),
     safeFetchJson('https://api.gold-api.com/price/XAG'),
     safeFetchJson('https://open.er-api.com/v6/latest/USD'),
     findMcx('GOLD', mcxExpiries),
     findMcx('SILVER', mcxExpiries),
+    prevCloses(),
   ]);
+
+  const goldUsd = xau?.price ?? null;
+  const silverUsd = xag?.price ?? null;
+  const usdInr = fx?.rates?.INR ?? null;
+
+  // gold-api.com publishes spot only - no previous close. Yahoo's gold and
+  // silver FUTURES carry one, and while futures sit above spot on contango
+  // (GC=F ~1% over XAU), the two move together in PERCENTAGE terms intraday.
+  // So convert the futures' day move into a percentage and rebase it onto
+  // the spot we actually display: spot_prev = spot_now / (1 + pct). The
+  // resulting change is correct in both percent and direction, and stays
+  // consistent with the spot figure on the tile rather than mixing a
+  // futures price into a spot row.
+  const goldPrev = rebasePrev(goldUsd, refs.gold);
+  const silverPrev = rebasePrev(silverUsd, refs.silver);
+
   return json({
-    gold_usd: xau?.price ?? null,
-    silver_usd: xag?.price ?? null,
-    usd_inr: fx?.rates?.INR ?? null,
-    mcx_gold: mcxG ? { ltp: mcxG.ltp, expiry: mcxG.expiry, pchg: mcxG.pchg } : null,
-    mcx_silver: mcxS ? { ltp: mcxS.ltp, expiry: mcxS.expiry, pchg: mcxS.pchg } : null,
+    gold_usd: goldUsd,
+    silver_usd: silverUsd,
+    usd_inr: usdInr,
+    // Yahoo quotes USD/INR directly, so its previous close needs no
+    // rebasing - it is the same instrument we display.
+    gold_usd_prev: goldPrev,
+    silver_usd_prev: silverPrev,
+    usd_inr_prev: refs.fx?.prev ?? null,
+    mcx_gold: mcxG ? { ltp: mcxG.ltp, expiry: mcxG.expiry, pchg: mcxG.pchg,
+                       prev: mcxG.prev, chg: mcxG.chg } : null,
+    mcx_silver: mcxS ? { ltp: mcxS.ltp, expiry: mcxS.expiry, pchg: mcxS.pchg,
+                         prev: mcxS.prev, chg: mcxS.chg } : null,
     updated_at: new Date().toISOString(),
   });
+}
+
+// Convert a reference instrument's day move into a percentage and apply it
+// to the value we actually display. Returns null when either side is
+// missing, so the page falls back cleanly rather than painting a bogus 0.
+function rebasePrev(nowVal, ref) {
+  if (!(nowVal > 0) || !ref || !(ref.now > 0) || !(ref.prev > 0)) return null;
+  const pct = (ref.now - ref.prev) / ref.prev;
+  if (!isFinite(pct) || pct <= -1) return null;
+  return nowVal / (1 + pct);
+}
+
+// Previous closes from Yahoo's chart API. `chartPreviousClose` on a 1-day
+// range is the last completed session's close, which is exactly the
+// reference a "change" column needs. Cached for an hour: these move once
+// per session, so there is no reason to re-fetch them on every 5s /market
+// miss. Each leg soft-fails independently - a missing reference makes that
+// one tile fall back, it never sinks the bundle.
+async function yahooQuote(ticker) {
+  const j = await safeFetchJson(
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=1d&interval=1d`,
+    { cacheTtl: 3600, timeoutMs: 8000 }
+  );
+  const m = j?.chart?.result?.[0]?.meta;
+  if (!m) return null;
+  const now = m.regularMarketPrice;
+  const prev = m.previousClose ?? m.chartPreviousClose;
+  if (!(now > 0) || !(prev > 0)) return null;
+  return { now, prev };
+}
+
+async function prevCloses() {
+  const [gold, silver, fx] = await Promise.all([
+    yahooQuote('GC=F').catch(() => null),
+    yahooQuote('SI=F').catch(() => null),
+    yahooQuote('USDINR=X').catch(() => null),
+  ]);
+  return { gold, silver, fx };
 }
 
 function mcxCandidateExpiries() {
@@ -148,10 +220,19 @@ async function findMcx(symbol, expiries) {
     if (j?.code === '200' && j?.data?.pricecurrent) {
       const ltp = parseFloat(j.data.pricecurrent);
       if (ltp > 0) {
+        // priceprevclose / pricechange are the EXCHANGE's own change against
+        // the previous close - the most authoritative reference available
+        // for these two tiles. They were already in this payload and were
+        // being dropped on the floor while the page displayed a 3-second
+        // tick difference of zero.
+        const prev = parseFloat(j.data.priceprevclose || 0);
+        const chg = parseFloat(j.data.pricechange || 0);
         return {
           ltp,
           expiry: j.data.EXPIRY || exp,
           pchg: parseFloat(j.data.pricepercentchange || 0),
+          prev: prev > 0 ? prev : null,
+          chg: isFinite(chg) ? chg : null,
         };
       }
     }
