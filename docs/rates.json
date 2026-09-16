@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-16",
-  "last_updated": "2026-09-16T14:07:00.530059+05:30",
+  "last_updated": "2026-09-16T17:06:57.684113+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -16,29 +16,23 @@
     "jeweller": "PN Gadgil",
     "rate_per_gram_inr": 15204.0
   },
-  "ibja_reference_24k_999_per_gram_inr": 15189.0,
+  "ibja_reference_24k_999_per_gram_inr": 15236.0,
   "akgsma_south_india_22k_per_gram_inr": 14065.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 151717.0,
-      "change_pct": 0.6
+      "price_per_10g_inr": 152355.0,
+      "change_pct": 1.03
     },
     {
       "contract": "GOLDM",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 151952.0,
-      "change_pct": 0.66
+      "price_per_10g_inr": 152500.0,
+      "change_pct": 1.02
     }
   ],
   "jewellers": [
-    {
-      "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 15195.0,
-      "rate_22k_per_gram_inr": 13928.75,
-      "rate_18k_per_gram_inr": 11396.25
-    },
     {
       "jeweller": "PN Gadgil",
       "rate_24k_per_gram_inr": 15204.0,
@@ -50,6 +44,12 @@
       "rate_24k_per_gram_inr": 15220.0,
       "rate_22k_per_gram_inr": 13951.67,
       "rate_18k_per_gram_inr": 11415.0
+    },
+    {
+      "jeweller": "Chandukaka Saraf",
+      "rate_24k_per_gram_inr": 15240.0,
+      "rate_22k_per_gram_inr": 13970.0,
+      "rate_18k_per_gram_inr": 11430.0
     },
     {
       "jeweller": "Kalyan Jewellers",
@@ -112,12 +112,6 @@
       "rate_18k_per_gram_inr": 11516.25
     },
     {
-      "jeweller": "Senco Gold",
-      "rate_24k_per_gram_inr": 15361.0,
-      "rate_22k_per_gram_inr": 14080.92,
-      "rate_18k_per_gram_inr": 11520.75
-    },
-    {
       "jeweller": "Bhima Jewels",
       "rate_24k_per_gram_inr": 15379.0,
       "rate_22k_per_gram_inr": 14097.42,
@@ -134,6 +128,12 @@
       "rate_24k_per_gram_inr": 15398.48,
       "rate_22k_per_gram_inr": 14115.27,
       "rate_18k_per_gram_inr": 11548.86
+    },
+    {
+      "jeweller": "Senco Gold",
+      "rate_24k_per_gram_inr": 15399.0,
+      "rate_22k_per_gram_inr": 14115.75,
+      "rate_18k_per_gram_inr": 11549.25
     },
     {
       "jeweller": "CaratLane",
