@@ -2266,6 +2266,7 @@ function handleCredentialResponse(resp){
   // business feed was the wrong shape anyway. Headlines now come from the
   // worker's /news (gold-specific Google News query across Indian
   // publishers), so the page no longer fetches or filters RSS itself.
+  var NEWS_BUILD = __NEWS_JSON__;
   var NEWS_CACHE_KEY='mgr_news_cache_v1';
   var NEWS_TTL_MS=30*60*1000;
   var NEWS_MAX=8;
@@ -2307,8 +2308,12 @@ function handleCredentialResponse(resp){
         }
       }
     } catch(e){}
-    // Single pipeline: the worker's /news, which aggregates Indian
-    // publishers via a gold-specific Google News query.
+    // Headlines are baked in at build time (see fetch_bullion_news and the
+    // news JSON token in generate_site.py), for the same reason the calendar
+    // is: the Cloudflare worker cannot reach news.google.com, so its /news
+    // answers with an empty list. CI reaches the feed without trouble, and
+    // a 30-minute build cadence is plenty for headlines. The worker stays
+    // as a fallback in case a build ships without the embed.
     //
     // This used to fetch Moneycontrol's business.xml and latestnews.xml
     // straight from the browser and keyword-filter them. Those feeds have
@@ -2317,6 +2322,7 @@ function handleCredentialResponse(resp){
     // news rail reads as "no news today" rather than as a fault, which is
     // why it went unnoticed. Reading them cross-origin from the page was
     // also fragile in its own right.
+    if(NEWS_BUILD&&NEWS_BUILD.length){renderNews(NEWS_BUILD);return}
     Promise.all([
       fetch(MARKET_API_BASE+'/news').then(function(r){return r.json()})
         .then(function(j){return (j&&j.items)||[]})
