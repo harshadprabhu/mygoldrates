@@ -43,8 +43,18 @@ INDIA_PREMIUM_GOLD = 0.14
 INDIA_PREMIUM_SILVER = 0.12
 
 
+# Cloudflare fronts the worker and its browser-integrity check answers
+# "Error 1010: Access denied" to urllib's default Python-urllib/3.x
+# User-Agent. Every scheduled run was getting 403 on 4 of 5 endpoints
+# because of this one missing header - reproduced exactly: same URL,
+# default UA -> 403, browser UA -> 200.
+UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
+
+
 def get_json(url, timeout=30):
-    req = urllib.request.Request(url, headers={"Accept": "application/json"})
+    req = urllib.request.Request(
+        url, headers={"Accept": "application/json", "User-Agent": UA})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read().decode("utf-8"))
 
@@ -173,12 +183,22 @@ def main():
     jobs = [("market", snap_market), ("vendors", snap_vendors),
             ("ohlc", snap_ohlc), ("news", snap_news),
             ("calendar", snap_calendar)]
+    # Count ROWS WRITTEN, not jobs that failed to raise. snap_ohlc swallows
+    # its per-symbol errors and returns 0, which used to be counted as a
+    # success - so a run where every single endpoint was 403ing still had
+    # ok == 1 and exited 0. Twenty consecutive green runs had persisted
+    # exactly nothing. A job that writes no rows is not a success.
     ok = 0
+    rows_total = 0
     for name, fn in jobs:
         try:
             n = fn()
-            print(f"market_snapshot: {name} ok ({n} rows)")
-            ok += 1
+            if n:
+                ok += 1
+                rows_total += n
+                print(f"market_snapshot: {name} ok ({n} rows)")
+            else:
+                print(f"market_snapshot: {name} WROTE NOTHING (0 rows)")
         except urllib.error.HTTPError as e:
             body = ""
             try:
@@ -189,10 +209,12 @@ def main():
         except Exception as e:
             print(f"market_snapshot: {name} FAILED {type(e).__name__}: "
                   f"{str(e)[:200]}")
-    if ok == 0:
-        print("market_snapshot: every endpoint failed")
+    if rows_total == 0:
+        print("market_snapshot: NOTHING WAS RECORDED - every endpoint "
+              "either failed or wrote zero rows")
         return 1
-    print(f"market_snapshot: {ok}/{len(jobs)} endpoints recorded")
+    print(f"market_snapshot: {ok}/{len(jobs)} endpoints recorded, "
+          f"{rows_total} rows")
     return 0
 
 
