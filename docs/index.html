@@ -431,7 +431,10 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 /* ─── Bottom nav ─── */
 .bnav{flex-shrink:0;display:flex;justify-content:space-around;padding:6px 4px 8px;background:var(--glass);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-top:1px solid var(--glass-border)}
 @supports(padding:env(safe-area-inset-bottom)){.bnav{padding-bottom:calc(8px + env(safe-area-inset-bottom))}}
-.ni{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--text3);font-size:9px;font-weight:600;padding:4px 8px;transition:color .2s;position:relative}
+/* flex:1 + min-width:0 so all four tabs share the row evenly and the
+   two-word "Making Charges" label wraps inside its own tab instead of
+   stretching it wider than the other three. */
+.ni{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;background:none;border:none;cursor:pointer;color:var(--text3);font-size:9px;font-weight:600;padding:4px 2px;transition:color .2s;position:relative;flex:1 1 0;min-width:0;text-align:center;line-height:1.2}
 .ni.active{color:var(--gold)}
 .ni.active::after{content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:14px;height:2px;background:var(--gold);border-radius:2px}
 .ni svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -550,7 +553,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   .site-calc-body{grid-template-columns:1fr}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://mygoldrates.com/#webpage", "url": "https://mygoldrates.com/", "name": "Gold Rate Today in India - Live 24K, 22K, 18K Rates from 14+ Jewellers | MyGoldRates", "description": "Live gold rate today across 14+ Indian jewellers, with MCX gold/silver futures, IBJA reference and real-time market data updated every 3 seconds. Compare 24K, 22K and 18K per-gram prices pre-GST.", "inLanguage": "en-IN", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/", "name": "MyGoldRates.com"}, "dateModified": "2026-09-16T11:05:27.621929+05:30", "primaryImageOfPage": "https://mygoldrates.com/og.png", "significantLink": ["https://mygoldrates.com/compare", "https://mygoldrates.com/news", "https://mygoldrates.com/calculators"]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://mygoldrates.com/#webpage", "url": "https://mygoldrates.com/", "name": "Gold Rate Today in India - Live 24K, 22K, 18K Rates from 14+ Jewellers | MyGoldRates", "description": "Live gold rate today across 14+ Indian jewellers, with MCX gold/silver futures, IBJA reference and real-time market data updated every 3 seconds. Compare 24K, 22K and 18K per-gram prices pre-GST.", "inLanguage": "en-IN", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/", "name": "MyGoldRates.com"}, "dateModified": "2026-09-16T11:45:23.297413+05:30", "primaryImageOfPage": "https://mygoldrates.com/og.png", "significantLink": ["https://mygoldrates.com/compare", "https://mygoldrates.com/news", "https://mygoldrates.com/calculators"]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}]}]}</script>
 <script>window.GR_SB_URL="https://opwrfflzzowhobesysmr.supabase.co";window.GR_SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE";</script>
 <script>(function(){
   var SB=window.GR_SB_URL||"",KEY=window.GR_SB_KEY||"";
@@ -630,8 +633,8 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 <!-- When the JEWELLER board rates were last scraped. Distinct from the live
      chip above, which tracks the spot/MCX feed refreshing every 3s. Values
      are substituted at build time by generate_site.py. -->
-<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1789536927">
-  Jeweller rates updated <b>16 September 2026, 11:05 AM IST</b><span id="ratesStampAgo"></span>
+<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1789539323">
+  Jeweller rates updated <b>16 September 2026, 11:45 AM IST</b><span id="ratesStampAgo"></span>
 </div>
 
 <!-- Google One Tap (uses Google Identity Services) -->
@@ -904,7 +907,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   <button class="ni active" data-view="v-rates"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Rates</button>
   <button class="ni" data-view="v-market"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Market</button>
   <button class="ni" data-view="v-calc"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Calc</button>
-  <button class="ni" data-view="v-mc"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>Charges</button>
+  <button class="ni" data-view="v-mc"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>Making Charges</button>
 </nav>
 </div>
 
@@ -1267,12 +1270,38 @@ function handleCredentialResponse(resp){
   // movement from a TRUE anchor instead of a guessed premium. Zero when
   // the IBJA fetch failed - applyLive falls back to the old estimate then.
   var IBJA_ANCHOR_24=Number("0")||0;
-  var IBJA_ANCHOR_SPOT=Number("13361.6964")||0;
+  var IBJA_ANCHOR_SPOT=Number("13353.3632")||0;
+  // Every `delta*` here is the change against the PREVIOUS CLOSE, not
+  // against the last poll. The previous close for each metric arrives from
+  // the worker as `*_prev` and is held in the `prev*` fields below.
+  //
+  // This used to be a tick-to-tick difference - current poll minus the one
+  // 3 seconds earlier - which could not be anything but zero:
+  //   * spot gold moves cents in three seconds; Math.round() -> 0
+  //   * MCX ticks in whole rupees on a 10g contract, and the worker's edge
+  //     cache is 5s while we poll at 3s, so most polls saw a byte-identical
+  //     payload -> 0
+  //   * USD/INR from open.er-api.com refreshes ONCE A DAY, so its tick
+  //     delta was 0.00 permanently, by construction
+  // Worse, an unchanged tick RESET the delta to 0, so even a genuine move
+  // showed for a single 3-second frame and then vanished. The board read
+  // "± ₹0" essentially always, while MCX Gold's own feed was reporting
+  // +₹881 (+0.58%) on the day.
+  //
+  // `tick*` holds the last poll-to-poll movement. That is still a useful
+  // signal, but only for the flash animation (pulseTile) - never for the
+  // number on the tile.
   var LIVE={ibja24:null,ibja22:null,deltaIbja24:0,ts:null,ok:false,source:'static',
     goldUsdOz:null,silverUsdOz:null,usdinr:null,silverInrKg:null,
-    deltaGoldUsd:0,deltaSilverUsd:0,deltaUsdInr:0,deltaSilverInr:0};
+    deltaGoldUsd:0,deltaSilverUsd:0,deltaUsdInr:0,deltaSilverInr:0,
+    prevGoldUsd:null,prevSilverUsd:null,prevUsdInr:null,
+    prevIbja24:null,prevIbja22:null,prevSilverInr:null,
+    prevMcxGold:null,prevMcxSilver:null,
+    deltaMcxGold:0,deltaMcxSilver:0,
+    tickIbja24:0,tickGoldUsd:0,tickSilverUsd:0,tickUsdInr:0,
+    tickSilverInr:0,tickMcxGold:0,tickMcxSilver:0};
 
-  function applyLive(usdOz,usdinr,silverUsdOz){
+  function applyLive(usdOz,usdinr,silverUsdOz,prevs){
     var spotRaw=(usdOz/OZ_TO_G)*usdinr;
     // Anchor on the REAL IBJA rate scraped at build and track intraday
     // movement by the ratio of spot now to spot then. The old
@@ -1282,21 +1311,47 @@ function handleCredentialResponse(resp){
     var ibja24=(IBJA_ANCHOR_24&&IBJA_ANCHOR_SPOT)
       ? IBJA_ANCHOR_24*(spotRaw/IBJA_ANCHOR_SPOT)
       : spotRaw*(1+INDIA_PREMIUM);
-    var prev=LIVE.ibja24;
-    LIVE.deltaIbja24=prev?Math.round(ibja24-prev):0;
+    // Tick movement (this poll vs the last) - drives the flash only.
+    LIVE.tickIbja24=LIVE.ibja24?ibja24-LIVE.ibja24:0;
+    LIVE.tickGoldUsd=LIVE.goldUsdOz?usdOz-LIVE.goldUsdOz:0;
+    LIVE.tickUsdInr=LIVE.usdinr?usdinr-LIVE.usdinr:0;
+
     LIVE.ibja24=ibja24;LIVE.ibja22=ibja24*PURITY['22K'];
+    LIVE.goldUsdOz=usdOz;LIVE.usdinr=usdinr;
     // NOTE: brand rates are intentionally not touched here - see the
     // comment on IBJA_ANCHOR_24. They are what the scraper read.
-    // Global Market tiles
-    LIVE.deltaGoldUsd=LIVE.goldUsdOz?+(usdOz-LIVE.goldUsdOz).toFixed(2):0;
-    LIVE.deltaUsdInr=LIVE.usdinr?+(usdinr-LIVE.usdinr).toFixed(2):0;
-    LIVE.goldUsdOz=usdOz;LIVE.usdinr=usdinr;
+
+    // Previous closes, if the worker supplied them this tick.
+    if(prevs){
+      if(prevs.goldUsd>0)LIVE.prevGoldUsd=prevs.goldUsd;
+      if(prevs.silverUsd>0)LIVE.prevSilverUsd=prevs.silverUsd;
+      if(prevs.usdInr>0)LIVE.prevUsdInr=prevs.usdInr;
+    }
+    // IBJA is a pure linear function of spot x FX, so its previous close is
+    // that same function of the previous spot and previous FX - run through
+    // the identical anchor maths rather than a second approximation.
+    if(LIVE.prevGoldUsd&&LIVE.prevUsdInr){
+      var prevSpot=(LIVE.prevGoldUsd/OZ_TO_G)*LIVE.prevUsdInr;
+      LIVE.prevIbja24=(IBJA_ANCHOR_24&&IBJA_ANCHOR_SPOT)
+        ? IBJA_ANCHOR_24*(prevSpot/IBJA_ANCHOR_SPOT)
+        : prevSpot*(1+INDIA_PREMIUM);
+      LIVE.prevIbja22=LIVE.prevIbja24*PURITY['22K'];
+    }
+    LIVE.deltaIbja24=LIVE.prevIbja24?ibja24-LIVE.prevIbja24:0;
+    LIVE.deltaGoldUsd=LIVE.prevGoldUsd?+(usdOz-LIVE.prevGoldUsd).toFixed(2):0;
+    LIVE.deltaUsdInr=LIVE.prevUsdInr?+(usdinr-LIVE.prevUsdInr).toFixed(2):0;
+
     if(silverUsdOz){
-      LIVE.deltaSilverUsd=LIVE.silverUsdOz?+(silverUsdOz-LIVE.silverUsdOz).toFixed(2):0;
+      LIVE.tickSilverUsd=LIVE.silverUsdOz?silverUsdOz-LIVE.silverUsdOz:0;
       LIVE.silverUsdOz=silverUsdOz;
       var silverInrKg=silverUsdOz*OZ_PER_KG*usdinr*(1+SILVER_INDIA_PREMIUM);
-      LIVE.deltaSilverInr=LIVE.silverInrKg?Math.round(silverInrKg-LIVE.silverInrKg):0;
+      LIVE.tickSilverInr=LIVE.silverInrKg?silverInrKg-LIVE.silverInrKg:0;
       LIVE.silverInrKg=silverInrKg;
+      LIVE.deltaSilverUsd=LIVE.prevSilverUsd?+(silverUsdOz-LIVE.prevSilverUsd).toFixed(2):0;
+      if(LIVE.prevSilverUsd&&LIVE.prevUsdInr){
+        LIVE.prevSilverInr=LIVE.prevSilverUsd*OZ_PER_KG*LIVE.prevUsdInr*(1+SILVER_INDIA_PREMIUM);
+      }
+      LIVE.deltaSilverInr=LIVE.prevSilverInr?silverInrKg-LIVE.prevSilverInr:0;
     }
   }
 
@@ -1342,22 +1397,34 @@ function handleCredentialResponse(resp){
     else if(dir>0) card.classList.add('pulse-up');
     setTimeout(function(){ card.classList.remove('pulse-up','pulse-dn'); }, 1100);
   }
-  function setMc(id,suf,val,delta){
+  // `delta` is the change against the previous close (the day move).
+  // `tick` is the last poll-to-poll movement and is used ONLY to drive the
+  // flash, so the tile still visibly reacts to live ticks while the number
+  // it displays stays the meaningful day change. `prev` enables the percent
+  // suffix; markets quote both, and the percent is what makes a large
+  // rupee figure on a 10g or per-kg contract readable at a glance.
+  function pctTxt(delta,prev){
+    if(!prev||!isFinite(prev)||prev===0)return '';
+    var p=(delta/prev)*100;
+    if(!isFinite(p))return '';
+    return ' ('+(p<0?'−':'+')+Math.abs(p).toFixed(2)+'%)';
+  }
+  function setMc(id,suf,val,delta,tick,prev){
     var v=$(id,suf),d=$(id+'D',suf);
     if(v)v.textContent=fmt(val);
     if(d){
-      delta=Math.round(delta||0);
+      var r=Math.round(delta||0);
       d.classList.remove('up','dn');
-      if(delta===0){ d.textContent='± ₹0'; }
+      if(r===0){ d.textContent='± ₹0'; }
       else {
-        d.classList.add(delta<0?'dn':'up');
-        d.innerHTML=(delta<0?'▼ −':'▲ +')+'₹'+Math.abs(delta);
+        d.classList.add(r<0?'dn':'up');
+        d.innerHTML=(r<0?'▼ −':'▲ +')+'₹'+Math.abs(r).toLocaleString('en-IN')+pctTxt(delta,prev);
       }
     }
-    pulseTile(v||d, delta);
+    pulseTile(v||d, tick==null?delta:tick);
   }
   // USD / FX variant of setMc: shows $ or a plain number with 2-decimal delta.
-  function setMcUsd(id,suf,val,delta,symbol,decimals){
+  function setMcUsd(id,suf,val,delta,symbol,decimals,tick,prev){
     symbol=symbol==null?'$':symbol;decimals=decimals==null?2:decimals;
     var v=$(id,suf),d=$(id+'D',suf);
     if(v)v.textContent=symbol+Number(val).toLocaleString('en-US',{minimumFractionDigits:decimals,maximumFractionDigits:decimals});
@@ -1367,10 +1434,10 @@ function handleCredentialResponse(resp){
       if(Math.abs(dn)<0.005){ d.textContent='± '+symbol+'0.00'; }
       else {
         d.classList.add(dn<0?'dn':'up');
-        d.innerHTML=(dn<0?'▼ −':'▲ +')+symbol+Math.abs(dn).toFixed(decimals);
+        d.innerHTML=(dn<0?'▼ −':'▲ +')+symbol+Math.abs(dn).toFixed(decimals)+pctTxt(dn,prev);
       }
     }
-    pulseTile(v||d, dn);
+    pulseTile(v||d, tick==null?dn:tick);
   }
   function paintMarket(){
     if(!LIVE.ibja24)return;
@@ -1380,18 +1447,25 @@ function handleCredentialResponse(resp){
     // never renders "—" during the first tick before the MCX call resolves.
     var mcx = LIVE.mcxGold!=null ? LIVE.mcxGold : i24*10*1.004;
     var mcxD = LIVE.mcxGold!=null ? LIVE.deltaMcxGold : LIVE.deltaIbja24*10*1.004;
-    var ak=i24*1.002,akD=LIVE.deltaIbja24*1.002; // est. regional spread
+    var mcxP = LIVE.mcxGold!=null ? LIVE.prevMcxGold : (LIVE.prevIbja24?LIVE.prevIbja24*10*1.004:null);
+    var mcxT = LIVE.mcxGold!=null ? LIVE.tickMcxGold : LIVE.tickIbja24;
+    // AKGSMA is an estimated regional spread over IBJA, so its day change
+    // and previous close ride the same 1.002 factor as the value itself.
+    var ak=i24*1.002,akD=LIVE.deltaIbja24*1.002;
+    var akP=LIVE.prevIbja24?LIVE.prevIbja24*1.002:null;
     SCOPES.forEach(function(suf){
-      setMc('mcIbja24',suf,i24,LIVE.deltaIbja24);
-      setMc('mcIbja22',suf,i22,LIVE.deltaIbja24*PURITY['22K']);
-      setMc('mcMcx',suf,mcx,mcxD);
-      setMc('mcAk',suf,ak,akD);
-      if(LIVE.mcxSilver!=null) setMc('mcMcxAg',suf,LIVE.mcxSilver,LIVE.deltaMcxSilver);
+      setMc('mcIbja24',suf,i24,LIVE.deltaIbja24,LIVE.tickIbja24,LIVE.prevIbja24);
+      setMc('mcIbja22',suf,i22,LIVE.deltaIbja24*PURITY['22K'],
+            LIVE.tickIbja24,LIVE.prevIbja22);
+      setMc('mcMcx',suf,mcx,mcxD,mcxT,mcxP);
+      setMc('mcAk',suf,ak,akD,LIVE.tickIbja24,akP);
+      if(LIVE.mcxSilver!=null) setMc('mcMcxAg',suf,LIVE.mcxSilver,
+            LIVE.deltaMcxSilver,LIVE.tickMcxSilver,LIVE.prevMcxSilver);
       // Global Market strip
-      if(LIVE.goldUsdOz)setMcUsd('mkGoldUsd',suf,LIVE.goldUsdOz,LIVE.deltaGoldUsd,'$',2);
-      if(LIVE.silverUsdOz)setMcUsd('mkSilverUsd',suf,LIVE.silverUsdOz,LIVE.deltaSilverUsd,'$',2);
-      if(LIVE.usdinr)setMcUsd('mkUsdInr',suf,LIVE.usdinr,LIVE.deltaUsdInr,'₹',2);
-      if(LIVE.silverInrKg)setMc('mkSilverInr',suf,LIVE.silverInrKg,LIVE.deltaSilverInr);
+      if(LIVE.goldUsdOz)setMcUsd('mkGoldUsd',suf,LIVE.goldUsdOz,LIVE.deltaGoldUsd,'$',2,LIVE.tickGoldUsd,LIVE.prevGoldUsd);
+      if(LIVE.silverUsdOz)setMcUsd('mkSilverUsd',suf,LIVE.silverUsdOz,LIVE.deltaSilverUsd,'$',2,LIVE.tickSilverUsd,LIVE.prevSilverUsd);
+      if(LIVE.usdinr)setMcUsd('mkUsdInr',suf,LIVE.usdinr,LIVE.deltaUsdInr,'₹',2,LIVE.tickUsdInr,LIVE.prevUsdInr);
+      if(LIVE.silverInrKg)setMc('mkSilverInr',suf,LIVE.silverInrKg,LIVE.deltaSilverInr,LIVE.tickSilverInr,LIVE.prevSilverInr);
       // MCX expiry chip text under the value
       var eu = $('mcMcxU', suf); if(eu && LIVE.mcxGoldExpiry) eu.textContent = LIVE.mcxGoldExpiry;
       var ev = $('mcMcxAgU', suf); if(ev && LIVE.mcxSilverExpiry) ev.textContent = LIVE.mcxSilverExpiry;
@@ -1428,8 +1502,11 @@ function handleCredentialResponse(resp){
           if(!j || j.code!=='200' || !j.data || !j.data.pricecurrent) return step();
           var ltp = parseFloat(j.data.pricecurrent);
           if(!(ltp>0)) return step();
+          var pv = parseFloat(j.data.priceprevclose||0);
+          var ch = parseFloat(j.data.pricechange||0);
           return { expiry: j.data.EXPIRY || exp, ltp: ltp,
-                   pchg: parseFloat(j.data.pricepercentchange||0) };
+                   pchg: parseFloat(j.data.pricepercentchange||0),
+                   prev: pv>0?pv:null, chg: isFinite(ch)?ch:null };
         })
         .catch(function(){ return step(); });
     }
@@ -1448,15 +1525,19 @@ function handleCredentialResponse(resp){
       var g=res[0], s=res[1];
       if(g){
         try{ localStorage.setItem('mcx_expiry_GOLD', g.expiry); }catch(e){}
-        var pg = LIVE.mcxGold;
-        LIVE.deltaMcxGold = pg!=null ? Math.round(g.ltp - pg) : 0;
+        LIVE.tickMcxGold = LIVE.mcxGold!=null ? g.ltp - LIVE.mcxGold : 0;
         LIVE.mcxGold = g.ltp; LIVE.mcxGoldExpiry = g.expiry;
+        if(g.prev>0) LIVE.prevMcxGold = g.prev;
+        LIVE.deltaMcxGold = (g.chg!=null&&isFinite(g.chg)) ? g.chg
+          : (LIVE.prevMcxGold ? g.ltp - LIVE.prevMcxGold : 0);
       }
       if(s){
         try{ localStorage.setItem('mcx_expiry_SILVER', s.expiry); }catch(e){}
-        var ps = LIVE.mcxSilver;
-        LIVE.deltaMcxSilver = ps!=null ? Math.round(s.ltp - ps) : 0;
+        LIVE.tickMcxSilver = LIVE.mcxSilver!=null ? s.ltp - LIVE.mcxSilver : 0;
         LIVE.mcxSilver = s.ltp; LIVE.mcxSilverExpiry = s.expiry;
+        if(s.prev>0) LIVE.prevMcxSilver = s.prev;
+        LIVE.deltaMcxSilver = (s.chg!=null&&isFinite(s.chg)) ? s.chg
+          : (LIVE.prevMcxSilver ? s.ltp - LIVE.prevMcxSilver : 0);
       }
     });
   }
@@ -1726,17 +1807,28 @@ function handleCredentialResponse(resp){
       // paintMarket() reads from there. On the worker path we never call it,
       // so mirror the same assignments (including the delta vs the previous
       // tick) or the MCX tiles would freeze on their last direct-fetch value.
+      // MCX carries its OWN change against the previous close (pricechange /
+      // priceprevclose from the exchange feed). Prefer it over anything we
+      // could derive - it is the same number Moneycontrol and MCX display.
       if(m.mcx_gold&&m.mcx_gold.ltp!=null){
-        var pg=LIVE.mcxGold;
-        LIVE.deltaMcxGold=pg!=null?Math.round(m.mcx_gold.ltp-pg):0;
+        LIVE.tickMcxGold=LIVE.mcxGold!=null?m.mcx_gold.ltp-LIVE.mcxGold:0;
         LIVE.mcxGold=m.mcx_gold.ltp;LIVE.mcxGoldExpiry=m.mcx_gold.expiry;
+        if(m.mcx_gold.prev>0)LIVE.prevMcxGold=m.mcx_gold.prev;
+        LIVE.deltaMcxGold=(m.mcx_gold.chg!=null&&isFinite(m.mcx_gold.chg))
+          ? m.mcx_gold.chg
+          : (LIVE.prevMcxGold?m.mcx_gold.ltp-LIVE.prevMcxGold:0);
       }
       if(m.mcx_silver&&m.mcx_silver.ltp!=null){
-        var ps=LIVE.mcxSilver;
-        LIVE.deltaMcxSilver=ps!=null?Math.round(m.mcx_silver.ltp-ps):0;
+        LIVE.tickMcxSilver=LIVE.mcxSilver!=null?m.mcx_silver.ltp-LIVE.mcxSilver:0;
         LIVE.mcxSilver=m.mcx_silver.ltp;LIVE.mcxSilverExpiry=m.mcx_silver.expiry;
+        if(m.mcx_silver.prev>0)LIVE.prevMcxSilver=m.mcx_silver.prev;
+        LIVE.deltaMcxSilver=(m.mcx_silver.chg!=null&&isFinite(m.mcx_silver.chg))
+          ? m.mcx_silver.chg
+          : (LIVE.prevMcxSilver?m.mcx_silver.ltp-LIVE.prevMcxSilver:0);
       }
-      return {usdOz:m.gold_usd,usdinr:m.usd_inr,silverUsdOz:m.silver_usd,mcx:m};
+      return {usdOz:m.gold_usd,usdinr:m.usd_inr,silverUsdOz:m.silver_usd,mcx:m,
+              prevs:{goldUsd:m.gold_usd_prev,silverUsd:m.silver_usd_prev,
+                     usdInr:m.usd_inr_prev}};
     }).catch(function(e){
       console.warn('[gr-market] worker /market failed, falling back to direct upstreams',e);
       var xagP=fetch('https://api.gold-api.com/price/XAG').then(function(r){return r.json()}).catch(function(){return null});
@@ -1755,7 +1847,7 @@ function handleCredentialResponse(resp){
       var usdOz=res.usdOz,usdinr=res.usdinr;
       var silverUsdOz=res.silverUsdOz;
       if(!usdOz||!usdinr)throw new Error('bad payload');
-      applyLive(usdOz,usdinr,silverUsdOz);
+      applyLive(usdOz,usdinr,silverUsdOz,res.prevs);
       LIVE.ts=Date.now();LIVE.ok=true;LIVE.source='live';
       try{localStorage.setItem('mgr_live_cache',JSON.stringify({usdOz:usdOz,usdinr:usdinr,silverUsdOz:silverUsdOz}))}catch(e){}
       recordHistoryPoint(LIVE.ibja24);
