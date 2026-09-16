@@ -8,6 +8,7 @@
  *                        *_prev (previous close for each), mcx_gold,
  *                        mcx_silver, updated_at } in one call
  *   /ohlc?sym=XAU      — 90-day daily OHLC candles for XAU or XAG (Stooq)
+ *   /intraday?sym=XAU  — today's session as 5m bars, rescaled to spot
  *   /calendar          — this week's US economic events (ForexFactory)
  *   /news              — filtered gold + silver headlines (Moneycontrol RSS)
  *   /vendors           — India national bullion reference rates (IBJA)
@@ -21,6 +22,7 @@
  *   /news     — 5min (headlines don't move that fast)
  *   /calendar — 1h   (weekly schedule, one hour is fine)
  *   /ohlc     — 6h   (daily candles regenerate once per session)
+ *   /intraday — 60s  (5m bars; a minute is finer than the bar itself)
  */
 
 const CORS = {
@@ -238,6 +240,73 @@ async function findMcx(symbol, expiries) {
     }
   }
   return null;
+}
+
+// ─── /intraday ──────────────────────────────────────────────────────────
+// Today's session as 5-minute bars, for the live chart under Market Pulse.
+// /ohlc is DAILY candles over 90 days - a different question entirely, and
+// far too coarse to show what gold did this morning.
+//
+// gold-api.com (our spot source) publishes a single current price with no
+// history at all, so the intraday SHAPE has to come from Yahoo's gold
+// futures bars. Futures sit ~1% over spot on contango, so the bars are
+// rescaled onto the spot level we actually display before being returned:
+// every bar is multiplied by (spot_now / futures_now). That keeps the
+// chart's axis consistent with the Gold Spot tile above it instead of
+// silently switching the reader to a futures price.
+//
+// Deliberately NOT offered for MCX. Moneycontrol's techCharts history
+// endpoint serves equities but answers "no_data" for every MCX commodity
+// symbol and expiry, Groww's chart API needs auth, and mcxindia.com denies
+// us outright. The only MCX number available to us is the current LTP. We
+// could fake an MCX line by converting these gold-futures bars into INR
+// per 10g, but that would be a MODELLED series presented as exchange
+// prints, so the page builds its MCX chart from real observed LTPs
+// instead (Supabase market_ticks plus the live session).
+async function handleIntraday(url) {
+  const sym = (url.searchParams.get('sym') || 'XAU').toUpperCase();
+  const map = { XAU: { ticker: 'GC=F', spot: 'XAU' },
+                XAG: { ticker: 'SI=F', spot: 'XAG' } };
+  const cfg = map[sym];
+  if (!cfg) return jsonErr(`unsupported sym: ${sym}`, 400);
+
+  const [raw, spotNow] = await Promise.all([
+    safeFetchJson(
+      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(cfg.ticker)}?range=1d&interval=5m`,
+      { cacheTtl: 60, timeoutMs: 10000 }),
+    safeFetchJson(`https://api.gold-api.com/price/${cfg.spot}`, { cacheTtl: 30 }),
+  ]);
+
+  const result = raw?.chart?.result?.[0];
+  if (!result) return jsonErr('intraday upstream returned no result', 502);
+  const meta = result.meta || {};
+  const ts = result.timestamp || [];
+  const quote = result.indicators?.quote?.[0];
+  if (!quote) return jsonErr('intraday upstream missing quote block', 502);
+
+  // Rescale futures -> spot. If either side is missing, fall back to 1 and
+  // say so, rather than returning a silently mis-levelled chart.
+  const futNow = meta.regularMarketPrice;
+  const spot = spotNow?.price;
+  const scale = (spot > 0 && futNow > 0) ? spot / futNow : 1;
+
+  const points = [];
+  for (let i = 0; i < ts.length; i++) {
+    const c = quote.close?.[i];
+    if (ts[i] == null || c == null) continue;
+    points.push({ t: ts[i], v: +(c * scale).toFixed(4) });
+  }
+
+  const prevRaw = meta.previousClose ?? meta.chartPreviousClose;
+  return json({
+    symbol: sym,
+    ticker: cfg.ticker,
+    interval: '5m',
+    scaled_to_spot: scale !== 1,
+    prev_close: prevRaw > 0 ? +(prevRaw * scale).toFixed(4) : null,
+    points,
+    updated_at: new Date().toISOString(),
+  });
 }
 
 // ─── /ohlc ──────────────────────────────────────────────────────────────
@@ -563,6 +632,7 @@ async function handleVendors() {
 const ROUTES = {
   '/market':   { ttl: 5,     fn: (req) => handleMarket() },
   '/ohlc':     { ttl: 21600, fn: (req, url) => handleOhlc(url) },
+  '/intraday': { ttl: 60,    fn: (req, url) => handleIntraday(url) },
   '/calendar': { ttl: 3600,  fn: (req) => handleCalendar() },
   '/news':     { ttl: 300,   fn: (req) => handleNews() },
   '/vendors':  { ttl: 60,    fn: (req) => handleVendors() },

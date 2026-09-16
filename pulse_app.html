@@ -266,6 +266,28 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
    classes are removed) inherited an unset colour and rendered near-black on
    the dark card - effectively invisible. Neutral state is now explicitly
    near-white; .up/.dn below still override it green/red when a value moves. */
+/* ─── Live intraday chart (Market Pulse) ─── */
+.ic-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:14px;margin:4px 0 6px}
+.ic-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.ic-tabs{display:inline-flex;gap:4px;background:rgba(255,255,255,0.05);padding:3px;border-radius:9px}
+.ic-tab{background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;transition:background .2s,color .2s;font-family:inherit}
+.ic-tab.active{background:var(--glass2);color:var(--gold)}
+.ic-last{text-align:right;line-height:1.25}
+.ic-last-v{display:block;font-size:16px;font-weight:800;color:var(--text)}
+.ic-last-d{display:block;font-size:10px;font-weight:700;color:var(--text3)}
+.ic-last-d.up{color:var(--mint)}.ic-last-d.dn{color:var(--rose)}
+.ic-wrap{position:relative;width:100%;height:200px}
+.ic-svg{width:100%;height:200px;display:block;overflow:visible;touch-action:pan-y}
+.ic-prevline{stroke:var(--text3);stroke-width:1;stroke-dasharray:4 4;opacity:.45}
+.ic-cursor{stroke:var(--gold);stroke-width:1;opacity:0;pointer-events:none}
+.ic-dot{fill:var(--gold);stroke:var(--bg);stroke-width:2;opacity:0;pointer-events:none}
+.ic-livedot{fill:var(--gold)}
+.ic-tip{position:absolute;transform:translate(-50%,-125%);background:var(--bg2,#1b1712);border:1px solid var(--glass-border);border-radius:8px;padding:5px 9px;font-size:11px;font-weight:700;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:3}
+.ic-tip.show{opacity:1}
+.ic-tip .t{font-size:9px;font-weight:600;color:var(--text3);margin-top:1px}
+.ic-empty{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;font-size:11px;color:var(--text3);padding:0 24px;line-height:1.5}
+.ic-empty.show{display:flex}
+.ic-foot{margin-top:8px;font-size:10px;color:var(--text3);line-height:1.5}
 .mc-d{font-size:10px;font-weight:700;margin-top:3px;display:inline-flex;align-items:center;gap:2px;padding:2px 6px;border-radius:5px;color:#F2EDE3;background:rgba(255,255,255,0.07)}
 .mc-d.up{color:var(--mint);background:var(--mint-soft)}.mc-d.dn{color:var(--rose);background:var(--rose-soft)}
 .mcard{transition:background-color .4s ease,border-color .4s ease,box-shadow .4s ease}
@@ -667,6 +689,23 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   </div>
   <p class="calc-note">Global Market shows international spot from gold-api.com and USD/INR from open.er-api.com; Silver INR is computed from XAG spot &plus; FX &plus; India duty premium.</p>
 
+  <div class="sh"><div class="ic bl">&#128201;</div><h2>Live Chart</h2></div>
+  <div class="ic-card">
+    <div class="ic-head">
+      <div class="ic-tabs" id="icTabs">
+        <button class="ic-tab active" data-ic="XAU">Gold Spot</button>
+        <button class="ic-tab" data-ic="MCX">MCX Gold</button>
+      </div>
+      <div class="ic-last"><span class="ic-last-v" id="icLastV">&mdash;</span><span class="ic-last-d" id="icLastD"></span></div>
+    </div>
+    <div class="ic-wrap">
+      <svg class="ic-svg" id="icChart" viewBox="0 0 600 200" preserveAspectRatio="none"></svg>
+      <div class="ic-tip" id="icTip"></div>
+      <div class="ic-empty" id="icEmpty"></div>
+    </div>
+    <div class="ic-foot"><span id="icNote">Loading today&rsquo;s session&hellip;</span></div>
+  </div>
+
   <div class="sh"><div class="ic mt">&#128200;</div><h2>Rate Trend</h2></div>
   <div class="trend-range" id="trendRange">
     <button class="tr-btn" data-r="7">1W</button>
@@ -946,7 +985,21 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
         <div class="mcard"><div class="ac mt"></div><div class="mc-l">USD / INR</div><div class="mc-r usd" id="mkUsdInrS">&mdash;</div><div class="mc-s">Reference FX &middot; live</div><div class="mc-d" id="mkUsdInrDS">&mdash;</div></div>
         <div class="mcard"><div class="ac sv"></div><div class="mc-l">Silver 999</div><div class="mc-r" id="mkSilverInrS">&#8377;&mdash;</div><div class="mc-s">Per kg &middot; spot &plus; India premium</div><div class="mc-d" id="mkSilverInrDS">&mdash;</div></div>
       </div>
-      <p class="calc-note">Global Market shows international spot from gold-api.com and USD/INR from open.er-api.com; Silver INR is computed from XAG spot &plus; FX &plus; India duty premium.</p>
+      <div class="ic-card">
+    <div class="ic-head">
+      <div class="ic-tabs" id="icTabsS">
+        <button class="ic-tab active" data-ic="XAU">Gold Spot</button>
+        <button class="ic-tab" data-ic="MCX">MCX Gold</button>
+      </div>
+      <div class="ic-last"><span class="ic-last-v" id="icLastVS">&mdash;</span><span class="ic-last-d" id="icLastDS"></span></div>
+    </div>
+    <div class="ic-wrap">
+      <svg class="ic-svg" id="icChartS" viewBox="0 0 600 200" preserveAspectRatio="none"></svg>
+      <div class="ic-tip" id="icTipS"></div>
+      <div class="ic-empty" id="icEmptyS"></div>
+    </div>
+    <div class="ic-foot"><span id="icNoteS">Loading today&rsquo;s session&hellip;</span></div>
+  </div>
       <div class="site-section-head" style="margin-top:36px">
         <div><span class="site-eyebrow-sm">Live History</span><h2>Rate Trend</h2></div>
         <div class="trend-range" id="trendRangeS">
@@ -1817,7 +1870,9 @@ function handleCredentialResponse(resp){
       LIVE.ts=Date.now();LIVE.ok=true;LIVE.source='live';
       try{localStorage.setItem('mgr_live_cache',JSON.stringify({usdOz:usdOz,usdinr:usdinr,silverUsdOz:silverUsdOz}))}catch(e){}
       recordHistoryPoint(LIVE.ibja24);
+      icRecordMcx(LIVE.mcxGold);
       renderAll();paintMarket();paintLiveChip(currentDotState());paintLiveStrip();renderTrend();
+      renderIntraday();
     }).catch(function(err){
       console.warn('Live gold rate fetch failed',err);
       if(!LIVE.ok){
@@ -1830,6 +1885,255 @@ function handleCredentialResponse(resp){
       paintLiveChip(currentDotState());paintLiveStrip();
     });
   }
+  // ═══ Live intraday chart — Gold Spot + MCX Gold ════════════════════
+  //
+  // Two series, two very different provenances, and the difference is the
+  // whole design:
+  //
+  // GOLD SPOT has real intraday history. gold-api.com (our spot source)
+  // publishes only a current price, so the worker's /intraday endpoint
+  // takes Yahoo's 5-minute gold-futures bars and rescales them onto the
+  // spot level we display. Full session from the open, every time.
+  //
+  // MCX HAS NO PUBLIC INTRADAY HISTORY. Moneycontrol's techCharts history
+  // endpoint serves equities but answers "no_data" for every MCX commodity
+  // symbol and expiry tried; Groww's chart API needs auth; mcxindia.com
+  // denies us outright. The only MCX number anyone hands us is the current
+  // LTP. So rather than convert gold-futures bars into INR/10g and pass a
+  // MODELLED line off as exchange prints, the MCX series is built ONLY
+  // from real observed LTPs:
+  //   1. Supabase market_ticks - the 15-minute archive market_snapshot.py
+  //      writes. Gives history from market open for every visitor.
+  //   2. the live session - every /market poll appends the LTP it saw,
+  //      persisted per IST day so a reload keeps the morning's shape.
+  // Both are genuine prints. Until market_ticks exists the chart simply
+  // starts when you open the page and says so, which is honest; it never
+  // draws a line it did not observe.
+  var IC = { sym:'XAU', xau:null, mcx:[], ticksLoaded:false, ticksOk:false };
+
+  function icDayKey(){
+    // IST calendar day - the session boundary for both MCX and the cache.
+    return new Date(Date.now()+19800000).toISOString().slice(0,10);
+  }
+  function icLoadMcx(){
+    try{
+      var raw=JSON.parse(localStorage.getItem('mgr_mcx_intraday')||'null');
+      if(raw&&raw.d===icDayKey()&&Array.isArray(raw.p))return raw.p;
+    }catch(e){}
+    return [];
+  }
+  function icSaveMcx(pts){
+    try{localStorage.setItem('mgr_mcx_intraday',
+      JSON.stringify({d:icDayKey(),p:pts.slice(-600)}))}catch(e){}
+  }
+  // Append a live MCX print. Throttled to ~1/min: the page polls every 3s
+  // and a chart does not need 1,200 points an hour to show the same shape.
+  function icRecordMcx(ltp){
+    if(!(ltp>0))return;
+    var now=Math.floor(Date.now()/1000);
+    var last=IC.mcx[IC.mcx.length-1];
+    if(last&&now-last.t<55){ last.v=ltp; last.t=now; }
+    else IC.mcx.push({t:now,v:ltp});
+    if(IC.mcx.length>600)IC.mcx=IC.mcx.slice(-600);
+    icSaveMcx(IC.mcx);
+  }
+  // Backfill today's MCX prints from the Supabase archive, merging by
+  // timestamp so the session's own points are not duplicated.
+  function icFetchTicks(){
+    if(IC.ticksLoaded)return Promise.resolve();
+    IC.ticksLoaded=true;
+    var base=(window.GR_SB_URL||SUPABASE_URL||'').replace(/\/$/,'');
+    var key=window.GR_SB_KEY||SUPABASE_ANON_KEY||'';
+    if(!base||!key)return Promise.resolve();
+    var since=new Date(Date.now()-86400000).toISOString();
+    return fetch(base+'/rest/v1/market_ticks?select=created_at,mcx_gold_ltp'
+        +'&mcx_gold_ltp=not.is.null&created_at=gte.'+encodeURIComponent(since)
+        +'&order=created_at.asc&limit=400',
+        {headers:{apikey:key,Authorization:'Bearer '+key}})
+      .then(function(r){return r.ok?r.json():null})
+      .then(function(rows){
+        if(!rows||!rows.length)return;
+        var day=icDayKey(),seen={},merged=[];
+        IC.mcx.forEach(function(p){seen[p.t]=1});
+        rows.forEach(function(r){
+          var t=Math.floor(new Date(r.created_at).getTime()/1000);
+          if(new Date((t+19800)*1000).toISOString().slice(0,10)!==day)return;
+          if(seen[t])return;
+          merged.push({t:t,v:+r.mcx_gold_ltp});
+        });
+        if(!merged.length)return;
+        IC.ticksOk=true;
+        IC.mcx=merged.concat(IC.mcx).sort(function(a,b){return a.t-b.t});
+        icSaveMcx(IC.mcx);
+      })
+      .catch(function(){/* archive absent - session-only is the fallback */});
+  }
+  function icFetchXau(){
+    return fetch(MARKET_API_BASE+'/intraday?sym=XAU')
+      .then(function(r){return r.ok?r.json():null})
+      .then(function(j){ if(j&&j.points&&j.points.length)IC.xau=j; })
+      .catch(function(){});
+  }
+
+  function icSeries(){
+    if(IC.sym==='XAU'){
+      var pts=(IC.xau&&IC.xau.points)?IC.xau.points.map(function(p){return {t:p.t,v:p.v}}):[];
+      // Append the live spot so the right edge is current, not 5m stale.
+      if(LIVE.goldUsdOz>0){
+        var now=Math.floor(Date.now()/1000),l=pts[pts.length-1];
+        if(l&&now-l.t<300)l.v=LIVE.goldUsdOz; else pts.push({t:now,v:LIVE.goldUsdOz});
+      }
+      return {pts:pts,prev:(IC.xau&&IC.xau.prev_close)||LIVE.prevGoldUsd,
+              cur:LIVE.goldUsdOz,sym:'$',dec:2,
+              src:'5-minute bars from gold futures, rescaled to spot'};
+    }
+    return {pts:IC.mcx.slice(),prev:LIVE.prevMcxGold,cur:LIVE.mcxGold,
+            sym:'₹',dec:0,
+            src:IC.ticksOk?'observed MCX prints (15-min archive + this session)'
+                          :'observed MCX prints from this session'};
+  }
+  function icFmt(v,sym,dec){
+    return sym+Number(v).toLocaleString(sym==='₹'?'en-IN':'en-US',
+      {minimumFractionDigits:dec,maximumFractionDigits:dec});
+  }
+  function icTime(t){
+    return new Date(t*1000).toLocaleTimeString('en-IN',
+      {hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'});
+  }
+  function renderIntradayFor(suf){
+    var svg=$('icChart',suf); if(!svg)return;
+    var note=$('icNote',suf),empty=$('icEmpty',suf);
+    var lastV=$('icLastV',suf),lastD=$('icLastD',suf);
+    var S=icSeries(),pts=S.pts;
+    while(svg.firstChild)svg.removeChild(svg.firstChild);
+
+    if(lastV)lastV.textContent=S.cur>0?icFmt(S.cur,S.sym,S.dec):'—';
+    if(lastD){
+      lastD.classList.remove('up','dn');
+      if(S.cur>0&&S.prev>0){
+        var d=S.cur-S.prev,pc=(d/S.prev)*100;
+        lastD.classList.add(d<0?'dn':'up');
+        lastD.textContent=(d<0?'▼ −':'▲ +')+icFmt(Math.abs(d),S.sym,S.dec)
+          +' ('+(pc<0?'−':'+')+Math.abs(pc).toFixed(2)+'%)';
+      } else lastD.textContent='';
+    }
+
+    if(pts.length<2){
+      if(empty){
+        empty.classList.add('show');
+        empty.textContent = IC.sym==='MCX'
+          ? 'Building today’s MCX line from live prints — MCX publishes no intraday history, so this fills in as the session runs.'
+          : 'Waiting for today’s session data…';
+      }
+      if(note)note.textContent=S.src;
+      return;
+    }
+    if(empty)empty.classList.remove('show');
+
+    var W=600,H=200,padY=14,padX=2;
+    var vals=pts.map(function(p){return p.v});
+    var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals);
+    if(S.prev>0){min=Math.min(min,S.prev);max=Math.max(max,S.prev);}
+    if(min===max){min-=1;max+=1;}
+    var t0=pts[0].t,t1=pts[pts.length-1].t; if(t1===t0)t1=t0+1;
+    function xAt(p){return padX+(W-2*padX)*((p.t-t0)/(t1-t0))}
+    function yAt(v){return H-padY-(H-2*padY)*((v-min)/(max-min))}
+
+    var ns='http://www.w3.org/2000/svg';
+    // Green above the previous close, red below - the same language as the
+    // tiles, so the chart agrees with the delta printed next to it.
+    var up=(S.cur>0&&S.prev>0)?S.cur>=S.prev:true;
+    var col=up?'#4ECB8E':'#E2626B';
+    var gid='icGrad'+(suf||'M')+IC.sym;
+    var defs=document.createElementNS(ns,'defs');
+    defs.innerHTML='<linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'
+      +'<stop offset="0%" stop-color="'+col+'" stop-opacity="0.3"/>'
+      +'<stop offset="100%" stop-color="'+col+'" stop-opacity="0"/></linearGradient>';
+    svg.appendChild(defs);
+
+    var d=pts.map(function(p,i){return (i?'L':'M')+xAt(p).toFixed(2)+','+yAt(p.v).toFixed(2)}).join(' ');
+    var area=document.createElementNS(ns,'path');
+    area.setAttribute('d',d+' L'+xAt(pts[pts.length-1]).toFixed(2)+','+(H-padY)
+      +' L'+xAt(pts[0]).toFixed(2)+','+(H-padY)+' Z');
+    area.setAttribute('fill','url(#'+gid+')');svg.appendChild(area);
+
+    if(S.prev>0&&S.prev>=min&&S.prev<=max){
+      var pl=document.createElementNS(ns,'line');
+      pl.setAttribute('class','ic-prevline');
+      pl.setAttribute('x1',0);pl.setAttribute('x2',W);
+      pl.setAttribute('y1',yAt(S.prev).toFixed(2));pl.setAttribute('y2',yAt(S.prev).toFixed(2));
+      svg.appendChild(pl);
+    }
+    var line=document.createElementNS(ns,'path');
+    line.setAttribute('d',d);line.setAttribute('fill','none');
+    line.setAttribute('stroke',col);line.setAttribute('stroke-width','2');
+    line.setAttribute('stroke-linejoin','round');line.setAttribute('stroke-linecap','round');
+    svg.appendChild(line);
+
+    var live=document.createElementNS(ns,'circle');
+    live.setAttribute('class','ic-livedot');
+    live.setAttribute('cx',xAt(pts[pts.length-1]).toFixed(2));
+    live.setAttribute('cy',yAt(pts[pts.length-1].v).toFixed(2));
+    live.setAttribute('r','3.5');live.setAttribute('fill',col);
+    svg.appendChild(live);
+
+    var cur=document.createElementNS(ns,'line');
+    cur.setAttribute('class','ic-cursor');cur.setAttribute('y1',0);cur.setAttribute('y2',H);
+    svg.appendChild(cur);
+    var dot=document.createElementNS(ns,'circle');
+    dot.setAttribute('class','ic-dot');dot.setAttribute('r','4');
+    svg.appendChild(dot);
+    svg._ic={pts:pts,xAt:xAt,yAt:yAt,cur:cur,dot:dot,S:S};
+
+    if(note){
+      var span=Math.round((t1-t0)/60);
+      note.textContent=pts.length+' points · '+icTime(t0)+'–'+icTime(t1)
+        +' IST ('+(span<60?span+'m':(span/60).toFixed(1)+'h')+') · '+S.src
+        +' · dashed line = previous close';
+    }
+  }
+  function renderIntraday(){ SCOPES.forEach(renderIntradayFor); }
+
+  function wireIntraday(suf){
+    var svg=$('icChart',suf),tip=$('icTip',suf),tabs=$('icTabs',suf);
+    if(tabs){
+      tabs.addEventListener('click',function(e){
+        var b=e.target.closest('.ic-tab'); if(!b)return;
+        IC.sym=b.getAttribute('data-ic');
+        SCOPES.forEach(function(sf){
+          var t=$('icTabs',sf); if(!t)return;
+          t.querySelectorAll('.ic-tab').forEach(function(x){
+            x.classList.toggle('active',x.getAttribute('data-ic')===IC.sym)});
+        });
+        renderIntraday();
+      });
+    }
+    if(!svg||!tip)return;
+    function at(clientX){
+      var st=svg._ic; if(!st||!st.pts.length)return;
+      var r=svg.getBoundingClientRect();
+      var sx=(clientX-r.left)/r.width*600;
+      var best=st.pts[0],bd=1e9;
+      st.pts.forEach(function(p){var dd=Math.abs(st.xAt(p)-sx);if(dd<bd){bd=dd;best=p}});
+      var x=st.xAt(best),y=st.yAt(best.v);
+      st.cur.setAttribute('x1',x);st.cur.setAttribute('x2',x);st.cur.style.opacity='1';
+      st.dot.setAttribute('cx',x);st.dot.setAttribute('cy',y);st.dot.style.opacity='1';
+      tip.innerHTML='<div>'+icFmt(best.v,st.S.sym,st.S.dec)+'</div><div class="t">'+icTime(best.t)+' IST</div>';
+      tip.style.left=(x/600*r.width)+'px';
+      tip.style.top=(y/200*r.height)+'px';
+      tip.classList.add('show');
+    }
+    function off(){
+      var st=svg._ic; if(st){st.cur.style.opacity='0';st.dot.style.opacity='0'}
+      tip.classList.remove('show');
+    }
+    svg.addEventListener('mousemove',function(e){at(e.clientX)});
+    svg.addEventListener('mouseleave',off);
+    svg.addEventListener('touchstart',function(e){at(e.touches[0].clientX)},{passive:true});
+    svg.addEventListener('touchmove',function(e){at(e.touches[0].clientX)},{passive:true});
+    svg.addEventListener('touchend',off);
+  }
+
   // ─── Hit counter — Supabase `hits` table (the site's real counter) ───
   // Previously this read countapi.mileshilliard.com with the key
   // 'mygoldrates-app-hits-total-v1'. That is a free third-party counter
@@ -2623,6 +2927,15 @@ function handleCredentialResponse(resp){
   // seconds, and Cloudflare's edge cache on our side keeps request cost
   // low. The live-status chip repaints every 3s so the "Xs ago" number
   // counts up smoothly even between actual fetches.
+  // Live intraday chart: seed MCX from this IST day's cached prints, wire
+  // the tabs/scrub, then pull the gold-spot session and the MCX archive.
+  IC.mcx = icLoadMcx();
+  SCOPES.forEach(wireIntraday);
+  renderIntraday();
+  icFetchXau().then(renderIntraday);
+  icFetchTicks().then(renderIntraday);
+  // The 5m bars only move once every five minutes; a minute is plenty.
+  setInterval(function(){icFetchXau().then(renderIntraday)},60000);
   fetchLiveRates();
   // 3s, matching what production's market drawer already used. At 10s the
   // board looked frozen - upstream spot moves every couple of seconds, so a
