@@ -398,19 +398,55 @@ def fetch_akgsma():
 
 
 def fetch_ibja():
-    """IBJA daily reference rates, per 10g pre-GST -> per gram.
-    Returns (r999, r916) or None."""
+    """IBJA daily reference rates, pre-GST, returned per GRAM.
+
+    Returns (r999, r916) or None.
+
+    Unit-agnostic by design. IBJA used to publish per 10 grams (six or
+    seven digits, e.g. 150900) and this parser hard-coded that: it matched
+    `[\d,]{6,7}` and divided by 10. By Sep 2026 the site publishes per
+    gram instead, labelled "(1 Gram)":
+
+        999 Purity   15090   (1 Gram)
+        916 Purity   13823   (1 Gram)
+
+    Five digits no longer matched, so this returned None - and because
+    every caller treats None as "IBJA unavailable" and falls back silently,
+    the failure was invisible: the homepage's IBJA anchor went to 0, the
+    IBJA 24K tile quietly reverted to a spot x (1 + INDIA_PREMIUM)
+    ESTIMATE (~15,220 against IBJA's real 15,090), and the "Jeweller
+    Premium Over the IBJA Rate" section plus the IBJA FAQ dropped off
+    /compare entirely.
+
+    So do not encode the unit at all. Accept 4-7 digits and let the
+    magnitude decide: a per-gram gold rate lands in 8k-22k, the same
+    figure per 10g lands in 80k-220k. Either publishing convention parses
+    correctly, including a revert, and anything outside both bands is
+    rejected rather than silently scaled into range.
+
+    The purity label is required in the pattern ("999 Purity", not bare
+    "999") so the Chart.js block further up the page - which contains the
+    literal strings "999 Purity Gold Rates (PM)" and `chartData.purity999`
+    - cannot be mistaken for the rate table.
+    """
     try:
         r = requests.get("https://ibjarates.com", headers={"User-Agent": UA},
                          timeout=20)
         text = re.sub(r"<[^>]+>", " ", r.text)
+        text = re.sub(r"\s+", " ", text)
 
         def grab(purity):
-            m = re.search(purity + r"\D{0,60}?([\d,]{6,7})", text)
-            if not m:
-                return None
-            v = float(m.group(1).replace(",", "")) / 10.0
-            return v if 8000 <= v <= 22000 else None
+            for m in re.finditer(
+                    purity + r"\s*Purity\D{0,40}?([\d,]{4,7})", text):
+                raw = m.group(1).replace(",", "")
+                if not raw.isdigit():
+                    continue
+                v = float(raw)
+                if 80_000 <= v <= 220_000:   # published per 10 grams
+                    v /= 10.0
+                if 8_000 <= v <= 22_000:     # per gram, as published or scaled
+                    return v
+            return None
 
         r999, r916 = grab("999"), grab("916")
         if r999 and r916:
