@@ -1,5 +1,5 @@
 /**
- * MyGoldRates Market API — CORS-open JSON proxy for the app-test Market
+ * MyGoldRates Market API — JSON proxy for the Market
  * Pulse view (and anything else that wants live gold/silver data).
  *
  * Endpoints (all GET, all Access-Control-Allow-Origin: *):
@@ -26,21 +26,67 @@
  *   /chart    — 60s intraday, 1h daily+ (finer than the bar itself)
  */
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Max-Age': '86400',
-};
+// Origins allowed to read this API from a browser. It used to send
+// Access-Control-Allow-Origin: * , which let any site on the web embed our
+// feed as if it were their own.
+//
+// Be clear about what this does and does not buy: CORS is enforced by
+// BROWSERS. It stops another website's JavaScript from reading our JSON;
+// it does nothing whatsoever against curl, Python, or any server-side
+// scraper, which ignore CORS entirely. Rate limiting below and the
+// Cloudflare WAF rules are what actually deter those.
+const ALLOWED_ORIGINS = [
+  'https://mygoldrates.com',
+  'https://www.mygoldrates.com',
+];
+// Cloudflare Pages preview deployments, e.g. https://abc123.mygoldrates.pages.dev
+const PREVIEW_ORIGIN = /^https:\/\/[a-z0-9-]+\.mygoldrates\.pages\.dev$/;
+
+function corsFor(request) {
+  const base = {
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
+    Vary: 'Origin',
+  };
+  const origin = request?.headers?.get('Origin');
+  // No Origin header means a non-browser client (our own market_snapshot.py
+  // job, a health check, curl). Those are not subject to CORS at all, so
+  // sending no ACAO header neither helps nor hinders them - it just avoids
+  // advertising a blanket allowance.
+  if (!origin) return base;
+  if (ALLOWED_ORIGINS.includes(origin) || PREVIEW_ORIGIN.test(origin)) {
+    return { ...base, 'Access-Control-Allow-Origin': origin };
+  }
+  return base;
+}
+
+// Per-IP rate limit, applied via Cloudflare's rate-limiting binding when one
+// is configured (see wrangler.toml). Written so the worker behaves normally
+// if the binding is absent or errors - an unavailable limiter must never
+// take the API down, and the WAF rule is the real enforcement layer.
+async function rateLimited(request, env) {
+  const limiter = env && env.RATE_LIMITER;
+  if (!limiter || typeof limiter.limit !== 'function') return false;
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  try {
+    const { success } = await limiter.limit({ key: ip });
+    return !success;
+  } catch (e) {
+    return false;
+  }
+}
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36';
 
+// CORS headers are attached once, centrally, in the fetch handler - so
+// these builders stay unaware of the request and every response gets the
+// same treatment, including ones returned from the cache.
 function json(body, extraHeaders = {}) {
   return new Response(JSON.stringify(body), {
     status: 200,
     headers: {
       'content-type': 'application/json; charset=utf-8',
-      ...CORS,
       ...extraHeaders,
     },
   });
@@ -49,7 +95,7 @@ function json(body, extraHeaders = {}) {
 function jsonErr(message, status = 502) {
   return new Response(JSON.stringify({ error: message }), {
     status,
-    headers: { 'content-type': 'application/json; charset=utf-8', ...CORS },
+    headers: { 'content-type': 'application/json; charset=utf-8' },
   });
 }
 
@@ -678,17 +724,31 @@ async function root() {
 }
 
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
+    const cors = corsFor(request);
+    const wrap = (res) => {
+      const out = new Response(res.body, res);
+      for (const [k, v] of Object.entries(cors)) out.headers.set(k, v);
+      return out;
+    };
+
     if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: CORS });
+      return new Response(null, { status: 204, headers: cors });
     }
     if (request.method !== 'GET') {
-      return new Response('method not allowed', { status: 405, headers: CORS });
+      return new Response('method not allowed', { status: 405, headers: cors });
+    }
+    if (await rateLimited(request, env)) {
+      return wrap(new Response(
+        JSON.stringify({ error: 'rate limited' }),
+        { status: 429,
+          headers: { 'content-type': 'application/json; charset=utf-8',
+                     'retry-after': '60' } }));
     }
     const url = new URL(request.url);
-    if (url.pathname === '/' || url.pathname === '') return root();
+    if (url.pathname === '/' || url.pathname === '') return wrap(root());
     const route = ROUTES[url.pathname];
-    if (!route) return new Response('not found', { status: 404, headers: CORS });
-    return withCache(request, route.ttl, () => route.fn(request, url));
+    if (!route) return new Response('not found', { status: 404, headers: cors });
+    return wrap(await withCache(request, route.ttl, () => route.fn(request, url)));
   },
 };

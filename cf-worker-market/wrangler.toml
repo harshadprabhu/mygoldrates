@@ -9,3 +9,21 @@ compatibility_date = "2024-11-01"
 
 [observability]
 enabled = true
+
+# Per-IP rate limit for the API. The worker reads this as env.RATE_LIMITER
+# and fails OPEN if it is absent or errors - an unavailable limiter must
+# never take the API down.
+#
+# 600 requests / 60s is deliberately generous. A real visitor polls /market
+# every 3s (~20/min) plus a handful of /chart calls, so this is ~30x normal
+# use. It is set that high because Indian mobile carriers run large-scale
+# CGNAT: many genuine users share one public IP, and a tight per-IP limit
+# would lock out a whole carrier before it inconvenienced a scraper running
+# from a single datacentre host. This layer exists to stop the crude
+# hammering case; the Cloudflare WAF rules (which can score on bot signals,
+# ASN and JA3 rather than IP alone) are the real enforcement.
+[[unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 600, period = 60 }
