@@ -2261,11 +2261,11 @@ function handleCredentialResponse(resp){
   //     the economic calendar all need a small server-side proxy — no free
   //     CORS-open upstream exists for those — and are deliberately deferred
   //     to a Supabase edge function follow-up. ───
-  var NEWS_FEEDS=[
-    'https://www.moneycontrol.com/rss/business.xml',
-    'https://www.moneycontrol.com/rss/latestnews.xml'
-  ];
-  var NEWS_KEYWORDS=/(gold|silver|bullion|xau|xag|mcx|ibja)/i;
+  // NEWS_FEEDS / NEWS_KEYWORDS removed: those two Moneycontrol feeds have
+  // been frozen since 23 Apr 2024 and the keyword filter over a general
+  // business feed was the wrong shape anyway. Headlines now come from the
+  // worker's /news (gold-specific Google News query across Indian
+  // publishers), so the page no longer fetches or filters RSS itself.
   var NEWS_CACHE_KEY='mgr_news_cache_v1';
   var NEWS_TTL_MS=30*60*1000;
   var NEWS_MAX=8;
@@ -2295,24 +2295,6 @@ function handleCredentialResponse(resp){
     if(s<86400)return Math.round(s/3600)+'h ago';
     return Math.round(s/86400)+'d ago';
   }
-  function parseRss(xmlText,source){
-    try {
-      var doc=new DOMParser().parseFromString(xmlText,'application/xml');
-      if(doc.querySelector('parsererror'))return [];
-      var items=doc.querySelectorAll('item');
-      var out=[];
-      for(var i=0;i<items.length;i++){
-        var el=items[i];
-        var title=(el.querySelector('title')||{}).textContent||'';
-        var link=(el.querySelector('link')||{}).textContent||'';
-        var pub=(el.querySelector('pubDate')||{}).textContent||'';
-        if(!title||!link)continue;
-        if(!NEWS_KEYWORDS.test(title))continue;
-        out.push({title:title.trim(),url:link.trim(),source:source,published:pub});
-      }
-      return out;
-    } catch(e){return []}
-  }
   function fetchNews(){
     // serve cache first when fresh
     try {
@@ -2325,11 +2307,21 @@ function handleCredentialResponse(resp){
         }
       }
     } catch(e){}
-    Promise.all(NEWS_FEEDS.map(function(u){
-      return fetch(u).then(function(r){return r.text()})
-        .then(function(t){return parseRss(t,'Moneycontrol')})
-        .catch(function(){return []});
-    })).then(function(lists){
+    // Single pipeline: the worker's /news, which aggregates Indian
+    // publishers via a gold-specific Google News query.
+    //
+    // This used to fetch Moneycontrol's business.xml and latestnews.xml
+    // straight from the browser and keyword-filter them. Those feeds have
+    // been FROZEN since 23 April 2024 - their newest item is still Q4 FY24
+    // earnings - so the rail rendered empty every single day, and an empty
+    // news rail reads as "no news today" rather than as a fault, which is
+    // why it went unnoticed. Reading them cross-origin from the page was
+    // also fragile in its own right.
+    Promise.all([
+      fetch(MARKET_API_BASE+'/news').then(function(r){return r.json()})
+        .then(function(j){return (j&&j.items)||[]})
+        .catch(function(){return []})
+    ]).then(function(lists){
       var seen={},merged=[];
       lists.forEach(function(list){list.forEach(function(it){
         if(seen[it.url])return;seen[it.url]=1;merged.push(it);
@@ -2469,7 +2461,15 @@ function handleCredentialResponse(resp){
       var el = $('calList',suf); if(el) el.innerHTML = html;
     });
   }
+  // This week's US economic events are baked into the page at build time
+  // (see fetch_calendar in generate_site.py). The worker CANNOT serve them:
+  // the upstream feed is itself behind Cloudflare and Cloudflare rejects
+  // worker-to-worker-zone subrequests, so /calendar answered 502 on every
+  // call and this strip was permanently empty. The worker is kept as a
+  // fallback in case a future build ships without the embed.
+  var CALENDAR_BUILD = __CALENDAR_JSON__;
   function fetchCalendar(){
+    if(CALENDAR_BUILD&&CALENDAR_BUILD.length){renderCalendar(CALENDAR_BUILD);return}
     fetch(MARKET_API_BASE+'/calendar').then(function(r){return r.json()}).then(function(j){
       renderCalendar(j&&j.events||[]);
     }).catch(function(err){
