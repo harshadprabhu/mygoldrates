@@ -11,7 +11,7 @@
  *   /chart?sym=XAU&interval=5m — OHLC candles at any interval from
  *                        1m to 1mo, rescaled to spot (/intraday aliases it)
  *   /calendar          — this week's US economic events (ForexFactory)
- *   /news              — filtered gold + silver headlines (Moneycontrol RSS)
+ *   /news              — gold + silver headlines (Google News RSS)
  *   /vendors           — India national bullion reference rates (IBJA)
  *
  * All responses are edge-cached with a TTL tuned to how often the upstream
@@ -458,39 +458,63 @@ async function handleCalendar() {
 }
 
 // ─── /news ──────────────────────────────────────────────────────────────
-// Gold + silver + bullion headlines from Moneycontrol RSS (business +
-// latestnews feeds), deduped and keyword-filtered.
-const NEWS_FEEDS = [
-  'https://www.moneycontrol.com/rss/business.xml',
-  'https://www.moneycontrol.com/rss/latestnews.xml',
-];
-const NEWS_KEYWORDS = /(gold|silver|bullion|xau|xag|mcx|ibja)/i;
+// Gold + silver headlines via Google News RSS.
+//
+// This used to read Moneycontrol's business.xml and latestnews.xml and
+// keyword-filter them for gold. It returned an empty array for months and
+// nobody noticed, because an empty news rail looks like "no news today"
+// rather than a fault. The cause was not the filter: BOTH Moneycontrol
+// feeds have been frozen since 23 April 2024 - their newest pubDate is
+// still Q4 FY24 earnings. A general business feed was also the wrong
+// shape for this; even when live, most days carry no gold story at all.
+//
+// Google News RSS takes the topic as a query, so the feed is gold by
+// construction rather than by filtering, and it aggregates every Indian
+// publisher. Same source generate_site.py already uses successfully.
+// Headlines only, each linking to the original publisher.
+const NEWS_URL = 'https://news.google.com/rss/search?q='
+  + encodeURIComponent('gold rate OR gold price OR silver price India when:3d')
+  + '&hl=en-IN&gl=IN&ceid=IN:en';
+
+function decodeEntities(s) {
+  return s.replace(/&#(\d+);/g, (_, d) => String.fromCharCode(+d))
+          .replace(/&amp;/g, '&').replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+          .replace(/&#39;|&apos;/g, "'").replace(/&nbsp;/g, ' ');
+}
 
 async function handleNews() {
-  const bodies = await Promise.all(
-    NEWS_FEEDS.map(u => safeFetchText(u, { accept: 'application/xml', cacheTtl: 300 }))
-  );
-  const seen = new Set();
+  const body = await safeFetchText(NEWS_URL,
+    { accept: 'application/xml', cacheTtl: 300, timeoutMs: 10000 });
+  if (!body) return json({ items: [], updated_at: new Date().toISOString() });
+
   const items = [];
-  for (const body of bodies) {
-    if (!body) continue;
-    const itemRe = /<item>([\s\S]*?)<\/item>/g;
-    let m;
-    while ((m = itemRe.exec(body)) !== null) {
-      const block = m[1];
-      const grab = tag => {
-        const mm = block.match(new RegExp(`<${tag}(?:><!\\[CDATA\\[([\\s\\S]*?)\\]\\]>|>([\\s\\S]*?))<\\/${tag}>`, 'i'));
-        return mm ? (mm[1] ?? mm[2] ?? '').trim() : '';
-      };
-      const title = grab('title');
-      const link = grab('link');
-      const pub = grab('pubDate');
-      if (!title || !link || title.length < 15) continue;
-      if (!NEWS_KEYWORDS.test(title)) continue;
-      if (seen.has(link)) continue;
-      seen.add(link);
-      items.push({ title, url: link, source: 'Moneycontrol', published: pub });
+  const seen = new Set();
+  const itemRe = /<item>([\s\S]*?)<\/item>/g;
+  let m;
+  while ((m = itemRe.exec(body)) !== null) {
+    const block = m[1];
+    const grab = (tag) => {
+      const mm = block.match(
+        new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
+      if (!mm) return '';
+      return decodeEntities(mm[1].replace(/<!\[CDATA\[|\]\]>/g, '')
+                                 .replace(/<[^>]+>/g, '')).trim();
+    };
+    let title = grab('title');
+    const link = grab('link');
+    const source = grab('source');
+    const pub = grab('pubDate');
+    if (!title || !link || title.length < 15) continue;
+    // Google appends " - Publisher" to every headline; the publisher is
+    // already carried separately, so strip the duplicate.
+    if (source && title.endsWith(' - ' + source)) {
+      title = title.slice(0, -(source.length + 3)).trim();
     }
+    if (seen.has(link)) continue;
+    seen.add(link);
+    items.push({ title, url: link, source: source || 'Google News',
+                 published: pub });
   }
   items.sort((a, b) => (new Date(b.published) - new Date(a.published)));
   return json({ items: items.slice(0, 12), updated_at: new Date().toISOString() });

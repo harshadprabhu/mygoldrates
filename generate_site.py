@@ -456,6 +456,57 @@ def fetch_ibja():
     return None
 
 
+def fetch_calendar():
+    """This week's US economic events, from FairEconomy's ForexFactory feed.
+
+    Baked into the page at build time rather than fetched by the browser
+    from our Cloudflare worker, because the worker CANNOT reach this feed:
+    nfs.faireconomy.media is itself behind Cloudflare, and Cloudflare
+    rejects worker-to-worker-zone subrequests, so /calendar returned 502 on
+    every single call while the identical request with identical headers
+    succeeded from anywhere else. The calendar strip was therefore always
+    empty. A build runs every 30 minutes and this is a WEEKLY schedule, so
+    build-time is ample freshness and removes the failing hop entirely.
+
+    Returns a list of dicts matching the shape the page already renders,
+    or [] if the feed is unavailable (the strip then just stays hidden).
+    """
+    try:
+        r = requests.get("https://nfs.faireconomy.media/ff_calendar_thisweek.xml",
+                         headers={"User-Agent": UA}, timeout=20)
+        if r.status_code != 200:
+            return []
+
+        def field(block, tag):
+            m = re.search(r"<" + tag + r">(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</"
+                          + tag + r">", block, re.S)
+            return m.group(1).strip() if m else ""
+
+        out = []
+        for block in re.findall(r"<event>(.*?)</event>", r.text, re.S):
+            country = field(block, "country")
+            # US events only - they are what actually moves the gold price.
+            if country and country.upper() not in ("USD", "US"):
+                continue
+            title = field(block, "title")
+            if not title:
+                continue
+            out.append({
+                "title": title,
+                "country": country or "USD",
+                "date": field(block, "date"),
+                "time": field(block, "time"),
+                "impact": field(block, "impact"),
+                "forecast": field(block, "forecast"),
+                "previous": field(block, "previous"),
+                "actual": field(block, "actual"),
+                "url": field(block, "url"),
+            })
+        return out
+    except Exception:
+        return []
+
+
 def fetch_news(limit=14):
     """Live gold news via Google News RSS (auto-refreshes each build).
 
@@ -3200,6 +3251,9 @@ def main():
     # the real IBJA figure, so the India reference tracks the market without
     # inventing a premium. Zero if either upstream was unavailable, in which
     # case the page keeps its old spot x (1 + INDIA_PREMIUM) estimate.
+    _calendar_events = fetch_calendar()
+    print(f"calendar: {len(_calendar_events)} US events this week")
+
     _ibja_anchor_spot = ((gold_usd / 31.1034768) * usdinr
                          if gold_usd and usdinr else 0)
 
@@ -3350,6 +3404,13 @@ def main():
              f"{r999:.4f}" if ibja and r999 else "0"),
             ("__IBJA_ANCHOR_SPOT__",
              f"{_ibja_anchor_spot:.4f}" if _ibja_anchor_spot else "0"),
+            # This week's US economic events, baked in at build time. The
+            # browser used to ask our worker for these, but the worker cannot
+            # reach the upstream at all (see fetch_calendar) so the strip was
+            # permanently empty. "[]" when unavailable - the page then falls
+            # back to the worker and, failing that, renders nothing.
+            ("__CALENDAR_JSON__", json.dumps(_calendar_events,
+                                             separators=(",", ":"))),
             # Google One Tap. pulse_app.html shipped the literal placeholder
             # "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com", so every
             # sign-in from the homepage hit Google's
