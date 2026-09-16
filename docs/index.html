@@ -266,28 +266,35 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
    classes are removed) inherited an unset colour and rendered near-black on
    the dark card - effectively invisible. Neutral state is now explicitly
    near-white; .up/.dn below still override it green/red when a value moves. */
-/* ─── Live intraday chart (Market Pulse) ─── */
+/* ─── Live Gold Spot chart (Market Pulse) ─── */
 .ic-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:14px;margin:4px 0 6px}
-.ic-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-.ic-tabs{display:inline-flex;gap:4px;background:rgba(255,255,255,0.05);padding:3px;border-radius:9px}
-.ic-tab{background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;transition:background .2s,color .2s;font-family:inherit}
-.ic-tab.active{background:var(--glass2);color:var(--gold)}
-.ic-last{text-align:right;line-height:1.25}
-.ic-last-v{display:block;font-size:16px;font-weight:800;color:var(--text)}
+.ic-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.ic-name{display:block;font-size:13px;font-weight:800;color:var(--text)}
+.ic-sub{display:block;font-size:10px;font-weight:600;color:var(--text3);margin-top:1px}
+.ic-last{text-align:right;line-height:1.25;margin-left:auto}
+.ic-last-v{display:block;font-size:17px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
 .ic-last-d{display:block;font-size:10px;font-weight:700;color:var(--text3)}
 .ic-last-d.up{color:var(--mint)}.ic-last-d.dn{color:var(--rose)}
-.ic-wrap{position:relative;width:100%;height:200px}
-.ic-svg{width:100%;height:200px;display:block;overflow:visible;touch-action:pan-y}
-.ic-prevline{stroke:var(--text3);stroke-width:1;stroke-dasharray:4 4;opacity:.45}
+.ic-ctrls{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.ic-tabs{display:inline-flex;gap:2px;background:rgba(255,255,255,0.05);padding:3px;border-radius:9px;flex-wrap:wrap}
+.ic-tab{background:none;border:none;cursor:pointer;color:var(--text3);font-size:10px;font-weight:700;padding:5px 9px;border-radius:6px;transition:background .2s,color .2s;font-family:inherit;line-height:1.1}
+.ic-tab.active{background:var(--glass2);color:var(--gold)}
+.ic-ty .ic-tab{font-size:12px;padding:4px 9px}
+.ic-wrap{position:relative;width:100%;height:220px}
+.ic-svg{width:100%;height:220px;display:block;overflow:visible;touch-action:pan-y}
+.ic-grid{stroke:var(--glass-border);stroke-width:1;opacity:.5}
+.ic-axis{fill:var(--text3);font-size:9px;font-weight:600}
+.ic-prevline{stroke:var(--text3);stroke-width:1;stroke-dasharray:4 4;opacity:.5}
 .ic-cursor{stroke:var(--gold);stroke-width:1;opacity:0;pointer-events:none}
 .ic-dot{fill:var(--gold);stroke:var(--bg);stroke-width:2;opacity:0;pointer-events:none}
-.ic-livedot{fill:var(--gold)}
-.ic-tip{position:absolute;transform:translate(-50%,-125%);background:var(--bg2,#1b1712);border:1px solid var(--glass-border);border-radius:8px;padding:5px 9px;font-size:11px;font-weight:700;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:3}
+.ic-tip{position:absolute;transform:translate(-50%,-125%);background:var(--bg2,#1b1712);border:1px solid var(--glass-border);border-radius:8px;padding:6px 9px;font-size:11px;font-weight:700;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:3;font-variant-numeric:tabular-nums}
 .ic-tip.show{opacity:1}
-.ic-tip .t{font-size:9px;font-weight:600;color:var(--text3);margin-top:1px}
+.ic-tip .t{font-size:9px;font-weight:600;color:var(--text3);margin-top:2px}
+.ic-tip .o{font-size:9px;font-weight:600;color:var(--text2,#bdb3a4);margin-top:2px}
 .ic-empty{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;font-size:11px;color:var(--text3);padding:0 24px;line-height:1.5}
 .ic-empty.show{display:flex}
 .ic-foot{margin-top:8px;font-size:10px;color:var(--text3);line-height:1.5}
+@media(max-width:420px){.ic-tab{font-size:9px;padding:5px 7px}}
 .mc-d{font-size:10px;font-weight:700;margin-top:3px;display:inline-flex;align-items:center;gap:2px;padding:2px 6px;border-radius:5px;color:#F2EDE3;background:rgba(255,255,255,0.07)}
 .mc-d.up{color:var(--mint);background:var(--mint-soft)}.mc-d.dn{color:var(--rose);background:var(--rose-soft)}
 .mcard{transition:background-color .4s ease,border-color .4s ease,box-shadow .4s ease}
@@ -575,7 +582,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   .site-calc-body{grid-template-columns:1fr}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://mygoldrates.com/#webpage", "url": "https://mygoldrates.com/", "name": "Gold Rate Today in India - Live 24K, 22K, 18K Rates from 14+ Jewellers | MyGoldRates", "description": "Live gold rate today across 14+ Indian jewellers, with MCX gold/silver futures, IBJA reference and real-time market data updated every 3 seconds. Compare 24K, 22K and 18K per-gram prices pre-GST.", "inLanguage": "en-IN", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/", "name": "MyGoldRates.com"}, "dateModified": "2026-09-16T12:20:49.875471+05:30", "primaryImageOfPage": "https://mygoldrates.com/og.png", "significantLink": ["https://mygoldrates.com/compare", "https://mygoldrates.com/news", "https://mygoldrates.com/calculators"]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://mygoldrates.com/#webpage", "url": "https://mygoldrates.com/", "name": "Gold Rate Today in India - Live 24K, 22K, 18K Rates from 14+ Jewellers | MyGoldRates", "description": "Live gold rate today across 14+ Indian jewellers, with MCX gold/silver futures, IBJA reference and real-time market data updated every 3 seconds. Compare 24K, 22K and 18K per-gram prices pre-GST.", "inLanguage": "en-IN", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/", "name": "MyGoldRates.com"}, "dateModified": "2026-09-16T12:31:51.100631+05:30", "primaryImageOfPage": "https://mygoldrates.com/og.png", "significantLink": ["https://mygoldrates.com/compare", "https://mygoldrates.com/news", "https://mygoldrates.com/calculators"]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}]}]}</script>
 <script>window.GR_SB_URL="https://opwrfflzzowhobesysmr.supabase.co";window.GR_SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE";</script>
 <script>(function(){
   var SB=window.GR_SB_URL||"",KEY=window.GR_SB_KEY||"";
@@ -655,8 +662,8 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 <!-- When the JEWELLER board rates were last scraped. Distinct from the live
      chip above, which tracks the spot/MCX feed refreshing every 3s. Values
      are substituted at build time by generate_site.py. -->
-<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1789541449">
-  Jeweller rates updated <b>16 September 2026, 12:20 PM IST</b><span id="ratesStampAgo"></span>
+<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1789542111">
+  Jeweller rates updated <b>16 September 2026, 12:31 PM IST</b><span id="ratesStampAgo"></span>
 </div>
 
 <!-- Google One Tap (uses Google Identity Services) -->
@@ -753,18 +760,33 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   <div class="sh"><div class="ic bl">&#128201;</div><h2>Live Chart</h2></div>
   <div class="ic-card">
     <div class="ic-head">
-      <div class="ic-tabs" id="icTabs">
-        <button class="ic-tab active" data-ic="XAU">Gold Spot</button>
-        <button class="ic-tab" data-ic="MCX">MCX Gold</button>
-      </div>
+      <div class="ic-title"><span class="ic-name">Gold Spot</span><span class="ic-sub">XAU/USD &middot; per troy oz</span></div>
       <div class="ic-last"><span class="ic-last-v" id="icLastV">&mdash;</span><span class="ic-last-d" id="icLastD"></span></div>
     </div>
+    <div class="ic-ctrls">
+      <div class="ic-tabs ic-tf" id="icTf">
+        <button class="ic-tab active" data-tf="live">LIVE</button>
+        <button class="ic-tab" data-tf="1m">1m</button>
+        <button class="ic-tab" data-tf="5m">5m</button>
+        <button class="ic-tab" data-tf="15m">15m</button>
+        <button class="ic-tab" data-tf="60m">1H</button>
+        <button class="ic-tab" data-tf="1d">1D</button>
+        <button class="ic-tab" data-tf="1wk">1W</button>
+        <button class="ic-tab" data-tf="1mo">1M</button>
+      </div>
+      <div class="ic-tabs ic-ty" id="icTy">
+        <button class="ic-tab active" data-ty="area" title="Area">&#9650;</button>
+        <button class="ic-tab" data-ty="line" title="Line">&#8764;</button>
+        <button class="ic-tab" data-ty="candle" title="Candlestick">&#9635;</button>
+        <button class="ic-tab" data-ty="bar" title="OHLC bars">&#8942;</button>
+      </div>
+    </div>
     <div class="ic-wrap">
-      <svg class="ic-svg" id="icChart" viewBox="0 0 600 200" preserveAspectRatio="none"></svg>
+      <svg class="ic-svg" id="icChart" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
       <div class="ic-tip" id="icTip"></div>
       <div class="ic-empty" id="icEmpty"></div>
     </div>
-    <div class="ic-foot"><span id="icNote">Loading today&rsquo;s session&hellip;</span></div>
+    <div class="ic-foot"><span id="icNote">Loading&hellip;</span></div>
   </div>
 
   <div class="sh"><div class="ic mt">&#128200;</div><h2>Rate Trend</h2></div>
@@ -1048,18 +1070,33 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
       </div>
       <div class="ic-card">
     <div class="ic-head">
-      <div class="ic-tabs" id="icTabsS">
-        <button class="ic-tab active" data-ic="XAU">Gold Spot</button>
-        <button class="ic-tab" data-ic="MCX">MCX Gold</button>
-      </div>
+      <div class="ic-title"><span class="ic-name">Gold Spot</span><span class="ic-sub">XAU/USD &middot; per troy oz</span></div>
       <div class="ic-last"><span class="ic-last-v" id="icLastVS">&mdash;</span><span class="ic-last-d" id="icLastDS"></span></div>
     </div>
+    <div class="ic-ctrls">
+      <div class="ic-tabs ic-tf" id="icTfS">
+        <button class="ic-tab active" data-tf="live">LIVE</button>
+        <button class="ic-tab" data-tf="1m">1m</button>
+        <button class="ic-tab" data-tf="5m">5m</button>
+        <button class="ic-tab" data-tf="15m">15m</button>
+        <button class="ic-tab" data-tf="60m">1H</button>
+        <button class="ic-tab" data-tf="1d">1D</button>
+        <button class="ic-tab" data-tf="1wk">1W</button>
+        <button class="ic-tab" data-tf="1mo">1M</button>
+      </div>
+      <div class="ic-tabs ic-ty" id="icTyS">
+        <button class="ic-tab active" data-ty="area" title="Area">&#9650;</button>
+        <button class="ic-tab" data-ty="line" title="Line">&#8764;</button>
+        <button class="ic-tab" data-ty="candle" title="Candlestick">&#9635;</button>
+        <button class="ic-tab" data-ty="bar" title="OHLC bars">&#8942;</button>
+      </div>
+    </div>
     <div class="ic-wrap">
-      <svg class="ic-svg" id="icChartS" viewBox="0 0 600 200" preserveAspectRatio="none"></svg>
+      <svg class="ic-svg" id="icChartS" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
       <div class="ic-tip" id="icTipS"></div>
       <div class="ic-empty" id="icEmptyS"></div>
     </div>
-    <div class="ic-foot"><span id="icNoteS">Loading today&rsquo;s session&hellip;</span></div>
+    <div class="ic-foot"><span id="icNoteS">Loading&hellip;</span></div>
   </div>
       <div class="site-section-head" style="margin-top:36px">
         <div><span class="site-eyebrow-sm">Live History</span><h2>Rate Trend</h2></div>
@@ -1323,7 +1360,7 @@ function handleCredentialResponse(resp){
   // movement from a TRUE anchor instead of a guessed premium. Zero when
   // the IBJA fetch failed - applyLive falls back to the old estimate then.
   var IBJA_ANCHOR_24=Number("15189.0000")||0;
-  var IBJA_ANCHOR_SPOT=Number("13358.9192")||0;
+  var IBJA_ANCHOR_SPOT=Number("13378.0523")||0;
   // Every `delta*` here is the change against the PREVIOUS CLOSE, not
   // against the last poll. The previous close for each metric arrives from
   // the worker as `*_prev` and is held in the `prev*` fields below.
@@ -1904,9 +1941,9 @@ function handleCredentialResponse(resp){
       LIVE.ts=Date.now();LIVE.ok=true;LIVE.source='live';
       try{localStorage.setItem('mgr_live_cache',JSON.stringify({usdOz:usdOz,usdinr:usdinr,silverUsdOz:silverUsdOz}))}catch(e){}
       recordHistoryPoint(LIVE.ibja24);
-      icRecordMcx(LIVE.mcxGold);
+      icRecordTick(LIVE.goldUsdOz);
       renderAll();paintMarket();paintLiveChip(currentDotState());paintLiveStrip();renderTrend();
-      renderIntraday();
+      renderIc();
     }).catch(function(err){
       console.warn('Live gold rate fetch failed',err);
       if(!LIVE.ok){
@@ -1919,246 +1956,257 @@ function handleCredentialResponse(resp){
       paintLiveChip(currentDotState());paintLiveStrip();
     });
   }
-  // ═══ Live intraday chart — Gold Spot + MCX Gold ════════════════════
+  // ═══ Live Gold Spot chart ══════════════════════════════════════════
   //
-  // Two series, two very different provenances, and the difference is the
-  // whole design:
+  // Eight timeframes x four chart types, all on real XAU data.
   //
-  // GOLD SPOT has real intraday history. gold-api.com (our spot source)
-  // publishes only a current price, so the worker's /intraday endpoint
-  // takes Yahoo's 5-minute gold-futures bars and rescales them onto the
-  // spot level we display. Full session from the open, every time.
+  // LIVE is seconds resolution and is OURS: Yahoo has no sub-minute bars,
+  // so this series is built from the spot prices the page actually observes
+  // on each 3-second poll, kept in memory for the session. Every other
+  // timeframe is OHLC from the worker's /chart endpoint, which rescales
+  // Yahoo's gold-futures bars onto the spot level we display (a uniform
+  // multiplicative shift - it preserves the shape exactly and only moves
+  // the level, so the axis agrees with the Gold Spot tile).
   //
-  // MCX HAS NO PUBLIC INTRADAY HISTORY. Moneycontrol's techCharts history
-  // endpoint serves equities but answers "no_data" for every MCX commodity
-  // symbol and expiry tried; Groww's chart API needs auth; mcxindia.com
-  // denies us outright. The only MCX number anyone hands us is the current
-  // LTP. So rather than convert gold-futures bars into INR/10g and pass a
-  // MODELLED line off as exchange prints, the MCX series is built ONLY
-  // from real observed LTPs:
-  //   1. Supabase market_ticks - the 15-minute archive market_snapshot.py
-  //      writes. Gives history from market open for every visitor.
-  //   2. the live session - every /market poll appends the LTP it saw,
-  //      persisted per IST day so a reload keeps the morning's shape.
-  // Both are genuine prints. Until market_ticks exists the chart simply
-  // starts when you open the page and says so, which is honest; it never
-  // draws a line it did not observe.
-  var IC = { sym:'XAU', xau:null, mcx:[], ticksLoaded:false, ticksOk:false };
+  // The MCX tab that used to sit beside this was removed: MCX publishes no
+  // intraday history anywhere we can reach (Moneycontrol's techCharts
+  // answers "no_data" for every commodity symbol and expiry, Groww needs
+  // auth, mcxindia.com denies us), and the only alternative would have been
+  // to model an MCX line from gold futures and present it as exchange
+  // prints. The MCX tiles above still show real live LTP and day change.
+  var IC = { tf:'live', ty:'area', data:{}, loading:{}, ticks:[] };
+  var IC_TF = {
+    live:{label:'LIVE', secs:true,  note:'live spot ticks, ~3s, this session'},
+    '1m':{label:'1m',  interval:'1m'},  '5m':{label:'5m',  interval:'5m'},
+    '15m':{label:'15m',interval:'15m'}, '60m':{label:'1H', interval:'60m'},
+    '1d':{label:'1D',  interval:'1d'},  '1wk':{label:'1W', interval:'1wk'},
+    '1mo':{label:'1M', interval:'1mo'}
+  };
 
-  function icDayKey(){
-    // IST calendar day - the session boundary for both MCX and the cache.
-    return new Date(Date.now()+19800000).toISOString().slice(0,10);
+  // Record an observed spot price for the LIVE series. Kept in memory only:
+  // these are seconds-resolution ticks for the current session, not history.
+  function icRecordTick(v){
+    if(!(v>0))return;
+    var t=Math.floor(Date.now()/1000),l=IC.ticks[IC.ticks.length-1];
+    if(l&&t-l.t<2){l.c=v;l.h=Math.max(l.h,v);l.l=Math.min(l.l,v);l.t=t;return}
+    IC.ticks.push({t:t,o:v,h:v,l:v,c:v});
+    if(IC.ticks.length>1200)IC.ticks=IC.ticks.slice(-1200);
   }
-  function icLoadMcx(){
-    try{
-      var raw=JSON.parse(localStorage.getItem('mgr_mcx_intraday')||'null');
-      if(raw&&raw.d===icDayKey()&&Array.isArray(raw.p))return raw.p;
-    }catch(e){}
-    return [];
-  }
-  function icSaveMcx(pts){
-    try{localStorage.setItem('mgr_mcx_intraday',
-      JSON.stringify({d:icDayKey(),p:pts.slice(-600)}))}catch(e){}
-  }
-  // Append a live MCX print. Throttled to ~1/min: the page polls every 3s
-  // and a chart does not need 1,200 points an hour to show the same shape.
-  function icRecordMcx(ltp){
-    if(!(ltp>0))return;
-    var now=Math.floor(Date.now()/1000);
-    var last=IC.mcx[IC.mcx.length-1];
-    if(last&&now-last.t<55){ last.v=ltp; last.t=now; }
-    else IC.mcx.push({t:now,v:ltp});
-    if(IC.mcx.length>600)IC.mcx=IC.mcx.slice(-600);
-    icSaveMcx(IC.mcx);
-  }
-  // Backfill today's MCX prints from the Supabase archive, merging by
-  // timestamp so the session's own points are not duplicated.
-  function icFetchTicks(){
-    if(IC.ticksLoaded)return Promise.resolve();
-    IC.ticksLoaded=true;
-    var base=(window.GR_SB_URL||SUPABASE_URL||'').replace(/\/$/,'');
-    var key=window.GR_SB_KEY||SUPABASE_ANON_KEY||'';
-    if(!base||!key)return Promise.resolve();
-    var since=new Date(Date.now()-86400000).toISOString();
-    return fetch(base+'/rest/v1/market_ticks?select=created_at,mcx_gold_ltp'
-        +'&mcx_gold_ltp=not.is.null&created_at=gte.'+encodeURIComponent(since)
-        +'&order=created_at.asc&limit=400',
-        {headers:{apikey:key,Authorization:'Bearer '+key}})
+  function icFetch(tf){
+    var cfg=IC_TF[tf];
+    if(!cfg||cfg.secs||IC.loading[tf])return Promise.resolve();
+    IC.loading[tf]=true;
+    return fetch(MARKET_API_BASE+'/chart?sym=XAU&interval='+cfg.interval)
       .then(function(r){return r.ok?r.json():null})
-      .then(function(rows){
-        if(!rows||!rows.length)return;
-        var day=icDayKey(),seen={},merged=[];
-        IC.mcx.forEach(function(p){seen[p.t]=1});
-        rows.forEach(function(r){
-          var t=Math.floor(new Date(r.created_at).getTime()/1000);
-          if(new Date((t+19800)*1000).toISOString().slice(0,10)!==day)return;
-          if(seen[t])return;
-          merged.push({t:t,v:+r.mcx_gold_ltp});
-        });
-        if(!merged.length)return;
-        IC.ticksOk=true;
-        IC.mcx=merged.concat(IC.mcx).sort(function(a,b){return a.t-b.t});
-        icSaveMcx(IC.mcx);
-      })
-      .catch(function(){/* archive absent - session-only is the fallback */});
+      .then(function(j){ if(j&&j.candles&&j.candles.length)IC.data[tf]=j; })
+      .catch(function(){})
+      .then(function(){ IC.loading[tf]=false; });
   }
-  function icFetchXau(){
-    return fetch(MARKET_API_BASE+'/intraday?sym=XAU')
-      .then(function(r){return r.ok?r.json():null})
-      .then(function(j){ if(j&&j.points&&j.points.length)IC.xau=j; })
-      .catch(function(){});
-  }
-
   function icSeries(){
-    if(IC.sym==='XAU'){
-      var pts=(IC.xau&&IC.xau.points)?IC.xau.points.map(function(p){return {t:p.t,v:p.v}}):[];
-      // Append the live spot so the right edge is current, not 5m stale.
-      if(LIVE.goldUsdOz>0){
-        var now=Math.floor(Date.now()/1000),l=pts[pts.length-1];
-        if(l&&now-l.t<300)l.v=LIVE.goldUsdOz; else pts.push({t:now,v:LIVE.goldUsdOz});
-      }
-      return {pts:pts,prev:(IC.xau&&IC.xau.prev_close)||LIVE.prevGoldUsd,
-              cur:LIVE.goldUsdOz,sym:'$',dec:2,
-              src:'5-minute bars from gold futures, rescaled to spot'};
+    if(IC.tf==='live'){
+      return {rows:IC.ticks.slice(),prev:LIVE.prevGoldUsd,
+              intraday:true,note:IC_TF.live.note};
     }
-    return {pts:IC.mcx.slice(),prev:LIVE.prevMcxGold,cur:LIVE.mcxGold,
-            sym:'₹',dec:0,
-            src:IC.ticksOk?'observed MCX prints (15-min archive + this session)'
-                          :'observed MCX prints from this session'};
+    var d=IC.data[IC.tf];
+    if(!d)return {rows:[],prev:LIVE.prevGoldUsd,intraday:true,note:''};
+    var rows=d.candles.map(function(c){return {t:c.t,o:c.o,h:c.h,l:c.l,c:c.c}});
+    // Label by the span the series actually covers, not by the interval
+    // name: 60m bars over a month are 488 bars spanning ~20 days, and
+    // time-only labels on those would read as one morning. The same
+    // test gates the previous-close line, which only means something
+    // on a chart that does not run past yesterday.
+    var span=rows.length>1?rows[rows.length-1].t-rows[0].t:0;
+    return {rows:rows,prev:d.prev_close||LIVE.prevGoldUsd,
+            intraday:span<=172800,
+            note:(d.scaled_to_spot?'gold futures rescaled to spot':'gold futures')
+                 +' · '+d.interval+' bars · '+d.range};
   }
-  function icFmt(v,sym,dec){
-    return sym+Number(v).toLocaleString(sym==='₹'?'en-IN':'en-US',
-      {minimumFractionDigits:dec,maximumFractionDigits:dec});
+  function icFmtP(v){
+    return '$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
   }
-  function icTime(t){
-    return new Date(t*1000).toLocaleTimeString('en-IN',
-      {hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'});
+  function icLabel(t,intraday){
+    var d=new Date(t*1000);
+    return intraday
+      ? d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'})
+      : d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'});
   }
-  function renderIntradayFor(suf){
+  function icStamp(t,intraday){
+    var d=new Date(t*1000);
+    return intraday
+      ? d.toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:IC.tf==='live'?'2-digit':undefined,timeZone:'Asia/Kolkata'})+' IST'
+      : d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  }
+
+  function renderIcFor(suf){
     var svg=$('icChart',suf); if(!svg)return;
     var note=$('icNote',suf),empty=$('icEmpty',suf);
     var lastV=$('icLastV',suf),lastD=$('icLastD',suf);
-    var S=icSeries(),pts=S.pts;
+    var S=icSeries(),rows=S.rows,cur=LIVE.goldUsdOz;
     while(svg.firstChild)svg.removeChild(svg.firstChild);
 
-    if(lastV)lastV.textContent=S.cur>0?icFmt(S.cur,S.sym,S.dec):'—';
+    if(lastV)lastV.textContent=cur>0?icFmtP(cur):'—';
     if(lastD){
       lastD.classList.remove('up','dn');
-      if(S.cur>0&&S.prev>0){
-        var d=S.cur-S.prev,pc=(d/S.prev)*100;
-        lastD.classList.add(d<0?'dn':'up');
-        lastD.textContent=(d<0?'▼ −':'▲ +')+icFmt(Math.abs(d),S.sym,S.dec)
-          +' ('+(pc<0?'−':'+')+Math.abs(pc).toFixed(2)+'%)';
+      if(cur>0&&LIVE.prevGoldUsd>0){
+        var dd=cur-LIVE.prevGoldUsd,pc=(dd/LIVE.prevGoldUsd)*100;
+        lastD.classList.add(dd<0?'dn':'up');
+        lastD.textContent=(dd<0?'▼ −':'▲ +')+'$'+Math.abs(dd).toFixed(2)
+          +' ('+(pc<0?'−':'+')+Math.abs(pc).toFixed(2)+'%) today';
       } else lastD.textContent='';
     }
 
-    if(pts.length<2){
+    if(rows.length<2){
       if(empty){
         empty.classList.add('show');
-        empty.textContent = IC.sym==='MCX'
-          ? 'Building today’s MCX line from live prints — MCX publishes no intraday history, so this fills in as the session runs.'
-          : 'Waiting for today’s session data…';
+        empty.textContent = IC.tf==='live'
+          ? 'Building the live tick series — a point every few seconds as spot updates.'
+          : 'Loading ' + (IC_TF[IC.tf]||{}).label + ' data…';
       }
-      if(note)note.textContent=S.src;
+      if(note)note.textContent=S.note||'';
       return;
     }
     if(empty)empty.classList.remove('show');
 
-    var W=600,H=200,padY=14,padX=2;
-    var vals=pts.map(function(p){return p.v});
-    var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals);
-    if(S.prev>0){min=Math.min(min,S.prev);max=Math.max(max,S.prev);}
-    if(min===max){min-=1;max+=1;}
-    var t0=pts[0].t,t1=pts[pts.length-1].t; if(t1===t0)t1=t0+1;
-    function xAt(p){return padX+(W-2*padX)*((p.t-t0)/(t1-t0))}
-    function yAt(v){return H-padY-(H-2*padY)*((v-min)/(max-min))}
+    var W=600,H=220,padT=10,padB=20,padL=2,padR=46;
+    // Candles and bars need the full high-low extent; line and area only
+    // need the closes, and using the wider extent there would flatten them.
+    var showOHLC=(IC.ty==='candle'||IC.ty==='bar');
+    var lo=Infinity,hi=-Infinity;
+    rows.forEach(function(r){
+      var a=showOHLC?r.l:r.c,b=showOHLC?r.h:r.c;
+      if(a<lo)lo=a; if(b>hi)hi=b;
+    });
+    if(S.prev>0&&S.intraday){lo=Math.min(lo,S.prev);hi=Math.max(hi,S.prev);}
+    if(lo===hi){lo-=1;hi+=1;}
+    var padV=(hi-lo)*0.06; lo-=padV; hi+=padV;
+    var n=rows.length;
+    function xAt(i){return padL+(W-padL-padR)*(n===1?0.5:i/(n-1))}
+    function yAt(v){return padT+(H-padT-padB)*(1-(v-lo)/(hi-lo))}
 
     var ns='http://www.w3.org/2000/svg';
-    // Green above the previous close, red below - the same language as the
-    // tiles, so the chart agrees with the delta printed next to it.
-    var up=(S.cur>0&&S.prev>0)?S.cur>=S.prev:true;
-    var col=up?'#4ECB8E':'#E2626B';
-    var gid='icGrad'+(suf||'M')+IC.sym;
-    var defs=document.createElementNS(ns,'defs');
-    defs.innerHTML='<linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'
-      +'<stop offset="0%" stop-color="'+col+'" stop-opacity="0.3"/>'
-      +'<stop offset="100%" stop-color="'+col+'" stop-opacity="0"/></linearGradient>';
-    svg.appendChild(defs);
-
-    var d=pts.map(function(p,i){return (i?'L':'M')+xAt(p).toFixed(2)+','+yAt(p.v).toFixed(2)}).join(' ');
-    var area=document.createElementNS(ns,'path');
-    area.setAttribute('d',d+' L'+xAt(pts[pts.length-1]).toFixed(2)+','+(H-padY)
-      +' L'+xAt(pts[0]).toFixed(2)+','+(H-padY)+' Z');
-    area.setAttribute('fill','url(#'+gid+')');svg.appendChild(area);
-
-    if(S.prev>0&&S.prev>=min&&S.prev<=max){
-      var pl=document.createElementNS(ns,'line');
-      pl.setAttribute('class','ic-prevline');
-      pl.setAttribute('x1',0);pl.setAttribute('x2',W);
-      pl.setAttribute('y1',yAt(S.prev).toFixed(2));pl.setAttribute('y2',yAt(S.prev).toFixed(2));
-      svg.appendChild(pl);
+    function el(tag,attrs){
+      var e=document.createElementNS(ns,tag);
+      for(var k in attrs)e.setAttribute(k,attrs[k]);
+      return e;
     }
-    var line=document.createElementNS(ns,'path');
-    line.setAttribute('d',d);line.setAttribute('fill','none');
-    line.setAttribute('stroke',col);line.setAttribute('stroke-width','2');
-    line.setAttribute('stroke-linejoin','round');line.setAttribute('stroke-linecap','round');
-    svg.appendChild(line);
+    var first=rows[0].c,last=rows[n-1].c;
+    var upAll=last>=first;
+    var GREEN='#4ECB8E',RED='#E2626B';
+    var col=upAll?GREEN:RED;
 
-    var live=document.createElementNS(ns,'circle');
-    live.setAttribute('class','ic-livedot');
-    live.setAttribute('cx',xAt(pts[pts.length-1]).toFixed(2));
-    live.setAttribute('cy',yAt(pts[pts.length-1].v).toFixed(2));
-    live.setAttribute('r','3.5');live.setAttribute('fill',col);
-    svg.appendChild(live);
-
-    var cur=document.createElementNS(ns,'line');
-    cur.setAttribute('class','ic-cursor');cur.setAttribute('y1',0);cur.setAttribute('y2',H);
-    svg.appendChild(cur);
-    var dot=document.createElementNS(ns,'circle');
-    dot.setAttribute('class','ic-dot');dot.setAttribute('r','4');
-    svg.appendChild(dot);
-    svg._ic={pts:pts,xAt:xAt,yAt:yAt,cur:cur,dot:dot,S:S};
-
-    if(note){
-      var span=Math.round((t1-t0)/60);
-      note.textContent=pts.length+' points · '+icTime(t0)+'–'+icTime(t1)
-        +' IST ('+(span<60?span+'m':(span/60).toFixed(1)+'h')+') · '+S.src
-        +' · dashed line = previous close';
+    // horizontal gridlines + right-hand price axis
+    for(var g=0;g<=3;g++){
+      var gv=lo+(hi-lo)*(g/3),gy=yAt(gv);
+      svg.appendChild(el('line',{class:'ic-grid',x1:0,x2:W-padR,y1:gy.toFixed(2),y2:gy.toFixed(2)}));
+      var tx=el('text',{class:'ic-axis',x:W-padR+5,y:(gy+3).toFixed(2)});
+      tx.textContent=gv.toFixed(hi-lo<20?2:0);
+      svg.appendChild(tx);
     }
-  }
-  function renderIntraday(){ SCOPES.forEach(renderIntradayFor); }
+    if(S.prev>0&&S.prev>=lo&&S.prev<=hi){
+      svg.appendChild(el('line',{class:'ic-prevline',x1:0,x2:W-padR,
+        y1:yAt(S.prev).toFixed(2),y2:yAt(S.prev).toFixed(2)}));
+    }
 
-  function wireIntraday(suf){
-    var svg=$('icChart',suf),tip=$('icTip',suf),tabs=$('icTabs',suf);
-    if(tabs){
-      tabs.addEventListener('click',function(e){
-        var b=e.target.closest('.ic-tab'); if(!b)return;
-        IC.sym=b.getAttribute('data-ic');
-        SCOPES.forEach(function(sf){
-          var t=$('icTabs',sf); if(!t)return;
-          t.querySelectorAll('.ic-tab').forEach(function(x){
-            x.classList.toggle('active',x.getAttribute('data-ic')===IC.sym)});
-        });
-        renderIntraday();
+    if(IC.ty==='area'||IC.ty==='line'){
+      var d=rows.map(function(r,i){return (i?'L':'M')+xAt(i).toFixed(2)+','+yAt(r.c).toFixed(2)}).join(' ');
+      if(IC.ty==='area'){
+        var gid='icG'+(suf||'M');
+        var defs=document.createElementNS(ns,'defs');
+        defs.innerHTML='<linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'
+          +'<stop offset="0%" stop-color="'+col+'" stop-opacity="0.32"/>'
+          +'<stop offset="100%" stop-color="'+col+'" stop-opacity="0"/></linearGradient>';
+        svg.appendChild(defs);
+        svg.appendChild(el('path',{d:d+' L'+xAt(n-1).toFixed(2)+','+(H-padB)
+          +' L'+xAt(0).toFixed(2)+','+(H-padB)+' Z',fill:'url(#'+gid+')',stroke:'none'}));
+      }
+      svg.appendChild(el('path',{d:d,fill:'none',stroke:col,'stroke-width':2,
+        'stroke-linejoin':'round','stroke-linecap':'round'}));
+      svg.appendChild(el('circle',{cx:xAt(n-1).toFixed(2),cy:yAt(rows[n-1].c).toFixed(2),
+        r:3.5,fill:col}));
+    } else {
+      // Per-bar colour: green when the bar closed at or above its open.
+      var slot=(W-padL-padR)/n;
+      var bw=Math.max(1,Math.min(9,slot*0.62));
+      rows.forEach(function(r,i){
+        var x=xAt(i),c=r.c>=r.o?GREEN:RED;
+        if(IC.ty==='candle'){
+          svg.appendChild(el('line',{x1:x.toFixed(2),x2:x.toFixed(2),
+            y1:yAt(r.h).toFixed(2),y2:yAt(r.l).toFixed(2),stroke:c,'stroke-width':1}));
+          var yo=yAt(r.o),yc=yAt(r.c);
+          var top=Math.min(yo,yc),hgt=Math.max(1,Math.abs(yc-yo));
+          svg.appendChild(el('rect',{x:(x-bw/2).toFixed(2),y:top.toFixed(2),
+            width:bw.toFixed(2),height:hgt.toFixed(2),fill:c}));
+        } else {
+          svg.appendChild(el('line',{x1:x.toFixed(2),x2:x.toFixed(2),
+            y1:yAt(r.h).toFixed(2),y2:yAt(r.l).toFixed(2),stroke:c,'stroke-width':1.3}));
+          svg.appendChild(el('line',{x1:(x-bw/2).toFixed(2),x2:x.toFixed(2),
+            y1:yAt(r.o).toFixed(2),y2:yAt(r.o).toFixed(2),stroke:c,'stroke-width':1.3}));
+          svg.appendChild(el('line',{x1:x.toFixed(2),x2:(x+bw/2).toFixed(2),
+            y1:yAt(r.c).toFixed(2),y2:yAt(r.c).toFixed(2),stroke:c,'stroke-width':1.3}));
+        }
       });
     }
+
+    var cursor=el('line',{class:'ic-cursor',y1:0,y2:H-padB});
+    svg.appendChild(cursor);
+    var dot=el('circle',{class:'ic-dot',r:4});
+    svg.appendChild(dot);
+    svg._ic={rows:rows,xAt:xAt,yAt:yAt,cursor:cursor,dot:dot,S:S,padR:padR};
+
+    if(note){
+      note.textContent=n+' bars · '+icLabel(rows[0].t,S.intraday)+' – '
+        +icLabel(rows[n-1].t,S.intraday)+' · '+S.note
+        +(S.prev>0&&S.intraday?' · dashed = previous close':'');
+    }
+  }
+  function renderIc(){ SCOPES.forEach(renderIcFor); }
+
+  function icSetTf(tf){
+    IC.tf=tf;
+    SCOPES.forEach(function(sf){
+      var t=$('icTf',sf); if(!t)return;
+      t.querySelectorAll('.ic-tab').forEach(function(x){
+        x.classList.toggle('active',x.getAttribute('data-tf')===tf)});
+    });
+    renderIc();
+    icFetch(tf).then(renderIc);
+  }
+  function icSetTy(ty){
+    IC.ty=ty;
+    SCOPES.forEach(function(sf){
+      var t=$('icTy',sf); if(!t)return;
+      t.querySelectorAll('.ic-tab').forEach(function(x){
+        x.classList.toggle('active',x.getAttribute('data-ty')===ty)});
+    });
+    renderIc();
+  }
+  function wireIc(suf){
+    var tf=$('icTf',suf),ty=$('icTy',suf),svg=$('icChart',suf),tip=$('icTip',suf);
+    if(tf)tf.addEventListener('click',function(e){
+      var b=e.target.closest('.ic-tab'); if(b)icSetTf(b.getAttribute('data-tf'));});
+    if(ty)ty.addEventListener('click',function(e){
+      var b=e.target.closest('.ic-tab'); if(b)icSetTy(b.getAttribute('data-ty'));});
     if(!svg||!tip)return;
     function at(clientX){
-      var st=svg._ic; if(!st||!st.pts.length)return;
+      var st=svg._ic; if(!st||!st.rows.length)return;
       var r=svg.getBoundingClientRect();
       var sx=(clientX-r.left)/r.width*600;
-      var best=st.pts[0],bd=1e9;
-      st.pts.forEach(function(p){var dd=Math.abs(st.xAt(p)-sx);if(dd<bd){bd=dd;best=p}});
-      var x=st.xAt(best),y=st.yAt(best.v);
-      st.cur.setAttribute('x1',x);st.cur.setAttribute('x2',x);st.cur.style.opacity='1';
+      var bi=0,bd=1e9;
+      st.rows.forEach(function(p,i){var dd=Math.abs(st.xAt(i)-sx);if(dd<bd){bd=dd;bi=i}});
+      var p=st.rows[bi],x=st.xAt(bi),y=st.yAt(p.c);
+      st.cursor.setAttribute('x1',x);st.cursor.setAttribute('x2',x);st.cursor.style.opacity='1';
       st.dot.setAttribute('cx',x);st.dot.setAttribute('cy',y);st.dot.style.opacity='1';
-      tip.innerHTML='<div>'+icFmt(best.v,st.S.sym,st.S.dec)+'</div><div class="t">'+icTime(best.t)+' IST</div>';
-      tip.style.left=(x/600*r.width)+'px';
-      tip.style.top=(y/200*r.height)+'px';
+      var ohlc=(IC.ty==='candle'||IC.ty==='bar')
+        ? '<div class="o">O '+p.o.toFixed(2)+'  H '+p.h.toFixed(2)
+          +'<br>L '+p.l.toFixed(2)+'  C '+p.c.toFixed(2)+'</div>' : '';
+      tip.innerHTML='<div>'+icFmtP(p.c)+'</div>'+ohlc
+        +'<div class="t">'+icStamp(p.t,st.S.intraday)+'</div>';
+      tip.style.left=Math.max(8,Math.min(r.width-8,x/600*r.width))+'px';
+      tip.style.top=(y/220*r.height)+'px';
       tip.classList.add('show');
     }
     function off(){
-      var st=svg._ic; if(st){st.cur.style.opacity='0';st.dot.style.opacity='0'}
+      var st=svg._ic; if(st){st.cursor.style.opacity='0';st.dot.style.opacity='0'}
       tip.classList.remove('show');
     }
     svg.addEventListener('mousemove',function(e){at(e.clientX)});
@@ -2961,15 +3009,18 @@ function handleCredentialResponse(resp){
   // seconds, and Cloudflare's edge cache on our side keeps request cost
   // low. The live-status chip repaints every 3s so the "Xs ago" number
   // counts up smoothly even between actual fetches.
-  // Live intraday chart: seed MCX from this IST day's cached prints, wire
-  // the tabs/scrub, then pull the gold-spot session and the MCX archive.
-  IC.mcx = icLoadMcx();
-  SCOPES.forEach(wireIntraday);
-  renderIntraday();
-  icFetchXau().then(renderIntraday);
-  icFetchTicks().then(renderIntraday);
-  // The 5m bars only move once every five minutes; a minute is plenty.
-  setInterval(function(){icFetchXau().then(renderIntraday)},60000);
+  // Live Gold Spot chart: wire the timeframe + chart-type selectors, then
+  // warm the two intraday timeframes a visitor is most likely to open
+  // first. LIVE needs no fetch - it fills from the poll loop.
+  SCOPES.forEach(wireIc);
+  renderIc();
+  icFetch('5m'); icFetch('1m');
+  // Refresh whichever non-LIVE timeframe is on screen. Intraday bars close
+  // every 1-60 minutes and daily+ once a session, so a minute is ample and
+  // the worker's own cache absorbs the rest.
+  setInterval(function(){
+    if(IC.tf!=='live')icFetch(IC.tf).then(renderIc);
+  },60000);
   fetchLiveRates();
   // 3s, matching what production's market drawer already used. At 10s the
   // board looked frozen - upstream spot moves every couple of seconds, so a
