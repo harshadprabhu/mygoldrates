@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-19",
-  "last_updated": "2026-09-20T00:50:44.694509+05:30",
+  "last_updated": "2026-09-20T03:15:16.169406+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -44,12 +44,6 @@
       "rate_24k_per_gram_inr": 15425.0,
       "rate_22k_per_gram_inr": 14139.58,
       "rate_18k_per_gram_inr": 11568.75
-    },
-    {
-      "jeweller": "Candere",
-      "rate_24k_per_gram_inr": 15453.0,
-      "rate_22k_per_gram_inr": 14165.25,
-      "rate_18k_per_gram_inr": 11589.75
     },
     {
       "jeweller": "PN Gadgil & Sons",
@@ -110,6 +104,12 @@
       "rate_24k_per_gram_inr": 15592.0,
       "rate_22k_per_gram_inr": 14292.67,
       "rate_18k_per_gram_inr": 11694.0
+    },
+    {
+      "jeweller": "Candere",
+      "rate_24k_per_gram_inr": 15595.0,
+      "rate_22k_per_gram_inr": 14295.42,
+      "rate_18k_per_gram_inr": 11696.25
     },
     {
       "jeweller": "GRT Jewellers",
