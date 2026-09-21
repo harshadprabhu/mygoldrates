@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-21",
-  "last_updated": "2026-09-21T10:56:46.496089+05:30",
+  "last_updated": "2026-09-21T11:05:26.299276+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 153644.0,
-      "change_pct": -0.48
+      "price_per_10g_inr": 153575.0,
+      "change_pct": -0.52
     },
     {
       "contract": "GOLDM",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 153730.0,
-      "change_pct": -0.48
+      "price_per_10g_inr": 153683.0,
+      "change_pct": -0.51
     }
   ],
   "jewellers": [
@@ -44,6 +44,12 @@
       "rate_24k_per_gram_inr": 15400.0,
       "rate_22k_per_gram_inr": 14116.67,
       "rate_18k_per_gram_inr": 11550.0
+    },
+    {
+      "jeweller": "Indriya",
+      "rate_24k_per_gram_inr": 15563.02,
+      "rate_22k_per_gram_inr": 14266.1,
+      "rate_18k_per_gram_inr": 11672.26
     },
     {
       "jeweller": "Malabar Gold",
@@ -80,12 +86,6 @@
       "rate_24k_per_gram_inr": 15579.0,
       "rate_22k_per_gram_inr": 14280.75,
       "rate_18k_per_gram_inr": 11684.25
-    },
-    {
-      "jeweller": "Indriya",
-      "rate_24k_per_gram_inr": 15579.38,
-      "rate_22k_per_gram_inr": 14281.1,
-      "rate_18k_per_gram_inr": 11684.53
     },
     {
       "jeweller": "ORRA",
