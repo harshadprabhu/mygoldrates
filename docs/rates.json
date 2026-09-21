@@ -2,8 +2,8 @@
   "source": "MyGoldRates.com",
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
-  "date": "2026-09-20",
-  "last_updated": "2026-09-21T03:57:23.138241+05:30",
+  "date": "2026-09-21",
+  "last_updated": "2026-09-21T06:05:19.600073+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -112,12 +112,6 @@
       "rate_18k_per_gram_inr": 11696.25
     },
     {
-      "jeweller": "Vummidi Bangaru",
-      "rate_24k_per_gram_inr": 15595.0,
-      "rate_22k_per_gram_inr": 14295.42,
-      "rate_18k_per_gram_inr": 11696.25
-    },
-    {
       "jeweller": "BlueStone",
       "rate_24k_per_gram_inr": 15596.26,
       "rate_22k_per_gram_inr": 14296.57,
@@ -154,7 +148,7 @@
       "rate_18k_per_gram_inr": 11887.5
     }
   ],
-  "jeweller_count": 20,
+  "jeweller_count": 19,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
