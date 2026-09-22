@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-22",
-  "last_updated": "2026-09-22T17:07:06.783195+05:30",
+  "last_updated": "2026-09-22T20:16:55.784531+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 15388.66,
-    "22k": 14106.27,
-    "18k": 11541.49
+    "24k": 15381.82,
+    "22k": 14100.0,
+    "18k": 11536.36
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 152194.0,
-      "change_pct": -0.59
+      "price_per_10g_inr": 152070.0,
+      "change_pct": -0.67
     },
     {
       "contract": "GOLDM",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 152207.0,
-      "change_pct": -0.63
+      "price_per_10g_inr": 152130.0,
+      "change_pct": -0.68
     }
   ],
   "jewellers": [
@@ -82,6 +82,12 @@
       "rate_18k_per_gram_inr": 11503.5
     },
     {
+      "jeweller": "Candere",
+      "rate_24k_per_gram_inr": 15344.0,
+      "rate_22k_per_gram_inr": 14065.33,
+      "rate_18k_per_gram_inr": 11508.0
+    },
+    {
       "jeweller": "GRT Jewellers",
       "rate_24k_per_gram_inr": 15344.0,
       "rate_22k_per_gram_inr": 14065.33,
@@ -124,16 +130,16 @@
       "rate_18k_per_gram_inr": 11609.25
     },
     {
-      "jeweller": "Candere",
-      "rate_24k_per_gram_inr": 15486.0,
-      "rate_22k_per_gram_inr": 14195.5,
-      "rate_18k_per_gram_inr": 11614.5
-    },
-    {
       "jeweller": "Kisna",
       "rate_24k_per_gram_inr": 15528.88,
       "rate_22k_per_gram_inr": 14234.81,
       "rate_18k_per_gram_inr": 11646.66
+    },
+    {
+      "jeweller": "BlueStone",
+      "rate_24k_per_gram_inr": 15596.26,
+      "rate_22k_per_gram_inr": 14296.57,
+      "rate_18k_per_gram_inr": 11697.19
     },
     {
       "jeweller": "C Krishniah Chetty",
@@ -154,7 +160,7 @@
       "rate_18k_per_gram_inr": 11805.0
     }
   ],
-  "jeweller_count": 20,
+  "jeweller_count": 21,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
