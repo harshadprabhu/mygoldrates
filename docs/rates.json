@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-23",
-  "last_updated": "2026-09-23T20:29:28.246547+05:30",
+  "last_updated": "2026-09-24T00:32:31.696955+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,13 +22,13 @@
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 151400.0,
-      "change_pct": -0.86
+      "price_per_10g_inr": 151360.0,
+      "change_pct": -0.89
     },
     {
       "contract": "GOLDM",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 151400.0,
+      "price_per_10g_inr": 151394.0,
       "change_pct": -0.85
     }
   ],
