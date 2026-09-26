@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-09-26",
-  "last_updated": "2026-09-26T14:05:27.587052+05:30",
+  "last_updated": "2026-09-26T15:43:51.258693+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 15275.5,
-    "22k": 14002.54,
-    "18k": 11456.62
+    "24k": 15278.0,
+    "22k": 14004.83,
+    "18k": 11458.5
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -50,12 +50,6 @@
       "rate_24k_per_gram_inr": 15150.0,
       "rate_22k_per_gram_inr": 13887.5,
       "rate_18k_per_gram_inr": 11362.5
-    },
-    {
-      "jeweller": "Indriya",
-      "rate_24k_per_gram_inr": 15263.1,
-      "rate_22k_per_gram_inr": 13991.17,
-      "rate_18k_per_gram_inr": 11447.33
     },
     {
       "jeweller": "ORRA",
@@ -112,6 +106,12 @@
       "rate_18k_per_gram_inr": 11458.5
     },
     {
+      "jeweller": "Indriya",
+      "rate_24k_per_gram_inr": 15279.47,
+      "rate_22k_per_gram_inr": 14006.18,
+      "rate_18k_per_gram_inr": 11459.6
+    },
+    {
       "jeweller": "Senco Gold",
       "rate_24k_per_gram_inr": 15290.0,
       "rate_22k_per_gram_inr": 14015.83,
@@ -131,9 +131,9 @@
     },
     {
       "jeweller": "Kisna",
-      "rate_24k_per_gram_inr": 15321.88,
-      "rate_22k_per_gram_inr": 14045.06,
-      "rate_18k_per_gram_inr": 11491.41
+      "rate_24k_per_gram_inr": 15338.3,
+      "rate_22k_per_gram_inr": 14060.11,
+      "rate_18k_per_gram_inr": 11503.72
     },
     {
       "jeweller": "C Krishniah Chetty",
@@ -149,9 +149,9 @@
     },
     {
       "jeweller": "BlueStone",
-      "rate_24k_per_gram_inr": 15446.1,
-      "rate_22k_per_gram_inr": 14158.92,
-      "rate_18k_per_gram_inr": 11584.58
+      "rate_24k_per_gram_inr": 15443.52,
+      "rate_22k_per_gram_inr": 14156.56,
+      "rate_18k_per_gram_inr": 11582.64
     },
     {
       "jeweller": "Ranka Jewellers",
