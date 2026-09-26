@@ -672,7 +672,8 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
     <div class="al-d">One free email each morning &mdash; who's cheapest, bullion premium, market median. Unsubscribe anytime.</div>
     <div class="al-form">
       <input class="al-inp" id="alName" type="text" placeholder="Your name" autocomplete="name">
-      <input class="al-inp" id="alEmail" type="email" placeholder="Your email" inputmode="email" autocomplete="email">
+      <input class="al-inp" id="alEmail" type="email" placeholder="Your email *" inputmode="email" autocomplete="email">
+      <input class="al-inp" id="alPhone" type="tel" placeholder="Mobile number *" inputmode="tel" autocomplete="tel" maxlength="18" value="+91 ">
       <button class="al-locate" id="alLocate" type="button"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Use my current location</span></button>
       <div class="al-row2">
         <input class="al-inp" id="alCity" type="text" placeholder="City" autocomplete="address-level2">
@@ -929,7 +930,8 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
     <div class="sp-d">One free email each morning &mdash; who&rsquo;s cheapest today, the bullion premium and the market median across 21 jewellers.</div>
     <div class="al-form">
       <input class="al-inp" id="alNameP" type="text" placeholder="Your name" autocomplete="name">
-      <input class="al-inp" id="alEmailP" type="email" placeholder="Your email" inputmode="email" autocomplete="email">
+      <input class="al-inp" id="alEmailP" type="email" placeholder="Your email *" inputmode="email" autocomplete="email">
+      <input class="al-inp" id="alPhoneP" type="tel" placeholder="Mobile number *" inputmode="tel" autocomplete="tel" maxlength="18" value="+91 ">
       <button class="al-locate" id="alLocateP" type="button"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Use my current location</span></button>
       <div class="al-row2">
         <input class="al-inp" id="alCityP" type="text" placeholder="City" autocomplete="address-level2">
@@ -1266,7 +1268,8 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
       <p>One free email each morning &mdash; who's cheapest, bullion premium, market median. Unsubscribe anytime.</p>
       <div class="al-form site-al-form">
         <input class="al-inp" id="alNameS" type="text" placeholder="Your name" autocomplete="name">
-        <input class="al-inp" id="alEmailS" type="email" placeholder="Your email" autocomplete="email">
+        <input class="al-inp" id="alEmailS" type="email" placeholder="Your email *" autocomplete="email">
+      <input class="al-inp" id="alPhoneS" type="tel" placeholder="Mobile number *" inputmode="tel" autocomplete="tel" maxlength="18" value="+91 ">
         <button class="al-locate" id="alLocateS" type="button"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Use my current location</span></button>
         <div class="al-row2">
           <input class="al-inp" id="alCityS" type="text" placeholder="City" autocomplete="address-level2">
@@ -1315,7 +1318,9 @@ function handleCredentialResponse(resp){
         google_email_verified:!!payload.email_verified,
         signup_method:'google'
       }).then(function(){
-        if(window.GR_CLOSE_SUBPOP)window.GR_CLOSE_SUBPOP(true);
+        // Recorded - but Google gives us no phone, and mobile is mandatory.
+        // Ask for just that, with the name and email already filled in.
+        if(window.GR_ASK_PHONE)window.GR_ASK_PHONE(payload.name||'',payload.email);
       }).catch(function(e){console.warn('google subscriber save failed',e)});
     }
   }catch(e){console.warn('gsi decode',e)}
@@ -3014,8 +3019,16 @@ function handleCredentialResponse(resp){
       body:JSON.stringify({payload:payload})
     }).then(function(r){
       if(!r.ok)return r.text().then(function(t){throw new Error(t||('HTTP '+r.status))});
-      // Remembering this suppresses the subscribe popup for good.
-      try{localStorage.setItem('gr_sub','1')}catch(_){}
+      // Only a signup that carried a mobile number counts as complete, and
+      // only a complete one suppresses the popup for good. A Google One Tap
+      // sign-in has no phone to give, so it records the subscriber and
+      // deliberately leaves the popup armed to collect it - otherwise
+      // "mobile is mandatory" would be trivially bypassed by signing in
+      // with Google.
+      try{
+        if(payload.phone)localStorage.setItem('gr_sub','1');
+        else localStorage.setItem('gr_sub_nophone','1');
+      }catch(_){}
       return true;
     });
   }
@@ -3024,15 +3037,40 @@ function handleCredentialResponse(resp){
   function wireSubscribe(suf){
     var btn=$('alBtn',suf);if(!btn)return;
     btn.addEventListener('click',function(){
-      var emEl=$('alEmail',suf),st=$('alStatus',suf);
+      var emEl=$('alEmail',suf),phEl=$('alPhone',suf),st=$('alStatus',suf);
       if(!emEl)return;
+      function reject(msg,el){
+        if(st){st.style.color='var(--rose)';st.textContent=msg}
+        if(el){try{el.focus()}catch(_){}}
+      }
       var e=emEl.value.trim();
       if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){
-        if(st){st.style.color='var(--rose)';st.textContent='Enter a valid email'}
-        return;
+        reject('Enter a valid email',emEl);return;
+      }
+      // Mobile number is mandatory. Validated against Indian mobile format -
+      // 10 digits starting 6-9 - with an optional 91/+91 country prefix, so
+      // "+91 98765 43210", "09876543210" and "9876543210" are all accepted
+      // and all normalise to one stored shape. A number that is only the
+      // pre-filled "+91 " counts as empty, not as invalid, so the message
+      // tells people what to do rather than implying they mistyped.
+      var digits=(phEl?phEl.value:'').replace(/\D/g,'');
+      // The field ships pre-filled with "+91 ", so an untouched field leaves
+      // digits==="91". Treat a bare country prefix as EMPTY, not as a
+      // malformed number - otherwise the most common case (person never
+      // typed anything) is told "enter a valid 10-digit mobile number",
+      // which reads as "you mistyped" when they simply skipped the field.
+      if(digits==='91'||digits==='0'||digits==='091')digits='';
+      else{
+        if(digits.length>10&&digits.slice(0,2)==='91')digits=digits.slice(2);
+        if(digits.length===11&&digits.charAt(0)==='0')digits=digits.slice(1);
+      }
+      if(!digits){ reject('Mobile number is required',phEl); return; }
+      if(!/^[6-9]\d{9}$/.test(digits)){
+        reject('Enter a valid 10-digit mobile number',phEl);return;
       }
       var payload={
         email:e,
+        phone:'+91'+digits,
         name:(($('alName',suf)||{}).value||'').trim(),
         city:(($('alCity',suf)||{}).value||'').trim(),
         zip:(($('alPin',suf)||{}).value||'').trim(),
@@ -3110,6 +3148,26 @@ function handleCredentialResponse(resp){
   }
   window.GR_OPEN_SUBPOP=openSubPop;
 
+  // Signed in with Google, so we hold the name and email but no mobile.
+  // Re-title the popup to ask for the one missing mandatory field, and
+  // bypass the "shown once ever" guard: this is a direct consequence of an
+  // action the person just took, not an unprompted interruption.
+  function askForPhone(name,email){
+    if(!subPop)return;
+    if(lsGet(SP_SUB)==='1')return;          // already gave us a number
+    var t=document.getElementById('spTitle'),d=subPop.querySelector('.sp-d');
+    if(t)t.textContent='One last thing \u2014 your mobile number';
+    if(d)d.textContent='We have '+(email||'your email')+'. Add your mobile so we can reach you if a rate moves sharply.';
+    var nP=document.getElementById('alNameP'),eP=document.getElementById('alEmailP');
+    if(nP&&name)nP.value=name;
+    if(eP&&email)eP.value=email;
+    subPop.classList.add('open');
+    document.body.style.overflow='hidden';
+    var ph=document.getElementById('alPhoneP');
+    if(ph)setTimeout(function(){try{ph.focus()}catch(_){}},150);
+  }
+  window.GR_ASK_PHONE=askForPhone;
+
   if(subPop){
     var spX=document.getElementById('spClose'),spL=document.getElementById('spLater');
     if(spX)spX.addEventListener('click',function(){closeSubPop(false)});
@@ -3122,7 +3180,7 @@ function handleCredentialResponse(resp){
 
   function subPopEligible(){
     if(!subPop)return false;
-    if(lsGet(SP_SUB)==='1')return false;
+    if(lsGet(SP_SUB)==='1')return false;   // complete, mobile and all
     if(lsGet(SP_SEEN))return false;
     if(ssGet(SP_DISMISS))return false;
     // Don't stack behind Google's own prompt.
