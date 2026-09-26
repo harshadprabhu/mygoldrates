@@ -438,6 +438,21 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 .cl-ar{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;flex-shrink:0}
 
 /* ─── Alert card ─── */
+/* ─── Daily-alerts subscribe popup ─── */
+#subPop{position:fixed;inset:0;z-index:4000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+#subPop.open{display:flex;animation:spFade .22s ease}
+@keyframes spFade{from{opacity:0}to{opacity:1}}
+.sp-box{position:relative;width:100%;max-width:392px;max-height:calc(100vh - 32px);overflow-y:auto;background:var(--bg2,#1b1712);border:1px solid var(--glass-border);border-radius:18px;padding:22px 20px 18px;box-shadow:0 24px 64px rgba(0,0,0,.55);animation:spRise .26s cubic-bezier(.2,.8,.3,1)}
+@keyframes spRise{from{transform:translateY(14px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+.sp-x{position:absolute;top:10px;right:10px;width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.06);color:var(--text3);font-size:19px;line-height:1;cursor:pointer;font-family:inherit}
+.sp-x:hover{background:rgba(255,255,255,.12);color:var(--text)}
+.sp-em{font-size:30px;line-height:1;margin-bottom:8px}
+.sp-t{font-size:17px;font-weight:800;color:var(--text);letter-spacing:-.2px}
+.sp-d{font-size:12px;color:var(--text3);line-height:1.55;margin:6px 0 14px}
+.sp-note{font-size:10px;color:var(--text3);text-align:center;margin-top:10px;line-height:1.5}
+.sp-later{display:block;width:100%;margin-top:8px;background:none;border:none;color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;padding:6px;font-family:inherit}
+.sp-later:hover{color:var(--text)}
+@media(max-width:420px){.sp-box{padding:20px 16px 16px}.sp-t{font-size:16px}}
 .alcard{margin:0 12px;background:linear-gradient(135deg,rgba(232,138,174,0.1),rgba(212,166,60,0.08));backdrop-filter:blur(20px);border-radius:16px;border:1px solid rgba(232,138,174,0.15);padding:20px 16px;text-align:center;position:relative;overflow:hidden}
 .alcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--rose),var(--gold),transparent)}
 .al-em{font-size:24px;margin-bottom:4px}
@@ -582,7 +597,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   .site-calc-body{grid-template-columns:1fr}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://mygoldrates.com/#webpage", "url": "https://mygoldrates.com/", "name": "Gold Rate Today in India - Live 24K, 22K, 18K Rates from 14+ Jewellers | MyGoldRates", "description": "Live gold rate today across 14+ Indian jewellers, with MCX gold/silver futures, IBJA reference and real-time market data updated every 3 seconds. Compare 24K, 22K and 18K per-gram prices pre-GST.", "inLanguage": "en-IN", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/", "name": "MyGoldRates.com"}, "dateModified": "2026-09-26T06:06:11.130284+05:30", "primaryImageOfPage": "https://mygoldrates.com/og.png", "significantLink": ["https://mygoldrates.com/compare", "https://mygoldrates.com/news", "https://mygoldrates.com/calculators"]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://mygoldrates.com/#webpage", "url": "https://mygoldrates.com/", "name": "Gold Rate Today in India - Live 24K, 22K, 18K Rates from 14+ Jewellers | MyGoldRates", "description": "Live gold rate today across 14+ Indian jewellers, with MCX gold/silver futures, IBJA reference and real-time market data updated every 3 seconds. Compare 24K, 22K and 18K per-gram prices pre-GST.", "inLanguage": "en-IN", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/", "name": "MyGoldRates.com"}, "dateModified": "2026-09-26T10:39:35.971359+05:30", "primaryImageOfPage": "https://mygoldrates.com/og.png", "significantLink": ["https://mygoldrates.com/compare", "https://mygoldrates.com/news", "https://mygoldrates.com/calculators"]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}]}]}</script>
 <script>window.GR_SB_URL="https://opwrfflzzowhobesysmr.supabase.co";window.GR_SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE";</script>
 <script>(function(){
   var SB=window.GR_SB_URL||"",KEY=window.GR_SB_KEY||"";
@@ -662,8 +677,8 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 <!-- When the JEWELLER board rates were last scraped. Distinct from the live
      chip above, which tracks the spot/MCX feed refreshing every 3s. Values
      are substituted at build time by generate_site.py. -->
-<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1790382971">
-  Jeweller rates updated <b>26 September 2026, 6:06 AM IST</b><span id="ratesStampAgo"></span>
+<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1790399375">
+  Jeweller rates updated <b>26 September 2026, 10:39 AM IST</b><span id="ratesStampAgo"></span>
 </div>
 
 <!-- Google One Tap (uses Google Identity Services) -->
@@ -962,6 +977,32 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 
 <!-- Daily/total hit counter, always visible above the bottom nav -->
 <div class="hits-bar"><span>&#128065;</span><span id="hitsTxt">Counting views…</span></div>
+
+<!-- ═══ Daily-alerts subscribe popup ═══
+     Field ids carry the 'P' suffix so wireSubscribe('P') and wireLocate('P')
+     - the suffix-parameterised functions the inline form already uses - drive
+     this form too. No duplicated submit, validation or geolocation code. -->
+<div id="subPop" role="dialog" aria-modal="true" aria-labelledby="spTitle">
+  <div class="sp-box">
+    <button class="sp-x" id="spClose" type="button" aria-label="Close">&times;</button>
+    <div class="sp-em">&#128140;</div>
+    <div class="sp-t" id="spTitle">Never miss the cheapest rate</div>
+    <div class="sp-d">One free email each morning &mdash; who&rsquo;s cheapest today, the bullion premium and the market median across 21 jewellers.</div>
+    <div class="al-form">
+      <input class="al-inp" id="alNameP" type="text" placeholder="Your name" autocomplete="name">
+      <input class="al-inp" id="alEmailP" type="email" placeholder="Your email" inputmode="email" autocomplete="email">
+      <button class="al-locate" id="alLocateP" type="button"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Use my current location</span></button>
+      <div class="al-row2">
+        <input class="al-inp" id="alCityP" type="text" placeholder="City" autocomplete="address-level2">
+        <input class="al-inp al-pin" id="alPinP" type="text" placeholder="PIN code" inputmode="numeric" maxlength="6" autocomplete="postal-code">
+      </div>
+      <button class="al-btn al-btn-full" id="alBtnP">Subscribe</button>
+    </div>
+    <div id="alStatusP" style="font-size:11px;color:var(--mint);margin-top:8px;min-height:14px"></div>
+    <p class="sp-note">Free. No spam. Unsubscribe from any email in one click.</p>
+    <button class="sp-later" id="spLater" type="button">Maybe later</button>
+  </div>
+</div>
 
 <!-- Bottom nav -->
 <nav class="bnav">
@@ -1315,7 +1356,29 @@ function handleCredentialResponse(resp){
     var payload=JSON.parse(atob(resp.credential.split('.')[1]));
     var msg='<div style="background:var(--mint-soft);border:1px solid rgba(92,196,160,0.2);border-radius:12px;padding:12px;font-size:12px;color:var(--text);text-align:center">Signed in as <b>'+(payload.name||payload.email)+'</b></div>';
     ['gsiSlot','gsiSlotS'].forEach(function(id){var slot=document.getElementById(id);if(slot)slot.innerHTML=msg});
-    // TODO: POST resp.credential to /api/auth for server-side verification
+    // A One Tap sign-in used to end here, with only a "// TODO: POST
+    // resp.credential to /api/auth". The person saw "Signed in as ..." and
+    // nothing was stored, so a Google sign-up on the homepage subscribed
+    // them to precisely nothing. /compare has always merged these into the
+    // same subscriber row via upsert_subscriber; do the same here.
+    //
+    // The ID token is NOT verified server-side, so treat these fields as
+    // self-reported: they go in as profile data, never as an authorisation
+    // decision. google_email_verified carries Google's own claim so a
+    // later server-side check can tell them apart.
+    if(payload.email&&window.GR_SAVE_SUBSCRIBER){
+      window.GR_SAVE_SUBSCRIBER({
+        email:payload.email,
+        name:payload.name||'',
+        picture_url:payload.picture||'',
+        locale:payload.locale||'',
+        google_id:payload.sub||'',
+        google_email_verified:!!payload.email_verified,
+        signup_method:'google'
+      }).then(function(){
+        if(window.GR_CLOSE_SUBPOP)window.GR_CLOSE_SUBPOP(true);
+      }).catch(function(e){console.warn('google subscriber save failed',e)});
+    }
   }catch(e){console.warn('gsi decode',e)}
 }
 
@@ -2300,7 +2363,7 @@ function handleCredentialResponse(resp){
   // business feed was the wrong shape anyway. Headlines now come from the
   // worker's /news (gold-specific Google News query across Indian
   // publishers), so the page no longer fetches or filters RSS itself.
-  var NEWS_BUILD = [{"title":"Silver Rate Today in Karnataka 26th September 2026 : 1 KG, Todays Silver Price in Karnataka","url":"https://news.google.com/rss/articles/CBMieEFVX3lxTE9rZmJHVWZQai1TOVJWcTN0cVU3OC1wNy1Jazd2Y240R3NpUlA1RGdacHc2QXBzNW45STdXNXBrZEFmdC1PbHJrQjRWMHc4UTFtNkU2VU0xdEdZTC1ndnlDanBjcF9XOHEwU3YzcFdWVFNJWGxEeXFmLQ?oc=5","source":"Business Today","published":"2026-09-25T22:26:56"},{"title":"Silver Price Today: Rates Hold at \u20b92,450 per 10 Grams","url":"https://news.google.com/rss/articles/CBMizgFBVV95cUxNS3h6WWxoT0JFUFg5ZmxMa043Q3N0TGxiQ0VYUHZSbFQ2UVJNdl9zSWJHOGJGT3FfSW94VWdfVXhKQUFIbUN1LUNEZk5iUmxSaTFOaGJWOVZVVXpHVldKVUloendBZ3k1UmpaZGEySE5UN3A0WXJ6N2FtREJLR3RjeDBGYWpmdmo4eEJQTGRJRjVlSDFFakJidmdnc2NLMF9ITTdBZmVjRVRFSjcycjV4eGdQSjJEWExFVm0tTU9maHp6YkswZEc2dVJqOEU0UQ?oc=5","source":"hdfcsky.com","published":"2026-09-25T07:00:26"},{"title":"Gold Rate Today in Maharashtra 26th September 2026 : 22 & 24 Carat, Todays Gold Price in Maharashtra","url":"https://news.google.com/rss/articles/CBMieEFVX3lxTE54NWVub3hEVTEwSGxOSnhkcnZUMzVXWkZ3MFNyN1JiekttYkg3RGUzR1NIdTJfTTZHR0F1MWlIQ3ZHZjV3TlRzMVdFcV9CN2V3VGY5U2k1T01vY3RseVRqN2lna283V09qZDFoTVkyOUEteEVPUjl5Vw?oc=5","source":"Business Today","published":"2026-09-25T22:16:20"},{"title":"Gold Rate Today in Greater Mumbai 26th September 2026 : 22 & 24 Carat, Todays Gold Price in Greater Mumbai","url":"https://news.google.com/rss/articles/CBMifEFVX3lxTFB1b2xKS29ZcnRCVWx2WS1PR2piMjZ6cXlXM3JKVUZsQnJfVnpPb00tdGl4bjh2Y3YyeGJJT3E0MHU1U2l2VDdLdEVkUWdSZElMRjk4VFlJcWptWk9zME1NLUZfdlhxZkxrQzNoT0F0bFIwT3VTNF9KeWlUTVc?oc=5","source":"Business Today","published":"2026-09-25T23:14:56"},{"title":"Silver Rate Today in Noida \u2013 Silver Price per Gram & Kg | 25 September 2026","url":"https://news.google.com/rss/articles/CBMijgFBVV95cUxNeVRiX0x1azRfcWVwY1hTc0pQcUZEZUlYNUhDQW12aXYyZGlwTW5qdXJyc1doSGZwZFFTQTYzVGJOc280eFhmRVptR21IMXJ0YXczcWN4QnREZi1wbmJ4b243VmRWYkJLRy1NYm1LOWV6VGwxaXhTd3g3dFdpcFQwRm1jTmNOdElvR2JoczNR?oc=5","source":"The Times of India","published":"2026-09-25T18:26:01"},{"title":"Gold Rate Today, September 25: Check latest Gold prices in Delhi, Mumbai, Kolkata, Chennai, Bengaluru, Hyderabad, Pune & Other Cities","url":"https://news.google.com/rss/articles/CBMilwJBVV95cUxPRVpaQXVoeFRDMmVUM2V1UERGNmhMTHplZUpjTzdYc3RwTmFnTy1hTGdXdWthYU9zRnQtOV9BNzdTMW53cjllSXN6dWpYRjlKdGhsR2FjeDEzOTVVWEJKZGphc0NyTS14d3BtYmdHM2w4dHNKdEtQMTBsNFpEUzVqcVhYSXVCM1hNdjRKU3lEUDhvY3FsUUhaZC1PVXdDbTFYNUtTUVhNdXY5UlN3dTdEUTBYOHgxZUQ0WHRFUTJlTGhYS2h4d3ZpRG42NHcxVFI0ZjZTd2wwcFRkNDBNa0hLMWFWUHBWR3Z6RzZzem5RbC1nZDd2S3hKanJKMW8xUWY3N3YwMWt0WnNwa05mUDlHd2p2TXZIVU3SAZ4CQVVfeXFMTmdSeHlVVTJRSHpjMXVoMUdiUE9PX2U2UngtUVdZaElOREtwVXhqS01UNDdESlUwUFVCRGh6LWRmdkhsRG1HbmVGVFRaTk1ETHdmOGJBTGRuOFduUHpnOUM1Wi1jTU12OW1EWGp2VXVtQmZ0eS1GZkNST0hhRjVYNzNLTlA5NFZ4LTd5c3dOak9ldldnbVdRRWg1cW9HZk0ydk1Qel95VzVBSHFNN1pHT2YwRG1WUGdfZW92VHc0dkdMaEhJRmdDaS1GVDB4YUNmeFM2RTNZRXBlbDlORWZ3bTVkY1dNWV85WlBUUU1LNjFnZ2VSODRzb3pEZERiV3U1dlA1SkFLdzJ5Z1ZEdXctQk01MzIyYURGWk1aTmpzQQ?oc=5","source":"BusinessLine","published":"2026-09-25T08:01:02"},{"title":"Silver Rate Today, September 25, 2026: IBJA \u20b9245/g as Iran Talks Ease Geopolitical Pressure","url":"https://news.google.com/rss/articles/CBMieEFVX3lxTE1INWpocFk5STBBN1M5RkFfRkFEUEZQSTQ4MThLcGxHTFpmdmhzYlByQkdSbnpGOFVkaVF1a2ZqMXNZdzVXOUxaNURMS3ZmS1k2Wkl1OWRfV2VxRVN0Ri03T0JLblhTanhXOWJBbDc0RnFGLTBFOWZZZg?oc=5","source":"easternherald.com","published":"2026-09-25T19:43:15"},{"title":"Gold price prediction: Is gold ripe for buy on dips strategy? Check September 25, 2026 outlook","url":"https://news.google.com/rss/articles/CBMiowJBVV95cUxNMk54RGFnWXJSZEpPQ0RfX0c4WkRJQlRjblg2cEpWcWY0X0NhSmxJNDNXbmZJd3NDQ0M1dTlybndDUGstVjduZEl5S09BbVFiRHJ1RUktcVlKUWxDbGlRemMzUTVqNFFGQnhaUng5R0ZtRENzV0ViZ2FTMHRkTWpfY19VR2ZBb2EyWkt4VXN4X295WjF0b2ZheDhOZk9BeUgwMWNPOXFNOE1vU3otbTlzb05HSjN1ci03TF95clpKeFdyNHZITkVJeUY4azk3Rm9UOWluNDY0LWJHcEY0anl1Vks0NW9LcHJ1NGhxc2xQWV9maDdjQ2lCR1BrR2trVHVldlByR25fdUQtTFRxX2FzTGc3VnFhRFppcksxaFF4WVYwVGfSAagCQVVfeXFMUEl4Zjk4bDE1cjY2T3A1bXUybzBneVRISmNDSFN4V282REpXX3BzaHFOWXJMbzFRTnpvdEhFOWJmNWRfbW9hM09MWDloOVd1dzZEbGI1ODduSjJ2Ukd2UjZCdXJSQkRHM0c2eUc5SDZkRHcydUNOanlYNnJQZnB0LVB1V1NrZ3IzYkJpMGhzN1hkenh4d1AyYmJyS0ZzbkVMRHZjRDVmWXM5T3pfQy1aZDBYM2xTdDlETjd1WTJRdzd0UTZ5d3BsajR6bzc0UXYzdlJESWVsaUlGWUhUTnFhNzc5NEFLTnh2NHBxYjEyNnZtdHZPOTZ5REZiOHAyOUZ5elI0Yk5zWjBCNExScE1qU1M0QXlrTEJFUFVRVXoxSjFJXzh3MDUwTkI?oc=5","source":"The Times of India","published":"2026-09-25T07:34:00"}];
+  var NEWS_BUILD = [{"title":"Gold Rate Today, September 26: Check 18, 22 and 24 carat gold prices in Chennai, Mumbai, Delhi, Kolkata and other cities","url":"https://news.google.com/rss/articles/CBMi9wFBVV95cUxPYVN2alVSWHVYZk52Nkk0TG50TzVaeUtlSGhiYnNLSE5MQi1Ibi1vWXdKS3hLWVlkNEE2UFZma0FmY24wZlhscGJHNzBfbENqU1JsZjBRdl9KQXlVTmViU0tDa01qOEh3d2lYY0pqUXlkbTJOTDNFRW9WRVRmVjF0TFdLWE05M2NYMzEtVEM3U1lVVnlCVTc5Vnk4ekxBbDJtSWYzb3dMZEQ2NmpoZzgwT3c0cXNnbEhNcXNRa1FmTzV0WnVSTXFYSDlrQ3UwdGZacjZiU3ZxWi05UFVWa0pVcWgzdkN3OWJjOW1aeUM4X0tlRHZBbHFR0gH-AUFVX3lxTE5HR2w0UzBCMFpqZFh3OHBnZkxfZ1R2dDc3b3dxekowX2hwNXg0WkQ2MVNBV21nTDRyUW13R2gzdVZmc3JNME9QU0gxRWwtcTlnME9XeUpfMEhRZkRQLTVTOFZHcU1uemJTVF9BTzJiZDJucVh1ZUxRNmtSNGFhNm1LWmNPSkN4bkFMS2daSm45Vno1S18xUFJpeWhLZl9MRWQ0QlI4MnRqZ0otY3M0eWp3aXZRRk96amFpXzRKVWxFMEF1RDkxM2plcDczMG0yT0VRN1dDZkl3MVdUVFpkVVlQVGNyOGxBTG43RDFra0pnZnBoQjk5eFBFdUNJd2RR?oc=5","source":"indianexpress.com","published":"2026-09-26T04:47:42"},{"title":"Silver Rate Today in Karnataka 26th September 2026 : 1 KG, Todays Silver Price in Karnataka","url":"https://news.google.com/rss/articles/CBMieEFVX3lxTE9rZmJHVWZQai1TOVJWcTN0cVU3OC1wNy1Jazd2Y240R3NpUlA1RGdacHc2QXBzNW45STdXNXBrZEFmdC1PbHJrQjRWMHc4UTFtNkU2VU0xdEdZTC1ndnlDanBjcF9XOHEwU3YzcFdWVFNJWGxEeXFmLQ?oc=5","source":"Business Today","published":"2026-09-26T02:24:28"},{"title":"Gold Rate Today in Delhi 26th September 2026 : 22 & 24 Carat, Todays Gold Price in Delhi","url":"https://news.google.com/rss/articles/CBMicEFVX3lxTE5uN0hKSXRHZGo3S1pxTWZIdVAzWmhUVG5OU1lCdDV1cG0wN1ZsNXpXWkJnTEt4WUlDTGpZZHItV2I2bnNPX2V0UDk2Zzd3T18zcWc4RHRIYWxoc20yRXYxa2ZNMVVCTkRqZDQ3LW5QdFc?oc=5","source":"Business Today","published":"2026-09-26T03:05:42"},{"title":"Gold Rate Today in Jalandhar 26th September 2026 : 22 & 24 Carat, Todays Gold Price in Jalandhar","url":"https://news.google.com/rss/articles/CBMidkFVX3lxTE14MnFrWDZqblc2WTJYU0RsajFUS05sMWlFTTJLOHloN2R6azBqVThvTE1Sdk80TW9BLVdOS0d1MElTUHQzdGxhbm14eWdGRjJyUHNIUFB4eWxuYWUxN1pBc1lGcjFhRXFjNlQ5ZFctTV85REpMQUE?oc=5","source":"Business Today","published":"2026-09-26T02:54:52"},{"title":"Silver Price Today: Rates Hold at \u20b92,450 per 10 Grams","url":"https://news.google.com/rss/articles/CBMizgFBVV95cUxNS3h6WWxoT0JFUFg5ZmxMa043Q3N0TGxiQ0VYUHZSbFQ2UVJNdl9zSWJHOGJGT3FfSW94VWdfVXhKQUFIbUN1LUNEZk5iUmxSaTFOaGJWOVZVVXpHVldKVUloendBZ3k1UmpaZGEySE5UN3A0WXJ6N2FtREJLR3RjeDBGYWpmdmo4eEJQTGRJRjVlSDFFakJidmdnc2NLMF9ITTdBZmVjRVRFSjcycjV4eGdQSjJEWExFVm0tTU9maHp6YkswZEc2dVJqOEU0UQ?oc=5","source":"hdfcsky.com","published":"2026-09-25T07:00:26"},{"title":"Silver Rate Today in Noida \u2013 Silver Price per Gram & Kg | 25 September 2026","url":"https://news.google.com/rss/articles/CBMijgFBVV95cUxNeVRiX0x1azRfcWVwY1hTc0pQcUZEZUlYNUhDQW12aXYyZGlwTW5qdXJyc1doSGZwZFFTQTYzVGJOc280eFhmRVptR21IMXJ0YXczcWN4QnREZi1wbmJ4b243VmRWYkJLRy1NYm1LOWV6VGwxaXhTd3g3dFdpcFQwRm1jTmNOdElvR2JoczNR?oc=5","source":"The Times of India","published":"2026-09-25T18:26:01"},{"title":"India Gold price today: Gold falls, according to FXStreet data","url":"https://news.google.com/rss/articles/CBMixgFBVV95cUxNOUE1Sno4Nk5JLWpqQnZnQVl0eFV2R0pBaElnQ0J2OENRaGxEVVN6aVdZOE9GOFpBc0t6NlVyc3NfYUt6dk5LMHZieUx2MWtRRG50R2Q3d19uR195d3d4Tnpaa05YYWxHWjZzS0RvczFWMTFPZGJsU0dudFkwU3NYYnlhVVJZWWFXZlhvZ2V2RUZhWjNJdnJaak9nWmRUNTRNd0ZIRXItWXJzQV9sUjVQNTJhc0JHT0tjdHgwQWNxSm4tZmRpSkE?oc=5","source":"tmgm.com","published":"2026-09-26T00:29:47"},{"title":"Silver Rate Today in Gaya 25th September 2026 : 1 KG, Todays Silver Price in Gaya","url":"https://news.google.com/rss/articles/CBMickFVX3lxTE8tc2dwOTBVTG83c1dlaHJxcHh4czF6d2FNRFdvckhTREZrRUxkeWFxdy16cXB6dzlDN1NJZ3dVMFBRNkh3ZzRWN3I2aDZ0eUJjWmZwa3Vsd0pzcGdQX3N5YWZUbnhna3dJUXdzTWtYdklIQQ?oc=5","source":"Business Today","published":"2026-09-25T14:14:54"}];
   var NEWS_CACHE_KEY='mgr_news_cache_v1';
   var NEWS_TTL_MS=30*60*1000;
   var NEWS_MAX=8;
@@ -2958,19 +3021,176 @@ function handleCredentialResponse(resp){
     });
   });
 
-  // ─── Alerts subscribe (both scopes, localStorage stub) ───
+  // ─── Alerts subscribe ────────────────────────────────────────────────
+  //
+  // This WAS a stub. It wrote the address to localStorage, printed
+  // "\u2713 Subscribed \u2014 check your inbox tomorrow morning." and sent
+  // nothing anywhere - the only network call in it was a commented-out
+  // fetch('/api/subscribe'), an endpoint that has never existed (it answers
+  // 405). So from the day this page became the homepage, every person who
+  // subscribed here was told it worked and was never recorded and never
+  // emailed. The classic /compare page was calling upsert_subscriber
+  // correctly the whole time, which is why the subscriber table kept
+  // growing and the breakage stayed invisible.
+  //
+  // Now it calls the same SECURITY DEFINER RPC /compare uses, and the
+  // success message is only shown when the write actually succeeded.
+  function saveSubscriber(payload){
+    var base=(window.GR_SB_URL||SUPABASE_URL||'').replace(/\/$/,'');
+    var key=window.GR_SB_KEY||SUPABASE_ANON_KEY||'';
+    if(!base||!key||!payload||!payload.email){
+      return Promise.reject(new Error('subscribe not configured'));
+    }
+    return fetch(base+'/rest/v1/rpc/upsert_subscriber',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',apikey:key,
+               Authorization:'Bearer '+key},
+      body:JSON.stringify({payload:payload})
+    }).then(function(r){
+      if(!r.ok)return r.text().then(function(t){throw new Error(t||('HTTP '+r.status))});
+      // Remembering this suppresses the subscribe popup for good.
+      try{localStorage.setItem('gr_sub','1')}catch(_){}
+      return true;
+    });
+  }
+  window.GR_SAVE_SUBSCRIBER=saveSubscriber;
+
   function wireSubscribe(suf){
     var btn=$('alBtn',suf);if(!btn)return;
     btn.addEventListener('click',function(){
-      var e=$('alEmail',suf).value.trim(),st=$('alStatus',suf);
-      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){st.style.color='var(--rose)';st.textContent='Enter a valid email';return}
-      var name=($('alName',suf)||{}).value||'',city=($('alCity',suf)||{}).value||'',pin=($('alPin',suf)||{}).value||'';
-      try{localStorage.setItem('mgr_subscriber',JSON.stringify({email:e,name:name,city:city,pin:pin}))}catch(_){}
-      st.style.color='var(--mint)';st.textContent='✓ Subscribed — check your inbox tomorrow morning.';
-      // TODO: fetch('/api/subscribe',{method:'POST',body:JSON.stringify({email:e,name:name,city:city,pin:pin})})
+      var emEl=$('alEmail',suf),st=$('alStatus',suf);
+      if(!emEl)return;
+      var e=emEl.value.trim();
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){
+        if(st){st.style.color='var(--rose)';st.textContent='Enter a valid email'}
+        return;
+      }
+      var payload={
+        email:e,
+        name:(($('alName',suf)||{}).value||'').trim(),
+        city:(($('alCity',suf)||{}).value||'').trim(),
+        zip:(($('alPin',suf)||{}).value||'').trim(),
+        country:'India',
+        signup_method:'manual'
+      };
+      var idle=btn.textContent;
+      btn.disabled=true;btn.textContent='Subscribing\u2026';
+      if(st){st.style.color='var(--text3)';st.textContent='Saving\u2026'}
+      saveSubscriber(payload).then(function(){
+        btn.textContent='Subscribed \u2713';
+        if(st){st.style.color='var(--mint)';
+               st.textContent='\u2713 Subscribed \u2014 your first email arrives tomorrow morning.'}
+        if(window.GR_CLOSE_SUBPOP)window.GR_CLOSE_SUBPOP(true);
+      }).catch(function(err){
+        console.warn('subscribe failed',err);
+        btn.disabled=false;btn.textContent=idle;
+        if(st){st.style.color='var(--rose)';
+               st.textContent="Couldn't save that \u2014 please try again in a moment."}
+      });
     });
   }
   wireSubscribe('');wireSubscribe('S');
+  wireSubscribe('P');
+
+  // ═══ Daily-alerts subscribe popup ═════════════════════════════════════
+  //
+  // Restores the popup the old homepage had. It was never deleted - it
+  // still runs on /compare - it was just left behind when this page became
+  // the homepage in the September swap, so the moment the classic page
+  // stopped being "/" the popup stopped being seen by almost anyone.
+  //
+  // The guard discipline is carried over verbatim from that original,
+  // because it is the part that makes a popup tolerable:
+  //   * never if already subscribed          (gr_sub, set by saveSubscriber)
+  //   * never if already shown, EVER         (gr_otp_seen)
+  //   * never if dismissed this session      (gr_dismissed)
+  //   * never while Google One Tap is on screen - that prompt owns the
+  //     moment, and stacking a second dialog behind it is hostile
+  //
+  // And it is deliberately a soft, dismissible popup rather than the
+  // feature gate that also exists in this codebase: that gate was measured
+  // driving ~79% of people who hit it straight off the site, and it hid the
+  // content Google needs to index. Nothing here blocks reading a rate.
+  var SP_SEEN='gr_otp_seen', SP_SUB='gr_sub', SP_DISMISS='gr_dismissed';
+  function lsGet(k){try{return localStorage.getItem(k)}catch(_){return null}}
+  function lsSet(k,v){try{localStorage.setItem(k,v)}catch(_){}}
+  function ssGet(k){try{return sessionStorage.getItem(k)}catch(_){return null}}
+  function ssSet(k,v){try{sessionStorage.setItem(k,v)}catch(_){}}
+
+  var subPop=document.getElementById('subPop');
+  function closeSubPop(subscribed){
+    if(!subPop)return;
+    subPop.classList.remove('open');
+    document.body.style.overflow='';
+    // A dismissal is remembered for the session; a subscribe is permanent
+    // and already recorded by saveSubscriber.
+    if(!subscribed)ssSet(SP_DISMISS,'1');
+  }
+  window.GR_CLOSE_SUBPOP=closeSubPop;
+  function openSubPop(){
+    if(!subPop)return;
+    lsSet(SP_SEEN,'1');          // once ever, whatever happens next
+    subPop.classList.add('open');
+    document.body.style.overflow='hidden';
+    var em=document.getElementById('alEmailP');
+    // Carry over an address already typed into the inline form.
+    SCOPES.forEach(function(sf){
+      var src=$('alEmail',sf);
+      if(em&&!em.value&&src&&src.value.trim())em.value=src.value.trim();
+      var n=$('alName',sf),nP=document.getElementById('alNameP');
+      if(nP&&!nP.value&&n&&n.value.trim())nP.value=n.value.trim();
+    });
+    if(em)setTimeout(function(){try{em.focus()}catch(_){}},120);
+  }
+  window.GR_OPEN_SUBPOP=openSubPop;
+
+  if(subPop){
+    var spX=document.getElementById('spClose'),spL=document.getElementById('spLater');
+    if(spX)spX.addEventListener('click',function(){closeSubPop(false)});
+    if(spL)spL.addEventListener('click',function(){closeSubPop(false)});
+    subPop.addEventListener('click',function(e){if(e.target===subPop)closeSubPop(false)});
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'&&subPop.classList.contains('open'))closeSubPop(false);
+    });
+  }
+
+  function subPopEligible(){
+    if(!subPop)return false;
+    if(lsGet(SP_SUB)==='1')return false;
+    if(lsGet(SP_SEEN))return false;
+    if(ssGet(SP_DISMISS))return false;
+    // Don't stack behind Google's own prompt.
+    if(document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi"]'))return false;
+    return true;
+  }
+  function maybeOpenSubPop(){ if(subPopEligible())openSubPop(); }
+
+  // Trigger: whichever engagement signal lands first, then never again.
+  // The original fired as soon as One Tap concluded, which on a cold load
+  // means a dialog over a half-painted page; these two signals both mean
+  // "this person is actually reading" and cost nothing if neither fires.
+  (function armSubPop(){
+    if(!subPop)return;
+    var armed=true;
+    function fire(){ if(!armed)return; armed=false; cleanup(); maybeOpenSubPop(); }
+    function onScroll(){
+      var el=document.getElementById('sections')||document.documentElement;
+      var top=el.scrollTop||window.scrollY||0;
+      var h=(el.scrollHeight||0)-(el.clientHeight||window.innerHeight||0);
+      if(h>0&&top/h>0.35)fire();
+    }
+    var t=setTimeout(fire,30000);
+    function cleanup(){
+      clearTimeout(t);
+      window.removeEventListener('scroll',onScroll,true);
+      var sc=document.getElementById('sections');
+      if(sc)sc.removeEventListener('scroll',onScroll);
+    }
+    window.addEventListener('scroll',onScroll,true);
+    var sc=document.getElementById('sections');
+    if(sc)sc.addEventListener('scroll',onScroll);
+  })();
+
 
   // ─── "Use my location" — geolocates, then reverse-geocodes via OSM Nominatim
   //     (free, no key) to auto-fill city + PIN in the subscribe form ───
