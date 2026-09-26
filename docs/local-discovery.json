@@ -1,0 +1,199 @@
+{
+ "generated_at": "2026-09-26T11:12:34.232091+00:00",
+ "candidates": 10,
+ "verified": 0,
+ "promoted_inactive": 0,
+ "states_covered": [],
+ "results": [
+  {
+   "state": "Delhi",
+   "city": "New Delhi",
+   "name": "PC Jeweller",
+   "domain": "pcjeweller.com",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
+   "tried": [
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: 404",
+    "/gold-rate-today/: 404",
+    "/gold-rate-today: 404",
+    "/gold-rate: 404",
+    "/goldrate: 404",
+    "/goldprice: 404",
+    "/gold-rate.html: 404"
+   ],
+   "may_work_with_render": true
+  },
+  {
+   "state": "Delhi",
+   "city": "New Delhi",
+   "name": "Khanna Jewellers",
+   "domain": "khannajeweller.com",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
+   "tried": [
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: 404",
+    "/gold-rate-today/: 404",
+    "/gold-rate-today: 404",
+    "/gold-rate: 404",
+    "/goldrate: 404",
+    "/goldprice: 404",
+    "/gold-rate.html: 404"
+   ],
+   "may_work_with_render": true
+  },
+  {
+   "state": "Delhi",
+   "city": "New Delhi",
+   "name": "Mehrasons Jewellers",
+   "domain": "mehrasons.com",
+   "verdict": "dead",
+   "note": "nothing resolved on any path",
+   "tried": [
+    "/: soft-404",
+    "/in/pan-india/en/live-gold-rate.html: soft-404",
+    "/gold-rate-today/: soft-404",
+    "/gold-rate-today: soft-404",
+    "/gold-rate: soft-404",
+    "/goldrate: soft-404",
+    "/goldprice: soft-404",
+    "/gold-rate.html: soft-404"
+   ],
+   "may_work_with_render": false
+  },
+  {
+   "state": "Maharashtra",
+   "city": "Mumbai",
+   "name": "Anmol Jewellers",
+   "domain": "anmoljewellers.in",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
+   "tried": [
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: 404",
+    "/gold-rate-today/: 404",
+    "/gold-rate-today: 404",
+    "/gold-rate: 404",
+    "/goldrate: 404",
+    "/goldprice: 404",
+    "/gold-rate.html: 404"
+   ],
+   "may_work_with_render": true
+  },
+  {
+   "state": "Tamil Nadu",
+   "city": "Chennai",
+   "name": "Lalithaa Jewellery",
+   "domain": "lalithaajewellery.com",
+   "verdict": "dead",
+   "note": "nothing resolved on any path",
+   "tried": [
+    "/: soft-404",
+    "/in/pan-india/en/live-gold-rate.html: soft-404",
+    "/gold-rate-today/: soft-404",
+    "/gold-rate-today: soft-404",
+    "/gold-rate: soft-404",
+    "/goldrate: soft-404",
+    "/goldprice: soft-404",
+    "/gold-rate.html: soft-404"
+   ],
+   "may_work_with_render": false
+  },
+  {
+   "state": "Tamil Nadu",
+   "city": "Coimbatore",
+   "name": "Kirtilals",
+   "domain": "kirtilals.com",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
+   "tried": [
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: no values",
+    "/gold-rate-today/: no values",
+    "/gold-rate-today: no values",
+    "/gold-rate: no values",
+    "/goldrate: no values",
+    "/goldprice: no values",
+    "/gold-rate.html: no values"
+   ],
+   "may_work_with_render": true
+  },
+  {
+   "state": "Kerala",
+   "city": "Thrissur",
+   "name": "Josco Jewellers",
+   "domain": "joscogroup.com",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
+   "tried": [
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: no values",
+    "/gold-rate-today/: no values",
+    "/gold-rate-today: no values",
+    "/gold-rate: no values",
+    "/goldrate: no values",
+    "/goldprice: no values",
+    "/gold-rate.html: no values"
+   ],
+   "may_work_with_render": true
+  },
+  {
+   "state": "Gujarat",
+   "city": "Ahmedabad",
+   "name": "RBZ Jewellers",
+   "domain": "rbzjewellers.com",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
+   "tried": [
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: soft-404",
+    "/gold-rate-today/: soft-404",
+    "/gold-rate-today: soft-404",
+    "/gold-rate: soft-404",
+    "/goldrate: soft-404",
+    "/goldprice: soft-404",
+    "/gold-rate.html: soft-404"
+   ],
+   "may_work_with_render": true
+  },
+  {
+   "state": "Karnataka",
+   "city": "Bengaluru",
+   "name": "Sri Kumaran",
+   "domain": "srikumaran.com",
+   "verdict": "dead",
+   "note": "nothing resolved on any path",
+   "tried": [
+    "/: ConnectionError",
+    "/in/pan-india/en/live-gold-rate.html: ConnectionError",
+    "/gold-rate-today/: ConnectionError",
+    "/gold-rate-today: ConnectionError",
+    "/gold-rate: ConnectionError",
+    "/goldrate: ConnectionError",
+    "/goldprice: ConnectionError",
+    "/gold-rate.html: ConnectionError"
+   ],
+   "may_work_with_render": false
+  },
+  {
+   "state": "Maharashtra",
+   "city": "Mumbai",
+   "name": "Bhindi Jewellers",
+   "domain": "bhindi.com",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
+   "tried": [
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: 404",
+    "/gold-rate-today/: 404",
+    "/gold-rate-today: 404",
+    "/gold-rate: 404",
+    "/goldrate: 404",
+    "/goldprice: 404",
+    "/gold-rate.html: 404"
+   ],
+   "may_work_with_render": true
+  }
+ ]
+}

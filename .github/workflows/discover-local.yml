@@ -1,0 +1,67 @@
+name: discover-local
+
+# Probes the candidate local jewellers in local_candidates.py and reports
+# which publish a scrapeable rate, promoting verified ones into `brands` as
+# INACTIVE with a pinned rate_url (see discover_local.py for why inactive).
+#
+# WEEKLY, not daily. This is not a rate feed - it answers "does a readable
+# rate exist on this site at all", which changes on the timescale of a site
+# redesign, not a trading session. It also walks up to ~16 paths per
+# candidate, so a daily sweep would be a lot of traffic aimed at small
+# jewellers' sites for no extra information.
+#
+# Re-probing matters even though it is slow-moving: in a single week this
+# repo saw Senco rename a product handle and IBJA switch from per-10g to
+# per-gram. A candidate that answers "blocked" today can become readable,
+# and the report is how that gets noticed.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "40 2 * * 1"   # Mondays 02:40 UTC ~ 08:10 IST
+
+permissions:
+  contents: write   # commits docs/local-discovery.json
+
+concurrency:
+  group: discover-local
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Probe local jeweller candidates
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python discover_local.py
+
+      - name: Publish the report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/local-discovery.json
+          if git diff --cached --quiet; then
+            echo "discovery report unchanged"
+          else
+            git commit -m "discover-local: refresh candidate report"
+            git fetch origin main
+            git rebase -X ours origin/main || {
+              git rebase --abort
+              git reset --soft origin/main
+              git add docs/local-discovery.json
+              git commit -m "discover-local: refresh candidate report"
+            }
+            git push
+          fi
