@@ -39,7 +39,10 @@ What it flags
               pinned, so it can move without warning. Repair the rate_url
               in seed_brands.py and run seed-brands.
   NOT LIVE    an active brand with no published row today (quarantined,
-              estimated, or missing entirely) - it is absent from the board.
+              estimated, or missing entirely) - it is absent from the board
+              right now. The line also reports how many of the last 7 days
+              the brand DID publish, so a failed run mid-day is not mistaken
+              for a dead source.
 
 A brand recovering via CANDIDATE_PATHS rather than discover_products keeps
 a plain `static/`|`rendered/` method and so is not flagged here; that case
@@ -51,7 +54,7 @@ import os
 import sys
 import urllib.error
 import urllib.request
-from datetime import date
+from datetime import date, timedelta
 
 
 def get(url, key, path):
@@ -74,6 +77,18 @@ def main():
     try:
         brands = get(url, key, "brands?select=id,slug,name,rate_url,active"
                                "&active=eq.true")
+        # Also the previous week, so a brand that is missing RIGHT NOW can be
+        # told apart from one that is actually broken. rates.yml re-scrapes
+        # every 30 minutes and upserts the day's row, so a brand can sit at
+        # `estimated` mid-morning and be `published` by noon. Reporting that
+        # snapshot as "absent from the board" with no history reads as a
+        # standing outage - it misled the author of this script into saying
+        # exactly that about Tanishq, which had in fact published on 40
+        # consecutive days.
+        since = (date.today() - timedelta(days=7)).isoformat()
+        hist = get(url, key, f"rates?rate_date=gte.{since}&rate_date=lt.{today}"
+                             "&status=eq.published"
+                             "&select=brand_id,rate_date")
         rates = get(url, key, f"rates?rate_date=eq.{today}"
                               "&select=brand_id,canonical_24k_pre_gst,status,"
                               "method,purities_found,rate_url")
@@ -124,9 +139,23 @@ def main():
 
     if notlive:
         print("")
+        recent = {}
+        for h in hist:
+            recent.setdefault(h["brand_id"], set()).add(h["rate_date"])
         for b, r in notlive:
             st = r["status"] if r else "no row"
-            print(f"NOT LIVE {b['slug']:<14} {st} - absent from the board")
+            days = len(recent.get(b["id"], ()))
+            if days >= 5:
+                # Published nearly every day this week, so this is almost
+                # certainly a failed run that a later one will fix, not an
+                # outage. Say so, rather than implying the brand is gone.
+                note = (f"published {days}/7 of the last 7 days - most likely a "
+                        f"transient run failure; re-check after the next scrape")
+            elif days:
+                note = f"published only {days}/7 of the last 7 days - flaky source"
+            else:
+                note = "NOT published at all in the last 7 days - genuinely broken"
+            print(f"NOT LIVE {b['slug']:<14} {st} - {note}")
 
     if not stale and not moved and not notlive:
         print("pin-health: OK - every active brand published from its "
