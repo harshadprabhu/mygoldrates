@@ -13,7 +13,11 @@ path and which extractor - so a promotion carries a pinned rate_url rather
 than a guess.
 
 VERDICTS
-  verified   a per-gram rate was extracted and passed the sanity check
+  verified   a per-gram rate was extracted, and its purity ratios hang
+             together like one metal rate
+  suspect    a rate-shaped number was extracted but the purities do not form
+             a real ladder - retail or making-inclusive pricing. Reported
+             loudly and never promoted; see ladder_sane()
   no-rate    the site answered but no purity-labelled rate could be read
   blocked    401/403/429/503 on every path - bot-walled to a plain request
   dead       nothing resolved (DNS, timeout, 404 everywhere)
@@ -75,6 +79,32 @@ def slugify(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")[:40]
 
 
+def ladder_sane(found):
+    """-> (ok, why). Does this set of purities behave like one metal rate?
+
+    scrape.ordering_sane() only checks the values descend with purity, which a
+    retail price list also does. This additionally checks the RATIOS: 22K
+    should be 22/24 of 24K, 18K should be 18/24, and so on. A genuine per-gram
+    metal rate satisfies that to within a fraction of a percent; a retail or
+    making-inclusive price list does not, because making charges are not
+    proportional to purity.
+
+    Reuses scrape.basis_confirmed so the tolerance here is the same one the
+    real scraper already trusts (RATIO_TOLERANCE), rather than a second
+    opinion that could drift from it.
+    """
+    if len(found) < 2:
+        # One purity cannot be cross-checked at all. Not a failure - plenty of
+        # real sources publish a single rate - but say so, because the ladder
+        # for every other karat is then inferred from this one number.
+        return True, "single purity - no ratio cross-check possible"
+    ok, why = scrape.basis_confirmed(found)
+    if ok:
+        return True, why
+    return False, (f"purity ratios inconsistent ({why}) - looks like retail or "
+                   f"making-inclusive pricing, not a per-gram metal rate")
+
+
 def probe(cand, session):
     """-> verdict dict for one candidate."""
     host = cand["domain"].lower().lstrip("/")
@@ -112,17 +142,34 @@ def probe(cand, session):
             continue
         found, counts, how, note = scrape.try_html(html)
         if found:
-            k24 = scrape.derive_ladder(
-                max((v / scrape.PURITY_FRACTION[k] for k, v in found.items()),
-                    default=0))
             best = max(found.items(),
                        key=lambda kv: scrape.PURITY_FRACTION[kv[0]])
             c24 = round(best[1] / scrape.PURITY_FRACTION[best[0]], 2)
-            return {**cand, "verdict": "verified", "rate_url": url,
-                    "method": how, "purities": sorted(found),
-                    "canonical_24k": c24,
-                    "slug": slugify(cand["name"]),
-                    "note": f"read {len(found)} purity/purities via {how}"}
+            res = {**cand, "rate_url": url, "method": how,
+                   "purities": sorted(found), "canonical_24k": c24,
+                   "slug": slugify(cand["name"])}
+            sane, why = ladder_sane(found)
+            if not sane:
+                # Extracted cleanly but the numbers do not hang together, so
+                # this is NOT a board rate. Khanna Jewellers is the case that
+                # forced this check: its metalPriceConfig parses perfectly
+                # (gold_price_24k 16200, _22k 14040, _18k 11487) and is
+                # updated daily, but the 22K/24K ratio is 0.867 instead of
+                # 0.9167, gold_price_21k is 6343.75 where the ladder says
+                # ~14175, and the config carries include_taxes: true - it is
+                # GST-inclusive retail pricing with several dead placeholder
+                # entries, not a pre-GST metal rate. Published as-is it would
+                # have been 6% over market.
+                #
+                # ordering_sane() passes it (the values do descend by purity)
+                # so try_html alone cannot catch this. Reporting it as
+                # "verified" would hand a reviewer a confident false positive,
+                # which is worse than reporting nothing.
+                res.update(verdict="suspect", note=why)
+                return res
+            res.update(verdict="verified",
+                       note=f"read {len(found)} purity/purities via {how}")
+            return res
         tried.append(f"{p or '/'}: {note}")
 
     if blocked and not dead:
@@ -186,6 +233,7 @@ def main():
               f"{r['name'][:26]:<26}{extra}")
 
     verified = [r for r in results if r["verdict"] == "verified"]
+    suspect = [r for r in results if r["verdict"] == "suspect"]
     by_verdict = {}
     for r in results:
         by_verdict[r["verdict"]] = by_verdict.get(r["verdict"], 0) + 1
@@ -197,6 +245,12 @@ def main():
     states = sorted({r["state"] for r in verified})
     if states:
         print(f"  states with a verified local source: {', '.join(states)}")
+    for r in suspect:
+        print(f"  SUSPECT {r['name'][:26]:<26} 24K~{r['canonical_24k']} "
+              f"at {r['rate_url']}")
+        print(f"          {r['note']}")
+        print(f"          NOT promoted - a number was read but it is not a "
+              f"metal rate")
     retry = [r for r in results if r.get("may_work_with_render")]
     if retry:
         print(f"  {len(retry)} answered but not readable cheaply - these may "
