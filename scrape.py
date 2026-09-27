@@ -540,8 +540,15 @@ def extract_rate_json(html):
     # date. The closing quote after the karat is required so the suffixed
     # variants (goldPrice24K995, ...995GW) never bind to 24K: those are the
     # 995 rate, and mixing them in would drag the 999 figure down.
+    # `gold_?_?[Pp]rice_?` admits the snake_case spelling too - Khanna
+    # Jewellers ships "gold_price_24k" from a Shopify pricing app, which the
+    # camelCase-only pattern missed entirely. Matching it does NOT mean
+    # trusting it: that particular config is GST-inclusive retail with broken
+    # lower karats, and it is the purity-ratio check in
+    # discover_local.ladder_sane() / basis_confirmed() that rejects it. The
+    # karat letter is case-insensitive for the same reason ("24k" vs "24K").
     for m in re.finditer(
-            r'\\?"gold_?[Pp]rice(\d{1,2})K\\?"\s*:\s*"?([\d,]+(?:\.\d+)?)',
+            r'\\?"gold_?_?[Pp]rice_?(\d{1,2})[Kk]\\?"\s*:\s*"?([\d,]+(?:\.\d+)?)',
             html):
         karat = f"{m.group(1)}K"
         if karat not in PURITY_FRACTION:

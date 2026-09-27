@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-26T11:26:51.591050+00:00",
+ "generated_at": "2026-09-27T02:07:17.093450+00:00",
  "candidates": 10,
  "verified": 0,
  "promoted_inactive": 0,
@@ -29,19 +29,18 @@
    "city": "New Delhi",
    "name": "Khanna Jewellers",
    "domain": "khannajeweller.com",
-   "verdict": "no-rate",
-   "note": "responded but no purity-labelled rate found",
-   "tried": [
-    "/: no values",
-    "/in/pan-india/en/live-gold-rate.html: 404",
-    "/gold-rate-today/: 404",
-    "/gold-rate-today: 404",
-    "/gold-rate: 404",
-    "/goldrate: 404",
-    "/goldprice: 404",
-    "/gold-rate.html: 404"
+   "rate_url": "https://khannajeweller.com",
+   "method": "ratejson",
+   "purities": [
+    "14K",
+    "18K",
+    "22K",
+    "24K"
    ],
-   "may_work_with_render": true
+   "canonical_24k": 16200.0,
+   "slug": "khanna-jewellers",
+   "verdict": "suspect",
+   "note": "purity ratios inconsistent (24K/22K ratio off) - looks like retail or making-inclusive pricing, not a per-gram metal rate"
   },
   {
    "state": "Delhi",
