@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-27T02:07:17.093450+00:00",
+ "generated_at": "2026-09-28T09:08:20.514632+00:00",
  "candidates": 10,
  "verified": 0,
  "promoted_inactive": 0,
@@ -50,14 +50,14 @@
    "verdict": "dead",
    "note": "nothing resolved on any path",
    "tried": [
-    "/: soft-404",
-    "/in/pan-india/en/live-gold-rate.html: soft-404",
-    "/gold-rate-today/: soft-404",
-    "/gold-rate-today: soft-404",
-    "/gold-rate: soft-404",
-    "/goldrate: soft-404",
-    "/goldprice: soft-404",
-    "/gold-rate.html: soft-404"
+    "/: ConnectionError",
+    "/in/pan-india/en/live-gold-rate.html: ConnectionError",
+    "/gold-rate-today/: ConnectionError",
+    "/gold-rate-today: ConnectionError",
+    "/gold-rate: ConnectionError",
+    "/goldrate: ConnectionError",
+    "/goldprice: ConnectionError",
+    "/gold-rate.html: ConnectionError"
    ],
    "may_work_with_render": false
   },
