@@ -495,6 +495,100 @@ def sheet_outlook(wb, ol):
     return ws
 
 
+def sheet_horizons(wb, ol):
+    """Week, month and quarter side by side - each with its measured skill.
+
+    The skill row is not a footnote. A verdict published without any
+    statement of whether that verdict has ever been right is the thing this
+    product is meant not to be, so it sits directly under the call.
+    """
+    hs = ol.get("horizons") or []
+    if not hs:
+        return None
+    ws = wb.create_sheet("Horizons")
+    ws["A1"] = "Outlook by horizon"
+    ws["A1"].font = Font(bold=True, size=15, color=INK)
+    ws["A2"] = (f"As of {ol.get('as_of', '-')} - international parity, "
+                f"rupees per gram")
+    ws["A2"].font = Font(italic=True, color="6B6357")
+    r = _disclaimer(ws, 4, width=4)
+
+    ws.column_dimensions["A"].width = 34
+    for col in "BCD":
+        ws.column_dimensions[col].width = 26
+
+    def row(label, vals, fmt=None, bold=False):
+        nonlocal r
+        c = ws.cell(row=r, column=1, value=label)
+        if bold:
+            c.font = BOLD
+        for k, v in enumerate(vals, 2):
+            cell = ws.cell(row=r, column=k, value=v)
+            if fmt:
+                cell.number_format = fmt
+            if bold:
+                cell.font = BOLD
+        r += 1
+
+    _hrow(ws, r, ["", *[h["label"] for h in hs]], {"": 34})
+    r += 1
+    row("Trading days ahead", [h["days"] for h in hs])
+    row("Verdict", [h["verdict"] for h in hs], bold=True)
+    row("Score (-100 to +100)", [h["score"] for h in hs], "+0.0;-0.0")
+    row("Signal agreement", [h["agreement"] for h in hs], "0.00")
+    r += 1
+
+    ws.cell(row=r, column=1, value="TYPICAL RANGE FROM HERE").font = BOLD
+    ws.cell(row=r, column=1).fill = SUBHEAD
+    r += 1
+    row("Move, either way", [(h.get("range") or {}).get("pct") for h in hs],
+        "0.00\%")
+    row("Low", [(h.get("range") or {}).get("low") for h in hs], "#,##0")
+    row("High", [(h.get("range") or {}).get("high") for h in hs], "#,##0")
+    r += 1
+
+    ws.cell(row=r, column=1, value="HAS THIS CALL EVER BEEN RIGHT?").font = BOLD
+    ws.cell(row=r, column=1).fill = SUBHEAD
+    r += 1
+    sk = [h.get("skill") or {} for h in hs]
+    row("Reading", [x.get("verdict") for x in sk], bold=True)
+    row("Correlation with what followed", [x.get("ic") for x in sk], "+0.000;-0.000")
+    row("Times the direction was right", [x.get("hit_rate") for x in sk], "0.0\%")
+    row("Same, if you always said 'up'", [x.get("base_rate") for x in sk], "0.0\%")
+    row("Difference", [x.get("beats_baseline") for x in sk], "+0.0;-0.0")
+    row("Days measured", [x.get("n") for x in sk], "0")
+    r += 1
+
+    season = [h.get("seasonality") for h in hs]
+    if any(season):
+        ws.cell(row=r, column=1, value="SAME MONTHS, PAST YEARS").font = BOLD
+        ws.cell(row=r, column=1).fill = SUBHEAD
+        r += 1
+        row("Months", [", ".join(x["months"]) if x else "-" for x in season])
+        row("Average", [x["mean_pct"] if x else None for x in season],
+            "+0.00\%;-0.00\%")
+        row("Years in sample", [x["n"] if x else None for x in season], "0")
+        r += 1
+
+    note = next((x.get("caveat") for x in sk if x.get("caveat")), None)
+    if note:
+        ws.cell(row=r, column=1, value=note).alignment = \
+            Alignment(wrap_text=True, vertical="top")
+        ws.merge_cells(start_row=r, start_column=1, end_row=r + 2, end_column=4)
+        for k in range(3):
+            ws.row_dimensions[r + k].height = 26
+        r += 4
+
+    ws.cell(row=r, column=1, value=(
+        "Each horizon is scored on the signals that matter over that length "
+        "of time - a week on short momentum, a quarter on the long averages "
+        "and their slope. They can and do disagree.")).alignment = \
+        Alignment(wrap_text=True, vertical="top")
+    ws.merge_cells(start_row=r, start_column=1, end_row=r + 1, end_column=4)
+    return ws
+
+
+
 def sheet_levels(wb, ol):
     """Support and resistance, quoted on the board a jeweller actually reads."""
     ws = wb.create_sheet("Levels")
@@ -646,6 +740,7 @@ def build(rates, brands, mc, generated):
     ol = load_outlook()
     if ol:
         sheet_outlook(wb, ol)
+        sheet_horizons(wb, ol)
         sheet_levels(wb, ol)
         sheet_events(wb, ol)
     else:
