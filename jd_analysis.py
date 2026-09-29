@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Analysis over the scraped jeweller rate history, for the B2B report.
+"""Analysis over the scraped jeweller rate history, for Jewellers Digest.
 
 Pure computation: takes rows, returns numbers. No Supabase, no Excel, no
 network - so every figure in the paid report can be tested directly against

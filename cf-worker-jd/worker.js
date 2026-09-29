@@ -1,5 +1,6 @@
 /**
- * MyGoldRates B2B API — subscriptions, entitlement, report delivery.
+ * Jewellers Digest (JD) — the MyGoldRates B2B API.
+ * Subscriptions, entitlement, and report delivery.
  *
  * Separate Worker from cf-worker-market on purpose. That one is a public,
  * CORS-open, edge-cached proxy for anonymous readers; this one holds a
@@ -8,12 +9,12 @@
  * a different Worker rather than more routes on the public one.
  *
  * ROUTES
- *   POST /b2b/signup        create account + Razorpay subscription
+ *   POST /jd/signup        create account + Razorpay subscription
  *                           -> { short_url } for the jeweller to authorise
- *   POST /b2b/webhook       Razorpay events (signature-verified, idempotent)
- *   GET  /b2b/status        entitlement for the calling API key
- *   GET  /b2b/report        short-lived signed URL for the latest workbook
- *   GET  /b2b/rates         the rate history as JSON, for programmatic use
+ *   POST /jd/webhook       Razorpay events (signature-verified, idempotent)
+ *   GET  /jd/status        entitlement for the calling API key
+ *   GET  /jd/report        short-lived signed URL for the latest workbook
+ *   GET  /jd/rates         the rate history as JSON, for programmatic use
  *
  * SECRETS (wrangler secret put …)
  *   SUPABASE_URL, SUPABASE_SERVICE_KEY
@@ -141,7 +142,7 @@ const LIVE_STATUSES = new Set(['active', 'authenticated']);
 
 async function entitlementFor(env, accountId) {
   const { body } = await sb(env,
-    `b2b_subscriptions?account_id=eq.${accountId}` +
+    `jd_subscriptions?account_id=eq.${accountId}` +
     `&select=status,current_end,razorpay_subscription_id` +
     `&order=updated_at.desc&limit=1`);
   const s = Array.isArray(body) ? body[0] : null;
@@ -164,12 +165,12 @@ async function authenticate(env, request) {
   if (!m) return { ok: false, error: 'missing or malformed API key' };
   const hash = await sha256Hex(m[1]);
   const { body } = await sb(env,
-    `b2b_api_keys?key_hash=eq.${hash}&active=is.true` +
+    `jd_api_keys?key_hash=eq.${hash}&active=is.true` +
     `&select=id,account_id&limit=1`);
   const k = Array.isArray(body) ? body[0] : null;
   if (!k) return { ok: false, error: 'unknown or revoked API key' };
   // Best-effort last-used stamp; never let it fail the request.
-  sb(env, `b2b_api_keys?id=eq.${k.id}`, {
+  sb(env, `jd_api_keys?id=eq.${k.id}`, {
     method: 'PATCH',
     body: JSON.stringify({ last_used_at: new Date().toISOString() }),
   }).catch(() => {});
@@ -200,23 +201,23 @@ export default {
     const url = new URL(request.url);
     try {
       switch (`${request.method} ${url.pathname}`) {
-        case 'POST /b2b/signup':   return wrap(await handleSignup(request, env));
-        case 'POST /b2b/webhook':  return wrap(await handleWebhook(request, env));
-        case 'GET /b2b/status':    return wrap(await handleStatus(request, env));
-        case 'GET /b2b/report':    return wrap(await handleReport(request, env));
-        case 'GET /b2b/rates':     return wrap(await handleRates(request, env, url));
+        case 'POST /jd/signup':   return wrap(await handleSignup(request, env));
+        case 'POST /jd/webhook':  return wrap(await handleWebhook(request, env));
+        case 'GET /jd/status':    return wrap(await handleStatus(request, env));
+        case 'GET /jd/report':    return wrap(await handleReport(request, env));
+        case 'GET /jd/rates':     return wrap(await handleRates(request, env, url));
         default:                   return wrap(json({ error: 'not found' }, 404));
       }
     } catch (e) {
       // Never surface internals to a caller; the message could carry a URL
       // with a key in it.
-      console.error('b2b worker error', e && e.stack);
+      console.error('jd worker error', e && e.stack);
       return wrap(json({ error: 'internal error' }, 500));
     }
   },
 };
 
-// ─── POST /b2b/signup ────────────────────────────────────────────────────
+// ─── POST /jd/signup ────────────────────────────────────────────────────
 // Creates (or reuses) the account, then a Razorpay subscription, and returns
 // the short_url where the jeweller authorises the auto-debit mandate.
 //
@@ -245,7 +246,7 @@ async function handleSignup(request, env) {
 
   // Upsert the account by email so a second signup lands on the same row
   // rather than creating a duplicate that could be charged separately.
-  const up = await sb(env, 'b2b_accounts?on_conflict=email', {
+  const up = await sb(env, 'jd_accounts?on_conflict=email', {
     method: 'POST',
     headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
     body: JSON.stringify([{
@@ -273,7 +274,7 @@ async function handleSignup(request, env) {
     return json({ error: 'could not start subscription' }, 502);
   }
 
-  await sb(env, 'b2b_subscriptions', {
+  await sb(env, 'jd_subscriptions', {
     method: 'POST',
     headers: { Prefer: 'resolution=merge-duplicates' },
     body: JSON.stringify([{
@@ -288,7 +289,7 @@ async function handleSignup(request, env) {
   // Issue an API key once. Only its hash is stored, so this response is the
   // single moment the plaintext exists — it cannot be re-read later.
   const key = newApiKey();
-  const ins = await sb(env, 'b2b_api_keys', {
+  const ins = await sb(env, 'jd_api_keys', {
     method: 'POST',
     body: JSON.stringify([{
       account_id: account.id,
@@ -310,7 +311,7 @@ async function handleSignup(request, env) {
   });
 }
 
-// ─── POST /b2b/webhook ───────────────────────────────────────────────────
+// ─── POST /jd/webhook ───────────────────────────────────────────────────
 // Razorpay -> us. Two things matter here and both are security-critical.
 //
 // 1. SIGNATURE. The body is HMAC-SHA256'd with the webhook secret and sent
@@ -320,7 +321,7 @@ async function handleSignup(request, env) {
 //    byte order and break the comparison.
 //
 // 2. IDEMPOTENCY. Razorpay retries until it gets a 2xx, so every event will
-//    arrive more than once. The unique index on b2b_webhook_events.event_id
+//    arrive more than once. The unique index on jd_webhook_events.event_id
 //    is the guard: a duplicate insert conflicts, and we return 200 without
 //    reprocessing. Returning non-2xx on a duplicate would make Razorpay
 //    retry forever.
@@ -344,7 +345,7 @@ async function handleWebhook(request, env) {
   const eventId = request.headers.get('X-Razorpay-Event-Id')
     || `${evt.event}:${evt.payload?.subscription?.entity?.id || ''}:${evt.created_at || ''}`;
 
-  const seen = await sb(env, 'b2b_webhook_events', {
+  const seen = await sb(env, 'jd_webhook_events', {
     method: 'POST',
     body: JSON.stringify([{ event_id: eventId, event: evt.event, payload: evt }]),
   });
@@ -373,16 +374,16 @@ async function handleWebhook(request, env) {
     }
     if (typeof subEnt.paid_count === 'number') patch.charge_count = subEnt.paid_count;
     await sb(env,
-      `b2b_subscriptions?razorpay_subscription_id=eq.${subEnt.id}`,
+      `jd_subscriptions?razorpay_subscription_id=eq.${subEnt.id}`,
       { method: 'PATCH', body: JSON.stringify(patch) });
   }
 
   if (payEnt?.id) {
     const { body } = await sb(env,
-      `b2b_subscriptions?razorpay_subscription_id=eq.${subEnt?.id || ''}` +
+      `jd_subscriptions?razorpay_subscription_id=eq.${subEnt?.id || ''}` +
       `&select=id,account_id&limit=1`);
     const row = Array.isArray(body) ? body[0] : null;
-    await sb(env, 'b2b_payments', {
+    await sb(env, 'jd_payments', {
       method: 'POST',
       headers: { Prefer: 'resolution=ignore-duplicates' },
       body: JSON.stringify([{
@@ -398,13 +399,13 @@ async function handleWebhook(request, env) {
     });
   }
 
-  await sb(env, `b2b_webhook_events?event_id=eq.${encodeURIComponent(eventId)}`,
+  await sb(env, `jd_webhook_events?event_id=eq.${encodeURIComponent(eventId)}`,
     { method: 'PATCH', body: JSON.stringify({ processed: true }) });
 
   return json({ ok: true, event: evt.event });
 }
 
-// ─── GET /b2b/status ─────────────────────────────────────────────────────
+// ─── GET /jd/status ─────────────────────────────────────────────────────
 async function handleStatus(request, env) {
   const a = await authenticate(env, request);
   if (!a.ok) return json({ error: a.error }, 401);
@@ -412,7 +413,7 @@ async function handleStatus(request, env) {
   return json({ account_id: a.accountId, entitlement: e });
 }
 
-// ─── GET /b2b/report ─────────────────────────────────────────────────────
+// ─── GET /jd/report ─────────────────────────────────────────────────────
 // Returns a SHORT-LIVED signed URL rather than the file. The bucket is
 // private, so the URL is the only way in, and a 10-minute expiry means a
 // link that leaks out of an inbox stops working quickly.
@@ -421,7 +422,7 @@ async function handleReport(request, env) {
   if (gate.resp) return gate.resp;
 
   const list = await fetch(
-    `${env.SUPABASE_URL}/storage/v1/object/list/b2b-reports`, {
+    `${env.SUPABASE_URL}/storage/v1/object/list/jd-reports`, {
       method: 'POST',
       headers: {
         apikey: env.SUPABASE_SERVICE_KEY,
@@ -437,7 +438,7 @@ async function handleReport(request, env) {
   }
 
   const signed = await fetch(
-    `${env.SUPABASE_URL}/storage/v1/object/sign/b2b-reports/${latest.name}`, {
+    `${env.SUPABASE_URL}/storage/v1/object/sign/jd-reports/${latest.name}`, {
       method: 'POST',
       headers: {
         apikey: env.SUPABASE_SERVICE_KEY,
@@ -456,7 +457,7 @@ async function handleReport(request, env) {
   });
 }
 
-// ─── GET /b2b/rates ──────────────────────────────────────────────────────
+// ─── GET /jd/rates ──────────────────────────────────────────────────────
 // The scraped history as JSON, for a jeweller who would rather pull it into
 // their own systems than open a spreadsheet.
 //

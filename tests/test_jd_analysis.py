@@ -1,4 +1,4 @@
-"""Analysis behind the paid B2B report.
+"""Analysis behind Jewellers Digest, the paid B2B report.
 
 Tested against hand-computed inputs rather than live data: someone is paying
 for these numbers, so each one needs to be checkable by reading the test.
@@ -8,7 +8,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import b2b_analysis as A
+import jd_analysis as A
 
 BRANDS = [
     {"id": 1, "slug": "cheap", "active": True},
