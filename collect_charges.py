@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Making-charge comparison scraper (runs ~once every 15 days).
+"""Making-charge comparison collector (runs ~once every 15 days).
 
 For brands that publish a product price breakup, sample MULTIPLE products per
 category and record the making charge as % of gold value, then aggregate to a
@@ -310,7 +310,7 @@ CURATED = []
 # fetch() tries each in turn until one returns >=500 bytes at HTTP 200.
 def _proxy_attempts(url):
     for key_env, name, url_tpl, params in [
-        ("SCRAPERAPI_KEY", "scraperapi", "http://api.scraperapi.com",
+        ("COLLECTRAPI_KEY", "collectorapi", "http://api.collectorapi.com",
          {"url": url, "render": "true", "country_code": "in"}),
         ("SCRAPINGBEE_KEY", "scrapingbee", "https://app.scrapingbee.com/api/v1/",
          {"url": url, "render_js": "true", "wait": "3000"}),

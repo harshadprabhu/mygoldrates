@@ -1,7 +1,7 @@
 name: gsc-report
 
 on:
-  workflow_dispatch:   # manual: one-off Search Console diagnostic, not part of the scrape/build pipeline
+  workflow_dispatch:   # manual: one-off Search Console diagnostic, not part of the collect/build pipeline
 
 jobs:
   report:

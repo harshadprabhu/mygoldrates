@@ -15,7 +15,7 @@ THE TWO SERIES, AND WHY BOTH ARE NEEDED
 The Indian retail board is not the international price. Over the window we
 hold, the board sits about 15% above international parity (duty plus a
 domestic premium) and, more importantly, it MOVES DIFFERENTLY: it is sticky.
-Measured on our own scraped history, the same-day correlation between the
+Measured on our own rate history, the same-day correlation between the
 board and international parity is only about 0.35, but at a ONE-DAY LAG it
 is about 0.71. Over ten-day windows it reaches 0.95, with roughly 80% of an
 international move eventually arriving.
@@ -50,7 +50,10 @@ FX_API = "https://api.frankfurter.dev/v1"
 UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/122.0 Safari/537.36")
 
-OUT = os.environ.get("OUTLOOK_OUT", "docs/outlook.json")
+# NOT under docs/. Everything in docs/ is published to mygoldrates.com, and
+# this analysis is a paid Jewellers Digest deliverable, not public copy. It
+# is written to a build-local path and consumed by jd_report.py.
+OUT = os.environ.get("OUTLOOK_OUT", "build/outlook.json")
 
 
 # ─── plumbing ────────────────────────────────────────────────────────────
@@ -744,7 +747,7 @@ def fetch_calendar():
 
 
 def fetch_board():
-    """Our own scraped retail board: the daily median across jewellers."""
+    """Our own retail board history: the daily median across jewellers."""
     sb = os.environ.get("SUPABASE_URL", "").rstrip("/")
     key = (os.environ.get("SUPABASE_SERVICE_KEY")
            or os.environ.get("SUPABASE_ANON_KEY"))
@@ -893,7 +896,7 @@ def to_board(levels, ratio):
     The technicals run on international parity because that is where the
     history and the direction are. Nobody buys at parity: the board sits
     above it by duty plus a domestic premium. That gap is MEASURED over our
-    own scraped window, not assumed from a duty schedule, because the duty
+    own measured window, not assumed from a duty schedule, because the duty
     schedule changes and the premium moves with local demand.
 
     The band comes from the gap's own dispersion, so a level is quoted as a

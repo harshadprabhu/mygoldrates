@@ -24,7 +24,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import discover_local as D
-import scrape
+import collect
 
 
 KHANNA_HTML = """
@@ -44,7 +44,7 @@ PNGSONS_HTML = """
 
 def test_snake_case_rate_config_is_read():
     """gold_price_24k must parse, not just goldPrice24K."""
-    found, _, how = scrape.extract(KHANNA_HTML)
+    found, _, how = collect.extract(KHANNA_HTML)
     assert how == "ratejson"
     assert found["24K"] == 16200.0
     assert found["22K"] == 14040.0
@@ -52,20 +52,20 @@ def test_snake_case_rate_config_is_read():
 
 def test_camelcase_shape_still_reads():
     """Widening the spelling must not break the shape it was written for."""
-    found, _, how = scrape.extract(PNGSONS_HTML)
+    found, _, how = collect.extract(PNGSONS_HTML)
     assert how == "ratejson"
     assert found["24K"] == 15320.0
 
 
 def test_995_variant_keys_still_excluded():
     """goldPrice24K995 is the 995 rate and must never bind to 24K."""
-    found, _, _ = scrape.extract(PNGSONS_HTML)
+    found, _, _ = collect.extract(PNGSONS_HTML)
     assert found["24K"] == 15320.0, "995 variant leaked into the 999 figure"
 
 
 def test_undefined_purities_skipped():
     """10K/9K have no PURITY_FRACTION entry, so they cannot be laddered."""
-    found, _, _ = scrape.extract(KHANNA_HTML)
+    found, _, _ = collect.extract(KHANNA_HTML)
     assert "10K" not in found and "21K" not in found
 
 
@@ -73,7 +73,7 @@ def test_undefined_purities_skipped():
 
 def test_khannas_real_config_is_rejected():
     """The whole point: parses cleanly, is not a metal rate."""
-    found, _, _ = scrape.extract(KHANNA_HTML)
+    found, _, _ = collect.extract(KHANNA_HTML)
     ok, why = D.ladder_sane(found)
     assert not ok
     assert "ratio" in why.lower()
@@ -82,12 +82,12 @@ def test_khannas_real_config_is_rejected():
 def test_ordering_sane_alone_would_have_passed_it():
     """Shows why this check is needed on top of the existing one - Khanna's
     values DO descend with purity, so try_html reports 'ok'."""
-    found, _, _, note = scrape.try_html(KHANNA_HTML)
+    found, _, _, note = collect.try_html(KHANNA_HTML)
     assert found is not None and note == "ok"
 
 
 def test_a_real_ladder_passes():
-    ok, why = D.ladder_sane(scrape.derive_ladder(15278.0))
+    ok, why = D.ladder_sane(collect.derive_ladder(15278.0))
     assert ok
     assert "consistent" in why
 

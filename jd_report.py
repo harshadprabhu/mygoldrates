@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the Jewellers Digest analysis workbook from scraped history.
+"""Build the Jewellers Digest analysis workbook from our rate history.
 
 Reads `rates` + `brands` from Supabase, runs jd_analysis, and writes an
 .xlsx with the raw export a jeweller can pivot themselves plus the derived
@@ -43,6 +43,19 @@ KEY = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_ANON_KE
 OUT = os.environ.get("JD_REPORT_OUT", "build/jewellers-digest.xlsx")
 BUCKET = os.environ.get("JD_REPORT_BUCKET", "jd-reports")
 MC_URL = "https://mygoldrates.com/making-charges.json"
+
+DISCLAIMER = (
+    "IMPORTANT - PLEASE READ. Jewellers Digest is market analysis prepared "
+    "for jewellery trade buyers. It is NOT investment advice, NOT a "
+    "recommendation to buy or sell gold or any financial instrument, and "
+    "NOT a guarantee of any future price. Every figure here is computed "
+    "from rates each jeweller published on its own website; rates move "
+    "continuously and the price on a jeweller's own counter at the moment "
+    "of sale is the only one that governs a transaction. Forward-looking "
+    "figures describe how prices have behaved in the past and may be wrong. "
+    "Any commercial decision taken on this report is the reader's own. "
+    "MyGoldRates accepts no liability for any loss arising from its use."
+)
 
 GOLD = "D4A63C"
 INK = "1B1712"
@@ -102,7 +115,7 @@ def sheet_summary(wb, trend, stats, dates, excluded, generated):
     for col in "BCDEF":
         ws.column_dimensions[col].width = 15
 
-    r = 4
+    r = _disclaimer(ws, 4, width=6)
     ws.cell(row=r, column=1, value="WINDOW").font = BOLD
     ws.cell(row=r, column=1).fill = SUBHEAD
     r += 1
@@ -293,7 +306,7 @@ def sheet_methodology(wb, notes, excluded, trend, generated):
     ws.column_dimensions["A"].width = 120
     ws["A1"] = "How to read this report"
     ws["A1"].font = Font(bold=True, size=14, color=INK)
-    r = 3
+    r = _disclaimer(ws, 3, width=1)
     for n in notes:
         ws.cell(row=r, column=1, value="- " + n).alignment = \
             Alignment(wrap_text=True, vertical="top")
@@ -314,7 +327,7 @@ def sheet_methodology(wb, notes, excluded, trend, generated):
         "Spread - cheapest to dearest on the same day. This is the number "
         "that bounds what a buyer could save by shopping around that day.",
         "Days unchanged - days where the jeweller's published rate did not "
-        "move from the previous scraped day.",
+        "move from the previous published day.",
     ]:
         ws.cell(row=r, column=1, value="- " + d).alignment = \
             Alignment(wrap_text=True, vertical="top")
@@ -331,9 +344,287 @@ def sheet_methodology(wb, notes, excluded, trend, generated):
         ws.row_dimensions[r].height = 45
         r += 2
     ws.cell(row=r, column=1,
-            value=f"Generated {generated} from mygoldrates.com scraped data. "
+            value=f"Generated {generated} from the MyGoldRates rate history. "
                   f"Window {trend.get('from')} to {trend.get('to')}.")
     return ws
+
+
+def _disclaimer(ws, row, width=7):
+    """The disclaimer, in the same words on every sheet that carries it.
+
+    Written once as a constant and stamped from here rather than retyped per
+    sheet: a disclaimer that says three slightly different things in three
+    places is worth less than one that says the same thing everywhere.
+    """
+    c = ws.cell(row=row, column=1, value=DISCLAIMER)
+    c.font = Font(bold=True, size=9, color="7A2E22")
+    c.alignment = Alignment(wrap_text=True, vertical="top")
+    c.fill = PatternFill("solid", fgColor="FBF0EC")
+    ws.merge_cells(start_row=row, start_column=1,
+                   end_row=row + 2, end_column=width)
+    for i in range(3):
+        ws.row_dimensions[row + i].height = 30
+    return row + 4
+
+
+def _section(ws, r, title):
+    c = ws.cell(row=r, column=1, value=title)
+    c.font = BOLD
+    c.fill = SUBHEAD
+    return r + 1
+
+
+def sheet_outlook(wb, ol):
+    """Direction, conviction and the signals behind it.
+
+    This is the part of the product a jeweller is paying for, so it carries
+    its own workings: the six components with their weights, what the market
+    did over the last twenty days, and where the confidence is discounted.
+    A verdict with nothing under it is a horoscope.
+    """
+    ws = wb.create_sheet("Outlook")
+    ws.column_dimensions["A"].width = 34
+    for col in "BCDE":
+        ws.column_dimensions[col].width = 18
+
+    ws["A1"] = "Outlook"
+    ws["A1"].font = Font(bold=True, size=15, color=INK)
+    ws["A2"] = (f"As of {ol.get('as_of', '-')} - international parity in "
+                f"rupees per gram of 999 gold")
+    ws["A2"].font = Font(italic=True, color="6B6357")
+
+    r = _disclaimer(ws, 4, width=5)
+    st_ = ol.get("stance") or {}
+    r = _section(ws, r, "VERDICT")
+    for label, val in (
+        ("Direction", st_.get("label", "no reading")),
+        ("Score (-100 to +100)", st_.get("score")),
+        ("Signal agreement", st_.get("agreement")),
+        ("Conviction after penalties", st_.get("conviction")),
+    ):
+        ws.cell(row=r, column=1, value=label)
+        ws.cell(row=r, column=2, value=val)
+        r += 1
+    for pen in st_.get("penalties") or []:
+        ws.cell(row=r, column=1, value="Confidence reduced")
+        ws.cell(row=r, column=2,
+                value=f"x{pen['factor']} - {pen['reason']}")
+        r += 1
+    r += 1
+
+    if st_.get("components"):
+        r = _section(ws, r, "WHAT THE SIGNALS SAY")
+        _hrow(ws, r, ["Signal", "Reading", "Score", "Weight"],
+              {"Signal": 34, "Reading": 28})
+        r += 1
+        for c in st_["components"]:
+            ws.cell(row=r, column=1, value=c["name"])
+            ws.cell(row=r, column=2, value=c["detail"])
+            ws.cell(row=r, column=3, value=c["score"]).number_format = "+0.00;-0.00"
+            ws.cell(row=r, column=4, value=c["weight"]).number_format = "0%"
+            r += 1
+        r += 1
+
+    for cav in st_.get("caveats") or []:
+        ws.cell(row=r, column=1, value=cav).alignment = Alignment(wrap_text=True)
+        ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=5)
+        ws.row_dimensions[r].height = 30
+        r += 2
+
+    d = ol.get("drivers")
+    if d:
+        r = _section(ws, r, f"WHAT MOVED IT, LAST {d['days']} DAYS")
+        for label, key in (("Total, in rupee terms", "total_pct"),
+                           ("Gold, in US dollars", "gold_usd_pct"),
+                           ("Rupee (USD/INR)", "rupee_pct")):
+            ws.cell(row=r, column=1, value=label)
+            ws.cell(row=r, column=2,
+                    value=d[key]).number_format = "+0.00\%;-0.00\%"
+            r += 1
+        ws.cell(row=r, column=1, value="Driven mainly by")
+        ws.cell(row=r, column=2, value=d["driver"])
+        r += 2
+
+    em = [x for x in (ol.get("expected_move") or []) if "sigma_pct" in x]
+    if em:
+        r = _section(ws, r, "HOW FAR IT USUALLY TRAVELS")
+        _hrow(ws, r, ["Horizon", "Typical move, Rs", "Typical move %",
+                      "Seen over the last year %", "Days in sample"])
+        r += 1
+        names = {1: "Next day", 5: "Next week", 21: "Next month"}
+        for x in em:
+            ws.cell(row=r, column=1, value=names.get(x["days"],
+                                                     f"{x['days']} days"))
+            ws.cell(row=r, column=2, value=x["sigma_rupees"]).number_format = "#,##0"
+            ws.cell(row=r, column=3, value=x["sigma_pct"]).number_format = "0.00\%"
+            ws.cell(row=r, column=4,
+                    value=x["observed_68_pct"]).number_format = "0.00\%"
+            ws.cell(row=r, column=5, value=x["n"])
+            r += 1
+        ws.cell(row=r, column=1,
+                value=("About two days in three land inside these. The "
+                       "observed column is what actually happened and runs "
+                       "wider at longer horizons, because big moves cluster."))
+        ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=5)
+        r += 2
+
+    se = ol.get("seasonality") or {}
+    if se.get("mean_pct") is not None:
+        r = _section(ws, r, f"{se['month'].upper()}, IN PAST YEARS")
+        _hrow(ws, r, ["Year", "Return %"])
+        r += 1
+        for y in se.get("years", []):
+            ws.cell(row=r, column=1, value=y["year"])
+            ws.cell(row=r, column=2,
+                    value=y["return_pct"]).number_format = "+0.00\%;-0.00\%"
+            r += 1
+        for label, val, fmt in (("Average", se["mean_pct"], "+0.00\%;-0.00\%"),
+                                ("Year-to-year spread", se["stdev_pct"], "0.00\%"),
+                                ("Years in sample", se["n"], "0"),
+                                ("Up years", se["positive_years"], "0")):
+            ws.cell(row=r, column=1, value=label).font = BOLD
+            ws.cell(row=r, column=2, value=val).number_format = fmt
+            r += 1
+        ws.cell(row=r, column=1,
+                value=(f"{se['n']} years is {se['n']} observations, and the "
+                       "year-to-year spread is wider than the average itself. "
+                       "Festival demand reaches local premiums and stock "
+                       "availability well before it reaches the rate, which "
+                       "is set internationally."))
+        ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=5)
+    return ws
+
+
+def sheet_levels(wb, ol):
+    """Support and resistance, quoted on the board a jeweller actually reads."""
+    ws = wb.create_sheet("Levels")
+    ws["A1"] = "Support and resistance"
+    ws["A1"].font = Font(bold=True, size=15, color=INK)
+
+    bl = ol.get("board_levels") or {}
+    on_board = bool(bl.get("current"))
+    ws["A2"] = ("On the jeweller board" if on_board
+                else "International parity, rupees per gram")
+    ws["A2"].font = Font(italic=True, color="6B6357")
+
+    r = 4
+    if on_board:
+        ws.cell(row=r, column=1, value="Board today").font = BOLD
+        ws.cell(row=r, column=2, value=bl["current"]).number_format = "#,##0"
+        r += 1
+        ws.cell(row=r, column=1, value="Board premium over parity").font = BOLD
+        ws.cell(row=r, column=2,
+                value=bl["premium_over_parity_pct"]).number_format = "0.00\%"
+        r += 2
+
+    sup = bl.get("support") if on_board else (ol.get("levels") or {}).get("support")
+    res = bl.get("resistance") if on_board else (ol.get("levels") or {}).get("resistance")
+    _hrow(ws, r, ["Kind", "Level Rs/g", "Band low", "Band high",
+                  "Distance %", "Times price turned there", "Last touched"],
+          {"Times price turned there": 20})
+    r += 1
+    for kind, zs in (("Resistance", list(reversed(res or []))),
+                     ("Support", sup or [])):
+        for z in zs:
+            ws.cell(row=r, column=1, value=kind)
+            ws.cell(row=r, column=2, value=z["price"]).number_format = "#,##0"
+            ws.cell(row=r, column=3, value=z.get("low")).number_format = "#,##0"
+            ws.cell(row=r, column=4, value=z.get("high")).number_format = "#,##0"
+            ws.cell(row=r, column=5,
+                    value=z["distance_pct"]).number_format = "+0.00\%;-0.00\%"
+            ws.cell(row=r, column=6, value=z["touches"])
+            ws.cell(row=r, column=7, value=z.get("last_touch"))
+            r += 1
+    r += 1
+    for line in ((ol.get("levels") or {}).get("method"), bl.get("method")):
+        if not line:
+            continue
+        ws.cell(row=r, column=1, value=line).alignment = Alignment(wrap_text=True)
+        ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=7)
+        ws.row_dimensions[r].height = 42
+        r += 1
+    return ws
+
+
+def sheet_events(wb, ol):
+    """Releases scheduled to reprice gold, and the board pass-through."""
+    ws = wb.create_sheet("Event Risk")
+    ws["A1"] = "Scheduled event risk"
+    ws["A1"].font = Font(bold=True, size=15, color=INK)
+    ws["A2"] = "US releases that reliably move the gold price"
+    ws["A2"].font = Font(italic=True, color="6B6357")
+
+    r = 4
+    evs = ol.get("events") or []
+    if evs:
+        _hrow(ws, r, ["Date", "Release", "Impact", "Days away"],
+              {"Release": 38})
+        r += 1
+        for e in evs:
+            ws.cell(row=r, column=1, value=e["date"])
+            ws.cell(row=r, column=2, value=e["title"])
+            ws.cell(row=r, column=3, value=e["impact"])
+            ws.cell(row=r, column=4, value=e["days_away"])
+            r += 1
+    else:
+        ws.cell(row=r, column=1, value="Nothing high-impact scheduled "
+                                       "in the next seven days.")
+        r += 1
+    r += 1
+    ws.cell(row=r, column=1,
+            value=("Nobody here knows what these will say. This is when to "
+                   "expect the market to be repriced, not which way - a level "
+                   "that held all week means less the morning of an inflation "
+                   "print or a jobs report."))
+    ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=4)
+    ws.row_dimensions[r].height = 42
+    r += 2
+
+    bf = ol.get("board_forecast") or {}
+    if bf.get("usable"):
+        r = _section(ws, r, "HOW THE INTERNATIONAL MOVE REACHES THE BOARD")
+        for label, val, fmt in (
+            ("Lag", f"{bf['lag_days']} day", None),
+            ("Pass-through", bf["beta"], "0.00"),
+            ("Correlation", bf["corr"], "+0.00"),
+            ("Days measured", bf["n"], "0"),
+            ("International move, today", bf["international_move_pct"],
+             "+0.00\%;-0.00\%"),
+            ("Implied board move", bf["implied_board_move_pct"],
+             "+0.00\%;-0.00\%"),
+            ("Implied board level", bf["to_board"], "#,##0"),
+            ("Share NOT explained by this", bf["unexplained_share"], "0%"),
+        ):
+            ws.cell(row=r, column=1, value=label)
+            c = ws.cell(row=r, column=2, value=val)
+            if fmt:
+                c.number_format = fmt
+            r += 1
+        r += 1
+        ws.cell(row=r, column=1, value=bf["how"]).alignment = \
+            Alignment(wrap_text=True)
+        ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=4)
+        ws.row_dimensions[r].height = 56
+    elif bf:
+        ws.cell(row=r, column=1, value=bf.get("why", ""))
+        ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=4)
+    return ws
+
+
+def load_outlook():
+    """The outlook JSON, if the analysis step produced one.
+
+    Absent means the workbook simply ships without those sheets rather than
+    failing - the rate history is the core of the product and stands on its
+    own. Never read from docs/: that tree is public.
+    """
+    path = os.environ.get("OUTLOOK_OUT", "build/outlook.json")
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return None
+
 
 
 def build(rates, brands, mc, generated):
@@ -352,6 +643,13 @@ def build(rates, brands, mc, generated):
     sheet_brand_analysis(wb, stats)
     sheet_market_daily(wb, market)
     sheet_weekday(wb, A.weekday_pattern(market))
+    ol = load_outlook()
+    if ol:
+        sheet_outlook(wb, ol)
+        sheet_levels(wb, ol)
+        sheet_events(wb, ol)
+    else:
+        print("  outlook  not available - workbook ships without it")
     ai = None
     if os.environ.get("ANTHROPIC_API_KEY"):
         import jd_ai_report as AI

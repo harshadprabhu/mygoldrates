@@ -15,7 +15,7 @@ jobs:
       - run: pip install requests
       - name: Fetch Malabar live-gold-rate via each proxy, inspect raw HTML
         env:
-          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          COLLECTRAPI_KEY: ${{ secrets.COLLECTRAPI_KEY }}
           SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
           ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
           CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
@@ -63,21 +63,21 @@ jobs:
 
           tried_any = False
 
-          key = os.environ.get("SCRAPERAPI_KEY")
+          key = os.environ.get("COLLECTRAPI_KEY")
           if key:
               tried_any = True
               try:
-                  r = requests.get("http://api.scraperapi.com",
+                  r = requests.get("http://api.collectorapi.com",
                       params={"api_key": key, "url": URL, "render": "true",
                               "country_code": "in", "wait_for_selector": WAIT_SEL},
                       timeout=90)
-                  print(f"ScraperAPI status={r.status_code}")
+                  print(f"CollectorAPI status={r.status_code}")
                   if r.status_code == 200:
-                      inspect("ScraperAPI (render+waitFor)", r.text)
+                      inspect("CollectorAPI (render+waitFor)", r.text)
                   else:
-                      print(f"ScraperAPI error body: {r.text[:300]}")
+                      print(f"CollectorAPI error body: {r.text[:300]}")
               except Exception as e:
-                  print("ScraperAPI error:", e)
+                  print("CollectorAPI error:", e)
 
           key = os.environ.get("SCRAPINGBEE_KEY")
           if key:

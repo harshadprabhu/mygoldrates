@@ -23,7 +23,7 @@ the generated text must be traceable to the facts it was given. Anything
 else is an invented number, and the report is withheld rather than shipped.
 This is the same discipline as the rest of this codebase - a fabricated rate
 read off a 404 page got published for weeks because it looked plausible.
-Fluent prose is better at looking plausible than a scraper ever was.
+Fluent prose is better at looking plausible than a collector ever was.
 """
 import json
 import os
@@ -35,7 +35,7 @@ MODEL = "claude-opus-5-5"
 SYSTEM = """You write a short daily market note for Indian jewellery retailers, \
 published as Jewellers Digest (JD), a paid analysis product by MyGoldRates.
 
-You are given FACTS as JSON. They were computed from scraped data by code. \
+You are given FACTS as JSON. They were computed from our own rate history by code. \
 You are writing them up - you are not analysing raw data and not estimating \
 anything.
 

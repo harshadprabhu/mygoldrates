@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Probe candidate local jewellers and report which publish a usable rate.
 
-Reuses scrape.py wholesale - the same fetch(), the same CANDIDATE_PATHS
+Reuses collect.py wholesale - the same fetch(), the same CANDIDATE_PATHS
 walk, the same eight extractors, the same ordering_sane() check. A rate that
-verifies here is one the real scraper can read tomorrow; nothing is
+verifies here is one the real collector can read tomorrow; nothing is
 reimplemented, so the two cannot drift apart.
 
 For each candidate it walks the domain's likely rate paths, and for every
@@ -22,16 +22,16 @@ VERDICTS
   blocked    401/403/429/503 on every path - bot-walled to a plain request
   dead       nothing resolved (DNS, timeout, 404 everywhere)
 
-A "blocked" or "no-rate" verdict is NOT proof a jeweller is unscrapeable.
-This prober does static fetches only. The real scraper additionally has a
+A "blocked" or "no-rate" verdict is NOT proof a jeweller is unreadable.
+This prober does static fetches only. The real collector additionally has a
 browser-render path and a paid proxy waterfall, and several brands on the
 live board need them - Vaibhav Jewellers comes back "blocked" here while
-scrape.py reads it every day, and Tanishq 403s every plain request yet
+collect.py reads it every day, and Tanishq 403s every plain request yet
 publishes through the render path. That omission is deliberate: rendering
 and proxying cost time and credits per request, and a sweep whose job is to
 say "is there anything here at all" should not burn either. Read these two
 verdicts as "not readable cheaply", and hand a promising one to the real
-scraper to settle.
+collector to settle.
 
 Calibrated against brands already on the board: of five known-good
 controls, three verify from a plain fetch (CKC from a homepage banner, GRT
@@ -67,7 +67,7 @@ from urllib.parse import urljoin, urlsplit
 
 import requests
 
-import scrape
+import collect
 from local_candidates import CANDIDATES, DENY_HOSTS
 
 TIMEOUT = 20
@@ -82,15 +82,15 @@ def slugify(name):
 def ladder_sane(found):
     """-> (ok, why). Does this set of purities behave like one metal rate?
 
-    scrape.ordering_sane() only checks the values descend with purity, which a
+    collect.ordering_sane() only checks the values descend with purity, which a
     retail price list also does. This additionally checks the RATIOS: 22K
     should be 22/24 of 24K, 18K should be 18/24, and so on. A genuine per-gram
     metal rate satisfies that to within a fraction of a percent; a retail or
     making-inclusive price list does not, because making charges are not
     proportional to purity.
 
-    Reuses scrape.basis_confirmed so the tolerance here is the same one the
-    real scraper already trusts (RATIO_TOLERANCE), rather than a second
+    Reuses collect.basis_confirmed so the tolerance here is the same one the
+    real collector already trusts (RATIO_TOLERANCE), rather than a second
     opinion that could drift from it.
     """
     if len(found) < 2:
@@ -98,7 +98,7 @@ def ladder_sane(found):
         # real sources publish a single rate - but say so, because the ladder
         # for every other karat is then inferred from this one number.
         return True, "single purity - no ratio cross-check possible"
-    ok, why = scrape.basis_confirmed(found)
+    ok, why = collect.basis_confirmed(found)
     if ok:
         return True, why
     return False, (f"purity ratios inconsistent ({why}) - looks like retail or "
@@ -120,7 +120,7 @@ def probe(cand, session):
     # The bare domain first: several jewellers put the rate in a homepage
     # banner (CKC and Indriya on the live board both do), so the rate pages
     # are a fallback rather than the only place worth looking.
-    paths = [""] + list(scrape.CANDIDATE_PATHS)
+    paths = [""] + list(collect.CANDIDATE_PATHS)
     seen, tried = set(), []
     blocked = dead = 0
 
@@ -129,10 +129,10 @@ def probe(cand, session):
         if url in seen:
             continue
         seen.add(url)
-        if not scrape.robots_ok(url, session):
+        if not collect.robots_ok(url, session):
             tried.append(f"{p or '/'}: robots")
             continue
-        html, reason = scrape.fetch(url, session, TIMEOUT)
+        html, reason = collect.fetch(url, session, TIMEOUT)
         if not html:
             tried.append(f"{p or '/'}: {reason}")
             if str(reason).startswith("blocked"):
@@ -140,11 +140,11 @@ def probe(cand, session):
             else:
                 dead += 1
             continue
-        found, counts, how, note = scrape.try_html(html)
+        found, counts, how, note = collect.try_html(html)
         if found:
             best = max(found.items(),
-                       key=lambda kv: scrape.PURITY_FRACTION[kv[0]])
-            c24 = round(best[1] / scrape.PURITY_FRACTION[best[0]], 2)
+                       key=lambda kv: collect.PURITY_FRACTION[kv[0]])
+            c24 = round(best[1] / collect.PURITY_FRACTION[best[0]], 2)
             res = {**cand, "rate_url": url, "method": how,
                    "purities": sorted(found), "canonical_24k": c24,
                    "slug": slugify(cand["name"])}
@@ -191,7 +191,7 @@ def promote(sb, rows):
     """Insert verified candidates as INACTIVE brands with a pinned rate_url.
 
     Never touches a slug that already exists - an existing brand's
-    configuration is the scraper's business, not this job's.
+    configuration is the collector's business, not this job's.
     """
     if not sb or not rows:
         return 0
@@ -220,7 +220,7 @@ def promote(sb, rows):
 
 def main():
     session = requests.Session()
-    session.headers.update({"User-Agent": scrape.UA})
+    session.headers.update({"User-Agent": collect.UA})
 
     results = []
     for c in CANDIDATES:

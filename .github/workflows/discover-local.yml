@@ -1,7 +1,7 @@
 name: discover-local
 
 # Probes the candidate local jewellers in local_candidates.py and reports
-# which publish a scrapeable rate, promoting verified ones into `brands` as
+# which publish a readable rate, promoting verified ones into `brands` as
 # INACTIVE with a pinned rate_url (see discover_local.py for why inactive).
 #
 # WEEKLY, not daily. This is not a rate feed - it answers "does a readable

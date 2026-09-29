@@ -15,7 +15,7 @@ jobs:
       - run: pip install requests
       - name: CaratLane making-charge extractor POC
         env:
-          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          COLLECTRAPI_KEY: ${{ secrets.COLLECTRAPI_KEY }}
           SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
           ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
           CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
@@ -49,7 +49,7 @@ jobs:
             except Exception:
               pass
             for key_env, name, u, p in [
-              ("SCRAPERAPI_KEY","scraperapi","http://api.scraperapi.com",
+              ("COLLECTRAPI_KEY","collectorapi","http://api.collectorapi.com",
                 {"url": url, "render":"true","country_code":"in"}),
               ("SCRAPINGBEE_KEY","scrapingbee","https://app.scrapingbee.com/api/v1/",
                 {"url": url, "render_js":"true","wait":"3000"}),
@@ -96,7 +96,7 @@ jobs:
               except ValueError: pass
               return None, mm, gm
 
-          # ---- current GENERIC extractor (from scrape_charges.py) ----
+          # ---- current GENERIC extractor (from collect_charges.py) ----
           def generic_making_pct(html):
               mt = re.search(r'"making_charge_type"\s*:\s*"([a-z]+)"', html)
               mv = re.search(r'"making_charge"\s*:\s*"?([0-9.]+)', html)

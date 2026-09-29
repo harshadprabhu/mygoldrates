@@ -1,7 +1,7 @@
 name: rebuild-deploy
 
 on:
-  workflow_dispatch:   # manual: regenerate docs/ from current code + latest DB rates, no scrape
+  workflow_dispatch:   # manual: regenerate docs/ from current code + latest DB rates, no collect
 
 permissions:
   contents: write
@@ -32,22 +32,6 @@ jobs:
           ANALYTICS_TOKEN: ${{ secrets.ANALYTICS_TOKEN }}
         run: python generate_site.py
 
-      - name: Market outlook
-        # Direction, support and resistance for the Market Pulse section.
-        # Runs AFTER the site build so it writes into the docs/ tree the
-        # publish step is about to commit, and after the scrape so the board
-        # history it calibrates against includes today.
-        #
-        # continue-on-error: an upstream feed being down must not fail a
-        # rates run. outlook.py writes nothing when a feed fails, so the
-        # previous outlook.json stays in place and the page shows the last
-        # good read with its own timestamp on it, rather than an empty card.
-        continue-on-error: true
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: python outlook.py
-
       - name: Analytics RLS health check
         # Verifies anon can still INSERT into page_views + click_events.
         # On 2026-09-07 we discovered page_views INSERTs had been silently
@@ -71,13 +55,13 @@ jobs:
           if git diff --cached --quiet; then
             echo "site unchanged"
           else
-            git commit -m "Rebuild site (no scrape)"
+            git commit -m "Rebuild site (no collect)"
             git fetch origin main
             git rebase -X ours origin/main || {
               git rebase --abort
               git reset --soft origin/main
               git add docs
-              git commit -m "Rebuild site (no scrape)"
+              git commit -m "Rebuild site (no collect)"
             }
             git push
           fi

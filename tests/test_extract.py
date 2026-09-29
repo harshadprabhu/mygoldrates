@@ -12,12 +12,12 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import scrape  # noqa: E402
+import collect  # noqa: E402
 
 
 def _extract(text):
     """extract() takes HTML; these fixtures are the text shapes that matter."""
-    return scrape.extract(f"<html><body>{text}</body></html>")
+    return collect.extract(f"<html><body>{text}</body></html>")
 
 
 # --------------------------------------------------------------------------
@@ -55,9 +55,9 @@ def test_fineness_code_does_not_block_the_karat_row():
 def test_published_24k_wins_over_ladder_inference():
     """With a real 24K on the page we must use it, not derive one."""
     found, _, _ = _extract(CKC_BOARD)
-    top = max(found, key=lambda k: scrape.PURITY_FRACTION[k])
+    top = max(found, key=lambda k: collect.PURITY_FRACTION[k])
     assert top == "24K"
-    implied = found[top] / scrape.PURITY_FRACTION[top]
+    implied = found[top] / collect.PURITY_FRACTION[top]
     assert abs(implied - 15685.35) < 0.01
     # The value the old bug produced must NOT come back.
     assert abs(implied - 15534.55) > 100
@@ -65,7 +65,7 @@ def test_published_24k_wins_over_ladder_inference():
 
 def test_ckc_three_purities_confirm_the_basis():
     found, _, _ = _extract(CKC_BOARD)
-    ok, why = scrape.basis_confirmed(found)
+    ok, why = collect.basis_confirmed(found)
     assert ok, f"CKC's three purities should cross-validate, got: {why}"
 
 
@@ -106,12 +106,12 @@ def test_pure_gold_coin_reads_24k_directly():
 def test_lower_purity_only_page_still_extracts():
     found, _, _ = _extract("22Kt Gold : &#8377; 14145.00 /Gram")
     assert found.get("22K") == 14145.0
-    implied = found["22K"] / scrape.PURITY_FRACTION["22K"]
+    implied = found["22K"] / collect.PURITY_FRACTION["22K"]
     assert abs(implied - 15430.91) < 0.5
 
 
 def test_single_purity_is_not_basis_confirmed():
-    ok, why = scrape.basis_confirmed({"22K": 14145.0})
+    ok, why = collect.basis_confirmed({"22K": 14145.0})
     assert not ok and "single" in why.lower()
 
 
@@ -131,18 +131,18 @@ def test_labeled_re_spans_only_a_fineness_code_not_any_number():
     not what this test governs.
     """
     ok = "22Kt Gold (916) : \u20b9 14240.00 /Gram"
-    assert [m.group(2) for m in scrape._LABELED_RE.finditer(ok)] == ["14240.00"]
+    assert [m.group(2) for m in collect._LABELED_RE.finditer(ok)] == ["14240.00"]
 
     # "4821" is not a fineness code, so the label must not reach the rate.
     bad = "22Kt Gold, item 4821 in stock, priced at \u20b9 14240.00 /Gram"
-    assert not [m for m in scrape._LABELED_RE.finditer(bad)], (
+    assert not [m for m in collect._LABELED_RE.finditer(bad)], (
         "_LABELED_RE must not span an arbitrary number between the karat "
         "label and the rate")
 
 
 def test_ratio_check_rejects_inconsistent_purities():
     # 22K quoted far off the 22/24 ratio against the 24K on the same page.
-    ok, _ = scrape.basis_confirmed({"24K": 15685.35, "22K": 9000.0})
+    ok, _ = collect.basis_confirmed({"24K": 15685.35, "22K": 9000.0})
     assert not ok
 
 
@@ -172,7 +172,7 @@ GRT_RATE_JSON = r'''
 
 
 def test_script_json_rate_table_beats_the_visible_default_row():
-    found, _, how = scrape.extract(GRT_RATE_JSON)
+    found, _, how = collect.extract(GRT_RATE_JSON)
     assert how == "ratejson", f"expected the JSON reader, got {how}"
     assert found.get("24K") == 15442.0, (
         "must read the 24K row from the script JSON, not ladder it up from "
@@ -182,14 +182,14 @@ def test_script_json_rate_table_beats_the_visible_default_row():
 
 
 def test_rate_json_ignores_platinum_and_silver():
-    found, _, _ = scrape.extract(GRT_RATE_JSON)
+    found, _, _ = collect.extract(GRT_RATE_JSON)
     assert 7450.0 not in found.values(), "platinum leaked into gold purities"
     assert 255.0 not in found.values(), "silver leaked into gold purities"
 
 
 def test_rate_json_purities_confirm_the_basis():
-    found, _, _ = scrape.extract(GRT_RATE_JSON)
-    ok, why = scrape.basis_confirmed(found)
+    found, _, _ = collect.extract(GRT_RATE_JSON)
+    ok, why = collect.basis_confirmed(found)
     assert ok, f"GRT's four purities should cross-validate, got: {why}"
 
 
@@ -222,7 +222,7 @@ INDRIYA_ATTR_JSON = (
 
 
 def test_entity_encoded_attribute_json_is_read():
-    found, _, how = scrape.extract(INDRIYA_ATTR_JSON)
+    found, _, how = collect.extract(INDRIYA_ATTR_JSON)
     assert how == "ratejson", f"expected the JSON reader, got {how}"
     assert found.get("24K") == 15426.7, (
         "24K key carrying a fineness suffix ('24KT 999') must still match - "
@@ -231,7 +231,7 @@ def test_entity_encoded_attribute_json_is_read():
 
 
 def test_yesterday_is_never_read_as_todays_rate():
-    found, _, _ = scrape.extract(INDRIYA_ATTR_JSON)
+    found, _, _ = collect.extract(INDRIYA_ATTR_JSON)
     assert 15530.3 not in found.values(), "read yesterday's rate as today's"
     assert 14240.0 not in found.values(), "read yesterday's 22K as today's"
 
@@ -279,7 +279,7 @@ def test_region_map_is_not_empty():
 #
 # Their /gold-rates/ page renders its table from a live API; the numbers
 # baked into the served HTML are a stale fallback the page overwrites on
-# load. We were scraping the fallback: 24K at 14,450 when the live rate was
+# load. We were reading the fallback: 24K at 14,450 when the live rate was
 # 15,320 - 870/g, 5.7% out of date. That tripped both the purity-ratio check
 # and the 6.5%-off-median outlier gate, so the brand was quarantined and
 # vanished from the board entirely.
@@ -301,7 +301,7 @@ PNGS_API = (
 
 
 def test_flat_rates_object_is_read():
-    found, _, how = scrape.extract(PNGS_API)
+    found, _, how = collect.extract(PNGS_API)
     assert how == "ratejson", f"expected the JSON reader, got {how}"
     assert found.get("24K") == 15320.0
     assert found.get("22K") == 14094.0
@@ -310,14 +310,14 @@ def test_flat_rates_object_is_read():
 
 
 def test_995_variant_keys_never_bind_to_24k():
-    found, _, _ = scrape.extract(PNGS_API)
+    found, _, _ = collect.extract(PNGS_API)
     assert found["24K"] == 15320.0, (
         "goldPrice24K995/995GW must not be averaged into the 999 rate")
     assert 15290.0 not in found.values()
 
 
 def test_non_gold_and_undefined_purities_are_skipped():
-    found, _, _ = scrape.extract(PNGS_API)
+    found, _, _ = collect.extract(PNGS_API)
     assert 6128.0 not in found.values(), "9K has no PURITY_FRACTION entry"
     assert 232.0 not in found.values(), "silver leaked in"
     assert 7500.0 not in found.values(), "platinum leaked in"

@@ -10,7 +10,7 @@ request and Bing's RSS returns essentially nothing, so a job cannot
 discover domains on its own. So the split is deliberate - a person (or an
 agent with a search tool) appends candidates here, and discover_local.py
 does the repetitive part: probe every candidate, work out whether it
-publishes a scrapeable rate, and say so.
+publishes a readable rate, and say so.
 
 Re-probing on a schedule is the point, not a nicety. In one week this
 repo saw Senco rename a product handle (breaking a pinned URL) and IBJA
