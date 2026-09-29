@@ -35,4 +35,8 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          # Optional. Without it the workbook is built and uploaded exactly as
+          # before, minus the written note - the sheet then says the note was
+          # withheld rather than silently vanishing.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python b2b_report.py

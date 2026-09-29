@@ -250,6 +250,44 @@ def sheet_making_charges(wb, mc):
     return ws
 
 
+def sheet_market_note(wb, ai, generated):
+    """The AI-written daily note - or an honest blank where it would have been.
+
+    When the note fails validation the sheet says so instead of quietly
+    disappearing. A subscriber who paid for commentary should be told it was
+    withheld and why, not left wondering whether they missed a tab.
+    """
+    ws = wb.create_sheet("Market Note")
+    ws.column_dimensions["A"].width = 110
+    ws["A1"] = "Daily market note"
+    ws["A1"].font = Font(bold=True, size=14, color=INK)
+    ws["A2"] = (f"Written {generated} by Claude from the figures in this "
+                f"workbook. Every rupee figure below is checked against those "
+                f"figures before publication.")
+    ws["A2"].font = Font(italic=True, color="6B6357")
+    ws["A2"].alignment = Alignment(wrap_text=True, vertical="top")
+    ws.row_dimensions[2].height = 30
+
+    if ai and ai.get("ok"):
+        r = 4
+        for para in [p for p in ai["note"].split("\n") if p.strip()]:
+            c = ws.cell(row=r, column=1, value=para.strip())
+            c.alignment = Alignment(wrap_text=True, vertical="top")
+            ws.row_dimensions[r].height = max(30, 15 * (len(para) // 95 + 1))
+            r += 1
+        return ws
+
+    ws["A4"] = "No note today."
+    ws["A4"].font = BOLD
+    ws["A5"] = ("It was withheld rather than published: "
+                + (ai or {}).get("reason", "the generator was not configured")
+                + ". The figures in the other sheets are unaffected - they are "
+                  "computed by code, not written.")
+    ws["A5"].alignment = Alignment(wrap_text=True, vertical="top")
+    ws.row_dimensions[5].height = 45
+    return ws
+
+
 def sheet_methodology(wb, notes, excluded, trend, generated):
     ws = wb.create_sheet("Methodology")
     ws.column_dimensions["A"].width = 120
@@ -314,6 +352,13 @@ def build(rates, brands, mc, generated):
     sheet_brand_analysis(wb, stats)
     sheet_market_daily(wb, market)
     sheet_weekday(wb, A.weekday_pattern(market))
+    ai = None
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        import b2b_ai_report as AI
+        ai = AI.generate({"trend": trend, "stats": stats, "market": market})
+        sheet_market_note(wb, ai, generated)
+    else:
+        print("  ai note  skipped (ANTHROPIC_API_KEY not set)")
     if mc:
         sheet_making_charges(wb, mc)
     sheet_methodology(wb, notes, excluded, trend, generated)
