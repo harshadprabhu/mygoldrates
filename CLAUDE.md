@@ -96,6 +96,66 @@ send_alerts.py  →  Brevo API  →  subscriber emails
 - Needs a Cloudflare secret `GH_PAT` (fine-grained PAT with Actions read/write on this repo).
 - Deploy: Actions → `deploy-worker` workflow.
 
+## Market outlook (`outlook.py`)
+
+Direction, support/resistance and expected size for the Market Pulse
+section. Runs at build time and publishes `docs/outlook.json`, which the
+page fetches same-origin.
+
+### The two series, and why both
+The Indian retail board is **not** the international price, in level or in
+behaviour. Measured over our own scraped window:
+- The board sits about **15% above international parity** (duty plus a
+  domestic premium). Stable: stdev 0.012 on a median ratio of 1.149.
+- It is **sticky**. Same-day correlation with parity is only **0.35**, but
+  at a **one-day lag it is 0.71** with a pass-through of **0.56x**. Over
+  10-day windows correlation reaches 0.95 and ~82% of the move arrives.
+
+So technicals run on the international series (5 years of real OHLC, and it
+sets the direction), and the result is translated onto the board through the
+measured ratio and the measured lag. Running RSI on 72 days of sticky retail
+quotes would produce confident nonsense.
+
+That one-day lag is also the only genuinely forward-looking number on the
+page: today's international close mechanically implies tomorrow's board
+move. It ships with its correlation, its n, and the share it does **not**
+explain (about 71%).
+
+### Feeds
+- Gold daily OHLC: our own market Worker `/chart?sym=XAU&interval=1d&range=5y`
+  (Yahoo rate-limits shared CI egress; the Worker caches and is the same
+  source the live page reads, so the two cannot disagree).
+- USD/INR daily: `api.frankfurter.dev` (ECB series, no key, no quota).
+- Calendar: `generate_site.fetch_calendar()`, **not** the Worker's
+  `/calendar`, which cannot reach the feed and answers "upstream
+  unavailable" on every call.
+- Board history: `rates` via `jd_analysis.build_matrix`.
+
+### Things that bit during the build, and are now regression-tested
+- **Levels from a dead price regime.** Searching 5 years and ranking by
+  touch count offered Rs 4,807 (71 touches, 2021) as support for a market at
+  Rs 12,800. Levels now come from the last 260 bars only, with a capped
+  touch bonus.
+- **RSI 100 on a stalled feed.** Zero losses is not maximum bullish; with
+  zero gains too it means the price did not move. Returns 50 now.
+- **The calendar's MM-DD-YYYY dates.** Parsed as ISO they threw on every
+  row and a payrolls week read as "nothing scheduled".
+- **Truncating events by date** dropped Friday's payrolls for Tuesday's job
+  openings. High-impact releases are kept first now.
+
+### Degrading
+Any feed failing means `outlook.py` writes **nothing** and exits non-zero;
+the previous `outlook.json` stays and the page shows the last good read with
+its own timestamp. The workflow step is `continue-on-error`. A missing
+section is omitted rather than filled in - an outlook with a hole is honest,
+one with an invented figure looks identical to a real one.
+
+### What it is not
+Not investment advice, and the page says so. It describes market structure
+for people buying metal to stock. Every figure carries its own sample size,
+and the stance ships with its six components so a reader can disagree with
+it.
+
 ## Jewellers Digest (JD)
 
 The paid B2B product: a daily analysis workbook for jewellers, sold as a
@@ -171,9 +231,9 @@ it shipped once under the name `b2b` and was renamed wholesale.
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| `rates.yml` | CF Worker cron (via `workflow_dispatch`) + 4 morning GitHub crons | scrape → build site → publish → email |
+| `rates.yml` | CF Worker cron (via `workflow_dispatch`) + 4 morning GitHub crons | scrape → build site → outlook → publish → email |
 | `charges.yml` | 1st & 16th of month | scrape making charges → update `docs/making-charges.json` |
-| `rebuild-deploy.yml` | manual | rebuild site (generate_site.py) + deploy without re-scraping rates |
+| `rebuild-deploy.yml` | manual | rebuild site (generate_site.py) + outlook + deploy without re-scraping rates |
 | `deploy.yml` | manual | push `docs/` to Cloudflare Pages without scraping |
 | `deploy-worker.yml` | manual | deploy `cf-worker/` to Cloudflare Workers |
 | `cf-domain.yml` | manual (inspect/switch mode) | manage Cloudflare DNS for mygoldrates.com |

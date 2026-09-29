@@ -79,6 +79,22 @@ jobs:
           ANALYTICS_TOKEN: ${{ secrets.ANALYTICS_TOKEN }}
         run: python generate_site.py
 
+      - name: Market outlook
+        # Direction, support and resistance for the Market Pulse section.
+        # Runs AFTER the site build so it writes into the docs/ tree the
+        # publish step is about to commit, and after the scrape so the board
+        # history it calibrates against includes today.
+        #
+        # continue-on-error: an upstream feed being down must not fail a
+        # rates run. outlook.py writes nothing when a feed fails, so the
+        # previous outlook.json stays in place and the page shows the last
+        # good read with its own timestamp on it, rather than an empty card.
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python outlook.py
+
       - name: Publish site
         run: |
           git config user.name "github-actions[bot]"
