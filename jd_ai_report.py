@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""AI-written commentary for the B2B report, over pre-computed facts only.
+"""AI-written commentary for Jewellers Digest, over pre-computed facts only.
 
 MODEL AND COST
   claude-opus-5-5, adaptive thinking, effort high. One report per day serves
@@ -13,7 +13,7 @@ MODEL AND COST
 THE CONSTRAINT THAT SHAPES THIS FILE
 
 The model is never shown raw data and asked to analyse it. It is shown
-FACTS ALREADY COMPUTED by b2b_analysis - which is pure, deterministic and
+FACTS ALREADY COMPUTED by jd_analysis - which is pure, deterministic and
 separately tested - and asked to write them up. A language model asked to
 find patterns in 72 days of prices will find some, state them fluently, and
 be wrong in a way a jeweller cannot check.
@@ -33,7 +33,7 @@ import sys
 MODEL = "claude-opus-5-5"
 
 SYSTEM = """You write a short daily market note for Indian jewellery retailers, \
-published as part of a paid analysis product.
+published as Jewellers Digest (JD), a paid analysis product by MyGoldRates.
 
 You are given FACTS as JSON. They were computed from scraped data by code. \
 You are writing them up - you are not analysing raw data and not estimating \

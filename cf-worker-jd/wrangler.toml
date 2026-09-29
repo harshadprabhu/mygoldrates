@@ -1,4 +1,4 @@
-name = "mygoldrates-b2b-api"
+name = "mygoldrates-jd-api"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 

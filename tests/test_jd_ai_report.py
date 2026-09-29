@@ -11,7 +11,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import b2b_ai_report as R
+import jd_ai_report as R
 
 FACTS = {
     "market": {"median_last_day": 14889.0, "avg_spread": 479.89,

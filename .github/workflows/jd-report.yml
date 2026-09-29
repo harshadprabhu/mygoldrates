@@ -1,4 +1,4 @@
-name: b2b-report
+name: jd-report
 
 # Builds the subscriber workbook and uploads it to the PRIVATE Supabase
 # Storage bucket. Daily, after the morning scrapes have landed.
@@ -6,7 +6,7 @@ name: b2b-report
 # The workbook is NOT committed. Everything under docs/ is published to
 # mygoldrates.com, so committing the paid artifact would give it away; it
 # goes to private storage and subscribers get short-lived signed URLs from
-# the B2B worker.
+# the JD worker.
 
 on:
   workflow_dispatch:
@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: b2b-report
+  group: jd-report
   cancel-in-progress: false
 
 jobs:
@@ -39,4 +39,4 @@ jobs:
           # before, minus the written note - the sheet then says the note was
           # withheld rather than silently vanishing.
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: python b2b_report.py
+        run: python jd_report.py

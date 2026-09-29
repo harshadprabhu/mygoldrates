@@ -96,6 +96,61 @@ send_alerts.py  →  Brevo API  →  subscriber emails
 - Needs a Cloudflare secret `GH_PAT` (fine-grained PAT with Actions read/write on this repo).
 - Deploy: Actions → `deploy-worker` workflow.
 
+## Jewellers Digest (JD)
+
+The paid B2B product: a daily analysis workbook for jewellers, sold as a
+Rs 50/month Razorpay auto-debit subscription. Everything in it is named `jd`;
+it shipped once under the name `b2b` and was renamed wholesale.
+
+### `jd_analysis.py`
+- Pure, deterministic analysis over the scraped `rates` history. No I/O, no
+  formatting, separately tested. Every number in the product comes from here.
+- `build_matrix()` (date x brand, with brands excluded for thin coverage),
+  `daily_market()`, `brand_stats()` (premium = mean of **daily** gaps, not a
+  gap of means), `weekday_pattern()` (returns `n` so the sample size travels
+  with the number), `market_trend()`, `describe_confidence()`.
+
+### `jd_report.py`
+- Builds the 7-sheet .xlsx: Summary, Daily Rates, Brand Analysis, Market
+  Daily, Weekday, Making Charges, Methodology. Formatting only; it computes
+  nothing itself.
+- Writes to `build/jewellers-digest.xlsx` — **never** under `docs/`. Everything
+  in `docs/` is published to mygoldrates.com, so writing the paid artifact
+  there would hand it to anyone who guessed the filename.
+- Uploads to the PRIVATE Supabase Storage bucket `jd-reports` as
+  `jewellers-digest-<window-end>.xlsx`. Dated, not overwritten, so a
+  subscriber who paid last week can still be given what they paid for.
+
+### `jd_ai_report.py`
+- The AI market note (`claude-opus-5-5`, adaptive thinking). The model is
+  never shown raw data — only facts already computed by `jd_analysis` — and
+  every rupee figure in its output is checked back against those facts before
+  the note ships. An untraceable figure means the note is withheld, not
+  published. Optional: no `ANTHROPIC_API_KEY`, no note, report still builds.
+
+### Cloudflare Worker (`cf-worker-jd/`)
+- Separate Worker from `cf-worker-market/` on purpose: that one is public,
+  CORS-open and edge-cached; this one holds payment credentials and decides
+  who has paid. **No caching anywhere in it** — a cached entitlement decision
+  or signed URL would hand one jeweller's access to the next caller.
+- Routes: `POST /jd/signup`, `POST /jd/webhook`, `GET /jd/status`,
+  `GET /jd/report` (10-minute signed URL), `GET /jd/rates`.
+- Razorpay webhooks are HMAC-verified with a constant-time compare and made
+  idempotent by a unique index on `jd_webhook_events.event_id`.
+- API keys are shown once and stored only as SHA-256; `jd_api_keys` holds the
+  hash and a visible prefix, never the key.
+- Deploy: Actions → `deploy-jd-worker` (manual only).
+
+### Going live — one-time setup (not done yet)
+1. Run `sql/jd.sql` in the Supabase SQL Editor.
+2. Create a Supabase Storage bucket named `jd-reports` and leave it **private**.
+3. Create the Razorpay plan; note the `plan_…` id.
+4. `wrangler secret put` for `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`,
+   `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`
+   (the webhook secret, **not** the key secret), `RAZORPAY_PLAN_ID`.
+5. Point the Razorpay webhook at `…/jd/webhook`.
+6. Optional: add `ANTHROPIC_API_KEY` as a GitHub secret for the AI note.
+
 ## Supabase schema (key tables)
 
 **`brands`** — jeweller catalogue. `slug` is the stable identifier used in `NEEDS_PROXY`, `REGION_MAP`, and URL paths. `active=false` brands are skipped by the scraper.
@@ -109,6 +164,8 @@ send_alerts.py  →  Brevo API  →  subscriber emails
 **`page_views`** — day-wise visitor analytics (page URL, referrer, IST calendar date). Insert-only via anon key (RLS); read via service key or `analytics_report()` function.
 
 **`click_events`** — click tracking (label, page URL, IST calendar date). Same RLS as `page_views`.
+
+**`jd_accounts` / `jd_subscriptions` / `jd_payments` / `jd_api_keys` / `jd_webhook_events`** — Jewellers Digest. RLS is ON with **zero policies** and anon/authenticated are explicitly revoked, so the anon key the public site ships cannot reach a single row. Service key only, from a Cloudflare secret. Amounts are integers in paise.
 
 ## GitHub Actions workflows
 
@@ -124,6 +181,8 @@ send_alerts.py  →  Brevo API  →  subscriber emails
 | `list-brands.yml` | manual | run `list_brands.py` |
 | `mc-engine-test.yml` | manual | test mc_engine.py extraction |
 | `test-send.yml` | manual (needs `email` input) | send a test digest to one address |
+| `jd-report.yml` | daily 06:45 UTC + manual | build the Jewellers Digest workbook → private Supabase Storage |
+| `deploy-jd-worker.yml` | manual | deploy `cf-worker-jd/` (payment credentials — deliberately manual) |
 | `diag-*.yml` | manual (throwaway) | one-off diagnostic workflows for debugging brand extractors |
 
 ## Required GitHub secrets
@@ -139,6 +198,7 @@ send_alerts.py  →  Brevo API  →  subscriber emails
 - `extend_inquiries.sql` — adds enrichment columns (`google_id`, `google_picture`, `age`, `gender`, `signup_source`) and recreates the `upsert_subscriber` RPC.
 - `analytics.sql` — creates `page_views` + `click_events` tables with anon insert-only RLS.
 - `analytics_report.sql` — secret-gated `analytics_report()` function for the private dashboard (replace `__ANALYTICS_TOKEN__` with real token before running).
+- `jd.sql` — Jewellers Digest tables (`jd_*`), RLS-denied to anon. Safe to re-run; it also renames the older `b2b_*` objects in place if that earlier version was ever run, so no subscriber's data or API key is lost to the rename.
 
 ## Adding a new brand
 

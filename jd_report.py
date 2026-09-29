@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Build the B2B gold-rate analysis workbook from scraped history.
+"""Build the Jewellers Digest analysis workbook from scraped history.
 
-Reads `rates` + `brands` from Supabase, runs b2b_analysis, and writes an
+Reads `rates` + `brands` from Supabase, runs jd_analysis, and writes an
 .xlsx with the raw export a jeweller can pivot themselves plus the derived
-analysis. Formatting lives here; every number comes from b2b_analysis, which
+analysis. Formatting lives here; every number comes from jd_analysis, which
 is pure and separately tested.
 
 Sheets
@@ -31,7 +31,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
-import b2b_analysis as A
+import jd_analysis as A
 
 SB = os.environ.get("SUPABASE_URL", "").rstrip("/")
 KEY = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_ANON_KEY")
@@ -39,9 +39,9 @@ KEY = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_ANON_KE
 # Cloudflare Pages, so writing the paid workbook there would hand it to
 # anyone who guessed the filename. It is written to a build-local path and
 # uploaded to a PRIVATE Supabase Storage bucket; entitled subscribers get a
-# short-lived signed URL from the B2B worker, never a public path.
-OUT = os.environ.get("B2B_REPORT_OUT", "build/mygoldrates-analysis.xlsx")
-BUCKET = os.environ.get("B2B_REPORT_BUCKET", "b2b-reports")
+# short-lived signed URL from the JD worker, never a public path.
+OUT = os.environ.get("JD_REPORT_OUT", "build/jewellers-digest.xlsx")
+BUCKET = os.environ.get("JD_REPORT_BUCKET", "jd-reports")
 MC_URL = "https://mygoldrates.com/making-charges.json"
 
 GOLD = "D4A63C"
@@ -70,7 +70,7 @@ def get(path):
 
 def fetch_making_charges():
     try:
-        req = urllib.request.Request(MC_URL, headers={"User-Agent": "mygoldrates-b2b"})
+        req = urllib.request.Request(MC_URL, headers={"User-Agent": "mygoldrates-jd"})
         with urllib.request.urlopen(req, timeout=30) as r:
             return json.loads(r.read())
     except Exception as e:
@@ -94,7 +94,7 @@ def _hrow(ws, row, headers, width=None):
 
 def sheet_summary(wb, trend, stats, dates, excluded, generated):
     ws = wb.create_sheet("Summary")
-    ws["A1"] = "MyGoldRates - Jeweller Rate Analysis"
+    ws["A1"] = "Jewellers Digest - MyGoldRates jeweller rate analysis"
     ws["A1"].font = Font(bold=True, size=15, color=INK)
     ws["A2"] = f"Generated {generated} - all rates 24K, pre-GST, per gram"
     ws["A2"].font = Font(italic=True, color="6B6357")
@@ -354,7 +354,7 @@ def build(rates, brands, mc, generated):
     sheet_weekday(wb, A.weekday_pattern(market))
     ai = None
     if os.environ.get("ANTHROPIC_API_KEY"):
-        import b2b_ai_report as AI
+        import jd_ai_report as AI
         ai = AI.generate({"trend": trend, "stats": stats, "market": market})
         sheet_market_note(wb, ai, generated)
     else:
@@ -370,7 +370,7 @@ def upload(path, trend):
     """Upload to a PRIVATE Supabase Storage bucket, keyed by window end date.
 
     Needs the service key - the anon key cannot write here, and the bucket
-    must not be public: the whole point is that only the B2B worker can mint
+    must not be public: the whole point is that only the JD worker can mint
     a signed URL for a subscriber whose entitlement is current.
 
     Dated object names keep every day's workbook rather than overwriting, so
@@ -381,7 +381,7 @@ def upload(path, trend):
     key = os.environ.get("SUPABASE_SERVICE_KEY")
     if not key:
         return "skipped (no service key - report written locally only)"
-    name = f"analysis-{trend.get('to')}.xlsx"
+    name = f"jewellers-digest-{trend.get('to')}.xlsx"
     url = f"{SB}/storage/v1/object/{BUCKET}/{name}"
     with open(path, "rb") as f:
         body = f.read()
@@ -409,7 +409,7 @@ def upload(path, trend):
 
 def main():
     if not SB or not KEY:
-        print("b2b_report: SUPABASE_URL / key not set")
+        print("jd_report: SUPABASE_URL / key not set")
         return 1
     generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     rates = get("rates?select=rate_date,brand_id,canonical_24k_pre_gst,status"
@@ -420,7 +420,7 @@ def main():
     os.makedirs(os.path.dirname(OUT) or ".", exist_ok=True)
     wb.save(OUT)
     t = ctx["trend"]
-    print(f"b2b_report: {OUT}")
+    print(f"jd_report: {OUT}")
     print(f"  window   {t['from']} -> {t['to']} ({t['days']} days)")
     print(f"  brands   {len(ctx['stats'])} included"
           + (f", excluded {ctx['excluded']}" if ctx["excluded"] else ""))
