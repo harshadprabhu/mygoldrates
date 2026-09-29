@@ -1,0 +1,42 @@
+name: b2b-report
+
+# Builds the subscriber workbook and uploads it to the PRIVATE Supabase
+# Storage bucket. Daily, after the morning scrapes have landed.
+#
+# The workbook is NOT committed. Everything under docs/ is published to
+# mygoldrates.com, so committing the paid artifact would give it away; it
+# goes to private storage and subscribers get short-lived signed URLs from
+# the B2B worker.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "45 6 * * *"   # 06:45 UTC ~ 12:15 IST, after the morning runs
+
+permissions:
+  contents: read
+
+concurrency:
+  group: b2b-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build and upload the subscriber workbook
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          # Optional. Without it the workbook is built and uploaded exactly as
+          # before, minus the written note - the sheet then says the note was
+          # withheld rather than silently vanishing.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python b2b_report.py

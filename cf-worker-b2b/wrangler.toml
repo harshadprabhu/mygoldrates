@@ -1,0 +1,23 @@
+name = "mygoldrates-b2b-api"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# No routes bound here - add a custom route in the Cloudflare dashboard when
+# going live. The workers.dev URL is enough to test against.
+#
+# NO CACHING ANYWHERE in this Worker. Every answer is per-caller and
+# time-bound: an entitlement decision or a signed report URL served from a
+# shared cache would hand one jeweller's access to the next caller.
+
+[observability]
+enabled = true
+
+# Secrets - set with `wrangler secret put <NAME>`, never in this file:
+#   SUPABASE_URL              same project the site uses
+#   SUPABASE_SERVICE_KEY      service role; these tables are RLS-denied to anon
+#   RAZORPAY_KEY_ID           rzp_live_… / rzp_test_…
+#   RAZORPAY_KEY_SECRET
+#   RAZORPAY_WEBHOOK_SECRET   the webhook secret, NOT the key secret - they
+#                             are different values and signature verification
+#                             fails silently-looking if they are swapped
+#   RAZORPAY_PLAN_ID          plan_… created once for the monthly price

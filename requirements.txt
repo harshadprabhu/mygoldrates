@@ -5,3 +5,5 @@ playwright
 truststore
 brotli
 pillow
+openpyxl
+anthropic
