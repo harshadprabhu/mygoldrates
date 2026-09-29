@@ -1,0 +1,27 @@
+name: deploy-b2b-worker
+
+# Deploys the B2B subscription API. Manual only: this Worker holds payment
+# credentials and decides who has paid, so it should go out when someone
+# means it to, not on every push to main.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Deploy
+        working-directory: cf-worker-b2b
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@3 deploy
