@@ -1,4 +1,4 @@
-"""One-off Search Console diagnostic - NOT part of the regular scrape/build
+"""One-off Search Console diagnostic - NOT part of the regular collect/build
 pipeline. Run manually via the gsc-report.yml workflow when investigating
 search performance.
 

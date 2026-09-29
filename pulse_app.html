@@ -106,7 +106,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
 
 /* ─── Top bar ─── */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 4px;flex-shrink:0}
-/* When the jeweller board rates were last scraped - distinct from the live
+/* When the jeweller board rates were last collected - distinct from the live
    chip, which tracks the 3s spot feed. Sits directly under the topbar so it
    is the first thing read after the brand. */
 .rates-stamp{flex-shrink:0;padding:2px 16px 6px;font-family:'DM Sans',sans-serif;
@@ -297,66 +297,6 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
 @media(max-width:420px){.ic-tab{font-size:9px;padding:5px 7px}}
 .mc-d{font-size:10px;font-weight:700;margin-top:3px;display:inline-flex;align-items:center;gap:2px;padding:2px 6px;border-radius:5px;color:#F2EDE3;background:rgba(255,255,255,0.07)}
 .mc-d.up{color:var(--mint);background:var(--mint-soft)}.mc-d.dn{color:var(--rose);background:var(--rose-soft)}
-/* ─── Outlook (Market Pulse): direction, levels, and how far ─── */
-.ol-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:14px;margin:10px 0 6px}
-.ol-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
-.ol-verdict{display:flex;align-items:center;gap:10px;min-width:0}
-.ol-arrow{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-size:15px;flex-shrink:0}
-.ol-arrow.up{background:var(--mint-soft);color:var(--mint)}
-.ol-arrow.down{background:var(--rose-soft);color:var(--rose)}
-.ol-arrow.flat{background:var(--gold-soft);color:var(--gold)}
-.ol-label{font-size:17px;font-weight:700;letter-spacing:-.2px;line-height:1.15}
-.ol-label.up{color:var(--mint)} .ol-label.down{color:var(--rose)} .ol-label.flat{color:var(--gold-light)}
-.ol-sub{font-size:10.5px;color:var(--text3);margin-top:2px}
-.ol-conv{text-align:right;flex-shrink:0}
-.ol-conv .k{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3)}
-.ol-bars{display:flex;gap:2px;margin-top:4px;justify-content:flex-end}
-.ol-bars i{width:8px;height:12px;border-radius:2px;background:rgba(255,255,255,0.12)}
-.ol-bars i.on{background:var(--gold)}
-
-.ol-sec{border-top:1px solid var(--border);padding-top:11px;margin-top:11px}
-.ol-sec>h4{font-size:9.5px;letter-spacing:1.3px;text-transform:uppercase;color:var(--text3);font-weight:700;margin:0 0 8px}
-
-/* signal rows */
-.ol-sig{display:grid;grid-template-columns:1fr auto 54px;gap:8px;align-items:center;padding:4px 0;font-size:11.5px}
-.ol-sig .n{color:var(--text2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ol-sig .d{color:var(--text3);font-size:10.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.ol-mini{position:relative;height:6px;border-radius:3px;background:rgba(255,255,255,0.08)}
-.ol-mini u{position:absolute;top:0;bottom:0;border-radius:3px;text-decoration:none}
-.ol-mini u.up{background:var(--mint)} .ol-mini u.down{background:var(--rose)}
-.ol-mini::after{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:rgba(255,255,255,0.18)}
-
-/* level ladder */
-.ol-lad{display:flex;flex-direction:column;gap:4px}
-.ol-lv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:baseline;padding:6px 9px;border-radius:8px;font-size:12px;background:rgba(255,255,255,0.03);border-left:2px solid transparent}
-.ol-lv.res{border-left-color:var(--rose)}
-.ol-lv.sup{border-left-color:var(--mint)}
-.ol-lv.now{background:var(--gold-soft);border-left-color:var(--gold);font-weight:700}
-.ol-lv .p{font-variant-numeric:tabular-nums;color:var(--text)}
-.ol-lv .m{font-size:10px;color:var(--text3);font-variant-numeric:tabular-nums;white-space:nowrap}
-.ol-lv .band{font-size:9.5px;color:var(--text3);display:block;font-weight:400;font-variant-numeric:tabular-nums}
-
-/* range + driver tiles */
-.ol-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.ol-tile{background:rgba(255,255,255,0.03);border-radius:9px;padding:8px 9px;min-width:0}
-.ol-tile .k{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
-.ol-tile .v{font-size:14px;font-weight:700;color:var(--text);margin-top:3px;font-variant-numeric:tabular-nums}
-.ol-tile .s{font-size:9.5px;color:var(--text3);margin-top:2px;font-variant-numeric:tabular-nums}
-
-/* events */
-.ol-ev{display:flex;gap:8px;align-items:baseline;padding:5px 0;font-size:11.5px;border-bottom:1px solid rgba(255,255,255,0.04)}
-.ol-ev:last-child{border-bottom:0}
-.ol-ev .dt{font-size:9.5px;color:var(--text3);width:52px;flex-shrink:0;font-variant-numeric:tabular-nums}
-.ol-ev .ti{color:var(--text2);flex:1 1 auto;min-width:0}
-.ol-ev .im{font-size:8.5px;letter-spacing:.8px;text-transform:uppercase;padding:2px 6px;border-radius:99px;flex-shrink:0}
-.ol-ev .im.high{background:var(--rose-soft);color:var(--rose)}
-.ol-ev .im.medium{background:var(--gold-soft);color:var(--gold)}
-
-.ol-note{font-size:10.5px;color:var(--text3);line-height:1.5;margin-top:10px}
-.ol-caveat{font-size:10.5px;color:var(--gold-light);background:var(--gold-soft);border-radius:7px;padding:7px 9px;margin-top:8px;line-height:1.45}
-.ol-empty{font-size:11.5px;color:var(--text3);padding:10px 0;text-align:center}
-@media (max-width:360px){.ol-tiles{grid-template-columns:repeat(2,1fr)}.ol-sig{grid-template-columns:1fr auto 40px}}
-
 .mcard{transition:background-color .4s ease,border-color .4s ease,box-shadow .4s ease}
 .mcard.pulse-up{background:color-mix(in srgb,var(--mint) 12%,var(--glass2));border-color:color-mix(in srgb,var(--mint) 45%,var(--glass-border));box-shadow:0 0 0 1px color-mix(in srgb,var(--mint) 30%,transparent),0 4px 18px color-mix(in srgb,var(--mint) 22%,transparent)}
 .mcard.pulse-dn{background:color-mix(in srgb,var(--rose) 12%,var(--glass2));border-color:color-mix(in srgb,var(--rose) 45%,var(--glass-border));box-shadow:0 0 0 1px color-mix(in srgb,var(--rose) 30%,transparent),0 4px 18px color-mix(in srgb,var(--rose) 22%,transparent)}
@@ -423,7 +363,7 @@ p.calc-note{font-size:10px;color:var(--text3);text-align:center;padding:10px 20p
 p.mc-intro{font-size:11px;color:var(--text2);line-height:1.6;padding:0 16px 12px}
 .mc-brand-logo{width:18px;height:18px;border-radius:5px;object-fit:contain;flex-shrink:0;background:#fff;border:1px solid var(--border);padding:1px}
 /* Brand picker: a single dropdown trigger + list, not a row of open buttons -
-   scales cleanly as more brands get scraped instead of needing sideways
+   scales cleanly as more brands get collected instead of needing sideways
    scroll to discover them. */
 .mc-brand-select{position:relative;margin:0 12px 10px}
 .mc-brand-trigger{width:100%;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;padding:10px 12px 10px 10px;border-radius:13px;border:1px solid var(--glass-border2);background:var(--glass2);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:var(--text);cursor:pointer;font-family:inherit;transition:border-color .2s;text-align:left}
@@ -673,7 +613,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   </div>
 </header>
 
-<!-- When the JEWELLER board rates were last scraped. Distinct from the live
+<!-- When the JEWELLER board rates were last collected. Distinct from the live
      chip above, which tracks the spot/MCX feed refreshing every 3s. Values
      are substituted at build time by generate_site.py. -->
 <div class="rates-stamp" id="ratesStamp" data-rates-epoch="__RATES_EPOCH__">
@@ -802,25 +742,6 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
       <div class="ic-empty" id="icEmpty"></div>
     </div>
     <div class="ic-foot"><span id="icNote">Loading&hellip;</span></div>
-  </div>
-
-  <div class="sh"><div class="ic gl">&#9878;</div><h2>Outlook</h2></div>
-
-  <div class="ol-card" id="olCard">
-    <div class="ol-head">
-      <div class="ol-verdict">
-        <div class="ol-arrow flat" id="olArrow">&#8212;</div>
-        <div>
-          <div class="ol-label flat" id="olLabel">Reading the market&hellip;</div>
-          <div class="ol-sub" id="olSub">Loading outlook</div>
-        </div>
-      </div>
-      <div class="ol-conv">
-        <div class="k">Conviction</div>
-        <div class="ol-bars" id="olConv"></div>
-      </div>
-    </div>
-    <div id="olBody"><div class="ol-empty">Loading&hellip;</div></div>
   </div>
 
   <div class="sh"><div class="ic mt">&#128200;</div><h2>Rate Trend</h2></div>
@@ -1160,27 +1081,6 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
     <div class="ic-foot"><span id="icNoteS">Loading&hellip;</span></div>
   </div>
       <div class="site-section-head" style="margin-top:36px">
-        <div><span class="site-eyebrow-sm">Direction &amp; Levels</span><h2>Outlook</h2></div>
-      </div>
-
-  <div class="ol-card" id="olCardS">
-    <div class="ol-head">
-      <div class="ol-verdict">
-        <div class="ol-arrow flat" id="olArrowS">&#8212;</div>
-        <div>
-          <div class="ol-label flat" id="olLabelS">Reading the market&hellip;</div>
-          <div class="ol-sub" id="olSubS">Loading outlook</div>
-        </div>
-      </div>
-      <div class="ol-conv">
-        <div class="k">Conviction</div>
-        <div class="ol-bars" id="olConvS"></div>
-      </div>
-    </div>
-    <div id="olBodyS"><div class="ol-empty">Loading&hellip;</div></div>
-  </div>
-
-      <div class="site-section-head" style="margin-top:36px">
         <div><span class="site-eyebrow-sm">Live History</span><h2>Rate Trend</h2></div>
         <div class="trend-range" id="trendRangeS">
           <button class="tr-btn" data-r="7">1W</button>
@@ -1479,17 +1379,17 @@ function handleCredentialResponse(resp){
   var OZ_PER_KG=32.1507466; // troy oz per kg — silver quoted per kg locally
   var INDIA_PREMIUM=0.14; // approx import duty + dealer markup over raw LBMA spot, tuned to typical IBJA vs XAU/INR gap
   var SILVER_INDIA_PREMIUM=0.12; // silver import duty + local markup vs XAG spot, slightly under gold
-  // BRANDS[].rate is the rate actually scraped from each jeweller and is
+  // BRANDS[].rate is the rate actually collected from each jeweller and is
   // rendered as-is. It is deliberately NOT rescaled against a spot-derived
   // anchor: this page used to rebuild every brand price every 3s from
-  // (spot x 1.14), which threw the scraped values away and inflated the
+  // (spot x 1.14), which threw the collected values away and inflated the
   // whole board by ~25/g - a jeweller's board rate is their own margin
   // decision, not a fixed premium over LBMA, which is precisely why each
-  // one is scraped separately. Board rates refresh when the scraper runs
+  // one is collected separately. Board rates refresh when the collector runs
   // (every 30 min), not on the 3s spot tick; spot, silver, FX and MCX
   // tiles below still tick live because those genuinely move that fast.
   //
-  // Real IBJA 24K/22K per gram, scraped from ibjarates.com at build, plus
+  // Real IBJA 24K/22K per gram, collected from ibjarates.com at build, plus
   // the raw spot INR/g at that moment so the tile can track intraday
   // movement from a TRUE anchor instead of a guessed premium. Zero when
   // the IBJA fetch failed - applyLive falls back to the old estimate then.
@@ -1527,7 +1427,7 @@ function handleCredentialResponse(resp){
 
   function applyLive(usdOz,usdinr,silverUsdOz,prevs){
     var spotRaw=(usdOz/OZ_TO_G)*usdinr;
-    // Anchor on the REAL IBJA rate scraped at build and track intraday
+    // Anchor on the REAL IBJA rate collected at build and track intraday
     // movement by the ratio of spot now to spot then. The old
     // spotRaw*(1+0.14) was a guessed premium and sat ~43/g under the
     // published IBJA figure. Falls back to that estimate only when the
@@ -1543,7 +1443,7 @@ function handleCredentialResponse(resp){
     LIVE.ibja24=ibja24;LIVE.ibja22=ibja24*PURITY['22K'];
     LIVE.goldUsdOz=usdOz;LIVE.usdinr=usdinr;
     // NOTE: brand rates are intentionally not touched here - see the
-    // comment on IBJA_ANCHOR_24. They are what the scraper read.
+    // comment on IBJA_ANCHOR_24. They are what the collector read.
 
     // Previous closes, if the worker supplied them this tick.
     if(prevs){
@@ -2513,200 +2413,6 @@ function handleCredentialResponse(resp){
     });
   }
 
-  // ─── Outlook ───────────────────────────────────────────────────────────
-  // Direction, levels and expected size, computed by outlook.py at build
-  // time and published to /outlook.json alongside this page.
-  //
-  // Same-origin on purpose. The Cloudflare worker cannot reach the calendar
-  // feed at all and Yahoo rate-limits shared egress, so the analysis runs
-  // where those feeds are actually reachable and ships as a static file.
-  // That also means this section renders instantly and cannot half-load.
-  //
-  // Every number here arrives pre-computed. Nothing in this function
-  // calculates a market figure; if a field is missing the block that needed
-  // it is skipped, because a missing section is honest and an invented one
-  // looks exactly like a real one.
-  var OUTLOOK = null;
-
-  function olMoney(v){
-    if(v===null||v===undefined) return '—';
-    return '₹'+Math.round(v).toLocaleString('en-IN');
-  }
-  function olPct(v,dp){
-    if(v===null||v===undefined) return '—';
-    return (v>=0?'+':'')+v.toFixed(dp===undefined?2:dp)+'%';
-  }
-  function olEsc(t){
-    return String(t==null?'':t).replace(/[&<>"]/g,function(c){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});
-  }
-  function olDay(iso){
-    var p=String(iso||'').split('-');
-    if(p.length!==3) return olEsc(iso);
-    var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return (+p[2])+' '+m[(+p[1])-1];
-  }
-
-  function olSignals(comps){
-    if(!comps||!comps.length) return '';
-    var rows=comps.map(function(c){
-      var pos=c.score>=0, w=Math.min(Math.abs(c.score),1)*50;
-      return '<div class="ol-sig"><span class="n">'+olEsc(c.name)+'</span>'+
-        '<span class="d">'+olEsc(c.detail)+'</span>'+
-        '<span class="ol-mini"><u class="'+(pos?'up':'down')+'" style="'+
-        (pos?'left:50%;width:':'right:50%;width:')+w.toFixed(1)+'%"></u></span></div>';
-    }).join('');
-    return '<div class="ol-sec"><h4>What the signals say</h4>'+rows+'</div>';
-  }
-
-  function olLadder(bl,levels){
-    // Prefer levels already translated onto the jeweller board; fall back to
-    // international parity, clearly labelled, when the board translation is
-    // not available (it needs our own scraped history to calibrate).
-    var onBoard=!!(bl&&bl.current), sup, res, cur, unit;
-    if(onBoard){ sup=bl.support||[]; res=bl.resistance||[]; cur=bl.current;
-                 unit='on the jeweller board'; }
-    else { if(!levels) return ''; sup=levels.support||[]; res=levels.resistance||[];
-           cur=null; unit='international parity, ₹/g'; }
-    if(!sup.length&&!res.length) return '';
-    function row(z,cls){
-      var band=(z.low&&z.high)?'<span class="band">'+olMoney(z.low)+'–'+olMoney(z.high)+'</span>':'';
-      var t=z.touches===1?'1 touch':z.touches+' touches';
-      return '<div class="ol-lv '+cls+'"><span class="p">'+olMoney(z.price)+band+
-        '</span><span class="m">'+olPct(z.distance_pct,1)+' · '+t+'</span></div>';
-    }
-    var html='<div class="ol-sec"><h4>Levels — '+unit+'</h4><div class="ol-lad">';
-    res.slice().reverse().forEach(function(z){ html+=row(z,'res'); });
-    if(cur) html+='<div class="ol-lv now"><span class="p">'+olMoney(cur)+
-      '</span><span class="m">today</span></div>';
-    sup.forEach(function(z){ html+=row(z,'sup'); });
-    html+='</div><div class="ol-note">Touches is how many separate times price '+
-      'turned at that level, not how often it was crossed. A level with one '+
-      'touch is a guess; one with eight has been tested.</div></div>';
-    return html;
-  }
-
-  function olRange(em,price){
-    if(!em||!em.length) return '';
-    var by={}; em.forEach(function(r){ if(r.sigma_pct!==undefined) by[r.days]=r; });
-    var want=[[1,'Tomorrow'],[5,'This week'],[21,'This month']];
-    var tiles=want.map(function(w){
-      var r=by[w[0]]; if(!r) return '';
-      return '<div class="ol-tile"><div class="k">'+w[1]+'</div><div class="v">±'+
-        olMoney(r.sigma_rupees)+'</div><div class="s">±'+r.sigma_pct.toFixed(1)+
-        '% · seen '+r.observed_68_pct.toFixed(1)+'%</div></div>';
-    }).join('');
-    if(!tiles) return '';
-    return '<div class="ol-sec"><h4>How far it usually travels</h4>'+
-      '<div class="ol-tiles">'+tiles+'</div>'+
-      '<div class="ol-note">About two days in three land inside these. The '+
-      'second figure is what actually happened over the last year, which '+
-      'runs wider than the model at longer horizons — big moves cluster.'+
-      '</div></div>';
-  }
-
-  function olDrivers(d){
-    if(!d) return '';
-    var who=d.driver==='gold'?'the dollar gold price':
-            d.driver==='rupee'?'the rupee':'gold and the rupee together';
-    return '<div class="ol-sec"><h4>What moved it, last '+d.days+' days</h4>'+
-      '<div class="ol-tiles">'+
-      '<div class="ol-tile"><div class="k">Total</div><div class="v">'+olPct(d.total_pct)+'</div><div class="s">in rupee terms</div></div>'+
-      '<div class="ol-tile"><div class="k">Gold, USD</div><div class="v">'+olPct(d.gold_usd_pct)+'</div><div class="s">international</div></div>'+
-      '<div class="ol-tile"><div class="k">Rupee</div><div class="v">'+olPct(d.rupee_pct)+'</div><div class="s">USD/INR</div></div>'+
-      '</div><div class="ol-note">Driven mainly by '+who+'. A move that came '+
-      'from the currency turns for different reasons than one that came from '+
-      'the metal.</div></div>';
-  }
-
-  function olBoardCall(bf){
-    if(!bf) return '';
-    if(!bf.usable) return '<div class="ol-sec"><h4>Tomorrow on the board</h4>'+
-      '<div class="ol-note">'+olEsc(bf.why)+'</div></div>';
-    var dir=bf.implied_board_move_pct>=0?'up':'down';
-    return '<div class="ol-sec"><h4>Tomorrow on the board</h4>'+
-      '<div class="ol-tiles">'+
-      '<div class="ol-tile"><div class="k">Today, international</div><div class="v">'+olPct(bf.international_move_pct)+'</div><div class="s">parity close</div></div>'+
-      '<div class="ol-tile"><div class="k">Implied, board</div><div class="v" style="color:var(--'+(dir==='up'?'mint':'rose')+')">'+olPct(bf.implied_board_move_pct)+'</div><div class="s">'+olMoney(bf.to_board)+'/g</div></div>'+
-      '<div class="ol-tile"><div class="k">Fit</div><div class="v">r '+bf.corr.toFixed(2)+'</div><div class="s">n = '+bf.n+'</div></div>'+
-      '</div><div class="ol-note">'+olEsc(bf.how)+'</div></div>';
-  }
-
-  function olEvents(evs){
-    if(!evs||!evs.length) return '';
-    var rows=evs.map(function(e){
-      return '<div class="ol-ev"><span class="dt">'+olDay(e.date)+'</span>'+
-        '<span class="ti">'+olEsc(e.title)+'</span>'+
-        '<span class="im '+olEsc(e.impact)+'">'+olEsc(e.impact)+'</span></div>';
-    }).join('');
-    return '<div class="ol-sec"><h4>Scheduled to move it this week</h4>'+rows+
-      '<div class="ol-note">US releases that reliably reprice gold. Nobody '+
-      'here knows what they will say — this is when to expect the move, '+
-      'not which way.</div></div>';
-  }
-
-  function olSeason(s){
-    if(!s||s.mean_pct===undefined) return '';
-    return '<div class="ol-sec"><h4>'+olEsc(s.month)+', in past years</h4>'+
-      '<div class="ol-tiles">'+
-      '<div class="ol-tile"><div class="k">Average</div><div class="v">'+olPct(s.mean_pct,1)+'</div><div class="s">n = '+s.n+' years</div></div>'+
-      '<div class="ol-tile"><div class="k">Spread</div><div class="v">±'+s.stdev_pct.toFixed(1)+'%</div><div class="s">year to year</div></div>'+
-      '<div class="ol-tile"><div class="k">Up years</div><div class="v">'+s.positive_years+' of '+s.n+'</div><div class="s">same month</div></div>'+
-      '</div><div class="ol-note">'+s.n+' years is '+s.n+' observations, and the '+
-      'year-to-year spread here is wider than the average itself. Festival '+
-      'demand shows up in local premiums and availability long before it '+
-      'shows up in the rate, which is set internationally.</div></div>';
-  }
-
-  function renderOutlook(suf){
-    var card=document.getElementById('olCard'+suf);
-    if(!card) return;
-    var body=document.getElementById('olBody'+suf),
-        arrow=document.getElementById('olArrow'+suf),
-        label=document.getElementById('olLabel'+suf),
-        sub=document.getElementById('olSub'+suf),
-        conv=document.getElementById('olConv'+suf);
-    var d=OUTLOOK;
-    if(!d){ body.innerHTML='<div class="ol-empty">Outlook unavailable right now.</div>';
-            label.textContent='Outlook unavailable'; sub.textContent='';
-            return; }
-    var s=d.stance;
-    if(s){
-      var dir=s.direction, glyph=dir==='up'?'▲':dir==='down'?'▼':'▬';
-      arrow.className='ol-arrow '+dir; arrow.innerHTML=glyph;
-      label.className='ol-label '+dir; label.textContent=s.label;
-      sub.textContent='Score '+(s.score>0?'+':'')+s.score+' · as of '+olDay(d.as_of);
-      var filled=Math.max(1,Math.round((s.conviction||0)*5)), bars='';
-      for(var i=0;i<5;i++) bars+='<i class="'+(i<filled?'on':'')+'"></i>';
-      conv.innerHTML=bars;
-    }
-    var html='';
-    html+=olBoardCall(d.board_forecast);
-    html+=olLadder(d.board_levels,d.levels);
-    html+=olRange(d.expected_move,d.basis&&d.basis.price);
-    html+=olSignals(s&&s.components);
-    if(s&&s.caveats&&s.caveats.length)
-      html+=s.caveats.map(function(c){
-        return '<div class="ol-caveat">'+olEsc(c)+'</div>';}).join('');
-    html+=olDrivers(d.drivers);
-    html+=olEvents(d.events);
-    html+=olSeason(d.seasonality);
-    html+='<div class="ol-note" style="border-top:1px solid var(--border);'+
-      'padding-top:10px;margin-top:12px">'+olEsc(d.disclaimer)+'</div>';
-    body.innerHTML=html||'<div class="ol-empty">Not enough history yet.</div>';
-  }
-
-  function loadOutlook(){
-    fetch('outlook.json',{cache:'no-cache'})
-      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-      .then(function(j){ OUTLOOK=j; renderOutlook(''); renderOutlook('S'); })
-      .catch(function(err){
-        console.warn('Outlook unavailable',err);
-        renderOutlook(''); renderOutlook('S');
-      });
-  }
-  loadOutlook();
-
   // ─── Market API worker (Cloudflare Worker on mygoldrates account) ───
   // Serves: /market /vendors /calendar /news /ohlc — all CORS-open and
   // edge-cached, so the browser polls fast without hammering upstreams.
@@ -2960,7 +2666,7 @@ function handleCredentialResponse(resp){
 
   function renderAll(){renderBrands();paintHero();recalcAll();renderMcTable()}
 
-  // ─── Making Charges Comparison: real scraped median making-charge %
+  // ─── Making Charges Comparison: real collected median making-charge %
   //     per brand/category from mygoldrates.com's production pipeline,
   //     combined with this app's own live gold rate for the metal value. ───
   var MC_CATS=['Bangle','Ring','Earrings','Mangalsutra'];
@@ -2984,7 +2690,7 @@ function handleCredentialResponse(resp){
   }
   // Brand picker is generated from whatever brands are actually present in
   // the fetched data, in BRANDS' own order, instead of a hardcoded 3 -
-  // coverage grows automatically as the scraper adds more brands. It's a
+  // coverage grows automatically as the collector adds more brands. It's a
   // single dropdown (trigger + list), not a row of open buttons, so the
   // full fetched-brand list stays reachable without sideways scrolling as
   // coverage grows.

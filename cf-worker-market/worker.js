@@ -33,7 +33,7 @@
 // Be clear about what this does and does not buy: CORS is enforced by
 // BROWSERS. It stops another website's JavaScript from reading our JSON;
 // it does nothing whatsoever against curl, Python, or any server-side
-// scraper, which ignore CORS entirely. Rate limiting below and the
+// collector, which ignore CORS entirely. Rate limiting below and the
 // Cloudflare WAF rules are what actually deter those.
 const ALLOWED_ORIGINS = [
   'https://mygoldrates.com',
@@ -532,7 +532,7 @@ async function handleNews() {
 //     answer this tick. This is the same underlying data finmetpulse.com
 //     surfaces in its dealer rate tables.
 //
-//   * IBJA HTML scrape — national bullion reference rate, kept as a
+//   * IBJA HTML collect — national bullion reference rate, kept as a
 //     "national" scope row so users see a benchmark alongside the dealers.
 //
 // Each dealer is queried independently and soft-fails; a single dealer

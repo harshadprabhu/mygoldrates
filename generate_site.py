@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Render the public gold-rate comparison site from today's scraped rates.
+"""Render the public gold-rate comparison site from today's collected rates.
 
-Runs in CI right after scrape.py. Reads today's rates from Supabase, fetches
+Runs in CI right after collect.py. Reads today's rates from Supabase, fetches
 the IBJA reference rate, and bakes everything into static HTML written to
 docs/ for GitHub Pages. The inquiry page posts to Supabase with the public
 anon key (insert-only table behind RLS); no privileged keys are shipped.
@@ -30,7 +30,7 @@ CONTACT_EMAIL = "contact@mygoldrates.com"
 # 24K uses 1.0 (canonical_24k_pre_gst IS already the 24K per-gram price).
 # Fractions are exact karat/24 ratios (not the rounded BIS fineness stamps
 # 916/750/583) so every displayed purity is derived with the same formula
-# used when a brand only publishes one purity. Kept in sync with scrape.py.
+# used when a brand only publishes one purity. Kept in sync with collect.py.
 PURITY_FRACTION = {"24K": 24 / 24, "22K": 22 / 24, "18K": 18 / 24, "14K": 14 / 24}
 IST = timezone(timedelta(hours=5, minutes=30))
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -2748,7 +2748,7 @@ def main():
   <p>Board rates displayed on this platform are compiled from public jeweller quotes, industry association rates (such as IBJA), and market feeds. GoldRates is an independent comparison platform and is not affiliated with, endorsed by, or sponsored by any listed jewellery brand unless explicitly stated.</p>
   
   <h2>3. Acceptable Use &amp; Intellectual Property</h2>
-  <p>The layout, design, comparison tools, calculators, and compiled datasets on MyGoldRates.com are protected by copyright and intellectual property laws. You may use this website for personal, non-commercial purposes. Automated scraping, data extraction, or redistribution of our compiled data without explicit written consent is strictly prohibited.</p>
+  <p>The layout, design, comparison tools, calculators, and compiled datasets on MyGoldRates.com are protected by copyright and intellectual property laws. You may use this website for personal, non-commercial purposes. Automated collection, data extraction, or redistribution of our compiled data without explicit written consent is strictly prohibited.</p>
   
   <h2>4. Third-Party Advertising &amp; Cookies</h2>
   <p>We work with third-party advertising partners, including <strong>Google AdSense</strong>, to serve advertisements when you visit our website. These partners may use cookies and web beacons to serve ads based on your visit history. For more information, please see our <a href="{SITE_URL}/privacy.html">Privacy Policy</a>.</p>
@@ -2978,7 +2978,7 @@ def main():
                        + body)
         extra_urls.append((f"learn/{slug}", "monthly", "0.5"))
 
-    # ---- Making charges comparison (from scrape_charges.py output) ----
+    # ---- Making charges comparison (from collect_charges.py output) ----
     try:
         with open("docs/making-charges.json", encoding="utf-8") as f:
             mc = json.load(f)
@@ -3311,7 +3311,7 @@ def main():
         # page renders, keyed on brand slug + domain + region (national vs
         # regional). Result: pulse's brand comparison drops in with the same
         # 21+ jeweller board that /compare shows, updated daily by the
-        # scraper, and applyLive() then scales it against live spot.
+        # collector, and applyLive() then scales it against live spot.
         _region_pulse = {  # DB slug -> pulse-side region tag
             "vaibhav": "south", "vummidi": "south", "lalithaa": "south",
             "kirtilals": "south", "josco": "south", "srikumaran": "south",
@@ -3426,7 +3426,7 @@ def main():
             # published figure. It previously used spot x (1 + 0.14), a
             # guessed premium that sat ~43/g under the actual IBJA rate and
             # - worse - was also used to rebuild every BRAND price, which
-            # discarded the scraped values and inflated the whole board by
+            # discarded the collected values and inflated the whole board by
             # ~25/g. Both are "0" when a fetch failed; the page then falls
             # back to the old estimate for the tile only.
             ("__IBJA_ANCHOR_24__",
@@ -3557,7 +3557,7 @@ def main():
         # Live "x ago" next to the rates stamp. Reads the epoch off the DOM
         # rather than baking a string, so a CDN-cached copy still counts up
         # correctly instead of insisting the rates are "just now" hours
-        # later. Ticks every 30s - the scrape itself runs every 30 min.
+        # later. Ticks every 30s - the collect itself runs every 30 min.
         stamp_js = (
             '<script>(function(){\n'
             '  function ago(s){\n'

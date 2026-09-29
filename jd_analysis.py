@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Analysis over the scraped jeweller rate history, for Jewellers Digest.
+"""Analysis over the jeweller rate history, for Jewellers Digest.
 
 Pure computation: takes rows, returns numbers. No Supabase, no Excel, no
 network - so every figure in the paid report can be tested directly against
@@ -8,7 +8,7 @@ known input, which matters when someone is paying for it.
 WHAT THE DATA SUPPORTS, AND WHAT IT DOES NOT
 
 Everything here is derived from `rates` - one published 24K pre-GST figure
-per brand per day, scraped from each jeweller's own site. As of 2026-09-29
+per brand per day, taken from each jeweller's own published board. As of 2026-09-29
 that is 72 consecutive days with no missing dates, median 21 brands/day.
 
 That supports: per-brand levels and dispersion, rank and how often a brand
@@ -50,7 +50,7 @@ def build_matrix(rows, brands, active_only=True):
 
     Selling that inside an analysis product would be selling a known-bad
     number. Seven other brands are inactive for the ordinary reason that no
-    scrapeable rate could be found; their history is fine but stale, and a
+    readable rate could be found; their history is fine but stale, and a
     reader comparing jewellers they can actually buy from is not helped by a
     brand that stopped reporting weeks ago.
 
@@ -192,14 +192,14 @@ def describe_confidence(dates, matrix, market):
         f"Brands per day: median {statistics.median([m['brands'] for m in market])}"
         f", minimum {min(m['brands'] for m in market)}." if market else "",
         "All rates are 24K, pre-GST, per gram, as published by each jeweller "
-        "on its own website and scraped daily.",
+        "on its own website and recorded daily.",
         "Premium figures compare each jeweller to the median of the other "
         "jewellers on the same day, NOT to a bullion benchmark: no daily "
         "IBJA/spot series is stored, so a premium-over-bullion figure cannot "
         "be computed for past dates and is deliberately absent.",
         f"Weekday averages rest on about {n // 7} observations per weekday. "
         "Treat them as a description of this window, not a seasonal pattern.",
-        "A brand absent on a given day was not scrapeable that day (blocked, "
+        "A brand absent on a given day was not readable that day (blocked, "
         "site change, or quarantined for failing a sanity check); it is "
         "excluded from that day rather than carried forward.",
         "Only jewellers currently on the live board are included. Brands "

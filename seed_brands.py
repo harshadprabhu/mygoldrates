@@ -3,7 +3,7 @@
 
 Edit REGIONAL_BRANDS and run the seed-brands workflow to add more. National
 brands already live in the DB; these are region-focused jewellers that publish
-a real gold rate on their own website, so they are genuinely scrapeable.
+a real gold rate on their own website, so they are genuinely readable.
 """
 import os
 from supabase import create_client
@@ -19,7 +19,7 @@ REGIONAL_BRANDS = [
      "rate_url": "https://www.vummidi.com/gold-rate-in-chennai",
      "active": True, "includes_gst": False},
     # JS/bot-walled - no static or rendered rate found; parked until we wire
-    # a Zyte render for them. Kept inactive so they aren't scraped.
+    # a Zyte render for them. Kept inactive so they are left alone.
     {"name": "Lalithaa Jewellery", "slug": "lalithaa",
      "domain": "lalithaajewellery.com",
      "rate_url": "https://www.lalithaajewellery.com/gold-rate-today",
@@ -32,7 +32,7 @@ REGIONAL_BRANDS = [
     # /gold-rates/ renders its table from
     #   goldpriceeditor.droidinfinity.com/api/external/metal-prices/1085
     # and the numbers baked into the served HTML are a stale fallback the
-    # page overwrites on load. Scraping the page gave 24K = 14,450 while the
+    # page overwrites on load. Collection the page gave 24K = 14,450 while the
     # API returned 15,320 - 870/g, 5.7% out of date. That tripped the
     # purity-ratio check AND the 6.5%-off-median outlier gate, so the brand
     # was quarantined and disappeared from the board entirely.
@@ -118,10 +118,10 @@ REGIONAL_BRANDS = [
     # ORRA - diamond-jewellery-only brand. The previous rate_url pointed
     # to a specific product (round-diamond-crown-star-pendant-set-in-rose-
     # gold-osp20029) that started 404-ing around 28 Aug 2026, retiring the
-    # brand's live scrape and dropping it to `estimated` daily (market
+    # brand's live collect and dropping it to `estimated` daily (market
     # median filler, which generate_site.py filters out). ORRA also
     # doesn't publish a per-gram rate on any /gold-rate-today path so
-    # scrape.py's path-discovery couldn't rescue it either. Anchor on a
+    # collect.py's path-discovery couldn't rescue it either. Anchor on a
     # bestseller product page - every ORRA product page renders the per-
     # gram gold rate straight into HTML in <span class="GoldRateGrams">
     # ...</span>. Verified live: this earrings URL currently yields
@@ -163,7 +163,7 @@ REGIONAL_BRANDS = [
     # the breakup is the cleanest possible expression of the board rate.
     # Waman Hari Pethe - DEACTIVATED 2026-09-09: publishing a fabricated
     # number. rate_url pointed at /products/whp-24kt-999-10-gm, a product
-    # handle that no longer exists. The scraper's own fetch() correctly
+    # handle that no longer exists. The collector's own fetch() correctly
     # calls that a 404, but the row was written by the RENDER path
     # (method was `rendered/rows`), which renders whatever the browser is
     # served - including the error page - without re-checking status. The
@@ -196,7 +196,7 @@ REGIONAL_BRANDS = [
     # is a dot: `24k-1-g-999.9-pure-gold-coin`.
     #
     # Nothing broke loudly, which is the part worth noting. fetch() rejected
-    # the 404 correctly, CANDIDATE_PATHS all 404'd too, and scrape_brand fell
+    # the 404 correctly, CANDIDATE_PATHS all 404'd too, and collect_brand fell
     # through to discover_products(), which landed on
     #   /jewellery/22k-1g-916-pure-gold-bar
     # and published off its breakup as `discovered/static/goldvalue` - a

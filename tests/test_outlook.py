@@ -631,3 +631,178 @@ def test_to_board_widens_the_band_when_the_premium_is_unstable():
 def test_to_board_says_nothing_without_a_measured_premium():
     assert O.to_board([{"price": 1.0, "touches": 1, "distance_pct": 0,
                         "last_touch": "x"}], None) == []
+
+
+# ─── horizons ───────────────────────────────────────────────────────────
+
+def _ctx(closes, fx=None):
+    return O.build_context(bars(closes), fx)
+
+
+def test_each_horizon_uses_its_own_signals():
+    """Three verdicts built from the same six signals would be one verdict
+    printed three times. A week is scored on the 20-day and 5-day change; a
+    quarter on the 200-day and its slope. They must not be the same list."""
+    ctx = _ctx(_trend(n=400, step=0.001, noise=0.004))
+    names = {h: {c["name"] for c in O.horizon_components(ctx, 399, h)}
+             for h in ("week", "month", "quarter")}
+    assert "Price vs 20-day" in names["week"]
+    assert "5-day change" in names["week"]
+    assert "Price vs 200-day" in names["quarter"]
+    assert "200-day slope" in names["quarter"]
+    assert names["week"] != names["month"] != names["quarter"]
+
+
+def test_horizons_agree_on_direction_in_an_unambiguous_trend():
+    ctx = _ctx(_trend(n=400, step=0.003, noise=0.002))
+    i = 399
+    for h in ("week", "month", "quarter"):
+        assert O.score_at(ctx, i, h) > 15, h
+
+
+def test_a_horizon_with_too_little_history_returns_no_verdict():
+    ctx = _ctx(_trend(n=120))
+    assert O.horizon_components(ctx, 119, "quarter") == []
+    assert O.score_at(ctx, 119, "quarter") is None
+
+
+def test_horizons_can_disagree_when_short_and_long_term_diverge():
+    """A long uptrend with a sharp recent drop: the quarter should still be
+    constructive while the week has turned. If they cannot disagree, the
+    horizons are decorative."""
+    closes = _trend(n=380, step=0.002, noise=0.001)
+    closes += [closes[-1] * (1 - 0.012) ** k for k in range(1, 21)]
+    ctx = _ctx(closes)
+    i = len(closes) - 1
+    assert O.score_at(ctx, i, "week") < O.score_at(ctx, i, "quarter")
+
+
+# ─── the backtest, and its honesty ──────────────────────────────────────
+
+def test_rolling_sd_never_uses_a_future_return():
+    """The bug this guards is invisible in the output: normalising a past
+    day's score by volatility measured over the whole series leaks the
+    future into it and turns a worthless signal into a convincing one."""
+    rets = [0.001] * 100 + [0.5] * 10          # a huge late shock
+    sd = O._rolling_sd(rets, window=120)
+    assert sd[50] == pytest.approx(0.0, abs=1e-9)   # calm, as it was then
+    assert sd[-1] > 0.05                            # the shock, once it lands
+
+
+def test_skill_reports_the_baseline_beside_the_hit_rate():
+    """In a market that rose in four periods out of five, a signal that says
+    'up' every day scores 80% and knows nothing. The baseline is what makes
+    the hit rate readable, so it must always be there."""
+    ctx = _ctx(_trend(n=600, step=0.002, noise=0.004))
+    sk = O.skill(ctx, "month")
+    assert sk["usable"] is True
+    assert sk["base_rate"] is not None
+    assert sk["beats_baseline"] == pytest.approx(
+        sk["hit_rate"] - sk["base_rate"], abs=0.11)
+
+
+def test_skill_says_plainly_when_a_signal_has_no_value():
+    import random
+    random.seed(21)
+    closes, p = [], 10000.0
+    for _ in range(700):                      # a pure random walk
+        p *= 1 + random.gauss(0, 0.01)
+        closes.append(p)
+    sk = O.skill(_ctx(closes), "month")
+    assert sk["usable"] is True
+    assert abs(sk["ic"]) < 0.25
+    assert "value" in sk["verdict"] or "coin toss" in sk["verdict"] \
+        or "WRONG" in sk["verdict"]
+
+
+def test_skill_detects_a_signal_that_genuinely_works():
+    """A series built so that being above the 200-day really does predict
+    the next month. If the measurement cannot see skill that is there, it
+    cannot be trusted when it reports none."""
+    import random
+    random.seed(4)
+    closes, p, drift = [10000.0], 10000.0, 0.0
+    for i in range(900):
+        if i % 180 < 90:
+            drift = 0.004        # long up regimes
+        else:
+            drift = -0.004       # long down regimes
+        p *= 1 + drift + random.gauss(0, 0.004)
+        closes.append(p)
+    sk = O.skill(_ctx(closes), "month")
+    assert sk["ic"] > 0.15, sk
+
+
+def test_skill_stands_down_on_a_short_series():
+    sk = O.skill(_ctx(_trend(n=260)), "quarter")
+    assert sk["usable"] is False
+    assert "not enough" in sk["why"]
+
+
+def test_skill_verdict_wording_is_blunt_at_the_bottom():
+    assert "too little" in O._skill_verdict(0.5, 5)
+    assert O._skill_verdict(0.25, 100) == \
+        "has predicted direction well on this history"
+    assert "no measurable" in O._skill_verdict(0.0, 100)
+    assert "WRONG" in O._skill_verdict(-0.2, 100)
+
+
+# ─── the assembled horizon view ─────────────────────────────────────────
+
+def test_horizon_view_carries_verdict_range_and_skill_together():
+    """The skill measurement must travel WITH the verdict. A confident call
+    published without it is the thing this whole file exists to prevent."""
+    ctx = _ctx(_trend(n=700, step=0.001, noise=0.004))
+    v = O.horizon_view(ctx, "month", ctx["closes"][-1], date(2026, 9, 29))
+    assert v["verdict"] and v["direction"] in ("up", "down", "flat")
+    assert v["components"]
+    assert v["skill"]["usable"] is True
+    assert v["range"]["low"] < ctx["closes"][-1] < v["range"]["high"]
+
+
+def test_horizon_view_range_widens_with_the_horizon():
+    ctx = _ctx(_trend(n=700, step=0.001, noise=0.004))
+    p = ctx["closes"][-1]
+    wk = O.horizon_view(ctx, "week", p, date(2026, 9, 29))["range"]
+    qt = O.horizon_view(ctx, "quarter", p, date(2026, 9, 29))["range"]
+    assert qt["pct"] > wk["pct"]
+
+
+def test_a_flat_market_scores_neutral_rather_than_no_verdict():
+    """Zero movement makes every normalised score 0/0. That is a market
+    doing nothing, which is Neutral - not a missing reading. Guarding it
+    with a falsiness check made every horizon return no verdict at all,
+    which a stalled feed repeating one price would have triggered."""
+    ctx = _ctx([10000.0] * 700)
+    v = O.horizon_view(ctx, "month", 10000.0, date(2026, 9, 29))
+    assert v is not None
+    assert v["verdict"] == "Neutral", v["verdict"]
+    assert abs(v["score"]) < 15
+
+
+def test_a_week_is_given_no_seasonality():
+    """Five trading days do not have a season. Printing one would be a
+    number dressed up as information."""
+    ctx = _ctx(_trend(n=700, step=0.0005, noise=0.003))
+    v = O.horizon_view(ctx, "week", ctx["closes"][-1], date(2026, 9, 29))
+    assert v.get("seasonality") is None
+
+
+def test_quarter_seasonality_covers_three_months_with_the_smallest_n():
+    b = []
+    for yr in (2021, 2022, 2023, 2024, 2025):
+        for mth in (9, 10, 11):
+            for d in range(1, 21):
+                b.append({"d": f"{yr}-{mth:02d}-{d:02d}", "o": 1, "h": 1,
+                          "l": 1, "c": 100 + d})
+    se = O._season_ahead(b, date(2026, 9, 15), 63)
+    assert se["months"] == ["September", "October", "November"]
+    assert se["n"] == 5
+
+
+def test_build_exposes_every_horizon():
+    d = O.build(_inr_bars(n=700))
+    labels = [h["label"] for h in d["horizons"]]
+    assert labels == ["Next week", "Next month", "Next quarter"]
+    for h in d["horizons"]:
+        assert "skill" in h

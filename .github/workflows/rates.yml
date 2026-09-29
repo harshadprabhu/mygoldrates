@@ -2,7 +2,7 @@ name: fetch-rates
 
 on:
   schedule:
-    # Every 30 minutes. Scraping volume is no longer the constraint, so the
+    # Every 30 minutes. Collection volume is no longer the constraint, so the
     # board tracks intraday revisions continuously instead of catching six
     # fixed windows - a jeweller who revises at 12:40 IST now shows within
     # the half hour rather than waiting for the old 14:47 slot.
@@ -11,7 +11,7 @@ on:
     # scheduled runs on private repos and the on-the-hour and on-the-half
     # minutes are the most congested, so odd minutes get picked up sooner.
     # A dropped tick is harmless - the next is 30 minutes out and every run
-    # re-scrapes all brands from scratch, so nothing accumulates.
+    # re-runs all brands from scratch, so nothing accumulates.
     #
     # `concurrency` below (group without cancel-in-progress) already keeps
     # two runs from overlapping if one is slow.
@@ -31,7 +31,7 @@ permissions:
   contents: write   # the job commits the regenerated site in docs/
 
 jobs:
-  scrape:
+  collect:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -51,11 +51,11 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
-          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          COLLECTRAPI_KEY: ${{ secrets.COLLECTRAPI_KEY }}
           SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
           ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
           CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
-        run: python scrape.py
+        run: python collect.py
 
       # Reports brands whose configured rate_url has gone dead and are
       # publishing off path discovery instead. Never fails the run - a
@@ -78,22 +78,6 @@ jobs:
           ADSENSE_SLOT: ${{ secrets.ADSENSE_SLOT }}
           ANALYTICS_TOKEN: ${{ secrets.ANALYTICS_TOKEN }}
         run: python generate_site.py
-
-      - name: Market outlook
-        # Direction, support and resistance for the Market Pulse section.
-        # Runs AFTER the site build so it writes into the docs/ tree the
-        # publish step is about to commit, and after the scrape so the board
-        # history it calibrates against includes today.
-        #
-        # continue-on-error: an upstream feed being down must not fail a
-        # rates run. outlook.py writes nothing when a feed fails, so the
-        # previous outlook.json stays in place and the page shows the last
-        # good read with its own timestamp on it, rather than an empty card.
-        continue-on-error: true
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: python outlook.py
 
       - name: Publish site
         run: |

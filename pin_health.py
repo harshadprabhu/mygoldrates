@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Health check: report brands whose configured rate_url has gone dead.
 
-Runs as a step in the rates workflow, after scrape.py. Reads today's rows
+Runs as a step in the rates workflow, after collect.py. Reads today's rows
 with the ANON key only (both tables are public-readable) and prints a
 report. Exit code is intentionally always 0 - a stale pin must never break
-the scrape or the deploy, only become visible.
+the collect or the deploy, only become visible.
 
 Why this exists
 ---------------
-scrape_brand() has a deliberate recovery chain: configured rate_url ->
+collect_brand() has a deliberate recovery chain: configured rate_url ->
 CANDIDATE_PATHS on the same domain -> discover_products(). That chain is
 good; a brand whose product handle is retired keeps publishing a real rate
 instead of collapsing to `estimated`. The problem is that it is *silent*.
@@ -78,7 +78,7 @@ def main():
         brands = get(url, key, "brands?select=id,slug,name,rate_url,active"
                                "&active=eq.true")
         # Also the previous week, so a brand that is missing RIGHT NOW can be
-        # told apart from one that is actually broken. rates.yml re-scrapes
+        # told apart from one that is actually broken. rates.yml re-runs
         # every 30 minutes and upserts the day's row, so a brand can sit at
         # `estimated` mid-morning and be `published` by noon. Reporting that
         # snapshot as "absent from the board" with no history reads as a
@@ -150,7 +150,7 @@ def main():
                 # certainly a failed run that a later one will fix, not an
                 # outage. Say so, rather than implying the brand is gone.
                 note = (f"published {days}/7 of the last 7 days - most likely a "
-                        f"transient run failure; re-check after the next scrape")
+                        f"transient run failure; re-check after the next collect")
             elif days:
                 note = f"published only {days}/7 of the last 7 days - flaky source"
             else:

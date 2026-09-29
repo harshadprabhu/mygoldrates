@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-scrape.py v4 - automated gold rate collector.
+collect.py v4 - automated gold rate collector.
 
 THE BUG v3 HAD:
   Purity was matched by looking +/-80 characters around each price in the
@@ -54,7 +54,7 @@ MIN_FOR_MEDIAN = 5
 
 # General formula: Unknown Rate = (Known Rate / Known Karat) x Unknown Karat.
 # 24K uses 1.0 — canonical_24k_pre_gst IS the per-gram 24K price. Dividing the
-# scraped 18K/22K rate by its fraction gives the 24K equivalent; scaling back
+# collected 18K/22K rate by its fraction gives the 24K equivalent; scaling back
 # out by another purity's fraction gives that purity's rate. Fractions are
 # exact karat/24 ratios (not the rounded BIS fineness stamps 916/750/583),
 # so any known purity converts to any unknown purity with this one formula.
@@ -222,7 +222,7 @@ def extract_product_breakup(html):
 # {"title":"995 Kt Yellow Gold","rate":"Rs. 14729/g",...} - a coin's own
 # per-gram gold cost, closely tracking the market (unlike their digital-gold
 # page, which quotes ~8% above median). Their JSON serialiser escapes the
-# slash as the unicode sequence / (verified live against ScraperAPI/
+# slash as the unicode sequence / (verified live against CollectorAPI/
 # ScrapingBee/ZenRows/Crawlbase output - NOT the backslash-slash \/ a plain
 # browser DOM read shows), so both forms are matched. Fineness
 # (995/999/916/750/583), not a literal "24K"/"22K" label, so it needs its
@@ -536,7 +536,7 @@ def extract_rate_json(html):
     #             "goldPrice22K":14094,"goldPrice18K":11873,...}}
     # PN Gadgil & Sons renders its table from exactly this, fetched live -
     # the numbers baked into the served HTML are a stale fallback the page
-    # overwrites on load, and scraping them gave a rate 870/g (5.7%) out of
+    # overwrites on load, and reading them gave a rate 870/g (5.7%) out of
     # date. The closing quote after the karat is required so the suffixed
     # variants (goldPrice24K995, ...995GW) never bind to 24K: those are the
     # 995 rate, and mixing them in would drag the 999 figure down.
@@ -703,7 +703,7 @@ def _is_soft_404(r, session, timeout):
 
     Some storefronts answer an unknown path with HTTP 200 and their error
     page rather than a 404. The status check above cannot see that, so the
-    scraper happily extracts whatever numbers the error page happens to
+    collector happily extracts whatever numbers the error page happens to
     carry - product prices, promo figures - and publishes them as a board
     rate. Waman Hari Pethe did exactly this: rate_url pointed at a product
     handle that no longer exists, the host returned 200 with a ~1.04 MB
@@ -868,7 +868,7 @@ def fetch_via_zyte(url, session, actions=None):
 
 def fetch_via_proxy_waterfall(url, session, actions=None, wait_selector=None):
     """Multi-proxy failover waterfall:
-    1. ScraperAPI (5,000 free req/mo)
+    1. CollectorAPI (5,000 free req/mo)
     2. ScrapingBee (1,000 free req/mo)
     3. ZenRows (1,000 free req/mo)
     4. Crawlbase (1,000 free req/mo)
@@ -880,16 +880,16 @@ def fetch_via_proxy_waterfall(url, session, actions=None, wait_selector=None):
     (e.g. Malabar's React SPA never has price text in a plain render=true
     snapshot).
     """
-    # 1. ScraperAPI
-    key = os.environ.get("SCRAPERAPI_KEY")
+    # 1. CollectorAPI
+    key = os.environ.get("COLLECTRAPI_KEY")
     if key:
         try:
             params = {"api_key": key, "url": url, "render": "true", "country_code": "in"}
             if wait_selector:
                 params["wait_for_selector"] = wait_selector
-            r = session.get("http://api.scraperapi.com", params=params, timeout=45)
+            r = session.get("http://api.collectorapi.com", params=params, timeout=45)
             if r.status_code == 200 and len(r.text) > 500:
-                return r.text, "ok:scraperapi"
+                return r.text, "ok:collectorapi"
         except Exception:
             pass
 
@@ -1013,7 +1013,7 @@ def discover_products(b, session, limit=3):
     return out
 
 
-def scrape_brand(b, session):
+def collect_brand(b, session):
     started = time.monotonic()
     tried, blocked = [], False
     slug = b.get("slug")
@@ -1190,12 +1190,12 @@ def main():
     today = datetime.now(timezone.utc).date().isoformat()
 
     # Retract any rate still published for a brand that has since been
-    # deactivated. Setting active=False only stops FUTURE scrapes - a row
+    # deactivated. Setting active=False only stops FUTURE collects - a row
     # already written earlier today stays `published` and keeps appearing
     # on the board, so a brand switched off because its source was found to
     # be wrong goes on showing that wrong number until the date rolls over.
     # That is exactly what happened with Waman Hari Pethe: it was
-    # deactivated for publishing a price scraped off a 404 page, but the
+    # deactivated for publishing a price collected off a 404 page, but the
     # row written before the change kept it on the board at 15,664.
     #
     # `retracted` (not deleted) so the history stays auditable, and
@@ -1216,9 +1216,9 @@ def main():
             print(f"retracted {len(stale)} rate(s) for deactivated brands: "
                   f"{[r['brand_id'] for r in stale]}")
 
-    # Every scheduled run re-scrapes ALL brands so intraday board revisions
+    # Every scheduled run re-runs ALL brands so intraday board revisions
     # (jewellers often revise on volatile days) are captured at 11:05, 14:00
-    # and 17:00 IST. A failed re-scrape simply keeps the stored rate - the
+    # and 17:00 IST. A failed re-run simply keeps the stored rate - the
     # upsert only happens on a successful extraction.
     existing = sb.table("rates").select("brand_id, canonical_24k_pre_gst, method") \
                  .eq("rate_date", today).execute().data
@@ -1232,7 +1232,7 @@ def main():
     for b in pending:
         print(f"-> {b['name']:22s} ", end="", flush=True)
         try:
-            url, found, counts, method, note = scrape_brand(b, session)
+            url, found, counts, method, note = collect_brand(b, session)
         except Exception as e:
             print(f"ERROR {type(e).__name__}: {e}")
             time.sleep(POLITE_DELAY)
@@ -1258,7 +1258,7 @@ def main():
             "basis_note": why, "method": method, "rate_url": url,
             "derived_rates": ladder,
             "status": "published",
-            "scraped_at": datetime.now(timezone.utc).isoformat(),
+            "collected_at": datetime.now(timezone.utc).isoformat(),
         }
         try:
             persisted_ladder = upsert_rate(sb, row)
@@ -1323,7 +1323,7 @@ def main():
             "basis_note": "estimate: market median, no live source",
             "method": PLACEHOLDER_METHOD, "rate_url": b.get("rate_url"),
             "derived_rates": ladder, "status": "estimated",
-            "scraped_at": datetime.now(timezone.utc).isoformat(),
+            "collected_at": datetime.now(timezone.utc).isoformat(),
         }
         try:
             upsert_rate(sb, row)

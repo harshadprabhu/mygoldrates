@@ -458,7 +458,7 @@ async function handleReport(request, env) {
 }
 
 // ─── GET /jd/rates ──────────────────────────────────────────────────────
-// The scraped history as JSON, for a jeweller who would rather pull it into
+// The collected history as JSON, for a jeweller who would rather pull it into
 // their own systems than open a spreadsheet.
 //
 // Only brands currently on the board, and only published rows — the same

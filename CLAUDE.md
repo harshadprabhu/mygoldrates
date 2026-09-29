@@ -16,13 +16,13 @@ export SUPABASE_SERVICE_KEY=...
 
 ```bash
 pip install -r requirements.txt
-playwright install --with-deps chromium   # only needed for scrape.py
+playwright install --with-deps chromium   # only needed for collect.py
 
-python scrape.py           # fetch today's rates for all active brands
+python collect.py           # fetch today's rates for all active brands
 python generate_site.py    # rebuild all HTML in docs/
 python send_alerts.py      # send daily digest (needs BREVO_API_KEY + ALERTS_FROM)
-python scrape_charges.py   # refresh making-charges.json (needs ZYTE_API_KEY)
-python mc_engine.py        # adaptive making-charge extraction engine (used by scrape_charges)
+python collect_charges.py   # refresh making-charges.json (needs ZYTE_API_KEY)
+python mc_engine.py        # adaptive making-charge extraction engine (used by collect_charges)
 python list_brands.py      # print brands table (read-only, good sanity check)
 ```
 
@@ -47,14 +47,14 @@ python -c "import ast; ast.parse(open('generate_site.py',encoding='utf-8').read(
 
 ### Data flow
 ```
-scrape.py  →  Supabase (rates table)
+collect.py  →  Supabase (rates table)
                   ↓
 generate_site.py  →  docs/*.html  →  git commit → Cloudflare Pages
                   ↓
 send_alerts.py  →  Brevo API  →  subscriber emails
 ```
 
-### scrape.py
+### collect.py
 - Reads active brands from the `brands` table (name, slug, domain, rate_url, active, includes_gst).
 - For each brand: fetches its rate page, extracts gold prices by purity using structural HTML parsing (`<tr>` rows first, character-window proximity as fallback).
 - Brand-specific extractors: CaratLane uses embedded price-breakup JSON from its coin page; Malabar uses a 'value-then-karat' layout extractor; Candere uses `.goldCard--rate` CSS selector.
@@ -78,13 +78,13 @@ send_alerts.py  →  Brevo API  →  subscriber emails
 - Missing `BREVO_API_KEY` → `sys.exit(1)` (intentionally loud). Whole-batch failure → `sys.exit(1)`.
 
 ### mc_engine.py
-- Adaptive making-charge extraction engine used by `scrape_charges.py`.
+- Adaptive making-charge extraction engine used by `collect_charges.py`.
 - Runs a battery of candidate strategies (JSON breakup, DOM tables, plain text) against a page, scores each result, keeps the best.
 - Learns per-brand "profiles" — on the next run the winning strategy is tried first (fast path); if it stops working the engine re-probes and re-learns.
 - Fuzzy semantic label matching handles unseen phrasings ("Making Charges" / "Value Addition" / "VA" / "Labour").
 - Robust statistics (MAD) reject garbage before it poisons a median.
 
-### scrape_charges.py
+### collect_charges.py
 - Refreshes `docs/making-charges.json` with making-charge data across brands and product categories.
 - Uses `mc_engine.py` for adaptive extraction; supports CaratLane, BlueStone, Kisna (Shopify pagination), and others.
 - Brand-specific URL discovery (category listings, sitemap indexes, direct product pages).
@@ -104,7 +104,7 @@ page fetches same-origin.
 
 ### The two series, and why both
 The Indian retail board is **not** the international price, in level or in
-behaviour. Measured over our own scraped window:
+behaviour. Measured over our own collected window:
 - The board sits about **15% above international parity** (duty plus a
   domestic premium). Stable: stdev 0.012 on a median ratio of 1.149.
 - It is **sticky**. Same-day correlation with parity is only **0.35**, but
@@ -163,7 +163,7 @@ Rs 50/month Razorpay auto-debit subscription. Everything in it is named `jd`;
 it shipped once under the name `b2b` and was renamed wholesale.
 
 ### `jd_analysis.py`
-- Pure, deterministic analysis over the scraped `rates` history. No I/O, no
+- Pure, deterministic analysis over the collected `rates` history. No I/O, no
   formatting, separately tested. Every number in the product comes from here.
 - `build_matrix()` (date x brand, with brands excluded for thin coverage),
   `daily_market()`, `brand_stats()` (premium = mean of **daily** gaps, not a
@@ -213,9 +213,9 @@ it shipped once under the name `b2b` and was renamed wholesale.
 
 ## Supabase schema (key tables)
 
-**`brands`** — jeweller catalogue. `slug` is the stable identifier used in `NEEDS_PROXY`, `REGION_MAP`, and URL paths. `active=false` brands are skipped by the scraper.
+**`brands`** — jeweller catalogue. `slug` is the stable identifier used in `NEEDS_PROXY`, `REGION_MAP`, and URL paths. `active=false` brands are skipped by the collector.
 
-**`rates`** — one row per `(brand_id, rate_date)`. `status` is `published` (real scraped rate), `estimated` (market-median placeholder), or `quarantined` (outlier). The email and site only use `published` rows.
+**`rates`** — one row per `(brand_id, rate_date)`. `status` is `published` (real collected rate), `estimated` (market-median placeholder), or `quarantined` (outlier). The email and site only use `published` rows.
 
 **`inquiries`** — subscribers. Key columns: `email` (unique case-insensitive index), `unsub_token` (UUID type, required for the email unsubscribe link), `last_emailed` (date, cleared to `null` to re-include someone in the next send). Extended with: `google_id`, `google_picture`, `google_locale`, `age`, `gender`, `signup_source` ('google' | 'form' | 'gate_google' | 'gate_form').
 
@@ -231,10 +231,10 @@ it shipped once under the name `b2b` and was renamed wholesale.
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| `rates.yml` | CF Worker cron (via `workflow_dispatch`) + 4 morning GitHub crons | scrape → build site → outlook → publish → email |
-| `charges.yml` | 1st & 16th of month | scrape making charges → update `docs/making-charges.json` |
-| `rebuild-deploy.yml` | manual | rebuild site (generate_site.py) + outlook + deploy without re-scraping rates |
-| `deploy.yml` | manual | push `docs/` to Cloudflare Pages without scraping |
+| `rates.yml` | CF Worker cron (via `workflow_dispatch`) + 4 morning GitHub crons | collect → build site → outlook → publish → email |
+| `charges.yml` | 1st & 16th of month | collect making charges → update `docs/making-charges.json` |
+| `rebuild-deploy.yml` | manual | rebuild site (generate_site.py) + outlook + deploy without re-collection rates |
+| `deploy.yml` | manual | push `docs/` to Cloudflare Pages without collection |
 | `deploy-worker.yml` | manual | deploy `cf-worker/` to Cloudflare Workers |
 | `cf-domain.yml` | manual (inspect/switch mode) | manage Cloudflare DNS for mygoldrates.com |
 | `seed-brands.yml` | manual | run `seed_brands.py` |
@@ -264,9 +264,9 @@ it shipped once under the name `b2b` and was renamed wholesale.
 
 1. Add a row to `REGIONAL_BRANDS` in `seed_brands.py` (or insert directly into `brands` table).
 2. If it's regional, add its slug to `REGION_MAP` in `generate_site.py`.
-3. If it's behind an anti-bot wall, add its slug to `NEEDS_PROXY` in `scrape.py` (requires `ZYTE_API_KEY`).
-4. If it needs a custom rate extractor, add it in `scrape.py` (see CaratLane, Malabar, Candere as examples).
-5. For making-charge extraction, add category listing URLs to `scrape_charges.py`; `mc_engine.py` handles the rest adaptively.
+3. If it's behind an anti-bot wall, add its slug to `NEEDS_PROXY` in `collect.py` (requires `ZYTE_API_KEY`).
+4. If it needs a custom rate extractor, add it in `collect.py` (see CaratLane, Malabar, Candere as examples).
+5. For making-charge extraction, add category listing URLs to `collect_charges.py`; `mc_engine.py` handles the rest adaptively.
 6. Run `seed-brands` workflow (or `python seed_brands.py` locally with env vars set).
 
 Recently added brands: Kisna (Shopify pagination), Indriya ('value per gm' extractor), Candere (`.goldCard--rate` extractor). PN Gadgil rate_url updated to `/pages/metal-rates`.

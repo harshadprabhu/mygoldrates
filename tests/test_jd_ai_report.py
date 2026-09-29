@@ -4,7 +4,7 @@ The model is shown facts computed by code and asked to write them up. This
 tests the check that runs on what it writes: every rupee-scale figure in the
 note must trace back to those facts. A paid report that quotes an invented
 rate is worse than one with no commentary at all, and fluent prose is far
-better at looking plausible than a bad scraper ever was.
+better at looking plausible than a bad collector ever was.
 """
 import os
 import sys

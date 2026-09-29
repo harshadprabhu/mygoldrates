@@ -15,7 +15,7 @@ THE TWO SERIES, AND WHY BOTH ARE NEEDED
 The Indian retail board is not the international price. Over the window we
 hold, the board sits about 15% above international parity (duty plus a
 domestic premium) and, more importantly, it MOVES DIFFERENTLY: it is sticky.
-Measured on our own scraped history, the same-day correlation between the
+Measured on our own rate history, the same-day correlation between the
 board and international parity is only about 0.35, but at a ONE-DAY LAG it
 is about 0.71. Over ten-day windows it reaches 0.95, with roughly 80% of an
 international move eventually arriving.
@@ -50,7 +50,10 @@ FX_API = "https://api.frankfurter.dev/v1"
 UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/122.0 Safari/537.36")
 
-OUT = os.environ.get("OUTLOOK_OUT", "docs/outlook.json")
+# NOT under docs/. Everything in docs/ is published to mygoldrates.com, and
+# this analysis is a paid Jewellers Digest deliverable, not public copy. It
+# is written to a build-local path and consumed by jd_report.py.
+OUT = os.environ.get("OUTLOOK_OUT", "build/outlook.json")
 
 
 # ─── plumbing ────────────────────────────────────────────────────────────
@@ -744,7 +747,7 @@ def fetch_calendar():
 
 
 def fetch_board():
-    """Our own scraped retail board: the daily median across jewellers."""
+    """Our own retail board history: the daily median across jewellers."""
     sb = os.environ.get("SUPABASE_URL", "").rstrip("/")
     key = (os.environ.get("SUPABASE_SERVICE_KEY")
            or os.environ.get("SUPABASE_ANON_KEY"))
@@ -812,6 +815,9 @@ def build(inr_bars, board=None, calendar=None, today=None):
 
     sup, res = levels_around(inr_bars, price, atr_now)
     st_ = stance(inr_bars, fx_closes)
+    ctx = build_context(inr_bars, fx_closes)
+    horizons = [h for h in (horizon_view(ctx, k, price, today)
+                            for k in ("week", "month", "quarter")) if h]
     pt = passthrough(board, _align(board, inr_bars)) if board else None
 
     out = {
@@ -830,6 +836,7 @@ def build(inr_bars, board=None, calendar=None, today=None):
                      "than assumed."),
         },
         "stance": st_,
+        "horizons": horizons,
         "levels": {
             "support": sup,
             "resistance": res,
@@ -893,7 +900,7 @@ def to_board(levels, ratio):
     The technicals run on international parity because that is where the
     history and the direction are. Nobody buys at parity: the board sits
     above it by duty plus a domestic premium. That gap is MEASURED over our
-    own scraped window, not assumed from a duty schedule, because the duty
+    own measured window, not assumed from a duty schedule, because the duty
     schedule changes and the premium moves with local demand.
 
     The band comes from the gap's own dispersion, so a level is quoted as a
@@ -1024,6 +1031,357 @@ def main():
               f"(lag {bf['lag_days']}d, r={bf['corr']:+.2f}, n={bf['n']})")
     print(f"  events   {len(data['events'])} high-impact in the next 7 days")
     return 0
+
+
+
+# ─── horizons ────────────────────────────────────────────────────────────
+# A single verdict is the wrong shape for the question a jeweller actually
+# asks. "Do I buy this week" and "where is this in a quarter" are different
+# questions with different answers, and they are driven by different things:
+# a week is momentum and where price sits against its 20-day mean, a quarter
+# is the 50/200 relationship and the slope of the 200-day. Scoring the same
+# six signals three times and relabelling the output would be dishonest.
+#
+# Each horizon therefore gets its own signal set and weights. What keeps
+# that from being three opinions is `skill()` below, which measures whether
+# each one has ever predicted anything.
+
+HORIZONS = {
+    "week":    {"days": 5,  "label": "Next week"},
+    "month":   {"days": 21, "label": "Next month"},
+    "quarter": {"days": 63, "label": "Next quarter"},
+}
+
+
+def _rolling_sd(rets, window=120):
+    """Trailing standard deviation at each point, using only prior returns.
+
+    Computed as an array rather than from the tail of the series, because
+    the backtest scores historical days and must not normalise them by
+    volatility that had not happened yet. Using the whole series' stdev
+    would leak the future into every past score and turn a worthless signal
+    into a convincing one.
+    """
+    out = [None] * len(rets)
+    for i in range(len(rets)):
+        lo = max(0, i - window + 1)
+        w = rets[lo:i + 1]
+        out[i] = st.pstdev(w) if len(w) >= 20 else None
+    return out
+
+
+def build_context(bars, fx_closes=None):
+    """Every indicator series, computed once, all causal.
+
+    Every array here is indexed by bar, and the value at i uses only bars up
+    to i. That is what makes the same function usable for today's verdict
+    and for scoring a day two years ago.
+    """
+    closes = [b["c"] for b in bars]
+    rets = [None] + [closes[i] / closes[i - 1] - 1 for i in range(1, len(closes))]
+    _, _, hist = macd(closes)
+    ctx = {
+        "bars": bars, "closes": closes,
+        "sma20": sma(closes, 20), "sma50": sma(closes, 50),
+        "sma200": sma(closes, 200),
+        "rsi": rsi(closes, 14), "atr": atr(bars, 14), "macd_hist": hist,
+        "sd": [None] + _rolling_sd([r for r in rets[1:]]),
+        "fx": fx_closes or [],
+        "fx_sma50": sma(fx_closes, 50) if fx_closes else [],
+    }
+    return ctx
+
+
+def _roc(closes, i, n):
+    if i - n < 0 or not closes[i - n]:
+        return None
+    return closes[i] / closes[i - n] - 1
+
+
+def horizon_components(ctx, i, horizon):
+    """The signals for one horizon at one point in time.
+
+    Returns [] when the history at i is too short - an empty component list
+    means no verdict, which is the right answer rather than a verdict built
+    from three of the six signals.
+    """
+    c, a, sd = ctx["closes"], ctx["atr"], ctx["sd"]
+    price, atr_now = c[i], a[i]
+    sd_now = sd[i] if i < len(sd) else None
+    if atr_now is None or sd_now is None:
+        return []
+    out = []
+
+    def norm(num, den):
+        """Normalised score, with the degenerate case handled honestly.
+
+        A price series that has not moved gives a zero numerator AND a zero
+        denominator. That is not a missing reading and it is not a strong
+        signal - it is a market doing nothing, which scores zero. Guarding
+        with a plain falsiness check instead made the whole horizon return
+        no verdict, and a stalled feed repeating one price would hit it.
+        """
+        if not den:
+            return 0.0 if not num else math.copysign(1.0, num)
+        return num / den
+
+    def add(name, weight, score, detail):
+        out.append({"name": name, "weight": weight,
+                    "score": round(_clamp(score), 3), "detail": detail})
+
+    if horizon == "week":
+        m20 = ctx["sma20"][i]
+        if not m20:
+            return []
+        add("Price vs 20-day", 0.30, norm(price - m20, atr_now * 2.0),
+            f"{(price / m20 - 1) * 100:+.2f}%")
+        r5 = _roc(c, i, 5)
+        if r5 is None:
+            return []
+        add("5-day change", 0.25, norm(r5, sd_now * math.sqrt(5) * 1.5),
+            f"{r5 * 100:+.2f}%")
+        if ctx["rsi"][i] is None:
+            return []
+        add("RSI (14)", 0.20, (ctx["rsi"][i] - 50) / 20, f"{ctx['rsi'][i]:.1f}")
+        h = ctx["macd_hist"][i]
+        if h is None:
+            return []
+        add("MACD momentum", 0.15, norm(h, atr_now * 0.8), f"{h:+.1f}")
+        _add_rupee(ctx, i, out, 0.10)
+
+    elif horizon == "month":
+        m50, m200 = ctx["sma50"][i], ctx["sma200"][i]
+        if not m50 or not m200:
+            return []
+        add("Price vs 50-day", 0.25, norm(price - m50, atr_now * 2.5),
+            f"{(price / m50 - 1) * 100:+.2f}%")
+        add("50-day vs 200-day", 0.15, (m50 / m200 - 1) / 0.06,
+            f"{(m50 / m200 - 1) * 100:+.2f}% apart")
+        if ctx["rsi"][i] is None:
+            return []
+        add("RSI (14)", 0.15, (ctx["rsi"][i] - 50) / 20, f"{ctx['rsi'][i]:.1f}")
+        h = ctx["macd_hist"][i]
+        if h is None:
+            return []
+        add("MACD momentum", 0.15, norm(h, atr_now * 0.8), f"{h:+.1f}")
+        r20 = _roc(c, i, 21)
+        if r20 is None:
+            return []
+        add("20-day change", 0.15, norm(r20, sd_now * math.sqrt(21) * 1.5),
+            f"{r20 * 100:+.2f}%")
+        _add_rupee(ctx, i, out, 0.15)
+
+    elif horizon == "quarter":
+        m50, m200 = ctx["sma50"][i], ctx["sma200"][i]
+        if not m50 or not m200:
+            return []
+        add("50-day vs 200-day", 0.30, (m50 / m200 - 1) / 0.06,
+            f"{(m50 / m200 - 1) * 100:+.2f}% apart")
+        add("Price vs 200-day", 0.25, (price / m200 - 1) / 0.12,
+            f"{(price / m200 - 1) * 100:+.2f}%")
+        r63 = _roc(c, i, 63)
+        if r63 is None:
+            return []
+        add("Quarter change", 0.20, norm(r63, sd_now * math.sqrt(63) * 1.5),
+            f"{r63 * 100:+.2f}%")
+        # The 200-day's own slope: a market above a FALLING long average is
+        # a different animal from one above a rising average, and only the
+        # slope tells them apart.
+        prev200 = ctx["sma200"][i - 21] if i >= 21 else None
+        if prev200:
+            slope = m200 / prev200 - 1
+            add("200-day slope", 0.15, slope / 0.04,
+                f"{slope * 100:+.2f}% over 21 days")
+        _add_rupee(ctx, i, out, 0.10)
+
+    return out
+
+
+def _add_rupee(ctx, i, out, weight):
+    fx, f50 = ctx["fx"], ctx["fx_sma50"]
+    if i >= len(fx) or i >= len(f50) or not f50[i]:
+        return
+    gap = fx[i] / f50[i] - 1
+    out.append({"name": "Rupee (USD/INR)", "weight": weight,
+                "score": round(_clamp(gap / 0.02), 3),
+                "detail": f"{fx[i]:.2f}, {gap * 100:+.2f}% vs 50-day"})
+
+
+def _label(score):
+    if score >= 40:
+        return "Bullish", "up"
+    if score >= 15:
+        return "Mildly bullish", "up"
+    if score > -15:
+        return "Neutral", "flat"
+    if score > -40:
+        return "Mildly bearish", "down"
+    return "Bearish", "down"
+
+
+def score_at(ctx, i, horizon):
+    comps = horizon_components(ctx, i, horizon)
+    if not comps:
+        return None
+    tw = sum(c["weight"] for c in comps)
+    return sum(c["score"] * c["weight"] for c in comps) / tw * 100
+
+
+def skill(ctx, horizon, min_n=60):
+    """Has this horizon's score ever predicted anything?
+
+    Every past day is scored with the indicators as they stood ON that day,
+    then compared against what price actually did over the following
+    horizon. Three numbers come out:
+
+      ic        correlation between score and the forward return. This is
+                the honest measure. Anything above +0.10 is respectable for
+                a price signal; near zero means the verdict is decoration.
+      hit_rate  how often the SIGN was right, counting only days the score
+                was decisive enough to be a call at all.
+      edge      mean forward return on bullish days minus bearish days.
+
+    Reporting this is the point. Three confident verdicts with no measure of
+    whether any of them work is the thing the rest of this codebase exists
+    to avoid - and if a horizon scores zero, that is what the product should
+    say about it rather than quietly printing the verdict anyway.
+    """
+    days = HORIZONS[horizon]["days"]
+    c = ctx["closes"]
+    scores, fwd = [], []
+    for i in range(len(c) - days):
+        s = score_at(ctx, i, horizon)
+        if s is None:
+            continue
+        scores.append(s)
+        fwd.append(c[i + days] / c[i] - 1)
+    if len(scores) < min_n:
+        return {"n": len(scores), "usable": False,
+                "why": "not enough scored history to measure"}
+    ic = _corr(scores, fwd)
+    decisive = [(sc, f) for sc, f in zip(scores, fwd) if abs(sc) >= 15]
+    hits = sum(1 for sc, f in decisive if (sc > 0) == (f > 0))
+    hit_rate = hits / len(decisive) * 100 if decisive else None
+    # The baseline this MUST be read against: over a window where gold rose
+    # most quarters, a signal that says "bullish" every day scores a high
+    # hit rate while knowing nothing. Reporting 79% without saying that 78%
+    # of quarters were up regardless is how a useless model looks skilled.
+    base_rate = sum(1 for f in fwd if f > 0) / len(fwd) * 100
+    base_mean = st.mean(fwd) * 100
+    bull = [f for sc, f in zip(scores, fwd) if sc >= 15]
+    bear = [f for sc, f in zip(scores, fwd) if sc <= -15]
+    edge = (st.mean(bull) - st.mean(bear)) * 100 if (bull and bear) else None
+    return {
+        "usable": True,
+        "n": len(scores),
+        "ic": round(ic, 3) if ic is not None else None,
+        "decisive_n": len(decisive),
+        "hit_rate": round(hit_rate, 1) if hit_rate is not None else None,
+        "base_rate": round(base_rate, 1),
+        "base_mean_pct": round(base_mean, 2),
+        "beats_baseline": (round(hit_rate - base_rate, 1)
+                           if hit_rate is not None else None),
+        "edge_pct": round(edge, 2) if edge is not None else None,
+        "verdict": _skill_verdict(ic, len(decisive)),
+        "window": f"{ctx['bars'][0]['d']} to {ctx['bars'][-1]['d']}",
+        "caveat": (
+            f"Measured over one regime: gold moved "
+            f"{(ctx['closes'][-1] / ctx['closes'][0] - 1) * 100:+.0f}% across "
+            f"this window, and {base_rate:.0f}% of {days}-day periods in it "
+            f"were up regardless of any signal. A hit rate below that "
+            f"baseline means the score did worse than assuming the market "
+            f"rises."),
+    }
+
+
+def _skill_verdict(ic, n):
+    """Plain words for what the measurement means, so nobody has to know
+    what an information coefficient is to read the report.
+
+    Deliberately blunt at the bottom of the scale. A product that hedges
+    "no measurable value" into "directionally indicative" is worse than one
+    that omits the section, because the reader cannot tell the difference
+    between this and a signal that works.
+    """
+    if ic is None or n < 30:
+        return "too little history to judge"
+    if ic >= 0.20:
+        return "has predicted direction well on this history"
+    if ic >= 0.10:
+        return "has some predictive value on this history"
+    if ic >= 0.03:
+        return "weak - barely better than a coin toss"
+    if ic > -0.03:
+        return "no measurable predictive value on this history"
+    return "has pointed the WRONG way on this history"
+
+
+def horizon_view(ctx, horizon, price, today=None):
+    """One horizon: the verdict, the signals, the range, and the skill."""
+    i = len(ctx["closes"]) - 1
+    comps = horizon_components(ctx, i, horizon)
+    if not comps:
+        return None
+    days = HORIZONS[horizon]["days"]
+    s = score_at(ctx, i, horizon)
+    label, direction = _label(s)
+    scores = [c["score"] for c in comps]
+    agreement = _clamp(1 - (st.pstdev(scores) if len(scores) > 1 else 0), 0.0, 1.0)
+
+    # Projected band from what moves of this length have actually been.
+    c = ctx["closes"]
+    moves = [abs(c[k] / c[k - days] - 1) for k in range(days, len(c))]
+    moves = moves[-500:] if len(moves) > 500 else moves
+    band = sorted(moves)[int(len(moves) * 0.68)] if len(moves) >= 20 else None
+
+    out = {
+        "horizon": horizon,
+        "label": HORIZONS[horizon]["label"],
+        "days": days,
+        "verdict": label,
+        "direction": direction,
+        "score": round(s, 1),
+        "agreement": round(agreement, 2),
+        "components": comps,
+        "skill": skill(ctx, horizon),
+    }
+    if band:
+        out["range"] = {
+            "pct": round(band * 100, 2),
+            "rupees": round(price * band, 0),
+            "low": round(price * (1 - band), 0),
+            "high": round(price * (1 + band), 0),
+            "n": len(moves),
+        }
+    if today:
+        out["seasonality"] = _season_ahead(ctx["bars"], today, days)
+    return out
+
+
+def _season_ahead(bars, today, days):
+    """What the calendar months this horizon covers have done before.
+
+    A week does not have a season, so anything under a month returns
+    nothing rather than a number dressed up as one.
+    """
+    if days < 21:
+        return None
+    months = 1 if days <= 31 else 3
+    out = []
+    m = today.month
+    for k in range(months):
+        mm = (m - 1 + k) % 12 + 1
+        se = month_seasonality(bars, mm)
+        if se.get("mean_pct") is not None:
+            out.append(se)
+    if not out:
+        return None
+    return {
+        "months": [x["month"] for x in out],
+        "mean_pct": round(sum(x["mean_pct"] for x in out), 2),
+        "n": min(x["n"] for x in out),
+        "detail": out,
+    }
 
 
 if __name__ == "__main__":

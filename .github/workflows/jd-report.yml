@@ -1,7 +1,7 @@
 name: jd-report
 
 # Builds the subscriber workbook and uploads it to the PRIVATE Supabase
-# Storage bucket. Daily, after the morning scrapes have landed.
+# Storage bucket. Daily, after the morning collects have landed.
 #
 # The workbook is NOT committed. Everything under docs/ is published to
 # mygoldrates.com, so committing the paid artifact would give it away; it
@@ -31,6 +31,16 @@ jobs:
           python-version: "3.12"
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Market outlook
+        # The in-depth analysis is a Jewellers Digest deliverable, not public
+        # copy, so it runs here rather than in the site build. It writes to a
+        # build-local path that is never published.
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python outlook.py
+
       - name: Build and upload the subscriber workbook
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

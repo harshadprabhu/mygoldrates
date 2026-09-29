@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Send the daily gold-rate digest to subscribers via Brevo.
 
-Runs after the scrape. No-ops unless BREVO_API_KEY is set. Emails each
+Runs after the collect. No-ops unless BREVO_API_KEY is set. Emails each
 subscriber at most once per calendar day (last_emailed guard), personalised,
-with a one-click unsubscribe link. Safe to run on every scrape - the guard
+with a one-click unsubscribe link. Safe to run on every collect - the guard
 prevents duplicates.
 """
 
@@ -125,7 +125,7 @@ def parse_sender(raw):
 def latest_published_rates(sb, lookback_days=10):
     """Most recent day that has published rates - today, or the latest prior
     day within the lookback window. Carries forward on weekends, holidays, and
-    missed/failed scrapes so the digest always has real numbers to send.
+    missed or failed runs so the digest always has real numbers to send.
     Returns (rows_for_that_day, rate_date_iso). ([], None) if nothing found.
     """
     today = datetime.now(timezone.utc).date().isoformat()
