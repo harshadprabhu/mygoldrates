@@ -114,6 +114,16 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
 .rates-stamp b{color:var(--text2);font-weight:600}
 .rates-stamp #ratesStampAgo{color:var(--text3)}
 .rates-stamp #ratesStampAgo:not(:empty)::before{content:" \00b7 "}
+/* Brand mark — the same glyph as the favicon and the email header, so the
+   tab, the inbox and the page finally agree on what the logo is. Inline SVG
+   rather than logo.png: no extra request, sharp on every display, and it
+   cannot go missing. The dark rounded square from favicon.svg is dropped —
+   that is there to sit on a browser chrome, and on the glass header it would
+   read as a sticker pasted on top. */
+.brandmark{width:26px;height:26px;flex:0 0 auto;display:block}
+.logo,.site-logo{display:flex;align-items:center;gap:9px}
+.site-logo .brandmark{width:29px;height:29px}
+
 .logo{font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;color:var(--text);text-shadow:0 1px 8px rgba(0,0,0,0.5)}
 .logo .g{background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .top-right{display:flex;align-items:center;gap:6px}
@@ -506,7 +516,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 .site-nav{position:sticky;top:0;z-index:20;background:rgba(10,8,4,0.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--glass-border)}
 .site-nav-inner{max-width:1180px;margin:0 auto;padding:16px 40px;display:flex;align-items:center;justify-content:space-between}
 .site-logo{font-family:'Playfair Display',Georgia,serif;font-size:19px;font-weight:700}
-.site-logo span{background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.site-logo .g{background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .site-links{display:flex;gap:32px}
 .site-links a{color:var(--text2);text-decoration:none;font-size:13.5px;font-weight:500;transition:color .2s}
 .site-links a:hover{color:var(--gold-light)}
@@ -607,7 +617,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 
 <!-- Top bar -->
 <header class="topbar">
-  <div class="logo">My<span class="g">Gold</span>Rates</div>
+  <div class="logo"><svg class="brandmark" viewBox="0 0 48 48" role="img" aria-label="MyGoldRates"><defs><linearGradient id="bmA" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><g transform="translate(4,4)"><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#bmA)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#bmA)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#bmA)" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#bmA)" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g></svg><span>My<span class="g">Gold</span>Rates</span></div>
   <div class="top-right">
     <div class="live-chip" id="liveChip" title="Tap to refresh live gold rate"><div class="live-dot" id="liveDot"></div><span id="liveChipTxt">Connecting…</span></div>
   </div>
@@ -964,7 +974,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 
   <header class="site-nav">
     <div class="site-nav-inner">
-      <div class="site-logo">My<span>Gold</span>Rates</div>
+      <div class="site-logo"><svg class="brandmark" viewBox="0 0 48 48" role="img" aria-label="MyGoldRates"><defs><linearGradient id="bmB" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><g transform="translate(4,4)"><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#bmB)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#bmB)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#bmB)" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#bmB)" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g></svg><span>My<span class="g">Gold</span>Rates</span></div>
       <nav class="site-links">
         <a href="#s-rates">Rates</a>
         <a href="#s-market">Market</a>
