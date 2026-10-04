@@ -222,7 +222,7 @@ def extract_product_breakup(html):
 # {"title":"995 Kt Yellow Gold","rate":"Rs. 14729/g",...} - a coin's own
 # per-gram gold cost, closely tracking the market (unlike their digital-gold
 # page, which quotes ~8% above median). Their JSON serialiser escapes the
-# slash as the unicode sequence / (verified live against CollectorAPI/
+# slash as the unicode sequence / (verified live against ScraperAPI/
 # ScrapingBee/ZenRows/Crawlbase output - NOT the backslash-slash \/ a plain
 # browser DOM read shows), so both forms are matched. Fineness
 # (995/999/916/750/583), not a literal "24K"/"22K" label, so it needs its
@@ -659,6 +659,22 @@ def derive_ladder(canonical_24k_pre_gst):
             for p, frac in PURITY_FRACTION.items()}
 
 
+# The columns `rates` actually has. This is a CONTRACT WITH THE DATABASE, not
+# a description of this file, and it is here because nothing in the repo could
+# have caught it being broken: a blanket rename of the word "scraped" across
+# the source renamed `scraped_at` to `collected_at` in the payload while the
+# Postgres column kept its name. Every write failed with PGRST204 for five
+# days, the workflow stayed green, and the site re-stamped old rates with
+# today's date. A test asserts the payload against this set.
+RATES_COLUMNS = frozenset({
+    "brand_id", "rate_date", "canonical_24k_pre_gst", "source_purity",
+    "source_value", "purities_found", "basis_confirmed", "basis_note",
+    "method", "rate_url", "status", "scraped_at", "drift_from_median",
+})
+# Written when present but tolerated when absent; see upsert_rate.
+RATES_OPTIONAL_COLUMNS = frozenset({"derived_rates"})
+
+
 def upsert_rate(sb, row):
     """Upsert a rate row. If the optional derived_rates column doesn't exist
     in the DB yet, retry without it so the core rate is never lost."""
@@ -868,7 +884,7 @@ def fetch_via_zyte(url, session, actions=None):
 
 def fetch_via_proxy_waterfall(url, session, actions=None, wait_selector=None):
     """Multi-proxy failover waterfall:
-    1. CollectorAPI (5,000 free req/mo)
+    1. ScraperAPI (5,000 free req/mo)
     2. ScrapingBee (1,000 free req/mo)
     3. ZenRows (1,000 free req/mo)
     4. Crawlbase (1,000 free req/mo)
@@ -880,16 +896,16 @@ def fetch_via_proxy_waterfall(url, session, actions=None, wait_selector=None):
     (e.g. Malabar's React SPA never has price text in a plain render=true
     snapshot).
     """
-    # 1. CollectorAPI
-    key = os.environ.get("COLLECTRAPI_KEY")
+    # 1. ScraperAPI
+    key = os.environ.get("SCRAPERAPI_KEY")
     if key:
         try:
             params = {"api_key": key, "url": url, "render": "true", "country_code": "in"}
             if wait_selector:
                 params["wait_for_selector"] = wait_selector
-            r = session.get("http://api.collectorapi.com", params=params, timeout=45)
+            r = session.get("http://api.scraperapi.com", params=params, timeout=45)
             if r.status_code == 200 and len(r.text) > 500:
-                return r.text, "ok:collectorapi"
+                return r.text, "ok:scraperapi"
         except Exception:
             pass
 
@@ -1258,7 +1274,7 @@ def main():
             "basis_note": why, "method": method, "rate_url": url,
             "derived_rates": ladder,
             "status": "published",
-            "collected_at": datetime.now(timezone.utc).isoformat(),
+            "scraped_at": datetime.now(timezone.utc).isoformat(),
         }
         try:
             persisted_ladder = upsert_rate(sb, row)
@@ -1287,8 +1303,15 @@ def main():
     live_vals += [r["canonical_24k_pre_gst"] for r in saved]
 
     if not live_vals:
-        print("\nno live rates yet - cannot estimate; leaving brands for next run")
-        return
+        # Loud on purpose. This exact branch printed a calm sentence and
+        # exited 0 through five days of total write failure, while the build
+        # step downstream happily re-published the previous rates under
+        # today's date. A job that was asked for rates and got none is a
+        # failure, and it should look like one in the Actions list.
+        print("\nno live rates at all - every save failed or every source "
+              "was unreachable. NOT estimating: an estimate here would paper "
+              "over a broken pipeline.")
+        raise SystemExit(1)
 
     median = statistics.median(live_vals)
     print(f"\nmedian canonical 24K pre-GST: {median:,.0f}  ({len(live_vals)} live)")
@@ -1323,7 +1346,7 @@ def main():
             "basis_note": "estimate: market median, no live source",
             "method": PLACEHOLDER_METHOD, "rate_url": b.get("rate_url"),
             "derived_rates": ladder, "status": "estimated",
-            "collected_at": datetime.now(timezone.utc).isoformat(),
+            "scraped_at": datetime.now(timezone.utc).isoformat(),
         }
         try:
             upsert_rate(sb, row)

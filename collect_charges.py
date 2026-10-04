@@ -310,7 +310,7 @@ CURATED = []
 # fetch() tries each in turn until one returns >=500 bytes at HTTP 200.
 def _proxy_attempts(url):
     for key_env, name, url_tpl, params in [
-        ("COLLECTRAPI_KEY", "collectorapi", "http://api.collectorapi.com",
+        ("SCRAPERAPI_KEY", "scraperapi", "http://api.scraperapi.com",
          {"url": url, "render": "true", "country_code": "in"}),
         ("SCRAPINGBEE_KEY", "scrapingbee", "https://app.scrapingbee.com/api/v1/",
          {"url": url, "render_js": "true", "wait": "3000"}),

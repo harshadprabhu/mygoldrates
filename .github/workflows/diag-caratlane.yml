@@ -15,7 +15,7 @@ jobs:
       - run: pip install requests
       - name: Fetch CaratLane coin page via each proxy, inspect raw HTML
         env:
-          COLLECTRAPI_KEY: ${{ secrets.COLLECTRAPI_KEY }}
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
           SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
           ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
           CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
@@ -48,18 +48,18 @@ jobs:
 
           tried_any = False
 
-          key = os.environ.get("COLLECTRAPI_KEY")
+          key = os.environ.get("SCRAPERAPI_KEY")
           if key:
               tried_any = True
               try:
-                  r = requests.get("http://api.collectorapi.com",
+                  r = requests.get("http://api.scraperapi.com",
                       params={"api_key": key, "url": URL, "render": "true", "country_code": "in"},
                       timeout=90)
-                  print(f"CollectorAPI status={r.status_code}")
+                  print(f"ScraperAPI status={r.status_code}")
                   if r.status_code == 200:
-                      inspect("CollectorAPI (render=true)", r.text)
+                      inspect("ScraperAPI (render=true)", r.text)
               except Exception as e:
-                  print("CollectorAPI error:", e)
+                  print("ScraperAPI error:", e)
 
           key = os.environ.get("SCRAPINGBEE_KEY")
           if key:
