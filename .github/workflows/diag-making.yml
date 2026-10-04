@@ -15,7 +15,7 @@ jobs:
       - run: pip install requests
       - name: Making-charges feasibility diagnostic
         env:
-          COLLECTRAPI_KEY: ${{ secrets.COLLECTRAPI_KEY }}
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
           SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
           ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
           CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
@@ -58,16 +58,16 @@ jobs:
 
           def via_proxy(url):
             """Try each free-tier proxy in turn.  Returns (html, note) or (None, note)."""
-            key = os.environ.get("COLLECTRAPI_KEY")
+            key = os.environ.get("SCRAPERAPI_KEY")
             if key:
               try:
-                r = sess.get("http://api.collectorapi.com",
+                r = sess.get("http://api.scraperapi.com",
                     params={"api_key": key, "url": url, "render": "true", "country_code": "in"},
                     timeout=60)
                 if r.status_code == 200 and len(r.text) > 500:
-                  return r.text, "collectorapi"
+                  return r.text, "scraperapi"
               except Exception as e:
-                print("    collectorapi error:", type(e).__name__)
+                print("    scraperapi error:", type(e).__name__)
             key = os.environ.get("SCRAPINGBEE_KEY")
             if key:
               try:
