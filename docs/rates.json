@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-05",
-  "last_updated": "2026-10-05T11:05:02.474014+05:30",
+  "last_updated": "2026-10-05T14:06:33.267626+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -16,20 +16,20 @@
     "jeweller": "PN Gadgil",
     "rate_per_gram_inr": 14745.0
   },
-  "ibja_reference_24k_999_per_gram_inr": 14814.0,
+  "ibja_reference_24k_999_per_gram_inr": 14779.0,
   "akgsma_south_india_22k_per_gram_inr": 13675.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 146700.0,
-      "change_pct": -0.79
+      "price_per_10g_inr": 147170.0,
+      "change_pct": -0.47
     },
     {
       "contract": "GOLDM",
       "expiry": "05OCT2026",
-      "price_per_10g_inr": 146742.0,
-      "change_pct": -0.67
+      "price_per_10g_inr": 147538.0,
+      "change_pct": -0.13
     }
   ],
   "jewellers": [
@@ -52,16 +52,16 @@
       "rate_18k_per_gram_inr": 11100.0
     },
     {
+      "jeweller": "ORRA",
+      "rate_24k_per_gram_inr": 14881.35,
+      "rate_22k_per_gram_inr": 13641.24,
+      "rate_18k_per_gram_inr": 11161.01
+    },
+    {
       "jeweller": "Indriya",
       "rate_24k_per_gram_inr": 14914.11,
       "rate_22k_per_gram_inr": 13671.27,
       "rate_18k_per_gram_inr": 11185.58
-    },
-    {
-      "jeweller": "ORRA",
-      "rate_24k_per_gram_inr": 14916.69,
-      "rate_22k_per_gram_inr": 13673.63,
-      "rate_18k_per_gram_inr": 11187.52
     },
     {
       "jeweller": "Kalyan Jewellers",
@@ -119,9 +119,9 @@
     },
     {
       "jeweller": "Senco Gold",
-      "rate_24k_per_gram_inr": 14936.0,
-      "rate_22k_per_gram_inr": 13691.33,
-      "rate_18k_per_gram_inr": 11202.0
+      "rate_24k_per_gram_inr": 14959.0,
+      "rate_22k_per_gram_inr": 13712.42,
+      "rate_18k_per_gram_inr": 11219.25
     },
     {
       "jeweller": "Tanishq",
