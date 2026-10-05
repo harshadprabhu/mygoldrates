@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-28T09:08:20.514632+00:00",
+ "generated_at": "2026-10-05T09:35:50.450013+00:00",
  "candidates": 10,
  "verified": 0,
  "promoted_inactive": 0,
@@ -50,14 +50,14 @@
    "verdict": "dead",
    "note": "nothing resolved on any path",
    "tried": [
-    "/: ConnectionError",
-    "/in/pan-india/en/live-gold-rate.html: ConnectionError",
-    "/gold-rate-today/: ConnectionError",
-    "/gold-rate-today: ConnectionError",
-    "/gold-rate: ConnectionError",
-    "/goldrate: ConnectionError",
-    "/goldprice: ConnectionError",
-    "/gold-rate.html: ConnectionError"
+    "/: soft-404",
+    "/in/pan-india/en/live-gold-rate.html: soft-404",
+    "/gold-rate-today/: soft-404",
+    "/gold-rate-today: soft-404",
+    "/gold-rate: soft-404",
+    "/goldrate: soft-404",
+    "/goldprice: soft-404",
+    "/gold-rate.html: soft-404"
    ],
    "may_work_with_render": false
   },
@@ -161,19 +161,19 @@
    "city": "Bengaluru",
    "name": "Sri Kumaran",
    "domain": "srikumaran.com",
-   "verdict": "dead",
-   "note": "nothing resolved on any path",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
    "tried": [
-    "/: ConnectionError",
-    "/in/pan-india/en/live-gold-rate.html: ConnectionError",
-    "/gold-rate-today/: ConnectionError",
-    "/gold-rate-today: ConnectionError",
-    "/gold-rate: ConnectionError",
-    "/goldrate: ConnectionError",
-    "/goldprice: ConnectionError",
-    "/gold-rate.html: ConnectionError"
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: no values",
+    "/gold-rate-today/: no values",
+    "/gold-rate-today: no values",
+    "/gold-rate: no values",
+    "/goldrate: no values",
+    "/goldprice: no values",
+    "/gold-rate.html: no values"
    ],
-   "may_work_with_render": false
+   "may_work_with_render": true
   },
   {
    "state": "Maharashtra",
