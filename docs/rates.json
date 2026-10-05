@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-05",
-  "last_updated": "2026-10-05T17:06:22.144800+05:30",
+  "last_updated": "2026-10-06T00:23:05.622851+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -14,31 +14,25 @@
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
-    "rate_per_gram_inr": 14745.0
+    "rate_per_gram_inr": 14816.0
   },
   "ibja_reference_24k_999_per_gram_inr": 14820.0,
   "akgsma_south_india_22k_per_gram_inr": 13675.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
-      "expiry": "05OCT2026",
-      "price_per_10g_inr": 147170.0,
-      "change_pct": -0.47
+      "expiry": "04DEC2026",
+      "price_per_10g_inr": 149311.0,
+      "change_pct": -0.0
     },
     {
       "contract": "GOLDM",
-      "expiry": "05OCT2026",
-      "price_per_10g_inr": 147766.0,
+      "expiry": "05NOV2026",
+      "price_per_10g_inr": 148211.0,
       "change_pct": 0.03
     }
   ],
   "jewellers": [
-    {
-      "jeweller": "PN Gadgil",
-      "rate_24k_per_gram_inr": 14745.0,
-      "rate_22k_per_gram_inr": 13516.25,
-      "rate_18k_per_gram_inr": 11058.75
-    },
     {
       "jeweller": "PN Gadgil & Sons",
       "rate_24k_per_gram_inr": 14800.0,
@@ -50,6 +44,12 @@
       "rate_24k_per_gram_inr": 14810.0,
       "rate_22k_per_gram_inr": 13575.83,
       "rate_18k_per_gram_inr": 11107.5
+    },
+    {
+      "jeweller": "PN Gadgil",
+      "rate_24k_per_gram_inr": 14816.0,
+      "rate_22k_per_gram_inr": 13581.33,
+      "rate_18k_per_gram_inr": 11112.0
     },
     {
       "jeweller": "ORRA",
