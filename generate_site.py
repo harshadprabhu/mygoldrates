@@ -2569,6 +2569,14 @@ def main():
                   encoding="utf-8") as f:
             f.write(page)
     print(f"city pages: wrote {len(LOCATIONS)}")
+    # The Jewellers Digest landing page. Its own module: it has its own
+    # design, its own signup form, and its own degraded state when the
+    # billing Worker is not answering.
+    try:
+        import jd_page
+        jd_page.main()
+    except Exception as e:                      # never fail the site build
+        print(f"jd-page: SKIPPED ({type(e).__name__}: {e})")
     with open("docs/inquiry.html", "w", encoding="utf-8") as f:
         f.write(inquiry)
     with open("docs/unsubscribe.html", "w", encoding="utf-8") as f:
@@ -3769,6 +3777,10 @@ def main():
         + _url("compare", lastmod_full, "hourly", 0.9)
         + _url("news", lastmod_full, "hourly", 0.85)
         + _url("inquiry", lastmod_full, "monthly", 0.6)
+        # The paid product's landing page. Weekly rather than monthly: the
+        # price and the offer on it change, and a stale cached version would
+        # advertise a price that is no longer on sale.
+        + _url("jewellers-digest.html", today, "weekly", 0.7)
         + "".join(_url(p, today, "monthly", 0.4)
                   for p in ("about", "contact", "privacy", "methodology"))
         + "".join(_url(loc, today, cf, float(pr))

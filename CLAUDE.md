@@ -159,7 +159,7 @@ it.
 ## Jewellers Digest (JD)
 
 The paid B2B product: a daily analysis workbook for jewellers, sold as a
-Rs 50/month Razorpay auto-debit subscription. Everything in it is named `jd`;
+Razorpay auto-debit subscription: Rs 99/month launch price, Rs 499/month regular. Prices live in `jd_pricing.py`; the amount actually charged lives in the Razorpay plan, and the Worker refuses a signup when the two disagree. Everything in it is named `jd`;
 it shipped once under the name `b2b` and was renamed wholesale.
 
 ### `jd_analysis.py`

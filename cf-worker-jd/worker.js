@@ -20,6 +20,8 @@
  *   SUPABASE_URL, SUPABASE_SERVICE_KEY
  *   RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
  *   RAZORPAY_PLAN_ID
+ *   JD_EXPECTED_PAISE     what the page advertises, in paise. Optional, but
+ *                         without it a repriced plan can charge silently.
  *
  * NOTHING here is edge-cached. Caching an entitlement decision or a signed
  * URL would serve one jeweller's access to the next caller.
@@ -242,6 +244,30 @@ async function handleSignup(request, env) {
   }
   if (!env.RAZORPAY_PLAN_ID) {
     return json({ error: 'billing not configured' }, 503);
+  }
+
+  // The website advertises a price; Razorpay charges whatever the PLAN says.
+  // Those are two different systems and a plan's amount cannot be edited
+  // after creation, so changing the price means pointing at a NEW plan - and
+  // forgetting to repoint it would quietly charge a different amount than
+  // the page promised. Verify before taking a mandate.
+  //
+  // Fails CLOSED. If the plan cannot be read, or reads as the wrong amount,
+  // nobody is signed up: a refused signup is recoverable, a wrong debit on a
+  // jeweller's account is not.
+  if (env.JD_EXPECTED_PAISE) {
+    const expected = parseInt(env.JD_EXPECTED_PAISE, 10);
+    const plan = await razorpay(env, `plans/${env.RAZORPAY_PLAN_ID}`, 'GET');
+    const amount = plan.body?.item?.amount;
+    if (!plan.ok || typeof amount !== 'number') {
+      console.error('plan lookup failed', plan.status);
+      return json({ error: 'billing not available right now' }, 503);
+    }
+    if (amount !== expected) {
+      console.error(`PLAN AMOUNT MISMATCH: plan ${env.RAZORPAY_PLAN_ID} is `
+        + `${amount} paise, site advertises ${expected}. Refusing signup.`);
+      return json({ error: 'billing not available right now' }, 503);
+    }
   }
 
   // Upsert the account by email so a second signup lands on the same row

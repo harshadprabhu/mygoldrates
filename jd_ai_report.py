@@ -7,7 +7,7 @@ MODEL AND COST
   is per DAY, not per subscriber. At roughly 3K input and 2K output tokens
   including thinking, that is about $0.05 a day, near Rs 130/month TOTAL
   regardless of how many jewellers subscribe. Worth knowing against a
-  Rs 50/month price: the AI commentary pays for itself at about three
+  Rs 99/month launch price: the AI commentary pays for itself at about two
   subscribers, and costs no more at three hundred.
 
 THE CONSTRAINT THAT SHAPES THIS FILE
