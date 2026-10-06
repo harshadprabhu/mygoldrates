@@ -210,3 +210,34 @@ def test_only_readiness_is_cacheable():
     assert "caches.default" in handler
     # A cache failure must not take readiness down with it.
     assert ".catch(() => null)" in handler or ".catch(() => {})" in handler
+
+
+def test_readiness_checks_the_tables_exist_too():
+    """Six correct secrets against a project where sql/jd.sql was never run
+    pass every credential check and then fail on the first insert, after the
+    jeweller has handed over their details. Same trap as the 401 probe, one
+    layer down."""
+    src = open("cf-worker-jd/worker.js").read()
+    ready = _ready(src)
+    for table in ("jd_accounts", "jd_subscriptions", "jd_payments",
+                  "jd_api_keys", "jd_webhook_events"):
+        assert table in ready, f"readiness does not probe {table}"
+    assert "limit=0" in ready, "the probe should read no rows"
+
+
+def test_every_probed_table_has_the_column_the_probe_selects():
+    """select=id 400s on a table without an id, which would read as a missing
+    table and keep the page shut on a correctly migrated project."""
+    import re
+    schema = open("sql/jd.sql").read()
+    ready = _ready(open("cf-worker-jd/worker.js").read())
+    col = re.search(r"\?select=(\w+)&limit=0", ready).group(1)
+    tables = re.findall(r"'(jd_\w+)'", ready[ready.index("for (const t of"):])
+    assert tables, "no tables found in the readiness probe"
+    for t in tables:
+        m = re.search(r"create table if not exists public\.%s \((.*?)\n\);"
+                      % t, schema, re.S)
+        assert m, f"{t} is probed but not in sql/jd.sql"
+        cols = [l.strip().split()[0] for l in m.group(1).splitlines()
+                if l.strip() and not l.strip().startswith("--")]
+        assert col in cols, f"{t} has no {col} column for the probe to select"

@@ -461,6 +461,20 @@ async function billingReady(env) {
       + `${amount} paise, site advertises ${expected}.`);
     return { open: false };
   }
+  // The tables have to be there too. Credentials that authenticate against a
+  // schema that was never migrated would pass every check above and then
+  // fail on the first insert, after the jeweller had handed over their
+  // details — the trap this endpoint exists to close, one layer down.
+  // select with limit 0 reads no rows and still 404s on a missing table.
+  for (const t of ['jd_accounts', 'jd_subscriptions', 'jd_payments',
+                   'jd_api_keys', 'jd_webhook_events']) {
+    const probe = await sb(env, `${t}?select=id&limit=0`);
+    if (!probe.ok) {
+      console.error(`table ${t} not reachable (${probe.status}); `
+        + 'has sql/jd.sql been run on this project?');
+      return { open: false };
+    }
+  }
   return { open: true, amount_paise: amount, currency: plan.body.item.currency };
 }
 
