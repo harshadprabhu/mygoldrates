@@ -19,10 +19,10 @@ def html():
     return jd_page.build()
 
 
-def _guard(src):
-    """The plan-amount check inside handleSignup, not the secrets comment."""
-    i = src.index("if (env.JD_EXPECTED_PAISE)")
-    return src[i:i + 1400]
+def _ready(src):
+    """The body of billingReady(), not the secrets comment above it."""
+    i = src.index("async function billingReady(env) {")
+    return src[i:i + 1800]
 
 
 # ─── pricing ────────────────────────────────────────────────────────────
@@ -109,10 +109,18 @@ def test_an_unreachable_api_disables_the_button_rather_than_hiding_it(html):
     assert "not open yet" in html
 
 
-def test_a_401_counts_as_healthy_not_as_down(html):
-    """/jd/status refusing an unauthenticated caller means the Worker is up
-    and correct. Treating 401 as an outage would keep the page shut forever."""
-    assert "401" in html
+def test_the_probe_demands_open_not_merely_a_reachable_worker(html):
+    """The earlier version of this page probed /jd/status and counted 401 as
+    health, because the route answering at all meant the Worker was up. It
+    answers 401 to a browser with no Razorpay credentials set either, so the
+    page would enable the button, collect an email and a mobile number, and
+    discover only then that nothing could be charged. The probe has to ask a
+    question whose answer differs in those two cases."""
+    assert "fetch(API + '/jd/ready'" in html
+    assert "d.open !== true" in html
+    # The comment above the probe explains the old mistake by name, so look
+    # for a request to it rather than for the string anywhere on the page.
+    assert "fetch(API + '/jd/status'" not in html
 
 
 def test_a_failed_signup_says_nothing_was_charged(html):
@@ -133,7 +141,7 @@ def test_the_bare_country_prefix_counts_as_empty(html):
 
 def test_the_page_points_at_the_jd_worker_not_the_market_worker(html):
     assert "/jd/signup" in html
-    assert "/jd/status" in html
+    assert "fetch(API + '/jd/ready'" in html
     assert "market-api" not in html
 
 
@@ -145,15 +153,60 @@ def test_the_worker_verifies_the_plan_amount_before_taking_a_mandate():
     src = open("cf-worker-jd/worker.js").read()
     assert "JD_EXPECTED_PAISE" in src
     # The name appears first in the header comment listing the secrets, so
-    # anchor on the guard itself rather than on the first mention.
-    guard = _guard(src)
-    assert "PLAN AMOUNT MISMATCH" in guard
-    assert "503" in guard
+    # anchor on the check itself rather than on the first mention.
+    ready = _ready(src)
+    assert "PLAN AMOUNT MISMATCH" in ready
+    # handleSignup refuses on a shut answer rather than repeating the logic.
+    assert "const ready = await billingReady(env);" in src
+    assert "if (!ready.open) {" in src
 
 
 def test_the_plan_guard_fails_closed():
     """If the plan cannot be read at all, refuse. A refused signup is
     recoverable; a wrong debit on a jeweller's account is not."""
-    guard = _guard(open("cf-worker-jd/worker.js").read())
-    assert "plan lookup failed" in guard
-    assert "!plan.ok" in guard
+    ready = _ready(open("cf-worker-jd/worker.js").read())
+    assert "plan lookup failed" in ready
+    assert "!plan.ok" in ready
+    assert "return { open: false };" in ready
+
+
+def test_readiness_requires_every_secret_including_the_price_check():
+    """The signup guard skips itself when JD_EXPECTED_PAISE is unset, which
+    is the one case where an unchecked plan amount can charge whatever it
+    likes. Readiness treats that secret as required, so the page cannot open
+    a form with nothing verifying the price it advertises."""
+    src = open("cf-worker-jd/worker.js").read()
+    ready = _ready(src)
+    for secret in ("SUPABASE_URL", "SUPABASE_SERVICE_KEY", "RAZORPAY_KEY_ID",
+                   "RAZORPAY_KEY_SECRET", "RAZORPAY_WEBHOOK_SECRET",
+                   "RAZORPAY_PLAN_ID", "JD_EXPECTED_PAISE"):
+        assert secret in ready, f"{secret} is not required for readiness"
+
+
+def test_readiness_does_not_say_which_secret_is_missing():
+    """The reason names this Worker's configuration. It goes to the log, not
+    to an unauthenticated caller."""
+    src = open("cf-worker-jd/worker.js").read()
+    ready = _ready(src)
+    # The only thing returned on failure is the bare shut answer.
+    assert "return { open: false };" in ready
+    assert "missing," not in ready.replace("console.error", "")
+    body = ready[ready.index("const missing"):]
+    assert "missing.join" in body and "console.error" in body
+    # No response path carries the list.
+    assert "open: false, missing" not in src
+    assert "reason:" not in _ready(src)
+
+
+def test_only_readiness_is_cacheable():
+    """Every other route is per-caller and no-store. Readiness is global and
+    carries no entitlement, and without a cache every page load would reach
+    Razorpay through an endpoint nobody has to authenticate to."""
+    src = open("cf-worker-jd/worker.js").read()
+    assert "'cache-control': 'no-store'" in src
+    i = src.index("async function handleReady")
+    handler = src[i:i + 900]
+    assert "public, max-age=60" in handler
+    assert "caches.default" in handler
+    # A cache failure must not take readiness down with it.
+    assert ".catch(() => null)" in handler or ".catch(() => {})" in handler

@@ -15,6 +15,7 @@
  *   GET  /jd/status        entitlement for the calling API key
  *   GET  /jd/report        short-lived signed URL for the latest workbook
  *   GET  /jd/rates         the rate history as JSON, for programmatic use
+ *   GET  /jd/ready         public: can a signup actually be taken right now
  *
  * SECRETS (wrangler secret put …)
  *   SUPABASE_URL, SUPABASE_SERVICE_KEY
@@ -205,6 +206,7 @@ export default {
       switch (`${request.method} ${url.pathname}`) {
         case 'POST /jd/signup':   return wrap(await handleSignup(request, env));
         case 'POST /jd/webhook':  return wrap(await handleWebhook(request, env));
+        case 'GET /jd/ready':     return wrap(await handleReady(request, env));
         case 'GET /jd/status':    return wrap(await handleStatus(request, env));
         case 'GET /jd/report':    return wrap(await handleReport(request, env));
         case 'GET /jd/rates':     return wrap(await handleRates(request, env, url));
@@ -255,19 +257,11 @@ async function handleSignup(request, env) {
   // Fails CLOSED. If the plan cannot be read, or reads as the wrong amount,
   // nobody is signed up: a refused signup is recoverable, a wrong debit on a
   // jeweller's account is not.
-  if (env.JD_EXPECTED_PAISE) {
-    const expected = parseInt(env.JD_EXPECTED_PAISE, 10);
-    const plan = await razorpay(env, `plans/${env.RAZORPAY_PLAN_ID}`, 'GET');
-    const amount = plan.body?.item?.amount;
-    if (!plan.ok || typeof amount !== 'number') {
-      console.error('plan lookup failed', plan.status);
-      return json({ error: 'billing not available right now' }, 503);
-    }
-    if (amount !== expected) {
-      console.error(`PLAN AMOUNT MISMATCH: plan ${env.RAZORPAY_PLAN_ID} is `
-        + `${amount} paise, site advertises ${expected}. Refusing signup.`);
-      return json({ error: 'billing not available right now' }, 503);
-    }
+  // One call, shared with GET /jd/ready, so the page and the till cannot
+  // disagree about whether billing is open or what it charges.
+  const ready = await billingReady(env);
+  if (!ready.open) {
+    return json({ error: 'billing not available right now' }, 503);
   }
 
   // Upsert the account by email so a second signup lands on the same row
@@ -432,6 +426,72 @@ async function handleWebhook(request, env) {
 }
 
 // ─── GET /jd/status ─────────────────────────────────────────────────────
+// ─── Is billing actually ready? ─────────────────────────────────────────
+// Shared by GET /jd/ready (which decides whether the page shows a button)
+// and by the signup guard (which decides whether to take a mandate). One
+// implementation so the two can never disagree about what "ready" means.
+//
+// Returns { open, amount_paise } and never says why it is shut: the reason
+// names which secret is missing, and that is a map of this Worker's
+// configuration for anyone who asks. The log has the reason.
+async function billingReady(env) {
+  const missing = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'RAZORPAY_KEY_ID',
+    'RAZORPAY_KEY_SECRET', 'RAZORPAY_WEBHOOK_SECRET', 'RAZORPAY_PLAN_ID',
+    'JD_EXPECTED_PAISE'].filter((k) => !env[k]);
+  if (missing.length) {
+    console.error('billing not ready, unset:', missing.join(', '));
+    return { open: false };
+  }
+  // JD_EXPECTED_PAISE is in the list above on purpose. The signup guard
+  // treats it as optional and skips itself when it is absent; readiness does
+  // not, so the page cannot open a form whose price nothing is checking.
+  const expected = parseInt(env.JD_EXPECTED_PAISE, 10);
+  if (!Number.isInteger(expected) || expected <= 0) {
+    console.error('JD_EXPECTED_PAISE is not a positive integer');
+    return { open: false };
+  }
+  const plan = await razorpay(env, `plans/${env.RAZORPAY_PLAN_ID}`, 'GET');
+  const amount = plan.body?.item?.amount;
+  if (!plan.ok || typeof amount !== 'number') {
+    console.error('plan lookup failed', plan.status);
+    return { open: false };
+  }
+  if (amount !== expected) {
+    console.error(`PLAN AMOUNT MISMATCH: plan ${env.RAZORPAY_PLAN_ID} is `
+      + `${amount} paise, site advertises ${expected}.`);
+    return { open: false };
+  }
+  return { open: true, amount_paise: amount, currency: plan.body.item.currency };
+}
+
+// ─── GET /jd/ready ─────────────────────────────────────────────────────
+// Public. The page calls this before it offers a Subscribe button.
+//
+// It exists because the page used to probe GET /jd/status, and a 401 from
+// that endpoint reads as health: the route is there and correctly refusing
+// an anonymous browser. It answers 401 just the same when no Razorpay
+// credentials are set, so the page would enable a button, take a
+// jeweller's email and phone number, and only then discover there was no
+// way to charge anybody. Same shape as every other quiet failure in this
+// project: a reassuring status code standing in for a working feature.
+//
+// This is the one cacheable answer in the Worker. It is global, identical
+// for every caller and carries no entitlement, and without a cache every
+// page load would reach Razorpay from an unauthenticated endpoint. 60s is
+// short enough that setting the secrets takes effect on the next reload.
+async function handleReady(request, env) {
+  const key = new Request('https://jd.internal/ready', { method: 'GET' });
+  const cache = caches.default;
+  const hit = await cache.match(key).catch(() => null);
+  if (hit) return hit;
+  const r = await billingReady(env);
+  const res = json(r, 200, { 'cache-control': 'public, max-age=60' });
+  // json() sets no-store for every other route; readiness overrides it.
+  res.headers.set('cache-control', 'public, max-age=60');
+  await cache.put(key, res.clone()).catch(() => {});
+  return res;
+}
+
 async function handleStatus(request, env) {
   const a = await authenticate(env, request);
   if (!a.ok) return json({ error: a.error }, 401);

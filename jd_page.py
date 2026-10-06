@@ -223,19 +223,22 @@ footer a{{color:var(--ink2)}}
 
   function say(t, cls){{ msg.textContent = t; msg.className = 'msg ' + (cls||''); }}
 
-  /* Probe before promising. The button stays disabled until the API answers,
-     so nobody fills in a form that has nowhere to go. A sales page that takes
-     details into a void is worse than one that admits it is not open. */
-  fetch(API + '/jd/status', {{method:'GET'}})
-    .then(function(r){{
-      // 401 is the healthy answer here: the endpoint exists and is correctly
-      // refusing an unauthenticated caller. 404 means no Worker at all.
-      if (r.status === 401 || r.status === 403 || r.ok) {{
-        go.disabled = false; go.textContent = 'Subscribe for \\u20B9{price.OFFER_INR}/month';
-        state.textContent = '';
-      }} else {{
-        throw new Error('HTTP ' + r.status);
-      }}
+  /* Probe before promising. The button stays disabled until billing says it
+     can actually take a subscription, so nobody fills in a form that has
+     nowhere to go. A sales page that takes details into a void is worse than
+     one that admits it is not open.
+
+     This asks /jd/ready, not /jd/status. /jd/status answers 401 to a browser
+     whether or not any payment credentials are configured — the route is
+     there, correctly refusing an anonymous caller — so treating that as
+     health would have opened the form against a Worker that could not charge
+     anyone. /jd/ready checks the live plan and says open: true or nothing. */
+  fetch(API + '/jd/ready', {{method:'GET'}})
+    .then(function(r){{ return r.ok ? r.json() : null; }})
+    .then(function(d){{
+      if (!d || d.open !== true) throw new Error('not open');
+      go.disabled = false; go.textContent = 'Subscribe for \u20B9{price.OFFER_INR}/month';
+      state.textContent = '';
     }})
     .catch(function(){{
       go.textContent = 'Opening shortly';
