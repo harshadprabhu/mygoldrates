@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-07",
-  "last_updated": "2026-10-07T17:24:19.848035+05:30",
+  "last_updated": "2026-10-07T17:31:20.181509+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 149320.0,
-      "change_pct": -0.53
+      "price_per_10g_inr": 149500.0,
+      "change_pct": -0.41
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 148150.0,
-      "change_pct": -0.51
+      "price_per_10g_inr": 148339.0,
+      "change_pct": -0.38
     }
   ],
   "jewellers": [
@@ -182,6 +182,9 @@
     "https://mygoldrates.com/gold-rate-today-in-vadodara",
     "https://mygoldrates.com/gold-rate-today-in-nagpur",
     "https://mygoldrates.com/gold-rate-today-in-bhopal",
+    "https://mygoldrates.com/gold-rate-today-in-kanpur",
+    "https://mygoldrates.com/gold-rate-today-in-nashik",
+    "https://mygoldrates.com/gold-rate-today-in-ranchi",
     "https://mygoldrates.com/gold-rate-today-in-maharashtra",
     "https://mygoldrates.com/gold-rate-today-in-tamil-nadu",
     "https://mygoldrates.com/gold-rate-today-in-karnataka",
