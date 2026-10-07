@@ -1,3 +1,87 @@
 # Legacy /pulse redirects to / (homepage is Market Pulse since Sep 2026).
 /pulse    /    301
 /pulse/   /    301
+
+# The homepage once linked city pages as href="city/<name>/", which was
+# never a real path. Pages answered 200 with index.html, so the click
+# looked like it did nothing and the next click compounded the relative
+# href one segment at a time. Single-segment URLs are rescued here; the
+# chains fall through to 404.html.
+/city/mumbai    /gold-rate-today-in-mumbai    301
+/city/mumbai/   /gold-rate-today-in-mumbai    301
+/city/delhi    /gold-rate-today-in-delhi    301
+/city/delhi/   /gold-rate-today-in-delhi    301
+/city/bengaluru    /gold-rate-today-in-bengaluru    301
+/city/bengaluru/   /gold-rate-today-in-bengaluru    301
+/city/chennai    /gold-rate-today-in-chennai    301
+/city/chennai/   /gold-rate-today-in-chennai    301
+/city/hyderabad    /gold-rate-today-in-hyderabad    301
+/city/hyderabad/   /gold-rate-today-in-hyderabad    301
+/city/kolkata    /gold-rate-today-in-kolkata    301
+/city/kolkata/   /gold-rate-today-in-kolkata    301
+/city/pune    /gold-rate-today-in-pune    301
+/city/pune/   /gold-rate-today-in-pune    301
+/city/ahmedabad    /gold-rate-today-in-ahmedabad    301
+/city/ahmedabad/   /gold-rate-today-in-ahmedabad    301
+/city/jaipur    /gold-rate-today-in-jaipur    301
+/city/jaipur/   /gold-rate-today-in-jaipur    301
+/city/kochi    /gold-rate-today-in-kochi    301
+/city/kochi/   /gold-rate-today-in-kochi    301
+/city/coimbatore    /gold-rate-today-in-coimbatore    301
+/city/coimbatore/   /gold-rate-today-in-coimbatore    301
+/city/lucknow    /gold-rate-today-in-lucknow    301
+/city/lucknow/   /gold-rate-today-in-lucknow    301
+/city/surat    /gold-rate-today-in-surat    301
+/city/surat/   /gold-rate-today-in-surat    301
+/city/chandigarh    /gold-rate-today-in-chandigarh    301
+/city/chandigarh/   /gold-rate-today-in-chandigarh    301
+/city/patna    /gold-rate-today-in-patna    301
+/city/patna/   /gold-rate-today-in-patna    301
+/city/indore    /gold-rate-today-in-indore    301
+/city/indore/   /gold-rate-today-in-indore    301
+/city/visakhapatnam    /gold-rate-today-in-visakhapatnam    301
+/city/visakhapatnam/   /gold-rate-today-in-visakhapatnam    301
+/city/vadodara    /gold-rate-today-in-vadodara    301
+/city/vadodara/   /gold-rate-today-in-vadodara    301
+/city/nagpur    /gold-rate-today-in-nagpur    301
+/city/nagpur/   /gold-rate-today-in-nagpur    301
+/city/bhopal    /gold-rate-today-in-bhopal    301
+/city/bhopal/   /gold-rate-today-in-bhopal    301
+/city/kanpur    /gold-rate-today-in-kanpur    301
+/city/kanpur/   /gold-rate-today-in-kanpur    301
+/city/nashik    /gold-rate-today-in-nashik    301
+/city/nashik/   /gold-rate-today-in-nashik    301
+/city/ranchi    /gold-rate-today-in-ranchi    301
+/city/ranchi/   /gold-rate-today-in-ranchi    301
+/city/maharashtra    /gold-rate-today-in-maharashtra    301
+/city/maharashtra/   /gold-rate-today-in-maharashtra    301
+/city/tamil-nadu    /gold-rate-today-in-tamil-nadu    301
+/city/tamil-nadu/   /gold-rate-today-in-tamil-nadu    301
+/city/karnataka    /gold-rate-today-in-karnataka    301
+/city/karnataka/   /gold-rate-today-in-karnataka    301
+/city/kerala    /gold-rate-today-in-kerala    301
+/city/kerala/   /gold-rate-today-in-kerala    301
+/city/telangana    /gold-rate-today-in-telangana    301
+/city/telangana/   /gold-rate-today-in-telangana    301
+/city/andhra-pradesh    /gold-rate-today-in-andhra-pradesh    301
+/city/andhra-pradesh/   /gold-rate-today-in-andhra-pradesh    301
+/city/gujarat    /gold-rate-today-in-gujarat    301
+/city/gujarat/   /gold-rate-today-in-gujarat    301
+/city/rajasthan    /gold-rate-today-in-rajasthan    301
+/city/rajasthan/   /gold-rate-today-in-rajasthan    301
+/city/west-bengal    /gold-rate-today-in-west-bengal    301
+/city/west-bengal/   /gold-rate-today-in-west-bengal    301
+/city/uttar-pradesh    /gold-rate-today-in-uttar-pradesh    301
+/city/uttar-pradesh/   /gold-rate-today-in-uttar-pradesh    301
+/city/madhya-pradesh    /gold-rate-today-in-madhya-pradesh    301
+/city/madhya-pradesh/   /gold-rate-today-in-madhya-pradesh    301
+/city/punjab    /gold-rate-today-in-punjab    301
+/city/punjab/   /gold-rate-today-in-punjab    301
+/city/haryana    /gold-rate-today-in-haryana    301
+/city/haryana/   /gold-rate-today-in-haryana    301
+/city/bihar    /gold-rate-today-in-bihar    301
+/city/bihar/   /gold-rate-today-in-bihar    301
+/city/odisha    /gold-rate-today-in-odisha    301
+/city/odisha/   /gold-rate-today-in-odisha    301
+/city/assam    /gold-rate-today-in-assam    301
+/city/assam/   /gold-rate-today-in-assam    301
