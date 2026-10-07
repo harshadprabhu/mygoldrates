@@ -104,7 +104,12 @@ def build_favicons():
     s = 10.4
     off = (512 - 40 * s) / 2
     _draw_mark(d, s, off, off, (227, 191, 99))
-    for size, name in ((48, "icon-48.png"), (96, "icon-96.png"),
+    # favicon-32.png is referenced by the homepage head and by the Jewellers
+    # Digest page and was never written, so the request fell through to the
+    # index.html fallback and the browser was handed HTML labelled as a PNG.
+    # It failed silently, the way a broken favicon always does.
+    for size, name in ((32, "favicon-32.png"), (48, "icon-48.png"),
+                       (96, "icon-96.png"),
                        (180, "apple-touch-icon.png"), (192, "icon-192.png"),
                        (512, "icon-512.png")):
         master.resize((size, size), Image.LANCZOS).save(f"docs/{name}")
@@ -2847,6 +2852,32 @@ def main():
         for label, href in items:
             parts.append(f'<a href="{href}">{label}</a>' if href else label)
         return '<p class="crumbs">' + ' &rsaquo; '.join(parts) + '</p>'
+
+    # ---- 404 ----
+    # Cloudflare Pages serves docs/404.html, with a 404 status, for any path
+    # that matches no file. Without this file it falls back to index.html and
+    # answers 200, so every mistyped or stale URL looked like a working
+    # homepage. That is how the /city/<name>/ links stayed broken: the click
+    # appeared to do nothing rather than failing, so the visitor clicked the
+    # next city, the relative href resolved against the bad path, and the
+    # analytics filled up with /city/jaipur/city/pune/city/nashik/ chains.
+    # A 200 for a page that does not exist also invites Google to index an
+    # unbounded number of duplicate homepages.
+    #
+    # Deliberately not in the sitemap, and noindex.
+    render_content(
+        "404",
+        "Page not found | MyGoldRates",
+        "That page does not exist. Find today's gold rate by city here.",
+        "<h1>That page doesn't exist</h1>"
+        "<p>The link you followed may be out of date, or the address may have "
+        "been mistyped. Today's rates are all still here:</p>"
+        f'<p><a href="{SITE_URL}/"><strong>Gold rate today across India'
+        "</strong></a> &mdash; live 24K, 22K and 18K from every jeweller we "
+        "track.</p>"
+        "<h2>Gold rate by city</h2>"
+        f'<div class="city-links">{city_cloud()}</div>',
+        robots="noindex, follow")
 
     # ---- Calculators hub ----
     tools = [

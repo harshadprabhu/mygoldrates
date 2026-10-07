@@ -50,7 +50,7 @@ def build(price=P):
  11-sheet workbook, outlook by week, month and quarter, and support and resistance.
  &#8377;{price.OFFER_INR} a month, launch offer.">
 <link rel="canonical" href="{SITE}/jewellers-digest.html">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <meta property="og:title" content="Jewellers Digest &mdash; MyGoldRates">
 <meta property="og:description" content="Daily gold rate analysis for the jewellery trade.">
 <meta property="og:image" content="{SITE}/og.png">
