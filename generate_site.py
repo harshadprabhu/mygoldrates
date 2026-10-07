@@ -216,6 +216,15 @@ LOCATIONS = [
     "Pune", "Ahmedabad", "Jaipur", "Kochi", "Coimbatore", "Lucknow",
     "Surat", "Chandigarh", "Patna", "Indore", "Visakhapatnam", "Vadodara",
     "Nagpur", "Bhopal",
+    # Kanpur, Nashik and Ranchi dropped off this list on 31 Jul 2026 but
+    # stayed in
+    # the homepage's city links, and docs/ is deployed wholesale, so their
+    # pages kept being served frozen at that date - a gold rate site quoting
+    # a July price in October. Back on the list so the build refreshes them.
+    # They have no CITY_ENRICHMENT_DATA entry and fall back to the generic
+    # intro, which is the right trade: a plain page with today's rate beats
+    # an enriched one with July's.
+    "Kanpur", "Nashik", "Ranchi",
     # Key states
     "Maharashtra", "Tamil Nadu", "Karnataka", "Kerala", "Telangana",
     "Andhra Pradesh", "Gujarat", "Rajasthan", "West Bengal", "Uttar Pradesh",
@@ -3931,12 +3940,32 @@ def main():
     # the same content is at /. Cloudflare Pages honours _redirects
     # (Netlify syntax): "from  to  status". A 301 keeps link equity on
     # anything Google or humans have already bookmarked as /pulse.
+    #
+    # The /city/<name>/ rules rescue a broken-link bug: the homepage linked
+    # its city list as href="city/pune/", a path that was never built. Those
+    # URLs are in analytics, in inbound links and in people's history, so
+    # they get a 301 to the page they were always meant to reach. Written one
+    # rule per city rather than with a :placeholder so that /city/<anything>
+    # still 404s instead of redirecting to a page that does not exist.
+    city_rules = "".join(
+        f"/city/{loc_slug(nm)}    /gold-rate-today-in-{loc_slug(nm)}    301\n"
+        f"/city/{loc_slug(nm)}/   /gold-rate-today-in-{loc_slug(nm)}    301\n"
+        for nm in LOCATIONS if nm != "India")
     with open("docs/_redirects", "w", encoding="utf-8") as f:
         f.write("# Legacy /pulse redirects to / (homepage is Market Pulse "
                 "since Sep 2026).\n"
                 "/pulse    /    301\n"
-                "/pulse/   /    301\n")
-    print("_redirects: /pulse -> / (301)")
+                "/pulse/   /    301\n"
+                "\n"
+                "# The homepage once linked city pages as href=\"city/<name>/\",\n"
+                "# which was never a real path. Pages answered 200 with\n"
+                "# index.html, so the click looked like it did nothing and the\n"
+                "# next click compounded the relative href into\n"
+                "# /city/jaipur/city/pune/city/nashik/. Single-segment URLs are\n"
+                "# rescued here; the chains fall through to 404.html.\n"
+                + city_rules)
+    print(f"_redirects: /pulse -> / (301), {len(city_rules.splitlines())} "
+          "legacy /city/ rules")
 
     # ---- IndexNow: instantly notify Bing/Yandex/Seznam of fresh URLs ----
     INDEXNOW_KEY = "b7f3c9a1e04d4f6a8c2b5d9e1f0a3c7d"

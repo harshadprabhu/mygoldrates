@@ -124,3 +124,85 @@ def test_the_site_has_a_404_page():
     assert os.path.exists(f"{DOCS}/404.html"), "docs/404.html is missing"
     html = open(f"{DOCS}/404.html", encoding="utf-8").read()
     assert "noindex" in html, "the 404 page must not be indexable"
+
+
+@pytest.mark.skipif(not os.path.isdir(DOCS), reason="site not built")
+def test_every_legacy_city_path_redirects_to_a_page_that_exists():
+    """generate_site.py writes docs/_redirects from scratch on every build.
+
+    I learned that the hard way: I added these rules to docs/_redirects by
+    hand, the build regenerated the file without them, and the commit that
+    removed them was authored by the bot and titled "Rebuild site". The rules
+    have to come from the generator, and this test is what says they still do.
+
+    It also checks each redirect target is a real page, because a 301 to a
+    404 is worse than the 404: it costs a round trip to tell the visitor the
+    same thing.
+    """
+    redirects = f"{DOCS}/_redirects"
+    assert os.path.exists(redirects), "docs/_redirects is missing"
+    rules = []
+    for line in open(redirects, encoding="utf-8"):
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split()
+        assert len(parts) == 3, f"malformed rule: {line}"
+        rules.append(parts)
+
+    paths = _built_paths()
+    city = [(src, dst) for src, dst, _ in rules if src.startswith("/city/")]
+    assert city, "no /city/ rescue rules in _redirects"
+    for src, dst in city:
+        assert _resolves(dst, paths), f"{src} redirects to {dst}, which is not built"
+
+    # Both the bare and the trailing-slash form, since the broken links used
+    # the trailing-slash form and a typed URL will not.
+    srcs = {s for s, _ in city}
+    for s in sorted(srcs):
+        other = s[:-1] if s.endswith("/") else s + "/"
+        assert other in srcs, f"{s} has a rule but {other} does not"
+
+
+@pytest.mark.skipif(not os.path.isdir(DOCS), reason="site not built")
+def test_the_redirects_cover_every_city_the_homepage_links():
+    """Whatever cities the homepage offers, the legacy paths for them must be
+    rescued - otherwise a city added later quietly loses its old URL."""
+    home = open(f"{DOCS}/index.html", encoding="utf-8").read()
+    linked = set(re.findall(r'href="/gold-rate-today-in-([a-z0-9-]+)"', home))
+    assert linked, "no city links found on the homepage"
+    # Read rules only. The comment in _redirects quotes the broken chain
+    # /city/jaipur/city/pune/city/nashik/ as the example, so a whole-file
+    # substring search reported Nashik as covered by the very comment
+    # explaining what went wrong with it.
+    sources = {line.split()[0]
+               for line in open(f"{DOCS}/_redirects", encoding="utf-8")
+               if line.strip() and not line.lstrip().startswith("#")}
+    missing = [c for c in sorted(linked) if f"/city/{c}/" not in sources]
+    assert not missing, f"no legacy /city/ redirect for: {', '.join(missing)}"
+
+
+@pytest.mark.skipif(not os.path.isdir(DOCS), reason="site not built")
+def test_no_city_page_the_homepage_links_is_left_unmaintained():
+    """docs/ is deployed wholesale and nothing prunes it, so a city removed
+    from LOCATIONS leaves its old page behind, served forever at whatever
+    rate it had on the day it was dropped.
+
+    Kanpur and Ranchi came off the list on 31 July 2026 and stayed in the
+    homepage's city links. In October they were still quoting a July price
+    under the words "Gold Rate Today". Nothing failed: the files were there,
+    the build was green, and the pages looked exactly like the live ones.
+
+    This only covers the cities the homepage links, which is what a visitor
+    can reach in one click. Orphans nothing links to are a separate cleanup.
+    """
+    import generate_site as gs
+
+    maintained = {gs.loc_slug(nm) for nm in gs.LOCATIONS}
+    home = open(f"{DOCS}/index.html", encoding="utf-8").read()
+    linked = set(re.findall(r'href="/gold-rate-today-in-([a-z0-9-]+)"', home))
+    assert linked, "no city links found on the homepage"
+    orphaned = sorted(linked - maintained)
+    assert not orphaned, (
+        "the homepage links city pages the build no longer regenerates, so "
+        "they serve a frozen rate: " + ", ".join(orphaned))
