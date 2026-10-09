@@ -39,6 +39,7 @@ SHEETS = [
 
 def build(price=P):
     disc = price.DISCOUNT_PCT
+    analytics = _analytics()
     sheets = "".join(
         f'<div class="sh"><b>{n}</b><span>{d}</span></div>' for n, d in SHEETS)
     return f"""<!doctype html>
@@ -129,7 +130,8 @@ footer{{padding:34px 0 60px;border-top:1px solid var(--line);
   color:var(--ink3);font-size:12.5px}}
 footer a{{color:var(--ink2)}}
 @media(max-width:520px){{.now{{font-size:52px}}}}
-</style></head><body>
+</style>
+{analytics}</head><body>
 
 <header><div class="wrap"><a href="{SITE}/" class="brand" style="text-decoration:none;color:inherit">
 <svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="bm" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><g transform="translate(4,4)"><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#bm)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#bm)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#bm)" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#bm)" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g></svg>
@@ -286,6 +288,22 @@ footer a{{color:var(--ink2)}}
 </script>
 </body></html>
 """
+
+
+def _analytics():
+    """The same inline beacon every other page gets.
+
+    This page shipped without one, so every visit to the Jewellers Digest
+    landing page since launch went unrecorded - including the ones this
+    page most needs to count, because they are the ones deciding whether
+    anybody wants to buy it.
+    """
+    url = os.environ.get("SUPABASE_URL", "").strip()
+    key = os.environ.get("SUPABASE_ANON_KEY", "").strip()
+    if not url or not key:
+        return ""
+    import generate_site
+    return generate_site.analytics_snippet(url, key)
 
 
 def main():

@@ -1,0 +1,81 @@
+name: diag-cf-analytics
+
+# Read-only. Asks Cloudflare what the edge actually served, so the
+# JavaScript tracker's numbers can be checked against something that does
+# not depend on JavaScript running. The gap between the two IS the answer
+# to "are we counting everyone": no-JS visitors, blocked beacons and bots
+# all show up at the edge and never reach page_views.
+#
+# Nothing is written or changed. Dispatch it and read the log.
+
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "How many days back"
+        default: "16"
+
+permissions:
+  contents: write
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Query Cloudflare analytics
+        env:
+          ZONE_TOKEN: ${{ secrets.CLOUDFLARE_ZONE_TOKEN }}
+          API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          DAYS: ${{ inputs.days }}
+        run: |
+          set -u
+          api="https://api.cloudflare.com/client/v4"
+          mkdir -p diagnostics
+          since=$(date -u -d "-${DAYS} days" +%Y-%m-%d)
+          until=$(date -u +%Y-%m-%d)
+
+          # Either token may carry Zone:Analytics:Read - try both rather
+          # than guessing, and say which one worked.
+          for name in ZONE_TOKEN API_TOKEN; do
+            tok="${!name:-}"
+            [ -z "$tok" ] && { echo "== $name: not set"; continue; }
+            zid=$(curl -s -H "Authorization: Bearer $tok" \
+                  "$api/zones?name=mygoldrates.com" | jq -r '.result[0].id // empty')
+            if [ -z "$zid" ]; then
+              echo "== $name: no zone access"; continue
+            fi
+            echo "== $name: zone $zid"
+            q='{"query":"query($z:String!,$s:Date!,$u:Date!){viewer{zones(filter:{zoneTag:$z}){httpRequests1dGroups(limit:60,filter:{date_geq:$s,date_leq:$u},orderBy:[date_ASC]){dimensions{date} sum{requests pageViews cachedRequests} uniq{uniques}}}}}","variables":{"z":"'"$zid"'","s":"'"$since"'","u":"'"$until"'"}}'
+            resp=$(curl -s -X POST "$api/graphql" \
+                   -H "Authorization: Bearer $tok" \
+                   -H "Content-Type: application/json" -d "$q")
+            echo "$resp" | tee /tmp/cf.json | jq -r '
+              if (.errors|length?)>0 then "GraphQL errors: \(.errors)"
+              else (["date","requests","pageViews","uniques","cached"]|@tsv),
+                   (.data.viewer.zones[0].httpRequests1dGroups[]?
+                     | [.dimensions.date, .sum.requests, .sum.pageViews,
+                        .uniq.uniques, .sum.cachedRequests] | @tsv)
+              end' | tee diagnostics/cf-analytics.tsv
+            # Zone access is not analytics access: the first token reached
+            # the zone and was still refused analytics.read. Only stop once
+            # real rows come back.
+            if grep -q "GraphQL errors" diagnostics/cf-analytics.tsv; then
+              echo "   ^ $name reached the zone but cannot read analytics"
+              continue
+            fi
+            exit 0
+          done
+          echo "No token could read zone analytics. Needs Zone:Analytics:Read."
+
+      - name: Commit the numbers so they can be read without the log
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add diagnostics
+          git diff --cached --quiet || {
+            git commit -m "diag: cloudflare edge request counts"
+            git pull --rebase -X ours origin main || true
+            git push
+          }

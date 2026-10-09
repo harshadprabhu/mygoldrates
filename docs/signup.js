@@ -181,42 +181,18 @@
   if(stored&&stored.email){chip(stored);prefill(stored);}
 })();
 
-/* ---- pageview + click analytics, day-wise (Supabase page_views/click_events) ---- */
-(function(){
-  var SB=window.GR_SB_URL||'', KEY=window.GR_SB_KEY||'';
-  if(!SB||!KEY)return;
-  var SID;
-  try{
-    SID=localStorage.getItem('gr_sid');
-    if(!SID){
-      SID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():
-        (Date.now().toString(36)+Math.random().toString(36).slice(2));
-      localStorage.setItem('gr_sid',SID);
-    }
-  }catch(e){SID='';}
-  function post(table,row,retried){
-    fetch(SB+'/rest/v1/'+table,{method:'POST',
-      headers:{'Content-Type':'application/json','apikey':KEY,
-               'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify(row)}).then(function(r){
-        // A schema mismatch (e.g. a column added to the client before the
-        // matching migration has actually been run against the live DB)
-        // returns a normal, non-throwing HTTP error here - fetch() only
-        // rejects on a network failure, so a bare .catch() alone silently
-        // drops every single insert with no sign anything is wrong. Same
-        // graceful-degradation shape as send()'s retry-without-newer-fields
-        // above: if this looks like exactly that case, retry once with the
-        // newer field stripped rather than losing the whole pageview.
-        if(!r.ok&&!retried&&row.host!==undefined){
-          var row2={};for(var k in row){if(k!=='host')row2[k]=row[k];}
-          post(table,row2,true);
-        }
-      }).catch(function(){});
-  }
-  post('page_views',{page:location.pathname,referrer:document.referrer||null,
-    session_id:SID,host:location.hostname});
 
-  /* delegated click tracking on interactive elements, de-duped per target */
+/* ---- click analytics ----------------------------------------------------
+   The PAGEVIEW is not sent from here any more. This file is deferred, so a
+   beacon in it could not fire until an extra round trip had completed - on a
+   live city page nothing at all was sent if the visitor left within 800ms.
+   It now goes inline in the document head (see analytics_snippet()), which
+   also owns the session id and the sender. This block only adds the click
+   listener, which has no such urgency, and reuses both so the two cannot
+   drift apart or double-count. */
+(function(){
+  var send=window.GR_TRACK;
+  if(typeof send!=='function')return;        /* head snippet absent */
   var lastTarget=null,lastAt=0;
   document.addEventListener('click',function(e){
     var el=e.target&&e.target.closest?
@@ -228,6 +204,7 @@
     var now=Date.now();
     if(label===lastTarget&&now-lastAt<2000)return;
     lastTarget=label;lastAt=now;
-    post('click_events',{page:location.pathname,target:label,session_id:SID});
+    send('click_events',{page:location.pathname,target:label,
+      session_id:window.GR_SID||''});
   },true);
 })();

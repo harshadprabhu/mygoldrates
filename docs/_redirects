@@ -2,11 +2,12 @@
 /pulse    /    301
 /pulse/   /    301
 
-# The homepage once linked city pages as href="city/<name>/", which was
-# never a real path. Pages answered 200 with index.html, so the click
-# looked like it did nothing and the next click compounded the relative
-# href one segment at a time. Single-segment URLs are rescued here; the
-# chains fall through to 404.html.
+# The homepage once linked city pages as href="city/<name>/",
+# which was never a real path. Pages answered 200 with
+# index.html, so the click looked like it did nothing and the
+# next click compounded the relative href into
+# /city/jaipur/city/pune/city/nashik/. Single-segment URLs are
+# rescued here; the chains fall through to 404.html.
 /city/mumbai    /gold-rate-today-in-mumbai    301
 /city/mumbai/   /gold-rate-today-in-mumbai    301
 /city/delhi    /gold-rate-today-in-delhi    301
