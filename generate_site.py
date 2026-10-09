@@ -209,6 +209,58 @@ def build_og_image(path="docs/og.png"):
     print(f"og: wrote {path}")
 
 
+def analytics_snippet(supabase_url, anon_key):
+    """The pageview beacon, as an inline <script> for the document head.
+
+    Two things here are deliberate, and both were measured rather than
+    assumed (tests/test_analytics_beacon.py records the numbers):
+
+    1. keepalive. The old tracker used a plain fetch(), which the browser
+       CANCELS when the document unloads. On a rate-checking site the
+       commonest visit is: land, read the number, leave - so the request was
+       being killed before it left. Measured on a fast datacentre link, six
+       identical fast-bounce loads landed 3 of 6 with a plain fetch and 6 of
+       6 with keepalive. On the live site, every visitor who left inside
+       about 1.6 seconds was invisible.
+
+    2. Inline, in the head, not in deferred signup.js. The beacon used to
+       ride along in an 11.6KB deferred bundle, so it could not fire until
+       that file had been fetched and parsed - a whole extra round trip.
+       Measured on a live city page, nothing at all was sent if the visitor
+       left within 800ms; the homepage, whose copy was already inline,
+       managed 200ms. Inline costs no round trip and fires during parse.
+
+    It also exposes window.GR_SID and window.GR_TRACK so the click tracking
+    in signup.js reuses this session id and this sender instead of carrying
+    a second copy that could drift.
+    """
+    return (
+        '<script>(function(){'
+        'var SB=' + json.dumps(supabase_url) + ',KEY=' + json.dumps(anon_key) + ';'
+        'if(!SB||!KEY)return;'
+        'var SID="";'
+        'try{SID=localStorage.getItem("gr_sid")||"";'
+        'if(!SID){SID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'
+        '(Date.now().toString(36)+Math.random().toString(36).slice(2));'
+        'localStorage.setItem("gr_sid",SID);}}catch(e){SID="";}'
+        'window.GR_SID=SID;'
+        'function send(table,row,retried){try{'
+        'fetch(SB+"/rest/v1/"+table,{method:"POST",keepalive:true,'
+        'headers:{"Content-Type":"application/json","apikey":KEY,'
+        '"Authorization":"Bearer "+KEY,"Prefer":"return=minimal"},'
+        'body:JSON.stringify(row)}).then(function(r){'
+        # A column the live DB does not have yet comes back as a normal
+        # HTTP error, not a throw, so without this the whole row is lost.
+        'if(!r.ok&&!retried&&row.host!==undefined){'
+        'var r2={};for(var k in row){if(k!=="host")r2[k]=row[k];}'
+        'send(table,r2,true);}}).catch(function(){});}catch(e){}}'
+        'window.GR_TRACK=send;'
+        'send("page_views",{page:location.pathname,'
+        'referrer:document.referrer||null,session_id:SID,'
+        'host:location.hostname});'
+        '})();</script>\n')
+
+
 # City/state landing pages: enriched with local market hubs, regional jeweller tags & unique intro content.
 LOCATIONS = [
     # Top major gold trading & retail hubs in India
@@ -2481,6 +2533,8 @@ def main():
     updated_http = formatdate(now_ist.timestamp(), usegmt=True)
     updated_iso = now_ist.isoformat(timespec="seconds")
     updated_epoch = str(int(now_ist.timestamp()))
+    # The pageview beacon, inline and early. See analytics_snippet().
+    analytics_js = analytics_snippet(supabase_url, anon_key)
     common = dict(site_url=SITE_URL, date=display_date, time=display_time,
                   iso_now=now_ist.isoformat(), year=str(now_ist.year),
                   updated_http=updated_http, updated_iso=updated_iso,
@@ -2490,7 +2544,8 @@ def main():
                   sig_ver=sig_ver, nav=NAV,
                   supabase_url=supabase_url, anon_key=anon_key,
                   gate_css=GATE_CSS if gclient else "",
-                  gate_html=gate_html, gate_js=gate_js)
+                  gate_html=gate_html, gate_js=gate_js,
+                  analytics_js=analytics_js)
     def city_cloud(current_slug=None):
         parts = []
         for nm in LOCATIONS:
@@ -2567,7 +2622,9 @@ def main():
     with open("docs/compare.html", "w", encoding="utf-8") as f:
         f.write(html)
     with open("docs/signup.js", "w", encoding="utf-8") as f:
-        f.write(SIGNUP_JS)
+        # Click tracking rides along in the deferred bundle; it has no
+        # urgency. The pageview does not - it is inline in the head.
+        f.write(SIGNUP_JS + "\n" + CLICK_JS)
 
     # ---- programmatic city/state pages (same board, local landing page) ----
     for nm in LOCATIONS:
@@ -3552,48 +3609,19 @@ def main():
         # dependency, so we inline the tracker directly here - no extra JS
         # file to load, no gate/modal/OTP code to conflict with the app's
         # own Google Identity Services flow.
+        # The same inline beacon every other page gets, from the one
+        # builder, rather than a second copy inlined here. The copy this
+        # replaces had drifted: it still used a plain fetch() with no
+        # keepalive long after the measurement showed that loses every
+        # visitor who leaves inside ~1.6s.
         analytics_js = (
             '<script>window.GR_SB_URL=' + json.dumps(supabase_url)
             + ';window.GR_SB_KEY=' + json.dumps(anon_key) + ';</script>\n'
-            '<script>(function(){\n'
-            '  var SB=window.GR_SB_URL||"",KEY=window.GR_SB_KEY||"";\n'
-            '  if(!SB||!KEY)return;\n'
-            '  var SID;\n'
-            '  try{\n'
-            '    SID=localStorage.getItem("gr_sid");\n'
-            '    if(!SID){\n'
-            '      SID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():\n'
-            '        (Date.now().toString(36)+Math.random().toString(36).slice(2));\n'
-            '      localStorage.setItem("gr_sid",SID);\n'
-            '    }\n'
-            '  }catch(e){SID="";}\n'
-            '  function post(table,row,retried){\n'
-            '    fetch(SB+"/rest/v1/"+table,{method:"POST",\n'
-            '      headers:{"Content-Type":"application/json","apikey":KEY,\n'
-            '               "Authorization":"Bearer "+KEY,"Prefer":"return=minimal"},\n'
-            '      body:JSON.stringify(row)}).then(function(r){\n'
-            '        if(!r.ok&&!retried&&row.host!==undefined){\n'
-            '          var row2={};for(var k in row){if(k!=="host")row2[k]=row[k];}\n'
-            '          post(table,row2,true);\n'
-            '        }\n'
-            '      }).catch(function(){});\n'
-            '  }\n'
-            '  post("page_views",{page:location.pathname,referrer:document.referrer||null,\n'
-            '    session_id:SID,host:location.hostname});\n'
-            '  var lastTarget=null,lastAt=0;\n'
-            '  document.addEventListener("click",function(e){\n'
-            '    var el=e.target&&e.target.closest?\n'
-            '      e.target.closest("a[href],button,input[type=\\"submit\\"],[role=\\"button\\"]"):null;\n'
-            '    if(!el)return;\n'
-            '    var label=el.id||el.getAttribute("data-track")||\n'
-            '      (el.textContent||"").trim().slice(0,60)||el.tagName.toLowerCase();\n'
-            '    if(!label)return;\n'
-            '    var now=Date.now();\n'
-            '    if(label===lastTarget&&now-lastAt<2000)return;\n'
-            '    lastTarget=label;lastAt=now;\n'
-            '    post("click_events",{page:location.pathname,target:label,session_id:SID});\n'
-            '  },true);\n'
-            '})();</script>\n')
+            + analytics_snippet(supabase_url, anon_key)
+            # CLICK_JS only. NOT SIGNUP_JS: this app runs its own Google
+            # Identity Services flow and the signup bundle's gate/modal/OTP
+            # code collides with it.
+            + '<script>' + CLICK_JS + '</script>\n')
         # NOTE: no hits/bump_hits injection here. pulse_app.html's own
         # loadHits() now calls bump_hits / hits_count against Supabase
         # directly (it used to read the third-party countapi counter, which
@@ -4324,6 +4352,34 @@ footer p{margin:6px 0;max-width:80ch}
 # sign-in (dormant until the GOOGLE_CLIENT_ID secret is set). Served as
 # docs/signup.js and used by both the modal (index) and inquiry forms -
 # field NAMEs are identical on both, so everything works via form.elements.
+CLICK_JS = r"""/* ---- click analytics ----------------------------------------------------
+   The PAGEVIEW is not sent from here any more. This file is deferred, so a
+   beacon in it could not fire until an extra round trip had completed - on a
+   live city page nothing at all was sent if the visitor left within 800ms.
+   It now goes inline in the document head (see analytics_snippet()), which
+   also owns the session id and the sender. This block only adds the click
+   listener, which has no such urgency, and reuses both so the two cannot
+   drift apart or double-count. */
+(function(){
+  var send=window.GR_TRACK;
+  if(typeof send!=='function')return;        /* head snippet absent */
+  var lastTarget=null,lastAt=0;
+  document.addEventListener('click',function(e){
+    var el=e.target&&e.target.closest?
+      e.target.closest('a[href],button,input[type="submit"],[role="button"]'):null;
+    if(!el)return;
+    var label=el.id||el.getAttribute('data-track')||
+      (el.textContent||'').trim().slice(0,60)||el.tagName.toLowerCase();
+    if(!label)return;
+    var now=Date.now();
+    if(label===lastTarget&&now-lastAt<2000)return;
+    lastTarget=label;lastAt=now;
+    send('click_events',{page:location.pathname,target:label,
+      session_id:window.GR_SID||''});
+  },true);
+})();
+"""
+
 SIGNUP_JS = r"""(function(){
   var SB=window.GR_SB_URL||'', KEY=window.GR_SB_KEY||'';
   var form=document.getElementById('m-form')||document.getElementById('inq');
@@ -4507,56 +4563,6 @@ SIGNUP_JS = r"""(function(){
   if(stored&&stored.email){chip(stored);prefill(stored);}
 })();
 
-/* ---- pageview + click analytics, day-wise (Supabase page_views/click_events) ---- */
-(function(){
-  var SB=window.GR_SB_URL||'', KEY=window.GR_SB_KEY||'';
-  if(!SB||!KEY)return;
-  var SID;
-  try{
-    SID=localStorage.getItem('gr_sid');
-    if(!SID){
-      SID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():
-        (Date.now().toString(36)+Math.random().toString(36).slice(2));
-      localStorage.setItem('gr_sid',SID);
-    }
-  }catch(e){SID='';}
-  function post(table,row,retried){
-    fetch(SB+'/rest/v1/'+table,{method:'POST',
-      headers:{'Content-Type':'application/json','apikey':KEY,
-               'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify(row)}).then(function(r){
-        // A schema mismatch (e.g. a column added to the client before the
-        // matching migration has actually been run against the live DB)
-        // returns a normal, non-throwing HTTP error here - fetch() only
-        // rejects on a network failure, so a bare .catch() alone silently
-        // drops every single insert with no sign anything is wrong. Same
-        // graceful-degradation shape as send()'s retry-without-newer-fields
-        // above: if this looks like exactly that case, retry once with the
-        // newer field stripped rather than losing the whole pageview.
-        if(!r.ok&&!retried&&row.host!==undefined){
-          var row2={};for(var k in row){if(k!=='host')row2[k]=row[k];}
-          post(table,row2,true);
-        }
-      }).catch(function(){});
-  }
-  post('page_views',{page:location.pathname,referrer:document.referrer||null,
-    session_id:SID,host:location.hostname});
-
-  /* delegated click tracking on interactive elements, de-duped per target */
-  var lastTarget=null,lastAt=0;
-  document.addEventListener('click',function(e){
-    var el=e.target&&e.target.closest?
-      e.target.closest('a[href],button,input[type="submit"],[role="button"]'):null;
-    if(!el)return;
-    var label=el.id||el.getAttribute('data-track')||
-      (el.textContent||'').trim().slice(0,60)||el.tagName.toLowerCase();
-    if(!label)return;
-    var now=Date.now();
-    if(label===lastTarget&&now-lastAt<2000)return;
-    lastTarget=label;lastAt=now;
-    post('click_events',{page:location.pathname,target:label,session_id:SID});
-  },true);
-})();
 """
 
 # Google sign-in block (ID-token button host + manual fallback link),
@@ -5665,7 +5671,7 @@ tbody tr:first-child .col-rank{color:var(--gold);font-weight:700}
 .save-pill{font:600 10px/1 "IBM Plex Mono",monospace;color:#5BBB93;background:rgba(30,92,70,.22);
   border:1px solid rgba(91,187,147,.35);padding:2px 6px;border-radius:4px;margin-left:6px}
 </style>
-</head>
+$analytics_js</head>
 <body>
 $nav
 <div class="wrap">
@@ -6606,7 +6612,7 @@ $base_css
 .hero-sm h1{font-size:clamp(24px,4vw,34px);color:#F6F1E3;margin-bottom:6px}
 .hero-sm p{color:#B9C2B4;max-width:52ch;font-size:15px}
 </style>
-</head>
+$analytics_js</head>
 <body>
 $nav
 <div class="wrap">
@@ -6775,7 +6781,7 @@ $base_css
 .foot-nav a{color:var(--ink-3);margin-right:14px;text-decoration:none}
 .foot-nav a:hover{color:var(--ink)}
 </style>
-</head>
+$analytics_js</head>
 <body>
 $nav
 <div class="wrap">
@@ -6877,7 +6883,7 @@ $base_css
 .foot-nav a{color:var(--ink-3);margin-right:14px;text-decoration:none}
 .foot-nav a:hover{color:var(--ink)}
 </style>
-</head>
+$analytics_js</head>
 <body>
 $nav
 <div class="wrap">
