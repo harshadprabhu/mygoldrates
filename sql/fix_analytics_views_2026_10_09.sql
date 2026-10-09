@@ -71,3 +71,27 @@ alter view public.daily_top_clicks set (security_invoker = on);
 -- to each of its WHERE clauses. That is a larger edit to a function whose
 -- body holds the real token, so it is left for a deliberate pass rather
 -- than bundled in here.
+
+-- 3. OPTIONAL: remove the synthetic rows already in the history.
+--
+--    The views above exclude them from here on, but the rows remain. These
+--    deletes remove only paths that no visitor can ever produce: they all
+--    begin "/__".
+--
+--      /__health__          analytics_health.py, one per build since Sep
+--      /__beacon_test__/*   measuring fetch vs keepalive, 2026-10-09
+--      /__claude_probe__    one row verifying anon INSERT still works
+--
+--    Run them or don't - excluding them is enough for the numbers to be
+--    right. Nothing else is touched.
+
+-- delete from public.page_views   where page like '/\_\_%';
+-- delete from public.click_events where page like '/\_\_%';
+
+-- NOT removable by pattern: on 2026-10-09 a browser was driven over the
+-- live site to measure when the beacon fires, which wrote ordinary-looking
+-- rows against real paths (mostly /gold-rate-today-in-chennai, a few each
+-- on /, /compare, /calculators and others). They are indistinguishable
+-- from real visits because that was the point of the test. Roughly 35-40
+-- rows, all on 2026-10-09 only. Read that one day's figures with that in
+-- mind; from 2026-10-10 the numbers are clean.
