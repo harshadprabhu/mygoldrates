@@ -58,6 +58,13 @@ jobs:
                      | [.dimensions.date, .sum.requests, .sum.pageViews,
                         .uniq.uniques, .sum.cachedRequests] | @tsv)
               end' | tee diagnostics/cf-analytics.tsv
+            # Zone access is not analytics access: the first token reached
+            # the zone and was still refused analytics.read. Only stop once
+            # real rows come back.
+            if grep -q "GraphQL errors" diagnostics/cf-analytics.tsv; then
+              echo "   ^ $name reached the zone but cannot read analytics"
+              continue
+            fi
             exit 0
           done
           echo "No token could read zone analytics. Needs Zone:Analytics:Read."
