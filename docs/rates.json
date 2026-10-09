@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-09",
-  "last_updated": "2026-10-09T17:07:22.709620+05:30",
+  "last_updated": "2026-10-09T18:41:53.654544+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,22 +22,22 @@
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 151250.0,
-      "change_pct": 1.1
+      "price_per_10g_inr": 151000.0,
+      "change_pct": 0.93
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 149921.0,
-      "change_pct": 1.07
+      "price_per_10g_inr": 149677.0,
+      "change_pct": 0.91
     }
   ],
   "jewellers": [
     {
       "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 14965.0,
-      "rate_22k_per_gram_inr": 13717.92,
-      "rate_18k_per_gram_inr": 11223.75
+      "rate_24k_per_gram_inr": 14940.0,
+      "rate_22k_per_gram_inr": 13695.0,
+      "rate_18k_per_gram_inr": 11205.0
     },
     {
       "jeweller": "PN Gadgil",
