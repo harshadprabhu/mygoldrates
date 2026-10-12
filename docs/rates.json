@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-12",
-  "last_updated": "2026-10-12T11:06:00.906359+05:30",
+  "last_updated": "2026-10-12T11:20:03.408344+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 15120.0,
-    "22k": 13860.0,
-    "18k": 11340.0
+    "24k": 15137.68,
+    "22k": 13876.21,
+    "18k": 11353.26
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 150274.0,
-      "change_pct": -0.81
+      "price_per_10g_inr": 150340.0,
+      "change_pct": -0.77
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 148915.0,
-      "change_pct": -0.81
+      "price_per_10g_inr": 149030.0,
+      "change_pct": -0.73
     }
   ],
   "jewellers": [
@@ -50,12 +50,6 @@
       "rate_24k_per_gram_inr": 14950.0,
       "rate_22k_per_gram_inr": 13704.17,
       "rate_18k_per_gram_inr": 11212.5
-    },
-    {
-      "jeweller": "Indriya",
-      "rate_24k_per_gram_inr": 15094.06,
-      "rate_22k_per_gram_inr": 13836.22,
-      "rate_18k_per_gram_inr": 11320.55
     },
     {
       "jeweller": "Joyalukkas",
@@ -98,6 +92,12 @@
       "rate_24k_per_gram_inr": 15120.0,
       "rate_22k_per_gram_inr": 13860.0,
       "rate_18k_per_gram_inr": 11340.0
+    },
+    {
+      "jeweller": "Indriya",
+      "rate_24k_per_gram_inr": 15137.68,
+      "rate_22k_per_gram_inr": 13876.21,
+      "rate_18k_per_gram_inr": 11353.26
     },
     {
       "jeweller": "Vaibhav Jewellers",
