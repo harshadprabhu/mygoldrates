@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-12",
-  "last_updated": "2026-10-12T20:47:37.232750+05:30",
+  "last_updated": "2026-10-13T04:09:38.278057+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 15023.25,
-    "22k": 13771.31,
-    "18k": 11267.44
+    "24k": 15004.18,
+    "22k": 13753.83,
+    "18k": 11253.14
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 149505.0,
-      "change_pct": -1.32
+      "price_per_10g_inr": 149540.0,
+      "change_pct": -0.0
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 148270.0,
-      "change_pct": -1.24
+      "price_per_10g_inr": 148293.0,
+      "change_pct": 0.0
     }
   ],
   "jewellers": [
@@ -100,6 +100,12 @@
       "rate_18k_per_gram_inr": 11244.0
     },
     {
+      "jeweller": "Tanishq",
+      "rate_24k_per_gram_inr": 15016.36,
+      "rate_22k_per_gram_inr": 13765.0,
+      "rate_18k_per_gram_inr": 11262.27
+    },
+    {
       "jeweller": "Kalyan Jewellers",
       "rate_24k_per_gram_inr": 15054.5,
       "rate_22k_per_gram_inr": 13799.96,
@@ -116,12 +122,6 @@
       "rate_24k_per_gram_inr": 15104.0,
       "rate_22k_per_gram_inr": 13845.33,
       "rate_18k_per_gram_inr": 11328.0
-    },
-    {
-      "jeweller": "Tanishq",
-      "rate_24k_per_gram_inr": 15147.27,
-      "rate_22k_per_gram_inr": 13885.0,
-      "rate_18k_per_gram_inr": 11360.45
     },
     {
       "jeweller": "Kisna",
