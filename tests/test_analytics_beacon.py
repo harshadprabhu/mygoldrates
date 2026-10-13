@@ -44,8 +44,7 @@ def test_the_beacon_is_inline_and_not_in_the_deferred_bundle():
 
 def test_every_page_template_carries_the_beacon_in_its_head():
     src = open("generate_site.py").read()
-    for name in ("TEMPLATE", "INQUIRY_TEMPLATE", "PAGE_TEMPLATE",
-                 "CONTENT_TEMPLATE"):
+    for name in ("INQUIRY_TEMPLATE", "PAGE_TEMPLATE", "CONTENT_TEMPLATE"):
         m = re.search(rf'^{name} = Template\("""', src, re.M)
         assert m, f"{name} not found"
         head = src[m.end():src.index("</head>", m.end()) + 7]

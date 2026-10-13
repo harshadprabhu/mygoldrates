@@ -2,6 +2,12 @@
 /pulse    /    301
 /pulse/   /    301
 
+# /compare was the old design's comparison page; the homepage
+# is that comparison now.
+/compare        /    301
+/compare/       /    301
+/compare.html   /    301
+
 # The homepage once linked city pages as href="city/<name>/",
 # which was never a real path. Pages answered 200 with
 # index.html, so the click looked like it did nothing and the
