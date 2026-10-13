@@ -208,32 +208,12 @@ def test_no_city_page_the_homepage_links_is_left_unmaintained():
         "they serve a frozen rate: " + ", ".join(orphaned))
 
 
-def test_retired_city_pages_redirect_and_are_gone():
-    """56 city pages were dropped from LOCATIONS on 31 July 2026 but their
-    files stayed in docs/, so Google kept indexing them showing the July
-    rate under "Gold Rate Today". Each must now 301 to a live page, and its
-    file must be gone - on Cloudflare Pages an existing file can shadow its
-    own redirect."""
-    import generate_site as gs
-    live = {gs.loc_slug(n) for n in gs.LOCATIONS}
-    rules = {}
-    for line in open(f"{DOCS}/_redirects", encoding="utf-8"):
-        p = line.split()
-        if len(p) == 3 and not line.startswith("#"):
-            rules[p[0]] = p[1]
-    paths = _built_paths()
-    for sl, tgt in gs.RETIRED_LOCATIONS.items():
-        assert sl not in live, f"{sl} is both retired and live"
-        assert not os.path.exists(f"{DOCS}/gold-rate-today-in-{sl}.html"), (
-            f"stale page for {sl} still in docs/ - it would keep serving July's rate")
-        src = f"/gold-rate-today-in-{sl}"
-        assert src in rules, f"no redirect for {src}"
-        assert _resolves(rules[src], paths), f"{src} redirects to {rules[src]}, not built"
-
-
 def test_no_built_city_page_is_unmaintained():
     """Every gold-rate-today-in-* page in docs/ must be one the build
-    regenerates daily. Anything else is serving a frozen price."""
+    regenerates daily. Anything else is serving a frozen price - 56 city
+    pages did exactly that from 31 July to 13 October 2026, showing the 31
+    July rate under "Gold Rate Today", after being dropped from LOCATIONS
+    without their files being removed."""
     import glob
     import generate_site as gs
     live = {gs.loc_slug(n) for n in gs.LOCATIONS}
@@ -257,3 +237,18 @@ def test_internal_links_use_clean_urls_not_html():
         r'href="((?:\{SITE_URL\}|\{SITE\}|\$site_url|https://mygoldrates\.com)?/?)'
         r'([\w-]+)\.html', src) if m.group(2) in built})
     assert not bad, "internal links still use .html: " + ", ".join(bad)
+
+
+def test_every_city_page_on_the_list_has_a_page_and_a_rescue_redirect():
+    """Restored on the owner's request so each place keeps its own URL and
+    heading - and so analytics shows which locations people come for. That
+    only works if the page exists and the old /city/<name>/ address lands on
+    it rather than somewhere else."""
+    import generate_site as gs
+    src = open("generate_site.py", encoding="utf-8").read()
+    assert 'f"/city/{loc_slug(nm)}/   /gold-rate-today-in-{loc_slug(nm)}' in src
+    slugs = [gs.loc_slug(n) for n in gs.LOCATIONS]
+    assert len(slugs) == len(set(slugs)), "duplicate place in LOCATIONS"
+    for place in ("Agra", "Ghaziabad", "Dehradun", "Thiruvananthapuram",
+                  "Goa", "Surat"):
+        assert place in gs.LOCATIONS, f"{place} missing from LOCATIONS"
