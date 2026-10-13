@@ -209,6 +209,57 @@ def build_og_image(path="docs/og.png"):
     print(f"og: wrote {path}")
 
 
+# Which state (or union territory) each place on LOCATIONS is in. Plain
+# geography, used to show the jewellers that actually serve a place - see
+# local_board() in main(). States map to themselves; "India" to None.
+PLACE_STATE = {
+    "India": None,
+    "Delhi": "Delhi", "Chandigarh": "Chandigarh",
+    # states listed on LOCATIONS map to themselves (filled in below)
+    "Mumbai": "Maharashtra", "Pune": "Maharashtra", "Nagpur": "Maharashtra",
+    "Nashik": "Maharashtra", "Aurangabad": "Maharashtra",
+    "Solapur": "Maharashtra", "Kolhapur": "Maharashtra",
+    "Bengaluru": "Karnataka", "Mysuru": "Karnataka", "Mangaluru": "Karnataka",
+    "Hubli": "Karnataka", "Belagavi": "Karnataka", "Vijayapura": "Karnataka",
+    "Davanagere": "Karnataka",
+    "Chennai": "Tamil Nadu", "Coimbatore": "Tamil Nadu", "Madurai": "Tamil Nadu",
+    "Tiruchirappalli": "Tamil Nadu", "Salem": "Tamil Nadu",
+    "Erode": "Tamil Nadu", "Tirunelveli": "Tamil Nadu",
+    "Hyderabad": "Telangana", "Warangal": "Telangana",
+    "Kolkata": "West Bengal", "Siliguri": "West Bengal",
+    "Ahmedabad": "Gujarat", "Surat": "Gujarat", "Vadodara": "Gujarat",
+    "Rajkot": "Gujarat",
+    "Jaipur": "Rajasthan", "Jodhpur": "Rajasthan", "Udaipur": "Rajasthan",
+    "Kota": "Rajasthan", "Ajmer": "Rajasthan",
+    "Kochi": "Kerala", "Thrissur": "Kerala", "Kozhikode": "Kerala",
+    "Thiruvananthapuram": "Kerala", "Kollam": "Kerala", "Kannur": "Kerala",
+    "Lucknow": "Uttar Pradesh", "Kanpur": "Uttar Pradesh",
+    "Varanasi": "Uttar Pradesh", "Agra": "Uttar Pradesh",
+    "Meerut": "Uttar Pradesh", "Ghaziabad": "Uttar Pradesh",
+    "Noida": "Uttar Pradesh", "Allahabad": "Uttar Pradesh",
+    "Bareilly": "Uttar Pradesh", "Moradabad": "Uttar Pradesh",
+    "Aligarh": "Uttar Pradesh",
+    "Patna": "Bihar",
+    "Indore": "Madhya Pradesh", "Bhopal": "Madhya Pradesh",
+    "Gwalior": "Madhya Pradesh", "Jabalpur": "Madhya Pradesh",
+    "Visakhapatnam": "Andhra Pradesh", "Vijayawada": "Andhra Pradesh",
+    "Tirupati": "Andhra Pradesh", "Guntur": "Andhra Pradesh",
+    "Ranchi": "Jharkhand", "Jamshedpur": "Jharkhand", "Dhanbad": "Jharkhand",
+    "Guwahati": "Assam",
+    "Bhubaneswar": "Odisha", "Cuttack": "Odisha",
+    "Ludhiana": "Punjab", "Amritsar": "Punjab", "Jalandhar": "Punjab",
+    "Faridabad": "Haryana", "Gurugram": "Haryana",
+    "Raipur": "Chhattisgarh",
+    "Dehradun": "Uttarakhand",
+}
+for _p in ("Maharashtra", "Tamil Nadu", "Karnataka", "Kerala", "Telangana",
+           "Andhra Pradesh", "Gujarat", "Rajasthan", "West Bengal",
+           "Uttar Pradesh", "Madhya Pradesh", "Punjab", "Haryana", "Bihar",
+           "Odisha", "Assam", "Jharkhand", "Uttarakhand", "Himachal Pradesh",
+           "Goa"):
+    PLACE_STATE.setdefault(_p, _p)
+
+
 def analytics_snippet(supabase_url, anon_key):
     """The pageview beacon, as an inline <script> for the document head.
 
@@ -2575,16 +2626,17 @@ def main():
 
     low_g = inr(ladder(lowest["canonical_24k_pre_gst"])["24K"])
 
-    def local_intro(nm):
+    def local_intro(nm, dark=False):
         """Enriched, unique per-city body so city pages have genuine local value."""
         if nm == "India":
             return ""
+        board_html = local_board(nm, dark)
         data = CITY_ENRICHMENT_DATA.get(nm, {})
         hubs_info = f'<p><strong>Key Shopping Hubs in {nm}:</strong> {data["hubs"]}.</p>' if data.get("hubs") else ""
         brands_info = f'<p><strong>Featured Regional & National Jewellers in {nm}:</strong> {", ".join(data["regional_brands"])} and leading national brands.</p>' if data.get("regional_brands") else ""
         custom_desc = data.get("intro", f"Gold rates in {nm} follow national board rates across major jewellers. Compare live 24K, 22K, and 18K per-gram prices pre-GST below.")
         
-        return (
+        return board_html + (
             f'<section class="seo"><h2>Gold Rate Today in {nm} - Market Overview & Shopping Hubs</h2>'
             f'<p>{custom_desc}</p>'
             f'<p>Today the live median gold rate in <strong>{nm}</strong> is '
@@ -2598,6 +2650,143 @@ def main():
             f'to estimate total billed costs with 3% GST, or read our <a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K guide</a>. '
             f'You can also <a href="{SITE_URL}/inquiry">subscribe to free daily {nm} rate alerts</a>.</p>'
             f'</section>')
+
+
+    def local_board(nm, dark=False):
+        """The part of a city or state page that is actually about that place.
+
+        Every city page used to be the full /compare page with the place name
+        swapped in - measured at 98-100% identical text between any two of
+        them, which is the "low value content" AdSense rejects sites for and
+        the doorway pattern Google demotes. This section uses data the build
+        already has and nothing invented: which of the regional chains in
+        REGION_MAP serve the place's state, and today's rate at each.
+
+        It also corrects something. "Cheapest today" elsewhere on the page is
+        computed over national chains only, so the Chennai page could name a
+        national chain as cheapest while a Tamil Nadu chain was cheaper. Here
+        regional chains that serve the state are included.
+        """
+        state = PLACE_STATE.get(nm)
+        if not state:
+            return ""
+        def k22(r):
+            return ladder(r["canonical_24k_pre_gst"])["22K"]
+        regional = [r for r in live
+                    if state in REGION_MAP.get((r["brands"] or {}).get("slug") or "", [])]
+        rows_here = sorted(regional + national, key=k22)
+        if not rows_here:
+            return ""
+        best = rows_here[0]
+        nat_med22 = med["22K"]
+        where = nm if nm == state else f"{nm} ({state})"
+        trs = "".join(
+            f'<tr><td class="lb-name">{_html.escape(r["brands"]["name"])}'
+            + ('<span class="lb-tag">Regional</span>' if r in regional else '')
+            + f'</td><td><strong>{inr(k22(r))}</strong></td>'
+            f'<td>{inr(ladder(r["canonical_24k_pre_gst"])["24K"])}</td></tr>'
+            for r in rows_here)
+        # Regional chains we know serve this state, whether or not they
+        # published a rate today - so a quiet day is not reported as "no
+        # regional chains here".
+        serving = sorted(sl for sl, sts in REGION_MAP.items() if state in sts)
+        quiet = len(serving) - len({(r["brands"] or {}).get("slug") for r in regional})
+        if regional:
+            names = ", ".join(sorted({r["brands"]["name"] for r in regional}))
+            who = (f'<p>Of the {len(live)} jewellers we track, {len(regional)} '
+                   f'regional chain{"s" if len(regional) > 1 else ""} with stores in '
+                   f'{state} published a rate today: {names}. '
+                   + (f'{quiet} more that serve{"s" if quiet == 1 else ""} '
+                      f'{state} did not. ' if quiet else '')
+                   + f'They are listed with the national chains, cheapest 22K '
+                   f'first.</p>')
+        elif serving:
+            who = (f'<p>The {len(serving)} regional chain'
+                   f'{"s" if len(serving) > 1 else ""} we track in {state} did '
+                   f'not publish a rate today, so the jewellers below are the '
+                   f'national chains, which quote one price across India. '
+                   f'Cheapest 22K first.</p>')
+        else:
+            who = (f'<p>We do not track a regional chain in {state} yet, so the '
+                   f'jewellers below are the national chains, which quote one '
+                   f'price across India. Cheapest 22K first.</p>')
+        diff = nat_med22 - k22(best)
+        # "Cheapest of these", not "cheapest in <city>": the rates are real,
+        # but a national chain's listing here is not a claim that it has a
+        # shop in this particular city.
+        cheapest = (f'<p>Lowest 22K among these jewellers today: '
+                    f'<strong>{_html.escape(best["brands"]["name"])}</strong> at '
+                    f'<strong>{inr(k22(best))}/g</strong>'
+                    + (f', {inr(round(diff))}/g below the national median.'
+                       if diff >= 1 else '.') + '</p>')
+        peers = [p for p in LOCATIONS
+                 if PLACE_STATE.get(p) == state and p not in (nm, state)]
+        links = ""
+        if peers or (state != nm and state in LOCATIONS):
+            items = []
+            if state != nm and state in LOCATIONS:
+                items.append(f'<a href="/gold-rate-today-in-{loc_slug(state)}">'
+                             f'{state} (state)</a>')
+            items += [f'<a href="/gold-rate-today-in-{loc_slug(p)}">{p}</a>'
+                      for p in peers]
+            links = (f'<h3>Gold rate in other places in {state}</h3>'
+                     f'<div class="citycloud">{"".join(items)}</div>')
+        if dark:
+            # The new design is dark glass: inherit its text colour, draw
+            # rules in translucent white, tag in the gold accent.
+            style = ('<style>.local-board .lb-wrap{overflow-x:auto;max-width:100%}'
+                     '.local-board h2{font-size:20px;margin:0 0 8px}'
+                     '.local-board h3{font-size:15px;margin:18px 0 8px}'
+                     '.local-board p{line-height:1.6;margin:0 0 10px;opacity:.9}'
+                     '.local-tbl{width:100%;border-collapse:collapse;font-size:14px}'
+                     '.local-tbl th,.local-tbl td{padding:9px 6px;'
+                     'border-bottom:1px solid rgba(255,255,255,.08);'
+                     'text-align:right;white-space:nowrap}'
+                     '.local-tbl th{font-size:11px;letter-spacing:.06em;'
+                     'text-transform:uppercase;opacity:.6;font-weight:500}'
+                     '.local-tbl th:first-child,.local-tbl td:first-child'
+                     '{text-align:left;white-space:normal}'
+                     '.local-tbl .lb-tag{display:inline-block;margin-left:6px;'
+                     'font-size:10.5px;padding:1px 6px;border-radius:8px;'
+                     'background:rgba(212,175,55,.16);color:#e8c766}'
+                     '.local-board .fine{font-size:12px;opacity:.6}'
+                     '.local-board .citycloud{display:flex;flex-wrap:wrap;gap:8px}'
+                     '.local-board .citycloud a{padding:6px 12px;border-radius:999px;'
+                     'border:1px solid rgba(212,175,55,.25);color:inherit;'
+                     'text-decoration:none;font-size:13px}'
+                     # The new design colours text per element, not on body,
+                     # so anything unstyled here would render dark on dark.
+                     '.city-local,.city-local h2,.city-local h3,.city-local p,'
+                     '.city-local td,.city-local strong{color:#efe4c8}'
+                     '.city-local h2,.city-local h3{font-family:\'Playfair Display\','
+                     'Georgia,serif}'
+                     '.city-local .seo{margin-top:22px}'
+                     '.city-local .seo h2{font-size:20px;margin:0 0 8px;'
+                     'font-weight:600}'
+                     '.city-local .seo p{line-height:1.6;margin:0 0 10px;'
+                     'opacity:.9}'
+                     '.city-local a{color:#e8c766}</style>')
+        else:
+            style = ('<style>.local-board .lb-wrap{overflow-x:auto;max-width:100%}'
+                     '.local-tbl{width:100%;border-collapse:collapse;font-size:15px}'
+                     '.local-tbl th,.local-tbl td{padding:9px 8px;'
+                     'border-bottom:1px solid rgba(0,0,0,.08);text-align:right;'
+                     'white-space:nowrap}'
+                     '.local-tbl th:first-child,.local-tbl td:first-child'
+                     '{text-align:left;white-space:normal}'
+                     '.local-tbl .lb-tag{display:inline-block;margin-left:6px;'
+                     'font-size:11px;padding:1px 6px;border-radius:8px;'
+                     'background:rgba(180,140,40,.15);color:#7a5a10}'
+                     '.local-board .fine{font-size:13px;opacity:.75}</style>')
+        return style + (
+            f'<section class="seo local-board"><h2>Jewellers serving {where} '
+            f'&mdash; today&rsquo;s rates</h2>{who}{cheapest}'
+            f'<div class="lb-wrap"><table class="local-tbl"><thead><tr>'
+            f'<th>Jeweller</th><th>22K /g</th><th>24K /g</th></tr></thead>'
+            f'<tbody>{trs}</tbody></table></div>'
+            f'<p class="fine">Per gram, pre-GST, as published by each jeweller '
+            f'on {display_date}. Add 3% GST and making charges for the billed '
+            f'price.</p>{links}</section>')
 
 
     tvars = dict(
@@ -2618,7 +2807,7 @@ def main():
         low_logo=low_logo,
         ibja_tiles=ibja_tiles, ibja_section=ibja_section, ads_unit=ads_unit,
         calc_brands=json.dumps(calc_brands),
-        rows="\n".join(body_rows), faq=faq_html, jsonld=jsonld,
+        rows="\n".join(body_rows), faq=('<section aria-labelledby="faqh">\n  <p class="eyebrow">Know Your Gold</p>\n  <h2 id="faqh">Gold Rate FAQs</h2>\n' + faq_html + '\n</section>'), jsonld=jsonld,
         seo_content=seo_content, drawer=drawer, calcdrawer=calcdrawer,
         coindrawer=coindrawer, news_home=news_home, **common)
     # As of the Sep-2026 IA swap, the app-test Market Pulse HTML is written
@@ -2644,20 +2833,142 @@ def main():
         # urgency. The pageview does not - it is inline in the head.
         f.write(SIGNUP_JS + "\n" + CLICK_JS)
 
+    def write_city_pages(home_html):
+        """Every city and state page, in the new design.
+
+        City pages used to be rendered from TEMPLATE - the old comparison
+        page design - so anyone arriving from search for a place saw a
+        different, older site from the homepage. They are now the homepage
+        itself with the place's own title, heading, address, structured data
+        and local_board() section, so a visitor lands in the same product,
+        including its details popup.
+        """
+        n_live = len(live)
+        for nm in LOCATIONS:
+            sl = loc_slug(nm)
+            url = f"{SITE_URL}/gold-rate-today-in-{sl}"
+            title = (f"Gold Rate Today in {nm} ({display_date}) - 24K, 22K, "
+                     f"18K Price | MyGoldRates")
+            desc = (f"Gold rate today in {nm}: 24K {inr(med['24K'])}/g, 22K "
+                    f"{inr(med['22K'])}/g (pre-GST) on {display_date}. Compare "
+                    f"{n_live} jewellers' live rates and the chains that "
+                    f"serve {PLACE_STATE.get(nm) or nm}.")
+            h = home_html
+            def sub(pattern, repl, h, count=1, flags=0):
+                out, n = re.subn(pattern, repl, h, count=count, flags=flags)
+                if n == 0:
+                    raise RuntimeError(f"city page {nm}: no match for {pattern[:50]}")
+                return out
+            esc = _html.escape
+            h = sub(r"<title>[^<]*</title>", f"<title>{esc(title)}</title>", h)
+            h = sub(r'(<meta name="description" content=")[^"]*', r"\g<1>" + esc(desc).replace("\\", "\\\\"), h)
+            h = sub(r'(<link rel="canonical" href=")[^"]*', r"\g<1>" + url, h)
+            h = sub(r'(<meta property="og:url" content=")[^"]*', r"\g<1>" + url, h)
+            for prop in ('property="og:title"', 'name="twitter:title"'):
+                h = sub(r'(<meta ' + prop + r' content=")[^"]*', r"\g<1>" + esc(title).replace("\\", "\\\\"), h)
+            for prop in ('property="og:description"', 'name="twitter:description"'):
+                h = sub(r'(<meta ' + prop + r' content=")[^"]*', r"\g<1>" + esc(desc).replace("\\", "\\\\"), h)
+            # headings
+            # On phones the homepage's h1 is screen-reader only. A visitor
+            # who searched for a place must see that place, so on city pages
+            # the heading is visible at the top of the price panel.
+            h = sub(r'<h1 class="sr-only">Gold Rate Today in India[^<]*</h1>',
+                    ('<h1 style="margin:2px 16px 6px;text-align:center;'
+                     'font-family:\'Playfair Display\',Georgia,serif;'
+                     'font-size:22px;font-weight:700;line-height:1.25;'
+                     'color:#f4e3a6">Gold Rate Today in ' + esc(nm)
+                     + '<span style="display:block;margin-top:3px;'
+                     'font-family:\'DM Sans\',system-ui,sans-serif;'
+                     'font-size:12.5px;font-weight:500;color:rgba(255,255,255,.62)">'
+                     f'Live 24K, 22K &amp; 18K from {n_live} jewellers</span></h1>')
+                    .replace("\\", "\\\\"), h)
+            h = sub(r"<h1>Gold Rate Today in India", "<h1>Gold Rate Today in " + esc(nm), h)
+            # structured data: the homepage's blocks describe "/", replace them
+            h = re.sub(r'<script type="application/ld\+json">.*?</script>\s*',
+                       "", h, flags=re.S)
+            ld = [x for x in _ld if x.get("@type") in ("WebSite", "Organization")] + [
+                {"@context": "https://schema.org", "@type": "WebPage",
+                 "url": url, "name": title, "inLanguage": "en-IN",
+                 "dateModified": updated_iso,
+                 "isPartOf": {"@type": "WebSite", "url": f"{SITE_URL}/"}},
+                {"@context": "https://schema.org", "@type": "BreadcrumbList",
+                 "itemListElement": [
+                     {"@type": "ListItem", "position": 1, "name": "Home",
+                      "item": f"{SITE_URL}/"},
+                     {"@type": "ListItem", "position": 2,
+                      "name": f"Gold Rate Today in {nm}", "item": url}]}]
+            h = h.replace("</head>", '<script type="application/ld+json">'
+                          + json.dumps(ld, ensure_ascii=False)
+                          + "</script>\n</head>", 1)
+            # the place's own section, in both layouts
+            local = local_intro(nm, dark=True)
+            if local:
+                phone = f'<div class="city-local" style="margin:18px 12px 6px">{local}</div>\n  '
+                i_rates = h.index('id="v-rates"')
+                k = h.index('<div class="dv">', i_rates)
+                h = h[:k] + phone + h[k:]
+                desk = ('<section class="site-section"><div class="site-container">'
+                        f'<div class="city-local">{local}</div></div></section>\n  ')
+                h = sub(r'(<section class="site-section alt" id="s-market">)',
+                        desk.replace("\\", "\\\\") + r"\g<1>", h)
+            with open(f"docs/gold-rate-today-in-{sl}.html", "w",
+                      encoding="utf-8") as f:
+                f.write(h)
+        print(f"city pages: wrote {len(LOCATIONS)} in the new design")
+
     # ---- programmatic city/state pages (same board, local landing page) ----
-    for nm in LOCATIONS:
-        sl = loc_slug(nm)
-        note = (f" Rates shown apply across {nm} - national jewellery chains "
-                f"quote the same board price in {nm} as everywhere else in "
-                "India.")
-        page = TEMPLATE.substitute(
-            where=f"in {nm}", where_note=note, local_intro=local_intro(nm),
-            canonical_url=f"{SITE_URL}/gold-rate-today-in-{sl}",
-            city_links=city_cloud(sl), **tvars)
-        with open(f"docs/gold-rate-today-in-{sl}.html", "w",
-                  encoding="utf-8") as f:
-            f.write(page)
-    print(f"city pages: wrote {len(LOCATIONS)}")
+    # City pages used to be /compare with the place name swapped in: the
+    # India FAQ ("What is the gold rate today in India?"), the 560-word
+    # "About the Tool: Gold Rate Today in India" guide and the site-wide news
+    # rail, repeated on all 95, measured at 97-100% identical text between
+    # any two. That is the "low value content" AdSense rejects and the
+    # doorway pattern search demotes. Those national sections now live only
+    # on /compare and are linked from here; each city page keeps the rate
+    # board and tools and leads with local_board(). Their structured data
+    # drops the FAQPage (Google forbids FAQ markup for questions not on the
+    # page) and the national Dataset, and gets a breadcrumb of its own.
+    _ld = [x for x in json.loads(jsonld)
+           if x.get("@type") not in ("FAQPage", "Dataset", "BreadcrumbList")]
+    def city_jsonld(nm, sl):
+        return json.dumps(_ld + [{
+            "@context": "https://schema.org", "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Home",
+                 "item": f"{SITE_URL}/"},
+                {"@type": "ListItem", "position": 2,
+                 "name": f"Gold Rate Today in {nm}",
+                 "item": f"{SITE_URL}/gold-rate-today-in-{sl}"}]}],
+            ensure_ascii=False)
+    city_more = (
+        '<section class="seo"><h2>More about today&rsquo;s gold rate</h2>'
+        f'<p>For every jeweller side by side across India, with the bullion '
+        f'reference and answers to common questions, see the '
+        f'<a href="{SITE_URL}/compare">full gold rate comparison</a>. To work '
+        f'out a bill, use the <a href="{SITE_URL}/making-charges-calculator">'
+        f'making charges calculator</a> or the other '
+        f'<a href="{SITE_URL}/calculators">gold calculators</a>; to choose a '
+        f'purity, read <a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K '
+        f'gold</a>.</p></section>')
+    def write_classic_city_pages():
+        """The old-design city pages. Only used if pulse_app.html is
+        missing; normally city pages are built from the new design
+        further down (see write_city_pages)."""
+        for nm in LOCATIONS:
+            sl = loc_slug(nm)
+            note = (f" Rates shown apply across {nm} - national jewellery chains "
+                    f"quote the same board price in {nm} as everywhere else in "
+                    "India.")
+            page = TEMPLATE.substitute(
+                where=f"in {nm}", where_note=note, local_intro=local_intro(nm),
+                canonical_url=f"{SITE_URL}/gold-rate-today-in-{sl}",
+                city_links=city_cloud(sl),
+                **{**tvars, "faq": "", "news_home": "", "seo_content": city_more,
+                   "jsonld": city_jsonld(nm, sl)})
+            with open(f"docs/gold-rate-today-in-{sl}.html", "w",
+                      encoding="utf-8") as f:
+                f.write(page)
+        print(f"city pages: wrote {len(LOCATIONS)} (classic fallback)")
+
     # The Jewellers Digest landing page. Its own module: it has its own
     # design, its own signup form, and its own degraded state when the
     # billing Worker is not answering.
@@ -3284,7 +3595,7 @@ def main():
         body = (
             crumbs(("News", f"{SITE_URL}/news"),
                    (f"Gold Rate {display_date}", None)) +
-            f"<h1>Gold Rate Today {where_in} - {display_date}</h1>"
+            f"<h1>Gold Price {where_in} on {display_date}: Daily Report</h1>"
             f'<p class="updated-on">Updated {display_time}, {display_date}</p>'
             f"<p>The <strong>gold rate today {where_in}</strong> is "
             f"<strong>{inr(lad['24K'])} per gram for 24 carat (999)</strong> "
@@ -3311,8 +3622,8 @@ def main():
             f"24K gold</a>.</p>")
         render_content(
             slug,
-            f"Gold Rate Today {where_in} ({display_date}) - 24K, 22K, 18K "
-            "Price | MyGoldRates",
+            f"Gold Price {where_in} on {display_date}: Daily Report | "
+            "MyGoldRates",
             f"Gold rate today {where_in} on {display_date}: 24K "
             f"{inr(lad['24K'])}/g, 22K {inr(lad['22K'])}/g, 18K "
             f"{inr(lad['18K'])}/g (pre-GST). 24K {darrow} {dsign}"
@@ -3595,6 +3906,38 @@ def main():
         if pulse_missing:
             raise RuntimeError("pulse_app.html header changed - patch these: "
                                + ", ".join(pulse_missing))
+        # Links the homepage never had. It linked 14 city pages and nothing
+        # else - no Privacy Policy, About, Contact or Terms, and no route to
+        # /compare, /calculators or /news, which is why Search Console showed
+        # /calculators and /news as "URL is unknown to Google" and /compare as
+        # never crawled. AdSense reviewers look for policy pages and clear
+        # navigation from the homepage. On phones the desktop layout and its
+        # footer are display:none, and Google indexes the phone version, so
+        # the same block goes at the foot of the default phone view too.
+        _states = [p for p in LOCATIONS if PLACE_STATE.get(p) == p]
+        _site_links = (
+            '<nav class="sl" aria-label="Site">'
+            f'<a href="{SITE_URL}/compare">Compare jewellers</a>'
+            f'<a href="{SITE_URL}/calculators">Gold calculators</a>'
+            f'<a href="{SITE_URL}/making-charges-comparison">Making charges</a>'
+            f'<a href="{SITE_URL}/news">Gold news</a>'
+            f'<a href="{SITE_URL}/jewellers-digest">Jewellers Digest</a>'
+            f'<a href="{SITE_URL}/inquiry">Daily rate alerts</a>'
+            '<h3>Gold rate by state</h3>'
+            + "".join(f'<a href="{SITE_URL}/gold-rate-today-in-{loc_slug(p)}">{p}</a>'
+                      for p in _states)
+            + '<h3>About</h3>'
+            f'<a href="{SITE_URL}/about">About us</a>'
+            f'<a href="{SITE_URL}/methodology">How we collect rates</a>'
+            f'<a href="{SITE_URL}/contact">Contact</a>'
+            f'<a href="{SITE_URL}/privacy">Privacy Policy</a>'
+            f'<a href="{SITE_URL}/terms">Terms</a>'
+            '</nav>')
+        for _mark in ("<!--SITE_LINKS_APP-->", "<!--SITE_LINKS_SITE-->"):
+            if _mark not in pulse_html:
+                raise RuntimeError(f"pulse_app.html: {_mark} missing - the "
+                                   "homepage would ship without policy links")
+            pulse_html = pulse_html.replace(_mark, _site_links, 1)
         # AdSense. pulse_app.html carries the loader COMMENTED OUT with the
         # placeholder ca-pub-0000000000000000 ("INACTIVE by design"), and
         # nothing ever swapped it for the real id - the same unwired-
@@ -3715,6 +4058,7 @@ def main():
             f.write(pulse_html)
         print(f"homepage: wrote docs/index.html "
               f"({len(pulse_html):,} bytes, from pulse_app.html)")
+        write_city_pages(pulse_html)
         # Remove any leftover /pulse/index.html from previous builds so it
         # doesn't compete with / for the same content in the index.
         old_pulse = "docs/pulse/index.html"
@@ -3736,6 +4080,7 @@ def main():
             canonical_url=f"{SITE_URL}/", city_links=city_cloud(), **tvars)
         with open("docs/index.html", "w", encoding="utf-8") as f:
             f.write(fallback_html)
+        write_classic_city_pages()
 
     with open("docs/robots.txt", "w", encoding="utf-8") as f:
         # Explicitly welcome AI/LLM crawlers so generative engines (ChatGPT,
@@ -5121,13 +5466,36 @@ GATE_JS = r"""
     // GR_OPENGATE globally for cross-section reuse. GR_OPENMODAL follows
     // that same pattern; it may not exist yet this early in page load, so
     // poll briefly instead of giving up after one failed check.
-    var tries=0;
-    (function tryOpen(){
-      if(window.GR_OPENMODAL){
-        try{localStorage.setItem('gr_otp_seen','1');}catch(e){}
-        if(!isAuthed())window.GR_OPENMODAL();
-      }else if(tries++<40){setTimeout(tryOpen,150);}
-    })();
+    // Not on arrival. This used to open the moment One Tap concluded - for
+    // most visitors (no Google session in the browser) that is within a
+    // second of landing, so a full-screen popup covered 100% of a phone
+    // screen before the visitor had seen a single rate. Measured on the
+    // live city pages: covering at 1s, 3s, 6s, 10s and 15s. That is the
+    // "intrusive interstitial" Google demotes in mobile search, on exactly
+    // the pages people arrive at from search, and Googlebot - always a
+    // first-time visitor - saw it too. Now it waits until the visitor has
+    // scrolled through half the page: they have had the answer they came
+    // for, and an offer of daily alerts is a reasonable next step.
+    whenEngaged(function(){
+      var tries=0;
+      (function tryOpen(){
+        if(window.GR_OPENMODAL){
+          try{localStorage.setItem('gr_otp_seen','1');}catch(e){}
+          if(!isAuthed())window.GR_OPENMODAL();
+        }else if(tries++<40){setTimeout(tryOpen,150);}
+      })();
+    });
+  }
+  function whenEngaged(fn){
+    var fired=false;
+    function check(){
+      if(fired)return;
+      var max=document.documentElement.scrollHeight-window.innerHeight;
+      if(max>0&&window.scrollY/max>=0.5){
+        fired=true;window.removeEventListener('scroll',check);fn();
+      }
+    }
+    window.addEventListener('scroll',check,{passive:true});
   }
 
   /* ---- auto One Tap on page load ---- */
@@ -5804,11 +6172,7 @@ $ibja_section
 
 $ads_unit
 
-<section aria-labelledby="faqh">
-  <p class="eyebrow">Know Your Gold</p>
-  <h2 id="faqh">Gold Rate FAQs</h2>
 $faq
-</section>
 
 $news_home
 
