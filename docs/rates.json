@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-13",
-  "last_updated": "2026-10-13T14:08:49.900269+05:30",
+  "last_updated": "2026-10-13T16:35:42.657583+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 149456.0,
-      "change_pct": -0.06
+      "price_per_10g_inr": 149420.0,
+      "change_pct": -0.08
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 148175.0,
-      "change_pct": -0.08
+      "price_per_10g_inr": 148239.0,
+      "change_pct": -0.04
     }
   ],
   "jewellers": [
@@ -94,6 +94,12 @@
       "rate_18k_per_gram_inr": 11204.25
     },
     {
+      "jeweller": "Candere",
+      "rate_24k_per_gram_inr": 14940.0,
+      "rate_22k_per_gram_inr": 13695.0,
+      "rate_18k_per_gram_inr": 11205.0
+    },
+    {
       "jeweller": "GRT Jewellers",
       "rate_24k_per_gram_inr": 14940.0,
       "rate_22k_per_gram_inr": 13695.0,
@@ -110,12 +116,6 @@
       "rate_24k_per_gram_inr": 14948.0,
       "rate_22k_per_gram_inr": 13702.33,
       "rate_18k_per_gram_inr": 11211.0
-    },
-    {
-      "jeweller": "Candere",
-      "rate_24k_per_gram_inr": 14978.0,
-      "rate_22k_per_gram_inr": 13729.83,
-      "rate_18k_per_gram_inr": 11233.5
     },
     {
       "jeweller": "Tanishq",
