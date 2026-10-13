@@ -3366,7 +3366,10 @@ def main():
         ANALYTICS_HTML
         .replace("__SB__", supabase_url)
         .replace("__KEY__", anon_key)
-        .replace("__DATE__", display_date))
+        .replace("__DATE__", display_date)
+        .replace("__CLICK_LABELS__",
+                 json.dumps(CLICK_LABELS, ensure_ascii=False))
+        .replace("__CITIES__", json.dumps(LOCATIONS)))
     with open("docs/analytics.html", "w", encoding="utf-8") as f:
         f.write(analytics_page)
     print("analytics dashboard: wrote docs/analytics.html (token via URL hash)")
@@ -3574,6 +3577,21 @@ def main():
         if pulse_missing:
             raise RuntimeError("pulse_app.html header changed - patch these: "
                                + ", ".join(pulse_missing))
+        # AdSense. pulse_app.html carries the loader COMMENTED OUT with the
+        # placeholder ca-pub-0000000000000000 ("INACTIVE by design"), and
+        # nothing ever swapped it for the real id - the same unwired-
+        # placeholder bug as the One Tap client id above. Every other page
+        # gets ads_head from ADSENSE_CLIENT; the homepage, which takes about
+        # half of all page views, made no ad request at all. Replace the
+        # whole dormant block with the same ads_head the rest of the site
+        # uses, or with nothing when the secret is unset.
+        _ads_block = re.search(
+            r"<!--[^>]*?Google AdSense[\s\S]*?-->", pulse_html)
+        if not _ads_block:
+            raise RuntimeError("pulse_app.html: dormant AdSense block not "
+                               "found - the homepage would ship without ads")
+        pulse_html = (pulse_html[:_ads_block.start()] + ads_head
+                      + pulse_html[_ads_block.end():])
         # Extra JSON-LD: WebPage + BreadcrumbList + a "See detailed
         # comparison" pointer that carries the schema.org relationship
         # between / and /compare so Google understands the IA split.
@@ -7757,6 +7775,106 @@ MC_DASH_JS = r"""
 
 
 # =====================================================================
+# What each tracked click actually is, for the private analytics dashboard.
+#
+# The click tracker records a stable key - the element id when there is one,
+# otherwise its visible text - because keys must not change when copy does,
+# or one button splits into two rows. The price of a stable key is that it
+# reads like "mcBrandTrigger" or "\u25a3". This map is where the meaning
+# lives. tests/test_click_labels.py fails if a button with an id appears on
+# the homepage without an entry here, so a new button cannot quietly show up
+# on the dashboard under its HTML name.
+#
+# Keys with no entry fall through to rules in the dashboard's friendly():
+# jeweller names, "Buy X 24K", weights, purities and so on.
+CLICK_LABELS = {
+    # bottom navigation (the four main views)
+    "Rates": "Nav: Today's rates",
+    "Market": "Nav: Live market",
+    "Calc": "Nav: Calculators",
+    "Making Charges": "Nav: Making charges",
+    # top menu
+    "navtog": "Menu: open",
+    "nav-x": "Menu: close",
+    "siteSignin": "Sign in (header)",
+    # side drawers
+    "drtab": "Gold markets panel: open",
+    "drx": "Gold markets panel: close",
+    "cdtab": "Calculators panel: open",
+    "cdx": "Calculators panel: close",
+    "coindtab": "Gold coins panel: open",
+    "coindx": "Gold coins panel: close",
+    # karat pills on the rate board
+    "24K": "Rate board: show 24K",
+    "22K": "Rate board: show 22K",
+    "18K": "Rate board: show 18K",
+    "14K": "Rate board: show 14K",
+    # rate board controls (each has a mobile twin ending in S)
+    "gstbtn": "Rate board: add 3% GST",
+    "gstBtn": "Rate board: add 3% GST",
+    "gstBtnS": "Rate board: add 3% GST",
+    "nearbtn": "Rate board: brands near me",
+    "nearBtn": "Rate board: brands near me",
+    "nearBtnS": "Rate board: brands near me",
+    # making-charges tool
+    "mcBrandTrigger": "Making charges: choose jeweller",
+    "mcBrandTriggerS": "Making charges: choose jeweller",
+    # calculator tabs
+    "Value": "Calculator: gold value",
+    "Budget": "Calculator: gold for my budget",
+    "Loan": "Calculator: gold loan",
+    "SIP": "Calculator: gold SIP",
+    "Making": "Calculator: making charges",
+    # live chart - timeframe
+    "LIVE": "Chart: live",
+    "1D": "Chart: 1 day", "5D": "Chart: 5 days", "1M": "Chart: 1 month",
+    "1m": "Chart: 1 month", "6M": "Chart: 6 months", "1Y": "Chart: 1 year",
+    "5Y": "Chart: 5 years", "1W": "Chart: 1 week", "3M": "Chart: 3 months",
+    "MAX": "Chart: all history", "5m": "Chart: 5-minute candles",
+    "15m": "Chart: 15-minute candles",
+    # live chart - type (the buttons are bare glyphs, hence the odd keys)
+    "\u25b2": "Chart: area view",
+    "\u223c": "Chart: line view",
+    "\u25a3": "Chart: candlestick view",
+    "\u22ee": "Chart: OHLC bar view",
+    # hallmark checker
+    "huid-scan-btn": "Hallmark (HUID) checker: verify",
+    # email alert popup
+    "spClose": "Alerts popup: closed",
+    "spLater": "Alerts popup: maybe later",
+    "m-close": "Add-your-city popup: closed",
+    "m-btn": "Add-your-city popup: subscribe",
+    "m-loc": "Add-your-city popup: use my location",
+    "qs-btn": "Get free alerts (quick signup)",
+    "alBtn": "Alerts: subscribe",
+    "alBtnP": "Alerts: subscribe free",
+    "alLocate": "Alerts: use my location",
+    "alLocateP": "Alerts: use my location",
+    "alLocateS": "Alerts: use my location",
+    "alBtnS": "Alerts: subscribe",
+    "f-loc": "Form: use my location",
+    # sign-in gate
+    "gate-close": "Sign-in gate: dismissed",
+    "gate-gbtn": "Sign-in gate: continue with Google",
+    "gate-enrich-skip": "Sign-in gate: skip details",
+    "gate-form": "Sign-in gate: manual form",
+    "gate-enrich": "Sign-in gate: details step",
+    # forms
+    "c-submit": "Contact form: send",
+    "m-form": "Subscribe form", "mbtn": "Subscribe button",
+    "inq": "Inquiry form",
+    "brandsearch": "Jeweller search",
+    # links and buttons on /compare and elsewhere
+    "Compare jewellers": "Compare: jump to comparison table",
+    "Making Charges Comparison": "Link: making-charges comparison page",
+    # retired: a menu button removed in mid-September 2026; kept so old
+    # date ranges still read properly
+    "Charges": "Nav: Charges (old menu, removed Sep 2026)",
+    # the dashboard's own buttons - shown so they can be recognised and ignored
+    "apply": "(dashboard) Apply", "today": "(dashboard) Today",
+}
+
+
 # Private analytics dashboard. Built to docs/analytics.html. Placeholders
 # __SB__ / __KEY__ / __DATE__ are filled at build time via str.replace()
 # (NOT f-string / Template) so JS braces and $ are literal. Reads aggregates
@@ -7896,24 +8014,58 @@ td.path{color:var(--accent);word-break:break-all}
   var d30=todayIST(); d30.setUTCDate(d30.getUTCDate()-29);
   $('from').value=iso(d30); $('to').value=iso(today);
 
-  // friendly names for click labels (raw element ids -> readable actions)
-  var CLICK_LABELS={
-    'drtab':'Rate-trend drawer','cdtab':'Calculator drawer','coindtab':'Coin drawer',
-    'nearbtn':'Brands near me','gstbtn':'GST toggle (+3%)','brandsearch':'Jeweller search',
-    'navtog':'Menu (hamburger)','gate-close':'Sign-in gate: dismissed',
-    'gate-gbtn':'Sign-in gate: Continue with Google','gate-form':'Sign-in gate: manual form',
-    'gate-enrich':'Sign-in gate: details step','m-form':'Subscribe form','mbtn':'Subscribe button',
-    'inq':'Inquiry form','apply':'Analytics: Apply','today':'Analytics: Today'};
+  // Readable names for click keys. The map is generated from CLICK_LABELS
+  // in generate_site.py (one source, tested); rules below cover the
+  // free-text keys that cannot be listed in advance.
+  var CLICK_LABELS=__CLICK_LABELS__;
+  var CITIES=__CITIES__;
   function friendly(t){
     if(t==null||t==='')return '(unlabelled)';
     if(CLICK_LABELS[t])return CLICK_LABELS[t];
-    var s=String(t);
+    var s=String(t).trim(),m;
     if(s.indexOf('Use my current location')>-1||s.indexOf('location to autofill')>-1)
       return 'Use my location (autofill)';
-    if(/^(24K|22K|18K|14K)$/.test(s))return s+' rate column';
+    if((m=s.match(/^Buy (.+?) (24K|22K|18K)/)))return 'Buy link: '+m[1]+' '+m[2];
+    if((m=s.match(/^Show full grid/)))return 'Dealer rates: show full grid';
+    if((m=s.match(/^(\d+(?:\.\d+)?)\s*g$/i)))return 'Weight picked: '+m[1]+'g';
+    if((m=s.match(/^(\d+K) \((\d+)\)$/)))return 'Making charges: purity '+m[1]+' ('+m[2]+')';
+    if(/^(Gold Spot|MCX Gold|Silver Spot|MCX Silver|USD\/INR)$/i.test(s))
+      return 'Market ticker: '+s;
+    if((m=s.match(/^(\d+(?:\.\d+)?)g\s*\u00b7\s*(.+)$/)))
+      return 'Making charges: '+m[1]+'g '+m[2];
+    if(/^(Rings?|Earrings|Chains?|Bangles?|Necklaces?|Pendants?|Bracelets?|Coins?|Mangalsutras?|Nose ?pins?|Anklets?|Kadas?|Studs?|Jhumkas?)$/i.test(s))
+      return 'Making charges: item '+s;
+    if(/(Jewell?ers?|Tanishq|Kalyan|Malabar|CaratLane|ORRA|Bhima|Joyalukkas|Chetty|Gadgil|Senco|Reliance|Khazana|Kisna|Candere|BlueStone|PC Chandra|Waman Hari|Lalithaa|Thangamayil)/i.test(s))
+      return 'Jeweller picked: '+s;
+    if(CITIES.indexOf(s)>-1)return 'City picked: '+s;
+    if(/^MyGoldRates/i.test(s))return 'Logo: back to home';
+    if(/^\u20b9/.test(s))return 'Budget picked: '+s;
+    if(/^(\d+(?:\.\d+)?\s*g\b.*|\d+\s*Tola)$/i.test(s))return 'Weight picked: '+s;
+    // A card's title and blurb arrive run together (\"Gold SIP CalculatorProject
+    // the future...\"); keep the title.
+    if(s.length>30&&(m=s.match(/^(.{6,40}?[a-z])([A-Z][a-z].{8,})$/)))return 'Card: '+m[1];
+    if(s.length>45)return 'Article link: '+s.slice(0,60)+'\u2026';
     s=s.replace(/^[^\x00-\x7F]+\s*/,'').trim();   // drop a leading emoji/pin
+    // Anything still shaped like an HTML id gets flagged rather than passed
+    // off as an action name, so a missing label is visible, not mysterious.
+    if(/^[a-z]+[A-Z-][\w-]*$/.test(s))return s+' (unnamed button)';
     return s||String(t);
   }
+  // Several keys mean the same action (a button and its mobile twin, or an
+  // old key and a new one). Fold them into one row after renaming.
+  function mergeByLabel(rows,key,val){
+    var by={},out=[];
+    rows.forEach(function(r){
+      var k=r[key];
+      if(!by[k]){by[k]={};by[k][key]=k;by[k][val]=0;out.push(by[k]);}
+      by[k][val]+=Number(r[val])||0;
+    });
+    return out.sort(function(a,b){return b[val]-a[val];});
+  }
+  // Synthetic rows - build health probes and test traffic - all live under
+  // paths starting "/__". They are not visitors.
+  function isSynthetic(p){var x=String(p||'');
+    return /^\/?__/.test(x)||x==='probe'||x==='diag';}
 
   function setStatus(t,isErr){var s=$('status');s.textContent=t;
     s.className='status'+(isErr?' err':'');}
@@ -8012,7 +8164,10 @@ td.path{color:var(--accent);word-break:break-all}
       renderChart(d.daily);
       renderTable($('pages'),d.top_pages,[{h:'Page',k:'page',path:true},
         {h:'Views',k:'views',num:true},{h:'Visitors',k:'visitors',num:true}]);
-      (d.top_clicks||[]).forEach(function(r){r.target=friendly(r.target);});
+      d.top_clicks=(d.top_clicks||[]).filter(function(r){return !isSynthetic(r.target);});
+      d.top_clicks.forEach(function(r){r.target=friendly(r.target);});
+      d.top_clicks=mergeByLabel(d.top_clicks,'target','clicks');
+      d.top_pages=(d.top_pages||[]).filter(function(r){return !isSynthetic(r.page);});
       renderTable($('clicks'),d.top_clicks,[{h:'Action',k:'target'},
         {h:'Clicks',k:'clicks',num:true}]);
       renderTable($('refs'),d.top_referrers,[{h:'Referrer',k:'referrer',path:true},
