@@ -506,7 +506,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 .site-nav{position:sticky;top:0;z-index:20;background:rgba(10,8,4,0.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--glass-border)}
 .site-nav-inner{max-width:1180px;margin:0 auto;padding:16px 40px;display:flex;align-items:center;justify-content:space-between}
 .site-logo{font-family:'Playfair Display',Georgia,serif;font-size:19px;font-weight:700}
-.site-logo span{background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.site-logo .g{background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .site-links{display:flex;gap:32px}
 .site-links a{color:var(--text2);text-decoration:none;font-size:13.5px;font-weight:500;transition:color .2s}
 .site-links a:hover{color:var(--gold-light)}
@@ -588,7 +588,8 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 
 /* Footer */
 .site-footer{border-top:1px solid var(--glass-border);padding:28px 0;text-align:center;font-size:12px;color:var(--text3)}
-.sl{margin:22px 12px 6px;font-size:12px;line-height:1.9;color:var(--text3);text-align:center}
+.sl{margin:22px 12px 6px;font-size:12px;line-height:1.9;color:var(--text3);text-align:center;display:flex;flex-wrap:wrap;justify-content:center;row-gap:2px}
+.sl h3{flex-basis:100%}
 .sl h3{font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin:14px 0 4px;color:var(--text3);font-weight:600}
 .sl a{color:var(--text2,#d8c9a3);text-decoration:none;margin:0 7px;white-space:nowrap}
 .sl a:hover{text-decoration:underline}
@@ -611,7 +612,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 
 <!-- Top bar -->
 <header class="topbar">
-  <div class="logo">My<span class="g">Gold</span>Rates</div>
+  <div class="logo" style="display:inline-flex;align-items:center;gap:8px"><svg class="brand-mark" width="26" height="26" style="flex:none" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx-app" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx-app)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx-app)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx-app)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx-app)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>My<span class="g">Gold</span>Rates</span></div>
   <div class="top-right">
     <div class="live-chip" id="liveChip" title="Tap to refresh live gold rate"><div class="live-dot" id="liveDot"></div><span id="liveChipTxt">Connecting…</span></div>
   </div>
@@ -969,7 +970,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 
   <header class="site-nav">
     <div class="site-nav-inner">
-      <div class="site-logo">My<span>Gold</span>Rates</div>
+      <div class="site-logo" style="display:inline-flex;align-items:center;gap:9px"><svg class="brand-mark" width="28" height="28" style="flex:none" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx-site" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx-site)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx-site)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx-site)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx-site)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>My<span class="g">Gold</span>Rates</span></div>
       <nav class="site-links">
         <a href="#s-rates">Rates</a>
         <a href="#s-market">Market</a>

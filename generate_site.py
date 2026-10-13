@@ -260,6 +260,131 @@ for _p in ("Maharashtra", "Tamil Nadu", "Karnataka", "Kerala", "Telangana",
     PLACE_STATE.setdefault(_p, _p)
 
 
+# ---------------------------------------------------------------------------
+# The new design, for every page that is not the app itself.
+#
+# The homepage and the 95 city pages are the Market Pulse app (pulse_app.html).
+# Everything else - calculators, articles, news, daily reports, recaps, the
+# policy pages, the alerts form, unsubscribe, 404 - used to be rendered in the
+# old light comparison-site design, so a visitor moving from the homepage to
+# any of them walked into a different website. These three pieces put them in
+# the new one: its palette, fonts, header and footer links. The old
+# templates' own stylesheet is driven by CSS variables (--paper, --ink, ...),
+# so restyling it is mostly a matter of redefining those, below.
+ND_CSS = """
+:root{
+  --paper:#0A0804; --ink:#F4EDE0; --ink-2:#C8BDA8; --ink-3:#9B907B;
+  --board:#15100A; --board-2:#1E160C; --gold:#D4A63C; --gold-bright:#E8C766;
+  --gold-foil:linear-gradient(100deg,#B07E12,#E3BF63 45%,#F4E3A6 55%,#D4A63C);
+  --emerald:#5CC4A0; --line:rgba(200,160,60,.16); --card:rgba(255,255,255,.035);
+  --warm:#E88AAE; --bar:#D4A63C;
+}
+html,body{background:#0A0804;color:var(--ink)}
+body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;
+  background:radial-gradient(1200px 600px at 50% -10%,rgba(212,166,60,.10),transparent 60%),#0A0804}
+h1,h2,h3,.page h1,.page h2{font-family:'Playfair Display',Georgia,serif;color:var(--ink)}
+.page a,.wrap a:not(.btn):not(.toolcard):not(.newscard){color:var(--gold-bright)}
+input,select,textarea{color-scheme:dark}
+.calcbox input,.calcbox select,input[type=text],input[type=email],input[type=tel],
+input[type=number],select,textarea{background:rgba(255,255,255,.04)!important;
+  color:var(--ink)!important;border-color:var(--line)!important}
+table{color:var(--ink)}
+th,td{border-color:var(--line)!important}
+"""
+
+ND_CHROME_CSS = """
+.nd-nav{position:sticky;top:0;z-index:50;background:rgba(10,8,4,.82);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(200,160,60,.12)}
+.nd-nav-in{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;
+  align-items:center;gap:22px}
+.nd-logo{font-family:'Playfair Display',Georgia,serif;font-size:20px;font-weight:700;
+  color:#F4EDE0;text-decoration:none;white-space:nowrap;display:inline-flex;
+  align-items:center;gap:9px}
+.nd-logo .nd-word span{background:linear-gradient(135deg,#F4E3A6,#D4A63C);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nd-links{display:flex;gap:20px;overflow-x:auto;scrollbar-width:none;flex:1}
+.nd-links::-webkit-scrollbar{display:none}
+.nd-links a{color:#C8BDA8;text-decoration:none;font-size:14px;font-weight:500;
+  white-space:nowrap}
+.nd-links a:hover,.nd-links a[aria-current]{color:#E8C766}
+.nd-cta{margin-left:auto;white-space:nowrap;padding:8px 14px;border-radius:999px;
+  background:linear-gradient(135deg,#E8C766,#D4A63C);color:#1A1205!important;
+  font-weight:600;font-size:13px;text-decoration:none}
+@media(max-width:720px){
+  .nd-nav-in{flex-wrap:wrap;gap:10px 16px;padding:12px 16px}
+  .nd-links{order:3;flex-basis:100%}
+}
+.nd-foot{border-top:1px solid rgba(200,160,60,.12);margin-top:36px;padding:26px 16px 34px;
+  text-align:center;font-size:12px;color:#9B907B}
+.sl{margin:0 auto 10px;max-width:980px;font-size:12.5px;line-height:1.95;color:#9B907B;
+  display:flex;flex-wrap:wrap;justify-content:center;row-gap:2px}
+.sl h3{flex-basis:100%}
+.city-links,.citycloud{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.city-links a,.citycloud a{padding:6px 12px;border-radius:999px;border:1px solid rgba(212,175,55,.25);
+  color:#E8C766!important;text-decoration:none;font-size:13px}
+.sl h3{font-family:'DM Sans',system-ui,sans-serif;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;margin:14px 0 4px;color:#9B907B;font-weight:600}
+.sl a{color:#C8BDA8;text-decoration:none;margin:0 7px;white-space:nowrap}
+.sl a:hover{text-decoration:underline;color:#E8C766}
+"""
+ND_CSS = ND_CSS + ND_CHROME_CSS
+
+ND_FONTS = ('<link href="https://fonts.googleapis.com/css2?family=DM+Sans:'
+            'opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family='
+            'Playfair+Display:wght@600;700&family=IBM+Plex+Mono:wght@500;700'
+            '&display=swap" rel="stylesheet">')
+
+
+def site_links_html():
+    """Footer links shared by the app pages and every other page. One list,
+    so a page added here appears everywhere."""
+    states = [p for p in LOCATIONS if PLACE_STATE.get(p) == p]
+    return (
+        '<nav class="sl" aria-label="Site">'
+        f'<a href="{SITE_URL}/">Today&rsquo;s gold rates</a>'
+        f'<a href="{SITE_URL}/calculators">Gold calculators</a>'
+        f'<a href="{SITE_URL}/making-charges-comparison">Making charges</a>'
+        f'<a href="{SITE_URL}/news">Gold news</a>'
+        f'<a href="{SITE_URL}/jewellers-digest">Jewellers Digest</a>'
+        f'<a href="{SITE_URL}/inquiry">Daily rate alerts</a>'
+        '<h3>Gold rate by state</h3>'
+        + "".join(f'<a href="{SITE_URL}/gold-rate-today-in-{loc_slug(p)}">{p}</a>'
+                  for p in states)
+        + '<h3>About</h3>'
+        f'<a href="{SITE_URL}/about">About us</a>'
+        f'<a href="{SITE_URL}/methodology">How we collect rates</a>'
+        f'<a href="{SITE_URL}/contact">Contact</a>'
+        f'<a href="{SITE_URL}/privacy">Privacy Policy</a>'
+        f'<a href="{SITE_URL}/terms">Terms</a>'
+        '</nav>')
+
+
+def nd_header_html():
+    return (
+        '<header class="nd-nav"><div class="nd-nav-in">'
+        # The gold bars-and-arrow mark, the same drawing the favicon is made
+        # from. The old header carried it; the new design's wordmark-only
+        # header dropped it when pages moved over.
+        f'<a class="nd-logo" href="{SITE_URL}/"><svg class="brand-mark" width="30" height="30" style="flex:none" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx-nd" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx-nd)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx-nd)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx-nd)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx-nd)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        '<span class="nd-word">My<span>Gold</span>Rates</span></a>'
+        '<nav class="nd-links" aria-label="Main">'
+        f'<a href="{SITE_URL}/">Today&rsquo;s rates</a>'
+        f'<a href="{SITE_URL}/calculators">Calculators</a>'
+        f'<a href="{SITE_URL}/making-charges-comparison">Making charges</a>'
+        f'<a href="{SITE_URL}/news">News</a>'
+        f'<a href="{SITE_URL}/jewellers-digest">For jewellers</a>'
+        '</nav>'
+        f'<a class="nd-cta" href="{SITE_URL}/inquiry">Get daily alerts</a>'
+        '</div></header>')
+
+
+def nd_footer_html(year):
+    return ('<footer class="nd-foot">' + site_links_html()
+            + f'<p>&copy; {year} MyGoldRates &middot; Rates are indicative, '
+            'updated daily &middot; Not investment advice</p></footer>')
+
+
 def analytics_snippet(supabase_url, anon_key):
     """The pageview beacon, as an inline <script> for the document head.
 
@@ -1433,7 +1558,6 @@ def main():
     supabase_url = os.environ["SUPABASE_URL"]
     # AdSense: dormant until the ADSENSE_CLIENT secret (ca-pub-...) is set.
     ads_client = os.environ.get("ADSENSE_CLIENT", "").strip()
-    ads_slot = os.environ.get("ADSENSE_SLOT", "").strip()
     if ads_client:
         ads_head = (
             '<script async src="https://pagead2.googlesyndication.com/pagead/'
@@ -1441,14 +1565,6 @@ def main():
             f'</script>\n<meta name="google-adsense-account" content="{ads_client}">')
     else:
         ads_head = ""
-    if ads_client and ads_slot:
-        ads_unit = (
-            '<ins class="adsbygoogle" style="display:block" '
-            f'data-ad-client="{ads_client}" data-ad-slot="{ads_slot}" '
-            'data-ad-format="auto" data-full-width-responsive="true"></ins>'
-            '<script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>')
-    else:
-        ads_unit = ""   # Auto ads (head script) place ads; no manual boxes
     today = datetime.now(timezone.utc).date().isoformat()
 
     def load_rates(day):
@@ -1482,7 +1598,6 @@ def main():
     base = national or live
     median24 = statistics.median(r["canonical_24k_pre_gst"] for r in base)
     lowest = min(base, key=lambda r: r["canonical_24k_pre_gst"])
-    highest = max(base, key=lambda r: r["canonical_24k_pre_gst"])
     now_ist = datetime.now(IST)
     display_date = now_ist.strftime("%d %B %Y")
     display_time = now_ist.strftime("%I:%M %p IST").lstrip("0")
@@ -1503,73 +1618,24 @@ def main():
                 f'<div class="nt">{_html.escape(n["title"])}</div>'
                 f'<div class="nd">{_html.escape(meta)}</div></a>')
 
-    news_home = ""
-    if news_items:
-        cards = "".join(news_card(n) for n in news_items[:5])
-        news_home = (
-            '<section class="citylinks" aria-labelledby="newsh">'
-            '<p class="eyebrow">Gold News</p>'
-            '<h2 id="newsh">Latest Gold News Today</h2>'
-            '<p class="hint">Live headlines, refreshed through the day.</p>'
-            f'{cards}'
-            f'<p style="margin-top:10px"><a href="{SITE_URL}/news" '
-            'style="font-weight:600">All gold news &amp; daily recaps '
-            '&rarr;</a></p></section>')
 
     # --------------------------------------------------- MCX gold futures
     mcx = fetch_mcx()
-    mcx_tile = ""
     mcx_expiry_for_js = ""
     if mcx:
         g = next((c for c in mcx if c["symbol"] == "GOLD"), mcx[0])
         mcx_expiry_for_js = g["expiry"]
-        mcx_tile = (
-            f'<div class="rtile" data-mk="mcx-gold">'
-            f'<div class="k">MCX Gold Futures</div>'
-            f'<div class="v" data-mk-v>{inr(g["ltp"])}</div>'
-            f'<div class="u">per 10g (995) · {g["expiry"]} · '
-            f'<span data-mk-u-pct>{g["pchg"]:+.2f}%</span></div>'
-            f'<div class="rtile-d flat" data-mk-d>± ₹0</div></div>')
 
     # ----------------------------------------- AKGSMA (South India benchmark)
     akgsma = fetch_akgsma()
-    akgsma_tile = ""
     if akgsma:
         ak24, ak22, ak18 = akgsma
-        akgsma_tile = (
-            f'<div class="rtile" data-mk="akgsma-24k">'
-            f'<div class="k">AKGSMA · South India 24K</div>'
-            f'<div class="v" data-mk-v>{inr(ak24)}</div>'
-            f'<div class="u">per gram · 22K <span data-mk-u2>{inr(ak22)}</span></div>'
-            f'<div class="rtile-d flat" data-mk-d>± ₹0</div></div>')
 
     # --------------------------------------------------------------- IBJA
     ibja = fetch_ibja()
     if ibja:
         r999, r916 = ibja
         premium_med = (median24 / r999 - 1) * 100
-        ibja_tiles = f'''
-<section class="ibja-ref" aria-labelledby="ibjarefh">
-  <p class="eyebrow">Bullion, Futures &amp; Regional Reference</p>
-  <h2 id="ibjarefh">IBJA &amp; AKGSMA Gold Rate Today</h2>
-  <p class="hint">The India Bullion &amp; Jewellers Association 24K benchmark
-  (national) and the AKGSMA South-India association rate, pre-GST, alongside
-  the exchange-traded gold futures quote.</p>
-  <div class="ref-tiles">
-    <div class="rtile" data-mk="ibja-999">
-      <div class="k">IBJA 999 Fine · 24K</div>
-      <div class="v" data-mk-v>{inr(r999)}</div>
-      <div class="u">per gram, pre-GST</div>
-      <div class="rtile-d flat" data-mk-d>± ₹0</div></div>
-    {akgsma_tile}
-    {mcx_tile}
-    <div class="rtile prem" data-mk="jeweller-premium">
-      <div class="k">Jeweller premium</div>
-      <div class="v" data-mk-v>{premium_med:+.1f}%</div>
-      <div class="u">median vs bullion, today</div>
-      <div class="rtile-d flat" data-mk-d>± 0.00pp</div></div>
-  </div>
-</section>'''
         # Premium-over-bullion bars: IBJA 999 is the zero baseline.
         prem = []
         for r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):
@@ -1589,19 +1655,6 @@ def main():
                 f'<span class="pbar-track"><span class="{cls}" '
                 f'style="width:{width:.1f}%"></span></span>'
                 f'<span class="pbar-val">{p:+.1f}%</span></div>')
-        bars = "\n".join(bar_rows)
-        ibja_section = f'''
-<section aria-labelledby="ibjah">
-  <p class="eyebrow">Bullion vs Board</p>
-  <h2 id="ibjah">Jeweller Premium Over the IBJA Rate</h2>
-  <p class="hint">IBJA's 24K bullion reference today is
-  <strong>{inr(r999)}/g</strong> (999), pre-GST. Each bar is a brand's
-  premium (or discount) per gram of pure gold versus bullion, smallest
-  first. Hover a bar for the rupee difference.</p>
-  <div class="chartcard pbar-card">
-{bars}
-  </div>
-</section>'''
         ibja_faq = (
             f"The IBJA (India Bullion and Jewellers Association) 24K reference "
             f"rate today is {inr(r999)} per gram for 999 gold, before GST. "
@@ -1609,10 +1662,6 @@ def main():
             "bullion reference today; the gap reflects each brand's sourcing "
             "and hallmarking premium.")
     else:
-        ibja_section = ""
-        ibja_tiles = (f'<section class="ibja-ref"><p class="eyebrow">Reference'
-                      f'</p><div class="ref-tiles">{akgsma_tile}{mcx_tile}</div>'
-                      f'</section>') if (mcx_tile or akgsma_tile) else ""
         ibja_faq = ("The IBJA (India Bullion and Jewellers Association) "
                     "publishes India's twice-daily bullion reference rate. "
                     "Jeweller board rates typically sit slightly above it, "
@@ -1657,10 +1706,6 @@ def main():
             f'<td class="num col-18" data-v="{lad["18K"]:.2f}">{inr(lad["18K"])}</td>'
             f'<td class="{dcls} col-delta" data-v="{ddiff:.2f}">{dtxt}</td></tr>')
 
-    calc_brands = [{"name": "Market median", "r24": round(median24, 2)}] + [
-        {"name": r["brands"]["name"],
-         "r24": round(r["canonical_24k_pre_gst"], 2)}
-        for r in sorted(live, key=lambda x: x["brands"]["name"])]
 
     # ------------------------------------------------------------- JSON-LD
     faq = [
@@ -1740,7 +1785,7 @@ def main():
                         "bullion reference and MCX gold futures.",
          "dateModified": now_ist.isoformat(),
          "datePublished": "2026-07-20", "url": SITE_URL,
-         "license": f"{SITE_URL}/compare#terms",
+         "license": f"{SITE_URL}/terms",
          "isAccessibleForFree": True,
          "keywords": ["gold rate", "gold rate today", "24 carat gold rate",
                       "22K gold rate", "gold price India", "IBJA gold rate",
@@ -1762,79 +1807,8 @@ def main():
                         for q, a in faq]},
     ])
 
-    faq_html = "\n".join(
-        f'<details class="faq"><summary>{q}</summary><p>{a}</p></details>'
-        for q, a in faq)
 
-    low_dom = (lowest["brands"].get("domain") or "") \
-        .replace("https://", "").replace("http://", "").split("/")[0]
-    low_logo = (f' <img src="https://www.google.com/s2/favicons?domain='
-                f'{low_dom}&amp;sz=64" alt="" loading="lazy" '
-                f'onerror="this.style.display=\'none\'">') if low_dom else ""
 
-    nb = str(len(live))
-    seo_content = f"""<section class="seo" aria-labelledby="abouth">
-  <p class="eyebrow">About the Tool</p>
-  <details class="seofold">
-  <summary><h2 id="abouth">Gold Rate Today in India, Compared Every Day</h2></summary>
-
-  <p>Checking the <strong>gold rate today</strong> before you buy can save you
-  thousands of rupees on a single piece of jewellery. MyGoldRates.com is India's
-  first dedicated <strong>gold rate</strong> comparison platform, built to place
-  the <strong>today gold rate</strong> from {nb} of the country's most recognised
-  jewellers side by side on one clean page, refreshed every single day. Instead
-  of opening a dozen websites or walking store to store, you see the whole market
-  at a glance and instantly spot which jeweller is offering the best value.</p>
-
-  <p>Gold is quoted per gram, but the rate you actually pay is rarely identical
-  at every store. Two jewellers can advertise the same metal on the same morning
-  yet differ by &#8377;50 to &#8377;150 per gram once their margins are added,
-  and over a 20-gram purchase that gap alone runs into thousands. By comparing
-  the <strong>gold rate</strong> across brands, and against the official IBJA
-  bullion benchmark, this tool shows exactly how much premium each jeweller
-  charges over pure bullion, so nothing stays hidden.</p>
-
-  <h3>24 carat and 22K gold rate today</h3>
-  <p>The <strong>24 carat gold rate today</strong> reflects the purest,
-  investment-grade gold, 99.9% fine and also written as 999, and is the figure
-  most buyers and investors track. Coins, bars and digital gold are usually
-  priced off this 24K rate. The <strong>gold rate today 22k</strong> (916 purity)
-  is what the vast majority of Indian jewellery is crafted from, because pure
-  gold is too soft to hold intricate designs. We publish 24K, 22K and 18K rates
-  together so you can compare like for like, whether you are buying an investment
-  coin or a bridal set.</p>
-
-  <h3>Gold rate today in Hyderabad, Chennai, Pune and Mumbai</h3>
-  <p>Retail gold prices across India tend to move together, so the
-  <strong>gold rate today in Hyderabad</strong>, the
-  <strong>gold rate today in Chennai</strong>, the
-  <strong>gold rate today in Pune</strong> and the
-  <strong>gold rate today in Mumbai</strong> usually sit within a narrow band of
-  one another. Most national jewellery chains quote a single, uniform price
-  across all their outlets, which means the brand rates listed here apply whether
-  you are shopping in Hyderabad, Chennai, Pune, Mumbai or any other major city.
-  Local taxes and small city-level adjustments can add minor differences, but the
-  underlying <strong>today gold rate</strong> you see on this page is an accurate
-  reference wherever you are in India.</p>
-
-  <h3>How to use MyGoldRates.com</h3>
-  <p>Start with the comparison board to see the <strong>gold rate today</strong>
-  ranked from lowest to highest, then use the built-in calculator to estimate the
-  exact cost of your gold by weight, purity and brand, with or without 3% GST.
-  Check the IBJA premium section to understand how much each jeweller adds over
-  the bullion benchmark, and subscribe to free daily alerts to get the morning's
-  comparison delivered straight to your inbox. Every rate is shown per gram,
-  before GST and before making charges, so every brand is measured on the same
-  honest basis.</p>
-
-  <p>Because the numbers are updated daily and compiled directly from each
-  brand's own published prices, you are always looking at a current, real-world
-  snapshot rather than a stale estimate. Whether you are planning a wedding
-  purchase, buying a gift, or simply tracking the <strong>gold rate</strong> as an
-  investor, MyGoldRates.com gives you a clear, up-to-date and unbiased view of
-  what India's leading jewellers are charging today, all in one place.</p>
-  </details>
-</section>"""
 
     # ------------------------------------------------- markets side drawer
     since = (datetime.now(timezone.utc).date() - timedelta(days=120)).isoformat()
@@ -1862,19 +1836,9 @@ def main():
                 f'<tr><td>{nm}<span class="mex">expiry {c["expiry"]}</span></td>'
                 f'<td>{inr(c["ltp"])}</td>'
                 f'<td class="{cls}">{c["pchg"]:+.2f}%</td></tr>')
-        mcx_block = f'''<h3>MCX Gold Futures</h3>
-  <p class="dnote">Exchange-traded gold futures, quoted per 10 g of 995 fine
-  gold. Indicative, delayed quotes.</p>
-  <table class="dtable"><thead><tr><th>Contract</th><th>Price /10g</th>
-  <th>&Delta; day</th></tr></thead><tbody>{mcx_rows}</tbody></table>'''
     else:
-        mcx_block = ('<h3>MCX Gold Futures</h3><p class="dnote">The futures '
-                     'feed is unavailable right now - check back later '
-                     'today.</p>')
+        pass
 
-    hist_table = "".join(
-        f'<tr><td>{datetime.fromisoformat(d).strftime("%d %b %Y")}</td>'
-        f'<td>{inr(v)}</td></tr>' for d, v in reversed(trend[-10:]))
 
     # ---------------------------------------- Global Market (spot + FX)
     # Emits four tiles for the Market Pulse strip in the drawer: gold spot
@@ -1917,29 +1881,16 @@ def main():
             f'<div class="u">per kg &middot; spot + India premium</div>'
             f'<div class="rtile-d flat" data-mk-d>± &#8377;0</div></div>')
     if global_tiles:
-        global_market_block = (
-            '<section class="ibja-ref" aria-labelledby="gmh">'
-            '<p class="eyebrow">International Spot &amp; FX</p>'
-            '<h2 id="gmh">Global Market</h2>'
-            '<p class="hint">International spot gold and silver alongside the '
-            'USD/INR reference. The Silver 999 INR figure is derived from XAG '
-            'spot, FX and India duty premium.</p>'
-            f'<div class="ref-tiles">{"".join(global_tiles)}</div>'
-            '</section>')
+        pass
     else:
-        global_market_block = ""
+        pass
 
     # ---------------------------------------- Bullion News (gold + silver)
     bullion_items = fetch_bullion_news()
     if bullion_items:
-        bnews_cards = "".join(news_card(n) for n in bullion_items[:6])
-        bullion_news_block = (
-            '<h3>Bullion News</h3>'
-            '<p class="dnote">Gold, silver and bullion headlines refreshed '
-            'through the day from India news sources.</p>'
-            f'<div class="newscards">{bnews_cards}</div>')
+        pass
     else:
-        bullion_news_block = ""
+        pass
 
     # ---- Live-refresh anchors ---------------------------------------------
     # Every 60s the browser re-fetches XAU + XAG + USD/INR + MCX Gold Futures
@@ -1981,609 +1932,10 @@ def main():
         mk_anchors["median24"] = float(median24)
     except Exception:
         pass
-    mk_anchors_json = json.dumps(mk_anchors)
 
-    market_live_script = f'''
-<script>
-(function(){{
-  var A = window.__MK_INIT__ = {mk_anchors_json};
-  var prev = {{}};
-  function $(sel, root){{ return (root||document).querySelector(sel); }}
-  function fmtUSD(v, dec){{ dec = dec==null?2:dec;
-    return '$'+Number(v).toLocaleString('en-US',{{minimumFractionDigits:dec,maximumFractionDigits:dec}}); }}
-  function fmtINR(v, dec){{ dec = dec||0;
-    return '\\u20B9'+Number(v).toLocaleString('en-IN',{{minimumFractionDigits:dec,maximumFractionDigits:dec}}); }}
-  function fmtPct(v){{ return (v>=0?'+':'')+v.toFixed(1)+'%'; }}
-  function paintTile(key, val, unit, dec){{
-    var el = document.querySelector('[data-mk="'+key+'"]'); if(!el||val==null) return;
-    var vNode = el.querySelector('[data-mk-v]');
-    var dNode = el.querySelector('[data-mk-d]');
-    var fmt = unit==='USD' ? function(x){{return fmtUSD(x,dec);}}
-            : unit==='INR' ? function(x){{return fmtINR(x,dec);}}
-            : unit==='INR2' ? function(x){{return fmtINR(x,2);}}
-            : function(x){{return fmtPct(x);}};
-    if(vNode) vNode.textContent = fmt(val);
-    var p = prev[key];
-    if(dNode){{
-      if(p==null){{ dNode.className='rtile-d flat'; dNode.textContent='\\u2500 live'; }}
-      else {{
-        var d = val - p;
-        if(unit==='USD'){{
-          if(Math.abs(d)<0.005){{ dNode.className='rtile-d flat'; dNode.textContent='\\u00b1 $0.00'; }}
-          else {{ dNode.className='rtile-d '+(d<0?'dn':'up');
-            dNode.textContent = (d<0?'\\u25BC \\u2212':'\\u25B2 +')+'$'+Math.abs(d).toFixed(2); }}
-        }} else if(unit==='INR' || unit==='INR2'){{
-          var precise = unit==='INR2';
-          var eps = precise?0.005:0.5;
-          if(Math.abs(d)<eps){{ dNode.className='rtile-d flat'; dNode.textContent='\\u00b1 \\u20B90'; }}
-          else {{ dNode.className='rtile-d '+(d<0?'dn':'up');
-            var body = precise ? Math.abs(d).toFixed(2)
-                               : Math.round(Math.abs(d)).toLocaleString('en-IN');
-            dNode.textContent = (d<0?'\\u25BC \\u2212':'\\u25B2 +')+'\\u20B9'+body; }}
-        }} else {{ // PCT
-          if(Math.abs(d)<0.005){{ dNode.className='rtile-d flat'; dNode.textContent='\\u00b1 0.00pp'; }}
-          else {{ dNode.className='rtile-d '+(d<0?'dn':'up');
-            dNode.textContent = (d<0?'\\u25BC \\u2212':'\\u25B2 +')+Math.abs(d).toFixed(2)+'pp'; }}
-        }}
-        el.classList.remove('pulse-up','pulse-dn');
-        void el.offsetWidth;
-        if(Math.abs(d)>0) el.classList.add(d<0?'pulse-dn':'pulse-up');
-        setTimeout(function(){{ el.classList.remove('pulse-up','pulse-dn'); }}, 900);
-      }}
-    }}
-    prev[key] = val;
-  }}
-  function setStatus(state, note){{
-    var badge = document.getElementById('mkLiveBadge');
-    var noteEl = document.getElementById('mkLiveNote');
-    if(badge){{
-      badge.style.color = state==='ok' ? '#5BBB93' : state==='warn' ? '#D9A441' : '#C9524B';
-      badge.style.background = state==='ok' ? 'rgba(30,92,70,.28)' : state==='warn' ? 'rgba(153,110,40,.24)' : 'rgba(120,40,40,.24)';
-      badge.style.borderColor = state==='ok' ? 'rgba(91,187,147,.45)' : state==='warn' ? 'rgba(217,164,65,.45)' : 'rgba(201,82,75,.45)';
-      var dot = badge.querySelector('.live-dot');
-      if(dot){{
-        dot.style.background = state==='ok' ? '#5BBB93' : state==='warn' ? '#D9A441' : '#C9524B';
-        dot.style.boxShadow = '0 0 8px '+(state==='ok'?'#5BBB93':state==='warn'?'#D9A441':'#C9524B');
-      }}
-      var txt = badge.querySelector('.live-txt');
-      if(txt) txt.textContent = state==='ok' ? 'LIVE' : state==='warn' ? 'DELAYED' : 'STALLED';
-    }}
-    if(noteEl) noteEl.textContent = note || '';
-  }}
-  function agoTxt(ms){{
-    var s = Math.round((Date.now()-ms)/1000);
-    if(s<5) return 'just now'; if(s<60) return s+'s ago';
-    return Math.round(s/60)+'m ago';
-  }}
-  var lastOkTs = null;
-  function repaintNote(){{
-    if(lastOkTs!=null){{
-      var el = document.getElementById('mkLiveNote');
-      if(el) el.textContent = 'Updated '+agoTxt(lastOkTs);
-    }}
-  }}
-  function fetchJson(url){{ return fetch(url).then(function(r){{ return r.json(); }}); }}
-  function tick(){{
-    var mcxUrl = A.mcxExpiry
-      ? 'https://priceapi.moneycontrol.com/pricefeed/mcx/commodityfuture/'+A.mcxSymbol+'?expiry='+A.mcxExpiry
-      : null;
-    var jobs = [
-      fetchJson('https://api.gold-api.com/price/XAU').catch(function(){{return null;}}),
-      fetchJson('https://api.gold-api.com/price/XAG').catch(function(){{return null;}}),
-      fetchJson('https://open.er-api.com/v6/latest/USD').catch(function(){{return null;}}),
-      mcxUrl ? fetchJson(mcxUrl).catch(function(){{return null;}}) : Promise.resolve(null),
-    ];
-    Promise.all(jobs).then(function(res){{
-      var gJ=res[0], sJ=res[1], fJ=res[2], mJ=res[3];
-      var goldUsd = gJ && +gJ.price;
-      var silverUsd = sJ && +sJ.price;
-      var usdinr = fJ && fJ.rates && +fJ.rates.INR;
-      var mcxLtp = mJ && mJ.data && +mJ.data.pricecurrent;
-      var mcxPct = mJ && mJ.data && +mJ.data.pricepercentchange;
-      var okCore = goldUsd && usdinr;
-      if(goldUsd) paintTile('gold-usd', goldUsd, 'USD', 2);
-      if(silverUsd) paintTile('silver-usd', silverUsd, 'USD', 2);
-      if(usdinr) paintTile('usdinr', usdinr, 'INR2');
-      if(silverUsd && usdinr) paintTile('silver-inr', silverUsd*A.ozPerKg*usdinr*(1+A.silverPremiumPct), 'INR', 0);
-      var spotInr = okCore ? (goldUsd/A.ozToG)*usdinr : null;
-      if(spotInr && A.ibjaFactor){{
-        var ibja = spotInr * A.ibjaFactor;
-        paintTile('ibja-999', ibja, 'INR', 0);
-        if(A.median24){{
-          paintTile('jeweller-premium', (A.median24/ibja - 1)*100, 'PCT');
-        }}
-      }}
-      if(spotInr && A.akgsmaFactor){{
-        paintTile('akgsma-24k', spotInr*A.akgsmaFactor, 'INR', 0);
-      }}
-      if(mcxLtp){{
-        paintTile('mcx-gold', mcxLtp, 'INR', 0);
-        // also refresh the pct next to the expiry
-        var mcxTile = document.querySelector('[data-mk="mcx-gold"]');
-        if(mcxTile){{
-          var u = mcxTile.querySelector('[data-mk-u-pct]');
-          if(u && !isNaN(mcxPct)) u.textContent = (mcxPct>=0?'+':'')+mcxPct.toFixed(2)+'%';
-        }}
-      }}
-      if(okCore){{ lastOkTs = Date.now(); setStatus('ok','Updated just now'); }}
-      else setStatus('warn','Feed partially available');
-    }}).catch(function(){{ setStatus('bad','Feed stalled'); }});
-  }}
-  // Only wire when the drawer is present.
-  if(!document.getElementById('mdrawer')) return;
-  // Live-tick every 3s so numbers visibly refresh — matches finmetpulse's
-  // felt cadence. Upstreams tick faster than that (Moneycontrol MCX
-  // pricefeed and gold-api both update every ~5-10s in practice), so a
-  // 3s poll actually surfaces changes; nothing is lost by not going
-  // faster. Pause when the tab is hidden so we don't drain battery or
-  // hammer the upstreams while the page is offscreen — a single tick
-  // fires on visibility restore so the display never shows stale
-  // values on tab-return. repaintNote runs 1s so the "Xs ago" counter
-  // and the mini pulse of the LIVE dot advance smoothly.
-  var LIVE_MS = 3000;
-  var pollTimer = null;
-  function startPolling(){{ if(!pollTimer){{ pollTimer = setInterval(tick, LIVE_MS); }} }}
-  function stopPolling(){{ if(pollTimer){{ clearInterval(pollTimer); pollTimer = null; }} }}
-  document.addEventListener('visibilitychange', function(){{
-    if(document.hidden){{ stopPolling(); }} else {{ tick(); startPolling(); }}
-  }});
-  tick();
-  startPolling();
-  setInterval(repaintNote, 1000);
 
-  // ─── Dealer rates, economic calendar, and 90-day OHLC ────────────────
-  // All three go through the mygoldrates-market-api Cloudflare Worker,
-  // which does the fetching + parsing + edge caching. See cf-worker-
-  // market/worker.js for the endpoints and their upstream sources.
-  var MK_API = 'https://mygoldrates-market-api.harshads-priority.workers.dev';
-  var metalTab = 'gold';
-  var vendorPrev = {{}};
-  function esc(s){{ return (s==null?'':String(s)).replace(/[<>&]/g,function(c){{return {{'<':'&lt;','>':'&gt;','&':'&amp;'}}[c]}}); }}
-  function fmtIn(n){{ if(n==null||!isFinite(n)) return '—'; return '\\u20B9'+Math.round(n).toLocaleString('en-IN'); }}
-  function paintVendors(vendors){{
-    var body = document.getElementById('vendorRows'); if(!body) return;
-    if(!vendors || !vendors.length){{
-      body.innerHTML = '<div class="v-empty">No dealer feeds responded this tick.</div>';
-      return;
-    }}
-    var rows = vendors.map(function(v){{
-      var slot = metalTab === 'silver' ? v.silver_999 : (v.gold_999 || v.gold_995);
-      var commodity = (slot && slot.commodity) || '—';
-      var price = slot && slot.price != null ? fmtIn(slot.price) : '—';
-      var dim = price === '—' ? ' dim' : '';
-      return '<div class="vrow" data-dealer="'+esc(v.dealer_id)+'">'+
-        '<div class="vrow-dealer">'+esc(v.dealer)+'</div>'+
-        '<div class="vrow-commodity">'+esc(commodity)+'</div>'+
-        '<div class="vrow-price'+dim+'">'+price+'</div>'+
-        '<div class="vrow-city">'+esc(v.city||'')+'</div></div>';
-    }}).join('');
-    body.innerHTML = rows;
-    vendors.forEach(function(v){{
-      var slot = metalTab === 'silver' ? v.silver_999 : (v.gold_999 || v.gold_995);
-      var now = slot && slot.price;
-      var prevKey = metalTab + ':' + v.dealer_id;
-      var prev = vendorPrev[prevKey];
-      if(prev != null && now != null && Math.abs(now - prev) >= 1){{
-        var row = body.querySelector('[data-dealer="'+v.dealer_id+'"]');
-        if(row){{
-          row.classList.remove('pulse-up','pulse-dn');
-          void row.offsetWidth;
-          row.classList.add(now > prev ? 'pulse-up' : 'pulse-dn');
-          setTimeout(function(){{ row.classList.remove('pulse-up','pulse-dn'); }}, 1200);
-        }}
-      }}
-      if(now != null) vendorPrev[prevKey] = now;
-    }});
-  }}
-  var lastVendors = [];
-  function fetchVendors(){{
-    fetch(MK_API + '/vendors').then(function(r){{return r.json()}}).then(function(j){{
-      lastVendors = (j && j.vendors) || [];
-      paintVendors(lastVendors);
-    }}).catch(function(){{ paintVendors([]); }});
-  }}
-  document.querySelectorAll('#mkMetalTabs .mk-metal-tab').forEach(function(btn){{
-    btn.addEventListener('click', function(){{
-      document.querySelectorAll('#mkMetalTabs .mk-metal-tab').forEach(function(b){{b.classList.remove('active')}});
-      btn.classList.add('active');
-      metalTab = btn.getAttribute('data-metal');
-      paintVendors(lastVendors);
-    }});
-  }});
 
-  // Economic calendar
-  function paintCalendar(events){{
-    var el = document.getElementById('calList'); if(!el) return;
-    if(!events || !events.length){{ el.innerHTML = '<div class="v-empty">No events this week.</div>'; return; }}
-    // Filter Medium + High only, USD country only, next 10.
-    var filtered = events.filter(function(e){{
-      var imp = (e.impact||'').toLowerCase();
-      var c = (e.country||'').toUpperCase();
-      return (imp==='medium'||imp==='high') && (c==='USD'||c==='US'||c==='');
-    }}).slice(0, 12);
-    if(!filtered.length){{ el.innerHTML = '<div class="v-empty">No Medium/High-impact USD events this week.</div>'; return; }}
-    el.innerHTML = filtered.map(function(e){{
-      var imp = (e.impact||'low').toLowerCase();
-      var d = e.date || ''; var t = e.time || '';
-      return '<div class="cal-item">'+
-        '<div class="cal-title">'+esc(e.title||'')+'</div>'+
-        '<div class="cal-time">'+esc(d)+' &middot; '+esc(t)+'</div>'+
-        '<span class="cal-impact '+imp+'">'+esc(e.impact||'')+'</span></div>';
-    }}).join('');
-  }}
-  function fetchCalendar(){{
-    fetch(MK_API + '/calendar').then(function(r){{return r.json()}}).then(function(j){{
-      paintCalendar((j && j.events) || []);
-    }}).catch(function(){{ paintCalendar([]); }});
-  }}
 
-  // 90-day OHLC sparkline (gold or silver via toggle)
-  var ohlcSym = 'XAU';
-  function paintOhlc(candles){{
-    var svg = document.getElementById('mkOhlcSvg'); if(!svg) return;
-    if(!candles || !candles.length){{ svg.innerHTML = ''; return; }}
-    var closes = candles.map(function(c){{ return c.c; }});
-    var lo = Math.min.apply(null, closes), hi = Math.max.apply(null, closes);
-    var w = 600, h = 120, pad = 4;
-    var pts = closes.map(function(v, i){{
-      var x = pad + (i / (closes.length - 1)) * (w - 2*pad);
-      var y = h - pad - ((v - lo) / (hi - lo || 1)) * (h - 2*pad);
-      return x.toFixed(1) + ',' + y.toFixed(1);
-    }}).join(' ');
-    var fillPts = pts + ' ' + (w-pad) + ',' + (h-pad) + ' ' + pad + ',' + (h-pad);
-    var gold = ohlcSym === 'XAG' ? '#C0C0C0' : '#E3BF63';
-    svg.innerHTML =
-      '<polygon fill="'+gold+'" fill-opacity="0.14" points="'+fillPts+'" />' +
-      '<polyline fill="none" stroke="'+gold+'" stroke-width="1.4" points="'+pts+'" />';
-    var fmt = function(v){{ return ohlcSym==='XAG' ? '$'+v.toFixed(2) : '$'+Math.round(v).toLocaleString('en-US'); }};
-    var loEl = document.getElementById('mkOhlcLo'); if(loEl) loEl.textContent = 'Low '+fmt(lo);
-    var hiEl = document.getElementById('mkOhlcHi'); if(hiEl) hiEl.textContent = 'High '+fmt(hi);
-  }}
-  function fetchOhlc(){{
-    fetch(MK_API + '/ohlc?sym=' + ohlcSym + '&range=90').then(function(r){{return r.json()}}).then(function(j){{
-      paintOhlc((j && j.candles) || []);
-    }}).catch(function(){{ paintOhlc([]); }});
-  }}
-  document.querySelectorAll('#mkOhlcTabs .mk-ohlc-tab').forEach(function(btn){{
-    btn.addEventListener('click', function(){{
-      document.querySelectorAll('#mkOhlcTabs .mk-ohlc-tab').forEach(function(b){{b.classList.remove('active')}});
-      btn.classList.add('active');
-      ohlcSym = btn.getAttribute('data-sym');
-      fetchOhlc();
-    }});
-  }});
-
-  // Kick off the worker-fed blocks. Vendors polls at 15s (worker edge-
-  // caches 60s so most hits are free). Calendar/OHLC are much less
-  // volatile, so poll once at open and every hour thereafter.
-  fetchVendors(); setInterval(function(){{ if(!document.hidden) fetchVendors(); }}, 15000);
-  fetchCalendar(); setInterval(function(){{ if(!document.hidden) fetchCalendar(); }}, 3600000);
-  fetchOhlc();     setInterval(function(){{ if(!document.hidden) fetchOhlc(); }}, 3600000);
-}})();
-</script>'''
-
-    drawer = f'''
-<button class="drawer-tab" id="drtab" aria-controls="mdrawer"
-  aria-expanded="false">Markets &#9670;</button>
-<div class="drawer-ov" id="drov" hidden></div>
-<aside class="drawer" id="mdrawer" aria-hidden="true"
-  aria-label="Gold markets panel">
-  <div class="drawer-head"><h2>Gold Markets</h2>
-    <button class="drawer-x" id="drx" aria-label="Close panel">&times;</button>
-  </div>
-  <div class="mk-live">
-    <span class="live-badge" id="mkLiveBadge">
-      <span class="live-dot"></span><span class="live-txt">LIVE</span></span>
-    <span class="mk-live-note" id="mkLiveNote">Connecting&hellip;</span>
-  </div>
-  {ibja_tiles}
-  {global_market_block}
-  {mcx_block}
-  <h3>Gold Rate Trend</h3>
-  <p class="dnote">Median 24K jeweller board rate per gram, pre-GST, by day.</p>
-  <div class="chartcard">{trend_chart(trend)}</div>
-  <table class="dtable"><thead><tr><th>Date</th><th>Median 24K /g</th></tr>
-  </thead><tbody>{hist_table}</tbody></table>
-  <h3>Spot vs Futures</h3>
-  <p class="dnote">MCX futures quote wholesale 995 gold for a future delivery
-  date, so they usually sit below retail jeweller board rates, which add
-  sourcing and hallmarking premiums. Watching both tells you where retail
-  prices are likely headed.</p>
-
-  <h3>Live Dealer Rates</h3>
-  <p class="dnote">Live prices from bullion trading dealers via the shared
-  VOTS broadcast stream. Switch between metals; the table refreshes every
-  ~15 seconds.</p>
-  <div class="mk-metal-tabs" id="mkMetalTabs">
-    <button class="mk-metal-tab active" data-metal="gold">Gold</button>
-    <button class="mk-metal-tab" data-metal="silver">Silver</button>
-  </div>
-  <div class="vtable" id="vendorTable">
-    <div class="vtable-hd"><div>Dealer</div><div>Commodity</div><div>Price</div><div>City</div></div>
-    <div id="vendorRows"><div class="v-empty">Loading dealer rates&hellip;</div></div>
-  </div>
-
-  <h3>Spot Gold (XAU/USD) &middot; Last 90 Sessions</h3>
-  <p class="dnote">International spot gold price, daily close. Fed live
-  through the market API from Yahoo Finance's GC=F chart.</p>
-  <div class="mk-ohlc"><svg id="mkOhlcSvg" viewBox="0 0 600 120" preserveAspectRatio="none"><path fill="none"/></svg>
-    <div class="mk-ohlc-meta"><span id="mkOhlcLo">&mdash;</span><span id="mkOhlcHi">&mdash;</span></div>
-  </div>
-  <div class="mk-ohlc-tabs" id="mkOhlcTabs">
-    <button class="mk-ohlc-tab active" data-sym="XAU">Gold</button>
-    <button class="mk-ohlc-tab" data-sym="XAG">Silver</button>
-  </div>
-
-  <h3>Economic Calendar &middot; USD, Medium &amp; High Impact</h3>
-  <p class="dnote">Upcoming US macro releases pulled live from ForexFactory
-  through the market API. High-impact prints (NFP, CPI, FOMC) typically move
-  XAU/USD within minutes.</p>
-  <div class="cal-list" id="calList"><div class="v-empty">Loading US calendar&hellip;</div></div>
-
-  {bullion_news_block}
-  {market_live_script}
-</aside>'''
-
-    calcdrawer = f'''
-<button class="drawer-tab drawer-tab2" id="cdtab" aria-controls="cdrawer"
-  aria-expanded="false">Calculators &#9672;</button>
-<div class="drawer-ov" id="cdov" hidden></div>
-<aside class="drawer" id="cdrawer" aria-hidden="true"
-  aria-label="Gold calculators panel">
-  <div class="drawer-head"><h2>Gold Calculators &#9672;</h2>
-    <button class="drawer-x" id="cdx" aria-label="Close panel">&times;</button>
-  </div>
-
-  <!-- Jewellery Final Bill Estimator -->
-  <div style="background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:20px">
-    <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
-      <div style="font-size:24px">&#129720;</div>
-      <div>
-        <h3 style="margin:0;font-size:16px">Jewellery Final Bill Estimator</h3>
-        <p class="dnote" style="margin:0">Calculate shop billing before you pay: Gold Weight + Making Charge % + 3% GST</p>
-      </div>
-    </div>
-
-    <div style="display:grid;gap:12px;margin:12px 0">
-      <div>
-        <label for="bc-karat" style="display:block;font:600 11px/1.4 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Select Karat / Purity</label>
-        <select id="bc-karat" style="width:100%;padding:8px 10px;font:600 14px 'IBM Plex Sans',sans-serif;background:var(--card);border:1px solid var(--line);border-radius:8px;color:var(--ink)">
-          <option value="22K" selected>22K Gold (Bridal &amp; Traditional)</option>
-          <option value="24K">24K Gold (999 Pure Coin/Bar)</option>
-          <option value="18K">18K Gold (Diamond &amp; Gemstone)</option>
-          <option value="14K">14K Gold (Daily Wear)</option>
-        </select>
-      </div>
-      <div>
-        <label for="bc-weight" style="display:block;font:600 11px/1.4 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Net Gold Weight (Grams)</label>
-        <input type="number" id="bc-weight" value="10" min="0.1" step="0.1" style="width:100%;padding:8px 10px;font:700 15px 'IBM Plex Mono',monospace;background:var(--card);border:1px solid var(--line);border-radius:8px;color:var(--ink)">
-      </div>
-      <div>
-        <label for="bc-making" style="display:block;font:600 11px/1.4 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Making Charge (%)</label>
-        <input type="number" id="bc-making" value="12" min="0" max="40" step="0.5" style="width:100%;padding:8px 10px;font:700 15px 'IBM Plex Mono',monospace;background:var(--card);border:1px solid var(--line);border-radius:8px;color:var(--ink)">
-      </div>
-    </div>
-
-    <div style="background:linear-gradient(150deg,#1A140A,#0C0904 60%,#1F180B);border:1px solid rgba(224,186,86,.4);border-radius:10px;padding:14px;color:#F0EAD8">
-      <div style="font:700 11px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#F4E3A6;margin-bottom:8px;border-bottom:1px solid rgba(224,186,86,.25);padding-bottom:6px">Itemized Billing Breakdown</div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12.5px;color:#C4B99A">
-        <span>1. Net Gold Cost (<span id="bb-wt-lbl">10g</span> @ <span id="bb-rate-lbl">&#8377;13,265/g</span>):</span>
-        <strong id="bb-gold-tot" style="font-family:'IBM Plex Mono',monospace;color:#FFFDF4">&#8377;1,32,650</strong>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12.5px;color:#C4B99A">
-        <span>2. Making Charges (<span id="bb-m-pct">12%</span>):</span>
-        <strong id="bb-making-tot" style="font-family:'IBM Plex Mono',monospace;color:#FFFDF4">&#8377;15,918</strong>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:12.5px;color:#C4B99A">
-        <span>3. GST (3% on Gold + Making):</span>
-        <strong id="bb-gst-tot" style="font-family:'IBM Plex Mono',monospace;color:#FFFDF4">&#8377;4,457</strong>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px dashed rgba(224,186,86,.3)">
-        <span style="font-size:13px;font-weight:600;color:#F4E3A6">Estimated Final Billed Amount:</span>
-        <strong id="bb-grand-tot" style="font-family:'IBM Plex Mono',monospace;font-size:19px;color:#F4E3A6">&#8377;1,53,025</strong>
-      </div>
-    </div>
-  </div>
-
-  <h3>Price Calculator</h3>
-  <p class="dnote">Weight, purity and brand - the price updates as you type.
-  Making charges vary by design and are not included.</p>
-  <div class="calc calc-drawer">
-    <div class="calc-fields">
-      <div class="field"><label for="c-w">Weight in grams</label>
-        <div class="quick-weights" role="group" aria-label="Quick weights">
-          <button type="button" class="qw-pill" data-w="1">1g</button>
-          <button type="button" class="qw-pill" data-w="8">8g (Sovereign)</button>
-          <button type="button" class="qw-pill active" data-w="10">10g</button>
-          <button type="button" class="qw-pill" data-w="50">50g</button>
-          <button type="button" class="qw-pill" data-w="100">100g</button>
-          <button type="button" class="qw-pill" data-w="11.66">1 Tola</button>
-        </div>
-        <input id="c-w" type="number" inputmode="decimal" min="0.1" step="0.1" value="10"></div>
-      <div class="field"><label id="c-p-label">Purity</label>
-        <div class="seg" role="group" aria-labelledby="c-p-label">
-          <button data-p="24K" aria-pressed="true">24K</button>
-          <button data-p="22K" aria-pressed="false">22K</button>
-          <button data-p="18K" aria-pressed="false">18K</button>
-          <button data-p="14K" aria-pressed="false">14K</button>
-        </div></div>
-      <div class="field"><label for="c-b">Brand rate</label>
-        <select id="c-b"></select></div>
-      <div class="field"><label id="c-g-label">GST</label>
-        <div class="seg" role="group" aria-labelledby="c-g-label">
-          <button data-g="0" aria-pressed="true">Excl. GST</button>
-          <button data-g="1" aria-pressed="false">Incl. 3% GST</button>
-        </div></div>
-    </div>
-    <div class="calc-out" aria-live="polite">
-      <div class="k" id="c-title">10 g &middot; 24K</div>
-      <div class="v" id="c-total">-</div>
-      <div class="sub" id="c-basis">-</div>
-      <div class="split">
-        <div><span>Rate per gram</span><span class="amt" id="c-rate">-</span></div>
-        <div><span>Gold value</span><span class="amt" id="c-gold">-</span></div>
-        <div><span>GST (3%)</span><span class="amt" id="c-gst">-</span></div>
-      </div>
-    </div>
-  </div>
-  <h3>Gold Calculator</h3>
-  <p class="dnote">Fix your budget and see how many grams you can take home
-  at each jeweller. Enter making charge from their quote &mdash; every jeweller
-  charges differently.</p>
-  <div class="calc calc-drawer">
-    <div class="calc-fields">
-      <div class="field"><label for="gc-b">Your budget (&#8377;)</label>
-        <div class="quick-weights" role="group" aria-label="Quick budgets">
-          <button type="button" class="qw-pill" data-gb="25000">&#8377;25k</button>
-          <button type="button" class="qw-pill" data-gb="50000">&#8377;50k</button>
-          <button type="button" class="qw-pill active" data-gb="100000">&#8377;1L</button>
-          <button type="button" class="qw-pill" data-gb="200000">&#8377;2L</button>
-          <button type="button" class="qw-pill" data-gb="500000">&#8377;5L</button>
-          <button type="button" class="qw-pill" data-gb="1000000">&#8377;10L</button>
-        </div>
-        <input id="gc-b" type="number" inputmode="numeric" min="1000" step="500" value="100000"></div>
-      <div class="field"><label id="gc-p-label">Purity</label>
-        <div class="seg" role="group" aria-labelledby="gc-p-label">
-          <button data-gp="24K" aria-pressed="true">24K</button>
-          <button data-gp="22K" aria-pressed="false">22K</button>
-          <button data-gp="18K" aria-pressed="false">18K</button>
-          <button data-gp="14K" aria-pressed="false">14K</button>
-        </div></div>
-      <div class="field"><label for="gc-brand">Brand rate</label>
-        <select id="gc-brand"></select></div>
-      <div class="field" id="gc-custom-row" hidden>
-        <label for="gc-custom">Your jeweller's <span id="gc-custom-k">24K</span> rate (&#8377;/g)</label>
-        <input id="gc-custom" type="number" inputmode="decimal" min="0" step="1" value="14000">
-        <div style="margin-top:6px;font-size:11px;color:#8E9A8C">Rate is treated as the price for your selected purity.</div>
-      </div>
-      <div class="field"><label for="gc-m">Making charge (%)</label>
-        <input id="gc-m" type="number" inputmode="decimal" min="0" max="60" step="0.5" value="18"></div>
-      <div class="field"><label id="gc-g-label">GST</label>
-        <div class="seg" role="group" aria-labelledby="gc-g-label">
-          <button data-gg="1" aria-pressed="true">Incl. 3% GST</button>
-          <button data-gg="0" aria-pressed="false">Excl. GST</button>
-        </div></div>
-    </div>
-    <div class="calc-out" aria-live="polite">
-      <div class="k" id="gc-title">&#8377;1,00,000 &middot; 24K</div>
-      <div class="v" id="gc-grams">-</div>
-      <div class="sub" id="gc-basis">-</div>
-      <div class="split">
-        <div><span>Rate per gram</span><span class="amt" id="gc-rate">-</span></div>
-        <div><span>Gold value</span><span class="amt" id="gc-gold">-</span></div>
-        <div><span>Making charge</span><span class="amt" id="gc-mc">-</span></div>
-        <div><span>GST</span><span class="amt" id="gc-gst">-</span></div>
-      </div>
-      <div style="margin-top:12px;padding-top:10px;border-top:1px dashed rgba(224,186,86,.2);font-size:12px;color:#8E9A8C;text-align:center">
-        <a href="{SITE_URL}/budget-gold-calculator" style="color:#E0BA56;text-decoration:none">Compare across every jeweller &rarr;</a>
-      </div>
-    </div>
-  </div>
-
-  <h3>More calculators</h3>
-  <a class="toolcard" href="{SITE_URL}/gold-loan-calculator"><b>Gold Loan
-    Calculator</b><span>Eligibility &amp; EMI</span></a>
-  <a class="toolcard" href="{SITE_URL}/gold-sip-calculator"><b>Gold SIP
-    Calculator</b><span>Future value &amp; grams</span></a>
-  <a class="toolcard" href="{SITE_URL}/making-charges-calculator"><b>Making
-    Charges</b><span>Final billed price with GST</span></a>
-</aside>'''
-
-    coindrawer = f'''
-<button class="drawer-tab drawer-tab3" id="coindtab" aria-controls="coindrawer"
-  aria-expanded="false">Gold Coins &#129689;</button>
-<div class="drawer-ov" id="coindov" hidden></div>
-<aside class="drawer" id="coindrawer" aria-hidden="true"
-  aria-label="Gold coins panel">
-  <div class="drawer-head"><h2>24K Minted Gold Coins &#129689;</h2>
-    <button class="drawer-x" id="coindx" aria-label="Close panel">&times;</button>
-  </div>
-  <p class="dnote">Compare 24K Swiss-Standard 999.9 &amp; 999 fine gold coins and bullion bars across certified refiners &amp; jewellers, with exact lowest making charges marked.</p>
-
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 16px">
-    <span style="font-size:11px;color:var(--ink-3);align-self:center">Weight:</span>
-    <button type="button" class="coin-pill active" data-wt="1" style="font:500 11px/1 'IBM Plex Mono',monospace;background:var(--gold);color:#0C0904;border:1px solid var(--gold);border-radius:999px;padding:5px 10px;cursor:pointer">1g</button>
-    <button type="button" class="coin-pill" data-wt="2" style="font:500 11px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer">2g</button>
-    <button type="button" class="coin-pill" data-wt="5" style="font:500 11px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer">5g</button>
-    <button type="button" class="coin-pill" data-wt="8" style="font:500 11px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer">8g</button>
-    <button type="button" class="coin-pill" data-wt="10" style="font:500 11px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer">10g</button>
-    <button type="button" class="coin-pill" data-wt="50" style="font:500 11px/1 'IBM Plex Mono',monospace;background:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer">50g</button>
-  </div>
-
-  <div style="display:grid;gap:14px">
-    <!-- MMTC-PAMP -->
-    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <strong style="font-size:14px">MMTC-PAMP 24K</strong>
-        <span style="font:700 10px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:2px 7px;border-radius:999px">999.9 Pure</span>
-      </div>
-      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 2.5% <span class="rank-badge rank-1" style="font-size:9px;padding:2px 5px">#1 LOWEST</span></div>
-      <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Swiss Assay Certification &amp; CertiPAMP Packaging</div>
-      <div id="cp-mmtc" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;—</div>
-      <a href="https://www.mmtcpamp.com/shop" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy MMTC-PAMP 24K &rarr;</a>
-    </div>
-
-    <!-- Kalyan Jewellers / Candere -->
-    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <strong style="font-size:14px">Kalyan Jewellers / Candere</strong>
-        <span style="font:700 10px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:2px 7px;border-radius:999px">999 Pure</span>
-      </div>
-      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 3.0% <span class="rank-badge rank-2" style="font-size:9px;padding:2px 5px">#2</span></div>
-      <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">BIS Hallmarked 999 Pure &amp; 100% Transparency</div>
-      <div id="cp-kalyan" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;—</div>
-      <a href="https://www.candere.com/gifts/gold-coins.html" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Kalyan 24K &rarr;</a>
-    </div>
-
-    <!-- Malabar Gold & Diamonds -->
-    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <strong style="font-size:14px">Malabar Gold &amp; Diamonds</strong>
-        <span style="font:700 10px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:2px 7px;border-radius:999px">999 Pure</span>
-      </div>
-      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 3.2% <span class="rank-badge rank-3" style="font-size:9px;padding:2px 5px">#3</span></div>
-      <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Tested Purity &amp; Free Transit Insurance Coverage</div>
-      <div id="cp-malabar" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;—</div>
-      <a href="https://www.malabargoldanddiamonds.com/in/pan-india/en/product-list.html?search=Gold%20Bars%20%26%20Coins" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Malabar 24K &rarr;</a>
-    </div>
-
-    <!-- Senco Gold -->
-    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <strong style="font-size:14px">Senco Gold &amp; Diamonds</strong>
-        <span style="font:700 10px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:2px 7px;border-radius:999px">999 Pure</span>
-      </div>
-      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 3.5%</div>
-      <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Traditional BIS Hallmarked &amp; Sealed Packaging</div>
-      <div id="cp-senco" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;—</div>
-      <a href="https://sencogoldanddiamonds.com/products/category/gold-coins" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Senco 24K &rarr;</a>
-    </div>
-
-    <!-- Joyalukkas -->
-    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <strong style="font-size:14px">Joyalukkas</strong>
-        <span style="font:700 10px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:2px 7px;border-radius:999px">999 Pure</span>
-      </div>
-      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 3.8%</div>
-      <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Assayer Certified 999 Pure &amp; Sealed Tamper-Proof</div>
-      <div id="cp-joyalukkas" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;—</div>
-      <a href="https://www.joyalukkas.in/search.html?query=gold+coin&amp;page=1" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Joyalukkas 24K &rarr;</a>
-    </div>
-
-    <!-- Tanishq -->
-    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <strong style="font-size:14px">Tanishq (Tata Product)</strong>
-        <span style="font:700 10px 'IBM Plex Mono',monospace;color:#5BBB93;background:rgba(30,92,70,.18);border:1px solid rgba(91,187,147,.35);padding:2px 7px;border-radius:999px">999 Pure</span>
-      </div>
-      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:4px">⚡ Lowest Making Charge: 4.0%</div>
-      <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">Tata Trust Stamp &amp; Buyback Guarantee</div>
-      <div id="cp-tanishq" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:6px">&#8377;—</div>
-      <a href="https://www.tanishq.co.in/search?search-button=&amp;q=gold+coins&amp;lang=en_IN" target="_blank" rel="noopener nofollow" class="btn btn-gold" style="display:block;text-align:center;font-size:11.5px;padding:7px 10px;margin-top:6px">Buy Tanishq 24K &rarr;</a>
-    </div>
-  </div>
-</aside>'''
 
     # Google sign-in: dormant until the GOOGLE_CLIENT_ID secret is set.
     gclient = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
@@ -2610,11 +1962,14 @@ def main():
                   updated_epoch=updated_epoch,
                   base_css=BASE_CSS, ads_head=ads_head,
                   gclient=gclient, gsi=gsi, google_btn="",
-                  sig_ver=sig_ver, nav=NAV,
+                  sig_ver=sig_ver,
                   supabase_url=supabase_url, anon_key=anon_key,
                   gate_css=GATE_CSS if gclient else "",
                   gate_html=gate_html, gate_js=gate_js,
-                  analytics_js=analytics_js)
+                  analytics_js=analytics_js,
+                  nd_css=ND_CSS, nd_fonts=ND_FONTS,
+                  nd_header=nd_header_html(),
+                  nd_footer=nd_footer_html(now_ist.year))
     def city_cloud(current_slug=None):
         parts = []
         for nm in LOCATIONS:
@@ -2789,36 +2144,11 @@ def main():
             f'price.</p>{links}</section>')
 
 
-    tvars = dict(
-        n_brands=str(len(live)),
-        med24=inr(med["24K"]), med22=inr(med["22K"]), med18=inr(med["18K"]),
-        low24=inr(ladder(lowest["canonical_24k_pre_gst"])["24K"]),
-        low22=inr(ladder(lowest["canonical_24k_pre_gst"])["22K"]),
-        low18=inr(ladder(lowest["canonical_24k_pre_gst"])["18K"]),
-        low24_raw=f"{ladder(lowest['canonical_24k_pre_gst'])['24K']:,.0f}",
-        low24_num=f"{ladder(lowest['canonical_24k_pre_gst'])['24K']:.0f}",
-        low_brand=lowest["brands"]["name"],
-        # Per-gram 24K spread between the priciest and cheapest brand on the
-        # board today. Powers the "Save up to Rs N/g" tag in the hero, which
-        # used to be a hard-coded 128 - meaningless when the actual gap moved.
-        spread24=inr(round(ladder(highest['canonical_24k_pre_gst'])['24K']
-                            - ladder(lowest['canonical_24k_pre_gst'])['24K'])),
-        high_brand=highest["brands"]["name"],
-        low_logo=low_logo,
-        ibja_tiles=ibja_tiles, ibja_section=ibja_section, ads_unit=ads_unit,
-        calc_brands=json.dumps(calc_brands),
-        rows="\n".join(body_rows), faq=('<section aria-labelledby="faqh">\n  <p class="eyebrow">Know Your Gold</p>\n  <h2 id="faqh">Gold Rate FAQs</h2>\n' + faq_html + '\n</section>'), jsonld=jsonld,
-        seo_content=seo_content, drawer=drawer, calcdrawer=calcdrawer,
-        coindrawer=coindrawer, news_home=news_home, **common)
     # As of the Sep-2026 IA swap, the app-test Market Pulse HTML is written
     # to docs/index.html by the /pulse builder further down. What used to be
     # the homepage (this SEO-rich comparison page with the Dataset+FAQPage
     # graph and 14+ jeweller cards) is preserved as /compare so nothing
     # loses its content or its schema.org anchor.
-    html = TEMPLATE.substitute(
-        where="in India", where_note="", local_intro="",
-        canonical_url=f"{SITE_URL}/compare",
-        city_links=city_cloud(), **tvars)
     inquiry = INQUIRY_TEMPLATE.substitute(**common)
     unsub = UNSUB_TEMPLATE.substitute(**common)
 
@@ -2826,8 +2156,12 @@ def main():
     build_og_image()
     build_favicons()
     build_email_logo()
-    with open("docs/compare.html", "w", encoding="utf-8") as f:
-        f.write(html)
+    # /compare was the old design's comparison page. The homepage is that
+    # comparison now - the full jeweller board, the FAQ with its FAQPage
+    # markup, the city links - so /compare 301s to / (see _redirects) instead
+    # of keeping a second copy of the homepage in the old design.
+    if os.path.exists("docs/compare.html"):
+        os.remove("docs/compare.html")
     with open("docs/signup.js", "w", encoding="utf-8") as f:
         # Click tracking rides along in the deferred bundle; it has no
         # urgency. The pageview does not - it is inline in the head.
@@ -2929,45 +2263,6 @@ def main():
     # page) and the national Dataset, and gets a breadcrumb of its own.
     _ld = [x for x in json.loads(jsonld)
            if x.get("@type") not in ("FAQPage", "Dataset", "BreadcrumbList")]
-    def city_jsonld(nm, sl):
-        return json.dumps(_ld + [{
-            "@context": "https://schema.org", "@type": "BreadcrumbList",
-            "itemListElement": [
-                {"@type": "ListItem", "position": 1, "name": "Home",
-                 "item": f"{SITE_URL}/"},
-                {"@type": "ListItem", "position": 2,
-                 "name": f"Gold Rate Today in {nm}",
-                 "item": f"{SITE_URL}/gold-rate-today-in-{sl}"}]}],
-            ensure_ascii=False)
-    city_more = (
-        '<section class="seo"><h2>More about today&rsquo;s gold rate</h2>'
-        f'<p>For every jeweller side by side across India, with the bullion '
-        f'reference and answers to common questions, see the '
-        f'<a href="{SITE_URL}/compare">full gold rate comparison</a>. To work '
-        f'out a bill, use the <a href="{SITE_URL}/making-charges-calculator">'
-        f'making charges calculator</a> or the other '
-        f'<a href="{SITE_URL}/calculators">gold calculators</a>; to choose a '
-        f'purity, read <a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K '
-        f'gold</a>.</p></section>')
-    def write_classic_city_pages():
-        """The old-design city pages. Only used if pulse_app.html is
-        missing; normally city pages are built from the new design
-        further down (see write_city_pages)."""
-        for nm in LOCATIONS:
-            sl = loc_slug(nm)
-            note = (f" Rates shown apply across {nm} - national jewellery chains "
-                    f"quote the same board price in {nm} as everywhere else in "
-                    "India.")
-            page = TEMPLATE.substitute(
-                where=f"in {nm}", where_note=note, local_intro=local_intro(nm),
-                canonical_url=f"{SITE_URL}/gold-rate-today-in-{sl}",
-                city_links=city_cloud(sl),
-                **{**tvars, "faq": "", "news_home": "", "seo_content": city_more,
-                   "jsonld": city_jsonld(nm, sl)})
-            with open(f"docs/gold-rate-today-in-{sl}.html", "w",
-                      encoding="utf-8") as f:
-                f.write(page)
-        print(f"city pages: wrote {len(LOCATIONS)} (classic fallback)")
 
     # The Jewellers Digest landing page. Its own module: it has its own
     # design, its own signup form, and its own degraded state when the
@@ -3914,25 +3209,7 @@ def main():
         # navigation from the homepage. On phones the desktop layout and its
         # footer are display:none, and Google indexes the phone version, so
         # the same block goes at the foot of the default phone view too.
-        _states = [p for p in LOCATIONS if PLACE_STATE.get(p) == p]
-        _site_links = (
-            '<nav class="sl" aria-label="Site">'
-            f'<a href="{SITE_URL}/compare">Compare jewellers</a>'
-            f'<a href="{SITE_URL}/calculators">Gold calculators</a>'
-            f'<a href="{SITE_URL}/making-charges-comparison">Making charges</a>'
-            f'<a href="{SITE_URL}/news">Gold news</a>'
-            f'<a href="{SITE_URL}/jewellers-digest">Jewellers Digest</a>'
-            f'<a href="{SITE_URL}/inquiry">Daily rate alerts</a>'
-            '<h3>Gold rate by state</h3>'
-            + "".join(f'<a href="{SITE_URL}/gold-rate-today-in-{loc_slug(p)}">{p}</a>'
-                      for p in _states)
-            + '<h3>About</h3>'
-            f'<a href="{SITE_URL}/about">About us</a>'
-            f'<a href="{SITE_URL}/methodology">How we collect rates</a>'
-            f'<a href="{SITE_URL}/contact">Contact</a>'
-            f'<a href="{SITE_URL}/privacy">Privacy Policy</a>'
-            f'<a href="{SITE_URL}/terms">Terms</a>'
-            '</nav>')
+        _site_links = site_links_html()
         for _mark in ("<!--SITE_LINKS_APP-->", "<!--SITE_LINKS_SITE-->"):
             if _mark not in pulse_html:
                 raise RuntimeError(f"pulse_app.html: {_mark} missing - the "
@@ -3971,7 +3248,6 @@ def main():
                      "dateModified": now_ist.isoformat(),
                      "primaryImageOfPage": f"{SITE_URL}/og.png",
                      "significantLink": [
-                         f"{SITE_URL}/compare",
                          f"{SITE_URL}/news",
                          f"{SITE_URL}/calculators"]},
                     {"@type": "BreadcrumbList",
@@ -4070,17 +3346,67 @@ def main():
                 pass  # not empty, leave it
             print("homepage: removed old docs/pulse/index.html")
     except FileNotFoundError:
-        print("homepage: pulse_app.html not found in repo root - falling "
-              "back to TEMPLATE-generated docs/index.html")
-        # Fall-back: re-emit the classic homepage at / so the site never
-        # ships broken. Overwrite docs/index.html (compare.html already
-        # has the same content and stays).
-        fallback_html = TEMPLATE.substitute(
-            where="in India", where_note="", local_intro="",
-            canonical_url=f"{SITE_URL}/", city_links=city_cloud(), **tvars)
-        with open("docs/index.html", "w", encoding="utf-8") as f:
-            f.write(fallback_html)
-        write_classic_city_pages()
+        # No fallback. There used to be one that re-emitted the old design's
+        # homepage and city pages when pulse_app.html was missing, which is
+        # exactly how an old page reaches production unnoticed. A missing
+        # template is a broken build and should look like one.
+        raise RuntimeError("pulse_app.html not found - refusing to build the "
+                           "site without the new design")
+
+    # ---- no page left in the old design ----
+    # Pages the build writes today come out in the new design. But docs/ is
+    # deployed wholesale and nothing prunes it, so pages written once and
+    # never again - methodology (written by hand in August) and every daily
+    # report older than today - would keep the old design forever. This
+    # converts any such page: it keeps its title, description, robots,
+    # canonical, structured data and article, and re-renders it in the new
+    # design. A page in the old design that cannot be converted fails the
+    # build rather than shipping.
+    def convert_legacy_pages():
+        skip = {"docs/analytics.html", "docs/jewellers-digest.html"}
+        converted, stuck = 0, []
+        for root, _, files in os.walk("docs"):
+            for fn in files:
+                if not fn.endswith(".html"):
+                    continue
+                path = os.path.join(root, fn)
+                if path in skip:
+                    continue
+                with open(path, encoding="utf-8") as fh:
+                    old = fh.read()
+                if 'class="nd-nav"' in old or 'id="v-rates"' in old:
+                    continue
+                def meta(pat, default=""):
+                    m = re.search(pat, old, re.S)
+                    return m.group(1) if m else default
+                art = re.search(r'<article class="page">(.*)</article>', old, re.S)
+                title = meta(r"<title>(.*?)</title>")
+                canonical = meta(r'<link rel="canonical" href="([^"]*)"')
+                if not (art and title and canonical):
+                    stuck.append(path)
+                    continue
+                tail = old[art.end():]
+                extra = "".join(
+                    sc for sc in re.findall(r"<script\b[^>]*>.*?</script>", tail, re.S)
+                    if "GR_SB_URL" not in sc and "signup.js" not in sc)
+                page = CONTENT_TEMPLATE.substitute(
+                    title=title,
+                    desc=meta(r'<meta name="description" content="([^"]*)"'),
+                    canonical=canonical,
+                    robots=meta(r'<meta name="robots" content="([^"]*)"',
+                                "index, follow, max-image-preview:large"),
+                    jsonld_block="".join(re.findall(
+                        r'<script type="application/ld\+json">.*?</script>', old, re.S)),
+                    body=art.group(1), extra_js=extra, **common)
+                with open(path, "w", encoding="utf-8") as fh:
+                    fh.write(page)
+                converted += 1
+        if stuck:
+            raise RuntimeError("pages still in the old design that could not be "
+                               "converted: " + ", ".join(sorted(stuck)[:20]))
+        print(f"legacy pages: converted {converted} to the new design")
+
+    convert_legacy_pages()
 
     with open("docs/robots.txt", "w", encoding="utf-8") as f:
         # Explicitly welcome AI/LLM crawlers so generative engines (ChatGPT,
@@ -4223,7 +3549,6 @@ def main():
     # its Dataset/FAQPage schema anchor.
     main_urls = (
         _url("", lastmod_full, "hourly", 1.0)
-        + _url("compare", lastmod_full, "hourly", 0.9)
         + _url("news", lastmod_full, "hourly", 0.85)
         + _url("inquiry", lastmod_full, "monthly", 0.6)
         # The paid product's landing page. Weekly rather than monthly: the
@@ -4365,6 +3690,11 @@ def main():
                 "since Sep 2026).\n"
                 "/pulse    /    301\n"
                 "/pulse/   /    301\n"
+                "\n# /compare was the old design's comparison page; the homepage\n"
+                "# is that comparison now.\n"
+                "/compare        /    301\n"
+                "/compare/       /    301\n"
+                "/compare.html   /    301\n"
                 "\n"
                 "# The homepage once linked city pages as href=\"city/<name>/\",\n"
                 "# which was never a real path. Pages answered 200 with\n"
@@ -4381,7 +3711,7 @@ def main():
     with open(f"docs/{INDEXNOW_KEY}.txt", "w", encoding="utf-8") as f:
         f.write(INDEXNOW_KEY)
     try:
-        fresh_now = [f"{SITE_URL}/", f"{SITE_URL}/compare",
+        fresh_now = [f"{SITE_URL}/",
                      f"{SITE_URL}/news"]
         fresh_now += [f"{SITE_URL}/{loc}" for loc, dd, _ in daily_meta
                       if dd == now_ist.date()]
@@ -4448,7 +3778,7 @@ def main():
                       "published prices, and can change during the day. "
                       "Confirm with the jeweller before purchase. Not "
                       "investment advice.",
-        "license": f"{SITE_URL}/compare#terms",
+        "license": f"{SITE_URL}/terms",
     }
     with open("docs/rates.json", "w", encoding="utf-8") as f:
         json.dump(rates_feed, f, ensure_ascii=False, indent=2)
@@ -4480,7 +3810,7 @@ per gram at {lowest['brands']['name']}
 futures, IBJA reference, vendor rates, 90-day OHLC, economic calendar): \
 {SITE_URL}/
 - Detailed jeweller comparison (14+ brands, per-gram 24K/22K/18K, \
-lowest-first, GST toggle, FAQ): {SITE_URL}/compare
+lowest-first, GST toggle, FAQ): {SITE_URL}/
 - Market news & daily recap: {SITE_URL}/news
 - Machine-readable JSON feed: {SITE_URL}/rates.json
 - Daily email alerts: {SITE_URL}/inquiry
@@ -4529,58 +3859,6 @@ jeweller before purchase. This is not investment advice.
 # Slide-out navigation drawer, shared across every page. Absolute links so it
 # works from nested paths (e.g. /news/recap/...). Self-contained (own inline
 # script); the hamburger button is added to each header.
-NAV = f"""<div class="nav-ov" id="nav-ov" hidden></div>
-<aside class="navdrawer" id="navdrawer" aria-hidden="true" aria-label="Menu">
-  <div class="nav-head"><strong>My<b>Gold</b>Rates</strong>
-    <button class="nav-x" id="nav-x" aria-label="Close menu">&times;</button>
-  </div>
-  <nav>
-    <p class="nav-grp">Gold Rates</p>
-    <a href="{SITE_URL}/">Live Market Pulse (Home)</a>
-    <a href="{SITE_URL}/compare">Detailed Jeweller Comparison</a>
-    <a href="{SITE_URL}/compare#cityh">Gold Rate by City &amp; State</a>
-    <a href="{SITE_URL}/calculators">Price Calculator</a>
-    <p class="nav-grp">Calculators</p>
-    <a href="{SITE_URL}/calculators">All Calculators</a>
-    <a href="{SITE_URL}/gold-loan-calculator">Gold Loan Calculator</a>
-    <a href="{SITE_URL}/gold-sip-calculator">Gold SIP Calculator</a>
-    <a href="{SITE_URL}/making-charges-calculator">Making Charges Calculator</a>
-    <a href="{SITE_URL}/making-charges-comparison">Making Charges Comparison</a>
-    <p class="nav-grp">News</p>
-    <a href="{SITE_URL}/news">Market News &amp; Daily Recap</a>
-    <p class="nav-grp">Learn</p>
-    <a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K Gold</a>
-    <a href="{SITE_URL}/learn/gold-hallmarking">Gold Hallmarking (BIS)</a>
-    <a href="{SITE_URL}/learn/how-gold-rates-are-set">How Gold Rates Are Set</a>
-    <a href="{SITE_URL}/learn/making-charges-explained">Making Charges Explained</a>
-    <p class="nav-grp">Company</p>
-    <a href="{SITE_URL}/about">About</a>
-    <a href="{SITE_URL}/methodology">Our Methodology</a>
-    <a href="{SITE_URL}/contact">Contact</a>
-    <a href="{SITE_URL}/privacy">Privacy Policy</a>
-    <a href="{SITE_URL}/inquiry">Daily Email Alerts</a>
-  </nav>
-</aside>
-<script>(function(){{
-  function init(){{
-    var d=document.getElementById('navdrawer'),o=document.getElementById('nav-ov'),
-        t=document.getElementById('navtog'),x=document.getElementById('nav-x');
-    if(!d||!t)return;
-    function s(open){{d.classList.toggle('open',open);o.hidden=!open;
-      d.setAttribute('aria-hidden',open?'false':'true');
-      t.setAttribute('aria-expanded',open?'true':'false');}}
-    t.addEventListener('click',function(){{s(!d.classList.contains('open'));}});
-    if(x)x.addEventListener('click',function(){{s(false);}});
-    o.addEventListener('click',function(){{s(false);}});
-    document.addEventListener('keydown',function(e){{
-      if(e.key==='Escape'&&d.classList.contains('open'))s(false);}});
-  }}
-  if(document.readyState==='loading'){{
-    document.addEventListener('DOMContentLoaded',init);
-  }}else{{
-    setTimeout(init,0);
-  }}
-}})();</script>"""
 
 
 BASE_CSS = """
@@ -5557,1409 +4835,6 @@ GATE_JS = r"""
 """
 
 
-TEMPLATE = Template("""<!DOCTYPE html>
-<html lang="en-IN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gold Rate Today $where ($date) - 24 Carat &amp; 22K Gold Rate, Compare Top Jewellers</title>
-<meta name="description" content="Gold rate today $where ($date): 24 carat gold rate $med24/g and 22K gold rate $med22/g pre-GST, compared across $n_brands top jewellers. Check the IBJA bullion premium, MCX futures, and calculate gold prices instantly.">
-<meta name="keywords" content="gold rate, gold rate today, today gold rate, 24 carat gold rate today, gold rate today 22k, gold rate today Hyderabad, gold rate today Chennai, gold rate today Pune, gold rate today Mumbai">
-<meta name="robots" content="index, follow, max-image-preview:large">
-<meta name="theme-color" content="#0B0805">
-<meta name="author" content="MyGoldRates.com">
-<meta name="geo.region" content="IN">
-<meta name="last-modified" content="$updated_http">
-<meta http-equiv="last-modified" content="$updated_http">
-<meta name="revisit-after" content="1 day">
-<link rel="canonical" href="$canonical_url">
-<link rel="alternate" type="application/json" title="Gold rates JSON feed" href="$site_url/rates.json">
-<link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
-<link rel="icon" type="image/png" sizes="96x96" href="$site_url/icon-96.png">
-<link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
-<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
-<link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="MyGoldRates.com">
-<meta property="og:locale" content="en_IN">
-<meta property="og:title" content="Gold Rate Today $where - Compare 24K, 22K &amp; 18K Across Top Jewellers">
-<meta property="og:description" content="Today's gold rate compared across $n_brands top Indian jewellers: 24 carat $med24/g, 22K $med22/g. IBJA bullion premium plus an instant price calculator.">
-<meta property="og:url" content="$canonical_url">
-<meta property="og:image" content="$site_url/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="MyGoldRates.com - India's gold rate comparison platform">
-<meta property="og:updated_time" content="$updated_iso">
-<meta property="article:modified_time" content="$updated_iso">
-<meta property="article:published_time" content="2026-07-20T00:00:00+05:30">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Gold Rate Today $where - Compare Top Jewellers">
-<meta name="twitter:description" content="24 carat gold rate $med24/g, 22K $med22/g today. Compare jewellers, check the bullion premium, calculate prices.">
-<meta name="twitter:image" content="$site_url/og.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
-$gsi
-$ads_head
-<script type="application/ld+json">$jsonld</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","url":"$canonical_url","name":"Gold Rate Today $where","inLanguage":"en-IN","isPartOf":{"@type":"WebSite","url":"$site_url/","name":"MyGoldRates.com"},"about":{"@type":"Thing","name":"Gold rate today $where"},"dateModified":"$updated_iso","datePublished":"2026-07-20T00:00:00+05:30","primaryImageOfPage":{"@type":"ImageObject","url":"$site_url/og.png"}}</script>
-<style>
-$base_css
-$gate_css
-/* IBJA reference tiles */
-.ibja-ref{margin-top:6px}
-.ref-tiles{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
-.rtile{flex:1;min-width:150px;background:var(--card);
-  border:1px solid var(--line);border-radius:12px;padding:16px 20px;
-  position:relative;overflow:hidden}
-.rtile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:var(--gold-foil)}
-.rtile .k{font:500 11.5px/1 "IBM Plex Mono",monospace;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--ink-3)}
-.rtile .v{font-family:"IBM Plex Mono",monospace;font-size:clamp(20px,3vw,26px);
-  margin:6px 0 3px;color:var(--gold)}
-.rtile .u{font-size:12px;color:var(--ink-3)}
-.rtile.prem::before{background:var(--emerald)}
-.rtile.prem .v{color:var(--emerald)}
-
-/* live rate-change chip under each tile value + brief flash on update */
-.rtile{transition:background-color .35s ease,border-color .35s ease}
-.rtile-d{display:inline-flex;align-items:center;gap:3px;
-  font:700 11px/1 "IBM Plex Mono",monospace;letter-spacing:.04em;
-  padding:3px 8px;border-radius:999px;margin-top:6px;
-  color:var(--ink-3);background:transparent;min-height:16px}
-.rtile-d.up{color:#2E9F70;background:rgba(46,159,112,.13)}
-.rtile-d.dn{color:#C9524B;background:rgba(201,82,75,.13)}
-.rtile-d.flat{color:var(--ink-3);background:rgba(150,150,150,.08)}
-.rtile.pulse-up{background:color-mix(in srgb,#2E9F70 8%,var(--card));
-  border-color:color-mix(in srgb,#2E9F70 30%,var(--line))}
-.rtile.pulse-dn{background:color-mix(in srgb,#C9524B 8%,var(--card));
-  border-color:color-mix(in srgb,#C9524B 30%,var(--line))}
-.mk-live{display:flex;align-items:center;gap:8px;margin:8px 0 4px}
-.mk-live .live-badge{margin:0}
-.mk-live-note{font:500 11px/1.3 "IBM Plex Mono",monospace;color:var(--ink-3);
-  letter-spacing:.04em}
-
-/* dealer / vendor rate table (worker-fed) */
-.mk-metal-tabs{display:inline-flex;gap:4px;margin:14px 0 8px;background:var(--card);
-  border:1px solid var(--line);border-radius:99px;padding:3px}
-.mk-metal-tab{background:transparent;border:none;font:700 11px "IBM Plex Mono",monospace;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);padding:6px 14px;border-radius:99px;cursor:pointer}
-.mk-metal-tab.active{background:var(--gold);color:#1a0e00}
-.vtable{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px}
-.vtable-hd{display:grid;grid-template-columns:1.3fr 1.6fr 1fr .7fr;gap:8px;
-  padding:9px 12px;font:700 10px "IBM Plex Mono",monospace;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--ink-3);background:color-mix(in srgb,var(--gold-foil) 8%,var(--card));
-  border-bottom:1px solid var(--line)}
-.vrow{display:grid;grid-template-columns:1.3fr 1.6fr 1fr .7fr;gap:8px;padding:11px 12px;
-  border-bottom:1px solid var(--line);align-items:center;font-size:13px;
-  transition:background-color .4s ease}
-.vrow:last-child{border-bottom:none}
-.vrow-dealer{font-weight:700;color:var(--ink)}
-.vrow-commodity{color:var(--ink-2);font-size:12px;font-family:"IBM Plex Mono",monospace}
-.vrow-price{font-family:"IBM Plex Mono",monospace;font-weight:700;color:var(--gold);letter-spacing:-.2px}
-.vrow-price.dim{color:var(--ink-3);font-weight:500}
-.vrow-city{color:var(--ink-3);font-size:12px}
-.vrow.pulse-up{background:color-mix(in srgb,#2E9F70 10%,transparent)}
-.vrow.pulse-dn{background:color-mix(in srgb,#C9524B 10%,transparent)}
-.v-empty{padding:16px;text-align:center;color:var(--ink-3);font-size:12px}
-.mk-title{font:700 11px "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--gold);margin:20px 0 6px}
-
-/* economic calendar strip */
-.cal-list{display:flex;flex-direction:column;gap:4px;margin-top:6px}
-.cal-item{display:grid;grid-template-columns:1.7fr 1fr .6fr;gap:8px;padding:10px 12px;
-  background:var(--card);border:1px solid var(--line);border-radius:10px;align-items:center;font-size:12.5px}
-.cal-title{color:var(--ink);line-height:1.35}
-.cal-time{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-2)}
-.cal-impact{display:inline-flex;padding:2px 8px;border-radius:99px;font:700 9.5px "IBM Plex Mono",monospace;
-  letter-spacing:.14em;text-transform:uppercase;justify-self:end}
-.cal-impact.high{color:#C9524B;background:rgba(201,82,75,.12)}
-.cal-impact.medium{color:#D9A441;background:rgba(217,164,65,.13)}
-.cal-impact.low{color:var(--ink-3);background:rgba(150,150,150,.08)}
-
-/* 90-day OHLC sparkline */
-.mk-ohlc{background:var(--card);border:1px solid var(--line);border-radius:12px;
-  padding:14px;margin-top:8px}
-.mk-ohlc svg{width:100%;height:120px;display:block}
-.mk-ohlc-meta{display:flex;justify-content:space-between;margin-top:6px;
-  font:600 10.5px "IBM Plex Mono",monospace;color:var(--ink-3);letter-spacing:.06em}
-.mk-ohlc-tabs{display:inline-flex;gap:4px;margin-top:12px}
-.mk-ohlc-tab{background:var(--card);border:1px solid var(--line);color:var(--ink-3);
-  padding:4px 12px;border-radius:99px;cursor:pointer;font:700 10.5px "IBM Plex Mono",monospace;letter-spacing:.14em}
-.mk-ohlc-tab.active{background:var(--gold);color:#1a0e00;border-color:var(--gold)}
-
-/* live market pulse badge */
-.live-badge{display:inline-flex;align-items:center;gap:7px;font:700 10.5px/1 "IBM Plex Mono",monospace;
-  letter-spacing:.16em;text-transform:uppercase;color:#5BBB93;background:rgba(30,92,70,.28);
-  border:1px solid rgba(91,187,147,.45);border-radius:999px;padding:5px 12px;margin-bottom:10px}
-.live-dot{width:7px;height:7px;border-radius:50%;background:#5BBB93;
-  box-shadow:0 0 8px #5BBB93;animation:livepulse 1.8s infinite ease-in-out}
-@keyframes livepulse{
-  0%{transform:scale(0.95);opacity:0.8;box-shadow:0 0 0 0 rgba(91,187,147,0.7)}
-  70%{transform:scale(1.15);opacity:1;box-shadow:0 0 0 8px rgba(91,187,147,0)}
-  100%{transform:scale(0.95);opacity:0.8;box-shadow:0 0 0 0 rgba(91,187,147,0)}
-}
-
-/* brand search box */
-.brand-search-box{position:relative;flex:1 1 200px;max-width:280px}
-.brand-search-box input{width:100%;font:500 13px "IBM Plex Sans",sans-serif;
-  background:var(--card);color:var(--ink);border:1px solid var(--line);
-  border-radius:999px;padding:8px 14px 8px 34px;transition:border-color .2s ease,box-shadow .2s ease}
-.brand-search-box input:focus{border-color:var(--gold);outline:none;
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 20%,transparent)}
-.brand-search-box::before{content:"🔍";position:absolute;left:11px;top:50%;
-  transform:translateY(-50%);font-size:12px;opacity:.65;pointer-events:none}
-
-/* quick weight pills */
-.quick-weights{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 10px}
-.qw-pill{font:600 11.5px/1 "IBM Plex Mono",monospace;background:var(--card);
-  border:1px solid var(--line);color:var(--ink-2);border-radius:999px;
-  padding:6px 12px;cursor:pointer;transition:all .15s ease}
-.qw-pill:hover,.qw-pill.active{border-color:var(--gold);color:var(--gold);
-  background:color-mix(in srgb,var(--gold) 12%,transparent)}
-
-/* rate board hero */
-.board{background:
-  linear-gradient(104deg,transparent 0 40%,rgba(240,219,154,.08) 46%,
-    rgba(255,253,244,.15) 50%,rgba(240,219,154,.08) 54%,transparent 61%),
-  radial-gradient(130% 150% at 85% -35%,rgba(224,186,86,.42),transparent 58%),
-  radial-gradient(120% 130% at 4% 135%,rgba(176,132,42,.28),transparent 58%),
-  linear-gradient(150deg,#3A2A0C,#140D04 52%,#241809);
-  color:#F0EAD8;border-radius:13px;margin:10px 0 8px;padding:14px 18px 12px;
-  position:relative;overflow:hidden;border:1px solid rgba(224,186,86,.38);
-  box-shadow:inset 0 1px 0 rgba(255,247,214,.10)}
-.board h1{font-size:clamp(18px,2.6vw,24px);color:#F8EFD6;margin-bottom:0}
-.board-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;
-  margin:5px 0 8px;font-size:12px;color:#A79B7E}
-.board-meta .signal{display:inline-flex;align-items:center;gap:5px;
-  color:#5BBB93;font-weight:600;letter-spacing:.03em}
-.board-meta .low-note{color:#CFC7AE}
-.board-rates{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.tile{border:1px solid rgba(224,186,86,.34);border-radius:9px;
-  padding:8px 12px;min-width:100px;flex:1;
-  background:linear-gradient(158deg,rgba(224,186,86,.11),rgba(224,186,86,.02))}
-.tile .k{font-family:"IBM Plex Mono",monospace;font-size:9.5px;
-  letter-spacing:.14em;color:var(--gold-bright);text-transform:uppercase}
-.tile .v{font-family:"IBM Plex Mono",monospace;font-size:clamp(16px,2.2vw,21px);
-  margin-top:2px;background:linear-gradient(100deg,#E8C86A,#FFFDF4 46%,#D9B24A);
-  -webkit-background-clip:text;background-clip:text;color:transparent}
-.tile .u{font-size:10px;color:#A79B7E}
-.tile.best{background:linear-gradient(158deg,rgba(224,186,86,.26),rgba(224,186,86,.08));
-  border:2px solid rgba(224,186,86,.6);flex:1.35;min-width:148px;
-  box-shadow:0 0 20px rgba(224,186,86,.12)}
-.tile.best .k{color:#F4E3A6;font-weight:700}
-.tile.best .v{font-weight:700;font-size:clamp(18px,2.6vw,24px)}
-.bwin{margin-top:5px;font-weight:700;font-size:12.5px;color:#F8EFD6;
-  display:flex;align-items:center;gap:6px}
-.bwin img{width:15px;height:15px;border-radius:3px;background:#fff;
-  padding:1px;flex:0 0 15px}
-.board-pregst{font-size:11px;color:#8A7E65;margin-top:6px}
-.note{font-size:13px;color:var(--ink-3);margin:12px 0 24px}
-.keyfacts{background:var(--card);border:1px solid var(--line);
-  border-radius:12px;padding:16px 20px;margin:14px 0 4px}
-.keyfacts h2{font-size:16px;margin:0 0 8px}
-.keyfacts ul{margin:0;padding-left:18px}
-.keyfacts li{font-size:13.5px;color:var(--ink-2);line-height:1.6;margin:3px 0}
-.keyfacts strong{color:var(--ink)}
-.seo{margin:40px 0 8px;max-width:74ch}
-.seo h3{font-family:"Marcellus",serif;font-weight:400;font-size:19px;
-  margin:24px 0 6px;color:var(--ink)}
-.seo p{color:var(--ink-2);font-size:15px;line-height:1.72;margin:0 0 14px}
-.seo strong{color:var(--ink);font-weight:600}
-.seofold summary{cursor:pointer;list-style:none;display:flex;
-  align-items:center;gap:12px}
-.seofold summary::-webkit-details-marker{display:none}
-.seofold summary h2{margin:0}
-.seofold summary::after{content:"+";font:500 24px/1 "IBM Plex Mono",monospace;
-  color:var(--gold);margin-left:auto}
-.seofold[open] summary::after{content:"\\2212"}
-.seofold summary:hover h2{color:var(--gold)}
-.seofold>p:first-of-type{margin-top:14px}
-.citylinks{margin:34px 0 8px}
-.citycloud{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-.citycloud a{font-size:12.5px;border:1px solid var(--line);
-  border-radius:999px;padding:6px 13px;text-decoration:none;
-  color:var(--ink-2);white-space:nowrap}
-.citycloud a:hover{border-color:var(--gold);color:var(--gold)}
-.citycloud a[aria-current="page"]{border-color:var(--gold);
-  color:var(--gold);font-weight:600}
-.newscard{display:block;background:var(--card);border:1px solid var(--line);
-  border-radius:12px;padding:14px 16px;margin:9px 0;text-decoration:none}
-.newscard:hover{border-color:var(--gold)}
-.newscard .nt{font-weight:600;color:var(--ink);font-size:14.5px;line-height:1.4}
-.newscard .nd{font:500 11.5px/1 "IBM Plex Mono",monospace;color:var(--ink-3);
-  margin-top:5px}
-.recap-move{font-family:"IBM Plex Mono",monospace;font-weight:600}
-
-/* calculator */
-.calc{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
-@media (max-width:720px){.calc{grid-template-columns:1fr}}
-.calc-fields{display:grid;gap:14px}
-.field label{display:block;font:500 12px/1.4 "IBM Plex Mono",monospace;
-  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
-  margin-bottom:6px}
-.field input,.field select{width:100%;font:15px "IBM Plex Sans",sans-serif;
-  color:var(--ink);background:var(--paper);border:1px solid var(--line);
-  border-radius:10px;padding:12px 14px}
-.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:10px;
-  overflow:hidden}
-.seg button{flex:1;font:500 13.5px "IBM Plex Mono",monospace;background:none;
-  border:0;padding:11px 0;color:var(--ink-2);cursor:pointer;
-  border-right:1px solid var(--line)}
-.seg button:last-child{border-right:0}
-.seg button[aria-pressed="true"]{background:var(--board);color:#F0DB9A}
-.calc-out{background:
-  radial-gradient(140% 150% at 90% -30%,rgba(224,186,86,.34),transparent 58%),
-  radial-gradient(120% 130% at 4% 130%,rgba(176,132,42,.22),transparent 58%),
-  linear-gradient(150deg,#3A2A0C,#140D04 55%,#241809);
-  border:1px solid rgba(224,186,86,.42);border-radius:14px;
-  padding:26px 26px 22px;color:#EDE9DD;min-height:100%}
-.calc-out .k{font-family:"IBM Plex Mono",monospace;font-size:11.5px;
-  letter-spacing:.22em;text-transform:uppercase;color:var(--gold-bright)}
-.calc-out .v{font-family:"IBM Plex Mono",monospace;
-  font-size:clamp(30px,5vw,44px);margin:10px 0 4px;
-  background:linear-gradient(100deg,#F0DB9A,#FFFDF4 45%,#E8C86A);
-  -webkit-background-clip:text;background-clip:text;color:transparent}
-.calc-out .sub{font-size:13px;color:#8E9A8C}
-.calc-out .split{margin-top:16px;padding-top:14px;
-  border-top:1px solid rgba(217,178,74,.25);display:grid;gap:6px;
-  font-family:"IBM Plex Mono",monospace;font-size:13px;color:#B9C2B4}
-.calc-out .split div{display:flex;justify-content:space-between}
-.calc-out .split .amt{color:#EDE9DD}
-
-/* premium bars */
-.pbar-card{display:flex;flex-direction:column;gap:11px}
-.pbar-row{display:flex;align-items:center;gap:12px;width:100%}
-.pbar-name{flex:0 0 clamp(110px,26vw,170px);font-size:13.5px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pbar-track{flex:1 1 auto;min-width:0;height:12px;border-radius:6px;
-  background:color-mix(in srgb,var(--line) 55%,transparent);overflow:hidden}
-.pbar-fill{display:block;height:100%;border-radius:6px 4px 4px 6px;
-  background:linear-gradient(90deg,color-mix(in srgb,var(--bar) 70%,transparent),var(--bar));
-  transition:width .5s ease}
-.pbar-neg{background:linear-gradient(90deg,color-mix(in srgb,var(--emerald) 70%,transparent),var(--emerald))}
-.pbar-val{flex:0 0 52px;font-family:"IBM Plex Mono",monospace;
-  font-size:12.5px;text-align:right;color:var(--ink-2)}
-@media (max-width:420px){
-  .pbar-row{flex-wrap:wrap;row-gap:5px}
-  .pbar-name{flex:1 1 100%}
-  .pbar-track{flex:1 1 auto}
-}
-
-/* table */
-.tablebar{display:flex;justify-content:space-between;align-items:center;
-  flex-wrap:wrap;gap:10px;margin-bottom:12px}
-.gst{font:500 12px/1 "IBM Plex Mono",monospace;letter-spacing:.06em;
-  background:none;border:1px solid var(--line);color:var(--ink-2);
-  border-radius:999px;padding:8px 15px;cursor:pointer}
-.gst[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
-.tablecard{background:var(--card);border:1px solid var(--line);
-  border-radius:14px;overflow:auto}
-table{width:100%;border-collapse:collapse;min-width:640px}
-thead th{font:500 12px/1.3 "IBM Plex Mono",monospace;text-transform:uppercase;
-  letter-spacing:.12em;color:var(--ink-3);text-align:right;
-  padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer;
-  user-select:none;white-space:nowrap}
-thead th:first-child{text-align:left}
-thead th[aria-sort]::after{content:" ↕";opacity:.5}
-thead th[aria-sort="ascending"]::after{content:" ↑";opacity:1}
-thead th[aria-sort="descending"]::after{content:" ↓";opacity:1}
-tbody th{font-weight:500;text-align:left;padding:12px 16px;white-space:nowrap}
-tbody td{font-family:"IBM Plex Mono",monospace;font-size:14.5px;
-  text-align:right;padding:12px 16px;font-variant-numeric:tabular-nums;
-  white-space:nowrap}
-tbody tr{border-bottom:1px solid var(--line)}
-tbody tr:last-child{border-bottom:0}
-tbody tr:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
-.delta-low{color:var(--emerald)}
-.delta-high{color:var(--warm)}
-.delta-par{color:var(--ink-3)}
-.tbar-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.karatseg{display:none}
-.karatseg button{font:600 12px/1 "IBM Plex Mono",monospace;letter-spacing:.05em;
-  background:none;border:1px solid var(--line);color:var(--ink-2);
-  padding:8px 14px;cursor:pointer}
-.karatseg button:first-child{border-radius:999px 0 0 999px}
-.karatseg button:last-child{border-radius:0 999px 999px 0}
-.karatseg button+button{border-left:0}
-.karatseg button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);
-  background:color-mix(in srgb,var(--gold) 12%,transparent)}
-/* markets side drawer */
-.calc-drawer{grid-template-columns:1fr!important}
-.drawer-tab{position:fixed;right:0;top:calc(50% - 175px);z-index:940;writing-mode:vertical-rl;
-  text-orientation:mixed;font:600 12px/1 "IBM Plex Mono",monospace;
-  letter-spacing:.14em;text-transform:uppercase;color:#1A1508;
-  background:var(--gold-foil);border:0;border-radius:9px 0 0 9px;
-  padding:15px 9px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.28)}
-.drawer-tab.drawer-tab2{top:calc(50% - 37px)}
-.drawer-tab.drawer-tab3{top:calc(50% + 136px)}
-.drawer-ov{position:fixed;inset:0;background:rgba(10,8,4,.5);z-index:950}
-.drawer{position:fixed;top:0;right:0;height:100%;width:min(440px,94vw);
-  background:var(--paper);border-left:1px solid var(--line);z-index:960;
-  transform:translateX(105%);transition:transform .28s ease;
-  overflow-y:auto;padding:20px 22px 34px}
-.drawer.open{transform:translateX(0)}
-.drawer-head{display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:4px}
-.drawer-head h2{margin:0;font-size:22px}
-.drawer-x{background:none;border:0;font-size:28px;color:var(--ink-3);
-  cursor:pointer;line-height:1;padding:2px 6px}
-.drawer h3{font-family:"Marcellus",serif;font-weight:400;font-size:18px;
-  margin:22px 0 4px}
-.dnote{font-size:12.5px;color:var(--ink-3);margin:0 0 10px;line-height:1.55}
-.dtable{width:100%;border-collapse:collapse;min-width:0}
-.dtable th{font:500 10.5px/1.3 "IBM Plex Mono",monospace;
-  text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);
-  text-align:right;padding:8px 6px;border-bottom:1px solid var(--line);
-  cursor:default}
-.dtable th:first-child,.dtable td:first-child{text-align:left}
-.dtable td{padding:9px 6px;text-align:right;
-  font-family:"IBM Plex Mono",monospace;font-size:13px;
-  border-bottom:1px solid var(--line);white-space:nowrap}
-.dtable tr:last-child td{border-bottom:0}
-.mex{display:block;font:400 10.5px/1.5 "IBM Plex Mono",monospace;
-  color:var(--ink-3)}
-.up{color:var(--emerald)}.dn{color:var(--warm)}
-.drawer svg{width:100%;height:auto;display:block}
-.drawer svg text{font:500 10.5px "IBM Plex Mono",monospace;fill:var(--ink-3)}
-@media (max-width:640px){
-  .karatseg{display:inline-flex}
-  table{min-width:0}
-  .tablecard{overflow:visible}
-  #rates .col-22,#rates .col-18{display:none}
-  #rates.k22 .col-24{display:none}
-  #rates.k22 .col-22{display:table-cell}
-  #rates.k18 .col-24{display:none}
-  #rates.k18 .col-18{display:table-cell}
-  thead th,tbody th,tbody td{padding:11px 9px}
-  thead th{font-size:10.5px;letter-spacing:.05em;white-space:normal}
-  tbody td{font-size:14px}
-  tbody th{white-space:normal;font-size:13.5px;line-height:1.28}
-  .bcell{gap:7px}
-  .blogo{width:18px;height:18px;flex:0 0 18px}
-  .stamp{margin-left:0;margin-top:4px;padding:2px 6px;font-size:9.5px}
-  .bcell>span{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
-}
-
-/* alerts CTA */
-.cta{background:
-  radial-gradient(130% 160% at 10% -30%,rgba(217,178,74,.2),transparent 55%),
-  linear-gradient(160deg,var(--board),var(--board-2));
-  border:1px solid rgba(217,178,74,.3);border-radius:16px;color:#EDE9DD;
-  margin:38px 0 0;padding:30px 32px;display:flex;flex-wrap:wrap;
-  align-items:center;gap:18px;justify-content:space-between}
-.cta h2{color:#F6F1E3;margin:0 0 4px}
-.cta p{color:#B9C2B4;font-size:14.5px;max-width:48ch}
-.quick-sub{display:flex;gap:8px;flex:0 0 auto}
-.quick-sub input{width:220px;max-width:60vw;padding:11px 14px;border-radius:10px;
-  border:1px solid rgba(217,178,74,.35);background:rgba(255,255,255,.06);
-  color:#F6F1E3;font-size:14px}
-.quick-sub input::placeholder{color:#8b8676}
-.quick-sub input:focus{outline:2px solid var(--gold);outline-offset:1px}
-.qs-msg{font-size:13px;margin:8px 0 0;display:none}
-.qs-msg.qs-ok{color:#9fd9a8}.qs-msg.qs-err{color:#e08a6a}
-.qs-msg a{color:inherit;text-decoration:underline}
-@media(max-width:560px){.quick-sub{flex-wrap:wrap;width:100%}
-  .quick-sub input{width:100%;max-width:none}
-  .quick-sub button{width:100%}}
-
-.adslot{margin:30px 0;min-height:90px;border:1px dashed var(--line);
-  border-radius:10px;display:flex;align-items:center;justify-content:center;
-  color:var(--ink-3);font-size:12px;letter-spacing:.08em}
-
-/* brand logos */
-/* rank column: subordinate to brand name (monospace, ink-3) so the eye reads
-   brand first. Kept narrow so the table doesn't lose horizontal room. */
-.col-rank{width:36px;text-align:center;
-  font:600 12.5px/1 "IBM Plex Mono",monospace;color:var(--ink-3);
-  font-variant-numeric:tabular-nums}
-tbody tr:first-child .col-rank{color:var(--gold);font-weight:700}
-@media(max-width:640px){.col-rank{width:24px;font-size:11.5px;padding-left:6px!important;padding-right:6px!important}}
-.bcell{display:inline-flex;align-items:center;gap:10px}
-.blogo{width:20px;height:20px;border-radius:5px;object-fit:contain;
-  background:#fff;border:1px solid var(--line);padding:1px;flex:0 0 20px}
-
-
-/* gold coin cursor trail */
-.coin{position:fixed;border-radius:50%;pointer-events:none;z-index:1200;
-  background:radial-gradient(circle at 35% 30%,#F7E7A9,#D9B24A 55%,#8C6A18);
-  box-shadow:0 0 6px rgba(217,178,74,.55);
-  animation:coinfall .9s ease-in forwards}
-@keyframes coinfall{to{transform:translateY(48px) scale(.35);opacity:0}}
-
-/* signup modal */
-.overlay{position:fixed;inset:0;background:rgba(8,13,10,.66);display:none;
-  align-items:center;justify-content:center;z-index:1000;padding:18px}
-.overlay.open{display:flex}
-.modal{background:var(--card);border:1px solid rgba(217,178,74,.45);
-  border-radius:16px;max-width:560px;width:100%;max-height:92vh;
-  overflow:auto;padding:28px;position:relative;
-  box-shadow:0 24px 70px rgba(0,0,0,.4)}
-.modal h2{margin:0 0 4px}
-.modal .hint{margin-bottom:16px}
-.modal-x{position:absolute;top:8px;right:12px;background:none;border:0;
-  font-size:24px;line-height:1;color:var(--ink-3);cursor:pointer;padding:6px}
-.modal-x:hover{color:var(--ink)}
-.m-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:520px){.m-grid2{grid-template-columns:1fr}}
-.m-field{margin-bottom:13px}
-.m-field label{display:block;font:500 11.5px/1.4 "IBM Plex Mono",monospace;
-  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
-  margin-bottom:5px}
-.m-field input,.m-field select{width:100%;font:15px "IBM Plex Sans",sans-serif;
-  color:var(--ink);background:var(--paper);border:1px solid var(--line);
-  border-radius:10px;padding:11px 13px}
-.m-field input:focus,.m-field select:focus{border-color:var(--gold);outline:none}
-.consent{display:flex;gap:8px;align-items:flex-start;margin:4px 0 14px;
-  font-size:11.5px;color:var(--ink-3);max-width:52ch}
-.consent input{margin-top:2px;accent-color:var(--gold)}
-.m-msg{border-radius:10px;padding:12px 14px;font-size:14px;margin-top:12px;
-  display:none}
-.m-ok{background:color-mix(in srgb,var(--emerald) 12%,transparent);
-  color:var(--emerald);border:1px solid var(--emerald)}
-.m-err{background:color-mix(in srgb,var(--warm) 12%,transparent);
-  color:var(--warm);border:1px solid var(--warm)}
-.hp{position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden}
-
-/* HUID Scanner & Verification Tool */
-.huid-scanner-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;margin:24px 0;box-shadow:0 8px 30px rgba(0,0,0,.15)}
-.huid-header{display:flex;gap:16px;align-items:flex-start;margin-bottom:20px}
-.huid-icon{font-size:28px;background:color-mix(in srgb,var(--gold) 15%,transparent);border:1px solid var(--gold);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;flex:0 0 52px}
-.huid-sub{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.5}
-.huid-field label{display:block;font:600 12px/1.4 "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
-.huid-input-group{display:flex;gap:10px}
-.huid-input-group input{flex:1;font:700 18px/1 "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
-.huid-input-group input:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 20%,transparent)}
-.sample-huid-pills{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
-.sample-label{font-size:12px;color:var(--ink-3);font-weight:500}
-.huid-sample-btn{font:500 11.5px/1 "IBM Plex Mono",monospace;background:none;border:1px solid var(--line);color:var(--ink-2);border-radius:999px;padding:6px 12px;cursor:pointer}
-.huid-sample-btn:hover{border-color:var(--gold);color:var(--gold)}
-
-/* Verification Certificate Result Box */
-.huid-certificate{background:linear-gradient(150deg,#1A140A,#0C0904 60%,#1F180B);border:1px solid rgba(224,186,86,.4);border-radius:14px;padding:22px;margin-top:20px;color:#F0EAD8}
-.cert-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid rgba(224,186,86,.25);padding-bottom:14px;margin-bottom:16px}
-.cert-status{font:700 12px/1 "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:#5BBB93;background:rgba(30,92,70,.35);border:1px solid rgba(91,187,147,.45);border-radius:999px;padding:6px 14px}
-.cert-id{font:700 16px/1 "IBM Plex Mono",monospace;letter-spacing:.14em;color:#F4E3A6}
-.cert-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
-.cert-tile{background:rgba(224,186,86,.06);border:1px solid rgba(224,186,86,.25);border-radius:10px;padding:14px}
-.cert-tile .ck{font:500 10.5px/1 "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-bright)}
-.cert-tile .cv{font:700 17px/1.3 "IBM Plex Sans",sans-serif;color:#FFFDF4;margin:6px 0 2px}
-.cert-tile .cu{font-size:11.5px;color:#C4B99A}
-
-/* Checklist */
-.cert-checklist h4{margin:0 0 12px;font-size:14px;color:#F4E3A6}
-.checklist-items{display:grid;gap:10px}
-.cl-item{display:flex;gap:12px;align-items:flex-start}
-.cl-check{width:22px;height:22px;border-radius:50%;background:#5BBB93;color:#0C0904;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 22px;font-size:13px}
-.cl-item strong{color:#FFFDF4;font-size:13.5px}
-.cl-item p{margin:2px 0 0;font-size:12px;color:#C4B99A;line-height:1.4}
-.cert-calc-box{margin-top:18px;padding-top:14px;border-top:1px dashed rgba(224,186,86,.3);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}
-.cc-row label{font-size:13px;color:#C4B99A;margin-right:10px}
-.cc-input-wrap input{width:75px;font:700 15px "IBM Plex Mono",monospace;background:#0C0904;color:#FFFDF4;border:1px solid rgba(224,186,86,.4);border-radius:6px;padding:6px 10px;text-align:center}
-.cc-result-total{font-size:14px;color:#C4B99A}
-.cc-result-total strong{font-family:"IBM Plex Mono",monospace;font-size:20px;color:#F4E3A6;margin-left:6px}
-
-.faq{border-bottom:1px solid var(--line);padding:14px 0}
-.faq summary{font-weight:500;cursor:pointer;color:var(--ink)}
-/* WhatsApp viral share button */
-.wa-share-btn{display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff!important;
-  font:600 12px/1 "IBM Plex Sans",sans-serif;padding:7px 14px;border-radius:999px;text-decoration:none;
-  box-shadow:0 3px 10px rgba(37,211,102,.25);transition:transform .2s ease,box-shadow .2s ease}
-.wa-share-btn:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(37,211,102,.35)}
-
-.rank-badge{font:700 10px/1 "IBM Plex Mono",monospace;padding:3px 6px;border-radius:4px;margin-right:6px}
-.rank-1{background:#D9B24A;color:#140D04}
-.rank-2{background:#C0C0C0;color:#140D04}
-.rank-3{background:#CD7F32;color:#FFF}
-.save-pill{font:600 10px/1 "IBM Plex Mono",monospace;color:#5BBB93;background:rgba(30,92,70,.22);
-  border:1px solid rgba(91,187,147,.35);padding:2px 6px;border-radius:4px;margin-left:6px}
-</style>
-$analytics_js</head>
-<body>
-$nav
-<div class="wrap">
-
-<header class="top">
-  <button class="navtog" id="navtog" aria-label="Open menu" aria-expanded="false">&#9776;</button>
-  <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
-  <div class="topright">
-    <span class="updated" data-updated-epoch="$updated_epoch"><time datetime="$updated_iso">Updated $date, $time</time> &middot; <span class="refreshed-ago">just now</span></span>
-    <span class="hauth" id="hauth" hidden></span>
-    <a class="wa-share-btn" href="https://api.whatsapp.com/send?text=Check%20today%27s%20live%2024K%20and%2022K%20gold%20rates%20across%20all%20top%20jewellers%20on%20https%3A%2F%2Fmygoldrates.com" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.485 1.332 5.001l-1.417 5.176 5.297-1.39c1.464.798 3.116 1.218 4.775 1.219h.004c5.505 0 9.988-4.478 9.989-9.984 0-2.667-1.038-5.174-2.924-7.06-1.886-1.886-4.393-2.925-7.061-2.925zm0 1.666c4.588 0 8.324 3.736 8.325 8.324 0 2.224-.866 4.314-2.439 5.888-1.573 1.574-3.663 2.44-5.887 2.44h-.003c-1.428 0-2.834-.378-4.066-1.094l-.291-.17-3.142.823.838-3.061-.186-.296c-.787-1.252-1.202-2.7-1.202-4.185.001-4.588 3.737-8.325 8.326-8.326z"/></svg> Share</a>
-    <a class="btn btn-lite" href="#cmp">Compare jewellers</a>
-  </div>
-</header>
-
-<section class="board" aria-label="Today's gold rate summary">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <div class="live-badge" data-updated-epoch="$updated_epoch"><span class="live-dot"></span> <span>LIVE</span> &middot; <time datetime="$updated_iso">$date, $time</time> &middot; <span class="refreshed-ago">just now</span></div>
-    <h1 style="margin:0">Gold Rate Today $where</h1>
-  </div>
-  <div class="board-meta">
-    <span class="signal">&#128994; Save up to &#8377;$spread24/g by picking the cheapest jeweller</span>
-    <span class="low-note">Lowest: <strong style="color:#F4E3A6">$low_brand &#8377;$low24_raw/g</strong></span>
-    <span>$n_brands brands compared</span>
-  </div>
-  <div class="board-rates">
-    <div class="tile best"><div class="k">&#9733; Lowest 24K &middot; $low_brand</div>
-      <div class="v">$low24</div>
-      <div class="bwin">$low_logo<span style="font-size:11px;color:#A79B7E">best price today</span></div></div>
-    <div class="tile"><div class="k">22K &middot; $low_brand</div>
-      <div class="v">$low22</div></div>
-    <div class="tile"><div class="k">18K &middot; $low_brand</div>
-      <div class="v">$low18</div></div>
-  </div>
-  <div class="board-pregst">All rates per gram &middot; pre-GST &middot; <time datetime="$updated_iso">$date at $time</time></div>
-</section>
-
-$local_intro
-<section aria-labelledby="cmp">
-  <p class="eyebrow">Today's Board</p>
-  <h2 id="cmp">Compare Gold Rates Across Jewellers</h2>
-  <div class="tablebar">
-    <p class="hint" style="margin:0">Sorted by today's 24K rate - tap a column
-    to re-sort. On mobile, use the karat filter to switch purity.</p>
-    <div class="tbar-controls">
-      <div class="brand-search-box"><input id="brandsearch" type="search" placeholder="Search jeweller..." aria-label="Search jeweller"></div>
-      <div class="karatseg" role="group" aria-label="Show karat">
-        <button data-k="24" aria-pressed="true">24K</button>
-        <button data-k="22" aria-pressed="false">22K</button>
-        <button data-k="18" aria-pressed="false">18K</button>
-      </div>
-      <button class="gst" id="nearbtn">&#128205; Brands near me</button>
-      <button class="gst" id="gstbtn" aria-pressed="false">+3% GST</button>
-    </div>
-  </div>
-  <p class="region-note" id="region-note" hidden></p>
-  <div class="tablecard">
-  <table id="rates">
-    <thead><tr>
-      <th scope="col" class="col-rank" aria-label="Rank">#</th>
-      <th scope="col">Jeweller</th>
-      <th scope="col" class="col-24" aria-sort="ascending">24K / g</th>
-      <th scope="col" class="col-22">22K / g</th>
-      <th scope="col" class="col-18">18K / g</th>
-      <th scope="col" class="col-delta">Δ vs median</th>
-    </tr></thead>
-    <tbody>
-$rows
-    </tbody>
-  </table>
-  </div>
-</section>
-
-$ads_unit
-
-$ibja_section
-
-<div class="cta" id="qs-cta">
-  <div>
-    <h2>Know today's cheapest rate before you leave home</h2>
-    <p>One free email each morning - who's cheapest today, the bullion
-    premium, and the market median. Takes five seconds, no password needed.</p>
-    <p class="qs-msg qs-ok" id="qs-ok" hidden>You're in - see you tomorrow
-    morning. <a href="#" class="js-alert">Add your city for local alerts too &rarr;</a></p>
-    <p class="qs-msg qs-err" id="qs-err" hidden>Something went wrong - please
-    try again, or <a href="#" class="js-alert">use the full form</a>.</p>
-  </div>
-  <form id="qs-form" class="quick-sub" novalidate>
-    <input type="email" id="qs-email" name="email" required maxlength="120"
-      placeholder="you@email.com" aria-label="Email address" autocomplete="email">
-    <button class="btn btn-gold" type="submit" id="qs-btn">Get Free Alerts</button>
-  </form>
-</div>
-
-$ads_unit
-
-$faq
-
-$news_home
-
-$seo_content
-
-<section class="citylinks" aria-labelledby="cityh">
-  <p class="eyebrow">Local Rates</p>
-  <h2 id="cityh">Gold Rate Today by City &amp; State</h2>
-  <p class="hint">National jewellery chains quote one board price across
-  India, so today's rates apply wherever you shop. Pick your city or state
-  for its dedicated page.</p>
-  <div class="citycloud">$city_links</div>
-</section>
-
-<section class="keyfacts" id="keyfacts" aria-labelledby="kfh">
-  <h2 id="kfh">Today's Gold Rate $where - Key Facts</h2>
-  <ul>
-    <li>The <strong>24K (999) gold rate today $where is $med24 per gram</strong>
-    (median across $n_brands leading jewellers, pre-GST) on $date.</li>
-    <li>The <strong>22K (916) gold rate today is $med22 per gram</strong> and the
-    <strong>18K (750) rate is $med18 per gram</strong>.</li>
-    <li>The <strong>lowest 24K gold rate today is $low24 per gram</strong>,
-    offered by $low_brand.</li>
-    <li>All rates are per gram in Indian Rupees, pre-GST; add 3% GST for the
-    billed price. Making charges are extra. Source: MyGoldRates.com.</li>
-  </ul>
-</section>
-
-$drawer
-$calcdrawer
-$coindrawer
-
-<footer>
-  <p id="terms"><strong>Disclaimer &amp; terms:</strong> Rates are indicative,
-  compiled from each brand's published prices, and can change during the day.
-  Always confirm the billed rate with the jeweller before purchase. This site
-  does not provide investment advice. Data is provided for personal reference
-  only; automated collection or redistribution is not permitted.</p>
-  <div class="foot-nav">
-    <a href="/about">About</a>
-    <a href="/contact">Contact</a>
-    <a href="/terms">Terms of Service</a>
-    <a href="/privacy">Privacy Policy</a>
-    <a href="/inquiry">Daily alerts</a>
-  </div>
-  <p>© $year GoldRates - daily gold rate comparison for India.
-  Rates updated daily; last updated $date.</p>
-  <p class="hits" id="hits" hidden>👁 <span id="hitcount">—</span> visits</p>
-</footer>
-
-</div>
-
-<div class="overlay" id="alert-overlay" role="dialog" aria-modal="true"
-     aria-labelledby="m-title">
-  <div class="modal">
-    <button class="modal-x" id="m-close" aria-label="Close">×</button>
-    <p class="eyebrow" style="margin-top:0">Add Your City</p>
-    <h2 id="m-title">Get alerts for your city too</h2>
-    <p class="hint">Just your email works. Add your city and we'll also flag
-    when a jeweller near you is the cheapest. Free, unsubscribe any time.</p>
-    <form id="m-form" novalidate>
-      $google_btn
-      <div class="manualbox" id="m-manual">
-      <div class="m-field"><label for="m-name">Name</label>
-        <input id="m-name" name="name" autocomplete="name" maxlength="80"></div>
-      <div class="m-grid2">
-        <div class="m-field"><label for="m-email">Email *</label>
-          <input id="m-email" name="email" type="email" autocomplete="email"
-          required maxlength="120"></div>
-        <div class="m-field"><label for="m-phone">Phone</label>
-          <input id="m-phone" name="phone" type="tel" autocomplete="tel"
-          inputmode="tel" maxlength="20" value="+91 "
-          placeholder="+91 98765 43210"></div>
-      </div>
-      <button type="button" class="locbtn" id="m-loc">&#128205; Use my current
-      location to autofill address</button>
-      <div class="m-grid2">
-        <div class="m-field"><label for="m-country">Country</label>
-          <select id="m-country" name="country" autocomplete="country-name">
-            <option selected>India</option><option>United Arab Emirates</option>
-            <option>United States</option><option>United Kingdom</option>
-            <option>Singapore</option><option>Other</option>
-          </select></div>
-        <div class="m-field"><label for="m-state">State</label>
-          <input id="m-state" name="state" autocomplete="address-level1"
-          maxlength="60"></div>
-      </div>
-      <div class="m-grid2">
-        <div class="m-field"><label for="m-city">City</label>
-          <input id="m-city" name="city" autocomplete="address-level2"
-          maxlength="60"></div>
-        <div class="m-field"><label for="m-zip">PIN / ZIP</label>
-          <input id="m-zip" name="zip" autocomplete="postal-code"
-          inputmode="numeric" maxlength="10"></div>
-      </div>
-      <div class="m-field"><label for="m-area">Area / Locality</label>
-        <input id="m-area" name="area" maxlength="80" list="m-areas"
-        autocomplete="address-level3" placeholder="auto-fills from PIN">
-        <datalist id="m-areas"></datalist></div>
-      <div class="hp" aria-hidden="true">
-        <label>Website<input name="website" tabindex="-1" autocomplete="off"></label>
-      </div>
-      <label class="consent"><input type="checkbox" name="offers" checked>
-        <span>Also send me gold offers, festive-scheme alerts and buying
-        guides by email. You can opt out any time.</span></label>
-      <button class="btn btn-gold" type="submit" id="m-btn">Subscribe</button>
-      </div>
-      <div class="m-msg m-ok" id="mm-ok">You're in - see you tomorrow
-      morning.</div>
-      <div class="m-msg m-err" id="mm-err">Something went wrong - please try
-      again.</div>
-    </form>
-  </div>
-</div>
-
-<script>
-var BRANDS=$calc_brands;
-var FRAC={"24K":24/24,"22K":22/24,"18K":18/24,"14K":14/24};
-(function(){
-  /* ---- sortable table + GST switch ---- */
-  var table=document.getElementById('rates');
-  var heads=(table && table.tHead && table.tHead.rows.length) ? table.tHead.rows[0].cells : null;
-  var body=(table && table.tBodies.length) ? table.tBodies[0] : null;
-  var gstOn=false;
-  function fmt(n){
-    var s=Math.round(n).toString(), out=s.slice(-3), rest=s.slice(0,-3);
-    while(rest.length>2){out=rest.slice(-2)+','+out;rest=rest.slice(0,-2);}
-    if(rest)out=rest+','+out;
-    return '₹'+out;
-  }
-  function repaint(){
-    if(!body)return;
-    [].forEach.call(body.rows,function(r){
-      for(var i=1;i<=3;i++){
-        var td=r.cells[i], base=parseFloat(td.dataset.v);
-        if(td)td.textContent=fmt(gstOn?base*1.03:base);
-      }
-    });
-  }
-  var gstbtn=document.getElementById('gstbtn');
-  if(gstbtn){
-    gstbtn.addEventListener('click',function(){
-      gstOn=!gstOn;
-      this.setAttribute('aria-pressed',gstOn?'true':'false');
-      this.textContent=gstOn?'Showing incl. 3% GST':'Show incl. 3% GST';
-      repaint();
-    });
-  }
-  function sortBy(i,dir){
-    if(!body)return;
-    var rows=[].slice.call(body.rows);
-    /* col 0 = rank (numeric data-v), col 1 = Jeweller name (localeCompare),
-       cols 2..N = numeric data-v. After sort, renumber the rank cells so
-       the "#" column always reflects the CURRENT ordering (e.g. sorting by
-       22K makes rank 1 = cheapest 22K, not the original 24K rank). */
-    rows.sort(function(a,b){
-      if(i===1){return a.cells[1].textContent.localeCompare(b.cells[1].textContent)*dir;}
-      return (parseFloat(a.cells[i].dataset.v)-parseFloat(b.cells[i].dataset.v))*dir;
-    });
-    rows.forEach(function(r){body.appendChild(r);});
-    rows.forEach(function(r,idx){
-      var rc=r.cells[0];
-      if(rc){rc.textContent=idx+1; rc.dataset.v=idx+1;}
-    });
-  }
-  if(heads){
-    [].forEach.call(heads,function(h,i){
-      h.addEventListener('click',function(){
-        var cur=h.getAttribute('aria-sort');
-        [].forEach.call(heads,function(x){x.removeAttribute('aria-sort');});
-        var dir=cur==='ascending'?-1:1;
-        h.setAttribute('aria-sort',dir===1?'ascending':'descending');
-        sortBy(i,dir);
-      });
-    });
-  }
-  /* ---- karat filter (mobile) ---- */
-  document.querySelectorAll('.karatseg button').forEach(function(b){
-    b.addEventListener('click',function(){
-      document.querySelectorAll('.karatseg button').forEach(function(x){
-        x.setAttribute('aria-pressed','false');});
-      b.setAttribute('aria-pressed','true');
-      table.classList.remove('k22','k18');
-      if(b.dataset.k==='22')table.classList.add('k22');
-      else if(b.dataset.k==='18')table.classList.add('k18');
-    });
-  });
-  /* ---- live brand search filter ---- */
-  var bsearch=document.getElementById('brandsearch');
-  if(bsearch){
-    bsearch.addEventListener('input',function(){
-      var q=this.value.toLowerCase().trim();
-      [].forEach.call(body.rows,function(r){
-        var name=r.cells[0].textContent.toLowerCase();
-        r.style.display=name.indexOf(q)!==-1?'':'none';
-      });
-    });
-  }
-  /* ---- calculator quick weight pills ---- */
-  document.querySelectorAll('.qw-pill').forEach(function(pill){
-    pill.addEventListener('click',function(){
-      document.querySelectorAll('.qw-pill').forEach(function(p){p.classList.remove('active');});
-      pill.classList.add('active');
-      var wInput=document.getElementById('c-w');
-      if(wInput){
-        wInput.value=pill.dataset.w;
-        wInput.dispatchEvent(new Event('input',{bubbles:true}));
-      }
-    });
-  });
-  /* ---- "in my area": GPS -> state -> filter regional jewellers ---- */
-  var nearOn=false, userState=null,
-      nearbtn=document.getElementById('nearbtn'),
-      rnote=document.getElementById('region-note');
-  function rowVisible(r){var ds=r.getAttribute('data-states');
-    return ds==='all'||r.classList.contains('region-show');}
-  function updateBest(){
-    if(!body)return;
-    /* recompute the hero "Lowest 24K" over whatever rows are visible */
-    var bestV=Infinity,name='',logo='';
-    [].forEach.call(body.rows,function(r){
-      if(!rowVisible(r))return;
-      var c=r.querySelector('td.col-24');if(!c)return;
-      var v=parseFloat(c.dataset.v);
-      if(v<bestV){bestV=v;name=r.getAttribute('data-brand')||'';
-        logo=r.getAttribute('data-logo')||'';}
-    });
-    var vEl=document.querySelector('.tile.best .v'),
-        bw=document.querySelector('.bwin');
-    if(vEl&&isFinite(bestV))vEl.textContent=fmt(bestV);
-    if(bw)bw.innerHTML=name+(logo?' <img src="'+logo+'" alt="">':'');
-  }
-  function applyRegion(){
-    if(!body)return 0;
-    var shown=0;
-    [].forEach.call(body.rows,function(r){
-      var ds=r.getAttribute('data-states');
-      if(!ds||ds==='all')return;             /* national: always visible */
-      var serves=nearOn&&userState&&ds.split('|').indexOf(userState)>=0;
-      r.classList.toggle('region-show',serves);
-      if(serves)shown++;
-    });
-    updateBest();                           /* lowest may now be a local store */
-    return shown;
-  }
-  if(nearbtn){
-    nearbtn.addEventListener('click',function(){
-      if(nearOn){nearOn=false;nearbtn.setAttribute('aria-pressed','false');
-        nearbtn.textContent='📍 Brands near me';if(rnote)rnote.hidden=true;
-        applyRegion();return;}
-      if(!navigator.geolocation){alert('Location is not supported here.');return;}
-      nearbtn.textContent='Locating...';
-      navigator.geolocation.getCurrentPosition(function(pos){
-        fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude='+
-          pos.coords.latitude+'&longitude='+pos.coords.longitude+
-          '&localityLanguage=en')
-        .then(function(r){return r.json();}).then(function(d){
-          userState=d.principalSubdivision||'';
-          nearOn=true;nearbtn.setAttribute('aria-pressed','true');
-          nearbtn.textContent='📍 Brands in '+(userState||'My area');
-          var n=applyRegion();
-          if(rnote){
-            rnote.textContent=(n?('Now showing '+n+' local jeweller'+(n>1?'s':'')+
-              ' in '+userState):('No local jewellers we track in '+
-              (userState||'your area')+' yet'))+' - national brands are always '+
-              'shown. Tap again to hide local jewellers.';
-            rnote.hidden=false;
-          }
-        }).catch(function(){nearbtn.textContent='📍 Brands near me';
-          alert('Could not detect your area.');});
-      },function(){nearbtn.textContent='📍 Brands near me';
-        alert('Location permission denied.');},
-       {enableHighAccuracy:false,timeout:12000,maximumAge:600000});
-    });
-  }
-  /* ---- markets drawer ---- */
-  var drw=document.getElementById('mdrawer'),
-      drov=document.getElementById('drov'),
-      drtab=document.getElementById('drtab');
-  if(drw&&drtab){
-    var drSet=function(open){
-      drw.classList.toggle('open',open);
-      if(drov)drov.hidden=!open;
-      drtab.setAttribute('aria-expanded',open?'true':'false');
-      drw.setAttribute('aria-hidden',open?'false':'true');
-    };
-    drtab.addEventListener('click',function(){
-      drSet(!drw.classList.contains('open'));});
-    var drx=document.getElementById('drx');
-    if(drx)drx.addEventListener('click',function(){drSet(false);});
-    if(drov)drov.addEventListener('click',function(){drSet(false);});
-    document.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&drw.classList.contains('open'))drSet(false);});
-  }
-  /* calculators drawer */
-  var cdw=document.getElementById('cdrawer'),
-      cdov=document.getElementById('cdov'),cdtab=document.getElementById('cdtab');
-  if(cdw&&cdtab){
-    var cdSet=function(o){cdw.classList.toggle('open',o);if(cdov)cdov.hidden=!o;
-      cdtab.setAttribute('aria-expanded',o?'true':'false');
-      cdw.setAttribute('aria-hidden',o?'false':'true');};
-    cdtab.addEventListener('click',function(){
-      cdSet(!cdw.classList.contains('open'));});
-    var cdx=document.getElementById('cdx');
-    if(cdx)cdx.addEventListener('click',function(){cdSet(false);});
-    if(cdov)cdov.addEventListener('click',function(){cdSet(false);});
-    document.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&cdw.classList.contains('open'))cdSet(false);});
-  }
-  /* gold coins drawer */
-  var coindw=document.getElementById('coindrawer'),
-      coindov=document.getElementById('coindov'),
-      coindtab=document.getElementById('coindtab');
-  if(coindw&&coindtab){
-    var coindSet=function(o){coindw.classList.toggle('open',o);coindov.hidden=!o;
-      coindtab.setAttribute('aria-expanded',o?'true':'false');
-      coindw.setAttribute('aria-hidden',o?'false':'true');};
-    coindtab.addEventListener('click',function(){
-      coindSet(!coindw.classList.contains('open'));});
-    var coindx=document.getElementById('coindx');
-    if(coindx)coindx.addEventListener('click',function(){coindSet(false);});
-    if(coindov)coindov.addEventListener('click',function(){coindSet(false);});
-    document.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&coindw.classList.contains('open'))coindSet(false);});
-  }
-
-  /* ---- calculator ---- */
-  var sel=document.getElementById('c-b'), w=document.getElementById('c-w');
-  if(sel && typeof BRANDS !== 'undefined' && BRANDS.length){
-    BRANDS.forEach(function(b,i){
-      var o=document.createElement('option');
-      o.value=i;o.textContent=b.name;sel.appendChild(o);
-    });
-  }
-  var purity='24K', gst=false;
-  function calc(){
-    if(!w || !sel || typeof BRANDS === 'undefined' || !BRANDS.length) return;
-    var grams=parseFloat(w.value)||0;
-    var idx=parseInt(sel.value,10)||0;
-    var b=BRANDS[idx]||BRANDS[0];
-    if(!b) return;
-    var rate=b.r24*({'24K':24/24,'22K':22/24,'18K':18/24,'14K':14/24}[purity]||1.0);
-    var goldVal=rate*grams, gstAmt=goldVal*0.03;
-    var total=gst?goldVal+gstAmt:goldVal;
-    var cTitle=document.getElementById('c-title'),
-        cTotal=document.getElementById('c-total'),
-        cBasis=document.getElementById('c-basis'),
-        cRate=document.getElementById('c-rate'),
-        cGold=document.getElementById('c-gold'),
-        cGst=document.getElementById('c-gst');
-    if(cTitle)cTitle.textContent=grams+' g · '+purity+' · '+b.name;
-    if(cTotal)cTotal.textContent=fmt(total);
-    if(cBasis)cBasis.textContent=gst?'including 3% GST, excluding making charges':'pre-GST, excluding making charges';
-    if(cRate)cRate.textContent=fmt(rate)+'/g';
-    if(cGold)cGold.textContent=fmt(goldVal);
-    if(cGst)cGst.textContent=gst?fmt(gstAmt):'not applied';
-  }
-  if(w)w.addEventListener('input',calc);
-  if(sel)sel.addEventListener('change',calc);
-  document.querySelectorAll('[data-p]').forEach(function(b){
-    b.addEventListener('click',function(){
-      document.querySelectorAll('[data-p]').forEach(function(x){x.setAttribute('aria-pressed','false');});
-      b.setAttribute('aria-pressed','true');purity=b.dataset.p;calc();
-    });
-  });
-  document.querySelectorAll('[data-g]').forEach(function(b){
-    b.addEventListener('click',function(){
-      document.querySelectorAll('[data-g]').forEach(function(x){x.setAttribute('aria-pressed','false');});
-      b.setAttribute('aria-pressed','true');gst=b.dataset.g==='1';calc();
-    });
-  });
-
-  /* ---- Gold Calculator (reverse: budget in, grams out) ---- */
-  /* Same BRANDS list as the price calc, scored the other way:
-     grams = budget / (rate * (1 + making%) * (1 + GST_if_on)). Making %
-     is user-typed - the multi-brand comparison at /budget-gold-calculator
-     is where our verified per-brand medians drive the picture. */
-  var gcSel=document.getElementById('gc-brand'),
-      gcBudget=document.getElementById('gc-b'),
-      gcMc=document.getElementById('gc-m'),
-      gcCustomRow=document.getElementById('gc-custom-row'),
-      gcCustom=document.getElementById('gc-custom'),
-      gcCustomK=document.getElementById('gc-custom-k');
-  if(gcSel && typeof BRANDS !== 'undefined' && BRANDS.length){
-    BRANDS.forEach(function(b,i){
-      var o=document.createElement('option');
-      o.value=i;o.textContent=b.name;gcSel.appendChild(o);
-    });
-    /* Custom-rate option: user's own jeweller quote, not on our tracked list.
-       The rate is treated as the price for whatever purity is selected, so we
-       infer the 24K anchor by dividing by the purity fraction - keeps the
-       downstream maths identical to a normal BRANDS entry. */
-    var oc=document.createElement('option');
-    oc.value='__custom__';oc.textContent='✎ Custom rate (your jeweller)';
-    gcSel.appendChild(oc);
-  }
-  var gcPurity='24K', gcGst=true;
-  var FRAC_GC={'24K':24/24,'22K':22/24,'18K':18/24,'14K':14/24};
-  function gcCalc(){
-    if(!gcBudget || !gcSel) return;
-    var isCustom=gcSel.value==='__custom__';
-    var budget=parseFloat(gcBudget.value)||0;
-    var mcPct=Math.max(0, Math.min(60, parseFloat(gcMc.value)||0));
-    var frac=FRAC_GC[gcPurity]||1.0;
-    var r24, brandName;
-    if(isCustom){
-      var custom=parseFloat(gcCustom.value)||0;
-      if(custom<=0){return;}
-      r24=custom/frac; brandName='Your quote';
-    } else {
-      if(typeof BRANDS==='undefined'||!BRANDS.length)return;
-      var idx=parseInt(gcSel.value,10)||0;
-      var b=BRANDS[idx]||BRANDS[0]; if(!b)return;
-      r24=b.r24; brandName=b.name;
-    }
-    if(budget<=0) return;
-    var rate=r24*frac;
-    var cpg=rate*(1+mcPct/100)*(gcGst?1.03:1);
-    var grams=cpg>0?budget/cpg:0;
-    var goldVal=rate*grams;
-    var mcVal=goldVal*(mcPct/100);
-    var gstVal=gcGst?(goldVal+mcVal)*0.03:0;
-    var t=document.getElementById('gc-title'),
-        gr=document.getElementById('gc-grams'),
-        ba=document.getElementById('gc-basis'),
-        rt=document.getElementById('gc-rate'),
-        gv=document.getElementById('gc-gold'),
-        mv=document.getElementById('gc-mc'),
-        gs=document.getElementById('gc-gst');
-    if(t)t.textContent='₹'+Math.round(budget).toLocaleString('en-IN')+' · '+gcPurity+' · '+brandName;
-    if(gr)gr.textContent=(grams<10?grams.toFixed(2):grams.toFixed(1))+' g';
-    if(ba)ba.textContent=(gcGst?'incl. 3% GST':'pre-GST')+', making @ '+mcPct+'%';
-    if(rt)rt.textContent=fmt(rate)+'/g';
-    if(gv)gv.textContent=fmt(goldVal);
-    if(mv)mv.textContent=mcPct>0?fmt(mcVal):'not applied';
-    if(gs)gs.textContent=gcGst?fmt(gstVal):'not applied';
-  }
-  /* Reveal the custom-rate input only when 'Custom rate' is selected, and
-     mirror the current purity into the input's label so the user sees exactly
-     which karat they're typing for ('Your jeweller's 22K rate'). */
-  function gcSyncCustom(){
-    var isCustom=gcSel && gcSel.value==='__custom__';
-    if(gcCustomRow) gcCustomRow.hidden=!isCustom;
-    if(gcCustomK) gcCustomK.textContent=gcPurity;
-  }
-  if(gcBudget)gcBudget.addEventListener('input',gcCalc);
-  if(gcMc)gcMc.addEventListener('input',gcCalc);
-  if(gcCustom)gcCustom.addEventListener('input',gcCalc);
-  if(gcSel)gcSel.addEventListener('change',function(){gcSyncCustom();gcCalc();});
-  document.querySelectorAll('[data-gp]').forEach(function(b){
-    b.addEventListener('click',function(){
-      document.querySelectorAll('[data-gp]').forEach(function(x){x.setAttribute('aria-pressed','false');});
-      b.setAttribute('aria-pressed','true');gcPurity=b.dataset.gp;gcSyncCustom();gcCalc();
-    });
-  });
-  document.querySelectorAll('[data-gg]').forEach(function(b){
-    b.addEventListener('click',function(){
-      document.querySelectorAll('[data-gg]').forEach(function(x){x.setAttribute('aria-pressed','false');});
-      b.setAttribute('aria-pressed','true');gcGst=b.dataset.gg==='1';gcCalc();
-    });
-  });
-  document.querySelectorAll('[data-gb]').forEach(function(b){
-    b.addEventListener('click',function(){
-      document.querySelectorAll('[data-gb]').forEach(function(x){x.classList.remove('active');});
-      b.classList.add('active');
-      if(gcBudget){gcBudget.value=b.dataset.gb;gcCalc();}
-    });
-  });
-  gcSyncCustom();
-  gcCalc();
-
-  /* ---- Middle Class Persona: Jewellery Final Bill Estimator JS ---- */
-  var bcKarat=document.getElementById('bc-karat'),
-      bcWeight=document.getElementById('bc-weight'),
-      bcMaking=document.getElementById('bc-making'),
-      bbWtLbl=document.getElementById('bb-wt-lbl'),
-      bbRateLbl=document.getElementById('bb-rate-lbl'),
-      bbGoldTot=document.getElementById('bb-gold-tot'),
-      bbMPct=document.getElementById('bb-m-pct'),
-      bbMakingTot=document.getElementById('bb-making-tot'),
-      bbGstTot=document.getElementById('bb-gst-tot'),
-      bbGrandTot=document.getElementById('bb-grand-tot');
-
-  function updateBillCalc(){
-    if(!bcKarat||!bcWeight||!bcMaking)return;
-    var k=bcKarat.value||'22K';
-    var w=parseFloat(bcWeight.value)||10;
-    var mPct=parseFloat(bcMaking.value)||12;
-
-    var base24 = parseInt("$low24_num", 10) || 14467;
-    var rate = Math.round(base24 * ({'24K':24/24, '22K':22/24, '18K':18/24, '14K':14/24}[k] || 22/24));
-
-    var goldCost=w*rate;
-    var makingCost=goldCost*(mPct/100);
-    var subtotal=goldCost+makingCost;
-    var gstCost=subtotal*0.03;
-    var grandTotal=subtotal+gstCost;
-
-    if(bbWtLbl)bbWtLbl.textContent=w+'g';
-    if(bbRateLbl)bbRateLbl.textContent='₹'+rate.toLocaleString('en-IN')+'/g';
-    if(bbGoldTot)bbGoldTot.textContent='₹'+Math.round(goldCost).toLocaleString('en-IN');
-    if(bbMPct)bbMPct.textContent=mPct+'%';
-    if(bbMakingTot)bbMakingTot.textContent='₹'+Math.round(makingCost).toLocaleString('en-IN');
-    if(bbGstTot)bbGstTot.textContent='₹'+Math.round(gstCost).toLocaleString('en-IN');
-    if(bbGrandTot)bbGrandTot.textContent='₹'+Math.round(grandTotal).toLocaleString('en-IN');
-  }
-
-  if(bcKarat)bcKarat.addEventListener('change',updateBillCalc);
-  if(bcWeight)bcWeight.addEventListener('input',updateBillCalc);
-  if(bcMaking)bcMaking.addEventListener('input',updateBillCalc);
-
-  /* ---- Rich Persona: 24K Coin Weight Pills JS ---- */
-  var coinPills=document.querySelectorAll('.coin-pill');
-  var cpMmtc=document.getElementById('cp-mmtc'),
-      cpTanishq=document.getElementById('cp-tanishq'),
-      cpKalyan=document.getElementById('cp-kalyan'),
-      cpMalabar=document.getElementById('cp-malabar'),
-      cpSenco=document.getElementById('cp-senco'),
-      cpJoyalukkas=document.getElementById('cp-joyalukkas');
-
-  function updateCoinPrices(wt){
-    var baseRate=parseInt("$low24_num", 10) || 14467;
-    /* making-charge multipliers: gold cost + maker's % (pre-GST) */
-    if(cpMmtc)cpMmtc.textContent='\u20b9'+(Math.round(wt*baseRate*1.025)).toLocaleString('en-IN');
-    if(cpKalyan)cpKalyan.textContent='\u20b9'+(Math.round(wt*baseRate*1.030)).toLocaleString('en-IN');
-    if(cpMalabar)cpMalabar.textContent='\u20b9'+(Math.round(wt*baseRate*1.032)).toLocaleString('en-IN');
-    if(cpSenco)cpSenco.textContent='\u20b9'+(Math.round(wt*baseRate*1.035)).toLocaleString('en-IN');
-    if(cpJoyalukkas)cpJoyalukkas.textContent='\u20b9'+(Math.round(wt*baseRate*1.038)).toLocaleString('en-IN');
-    if(cpTanishq)cpTanishq.textContent='\u20b9'+(Math.round(wt*baseRate*1.040)).toLocaleString('en-IN');
-  }
-
-  coinPills.forEach(function(pill){
-    pill.addEventListener('click',function(){
-      coinPills.forEach(function(p){
-        p.style.background='none';p.style.color='var(--ink-2)';p.style.border='1px solid var(--line)';
-      });
-      pill.style.background='var(--gold)';pill.style.color='#0C0904';pill.style.border='1px solid var(--gold)';
-      var wt=parseFloat(pill.dataset.wt)||1;
-      updateCoinPrices(wt);
-    });
-  });
-  if(w && sel)calc();
-  if(bcKarat)updateBillCalc();
-  updateCoinPrices(1); /* init all coin prices on page load using live rate */
-
-  /* ---- gold coin cursor trail ---- */
-  if(!matchMedia('(prefers-reduced-motion: reduce)').matches &&
-     !matchMedia('(pointer: coarse)').matches){
-    var lastCoin=0;
-    document.addEventListener('mousemove',function(e){
-      var now=Date.now(); if(now-lastCoin<55)return; lastCoin=now;
-      var c=document.createElement('span'); c.className='coin';
-      var s=5+Math.random()*7;
-      c.style.width=s+'px'; c.style.height=s+'px';
-      c.style.left=(e.clientX+(Math.random()*16-8))+'px';
-      c.style.top=(e.clientY+4+(Math.random()*8))+'px';
-      document.body.appendChild(c);
-      setTimeout(function(){if(c.parentNode)c.parentNode.removeChild(c);},950);
-    },{passive:true});
-  }
-
-
-
-  /* ---- BIS Hallmark & HUID Scanner Tool ---- */
-  var hInput=document.getElementById('huid-input'),
-      hBtn=document.getElementById('huid-scan-btn'),
-      hResCode=document.getElementById('res-code'),
-      hResKarat=document.getElementById('res-karat'),
-      hResFineness=document.getElementById('res-fineness'),
-      hResVal=document.getElementById('res-val'),
-      hResUse=document.getElementById('res-use'),
-      hStampText=document.getElementById('res-stamp-text'),
-      hWeightInput=document.getElementById('huid-weight'),
-      hCalcTotal=document.getElementById('huid-calc-total');
-
-  var currentPerGram = 13265;
-
-  function verifyHUID(code){
-    if(!code)code=(hInput?hInput.value:'').trim().toUpperCase();
-    if(!code)return;
-    code=code.trim().toUpperCase();
-    if(hInput)hInput.value=code;
-
-    var karat='22K', fineness=916, pct='91.6%', use='Bridal & Traditional Jewellery',
-        perGramRate = 13265;
-
-    if(code.indexOf('24K')!==-1 || code.indexOf('999')!==-1){
-      karat='24K'; fineness=999; pct='99.9%'; use='Investment Coins, Bars & Bullion';
-      perGramRate = 14467;
-    } else if(code.indexOf('18K')!==-1 || code.indexOf('750')!==-1){
-      karat='18K'; fineness=750; pct='75.0%'; use='Diamond & Gemstone Jewellery';
-      perGramRate = 10850;
-    } else if(code.indexOf('14K')!==-1 || code.indexOf('585')!==-1){
-      karat='14K'; fineness=585; pct='58.5%'; use='Lightweight Daily & Office Wear';
-      perGramRate = Math.round(14467 * 0.585);
-    }
-
-    currentPerGram = perGramRate;
-
-    if(hResCode)hResCode.textContent='HUID / STAMP: '+code;
-    if(hResKarat)hResKarat.textContent=karat+' Carat ('+karat+')';
-    if(hResFineness)hResFineness.textContent=pct+' Pure Gold ('+fineness+' Fineness)';
-    if(hResVal)hResVal.textContent='₹'+(perGramRate*10).toLocaleString('en-IN');
-    if(hResUse)hResUse.textContent=use;
-    if(hStampText)hStampText.textContent=karat+fineness;
-
-    recalcHUID();
-  }
-
-  function recalcHUID(){
-    if(!hWeightInput||!hCalcTotal)return;
-    var w=parseFloat(hWeightInput.value)||10;
-    var tot=Math.round(w*currentPerGram);
-    hCalcTotal.textContent='₹'+tot.toLocaleString('en-IN');
-  }
-
-  if(hBtn)hBtn.addEventListener('click',function(){verifyHUID();});
-  if(hInput)hInput.addEventListener('input',function(){verifyHUID();});
-  if(hWeightInput)hWeightInput.addEventListener('input',recalcHUID);
-
-  document.querySelectorAll('.huid-sample-btn').forEach(function(b){
-    b.addEventListener('click',function(){
-      verifyHUID(b.dataset.code);
-    });
-  });
-
-  /* ---- daily-alerts modal ---- */
-  var SB_URL="$supabase_url", SB_KEY="$anon_key";
-  var overlay=document.getElementById('alert-overlay');
-  var mform=document.getElementById('m-form');
-  var mok=document.getElementById('mm-ok'), merr=document.getElementById('mm-err');
-  var mbtn=document.getElementById('m-btn');
-  function openModal(){
-    mform.reset();                 /* never show previously typed/submitted data */
-    mok.style.display='none'; merr.style.display='none';
-    mbtn.disabled=false; mbtn.textContent='Subscribe';
-    overlay.classList.add('open');
-    /* carry over the email if they already used the quick-subscribe banner */
-    var qe=document.getElementById('qs-email');
-    if(qe&&qe.value.trim())document.getElementById('m-email').value=qe.value.trim();
-    document.getElementById('m-name').focus();
-  }
-  // Exposed for the auto-popup-after-One-Tap hook (separate top-level IIFE,
-  // earlier in this script - same reason GR_OPENGATE exists).
-  window.GR_OPENMODAL=openModal;
-  function closeModal(){overlay.classList.remove('open');
-    try{sessionStorage.setItem('gr_dismissed','1');}catch(e){}}
-  document.getElementById('m-close').addEventListener('click',closeModal);
-  overlay.addEventListener('click',function(e){
-    if(e.target===overlay)closeModal();});
-  document.addEventListener('keydown',function(e){
-    if(e.key==='Escape'&&overlay.classList.contains('open'))closeModal();});
-  document.querySelectorAll('.js-alert').forEach(function(a){
-    a.addEventListener('click',function(e){e.preventDefault();openModal();});
-  });
-  function send(payload,retried){
-    return fetch(SB_URL+'/rest/v1/inquiries',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_KEY,
-               'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify(payload)
-    }).then(function(r){
-      if(r.ok)return true;
-      /* older table without the newer columns: retry with base fields only */
-      if(!retried){
-        var BASE=['name','email','phone','country','state','city','zip'];
-        var p2={};BASE.forEach(function(k){
-          if(payload[k]!==undefined)p2[k]=payload[k];});
-        return send(p2,true);
-      }
-      throw new Error('bad status');
-    });
-  }
-  mform.addEventListener('submit',function(e){
-    e.preventDefault();
-    mok.style.display='none';merr.style.display='none';
-    if(mform.website.value){return;}
-    if(!mform.reportValidity()){return;}
-    if(!SB_KEY){merr.textContent='Subscriptions open shortly - please check back soon.';
-      merr.style.display='block';return;}
-    mbtn.disabled=true;mbtn.textContent='Subscribing...';
-    var payload={
-      name:mform.name.value.trim(), email:mform.email.value.trim(),
-      phone:mform.phone.value.trim(), country:mform.country.value,
-      state:mform.state.value.trim(), city:mform.city.value.trim(),
-      zip:mform.zip.value.trim(), area:mform.area.value.trim(),
-      offers_optin:mform.offers.checked
-    };
-    var g=window.GR_GDATA||{};
-    for(var k in g){if(g[k]!==null&&g[k]!==undefined)payload[k]=g[k];}
-    /* merge into the same email row when possible; else plain insert */
-    var save=window.GR_SAVE?window.GR_SAVE(payload):send(payload,false);
-    save.then(function(){
-      mok.style.display='block';mbtn.textContent='Subscribed';
-      try{localStorage.setItem('gr_sub','1');}catch(e){}
-      setTimeout(closeModal,1600);
-    }).catch(function(){
-      merr.style.display='block';
-      mbtn.disabled=false;mbtn.textContent='Subscribe';
-    });
-  });
-
-  /* ---- quick-subscribe (single email field, no modal) ---- */
-  (function(){
-    var qform=document.getElementById('qs-form');
-    if(!qform)return;
-    var qemail=document.getElementById('qs-email'),
-        qbtn=document.getElementById('qs-btn'),
-        qok=document.getElementById('qs-ok'), qerr=document.getElementById('qs-err');
-    try{if(localStorage.getItem('gr_sub')==='1'){
-      qform.hidden=true;qok.style.display='block';
-      qok.innerHTML='You\\'re already subscribed - see you tomorrow morning.';
-    }}catch(e){}
-    qform.addEventListener('submit',function(e){
-      e.preventDefault();
-      qok.style.display='none';qerr.style.display='none';
-      var email=(qemail.value||'').trim();
-      if(!email)return;
-      if(!SB_KEY){qerr.textContent='Subscriptions open shortly - please check back soon.';
-        qerr.style.display='block';return;}
-      qbtn.disabled=true;qbtn.textContent='Subscribing...';
-      var payload={email:email,signup_source:'quick_banner'};
-      var save=window.GR_SAVE?window.GR_SAVE(payload):send(payload,false);
-      save.then(function(){
-        qok.style.display='block';qbtn.textContent='Subscribed';
-        try{localStorage.setItem('gr_sub','1');}catch(e){}
-      }).catch(function(){
-        qerr.style.display='block';
-        qbtn.disabled=false;qbtn.textContent='Get Free Alerts';
-      });
-    });
-  })();
-
-  /* ---- visitor hit counter ---- */
-  (function(){
-    var el=document.getElementById('hitcount'),
-        wrap=document.getElementById('hits');
-    if(!SB_KEY||!el)return;
-    var counted=false; try{counted=!!sessionStorage.getItem('gr_hit');}catch(e){}
-    var fn=counted?'hits_count':'bump_hits';   /* bump once per session */
-    fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_KEY,
-               'Authorization':'Bearer '+SB_KEY},body:'{}'})
-      .then(function(r){return r.ok?r.json():Promise.reject();})
-      .then(function(n){
-        n=Number(n);
-        if(!isNaN(n)){el.textContent=n.toLocaleString('en-IN');wrap.hidden=false;}
-        try{sessionStorage.setItem('gr_hit','1');}catch(e){}
-      }).catch(function(){});
-  })();
-})();
-</script>
-<script>window.GR_GCID="$gclient";window.GR_SB_URL="$supabase_url";window.GR_SB_KEY="$anon_key";</script>
-<script src="signup.js?v=$sig_ver" defer></script>
-<script>
-// Live "refreshed X ago" ticker attached to every element that carries a
-// data-updated-epoch attribute. Reads the build time straight from the DOM
-// so it stays correct across CDN caches, and updates every 15s so users
-// see the number counting up in place — a low-cost signal that the rates
-// are actually being maintained.
-(function(){
-  function agoStr(sec){
-    if(sec<45) return 'just now';
-    if(sec<90) return '1 min ago';
-    if(sec<3600) return Math.round(sec/60)+' min ago';
-    if(sec<5400) return '1 hour ago';
-    if(sec<86400) return Math.round(sec/3600)+' hours ago';
-    var d=Math.round(sec/86400); return d===1?'1 day ago':d+' days ago';
-  }
-  function tick(){
-    var now=Date.now()/1000|0;
-    document.querySelectorAll('[data-updated-epoch]').forEach(function(el){
-      var e=parseInt(el.getAttribute('data-updated-epoch')||'0',10);
-      if(!e) return;
-      var slot=el.querySelector('.refreshed-ago');
-      if(slot) slot.textContent=agoStr(Math.max(0,now-e));
-    });
-  }
-  tick();
-  setInterval(tick,15000);
-})();
-</script>
-$gate_html
-$gate_js
-</body>
-</html>
-""")
 
 
 INQUIRY_TEMPLATE = Template("""<!DOCTYPE html>
@@ -6979,7 +4854,7 @@ INQUIRY_TEMPLATE = Template("""<!DOCTYPE html>
 $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+$nd_fonts
 $gsi
 <style>
 $base_css
@@ -7011,19 +4886,12 @@ $base_css
   border:1px solid rgba(217,178,74,.22)}
 .hero-sm h1{font-size:clamp(24px,4vw,34px);color:#F6F1E3;margin-bottom:6px}
 .hero-sm p{color:#B9C2B4;max-width:52ch;font-size:15px}
+$nd_css
 </style>
 $analytics_js</head>
 <body>
-$nav
+$nd_header
 <div class="wrap">
-
-<header class="top">
-  <button class="navtog" id="navtog" aria-label="Open menu" aria-expanded="false">&#9776;</button>
-  <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
-  <div class="topright">
-    <a class="btn" href="$site_url/">← Today's rates</a>
-  </div>
-</header>
 
 <section class="hero-sm">
   <h1>Daily Gold Rate Alerts</h1>
@@ -7090,11 +4958,10 @@ $nav
   email and are never sold or shared with jewellers or advertisers.</p>
 </form>
 
-<footer>
-  <p>© $year GoldRates - daily gold rate comparison for India.</p>
-</footer>
+
 
 </div>
+$nd_footer
 <script>
 (function(){
   var URL_="$supabase_url", KEY="$anon_key";
@@ -7166,7 +5033,7 @@ PAGE_TEMPLATE = Template("""<!DOCTYPE html>
 $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+$nd_fonts
 <style>
 $base_css
 .page{max-width:720px;margin:10px 0 30px}
@@ -7180,31 +5047,20 @@ $base_css
 .foot-nav{margin:8px 0}
 .foot-nav a{color:var(--ink-3);margin-right:14px;text-decoration:none}
 .foot-nav a:hover{color:var(--ink)}
+$nd_css
 </style>
 $analytics_js</head>
 <body>
-$nav
+$nd_header
 <div class="wrap">
-<header class="top">
-  <button class="navtog" id="navtog" aria-label="Open menu" aria-expanded="false">&#9776;</button>
-  <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
-  <div class="topright"><a class="btn" href="$site_url/">Today's rates</a></div>
-</header>
 <article class="page">
   <h1>$heading</h1>
   <p class="updated-on">Last updated $date</p>
 $body
 </article>
-<footer>
-  <div class="foot-nav">
-    <a href="$site_url/about">About</a>
-    <a href="$site_url/contact">Contact</a>
-    <a href="$site_url/terms">Terms of Service</a>
-    <a href="$site_url/privacy">Privacy Policy</a>
-  </div>
-  <p>© $year GoldRates - daily gold rate comparison for India.</p>
-</footer>
+
 </div>
+$nd_footer
 <script>window.GR_SB_URL="$supabase_url";window.GR_SB_KEY="$anon_key";</script>
 <script src="signup.js?v=$sig_ver" defer></script>
 </body>
@@ -7231,7 +5087,7 @@ CONTENT_TEMPLATE = Template("""<!DOCTYPE html>
 $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+$nd_fonts
 $jsonld_block
 <style>
 $base_css
@@ -7282,30 +5138,18 @@ $base_css
 .foot-nav{margin:8px 0}
 .foot-nav a{color:var(--ink-3);margin-right:14px;text-decoration:none}
 .foot-nav a:hover{color:var(--ink)}
+$nd_css
 </style>
 $analytics_js</head>
 <body>
-$nav
+$nd_header
 <div class="wrap">
-<header class="top">
-  <button class="navtog" id="navtog" aria-label="Open menu" aria-expanded="false">&#9776;</button>
-  <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
-  <div class="topright"><a class="btn" href="$site_url/">Today's rates</a></div>
-</header>
 <article class="page">
 $body
 </article>
-<footer>
-  <div class="foot-nav">
-    <a href="$site_url/about">About</a>
-    <a href="$site_url/contact">Contact</a>
-    <a href="$site_url/privacy">Privacy Policy</a>
-    <a href="$site_url/news">News</a>
-    <a href="$site_url/calculators">Calculators</a>
-  </div>
-  <p>© $year GoldRates - daily gold rate comparison for India.</p>
-</footer>
+
 </div>
+$nd_footer
 <script>window.GR_SB_URL="$supabase_url";window.GR_SB_KEY="$anon_key";</script>
 <script src="$site_url/signup.js?v=$sig_ver" defer></script>
 $extra_js
@@ -7329,7 +5173,7 @@ UNSUB_TEMPLATE = Template("""<!DOCTYPE html>
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+$nd_fonts
 <style>
 $base_css
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
@@ -7343,15 +5187,12 @@ $base_css
 .reasons .r input{accent-color:var(--gold,#D9B24A);width:16px;height:16px}
 .reasons .btn{width:100%;margin-top:14px}
 .skip{margin-top:12px;font-size:13px;text-align:center}
+$nd_css
 </style>
 </head>
 <body>
-$nav
+$nd_header
 <div class="wrap">
-<header class="top">
-  <button class="navtog" id="navtog" aria-label="Open menu" aria-expanded="false">&#9776;</button>
-  <a class="brand" href="$site_url/" aria-label="MyGoldRates.com home"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand-text"><span class="wm">My<b>Gold</b>Rates<span class="tld">.com</span></span><span class="brand-tag">India&rsquo;s 1st gold rate comparison platform</span></span></a>
-</header>
 <div class="card">
   <h1>Unsubscribe</h1>
   <div id="ask">
@@ -7370,6 +5211,7 @@ $nav
   <p style="margin-top:16px"><a class="btn" href="$site_url/">Back to gold rates</a></p>
 </div>
 </div>
+$nd_footer
 <script>
 (function(){
   var URL_="$supabase_url", KEY="$anon_key";

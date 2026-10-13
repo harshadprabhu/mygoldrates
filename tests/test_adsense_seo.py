@@ -28,7 +28,7 @@ def test_homepage_links_to_policy_and_main_pages():
     - Search Console reported /calculators and /news as unknown to Google.
     AdSense reviewers look for policy pages and navigation from here."""
     h = _read(f"{DOCS}/index.html")
-    for path in ("privacy", "about", "contact", "terms", "compare",
+    for path in ("privacy", "about", "contact", "terms",
                  "calculators", "news", "making-charges-comparison"):
         assert re.search(rf'href="(?:https://mygoldrates\.com)?/{path}"', h), (
             f"homepage does not link /{path}")
@@ -40,7 +40,7 @@ def test_phone_view_carries_the_links_too():
     display:none below 900px, and Google indexes the phone version."""
     h = _read(f"{DOCS}/index.html")
     app = h[h.index('id="v-rates"'):h.index("<!-- /v-rates -->")]
-    assert "/privacy" in app and "/about" in app and "/compare" in app
+    assert "/privacy" in app and "/about" in app and "/calculators" in app
 
 
 def test_homepage_template_markers_present():
@@ -93,8 +93,10 @@ def test_city_pages_do_not_repeat_the_national_faq_or_its_markup():
         types += [x.get("@type") for x in items]
     assert "FAQPage" not in types and "Dataset" not in types
     assert "BreadcrumbList" in types
-    c = _read(f"{DOCS}/compare.html")
-    assert 'id="faqh"' in c and '"FAQPage"' in c
+    # /compare is gone (it redirects to /); the homepage carries the FAQ
+    # and its markup now.
+    assert not os.path.exists(f"{DOCS}/compare.html")
+    assert '"FAQPage"' in _read(f"{DOCS}/index.html")
 
 
 @built
@@ -176,3 +178,57 @@ def test_city_section_text_is_coloured_for_the_dark_design():
     write-up rendered dark-on-dark until it was given a colour."""
     src = _read("generate_site.py")
     assert ".city-local,.city-local h2,.city-local h3,.city-local p," in src
+
+
+
+# ─── no old design anywhere ─────────────────────────────────────────────
+
+@built
+def test_no_public_page_is_in_the_old_design():
+    """Every page is either the app (home + city pages) or the new-design
+    page shell. The only exception is the private analytics dashboard,
+    which no visitor reaches."""
+    old_markers = ('<header class="top">', 'id="navdrawer"', 'class="navtog"',
+                   "family=Marcellus", 'class="board-rates"', 'class="brand-tag"')
+    bad = []
+    for root, _, files in os.walk(DOCS):
+        for f in files:
+            if not f.endswith(".html"):
+                continue
+            path = os.path.join(root, f)
+            if path == f"{DOCS}/analytics.html":
+                continue
+            h = _read(path)
+            new = 'id="v-rates"' in h or 'class="nd-nav"' in h
+            if not new or any(m in h for m in old_markers):
+                bad.append(path)
+    assert not bad, f"{len(bad)} page(s) in the old design, e.g. {bad[:5]}"
+
+
+def test_there_is_no_old_design_fallback():
+    """The old design used to come back whenever pulse_app.html was missing,
+    which is how an old page reaches production unnoticed."""
+    src = _read("generate_site.py")
+    assert "TEMPLATE = Template(" not in src.replace("PAGE_TEMPLATE", "").replace(
+        "CONTENT_TEMPLATE", "").replace("INQUIRY_TEMPLATE", "").replace("UNSUB_TEMPLATE", "")
+    assert "write_classic_city_pages" not in src
+    assert "refusing to build the" in src and "without the new design" in src
+    assert "NAV = f" not in src
+
+
+@built
+def test_compare_redirects_to_the_homepage():
+    rules = _read(f"{DOCS}/_redirects")
+    for src in ("/compare", "/compare/", "/compare.html"):
+        assert re.search(rf"^{re.escape(src)}\s+/\s+301$", rules, re.M), src
+
+
+@built
+@pytest.mark.parametrize("page", ["index.html", "gold-rate-today-in-chennai.html",
+                                  "about.html", "calculators.html",
+                                  "jewellers-digest.html", "404.html"])
+def test_logo_mark_is_in_the_header(page):
+    """The gold bars-and-arrow mark was in the old header and was lost when
+    pages moved to the new design's wordmark-only header."""
+    h = _read(f"{DOCS}/{page}")
+    assert 'class="brand-mark"' in h

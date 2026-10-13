@@ -40,6 +40,13 @@ SHEETS = [
 def build(price=P):
     disc = price.DISCOUNT_PCT
     analytics = _analytics()
+    # The site's shared header (with the logo and main menu) and footer, so
+    # this page is not the one place that looks like a different website.
+    import generate_site as _gs
+    from datetime import date as _date
+    nd_header = _gs.nd_header_html()
+    nd_footer = _gs.nd_footer_html(_date.today().year)
+    nd_chrome = _gs.ND_CHROME_CSS
     sheets = "".join(
         f'<div class="sh"><b>{n}</b><span>{d}</span></div>' for n, d in SHEETS)
     return f"""<!doctype html>
@@ -69,7 +76,6 @@ body{{background:var(--bg);color:var(--ink);font-family:var(--sans);
   font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}}
 a{{color:var(--gold-l)}}
 .wrap{{max-width:940px;margin:0 auto;padding:0 20px}}
-header{{padding:22px 0;border-bottom:1px solid var(--line)}}
 .brand{{display:flex;align-items:center;gap:9px;font-family:var(--serif);
   font-size:19px;font-weight:700}}
 .brand svg{{width:28px;height:28px;flex:0 0 auto}}
@@ -126,16 +132,14 @@ h2{{font-family:var(--serif);font-size:27px;margin-bottom:8px}}
 .note{{background:var(--card);border:1px solid var(--line);
   border-left:3px solid var(--gold);border-radius:11px;padding:16px 18px;
   color:var(--ink2);font-size:13.8px;max-width:72ch}}
-footer{{padding:34px 0 60px;border-top:1px solid var(--line);
-  color:var(--ink3);font-size:12.5px}}
 footer a{{color:var(--ink2)}}
 @media(max-width:520px){{.now{{font-size:52px}}}}
 </style>
+<style>{nd_chrome}
+.jd-disclosure{{max-width:720px;margin:30px auto 0;padding:0 20px;text-align:center;font-size:13px;opacity:.7}}</style>
 {analytics}</head><body>
 
-<header><div class="wrap"><a href="{SITE}/" class="brand" style="text-decoration:none;color:inherit">
-<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="bm" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><g transform="translate(4,4)"><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#bm)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#bm)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#bm)" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#bm)" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g></svg>
-<span>My<span class="g">Gold</span>Rates</span></a></div></header>
+{nd_header}
 
 <div class="wrap">
   <div class="hero">
@@ -208,13 +212,9 @@ footer a{{color:var(--ink2)}}
   </section>
 </div>
 
-<footer><div class="wrap">
-  <a href="{SITE}/">MyGoldRates.com</a> &middot;
-  <a href="{SITE}/about">About</a> &middot;
-  <a href="{SITE}/contact">Contact</a><br>
-  Jewellers Digest is a paid subscription. &#8377;{price.OFFER_INR}/month launch
-  price, &#8377;{price.REGULAR_INR}/month thereafter for new subscribers.
-</div></footer>
+<p class="jd-disclosure">Jewellers Digest is a paid subscription. &#8377;{price.OFFER_INR}/month launch
+  price, &#8377;{price.REGULAR_INR}/month thereafter for new subscribers.</p>
+{nd_footer}
 
 <script>
 (function(){{
