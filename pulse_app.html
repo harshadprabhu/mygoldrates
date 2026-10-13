@@ -3298,7 +3298,16 @@ function handleCredentialResponse(resp){
   // 10s tick threw away most of the movement the pulse UI exists to show.
   // The worker edge-caches /market for ~5s, so this costs no extra upstream
   // calls; it just stops the page sitting on stale values between ticks.
-  setInterval(fetchLiveRates,3000);
+  // Only while the tab is visible. A background tab polled every 3s
+  // forever - ~1,200 requests an hour for a page nobody was looking at -
+  // which is a large part of why Cloudflare reports request counts in the
+  // millions against tens of thousands of page views, and it spends the
+  // Worker's daily request allowance on nobody. On return, refresh at once
+  // so the board is never stale when someone looks at it.
+  setInterval(function(){if(!document.hidden)fetchLiveRates();},3000);
+  document.addEventListener('visibilitychange',function(){
+    if(!document.hidden){fetchLiveRates();fetchVendors();}
+  });
   setInterval(function(){paintLiveChip(currentDotState());paintLiveStrip();},3000);
   fetchNews();
   setInterval(fetchNews,15*60*1000);
@@ -3306,7 +3315,7 @@ function handleCredentialResponse(resp){
   // Vendors poll every 15s (edge-cache is 60s so most hits are free);
   // calendar polls every 30 min (upstream refreshes weekly).
   fetchVendors();
-  setInterval(fetchVendors,15000);
+  setInterval(function(){if(!document.hidden)fetchVendors();},15000);
   fetchCalendar();
   setInterval(fetchCalendar,30*60*1000);
   loadHits();

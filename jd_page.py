@@ -50,7 +50,7 @@ def build(price=P):
 <meta name="description" content="A daily analysis of India's jeweller gold board:
  11-sheet workbook, outlook by week, month and quarter, and support and resistance.
  &#8377;{price.OFFER_INR} a month, launch offer.">
-<link rel="canonical" href="{SITE}/jewellers-digest.html">
+<link rel="canonical" href="{SITE}/jewellers-digest">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <meta property="og:title" content="Jewellers Digest &mdash; MyGoldRates">
 <meta property="og:description" content="Daily gold rate analysis for the jewellery trade.">
@@ -210,8 +210,8 @@ footer a{{color:var(--ink2)}}
 
 <footer><div class="wrap">
   <a href="{SITE}/">MyGoldRates.com</a> &middot;
-  <a href="{SITE}/about.html">About</a> &middot;
-  <a href="{SITE}/contact.html">Contact</a><br>
+  <a href="{SITE}/about">About</a> &middot;
+  <a href="{SITE}/contact">Contact</a><br>
   Jewellers Digest is a paid subscription. &#8377;{price.OFFER_INR}/month launch
   price, &#8377;{price.REGULAR_INR}/month thereafter for new subscribers.
 </div></footer>

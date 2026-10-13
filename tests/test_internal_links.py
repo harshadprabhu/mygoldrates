@@ -206,3 +206,54 @@ def test_no_city_page_the_homepage_links_is_left_unmaintained():
     assert not orphaned, (
         "the homepage links city pages the build no longer regenerates, so "
         "they serve a frozen rate: " + ", ".join(orphaned))
+
+
+def test_retired_city_pages_redirect_and_are_gone():
+    """56 city pages were dropped from LOCATIONS on 31 July 2026 but their
+    files stayed in docs/, so Google kept indexing them showing the July
+    rate under "Gold Rate Today". Each must now 301 to a live page, and its
+    file must be gone - on Cloudflare Pages an existing file can shadow its
+    own redirect."""
+    import generate_site as gs
+    live = {gs.loc_slug(n) for n in gs.LOCATIONS}
+    rules = {}
+    for line in open(f"{DOCS}/_redirects", encoding="utf-8"):
+        p = line.split()
+        if len(p) == 3 and not line.startswith("#"):
+            rules[p[0]] = p[1]
+    paths = _built_paths()
+    for sl, tgt in gs.RETIRED_LOCATIONS.items():
+        assert sl not in live, f"{sl} is both retired and live"
+        assert not os.path.exists(f"{DOCS}/gold-rate-today-in-{sl}.html"), (
+            f"stale page for {sl} still in docs/ - it would keep serving July's rate")
+        src = f"/gold-rate-today-in-{sl}"
+        assert src in rules, f"no redirect for {src}"
+        assert _resolves(rules[src], paths), f"{src} redirects to {rules[src]}, not built"
+
+
+def test_no_built_city_page_is_unmaintained():
+    """Every gold-rate-today-in-* page in docs/ must be one the build
+    regenerates daily. Anything else is serving a frozen price."""
+    import glob
+    import generate_site as gs
+    live = {gs.loc_slug(n) for n in gs.LOCATIONS}
+    frozen = sorted(
+        os.path.basename(p)[len("gold-rate-today-in-"):-len(".html")]
+        for p in glob.glob(f"{DOCS}/gold-rate-today-in-*.html"))
+    frozen = [s for s in frozen if s not in live]
+    assert not frozen, "city pages nobody regenerates: " + ", ".join(frozen)
+
+
+def test_internal_links_use_clean_urls_not_html():
+    """/about.html answers 308 -> /about. Linking the .html form makes every
+    such link a "Page with redirect" in Search Console and spends crawl on
+    a hop. Canonicals are already clean; links must match."""
+    import re
+    src = (open("generate_site.py", encoding="utf-8").read()
+           + open("jd_page.py", encoding="utf-8").read()
+           + open("pulse_app.html", encoding="utf-8").read())
+    built = {f[:-5] for f in os.listdir(DOCS) if f.endswith(".html")}
+    bad = sorted({m.group(2) for m in re.finditer(
+        r'href="((?:\{SITE_URL\}|\{SITE\}|\$site_url|https://mygoldrates\.com)?/?)'
+        r'([\w-]+)\.html', src) if m.group(2) in built})
+    assert not bad, "internal links still use .html: " + ", ".join(bad)

@@ -209,6 +209,54 @@ def build_og_image(path="docs/og.png"):
     print(f"og: wrote {path}")
 
 
+# City pages retired on 31 Jul 2026, when LOCATIONS was cut from 95 places
+# to the 36 above. The cut was deliberate; removing the files was missed.
+# docs/ is deployed wholesale and nothing prunes it, so all 56 kept being
+# served - and indexed by Google - frozen at their last build, quoting the
+# 31 July gold rate under the heading "Gold Rate Today". Search Console
+# showed several of them (Ghaziabad, Dehradun, Jalandhar, Guwahati) among
+# the few pages still drawing impressions in October.
+#
+# Finishing the pruning rather than reviving them: 95 near-identical
+# "gold rate today in <place>" pages is the doorway-page pattern Google's
+# spam policies name, and a stale price is worse than none. Each URL now
+# 301s to its state page where one exists, otherwise to the homepage, which
+# keeps whatever ranking signal it had and stops it showing a wrong number.
+# The files themselves are deleted from docs/.
+RETIRED_LOCATIONS = {
+    "agra": "uttar-pradesh", "aligarh": "uttar-pradesh",
+    "allahabad": "uttar-pradesh", "bareilly": "uttar-pradesh",
+    "ghaziabad": "uttar-pradesh", "meerut": "uttar-pradesh",
+    "moradabad": "uttar-pradesh", "noida": "uttar-pradesh",
+    "varanasi": "uttar-pradesh",
+    "ajmer": "rajasthan", "jodhpur": "rajasthan", "kota": "rajasthan",
+    "udaipur": "rajasthan",
+    "amritsar": "punjab", "jalandhar": "punjab", "ludhiana": "punjab",
+    "aurangabad": "maharashtra", "kolhapur": "maharashtra",
+    "solapur": "maharashtra",
+    "belagavi": "karnataka", "davanagere": "karnataka", "hubli": "karnataka",
+    "mangaluru": "karnataka", "mysuru": "karnataka", "vijayapura": "karnataka",
+    "bhubaneswar": "odisha", "cuttack": "odisha",
+    "erode": "tamil-nadu", "madurai": "tamil-nadu", "salem": "tamil-nadu",
+    "tiruchirappalli": "tamil-nadu", "tirunelveli": "tamil-nadu",
+    "faridabad": "haryana", "gurugram": "haryana",
+    "guntur": "andhra-pradesh", "tirupati": "andhra-pradesh",
+    "vijayawada": "andhra-pradesh",
+    "guwahati": "assam",
+    "gwalior": "madhya-pradesh", "jabalpur": "madhya-pradesh",
+    "kannur": "kerala", "kollam": "kerala", "kozhikode": "kerala",
+    "thiruvananthapuram": "kerala", "thrissur": "kerala",
+    "rajkot": "gujarat",
+    "siliguri": "west-bengal",
+    "warangal": "telangana",
+    # no state page on the site for Uttarakhand, Jharkhand, Himachal
+    # Pradesh, Goa or Chhattisgarh: the national board is the honest target
+    "dehradun": None, "uttarakhand": None, "dhanbad": None,
+    "jamshedpur": None, "jharkhand": None, "himachal-pradesh": None,
+    "goa": None, "raipur": None,
+}
+
+
 def analytics_snippet(supabase_url, anon_key):
     """The pageview beacon, as an inline <script> for the document head.
 
@@ -2576,9 +2624,9 @@ def main():
             f'<strong>{low_g} per gram</strong>.</p>'
             f'{hubs_info}'
             f'{brands_info}'
-            f'<p>Before buying gold in {nm}, use our <a href="{SITE_URL}/making-charges-calculator.html">making charges calculator</a> '
+            f'<p>Before buying gold in {nm}, use our <a href="{SITE_URL}/making-charges-calculator">making charges calculator</a> '
             f'to estimate total billed costs with 3% GST, or read our <a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K guide</a>. '
-            f'You can also <a href="{SITE_URL}/inquiry.html">subscribe to free daily {nm} rate alerts</a>.</p>'
+            f'You can also <a href="{SITE_URL}/inquiry">subscribe to free daily {nm} rate alerts</a>.</p>'
             f'</section>')
 
 
@@ -2685,7 +2733,7 @@ def main():
   <h2>How to use it</h2>
   <p>Check the comparison table to see who's cheapest today, use the price
   calculator to estimate the cost of a specific weight and purity, and
-  <a href="{SITE_URL}/inquiry.html">subscribe</a> to get the day's comparison
+  <a href="{SITE_URL}/inquiry">subscribe</a> to get the day's comparison
   by email each morning.</p>
   <h2>A note on the numbers</h2>
   <p>Rates shown are indicative and pre-GST, compiled from each brand's own
@@ -2693,7 +2741,7 @@ def main():
   design. Always confirm the billed rate with the jeweller before purchase.
   GoldRates is not affiliated with any jeweller and does not provide investment
   advice.</p>
-  <p>Questions? <a href="{SITE_URL}/contact.html">Get in touch</a>.</p>""")
+  <p>Questions? <a href="{SITE_URL}/contact">Get in touch</a>.</p>""")
 
     write_page(
         "contact",
@@ -2761,10 +2809,10 @@ def main():
       </div>
 
       <h2>Daily Gold Rate Alerts</h2>
-      <p>To receive the daily gold rate comparison directly in your inbox every morning, <a href="{SITE_URL}/inquiry.html">subscribe to daily email alerts here</a>.</p>
+      <p>To receive the daily gold rate comparison directly in your inbox every morning, <a href="{SITE_URL}/inquiry">subscribe to daily email alerts here</a>.</p>
 
       <h2>Privacy &amp; Data Rights</h2>
-      <p>To request access to or removal of your personal information, email us at <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> or read our <a href="{SITE_URL}/privacy.html">Privacy Policy</a>.</p>
+      <p>To request access to or removal of your personal information, email us at <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> or read our <a href="{SITE_URL}/privacy">Privacy Policy</a>.</p>
     </div>
   </div>
 
@@ -2830,7 +2878,7 @@ def main():
   <p>The layout, design, comparison tools, calculators, and compiled datasets on MyGoldRates.com are protected by copyright and intellectual property laws. You may use this website for personal, non-commercial purposes. Automated collection, data extraction, or redistribution of our compiled data without explicit written consent is strictly prohibited.</p>
   
   <h2>4. Third-Party Advertising &amp; Cookies</h2>
-  <p>We work with third-party advertising partners, including <strong>Google AdSense</strong>, to serve advertisements when you visit our website. These partners may use cookies and web beacons to serve ads based on your visit history. For more information, please see our <a href="{SITE_URL}/privacy.html">Privacy Policy</a>.</p>
+  <p>We work with third-party advertising partners, including <strong>Google AdSense</strong>, to serve advertisements when you visit our website. These partners may use cookies and web beacons to serve ads based on your visit history. For more information, please see our <a href="{SITE_URL}/privacy">Privacy Policy</a>.</p>
   
   <h2>5. Limitation of Liability</h2>
   <p>In no event shall GoldRates, its owners, or operators be liable for any direct, indirect, incidental, or consequential damages resulting from your reliance on information or tools provided on this website.</p>
@@ -2847,7 +2895,7 @@ def main():
         f"""
   <p>This policy explains what information GoldRates ("we", "us") collects when
   you use <a href="{SITE_URL}/">mygoldrates.com</a>, how we use it, and the
-  choices you have. Please also review our <a href="{SITE_URL}/terms.html">Terms of Service</a>.</p>
+  choices you have. Please also review our <a href="{SITE_URL}/terms">Terms of Service</a>.</p>
   <h2>Information you give us</h2>
   <p>If you subscribe to daily rate alerts, we collect the details you enter:
   your name, email address, phone number and location (country, state, city and
@@ -3866,7 +3914,7 @@ def main():
         # The paid product's landing page. Weekly rather than monthly: the
         # price and the offer on it change, and a stale cached version would
         # advertise a price that is no longer on sale.
-        + _url("jewellers-digest.html", today, "weekly", 0.7)
+        + _url("jewellers-digest", today, "weekly", 0.7)
         + "".join(_url(p, today, "monthly", 0.4)
                   for p in ("about", "contact", "privacy", "methodology"))
         + "".join(_url(loc, today, cf, float(pr))
@@ -3997,6 +4045,18 @@ def main():
         f"/city/{loc_slug(nm)}    /gold-rate-today-in-{loc_slug(nm)}    301\n"
         f"/city/{loc_slug(nm)}/   /gold-rate-today-in-{loc_slug(nm)}    301\n"
         for nm in LOCATIONS if nm != "India")
+    retired_rules = "".join(
+        f"/gold-rate-today-in-{sl}{ext}   "
+        f"{'/gold-rate-today-in-' + tgt if tgt else '/'}   301\n"
+        for sl, tgt in sorted(RETIRED_LOCATIONS.items())
+        for ext in ("", ".html"))
+    # A retired page whose file is still in docs/ would shadow its own
+    # redirect and keep serving the frozen July rate. Remove them here so
+    # a stale checkout cannot bring one back.
+    for sl in RETIRED_LOCATIONS:
+        for stale in (f"docs/gold-rate-today-in-{sl}.html",):
+            if os.path.exists(stale):
+                os.remove(stale)
     with open("docs/_redirects", "w", encoding="utf-8") as f:
         f.write("# Legacy /pulse redirects to / (homepage is Market Pulse "
                 "since Sep 2026).\n"
@@ -4009,7 +4069,9 @@ def main():
                 "# next click compounded the relative href into\n"
                 "# /city/jaipur/city/pune/city/nashik/. Single-segment URLs are\n"
                 "# rescued here; the chains fall through to 404.html.\n"
-                + city_rules)
+                + city_rules
+                + "\n# City pages retired 31 Jul 2026 (see RETIRED_LOCATIONS).\n"
+                + retired_rules)
     print(f"_redirects: /pulse -> / (301), {len(city_rules.splitlines())} "
           "legacy /city/ rules")
 
@@ -5830,11 +5892,11 @@ $coindrawer
   does not provide investment advice. Data is provided for personal reference
   only; automated collection or redistribution is not permitted.</p>
   <div class="foot-nav">
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-    <a href="terms.html">Terms of Service</a>
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="inquiry.html">Daily alerts</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+    <a href="/terms">Terms of Service</a>
+    <a href="/privacy">Privacy Policy</a>
+    <a href="/inquiry">Daily alerts</a>
   </div>
   <p>© $year GoldRates - daily gold rate comparison for India.
   Rates updated daily; last updated $date.</p>
@@ -6815,10 +6877,10 @@ $body
 </article>
 <footer>
   <div class="foot-nav">
-    <a href="$site_url/about.html">About</a>
-    <a href="$site_url/contact.html">Contact</a>
-    <a href="$site_url/terms.html">Terms of Service</a>
-    <a href="$site_url/privacy.html">Privacy Policy</a>
+    <a href="$site_url/about">About</a>
+    <a href="$site_url/contact">Contact</a>
+    <a href="$site_url/terms">Terms of Service</a>
+    <a href="$site_url/privacy">Privacy Policy</a>
   </div>
   <p>© $year GoldRates - daily gold rate comparison for India.</p>
 </footer>
