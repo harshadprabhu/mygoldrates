@@ -2626,11 +2626,11 @@ def main():
 
     low_g = inr(ladder(lowest["canonical_24k_pre_gst"])["24K"])
 
-    def local_intro(nm):
+    def local_intro(nm, dark=False):
         """Enriched, unique per-city body so city pages have genuine local value."""
         if nm == "India":
             return ""
-        board_html = local_board(nm)
+        board_html = local_board(nm, dark)
         data = CITY_ENRICHMENT_DATA.get(nm, {})
         hubs_info = f'<p><strong>Key Shopping Hubs in {nm}:</strong> {data["hubs"]}.</p>' if data.get("hubs") else ""
         brands_info = f'<p><strong>Featured Regional & National Jewellers in {nm}:</strong> {", ".join(data["regional_brands"])} and leading national brands.</p>' if data.get("regional_brands") else ""
@@ -2652,7 +2652,7 @@ def main():
             f'</section>')
 
 
-    def local_board(nm):
+    def local_board(nm, dark=False):
         """The part of a city or state page that is actually about that place.
 
         Every city page used to be the full /compare page with the place name
@@ -2731,17 +2731,53 @@ def main():
                       for p in peers]
             links = (f'<h3>Gold rate in other places in {state}</h3>'
                      f'<div class="citycloud">{"".join(items)}</div>')
-        style = ('<style>.local-board .lb-wrap{overflow-x:auto;max-width:100%}'
-                 '.local-tbl{width:100%;border-collapse:collapse;font-size:15px}'
-                 '.local-tbl th,.local-tbl td{padding:9px 8px;'
-                 'border-bottom:1px solid rgba(0,0,0,.08);text-align:right;'
-                 'white-space:nowrap}'
-                 '.local-tbl th:first-child,.local-tbl td:first-child'
-                 '{text-align:left;white-space:normal}'
-                 '.local-tbl .lb-tag{display:inline-block;margin-left:6px;'
-                 'font-size:11px;padding:1px 6px;border-radius:8px;'
-                 'background:rgba(180,140,40,.15);color:#7a5a10}'
-                 '.local-board .fine{font-size:13px;opacity:.75}</style>')
+        if dark:
+            # The new design is dark glass: inherit its text colour, draw
+            # rules in translucent white, tag in the gold accent.
+            style = ('<style>.local-board .lb-wrap{overflow-x:auto;max-width:100%}'
+                     '.local-board h2{font-size:20px;margin:0 0 8px}'
+                     '.local-board h3{font-size:15px;margin:18px 0 8px}'
+                     '.local-board p{line-height:1.6;margin:0 0 10px;opacity:.9}'
+                     '.local-tbl{width:100%;border-collapse:collapse;font-size:14px}'
+                     '.local-tbl th,.local-tbl td{padding:9px 6px;'
+                     'border-bottom:1px solid rgba(255,255,255,.08);'
+                     'text-align:right;white-space:nowrap}'
+                     '.local-tbl th{font-size:11px;letter-spacing:.06em;'
+                     'text-transform:uppercase;opacity:.6;font-weight:500}'
+                     '.local-tbl th:first-child,.local-tbl td:first-child'
+                     '{text-align:left;white-space:normal}'
+                     '.local-tbl .lb-tag{display:inline-block;margin-left:6px;'
+                     'font-size:10.5px;padding:1px 6px;border-radius:8px;'
+                     'background:rgba(212,175,55,.16);color:#e8c766}'
+                     '.local-board .fine{font-size:12px;opacity:.6}'
+                     '.local-board .citycloud{display:flex;flex-wrap:wrap;gap:8px}'
+                     '.local-board .citycloud a{padding:6px 12px;border-radius:999px;'
+                     'border:1px solid rgba(212,175,55,.25);color:inherit;'
+                     'text-decoration:none;font-size:13px}'
+                     # The new design colours text per element, not on body,
+                     # so anything unstyled here would render dark on dark.
+                     '.city-local,.city-local h2,.city-local h3,.city-local p,'
+                     '.city-local td,.city-local strong{color:#efe4c8}'
+                     '.city-local h2,.city-local h3{font-family:\'Playfair Display\','
+                     'Georgia,serif}'
+                     '.city-local .seo{margin-top:22px}'
+                     '.city-local .seo h2{font-size:20px;margin:0 0 8px;'
+                     'font-weight:600}'
+                     '.city-local .seo p{line-height:1.6;margin:0 0 10px;'
+                     'opacity:.9}'
+                     '.city-local a{color:#e8c766}</style>')
+        else:
+            style = ('<style>.local-board .lb-wrap{overflow-x:auto;max-width:100%}'
+                     '.local-tbl{width:100%;border-collapse:collapse;font-size:15px}'
+                     '.local-tbl th,.local-tbl td{padding:9px 8px;'
+                     'border-bottom:1px solid rgba(0,0,0,.08);text-align:right;'
+                     'white-space:nowrap}'
+                     '.local-tbl th:first-child,.local-tbl td:first-child'
+                     '{text-align:left;white-space:normal}'
+                     '.local-tbl .lb-tag{display:inline-block;margin-left:6px;'
+                     'font-size:11px;padding:1px 6px;border-radius:8px;'
+                     'background:rgba(180,140,40,.15);color:#7a5a10}'
+                     '.local-board .fine{font-size:13px;opacity:.75}</style>')
         return style + (
             f'<section class="seo local-board"><h2>Jewellers serving {where} '
             f'&mdash; today&rsquo;s rates</h2>{who}{cheapest}'
@@ -2797,6 +2833,89 @@ def main():
         # urgency. The pageview does not - it is inline in the head.
         f.write(SIGNUP_JS + "\n" + CLICK_JS)
 
+    def write_city_pages(home_html):
+        """Every city and state page, in the new design.
+
+        City pages used to be rendered from TEMPLATE - the old comparison
+        page design - so anyone arriving from search for a place saw a
+        different, older site from the homepage. They are now the homepage
+        itself with the place's own title, heading, address, structured data
+        and local_board() section, so a visitor lands in the same product,
+        including its details popup.
+        """
+        n_live = len(live)
+        for nm in LOCATIONS:
+            sl = loc_slug(nm)
+            url = f"{SITE_URL}/gold-rate-today-in-{sl}"
+            title = (f"Gold Rate Today in {nm} ({display_date}) - 24K, 22K, "
+                     f"18K Price | MyGoldRates")
+            desc = (f"Gold rate today in {nm}: 24K {inr(med['24K'])}/g, 22K "
+                    f"{inr(med['22K'])}/g (pre-GST) on {display_date}. Compare "
+                    f"{n_live} jewellers' live rates and the chains that "
+                    f"serve {PLACE_STATE.get(nm) or nm}.")
+            h = home_html
+            def sub(pattern, repl, h, count=1, flags=0):
+                out, n = re.subn(pattern, repl, h, count=count, flags=flags)
+                if n == 0:
+                    raise RuntimeError(f"city page {nm}: no match for {pattern[:50]}")
+                return out
+            esc = _html.escape
+            h = sub(r"<title>[^<]*</title>", f"<title>{esc(title)}</title>", h)
+            h = sub(r'(<meta name="description" content=")[^"]*', r"\g<1>" + esc(desc).replace("\\", "\\\\"), h)
+            h = sub(r'(<link rel="canonical" href=")[^"]*', r"\g<1>" + url, h)
+            h = sub(r'(<meta property="og:url" content=")[^"]*', r"\g<1>" + url, h)
+            for prop in ('property="og:title"', 'name="twitter:title"'):
+                h = sub(r'(<meta ' + prop + r' content=")[^"]*', r"\g<1>" + esc(title).replace("\\", "\\\\"), h)
+            for prop in ('property="og:description"', 'name="twitter:description"'):
+                h = sub(r'(<meta ' + prop + r' content=")[^"]*', r"\g<1>" + esc(desc).replace("\\", "\\\\"), h)
+            # headings
+            # On phones the homepage's h1 is screen-reader only. A visitor
+            # who searched for a place must see that place, so on city pages
+            # the heading is visible at the top of the price panel.
+            h = sub(r'<h1 class="sr-only">Gold Rate Today in India[^<]*</h1>',
+                    ('<h1 style="margin:2px 16px 6px;text-align:center;'
+                     'font-family:\'Playfair Display\',Georgia,serif;'
+                     'font-size:22px;font-weight:700;line-height:1.25;'
+                     'color:#f4e3a6">Gold Rate Today in ' + esc(nm)
+                     + '<span style="display:block;margin-top:3px;'
+                     'font-family:\'DM Sans\',system-ui,sans-serif;'
+                     'font-size:12.5px;font-weight:500;color:rgba(255,255,255,.62)">'
+                     f'Live 24K, 22K &amp; 18K from {n_live} jewellers</span></h1>')
+                    .replace("\\", "\\\\"), h)
+            h = sub(r"<h1>Gold Rate Today in India", "<h1>Gold Rate Today in " + esc(nm), h)
+            # structured data: the homepage's blocks describe "/", replace them
+            h = re.sub(r'<script type="application/ld\+json">.*?</script>\s*',
+                       "", h, flags=re.S)
+            ld = [x for x in _ld if x.get("@type") in ("WebSite", "Organization")] + [
+                {"@context": "https://schema.org", "@type": "WebPage",
+                 "url": url, "name": title, "inLanguage": "en-IN",
+                 "dateModified": updated_iso,
+                 "isPartOf": {"@type": "WebSite", "url": f"{SITE_URL}/"}},
+                {"@context": "https://schema.org", "@type": "BreadcrumbList",
+                 "itemListElement": [
+                     {"@type": "ListItem", "position": 1, "name": "Home",
+                      "item": f"{SITE_URL}/"},
+                     {"@type": "ListItem", "position": 2,
+                      "name": f"Gold Rate Today in {nm}", "item": url}]}]
+            h = h.replace("</head>", '<script type="application/ld+json">'
+                          + json.dumps(ld, ensure_ascii=False)
+                          + "</script>\n</head>", 1)
+            # the place's own section, in both layouts
+            local = local_intro(nm, dark=True)
+            if local:
+                phone = f'<div class="city-local" style="margin:18px 12px 6px">{local}</div>\n  '
+                i_rates = h.index('id="v-rates"')
+                k = h.index('<div class="dv">', i_rates)
+                h = h[:k] + phone + h[k:]
+                desk = ('<section class="site-section"><div class="site-container">'
+                        f'<div class="city-local">{local}</div></div></section>\n  ')
+                h = sub(r'(<section class="site-section alt" id="s-market">)',
+                        desk.replace("\\", "\\\\") + r"\g<1>", h)
+            with open(f"docs/gold-rate-today-in-{sl}.html", "w",
+                      encoding="utf-8") as f:
+                f.write(h)
+        print(f"city pages: wrote {len(LOCATIONS)} in the new design")
+
     # ---- programmatic city/state pages (same board, local landing page) ----
     # City pages used to be /compare with the place name swapped in: the
     # India FAQ ("What is the gold rate today in India?"), the 560-word
@@ -2830,21 +2949,26 @@ def main():
         f'<a href="{SITE_URL}/calculators">gold calculators</a>; to choose a '
         f'purity, read <a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K '
         f'gold</a>.</p></section>')
-    for nm in LOCATIONS:
-        sl = loc_slug(nm)
-        note = (f" Rates shown apply across {nm} - national jewellery chains "
-                f"quote the same board price in {nm} as everywhere else in "
-                "India.")
-        page = TEMPLATE.substitute(
-            where=f"in {nm}", where_note=note, local_intro=local_intro(nm),
-            canonical_url=f"{SITE_URL}/gold-rate-today-in-{sl}",
-            city_links=city_cloud(sl),
-            **{**tvars, "faq": "", "news_home": "", "seo_content": city_more,
-               "jsonld": city_jsonld(nm, sl)})
-        with open(f"docs/gold-rate-today-in-{sl}.html", "w",
-                  encoding="utf-8") as f:
-            f.write(page)
-    print(f"city pages: wrote {len(LOCATIONS)}")
+    def write_classic_city_pages():
+        """The old-design city pages. Only used if pulse_app.html is
+        missing; normally city pages are built from the new design
+        further down (see write_city_pages)."""
+        for nm in LOCATIONS:
+            sl = loc_slug(nm)
+            note = (f" Rates shown apply across {nm} - national jewellery chains "
+                    f"quote the same board price in {nm} as everywhere else in "
+                    "India.")
+            page = TEMPLATE.substitute(
+                where=f"in {nm}", where_note=note, local_intro=local_intro(nm),
+                canonical_url=f"{SITE_URL}/gold-rate-today-in-{sl}",
+                city_links=city_cloud(sl),
+                **{**tvars, "faq": "", "news_home": "", "seo_content": city_more,
+                   "jsonld": city_jsonld(nm, sl)})
+            with open(f"docs/gold-rate-today-in-{sl}.html", "w",
+                      encoding="utf-8") as f:
+                f.write(page)
+        print(f"city pages: wrote {len(LOCATIONS)} (classic fallback)")
+
     # The Jewellers Digest landing page. Its own module: it has its own
     # design, its own signup form, and its own degraded state when the
     # billing Worker is not answering.
@@ -3934,6 +4058,7 @@ def main():
             f.write(pulse_html)
         print(f"homepage: wrote docs/index.html "
               f"({len(pulse_html):,} bytes, from pulse_app.html)")
+        write_city_pages(pulse_html)
         # Remove any leftover /pulse/index.html from previous builds so it
         # doesn't compete with / for the same content in the index.
         old_pulse = "docs/pulse/index.html"
@@ -3955,6 +4080,7 @@ def main():
             canonical_url=f"{SITE_URL}/", city_links=city_cloud(), **tvars)
         with open("docs/index.html", "w", encoding="utf-8") as f:
             f.write(fallback_html)
+        write_classic_city_pages()
 
     with open("docs/robots.txt", "w", encoding="utf-8") as f:
         # Explicitly welcome AI/LLM crawlers so generative engines (ChatGPT,

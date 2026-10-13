@@ -132,3 +132,47 @@ def test_daily_reports_do_not_reuse_the_city_page_title():
     body = src[i:i + 4000]
     assert "Daily Report" in body
     assert 'f"Gold Rate Today {where_in} ({display_date})' not in body
+
+
+# ─── city pages use the new design ──────────────────────────────────────
+
+@built
+@pytest.mark.parametrize("slug,place", [("chennai", "Chennai"), ("agra", "Agra"),
+                                        ("maharashtra", "Maharashtra")])
+def test_city_pages_are_the_new_design_with_their_own_identity(slug, place):
+    """City pages were rendered from the old comparison-page template, so a
+    visitor arriving from search for a place saw an older site than the
+    homepage. They are built from the homepage now."""
+    h = _read(f"{DOCS}/gold-rate-today-in-{slug}.html")
+    assert 'id="v-rates"' in h, "not the new design"
+    assert 'class="board-rates"' not in h, "still the old template"
+    assert f"<title>Gold Rate Today in {place} (" in h
+    assert f'rel="canonical" href="https://mygoldrates.com/gold-rate-today-in-{slug}"' in h
+    assert f'og:url" content="https://mygoldrates.com/gold-rate-today-in-{slug}"' in h
+    # visible on phones, not screen-reader only
+    assert re.search(rf'<h1 style="[^"]+">Gold Rate Today in {place}<span', h)
+    assert 'class="sr-only">Gold Rate Today in India' not in h
+    assert "Gold Rate Today in India" not in re.search(r"<title>[^<]*", h).group(0)
+    # the details popup ships on every city page
+    assert 'id="subPop"' in h
+    # local section in both layouts
+    assert h.count('class="seo local-board"') == 2
+
+
+@built
+def test_city_page_structured_data_describes_the_city_not_the_homepage():
+    h = _read(f"{DOCS}/gold-rate-today-in-chennai.html")
+    blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', h, re.S)
+    assert len(blocks) == 1
+    items = json.loads(blocks[0])
+    page = next(x for x in items if x["@type"] == "WebPage")
+    assert page["url"].endswith("/gold-rate-today-in-chennai")
+    assert {x["@type"] for x in items} == {"WebSite", "Organization", "WebPage",
+                                          "BreadcrumbList"}
+
+
+def test_city_section_text_is_coloured_for_the_dark_design():
+    """The new design sets text colour per element, so the local section's
+    write-up rendered dark-on-dark until it was given a colour."""
+    src = _read("generate_site.py")
+    assert ".city-local,.city-local h2,.city-local h3,.city-local p," in src
