@@ -209,6 +209,54 @@ def build_og_image(path="docs/og.png"):
     print(f"og: wrote {path}")
 
 
+# City pages retired on 31 Jul 2026, when LOCATIONS was cut from 95 places
+# to the 36 above. The cut was deliberate; removing the files was missed.
+# docs/ is deployed wholesale and nothing prunes it, so all 56 kept being
+# served - and indexed by Google - frozen at their last build, quoting the
+# 31 July gold rate under the heading "Gold Rate Today". Search Console
+# showed several of them (Ghaziabad, Dehradun, Jalandhar, Guwahati) among
+# the few pages still drawing impressions in October.
+#
+# Finishing the pruning rather than reviving them: 95 near-identical
+# "gold rate today in <place>" pages is the doorway-page pattern Google's
+# spam policies name, and a stale price is worse than none. Each URL now
+# 301s to its state page where one exists, otherwise to the homepage, which
+# keeps whatever ranking signal it had and stops it showing a wrong number.
+# The files themselves are deleted from docs/.
+RETIRED_LOCATIONS = {
+    "agra": "uttar-pradesh", "aligarh": "uttar-pradesh",
+    "allahabad": "uttar-pradesh", "bareilly": "uttar-pradesh",
+    "ghaziabad": "uttar-pradesh", "meerut": "uttar-pradesh",
+    "moradabad": "uttar-pradesh", "noida": "uttar-pradesh",
+    "varanasi": "uttar-pradesh",
+    "ajmer": "rajasthan", "jodhpur": "rajasthan", "kota": "rajasthan",
+    "udaipur": "rajasthan",
+    "amritsar": "punjab", "jalandhar": "punjab", "ludhiana": "punjab",
+    "aurangabad": "maharashtra", "kolhapur": "maharashtra",
+    "solapur": "maharashtra",
+    "belagavi": "karnataka", "davanagere": "karnataka", "hubli": "karnataka",
+    "mangaluru": "karnataka", "mysuru": "karnataka", "vijayapura": "karnataka",
+    "bhubaneswar": "odisha", "cuttack": "odisha",
+    "erode": "tamil-nadu", "madurai": "tamil-nadu", "salem": "tamil-nadu",
+    "tiruchirappalli": "tamil-nadu", "tirunelveli": "tamil-nadu",
+    "faridabad": "haryana", "gurugram": "haryana",
+    "guntur": "andhra-pradesh", "tirupati": "andhra-pradesh",
+    "vijayawada": "andhra-pradesh",
+    "guwahati": "assam",
+    "gwalior": "madhya-pradesh", "jabalpur": "madhya-pradesh",
+    "kannur": "kerala", "kollam": "kerala", "kozhikode": "kerala",
+    "thiruvananthapuram": "kerala", "thrissur": "kerala",
+    "rajkot": "gujarat",
+    "siliguri": "west-bengal",
+    "warangal": "telangana",
+    # no state page on the site for Uttarakhand, Jharkhand, Himachal
+    # Pradesh, Goa or Chhattisgarh: the national board is the honest target
+    "dehradun": None, "uttarakhand": None, "dhanbad": None,
+    "jamshedpur": None, "jharkhand": None, "himachal-pradesh": None,
+    "goa": None, "raipur": None,
+}
+
+
 def analytics_snippet(supabase_url, anon_key):
     """The pageview beacon, as an inline <script> for the document head.
 
@@ -2576,9 +2624,9 @@ def main():
             f'<strong>{low_g} per gram</strong>.</p>'
             f'{hubs_info}'
             f'{brands_info}'
-            f'<p>Before buying gold in {nm}, use our <a href="{SITE_URL}/making-charges-calculator.html">making charges calculator</a> '
+            f'<p>Before buying gold in {nm}, use our <a href="{SITE_URL}/making-charges-calculator">making charges calculator</a> '
             f'to estimate total billed costs with 3% GST, or read our <a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K guide</a>. '
-            f'You can also <a href="{SITE_URL}/inquiry.html">subscribe to free daily {nm} rate alerts</a>.</p>'
+            f'You can also <a href="{SITE_URL}/inquiry">subscribe to free daily {nm} rate alerts</a>.</p>'
             f'</section>')
 
 
@@ -2685,7 +2733,7 @@ def main():
   <h2>How to use it</h2>
   <p>Check the comparison table to see who's cheapest today, use the price
   calculator to estimate the cost of a specific weight and purity, and
-  <a href="{SITE_URL}/inquiry.html">subscribe</a> to get the day's comparison
+  <a href="{SITE_URL}/inquiry">subscribe</a> to get the day's comparison
   by email each morning.</p>
   <h2>A note on the numbers</h2>
   <p>Rates shown are indicative and pre-GST, compiled from each brand's own
@@ -2693,7 +2741,7 @@ def main():
   design. Always confirm the billed rate with the jeweller before purchase.
   GoldRates is not affiliated with any jeweller and does not provide investment
   advice.</p>
-  <p>Questions? <a href="{SITE_URL}/contact.html">Get in touch</a>.</p>""")
+  <p>Questions? <a href="{SITE_URL}/contact">Get in touch</a>.</p>""")
 
     write_page(
         "contact",
@@ -2761,10 +2809,10 @@ def main():
       </div>
 
       <h2>Daily Gold Rate Alerts</h2>
-      <p>To receive the daily gold rate comparison directly in your inbox every morning, <a href="{SITE_URL}/inquiry.html">subscribe to daily email alerts here</a>.</p>
+      <p>To receive the daily gold rate comparison directly in your inbox every morning, <a href="{SITE_URL}/inquiry">subscribe to daily email alerts here</a>.</p>
 
       <h2>Privacy &amp; Data Rights</h2>
-      <p>To request access to or removal of your personal information, email us at <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> or read our <a href="{SITE_URL}/privacy.html">Privacy Policy</a>.</p>
+      <p>To request access to or removal of your personal information, email us at <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> or read our <a href="{SITE_URL}/privacy">Privacy Policy</a>.</p>
     </div>
   </div>
 
@@ -2830,7 +2878,7 @@ def main():
   <p>The layout, design, comparison tools, calculators, and compiled datasets on MyGoldRates.com are protected by copyright and intellectual property laws. You may use this website for personal, non-commercial purposes. Automated collection, data extraction, or redistribution of our compiled data without explicit written consent is strictly prohibited.</p>
   
   <h2>4. Third-Party Advertising &amp; Cookies</h2>
-  <p>We work with third-party advertising partners, including <strong>Google AdSense</strong>, to serve advertisements when you visit our website. These partners may use cookies and web beacons to serve ads based on your visit history. For more information, please see our <a href="{SITE_URL}/privacy.html">Privacy Policy</a>.</p>
+  <p>We work with third-party advertising partners, including <strong>Google AdSense</strong>, to serve advertisements when you visit our website. These partners may use cookies and web beacons to serve ads based on your visit history. For more information, please see our <a href="{SITE_URL}/privacy">Privacy Policy</a>.</p>
   
   <h2>5. Limitation of Liability</h2>
   <p>In no event shall GoldRates, its owners, or operators be liable for any direct, indirect, incidental, or consequential damages resulting from your reliance on information or tools provided on this website.</p>
@@ -2847,7 +2895,7 @@ def main():
         f"""
   <p>This policy explains what information GoldRates ("we", "us") collects when
   you use <a href="{SITE_URL}/">mygoldrates.com</a>, how we use it, and the
-  choices you have. Please also review our <a href="{SITE_URL}/terms.html">Terms of Service</a>.</p>
+  choices you have. Please also review our <a href="{SITE_URL}/terms">Terms of Service</a>.</p>
   <h2>Information you give us</h2>
   <p>If you subscribe to daily rate alerts, we collect the details you enter:
   your name, email address, phone number and location (country, state, city and
@@ -3366,7 +3414,10 @@ def main():
         ANALYTICS_HTML
         .replace("__SB__", supabase_url)
         .replace("__KEY__", anon_key)
-        .replace("__DATE__", display_date))
+        .replace("__DATE__", display_date)
+        .replace("__CLICK_LABELS__",
+                 json.dumps(CLICK_LABELS, ensure_ascii=False))
+        .replace("__CITIES__", json.dumps(LOCATIONS)))
     with open("docs/analytics.html", "w", encoding="utf-8") as f:
         f.write(analytics_page)
     print("analytics dashboard: wrote docs/analytics.html (token via URL hash)")
@@ -3574,6 +3625,21 @@ def main():
         if pulse_missing:
             raise RuntimeError("pulse_app.html header changed - patch these: "
                                + ", ".join(pulse_missing))
+        # AdSense. pulse_app.html carries the loader COMMENTED OUT with the
+        # placeholder ca-pub-0000000000000000 ("INACTIVE by design"), and
+        # nothing ever swapped it for the real id - the same unwired-
+        # placeholder bug as the One Tap client id above. Every other page
+        # gets ads_head from ADSENSE_CLIENT; the homepage, which takes about
+        # half of all page views, made no ad request at all. Replace the
+        # whole dormant block with the same ads_head the rest of the site
+        # uses, or with nothing when the secret is unset.
+        _ads_block = re.search(
+            r"<!--[^>]*?Google AdSense[\s\S]*?-->", pulse_html)
+        if not _ads_block:
+            raise RuntimeError("pulse_app.html: dormant AdSense block not "
+                               "found - the homepage would ship without ads")
+        pulse_html = (pulse_html[:_ads_block.start()] + ads_head
+                      + pulse_html[_ads_block.end():])
         # Extra JSON-LD: WebPage + BreadcrumbList + a "See detailed
         # comparison" pointer that carries the schema.org relationship
         # between / and /compare so Google understands the IA split.
@@ -3848,7 +3914,7 @@ def main():
         # The paid product's landing page. Weekly rather than monthly: the
         # price and the offer on it change, and a stale cached version would
         # advertise a price that is no longer on sale.
-        + _url("jewellers-digest.html", today, "weekly", 0.7)
+        + _url("jewellers-digest", today, "weekly", 0.7)
         + "".join(_url(p, today, "monthly", 0.4)
                   for p in ("about", "contact", "privacy", "methodology"))
         + "".join(_url(loc, today, cf, float(pr))
@@ -3979,6 +4045,18 @@ def main():
         f"/city/{loc_slug(nm)}    /gold-rate-today-in-{loc_slug(nm)}    301\n"
         f"/city/{loc_slug(nm)}/   /gold-rate-today-in-{loc_slug(nm)}    301\n"
         for nm in LOCATIONS if nm != "India")
+    retired_rules = "".join(
+        f"/gold-rate-today-in-{sl}{ext}   "
+        f"{'/gold-rate-today-in-' + tgt if tgt else '/'}   301\n"
+        for sl, tgt in sorted(RETIRED_LOCATIONS.items())
+        for ext in ("", ".html"))
+    # A retired page whose file is still in docs/ would shadow its own
+    # redirect and keep serving the frozen July rate. Remove them here so
+    # a stale checkout cannot bring one back.
+    for sl in RETIRED_LOCATIONS:
+        for stale in (f"docs/gold-rate-today-in-{sl}.html",):
+            if os.path.exists(stale):
+                os.remove(stale)
     with open("docs/_redirects", "w", encoding="utf-8") as f:
         f.write("# Legacy /pulse redirects to / (homepage is Market Pulse "
                 "since Sep 2026).\n"
@@ -3991,7 +4069,9 @@ def main():
                 "# next click compounded the relative href into\n"
                 "# /city/jaipur/city/pune/city/nashik/. Single-segment URLs are\n"
                 "# rescued here; the chains fall through to 404.html.\n"
-                + city_rules)
+                + city_rules
+                + "\n# City pages retired 31 Jul 2026 (see RETIRED_LOCATIONS).\n"
+                + retired_rules)
     print(f"_redirects: /pulse -> / (301), {len(city_rules.splitlines())} "
           "legacy /city/ rules")
 
@@ -5812,11 +5892,11 @@ $coindrawer
   does not provide investment advice. Data is provided for personal reference
   only; automated collection or redistribution is not permitted.</p>
   <div class="foot-nav">
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-    <a href="terms.html">Terms of Service</a>
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="inquiry.html">Daily alerts</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+    <a href="/terms">Terms of Service</a>
+    <a href="/privacy">Privacy Policy</a>
+    <a href="/inquiry">Daily alerts</a>
   </div>
   <p>© $year GoldRates - daily gold rate comparison for India.
   Rates updated daily; last updated $date.</p>
@@ -6797,10 +6877,10 @@ $body
 </article>
 <footer>
   <div class="foot-nav">
-    <a href="$site_url/about.html">About</a>
-    <a href="$site_url/contact.html">Contact</a>
-    <a href="$site_url/terms.html">Terms of Service</a>
-    <a href="$site_url/privacy.html">Privacy Policy</a>
+    <a href="$site_url/about">About</a>
+    <a href="$site_url/contact">Contact</a>
+    <a href="$site_url/terms">Terms of Service</a>
+    <a href="$site_url/privacy">Privacy Policy</a>
   </div>
   <p>© $year GoldRates - daily gold rate comparison for India.</p>
 </footer>
@@ -7757,6 +7837,106 @@ MC_DASH_JS = r"""
 
 
 # =====================================================================
+# What each tracked click actually is, for the private analytics dashboard.
+#
+# The click tracker records a stable key - the element id when there is one,
+# otherwise its visible text - because keys must not change when copy does,
+# or one button splits into two rows. The price of a stable key is that it
+# reads like "mcBrandTrigger" or "\u25a3". This map is where the meaning
+# lives. tests/test_click_labels.py fails if a button with an id appears on
+# the homepage without an entry here, so a new button cannot quietly show up
+# on the dashboard under its HTML name.
+#
+# Keys with no entry fall through to rules in the dashboard's friendly():
+# jeweller names, "Buy X 24K", weights, purities and so on.
+CLICK_LABELS = {
+    # bottom navigation (the four main views)
+    "Rates": "Nav: Today's rates",
+    "Market": "Nav: Live market",
+    "Calc": "Nav: Calculators",
+    "Making Charges": "Nav: Making charges",
+    # top menu
+    "navtog": "Menu: open",
+    "nav-x": "Menu: close",
+    "siteSignin": "Sign in (header)",
+    # side drawers
+    "drtab": "Gold markets panel: open",
+    "drx": "Gold markets panel: close",
+    "cdtab": "Calculators panel: open",
+    "cdx": "Calculators panel: close",
+    "coindtab": "Gold coins panel: open",
+    "coindx": "Gold coins panel: close",
+    # karat pills on the rate board
+    "24K": "Rate board: show 24K",
+    "22K": "Rate board: show 22K",
+    "18K": "Rate board: show 18K",
+    "14K": "Rate board: show 14K",
+    # rate board controls (each has a mobile twin ending in S)
+    "gstbtn": "Rate board: add 3% GST",
+    "gstBtn": "Rate board: add 3% GST",
+    "gstBtnS": "Rate board: add 3% GST",
+    "nearbtn": "Rate board: brands near me",
+    "nearBtn": "Rate board: brands near me",
+    "nearBtnS": "Rate board: brands near me",
+    # making-charges tool
+    "mcBrandTrigger": "Making charges: choose jeweller",
+    "mcBrandTriggerS": "Making charges: choose jeweller",
+    # calculator tabs
+    "Value": "Calculator: gold value",
+    "Budget": "Calculator: gold for my budget",
+    "Loan": "Calculator: gold loan",
+    "SIP": "Calculator: gold SIP",
+    "Making": "Calculator: making charges",
+    # live chart - timeframe
+    "LIVE": "Chart: live",
+    "1D": "Chart: 1 day", "5D": "Chart: 5 days", "1M": "Chart: 1 month",
+    "1m": "Chart: 1 month", "6M": "Chart: 6 months", "1Y": "Chart: 1 year",
+    "5Y": "Chart: 5 years", "1W": "Chart: 1 week", "3M": "Chart: 3 months",
+    "MAX": "Chart: all history", "5m": "Chart: 5-minute candles",
+    "15m": "Chart: 15-minute candles",
+    # live chart - type (the buttons are bare glyphs, hence the odd keys)
+    "\u25b2": "Chart: area view",
+    "\u223c": "Chart: line view",
+    "\u25a3": "Chart: candlestick view",
+    "\u22ee": "Chart: OHLC bar view",
+    # hallmark checker
+    "huid-scan-btn": "Hallmark (HUID) checker: verify",
+    # email alert popup
+    "spClose": "Alerts popup: closed",
+    "spLater": "Alerts popup: maybe later",
+    "m-close": "Add-your-city popup: closed",
+    "m-btn": "Add-your-city popup: subscribe",
+    "m-loc": "Add-your-city popup: use my location",
+    "qs-btn": "Get free alerts (quick signup)",
+    "alBtn": "Alerts: subscribe",
+    "alBtnP": "Alerts: subscribe free",
+    "alLocate": "Alerts: use my location",
+    "alLocateP": "Alerts: use my location",
+    "alLocateS": "Alerts: use my location",
+    "alBtnS": "Alerts: subscribe",
+    "f-loc": "Form: use my location",
+    # sign-in gate
+    "gate-close": "Sign-in gate: dismissed",
+    "gate-gbtn": "Sign-in gate: continue with Google",
+    "gate-enrich-skip": "Sign-in gate: skip details",
+    "gate-form": "Sign-in gate: manual form",
+    "gate-enrich": "Sign-in gate: details step",
+    # forms
+    "c-submit": "Contact form: send",
+    "m-form": "Subscribe form", "mbtn": "Subscribe button",
+    "inq": "Inquiry form",
+    "brandsearch": "Jeweller search",
+    # links and buttons on /compare and elsewhere
+    "Compare jewellers": "Compare: jump to comparison table",
+    "Making Charges Comparison": "Link: making-charges comparison page",
+    # retired: a menu button removed in mid-September 2026; kept so old
+    # date ranges still read properly
+    "Charges": "Nav: Charges (old menu, removed Sep 2026)",
+    # the dashboard's own buttons - shown so they can be recognised and ignored
+    "apply": "(dashboard) Apply", "today": "(dashboard) Today",
+}
+
+
 # Private analytics dashboard. Built to docs/analytics.html. Placeholders
 # __SB__ / __KEY__ / __DATE__ are filled at build time via str.replace()
 # (NOT f-string / Template) so JS braces and $ are literal. Reads aggregates
@@ -7896,24 +8076,58 @@ td.path{color:var(--accent);word-break:break-all}
   var d30=todayIST(); d30.setUTCDate(d30.getUTCDate()-29);
   $('from').value=iso(d30); $('to').value=iso(today);
 
-  // friendly names for click labels (raw element ids -> readable actions)
-  var CLICK_LABELS={
-    'drtab':'Rate-trend drawer','cdtab':'Calculator drawer','coindtab':'Coin drawer',
-    'nearbtn':'Brands near me','gstbtn':'GST toggle (+3%)','brandsearch':'Jeweller search',
-    'navtog':'Menu (hamburger)','gate-close':'Sign-in gate: dismissed',
-    'gate-gbtn':'Sign-in gate: Continue with Google','gate-form':'Sign-in gate: manual form',
-    'gate-enrich':'Sign-in gate: details step','m-form':'Subscribe form','mbtn':'Subscribe button',
-    'inq':'Inquiry form','apply':'Analytics: Apply','today':'Analytics: Today'};
+  // Readable names for click keys. The map is generated from CLICK_LABELS
+  // in generate_site.py (one source, tested); rules below cover the
+  // free-text keys that cannot be listed in advance.
+  var CLICK_LABELS=__CLICK_LABELS__;
+  var CITIES=__CITIES__;
   function friendly(t){
     if(t==null||t==='')return '(unlabelled)';
     if(CLICK_LABELS[t])return CLICK_LABELS[t];
-    var s=String(t);
+    var s=String(t).trim(),m;
     if(s.indexOf('Use my current location')>-1||s.indexOf('location to autofill')>-1)
       return 'Use my location (autofill)';
-    if(/^(24K|22K|18K|14K)$/.test(s))return s+' rate column';
+    if((m=s.match(/^Buy (.+?) (24K|22K|18K)/)))return 'Buy link: '+m[1]+' '+m[2];
+    if((m=s.match(/^Show full grid/)))return 'Dealer rates: show full grid';
+    if((m=s.match(/^(\d+(?:\.\d+)?)\s*g$/i)))return 'Weight picked: '+m[1]+'g';
+    if((m=s.match(/^(\d+K) \((\d+)\)$/)))return 'Making charges: purity '+m[1]+' ('+m[2]+')';
+    if(/^(Gold Spot|MCX Gold|Silver Spot|MCX Silver|USD\/INR)$/i.test(s))
+      return 'Market ticker: '+s;
+    if((m=s.match(/^(\d+(?:\.\d+)?)g\s*\u00b7\s*(.+)$/)))
+      return 'Making charges: '+m[1]+'g '+m[2];
+    if(/^(Rings?|Earrings|Chains?|Bangles?|Necklaces?|Pendants?|Bracelets?|Coins?|Mangalsutras?|Nose ?pins?|Anklets?|Kadas?|Studs?|Jhumkas?)$/i.test(s))
+      return 'Making charges: item '+s;
+    if(/(Jewell?ers?|Tanishq|Kalyan|Malabar|CaratLane|ORRA|Bhima|Joyalukkas|Chetty|Gadgil|Senco|Reliance|Khazana|Kisna|Candere|BlueStone|PC Chandra|Waman Hari|Lalithaa|Thangamayil)/i.test(s))
+      return 'Jeweller picked: '+s;
+    if(CITIES.indexOf(s)>-1)return 'City picked: '+s;
+    if(/^MyGoldRates/i.test(s))return 'Logo: back to home';
+    if(/^\u20b9/.test(s))return 'Budget picked: '+s;
+    if(/^(\d+(?:\.\d+)?\s*g\b.*|\d+\s*Tola)$/i.test(s))return 'Weight picked: '+s;
+    // A card's title and blurb arrive run together (\"Gold SIP CalculatorProject
+    // the future...\"); keep the title.
+    if(s.length>30&&(m=s.match(/^(.{6,40}?[a-z])([A-Z][a-z].{8,})$/)))return 'Card: '+m[1];
+    if(s.length>45)return 'Article link: '+s.slice(0,60)+'\u2026';
     s=s.replace(/^[^\x00-\x7F]+\s*/,'').trim();   // drop a leading emoji/pin
+    // Anything still shaped like an HTML id gets flagged rather than passed
+    // off as an action name, so a missing label is visible, not mysterious.
+    if(/^[a-z]+[A-Z-][\w-]*$/.test(s))return s+' (unnamed button)';
     return s||String(t);
   }
+  // Several keys mean the same action (a button and its mobile twin, or an
+  // old key and a new one). Fold them into one row after renaming.
+  function mergeByLabel(rows,key,val){
+    var by={},out=[];
+    rows.forEach(function(r){
+      var k=r[key];
+      if(!by[k]){by[k]={};by[k][key]=k;by[k][val]=0;out.push(by[k]);}
+      by[k][val]+=Number(r[val])||0;
+    });
+    return out.sort(function(a,b){return b[val]-a[val];});
+  }
+  // Synthetic rows - build health probes and test traffic - all live under
+  // paths starting "/__". They are not visitors.
+  function isSynthetic(p){var x=String(p||'');
+    return /^\/?__/.test(x)||x==='probe'||x==='diag';}
 
   function setStatus(t,isErr){var s=$('status');s.textContent=t;
     s.className='status'+(isErr?' err':'');}
@@ -8012,7 +8226,10 @@ td.path{color:var(--accent);word-break:break-all}
       renderChart(d.daily);
       renderTable($('pages'),d.top_pages,[{h:'Page',k:'page',path:true},
         {h:'Views',k:'views',num:true},{h:'Visitors',k:'visitors',num:true}]);
-      (d.top_clicks||[]).forEach(function(r){r.target=friendly(r.target);});
+      d.top_clicks=(d.top_clicks||[]).filter(function(r){return !isSynthetic(r.target);});
+      d.top_clicks.forEach(function(r){r.target=friendly(r.target);});
+      d.top_clicks=mergeByLabel(d.top_clicks,'target','clicks');
+      d.top_pages=(d.top_pages||[]).filter(function(r){return !isSynthetic(r.page);});
       renderTable($('clicks'),d.top_clicks,[{h:'Action',k:'target'},
         {h:'Clicks',k:'clicks',num:true}]);
       renderTable($('refs'),d.top_referrers,[{h:'Referrer',k:'referrer',path:true},
