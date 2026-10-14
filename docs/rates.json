@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-14",
-  "last_updated": "2026-10-14T18:37:31.677372+05:30",
+  "last_updated": "2026-10-14T23:37:09.410864+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,34 +22,34 @@
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 146464.0,
-      "change_pct": -1.34
+      "price_per_10g_inr": 145850.0,
+      "change_pct": 0.0
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 145249.0,
-      "change_pct": -1.31
+      "price_per_10g_inr": 144631.0,
+      "change_pct": -1.73
     }
   ],
   "jewellers": [
     {
       "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 14630.0,
-      "rate_22k_per_gram_inr": 13410.83,
-      "rate_18k_per_gram_inr": 10972.5
+      "rate_24k_per_gram_inr": 14530.0,
+      "rate_22k_per_gram_inr": 13319.17,
+      "rate_18k_per_gram_inr": 10897.5
+    },
+    {
+      "jeweller": "PN Gadgil & Sons",
+      "rate_24k_per_gram_inr": 14600.0,
+      "rate_22k_per_gram_inr": 13383.33,
+      "rate_18k_per_gram_inr": 10950.0
     },
     {
       "jeweller": "PN Gadgil",
       "rate_24k_per_gram_inr": 14690.0,
       "rate_22k_per_gram_inr": 13465.83,
       "rate_18k_per_gram_inr": 11017.5
-    },
-    {
-      "jeweller": "PN Gadgil & Sons",
-      "rate_24k_per_gram_inr": 14700.0,
-      "rate_22k_per_gram_inr": 13475.0,
-      "rate_18k_per_gram_inr": 11025.0
     },
     {
       "jeweller": "Senco Gold",
@@ -131,9 +131,9 @@
     },
     {
       "jeweller": "ORRA",
-      "rate_24k_per_gram_inr": 14918.52,
-      "rate_22k_per_gram_inr": 13675.31,
-      "rate_18k_per_gram_inr": 11188.89
+      "rate_24k_per_gram_inr": 14903.23,
+      "rate_22k_per_gram_inr": 13661.29,
+      "rate_18k_per_gram_inr": 11177.42
     },
     {
       "jeweller": "C Krishniah Chetty",
