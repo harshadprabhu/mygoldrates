@@ -241,3 +241,20 @@ def test_every_probed_table_has_the_column_the_probe_selects():
         cols = [l.strip().split()[0] for l in m.group(1).splitlines()
                 if l.strip() and not l.strip().startswith("--")]
         assert col in cols, f"{t} has no {col} column for the probe to select"
+
+
+# ── sign-in page ────────────────────────────────────────────────────────
+def test_signin_page_is_noindex_and_talks_to_the_jd_worker():
+    s = jd_page.build_signin()
+    assert 'name="robots" content="noindex' in s
+    assert jd_page.WORKER in s and "/jd/login/start" in s and "/jd/login/verify" in s
+    assert 'class="nd-nav"' in s or "nd-nav" in s
+
+
+def test_signin_page_never_writes_server_text_as_html():
+    s = jd_page.build_signin()
+    assert ".innerHTML" not in s
+
+
+def test_landing_page_links_to_signin(html):
+    assert "/jd-sign-in" in html

@@ -16,6 +16,14 @@
  *   GET  /jd/report        short-lived signed URL for the latest workbook
  *   GET  /jd/rates         the rate history as JSON, for programmatic use
  *   GET  /jd/ready         public: can a signup actually be taken right now
+ *   POST /jd/login/start   email a 6-digit sign-in code (website login)
+ *   POST /jd/login/verify  code -> 30-day session token
+ *
+ * Paid routes accept either an API key (mgr_live_…, for a jeweller's own
+ * systems) or a session token (jds.…, for the website sign-in page). Both
+ * resolve to an account; entitlement is then checked live on every call, so
+ * a cancelled subscription or a withdrawn complimentary grant takes effect
+ * at once, whatever token the caller holds.
  *
  * SECRETS (wrangler secret put …)
  *   SUPABASE_URL, SUPABASE_SERVICE_KEY
@@ -23,6 +31,8 @@
  *   RAZORPAY_PLAN_ID
  *   JD_EXPECTED_PAISE     what the page advertises, in paise. Optional, but
  *                         without it a repriced plan can charge silently.
+ *   JD_SESSION_SECRET     signs session tokens and keys the login-code HMAC
+ *   BREVO_API_KEY, ALERTS_FROM   send the sign-in code email
  *
  * NOTHING here is edge-cached. Caching an entitlement decision or a signed
  * URL would serve one jeweller's access to the next caller.
@@ -103,6 +113,30 @@ function newApiKey() {
   return `mgr_live_${body}`;
 }
 
+// ─── website sessions ────────────────────────────────────────────────────
+// Stateless: jds.<account id>.<expiry, unix seconds>.<HMAC of the two>.
+// Nothing to store or clean up, and nothing in it grants access by itself -
+// it only says which account is calling; entitlement is checked live.
+const SESSION_DAYS = 30;
+
+async function newSession(env, accountId) {
+  const exp = Math.floor(Date.now() / 1000) + SESSION_DAYS * 86400;
+  const body = `${accountId}.${exp}`;
+  return `jds.${body}.${await hmacHex(env.JD_SESSION_SECRET, `session:${body}`)}`;
+}
+
+async function readSession(env, token) {
+  if (!env.JD_SESSION_SECRET) return null;
+  const m = token.match(/^jds\.(\d+)\.(\d+)\.([a-f0-9]{64})$/);
+  if (!m) return null;
+  const expected = await hmacHex(env.JD_SESSION_SECRET, `session:${m[1]}.${m[2]}`);
+  if (!timingSafeEqual(m[3], expected)) return null;
+  if (parseInt(m[2], 10) < Date.now() / 1000) return null;
+  return parseInt(m[1], 10);
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // ─── Supabase (service role) ─────────────────────────────────────────────
 async function sb(env, path, opts = {}) {
   const r = await fetch(`${env.SUPABASE_URL}/rest/v1/${path}`, {
@@ -144,6 +178,13 @@ async function razorpay(env, path, method = 'GET', payload) {
 const LIVE_STATUSES = new Set(['active', 'authenticated']);
 
 async function entitlementFor(env, accountId) {
+  // Complimentary access first: granted by hand, needs no mandate.
+  const acc = await sb(env,
+    `jd_accounts?id=eq.${accountId}&select=comp_until&limit=1`);
+  const comp = Array.isArray(acc.body) ? acc.body[0]?.comp_until : null;
+  if (comp && new Date(comp) > new Date()) {
+    return { active: true, status: 'complimentary', current_end: comp };
+  }
   const { body } = await sb(env,
     `jd_subscriptions?account_id=eq.${accountId}` +
     `&select=status,current_end,razorpay_subscription_id` +
@@ -164,6 +205,13 @@ async function entitlementFor(env, accountId) {
 
 async function authenticate(env, request) {
   const h = request.headers.get('Authorization') || '';
+  const t = h.match(/^Bearer\s+(jds\.\S+)$/);
+  if (t) {
+    const accountId = await readSession(env, t[1]);
+    return accountId
+      ? { ok: true, accountId }
+      : { ok: false, error: 'session expired - sign in again' };
+  }
   const m = h.match(/^Bearer\s+(mgr_live_[a-f0-9]{48})$/);
   if (!m) return { ok: false, error: 'missing or malformed API key' };
   const hash = await sha256Hex(m[1]);
@@ -207,6 +255,8 @@ export default {
         case 'POST /jd/signup':   return wrap(await handleSignup(request, env));
         case 'POST /jd/webhook':  return wrap(await handleWebhook(request, env));
         case 'GET /jd/ready':     return wrap(await handleReady(request, env));
+        case 'POST /jd/login/start':  return wrap(await handleLoginStart(request, env));
+        case 'POST /jd/login/verify': return wrap(await handleLoginVerify(request, env));
         case 'GET /jd/status':    return wrap(await handleStatus(request, env));
         case 'GET /jd/report':    return wrap(await handleReport(request, env));
         case 'GET /jd/rates':     return wrap(await handleRates(request, env, url));
@@ -510,7 +560,10 @@ async function handleStatus(request, env) {
   const a = await authenticate(env, request);
   if (!a.ok) return json({ error: a.error }, 401);
   const e = await entitlementFor(env, a.accountId);
-  return json({ account_id: a.accountId, entitlement: e });
+  const { body } = await sb(env,
+    `jd_accounts?id=eq.${a.accountId}&select=email&limit=1`);
+  const email = Array.isArray(body) ? body[0]?.email ?? null : null;
+  return json({ account_id: a.accountId, email, entitlement: e });
 }
 
 // ─── GET /jd/report ─────────────────────────────────────────────────────
@@ -529,7 +582,10 @@ async function handleReport(request, env) {
         Authorization: `Bearer ${env.SUPABASE_SERVICE_KEY}`,
         'content-type': 'application/json',
       },
-      body: JSON.stringify({ limit: 1, sortBy: { column: 'name', order: 'desc' } }),
+      // prefix is required by the Storage API; without it the call is a
+      // 400 and every subscriber would be told no report exists.
+      body: JSON.stringify({ prefix: '', limit: 1,
+                             sortBy: { column: 'name', order: 'desc' } }),
     });
   const files = await list.json().catch(() => null);
   const latest = Array.isArray(files) ? files[0] : null;
@@ -600,5 +656,134 @@ async function handleRates(request, env, url) {
         + 'no daily IBJA series is stored, so premium-over-bullion cannot be '
         + 'computed for past dates.',
     data: rows,
+  });
+}
+
+// ─── POST /jd/login/start ───────────────────────────────────────────────
+// Emails a 6-digit code to an address that has a Jewellers Digest account.
+//
+// The answer is the same whether or not the address has an account, so the
+// endpoint cannot be used to find out who subscribes. It only ever mails
+// addresses already in jd_accounts, so it cannot be used to send mail to
+// strangers, and at most 5 codes per address per hour.
+const CODE_TTL_MIN = 10;
+const CODES_PER_HOUR = 5;
+const MAX_ATTEMPTS = 5;
+
+function codeHash(env, email, code) {
+  return hmacHex(env.JD_SESSION_SECRET, `login:${email}:${code}`);
+}
+
+async function handleLoginStart(request, env) {
+  let b;
+  try { b = await request.json(); } catch { return json({ error: 'bad JSON' }, 400); }
+  const email = String(b.email || '').trim().toLowerCase();
+  if (!EMAIL_RE.test(email)) return json({ error: 'valid email required' }, 400);
+  const missing = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'JD_SESSION_SECRET',
+    'BREVO_API_KEY'].filter((k) => !env[k]);
+  if (missing.length) {
+    console.error('login not configured, unset:', missing.join(', '));
+    return json({ error: 'sign-in is not available right now' }, 503);
+  }
+  const generic = json({ ok: true, sent_if_account: true, ttl_minutes: CODE_TTL_MIN });
+
+  const acc = await sb(env,
+    `jd_accounts?email=eq.${encodeURIComponent(email)}&select=id&limit=1`);
+  if (!acc.ok) {
+    console.error('login: accounts lookup failed', acc.status);
+    return json({ error: 'sign-in is not available right now' }, 503);
+  }
+  if (!Array.isArray(acc.body) || !acc.body[0]) return generic;
+
+  const since = new Date(Date.now() - 3600 * 1000).toISOString();
+  const recent = await sb(env,
+    `jd_login_codes?email=eq.${encodeURIComponent(email)}` +
+    `&created_at=gte.${since}&select=id`);
+  if (Array.isArray(recent.body) && recent.body.length >= CODES_PER_HOUR) {
+    return generic;
+  }
+
+  const n = crypto.getRandomValues(new Uint32Array(1))[0] % 1000000;
+  const code = String(n).padStart(6, '0');
+  const ins = await sb(env, 'jd_login_codes', {
+    method: 'POST',
+    body: JSON.stringify([{
+      email,
+      code_hash: await codeHash(env, email, code),
+      expires_at: new Date(Date.now() + CODE_TTL_MIN * 60000).toISOString(),
+    }]),
+  });
+  if (!ins.ok) {
+    console.error('login: code store failed', ins.status);
+    return json({ error: 'sign-in is not available right now' }, 503);
+  }
+
+  const raw = (env.ALERTS_FROM || 'MyGoldRates <alerts@mygoldrates.com>').trim();
+  const sm = raw.match(/^(.*)<([^>]+)>$/);
+  const sender = sm ? { name: sm[1].trim() || 'MyGoldRates', email: sm[2].trim() }
+                    : { name: 'MyGoldRates', email: raw };
+  const r = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': env.BREVO_API_KEY, 'content-type': 'application/json',
+               accept: 'application/json' },
+    body: JSON.stringify({
+      sender,
+      to: [{ email }],
+      subject: `${code} is your Jewellers Digest sign-in code`,
+      textContent: `Your Jewellers Digest sign-in code is ${code}.\n\n`
+        + `It expires in ${CODE_TTL_MIN} minutes. If you did not ask for it, `
+        + 'ignore this email - nobody can sign in without the code.\n\n'
+        + 'MyGoldRates.com',
+      htmlContent: '<div style="font-family:Arial,sans-serif;font-size:15px;'
+        + 'color:#222"><p>Your Jewellers Digest sign-in code is</p>'
+        + `<p style="font-size:30px;font-weight:700;letter-spacing:6px">${code}</p>`
+        + `<p>It expires in ${CODE_TTL_MIN} minutes. If you did not ask for it, `
+        + 'ignore this email &mdash; nobody can sign in without the code.</p>'
+        + '<p style="color:#777">MyGoldRates.com</p></div>',
+    }),
+  });
+  if (!r.ok) {
+    console.error('login: brevo send failed', r.status);
+    return json({ error: 'could not send the code - try again shortly' }, 502);
+  }
+  return generic;
+}
+
+// ─── POST /jd/login/verify ──────────────────────────────────────────────
+// Checks the newest unused code for the address. Five wrong guesses burn
+// it; a fresh one has to be requested.
+async function handleLoginVerify(request, env) {
+  let b;
+  try { b = await request.json(); } catch { return json({ error: 'bad JSON' }, 400); }
+  const email = String(b.email || '').trim().toLowerCase();
+  const code = String(b.code || '').replace(/\D/g, '');
+  const bad = json({ error: 'that code is wrong or has expired' }, 401);
+  if (!EMAIL_RE.test(email) || code.length !== 6 || !env.JD_SESSION_SECRET) return bad;
+
+  const now = new Date().toISOString();
+  const { body } = await sb(env,
+    `jd_login_codes?email=eq.${encodeURIComponent(email)}&used_at=is.null` +
+    `&expires_at=gt.${now}&select=id,code_hash,attempts` +
+    `&order=created_at.desc&limit=1`);
+  const row = Array.isArray(body) ? body[0] : null;
+  if (!row || row.attempts >= MAX_ATTEMPTS) return bad;
+
+  if (!timingSafeEqual(row.code_hash, await codeHash(env, email, code))) {
+    await sb(env, `jd_login_codes?id=eq.${row.id}`, {
+      method: 'PATCH', body: JSON.stringify({ attempts: row.attempts + 1 }) });
+    return bad;
+  }
+  await sb(env, `jd_login_codes?id=eq.${row.id}`, {
+    method: 'PATCH', body: JSON.stringify({ used_at: now }) });
+
+  const acc = await sb(env,
+    `jd_accounts?email=eq.${encodeURIComponent(email)}&select=id&limit=1`);
+  const account = Array.isArray(acc.body) ? acc.body[0] : null;
+  if (!account) return bad;
+  return json({
+    token: await newSession(env, account.id),
+    email,
+    entitlement: await entitlementFor(env, account.id),
+    expires_in_days: SESSION_DAYS,
   });
 }

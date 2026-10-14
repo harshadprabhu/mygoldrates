@@ -194,7 +194,18 @@ it shipped once under the name `b2b` and was renamed wholesale.
   who has paid. **No caching anywhere in it** — a cached entitlement decision
   or signed URL would hand one jeweller's access to the next caller.
 - Routes: `POST /jd/signup`, `POST /jd/webhook`, `GET /jd/status`,
-  `GET /jd/report` (10-minute signed URL), `GET /jd/rates`.
+  `GET /jd/report` (10-minute signed URL), `GET /jd/rates`,
+  `POST /jd/login/start` + `POST /jd/login/verify` (website sign-in).
+- Website sign-in (`/jd-sign-in`, built by `jd_page.build_signin`): email a
+  6-digit code (Brevo), verify it, get a 30-day stateless session token
+  `jds.<account>.<exp>.<hmac>`. Codes are stored only as an HMAC, expire in
+  10 minutes, burn after 5 wrong guesses, max 5 per address per hour, and are
+  only ever mailed to addresses already in `jd_accounts`. Emails match
+  exactly (`eq`), never `ilike`: `_` is a wildcard there.
+- Complimentary access: `jd_accounts.comp_until` in the future = access with
+  no Razorpay mandate. Checked before the subscription.
+- Behaviour is tested against the real Worker in `tests/js/jd_login_harness.mjs`
+  (driven by `tests/test_jd_login.py`).
 - Razorpay webhooks are HMAC-verified with a constant-time compare and made
   idempotent by a unique index on `jd_webhook_events.event_id`.
 - API keys are shown once and stored only as SHA-256; `jd_api_keys` holds the
@@ -203,11 +214,14 @@ it shipped once under the name `b2b` and was renamed wholesale.
 
 ### Going live — one-time setup (not done yet)
 1. Run `sql/jd.sql` in the Supabase SQL Editor.
-2. Create a Supabase Storage bucket named `jd-reports` and leave it **private**.
+2. (`sql/jd.sql` also creates the private `jd-reports` Storage bucket.)
 3. Create the Razorpay plan; note the `plan_…` id.
-4. `wrangler secret put` for `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`,
-   `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`
-   (the webhook secret, **not** the key secret), `RAZORPAY_PLAN_ID`.
+4. Add `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`
+   (the webhook secret, **not** the key secret) and `RAZORPAY_PLAN_ID` as
+   GitHub repo secrets, then run `deploy-jd-worker`. It copies those plus
+   `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `BREVO_API_KEY` and `ALERTS_FROM`
+   into the Worker, creates `JD_SESSION_SECRET` once, and sets
+   `JD_EXPECTED_PAISE` from `jd_pricing.py`.
 5. Point the Razorpay webhook at `…/jd/webhook`.
 6. Optional: add `ANTHROPIC_API_KEY` as a GitHub secret for the AI note.
 

@@ -178,6 +178,29 @@ create unique index if not exists jd_webhook_events_uidx
 create index if not exists jd_webhook_events_recv_idx
   on public.jd_webhook_events (received_at desc);
 
+-- ------------------------------------------------------ complimentary
+-- Access granted by hand rather than bought: the owner, a reviewer, a
+-- jeweller on a trial. NULL means none. Checked before the subscription, so
+-- a complimentary account never needs a Razorpay mandate to read the report.
+alter table public.jd_accounts add column if not exists comp_until timestamptz;
+
+-- ---------------------------------------------------------- login codes
+-- Email one-time codes for signing in on the website. Only an HMAC of the
+-- code is stored (keyed with a Worker secret), so a leak of this table does
+-- not let anyone try the million possible codes offline. Codes expire after
+-- 10 minutes and allow 5 wrong guesses before they are burned.
+create table if not exists public.jd_login_codes (
+  id          bigint generated always as identity primary key,
+  email       text not null,
+  code_hash   text not null,
+  expires_at  timestamptz not null,
+  attempts    integer not null default 0,
+  used_at     timestamptz,
+  created_at  timestamptz not null default now()
+);
+create index if not exists jd_login_codes_email_idx
+  on public.jd_login_codes (lower(email), created_at desc);
+
 -- ------------------------------------------------------------------- RLS
 -- Enabled with no policies at all. Postgres denies by default, so the anon
 -- and authenticated roles get nothing; only the service role (which bypasses
@@ -188,12 +211,14 @@ alter table public.jd_subscriptions  enable row level security;
 alter table public.jd_payments       enable row level security;
 alter table public.jd_api_keys       enable row level security;
 alter table public.jd_webhook_events enable row level security;
+alter table public.jd_login_codes    enable row level security;
 
 revoke all on public.jd_accounts       from anon, authenticated;
 revoke all on public.jd_subscriptions  from anon, authenticated;
 revoke all on public.jd_payments       from anon, authenticated;
 revoke all on public.jd_api_keys       from anon, authenticated;
 revoke all on public.jd_webhook_events from anon, authenticated;
+revoke all on public.jd_login_codes    from anon, authenticated;
 
 -- ------------------------------------------------------- updated_at touch
 create or replace function public.jd_touch_updated_at()
@@ -207,6 +232,14 @@ create trigger jd_accounts_touch before update on public.jd_accounts
 drop trigger if exists jd_subs_touch on public.jd_subscriptions;
 create trigger jd_subs_touch before update on public.jd_subscriptions
   for each row execute function public.jd_touch_updated_at();
+
+-- ---------------------------------------------------------------- storage
+-- The private bucket the daily workbook is uploaded to. Created here so
+-- running this one file is the whole database setup. public = false: the
+-- workbook is only ever handed out as a 10-minute signed URL.
+insert into storage.buckets (id, name, public)
+values ('jd-reports', 'jd-reports', false)
+on conflict (id) do update set public = false;
 
 -- ----------------------------------------------------------------- notes
 -- Storage: create a bucket named `jd-reports` and leave it PRIVATE. The

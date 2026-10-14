@@ -172,6 +172,7 @@ footer a{{color:var(--ink2)}}
       <p class="fineprint">You will be taken to Razorpay to approve the monthly
       auto-debit. Cancel any time from your UPI app or by emailing us &mdash; cancelling
       stops the next charge.</p>
+      <p class="fineprint">Already subscribed? <a href="{SITE}/jd-sign-in">Sign in</a></p>
     </div>
   </div>
 </div>
@@ -290,6 +291,190 @@ footer a{{color:var(--ink2)}}
 """
 
 
+SIGNIN_OUT = os.environ.get("JD_SIGNIN_OUT", "docs/jd-sign-in.html")
+
+
+def build_signin():
+    """The Jewellers Digest sign-in page: email, then a 6-digit code.
+
+    No password to forget or leak. The Worker emails a code only to an
+    address that already has an account, answers the same either way, and
+    hands back a session token that names the account and nothing more -
+    access is checked live on every download, so a lapsed subscription
+    stops working immediately whatever the browser still holds.
+    """
+    import generate_site as _gs
+    from datetime import date as _date
+    return f"""<!doctype html>
+<html lang="en-IN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign in &mdash; Jewellers Digest | MyGoldRates</title>
+<meta name="description" content="Sign in to Jewellers Digest with a code sent to your email.">
+<meta name="robots" content="noindex,follow">
+<link rel="canonical" href="{SITE}/jd-sign-in">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<style>
+:root{{--bg:#0a0804;--card:rgba(22,16,8,.86);--line:rgba(201,162,39,.16);
+  --ink:#F4EDE0;--ink2:#C8BDA8;--ink3:#857B69;--gold:#D4A63C;--gold-l:#F0D080;
+  --mint:#5CC4A0;--rose:#E88AAE;--serif:'Playfair Display',Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}}
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;
+  line-height:1.6;-webkit-font-smoothing:antialiased}}
+a{{color:var(--gold-l)}}
+.card{{background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:28px 24px;margin:48px auto;max-width:420px}}
+h1{{font-family:var(--serif);font-size:30px;line-height:1.2}}
+.sub{{color:var(--ink2);font-size:14.5px;margin-top:8px}}
+form{{margin-top:20px;display:grid;gap:12px}}
+label{{font-size:12.5px;color:var(--ink3);display:block;margin-bottom:5px}}
+input{{width:100%;background:rgba(0,0,0,.34);border:1px solid var(--line);
+  border-radius:10px;padding:13px 14px;color:var(--ink);font-size:16px;font-family:inherit}}
+input:focus{{outline:2px solid var(--gold);outline-offset:1px}}
+#code{{font-size:24px;letter-spacing:8px;text-align:center}}
+button{{width:100%;border:0;border-radius:10px;padding:15px;font-size:16px;
+  font-weight:700;font-family:inherit;cursor:pointer;
+  background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#1a0a04}}
+button:disabled{{opacity:.45;cursor:not-allowed}}
+.link{{background:none;color:var(--gold-l);padding:6px;font-weight:500;
+  font-size:14px;text-decoration:underline}}
+.msg{{font-size:14px;margin-top:12px;line-height:1.5}}
+.msg.err{{color:var(--rose)}} .msg.ok{{color:var(--mint)}}
+.acc{{margin-top:16px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;
+  font-size:14.5px;color:var(--ink2)}}
+.acc b{{color:var(--ink)}}
+.foot{{font-size:13px;color:var(--ink3);margin-top:18px}}
+[hidden]{{display:none!important}}
+</style>
+<style>{_gs.ND_CHROME_CSS}</style>
+{_analytics()}</head><body>
+{_gs.nd_header_html()}
+<div style="padding:0 16px">
+<div class="card">
+  <h1>Jewellers Digest</h1>
+
+  <div id="v-email">
+    <p class="sub">Sign in with the email you subscribed with. We will send
+    you a 6-digit code &mdash; no password needed.</p>
+    <form id="f-email" novalidate>
+      <div><label for="em">Email</label>
+        <input id="em" type="email" autocomplete="email" placeholder="you@yourshop.com" required></div>
+      <button id="b-email" type="submit">Email me a code</button>
+    </form>
+  </div>
+
+  <div id="v-code" hidden>
+    <p class="sub">If <b id="em-show"></b> has a Jewellers Digest account, a
+    code is on its way. It expires in 10 minutes.</p>
+    <form id="f-code" novalidate>
+      <div><label for="code">6-digit code</label>
+        <input id="code" inputmode="numeric" autocomplete="one-time-code"
+          maxlength="6" pattern="[0-9]*" required></div>
+      <button id="b-code" type="submit">Sign in</button>
+    </form>
+    <button class="link" id="b-back" type="button">Use a different email</button>
+  </div>
+
+  <div id="v-in" hidden>
+    <p class="sub">Signed in as <b id="who"></b></p>
+    <div class="acc" id="acc"></div>
+    <form id="f-dl" style="margin-top:16px"><button id="b-dl" type="submit">Download today&rsquo;s workbook</button></form>
+    <button class="link" id="b-out" type="button">Sign out</button>
+  </div>
+
+  <div class="msg" id="msg" role="status"></div>
+  <p class="foot">Not subscribed yet? <a href="{SITE}/jewellers-digest">See Jewellers Digest</a>.</p>
+</div>
+</div>
+{_gs.nd_footer_html(_date.today().year)}
+<script>
+(function(){{
+  var API = {WORKER!r}, KEY = 'jd_session', token = null, email = '';
+  try {{ token = localStorage.getItem(KEY); }} catch (e) {{}}
+  function $(id){{ return document.getElementById(id); }}
+  function say(t, cls){{ $('msg').textContent = t || ''; $('msg').className = 'msg ' + (cls||''); }}
+  function show(v){{ ['v-email','v-code','v-in'].forEach(function(x){{ $(x).hidden = (x !== v); }}); }}
+  function keep(t){{ token = t; try {{ t ? localStorage.setItem(KEY, t) : localStorage.removeItem(KEY); }} catch (e) {{}} }}
+  function call(method, path, body){{
+    var h = {{'content-type':'application/json'}};
+    if (token) h['Authorization'] = 'Bearer ' + token;
+    return fetch(API + path, {{method: method, headers: h,
+        body: body ? JSON.stringify(body) : undefined}})
+      .then(function(r){{ return r.json().catch(function(){{ return {{}}; }})
+        .then(function(j){{ return {{status: r.status, ok: r.ok, j: j}}; }}); }});
+  }}
+  function day(iso){{ return new Date(iso).toLocaleDateString('en-IN',
+      {{day:'numeric', month:'short', year:'numeric'}}); }}
+  function account(who, e){{
+    $('who').textContent = who || '';
+    var a = $('acc'), dl = $('b-dl');
+    if (e && e.active && e.status === 'complimentary') {{
+      a.textContent = new Date(e.current_end).getFullYear() > 2090
+        ? 'Complimentary access.' : 'Complimentary access until ' + day(e.current_end) + '.';
+    }} else if (e && e.active) {{
+      a.textContent = 'Subscription active' + (e.current_end ? ', paid until ' + day(e.current_end) : '') + '.';
+    }} else {{
+      a.textContent = 'There is no active subscription on this email.';
+    }}
+    dl.hidden = !(e && e.active);
+    show('v-in');
+  }}
+
+  if (token) {{
+    call('GET', '/jd/status').then(function(r){{
+      if (r.ok) account(r.j.email, r.j.entitlement);
+      else {{ keep(null); show('v-email'); }}
+    }}).catch(function(){{ say('Could not reach the server. Check your connection.', 'err'); }});
+  }}
+
+  $('f-email').addEventListener('submit', function(ev){{
+    ev.preventDefault();
+    email = $('em').value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return say('Enter a valid email address.', 'err');
+    $('b-email').disabled = true; say('');
+    call('POST', '/jd/login/start', {{email: email}}).then(function(r){{
+      $('b-email').disabled = false;
+      if (!r.ok) return say(r.j.error || 'Could not send the code. Try again shortly.', 'err');
+      $('em-show').textContent = email; show('v-code'); $('code').focus();
+    }}).catch(function(){{ $('b-email').disabled = false;
+      say('Could not reach the server. Check your connection.', 'err'); }});
+  }});
+
+  $('f-code').addEventListener('submit', function(ev){{
+    ev.preventDefault();
+    var code = $('code').value.replace(/\D/g, '');
+    if (code.length !== 6) return say('Enter the 6-digit code from the email.', 'err');
+    $('b-code').disabled = true; say('');
+    call('POST', '/jd/login/verify', {{email: email, code: code}}).then(function(r){{
+      $('b-code').disabled = false;
+      if (!r.ok || !r.j.token) return say(r.j.error || 'That code is wrong or has expired.', 'err');
+      keep(r.j.token); $('code').value = ''; account(r.j.email, r.j.entitlement);
+    }}).catch(function(){{ $('b-code').disabled = false;
+      say('Could not reach the server. Check your connection.', 'err'); }});
+  }});
+
+  $('b-back').addEventListener('click', function(){{ say(''); show('v-email'); }});
+  $('b-out').addEventListener('click', function(){{ keep(null); say('Signed out.', 'ok'); show('v-email'); }});
+
+  $('f-dl').addEventListener('submit', function(ev){{
+    ev.preventDefault();
+    $('b-dl').disabled = true; say('Preparing your download\u2026');
+    call('GET', '/jd/report').then(function(r){{
+      $('b-dl').disabled = false;
+      if (r.ok && r.j.url) {{ say('Downloading ' + r.j.report + '.', 'ok'); window.location.href = r.j.url; return; }}
+      if (r.status === 401) {{ keep(null); show('v-email'); return say('Your session has ended. Sign in again.', 'err'); }}
+      if (r.status === 404) return say('Today\u2019s workbook is not ready yet. It is published every morning.', 'err');
+      say(r.j.error || 'Could not get the workbook. Try again shortly.', 'err');
+    }}).catch(function(){{ $('b-dl').disabled = false;
+      say('Could not reach the server. Check your connection.', 'err'); }});
+  }});
+}})();
+</script>
+</body></html>
+"""
+
+
 def _analytics():
     """The same inline beacon every other page gets.
 
@@ -313,6 +498,10 @@ def main():
         f.write(html)
     print(f"jd-page: wrote {OUT} ({len(html):,} bytes) "
           f"- Rs {P.REGULAR_INR} struck to Rs {P.OFFER_INR}")
+    signin = build_signin()
+    with open(SIGNIN_OUT, "w", encoding="utf-8") as f:
+        f.write(signin)
+    print(f"jd-page: wrote {SIGNIN_OUT} ({len(signin):,} bytes)")
     return 0
 
 
