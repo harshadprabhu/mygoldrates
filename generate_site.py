@@ -3622,7 +3622,25 @@ def main():
             "  Cache-Control: public, max-age=300, s-maxage=600, must-revalidate\n"
             "  X-Content-Type-Options: nosniff\n"
             "  Referrer-Policy: strict-origin-when-cross-origin\n"
+            "\n"
+            # Indexing signals by host. Cloudflare Pages also serves the
+            # whole site at mygoldrates.pages.dev and at a preview address
+            # for every deploy, and this header used to say "index, follow"
+            # on all of them - inviting search engines to index full copies
+            # of the site. Bing then listed pages.dev as the site's only
+            # referring domain: the copies link to mygoldrates.com ~70 times
+            # a page. The canonical tags point home, but the copies should
+            # not be indexed at all. This is Cloudflare's documented fix:
+            # absolute-URL rules in _headers. Crawling stays allowed so the
+            # noindex can be seen.
+            "https://mygoldrates.com/*\n"
             "  X-Robots-Tag: index, follow, max-image-preview:large\n"
+            "\n"
+            "https://:project.pages.dev/*\n"
+            "  X-Robots-Tag: noindex\n"
+            "\n"
+            "https://:version.:project.pages.dev/*\n"
+            "  X-Robots-Tag: noindex\n"
             "\n"
             "/*.html\n"
             f"  Last-Modified: {headers_lm}\n"

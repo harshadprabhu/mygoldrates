@@ -232,3 +232,19 @@ def test_logo_mark_is_in_the_header(page):
     pages moved to the new design's wordmark-only header."""
     h = _read(f"{DOCS}/{page}")
     assert 'class="brand-mark"' in h
+
+
+def test_pages_dev_copies_are_noindex_and_the_real_domain_is_not():
+    """mygoldrates.pages.dev and every deploy's preview address serve full
+    copies of the site. They were sent "X-Robots-Tag: index, follow", and
+    Bing counted them as the site's only referring domain."""
+    src = _read("generate_site.py")
+    i = src.index('with open("docs/_headers", "w"')
+    block = src[i:i + 4000]
+    assert '"https://:project.pages.dev/*\\n"' in block
+    assert '"https://:version.:project.pages.dev/*\\n"' in block
+    assert block.count('X-Robots-Tag: noindex') == 2
+    # the "index" signal is only ever sent on the real domain
+    first = block.index('"/*\\n"')
+    generic = block[first:block.index('"https://mygoldrates.com/*\\n"')]
+    assert "X-Robots-Tag" not in generic

@@ -1,36 +1,44 @@
 /*
-  Last-Modified: Tue, 13 Oct 2026 22:43:16 GMT
+  Last-Modified: Wed, 14 Oct 2026 01:20:22 GMT
   Cache-Control: public, max-age=300, s-maxage=600, must-revalidate
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+
+https://mygoldrates.com/*
   X-Robots-Tag: index, follow, max-image-preview:large
 
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex
+
 /*.html
-  Last-Modified: Tue, 13 Oct 2026 22:43:16 GMT
+  Last-Modified: Wed, 14 Oct 2026 01:20:22 GMT
   Cache-Control: public, max-age=300, s-maxage=600, must-revalidate
 
 /sitemap.xml
-  Last-Modified: Tue, 13 Oct 2026 22:43:16 GMT
+  Last-Modified: Wed, 14 Oct 2026 01:20:22 GMT
   Cache-Control: public, max-age=0, must-revalidate
 
 /sitemap_main.xml
-  Last-Modified: Tue, 13 Oct 2026 22:43:16 GMT
+  Last-Modified: Wed, 14 Oct 2026 01:20:22 GMT
   Cache-Control: public, max-age=0, must-revalidate
 
 /sitemap_cities.xml
-  Last-Modified: Tue, 13 Oct 2026 22:43:16 GMT
+  Last-Modified: Wed, 14 Oct 2026 01:20:22 GMT
   Cache-Control: public, max-age=0, must-revalidate
 
 /sitemap_daily.xml
-  Last-Modified: Tue, 13 Oct 2026 22:43:16 GMT
+  Last-Modified: Wed, 14 Oct 2026 01:20:22 GMT
   Cache-Control: public, max-age=0, must-revalidate
 
 /sitemap_news.xml
-  Last-Modified: Tue, 13 Oct 2026 22:43:16 GMT
+  Last-Modified: Wed, 14 Oct 2026 01:20:22 GMT
   Cache-Control: public, max-age=0, must-revalidate
 
 /rates.json
-  Last-Modified: Tue, 13 Oct 2026 22:43:16 GMT
+  Last-Modified: Wed, 14 Oct 2026 01:20:22 GMT
   Cache-Control: public, max-age=60, must-revalidate
 
 /robots.txt
