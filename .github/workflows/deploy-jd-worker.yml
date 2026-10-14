@@ -30,4 +30,49 @@ jobs:
           # (deploy-worker, deploy-market-worker) use CF_WORKERS_TOKEN.
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_WORKERS_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx --yes wrangler@3 deploy
+        # The advertised price goes in from jd_pricing.py, the one place
+        # prices live, so the Worker's plan-amount guard checks against the
+        # same number the page shows.
+        run: |
+          PAISE=$(cd .. && python3 -c "import jd_pricing as P; print(P.PLAN_AMOUNT_PAISE)")
+          npx --yes wrangler@3 deploy --var JD_EXPECTED_PAISE:$PAISE
+
+      # Copy the secrets the Worker needs from this repo's secrets, so each
+      # one is kept in one place. Values go in on stdin and never appear in
+      # the log. A secret that is not set here is skipped, which leaves any
+      # value already set in the Cloudflare dashboard alone.
+      - name: Sync secrets
+        working-directory: cf-worker-jd
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          ALERTS_FROM: ${{ secrets.ALERTS_FROM }}
+          RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
+          RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
+          RAZORPAY_WEBHOOK_SECRET: ${{ secrets.RAZORPAY_WEBHOOK_SECRET }}
+          RAZORPAY_PLAN_ID: ${{ secrets.RAZORPAY_PLAN_ID }}
+        run: |
+          set -eu
+          for name in SUPABASE_URL SUPABASE_SERVICE_KEY BREVO_API_KEY ALERTS_FROM \
+                      RAZORPAY_KEY_ID RAZORPAY_KEY_SECRET RAZORPAY_WEBHOOK_SECRET \
+                      RAZORPAY_PLAN_ID; do
+            val=$(printenv "$name" || true)
+            if [ -n "$val" ]; then
+              printf '%s' "$val" | npx --yes wrangler@3 secret put "$name" >/dev/null
+              echo "set    $name"
+            else
+              echo "skip   $name (not a repo secret)"
+            fi
+          done
+          # The session secret is generated once and never rotated by a
+          # redeploy: rotating it would sign every jeweller out.
+          if npx --yes wrangler@3 secret list | grep -q '"JD_SESSION_SECRET"'; then
+            echo "keep   JD_SESSION_SECRET"
+          else
+            openssl rand -hex 32 | tr -d '\n' | npx --yes wrangler@3 secret put JD_SESSION_SECRET >/dev/null
+            echo "made   JD_SESSION_SECRET"
+          fi
+          npx --yes wrangler@3 secret list | grep -o '"name": *"[A-Z_]*"' | sed 's/.*"\([A-Z_]*\)"/present \1/'

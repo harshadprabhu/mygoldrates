@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en-IN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign in &mdash; Jewellers Digest | MyGoldRates</title>
+<meta name="description" content="Sign in to Jewellers Digest with a code sent to your email.">
+<meta name="robots" content="noindex,follow">
+<link rel="canonical" href="https://mygoldrates.com/jd-sign-in">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<style>
+:root{--bg:#0a0804;--card:rgba(22,16,8,.86);--line:rgba(201,162,39,.16);
+  --ink:#F4EDE0;--ink2:#C8BDA8;--ink3:#857B69;--gold:#D4A63C;--gold-l:#F0D080;
+  --mint:#5CC4A0;--rose:#E88AAE;--serif:'Playfair Display',Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;
+  line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--gold-l)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:28px 24px;margin:48px auto;max-width:420px}
+h1{font-family:var(--serif);font-size:30px;line-height:1.2}
+.sub{color:var(--ink2);font-size:14.5px;margin-top:8px}
+form{margin-top:20px;display:grid;gap:12px}
+label{font-size:12.5px;color:var(--ink3);display:block;margin-bottom:5px}
+input{width:100%;background:rgba(0,0,0,.34);border:1px solid var(--line);
+  border-radius:10px;padding:13px 14px;color:var(--ink);font-size:16px;font-family:inherit}
+input:focus{outline:2px solid var(--gold);outline-offset:1px}
+#code{font-size:24px;letter-spacing:8px;text-align:center}
+button{width:100%;border:0;border-radius:10px;padding:15px;font-size:16px;
+  font-weight:700;font-family:inherit;cursor:pointer;
+  background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#1a0a04}
+button:disabled{opacity:.45;cursor:not-allowed}
+.link{background:none;color:var(--gold-l);padding:6px;font-weight:500;
+  font-size:14px;text-decoration:underline}
+.msg{font-size:14px;margin-top:12px;line-height:1.5}
+.msg.err{color:var(--rose)} .msg.ok{color:var(--mint)}
+.acc{margin-top:16px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;
+  font-size:14.5px;color:var(--ink2)}
+.acc b{color:var(--ink)}
+.foot{font-size:13px;color:var(--ink3);margin-top:18px}
+[hidden]{display:none!important}
+</style>
+<style>
+.nd-nav{position:sticky;top:0;z-index:50;background:rgba(10,8,4,.82);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(200,160,60,.12)}
+.nd-nav-in{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;
+  align-items:center;gap:22px}
+.nd-logo{font-family:'Playfair Display',Georgia,serif;font-size:20px;font-weight:700;
+  color:#F4EDE0;text-decoration:none;white-space:nowrap;display:inline-flex;
+  align-items:center;gap:9px}
+.nd-logo .nd-word span{background:linear-gradient(135deg,#F4E3A6,#D4A63C);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nd-links{display:flex;gap:20px;overflow-x:auto;scrollbar-width:none;flex:1}
+.nd-links::-webkit-scrollbar{display:none}
+.nd-links a{color:#C8BDA8;text-decoration:none;font-size:14px;font-weight:500;
+  white-space:nowrap}
+.nd-links a:hover,.nd-links a[aria-current]{color:#E8C766}
+.nd-cta{margin-left:auto;white-space:nowrap;padding:8px 14px;border-radius:999px;
+  background:linear-gradient(135deg,#E8C766,#D4A63C);color:#1A1205!important;
+  font-weight:600;font-size:13px;text-decoration:none}
+@media(max-width:720px){
+  .nd-nav-in{flex-wrap:wrap;gap:10px 16px;padding:12px 16px}
+  .nd-links{order:3;flex-basis:100%}
+}
+.nd-foot{border-top:1px solid rgba(200,160,60,.12);margin-top:36px;padding:26px 16px 34px;
+  text-align:center;font-size:12px;color:#9B907B}
+.sl{margin:0 auto 10px;max-width:980px;font-size:12.5px;line-height:1.95;color:#9B907B;
+  display:flex;flex-wrap:wrap;justify-content:center;row-gap:2px}
+.sl h3{flex-basis:100%}
+.city-links,.citycloud{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.city-links a,.citycloud a{padding:6px 12px;border-radius:999px;border:1px solid rgba(212,175,55,.25);
+  color:#E8C766!important;text-decoration:none;font-size:13px}
+.sl h3{font-family:'DM Sans',system-ui,sans-serif;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;margin:14px 0 4px;color:#9B907B;font-weight:600}
+.sl a{color:#C8BDA8;text-decoration:none;margin:0 7px;white-space:nowrap}
+.sl a:hover{text-decoration:underline;color:#E8C766}
+</style>
+<script>(function(){var SB="https://opwrfflzzowhobesysmr.supabase.co",KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE";if(!SB||!KEY)return;var SID="";try{SID=localStorage.getItem("gr_sid")||"";if(!SID){SID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(Date.now().toString(36)+Math.random().toString(36).slice(2));localStorage.setItem("gr_sid",SID);}}catch(e){SID="";}window.GR_SID=SID;function send(table,row,retried){try{fetch(SB+"/rest/v1/"+table,{method:"POST",keepalive:true,headers:{"Content-Type":"application/json","apikey":KEY,"Authorization":"Bearer "+KEY,"Prefer":"return=minimal"},body:JSON.stringify(row)}).then(function(r){if(!r.ok&&!retried&&row.host!==undefined){var r2={};for(var k in row){if(k!=="host")r2[k]=row[k];}send(table,r2,true);}}).catch(function(){});}catch(e){}}window.GR_TRACK=send;send("page_views",{page:location.pathname,referrer:document.referrer||null,session_id:SID,host:location.hostname});})();</script>
+</head><body>
+<header class="nd-nav"><div class="nd-nav-in"><a class="nd-logo" href="https://mygoldrates.com/"><svg class="brand-mark" width="30" height="30" style="flex:none" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx-nd" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx-nd)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx-nd)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx-nd)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx-nd)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nd-word">My<span>Gold</span>Rates</span></a><nav class="nd-links" aria-label="Main"><a href="https://mygoldrates.com/">Today&rsquo;s rates</a><a href="https://mygoldrates.com/calculators">Calculators</a><a href="https://mygoldrates.com/making-charges-comparison">Making charges</a><a href="https://mygoldrates.com/news">News</a><a href="https://mygoldrates.com/jewellers-digest">For jewellers</a></nav><a class="nd-cta" href="https://mygoldrates.com/inquiry">Get daily alerts</a></div></header>
+<div style="padding:0 16px">
+<div class="card">
+  <h1>Jewellers Digest</h1>
+
+  <div id="v-email">
+    <p class="sub">Sign in with the email you subscribed with. We will send
+    you a 6-digit code &mdash; no password needed.</p>
+    <form id="f-email" novalidate>
+      <div><label for="em">Email</label>
+        <input id="em" type="email" autocomplete="email" placeholder="you@yourshop.com" required></div>
+      <button id="b-email" type="submit">Email me a code</button>
+    </form>
+  </div>
+
+  <div id="v-code" hidden>
+    <p class="sub">If <b id="em-show"></b> has a Jewellers Digest account, a
+    code is on its way. It expires in 10 minutes.</p>
+    <form id="f-code" novalidate>
+      <div><label for="code">6-digit code</label>
+        <input id="code" inputmode="numeric" autocomplete="one-time-code"
+          maxlength="6" pattern="[0-9]*" required></div>
+      <button id="b-code" type="submit">Sign in</button>
+    </form>
+    <button class="link" id="b-back" type="button">Use a different email</button>
+  </div>
+
+  <div id="v-in" hidden>
+    <p class="sub">Signed in as <b id="who"></b></p>
+    <div class="acc" id="acc"></div>
+    <form id="f-dl" style="margin-top:16px"><button id="b-dl" type="submit">Download today&rsquo;s workbook</button></form>
+    <button class="link" id="b-out" type="button">Sign out</button>
+  </div>
+
+  <div class="msg" id="msg" role="status"></div>
+  <p class="foot">Not subscribed yet? <a href="https://mygoldrates.com/jewellers-digest">See Jewellers Digest</a>.</p>
+</div>
+</div>
+<footer class="nd-foot"><nav class="sl" aria-label="Site"><a href="https://mygoldrates.com/">Today&rsquo;s gold rates</a><a href="https://mygoldrates.com/dhanteras-gold-report-2026">Dhanteras 2026 report</a><a href="https://mygoldrates.com/calculators">Gold calculators</a><a href="https://mygoldrates.com/making-charges-comparison">Making charges</a><a href="https://mygoldrates.com/news">Gold news</a><a href="https://mygoldrates.com/jewellers-digest">Jewellers Digest</a><a href="https://mygoldrates.com/inquiry">Daily rate alerts</a><h3>Gold rate by state</h3><a href="https://mygoldrates.com/gold-rate-today-in-delhi">Delhi</a><a href="https://mygoldrates.com/gold-rate-today-in-chandigarh">Chandigarh</a><a href="https://mygoldrates.com/gold-rate-today-in-jharkhand">Jharkhand</a><a href="https://mygoldrates.com/gold-rate-today-in-uttarakhand">Uttarakhand</a><a href="https://mygoldrates.com/gold-rate-today-in-himachal-pradesh">Himachal Pradesh</a><a href="https://mygoldrates.com/gold-rate-today-in-goa">Goa</a><a href="https://mygoldrates.com/gold-rate-today-in-maharashtra">Maharashtra</a><a href="https://mygoldrates.com/gold-rate-today-in-tamil-nadu">Tamil Nadu</a><a href="https://mygoldrates.com/gold-rate-today-in-karnataka">Karnataka</a><a href="https://mygoldrates.com/gold-rate-today-in-kerala">Kerala</a><a href="https://mygoldrates.com/gold-rate-today-in-telangana">Telangana</a><a href="https://mygoldrates.com/gold-rate-today-in-andhra-pradesh">Andhra Pradesh</a><a href="https://mygoldrates.com/gold-rate-today-in-gujarat">Gujarat</a><a href="https://mygoldrates.com/gold-rate-today-in-rajasthan">Rajasthan</a><a href="https://mygoldrates.com/gold-rate-today-in-west-bengal">West Bengal</a><a href="https://mygoldrates.com/gold-rate-today-in-uttar-pradesh">Uttar Pradesh</a><a href="https://mygoldrates.com/gold-rate-today-in-madhya-pradesh">Madhya Pradesh</a><a href="https://mygoldrates.com/gold-rate-today-in-punjab">Punjab</a><a href="https://mygoldrates.com/gold-rate-today-in-haryana">Haryana</a><a href="https://mygoldrates.com/gold-rate-today-in-bihar">Bihar</a><a href="https://mygoldrates.com/gold-rate-today-in-odisha">Odisha</a><a href="https://mygoldrates.com/gold-rate-today-in-assam">Assam</a><h3>About</h3><a href="https://mygoldrates.com/about">About us</a><a href="https://mygoldrates.com/methodology">How we collect rates</a><a href="https://mygoldrates.com/contact">Contact</a><a href="https://mygoldrates.com/privacy">Privacy Policy</a><a href="https://mygoldrates.com/terms">Terms</a></nav><p>&copy; 2026 MyGoldRates &middot; Rates are indicative, updated daily &middot; Not investment advice</p></footer>
+<script>
+(function(){
+  var API = 'https://mygoldrates-jd-api.harshads-priority.workers.dev', KEY = 'jd_session', token = null, email = '';
+  try { token = localStorage.getItem(KEY); } catch (e) {}
+  function $(id){ return document.getElementById(id); }
+  function say(t, cls){ $('msg').textContent = t || ''; $('msg').className = 'msg ' + (cls||''); }
+  function show(v){ ['v-email','v-code','v-in'].forEach(function(x){ $(x).hidden = (x !== v); }); }
+  function keep(t){ token = t; try { t ? localStorage.setItem(KEY, t) : localStorage.removeItem(KEY); } catch (e) {} }
+  function call(method, path, body){
+    var h = {'content-type':'application/json'};
+    if (token) h['Authorization'] = 'Bearer ' + token;
+    return fetch(API + path, {method: method, headers: h,
+        body: body ? JSON.stringify(body) : undefined})
+      .then(function(r){ return r.json().catch(function(){ return {}; })
+        .then(function(j){ return {status: r.status, ok: r.ok, j: j}; }); });
+  }
+  function day(iso){ return new Date(iso).toLocaleDateString('en-IN',
+      {day:'numeric', month:'short', year:'numeric'}); }
+  function account(who, e){
+    $('who').textContent = who || '';
+    var a = $('acc'), dl = $('b-dl');
+    if (e && e.active && e.status === 'complimentary') {
+      a.textContent = new Date(e.current_end).getFullYear() > 2090
+        ? 'Complimentary access.' : 'Complimentary access until ' + day(e.current_end) + '.';
+    } else if (e && e.active) {
+      a.textContent = 'Subscription active' + (e.current_end ? ', paid until ' + day(e.current_end) : '') + '.';
+    } else {
+      a.textContent = 'There is no active subscription on this email.';
+    }
+    dl.hidden = !(e && e.active);
+    show('v-in');
+  }
+
+  if (token) {
+    call('GET', '/jd/status').then(function(r){
+      if (r.ok) account(r.j.email, r.j.entitlement);
+      else { keep(null); show('v-email'); }
+    }).catch(function(){ say('Could not reach the server. Check your connection.', 'err'); });
+  }
+
+  $('f-email').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    email = $('em').value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return say('Enter a valid email address.', 'err');
+    $('b-email').disabled = true; say('');
+    call('POST', '/jd/login/start', {email: email}).then(function(r){
+      $('b-email').disabled = false;
+      if (!r.ok) return say(r.j.error || 'Could not send the code. Try again shortly.', 'err');
+      $('em-show').textContent = email; show('v-code'); $('code').focus();
+    }).catch(function(){ $('b-email').disabled = false;
+      say('Could not reach the server. Check your connection.', 'err'); });
+  });
+
+  $('f-code').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var code = $('code').value.replace(/\D/g, '');
+    if (code.length !== 6) return say('Enter the 6-digit code from the email.', 'err');
+    $('b-code').disabled = true; say('');
+    call('POST', '/jd/login/verify', {email: email, code: code}).then(function(r){
+      $('b-code').disabled = false;
+      if (!r.ok || !r.j.token) return say(r.j.error || 'That code is wrong or has expired.', 'err');
+      keep(r.j.token); $('code').value = ''; account(r.j.email, r.j.entitlement);
+    }).catch(function(){ $('b-code').disabled = false;
+      say('Could not reach the server. Check your connection.', 'err'); });
+  });
+
+  $('b-back').addEventListener('click', function(){ say(''); show('v-email'); });
+  $('b-out').addEventListener('click', function(){ keep(null); say('Signed out.', 'ok'); show('v-email'); });
+
+  $('f-dl').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    $('b-dl').disabled = true; say('Preparing your download…');
+    call('GET', '/jd/report').then(function(r){
+      $('b-dl').disabled = false;
+      if (r.ok && r.j.url) { say('Downloading ' + r.j.report + '.', 'ok'); window.location.href = r.j.url; return; }
+      if (r.status === 401) { keep(null); show('v-email'); return say('Your session has ended. Sign in again.', 'err'); }
+      if (r.status === 404) return say('Today’s workbook is not ready yet. It is published every morning.', 'err');
+      say(r.j.error || 'Could not get the workbook. Try again shortly.', 'err');
+    }).catch(function(){ $('b-dl').disabled = false;
+      say('Could not reach the server. Check your connection.', 'err'); });
+  });
+})();
+</script>
+</body></html>
