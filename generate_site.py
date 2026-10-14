@@ -343,6 +343,7 @@ def site_links_html():
     return (
         '<nav class="sl" aria-label="Site">'
         f'<a href="{SITE_URL}/">Today&rsquo;s gold rates</a>'
+        f'<a href="{SITE_URL}/dhanteras-gold-report-2026">Dhanteras 2026 report</a>'
         f'<a href="{SITE_URL}/calculators">Gold calculators</a>'
         f'<a href="{SITE_URL}/making-charges-comparison">Making charges</a>'
         f'<a href="{SITE_URL}/news">Gold news</a>'
@@ -2763,6 +2764,51 @@ def main():
             crumbs(("Making Charges", None)) + mc_body,
             extra_js=mc_js)
         extra_urls.append(("making-charges-comparison", "monthly", "0.6"))
+
+        # ---- Dhanteras 2026 report: the citable version of the above ----
+        # Same `dash` join as the calculator, so the two never disagree; the
+        # report adds the spreads, the price move and a CSV. See
+        # dhanteras_report.py. A failure here must not take the site down.
+        try:
+            import dhanteras_report as _dr
+            from jd_pricing import rupees as _rupees
+            _hist_rows, _off = [], 0
+            while True:      # PostgREST caps a response at 1,000 rows
+                _page = (sb.table("rates")
+                         .select("rate_date, canonical_24k_pre_gst, brands(slug)")
+                         .eq("status", "published")
+                         .order("rate_date").range(_off, _off + 999)
+                         .execute().data)
+                _hist_rows += _page
+                if len(_page) < 1000:
+                    break
+                _off += 1000
+            _by_day = {}
+            for _r in _hist_rows:
+                if not _r.get("canonical_24k_pre_gst"):
+                    continue
+                if ((_r.get("brands") or {}).get("slug") or "") in REGION_MAP:
+                    continue          # national median, like the homepage
+                _by_day.setdefault(_r["rate_date"], []).append(
+                    _r["canonical_24k_pre_gst"])
+            _hist = [(datetime.strptime(d, "%Y-%m-%d").date(),
+                      statistics.median(v)) for d, v in sorted(_by_day.items())]
+            _dr_t, _dr_d, _dr_body, _dr_ld, _dr_csv = _dr.build(
+                dash, _hist, mc.get("updated", "")[:10],
+                (live[0].get("rate_date") or today), display_date,
+                # Indian grouping: these are 10 g totals, past one lakh,
+                # where the site-wide inr() would print 163,205.
+                SITE_URL, lambda x: "\u20b9" + _rupees(round(x)),
+                today=now_ist.date())
+            render_content(_dr.SLUG, _dr_t, _dr_d, _dr_body, jsonld_block=_dr_ld)
+            with open(f"docs/{_dr.SLUG}.csv", "w", encoding="utf-8",
+                      newline="") as _f:
+                _f.write(_dr_csv)
+            extra_urls.append((_dr.SLUG, "daily", "0.8"))
+            print(f"dhanteras report: {len(_hist)} days of history, "
+                  f"{_dr_csv.count(chr(10)) - 1} priced rows")
+        except Exception as _e:
+            print("dhanteras report: skipped -", type(_e).__name__, str(_e)[:160])
 
         # ---- Budget calculator: how many grams for a fixed rupee amount ----
         # Widen coverage vs the MC dashboard: EVERY brand with a live rate is
