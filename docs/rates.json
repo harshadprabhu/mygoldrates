@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-14",
-  "last_updated": "2026-10-14T13:03:59.981282+05:30",
+  "last_updated": "2026-10-14T14:04:57.215492+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14833.0,
-    "22k": 13596.92,
-    "18k": 11124.75
+    "24k": 14836.0,
+    "22k": 13599.67,
+    "18k": 11127.0
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 147832.0,
-      "change_pct": -0.42
+      "price_per_10g_inr": 148008.0,
+      "change_pct": -0.3
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 146587.0,
-      "change_pct": -0.4
+      "price_per_10g_inr": 146699.0,
+      "change_pct": -0.32
     }
   ],
   "jewellers": [
@@ -124,6 +124,12 @@
       "rate_18k_per_gram_inr": 11157.75
     },
     {
+      "jeweller": "Kisna",
+      "rate_24k_per_gram_inr": 14878.72,
+      "rate_22k_per_gram_inr": 13638.83,
+      "rate_18k_per_gram_inr": 11159.04
+    },
+    {
       "jeweller": "ORRA",
       "rate_24k_per_gram_inr": 14918.52,
       "rate_22k_per_gram_inr": 13675.31,
@@ -136,10 +142,10 @@
       "rate_18k_per_gram_inr": 11227.03
     },
     {
-      "jeweller": "Kisna",
-      "rate_24k_per_gram_inr": 14983.59,
-      "rate_22k_per_gram_inr": 13734.96,
-      "rate_18k_per_gram_inr": 11237.69
+      "jeweller": "CaratLane",
+      "rate_24k_per_gram_inr": 14975.0,
+      "rate_22k_per_gram_inr": 13727.08,
+      "rate_18k_per_gram_inr": 11231.25
     },
     {
       "jeweller": "BlueStone",
@@ -154,7 +160,7 @@
       "rate_18k_per_gram_inr": 11317.5
     }
   ],
-  "jeweller_count": 20,
+  "jeweller_count": 21,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
