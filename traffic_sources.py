@@ -50,7 +50,7 @@ def main():
     while True:
         r = requests.get(
             f"{url}/rest/v1/page_views",
-            params={"select": "day,referrer,session_id,page",
+            params={"select": "day,referrer,session_id,page,created_at",
                     "day": f"gte.{since}", "order": "day.asc"},
             headers={**h, "Range": f"{off}-{off + 999}"}, timeout=60)
         r.raise_for_status()
@@ -121,6 +121,35 @@ def main():
               f"{big} sessions with 20+ page views ==")
         for pg, n in lp.most_common(12):
             print(f"{n:5}  {pg[:90]}")
+
+    # Hour of day (IST) of direct landings, by landing page group. People
+    # in India browse in the daytime; an automated visitor is flat or
+    # clockwork. Pages per session says the same thing another way.
+    from datetime import datetime, timezone, timedelta as _td
+    ist = timezone(_td(hours=5, minutes=30))
+    n_pages = Counter(x.get("session_id") for x in rows)
+    for lo, hi in (("2026-09-28", "2026-10-06"), ("2026-10-08", "2026-10-31")):
+        groups = defaultdict(Counter); single = Counter(); tot = Counter()
+        for sid, (d, pg, s) in land.items():
+            if not (lo <= d <= hi and s == "direct"):
+                continue
+            g = ("/compare" if pg.startswith("/compare") else "/" if pg == "/"
+                 else "city" if pg.startswith("/gold-rate-today-in-") else "other")
+            ts = next((x.get("created_at") for x in rows
+                       if x.get("session_id") == sid), None)
+            if ts:
+                hr = datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone(ist).hour
+                groups[g][hr // 3 * 3] += 1
+            tot[g] += 1
+            single[g] += n_pages[sid] == 1
+        print(f"\n== DIRECT LANDINGS {lo}..{hi}: share by IST hour block, "
+              "and share of one-page sessions ==")
+        print("group      n    " + " ".join(f"{h:02d}h" for h in range(0, 24, 3)) + "  1-page")
+        for g in ("/compare", "/", "city", "other"):
+            if tot[g]:
+                print(f"{g:9} {tot[g]:4}  " + " ".join(
+                    f"{100 * groups[g][h] / tot[g]:3.0f}" for h in range(0, 24, 3))
+                    + f"  {100 * single[g] / tot[g]:4.0f}%")
 
     print("\n== TOP OTHER SITES (last 30 days) ==")
     cut = (date.today() - timedelta(days=30)).isoformat()
