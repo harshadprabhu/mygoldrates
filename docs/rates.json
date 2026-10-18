@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-18",
-  "last_updated": "2026-10-18T23:34:37.246787+05:30",
+  "last_updated": "2026-10-19T02:04:53.912195+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14770.0,
-    "22k": 13539.17,
-    "18k": 11077.5
+    "24k": 14771.0,
+    "22k": 13540.08,
+    "18k": 11078.25
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -142,6 +142,12 @@
       "rate_18k_per_gram_inr": 11183.54
     },
     {
+      "jeweller": "CaratLane",
+      "rate_24k_per_gram_inr": 14915.0,
+      "rate_22k_per_gram_inr": 13672.08,
+      "rate_18k_per_gram_inr": 11186.25
+    },
+    {
       "jeweller": "BlueStone",
       "rate_24k_per_gram_inr": 14933.06,
       "rate_22k_per_gram_inr": 13688.64,
@@ -154,7 +160,7 @@
       "rate_18k_per_gram_inr": 11295.0
     }
   ],
-  "jeweller_count": 20,
+  "jeweller_count": 21,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
