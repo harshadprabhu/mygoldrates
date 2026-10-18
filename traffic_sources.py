@@ -94,6 +94,34 @@ def main():
     for d in sorted(set(per) | set(views))[-21:]:
         print(f"{d}  {views[d]:5}  " + " ".join(f"{per[d][c]:12}" for c in COLS))
 
+    # Where do "direct" visits land, before and after the 7 Oct link fix?
+    # Bots that run JavaScript and follow broken relative links show up as
+    # direct sessions landing on odd paths.
+    land = {}
+    for x in rows:
+        sid = x.get("session_id") or id(x)
+        if sid not in land:
+            land[sid] = (x["day"], x.get("page") or "", source(x.get("referrer")))
+    for lo, hi in (("2026-09-28", "2026-10-06"), ("2026-10-08", "2026-10-31")):
+        lp = Counter(); city_chain = 0; deep = 0; tot = 0
+        pages_per = Counter()
+        for x in rows:
+            if lo <= x["day"] <= hi:
+                pages_per[x.get("session_id")] += 1
+        for sid, (d, pg, s) in land.items():
+            if lo <= d <= hi and s == "direct":
+                tot += 1; lp[pg] += 1
+                if pg.startswith("/city/"):
+                    city_chain += 1
+                if pg.count("/city/") > 1:
+                    deep += 1
+        big = sum(1 for v in pages_per.values() if v >= 20)
+        print(f"\n== DIRECT LANDINGS {lo}..{hi}: {tot} sessions, "
+              f"{city_chain} on /city/ paths, {deep} on chained /city/.../city/ paths, "
+              f"{big} sessions with 20+ page views ==")
+        for pg, n in lp.most_common(12):
+            print(f"{n:5}  {pg[:90]}")
+
     print("\n== TOP OTHER SITES (last 30 days) ==")
     cut = (date.today() - timedelta(days=30)).isoformat()
     hosts = Counter()
