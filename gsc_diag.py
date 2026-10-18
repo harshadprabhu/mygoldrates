@@ -16,10 +16,11 @@ from googleapiclient.discovery import build
 
 SITE_BASE = "https://mygoldrates.com/"
 INSPECT = [
-    "", "compare", "gold-rate-today-in-pune", "gold-rate-today-in-mumbai",
-    "gold-rate-today-in-chennai", "gold-rate-today-in-agra", "calculators",
-    "gold-loan-calculator", "news", "making-charges-comparison",
-    "jewellers-digest", "city/pune/",
+    "", "gold-rate-today-in-surat", "gold-rate-today-in-mumbai",
+    "gold-rate-today-in-chennai", "gold-rate-today-in-pune",
+    "gold-rate-today-in-delhi", "making-charges-comparison",
+    "dhanteras-gold-report-2026", "calculators", "gold-loan-calculator",
+    "news", "jewellers-digest",
 ]
 
 
