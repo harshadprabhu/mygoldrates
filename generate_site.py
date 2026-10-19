@@ -2090,6 +2090,68 @@ def main():
 
     low_g = inr(ladder(lowest["canonical_24k_pre_gst"])["24K"])
 
+    def city_faq(nm):
+        """Questions people ask about gold in a place, answered from today's
+        figures and the place's own enrichment data. Every answer is on the
+        page, so the FAQPage markup describes visible text. Plain text."""
+        if nm == "India":
+            return []
+        state = PLACE_STATE.get(nm) or nm
+        data = CITY_ENRICHMENT_DATA.get(nm, {})
+        def k22(r):
+            return ladder(r["canonical_24k_pre_gst"])["22K"]
+        regional = [r for r in live
+                    if state in REGION_MAP.get((r["brands"] or {}).get("slug") or "", [])]
+        rows = sorted(regional + national, key=k22)
+        qa = [(f"What is the gold rate today in {nm}?",
+               f"On {display_date} the median gold rate across the {len(live)} "
+               f"jewellers we track is {inr(med['24K'])} per gram for 24K (999), "
+               f"{inr(med['22K'])} for 22K (916) and {inr(med['18K'])} for 18K "
+               f"(750), before 3% GST and making charges.")]
+        if rows:
+            best, worst = rows[0], rows[-1]
+            qa.append((
+                f"Which jeweller has the lowest gold rate for {nm} today?",
+                f"Among the national chains and the regional chains serving "
+                f"{state} that published a rate today, {best['brands']['name']} "
+                f"is lowest for 22K at {inr(k22(best))} per gram"
+                + (f", and {worst['brands']['name']} highest at "
+                   f"{inr(k22(worst))}, a gap of {inr(round(k22(worst) - k22(best)))} "
+                   f"per gram." if len(rows) > 1 and k22(worst) - k22(best) >= 1
+                   else ".")))
+        g10 = med["22K"] * 10
+        qa.append((
+            f"How much do 10 grams of 22K gold cost in {nm} with GST?",
+            f"At today's 22K median of {inr(med['22K'])} per gram, 10 grams "
+            f"cost {inr(round(g10))} before tax and {inr(round(g10 * 1.03))} "
+            f"with 3% GST. Jewellery also carries a making charge, usually "
+            f"quoted as a percentage of the gold value or per gram, which is "
+            f"added before GST."))
+        if regional:
+            qa.append((
+                f"Is the gold rate the same at every jeweller in {nm}?",
+                f"No. National chains quote one price across India, while "
+                f"regional chains serving {state} set their own: today "
+                + ", ".join(sorted({r['brands']['name'] for r in regional}))
+                + " published rates for the region. Making charges differ "
+                  "even more than rates, so compare both."))
+        else:
+            qa.append((
+                f"Is the gold rate the same at every jeweller in {nm}?",
+                "No. Each jeweller sets its own daily rate, and making charges "
+                "differ even more than rates, so compare both before buying."))
+        if data.get("hubs"):
+            qa.append((f"Where do people buy gold in {nm}?",
+                       f"The main gold markets are {data['hubs']}."))
+        if data.get("seasons"):
+            qa.append((f"When is gold demand highest in {nm}?", data["seasons"]))
+        qa.append((
+            f"Does the gold rate in {nm} change every day?",
+            "Yes. Jewellers revise their rates each morning, and some again "
+            "during the day, following the international gold price and the "
+            "rupee. We refresh this page several times a day."))
+        return qa
+
     def local_intro(nm, dark=False):
         """Enriched, unique per-city body so city pages have genuine local value."""
         if nm == "India":
@@ -2100,6 +2162,12 @@ def main():
         brands_info = f'<p><strong>Featured Regional & National Jewellers in {nm}:</strong> {", ".join(data["regional_brands"])} and leading national brands.</p>' if data.get("regional_brands") else ""
         seasons_info = f'<p><strong>When {nm} buys gold:</strong> {data["seasons"]}</p>' if data.get("seasons") else ""
         tip_info = f'<p><strong>Buying tip for {nm}:</strong> {data["tip"]}</p>' if data.get("tip") else ""
+        faq_html = "".join(
+            f'<h3>{_html.escape(q)}</h3><p>{_html.escape(a)}</p>'
+            for q, a in city_faq(nm))
+        if faq_html:
+            faq_html = (f'<section class="seo city-faq"><h2>Gold rate in {nm}: '
+                        f'common questions</h2>{faq_html}</section>')
         custom_desc = data.get("intro", f"Gold rates in {nm} follow national board rates across major jewellers. Compare live 24K, 22K, and 18K per-gram prices pre-GST below.")
         
         return board_html + (
@@ -2117,7 +2185,7 @@ def main():
             f'<p>Before buying gold in {nm}, use our <a href="{SITE_URL}/making-charges-calculator">making charges calculator</a> '
             f'to estimate total billed costs with 3% GST, or read our <a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K guide</a>. '
             f'You can also <a href="{SITE_URL}/inquiry">subscribe to free daily {nm} rate alerts</a>.</p>'
-            f'</section>')
+            f'</section>' + faq_html)
 
 
     def local_board(nm, dark=False):
@@ -2294,8 +2362,8 @@ def main():
         for nm in LOCATIONS:
             sl = loc_slug(nm)
             url = f"{SITE_URL}/gold-rate-today-in-{sl}"
-            title = (f"Gold Rate Today in {nm} ({display_date}) - 24K, 22K, "
-                     f"18K Price | MyGoldRates")
+            title = (f"Gold Rate Today in {nm} ({now_ist.strftime('%-d %b')}): "
+                     f"24K, 22K, 18K | MyGoldRates")
             desc = (f"Gold rate today in {nm}: 24K {inr(med['24K'])}/g, 22K "
                     f"{inr(med['22K'])}/g (pre-GST) on {display_date}. Compare "
                     f"{n_live} jewellers' live rates and the chains that "
@@ -2344,6 +2412,12 @@ def main():
                       "item": f"{SITE_URL}/"},
                      {"@type": "ListItem", "position": 2,
                       "name": f"Gold Rate Today in {nm}", "item": url}]}]
+            qa = city_faq(nm)
+            if qa:
+                ld.append({"@context": "https://schema.org", "@type": "FAQPage",
+                           "mainEntity": [{"@type": "Question", "name": q,
+                                           "acceptedAnswer": {"@type": "Answer", "text": a}}
+                                          for q, a in qa]})
             h = h.replace("</head>", '<script type="application/ld+json">'
                           + json.dumps(ld, ensure_ascii=False)
                           + "</script>\n</head>", 1)
@@ -3069,7 +3143,7 @@ def main():
         }, ensure_ascii=False) + "</script>")
         render_content(
             history_slug(first[0]),
-            f"Gold Rate History {mname}: Daily 24K, 22K, 18K Prices | MyGoldRates",
+            f"Gold Rate History {mname}: Daily 24K & 22K | MyGoldRates",
             f"Gold rate for every day of {mname}: 24K {inr(first[1])} to "
             f"{inr(last[1])}/g, high {inr(hi[1])} on {hi[0].strftime('%d %b')}, "
             f"low {inr(lo[1])} on {lo[0].strftime('%d %b')}. Pre-GST, per gram.",
@@ -3410,12 +3484,14 @@ def main():
         # the number of jewellers and karat coverage - rather than the
         # /pulse-specific "Market Pulse" phrasing. Google matches queries
         # to page title tokens before it looks at anything else.
-        home_title = ("Gold Rate Today in India - Live 24K, 22K, 18K "
-                      "Rates from 14+ Jewellers | MyGoldRates")
-        home_desc = ("Live gold rate today across 14+ Indian jewellers, "
-                     "with MCX gold/silver futures, IBJA reference and "
-                     "real-time market data updated every 3 seconds. "
-                     "Compare 24K, 22K and 18K per-gram prices pre-GST.")
+        # Kept under ~70 and ~160 characters so Google shows them whole,
+        # with the real jeweller count (the template said "14+").
+        _nj = len(pulse_brands) or len(live)
+        home_title = (f"Gold Rate Today in India: 24K, 22K, 18K from {_nj} "
+                      "Jewellers | MyGoldRates")
+        home_desc = (f"Gold rate today in India: compare live 24K, 22K and 18K "
+                     f"per-gram prices from {_nj} jewellers, with MCX futures "
+                     "and the IBJA rate. Pre-GST, updated daily.")
         home_canonical = f"{SITE_URL}/"
         home_url = f"{SITE_URL}/"
         replacements = [
@@ -3631,6 +3707,10 @@ def main():
 
         pulse_html = pulse_html.replace(
             "</head>", extra_ld + analytics_js + stamp_js + "</head>", 1)
+        # The app template says "14+ jewellers" in its headings and meta;
+        # the board has more. Answer engines quote these lines, so they
+        # must carry the real count. Flows into every city page too.
+        pulse_html = re.sub(r"14\+(?=\s)", str(_nj), pulse_html)
         # Homepage now lives at docs/index.html - overwrites what TEMPLATE
         # used to write (that content is at docs/compare.html now).
         with open("docs/index.html", "w", encoding="utf-8") as f:
@@ -3677,11 +3757,31 @@ def main():
                     continue
                 with open(path, encoding="utf-8") as fh:
                     old = fh.read()
-                if 'class="nd-nav"' in old or 'id="v-rates"' in old:
-                    continue
                 def meta(pat, default=""):
                     m = re.search(pat, old, re.S)
                     return m.group(1) if m else default
+                if 'class="nd-nav"' in old or 'id="v-rates"' in old:
+                    # Already in the new design, but written before the
+                    # templates carried share tags: add them in place.
+                    m = re.search(r'<link rel="canonical" href="([^"]*)">\n?', old)
+                    if m and 'property="og:title"' not in old:
+                        t = meta(r"<title>(.*?)</title>")
+                        d = meta(r'<meta name="description" content="([^"]*)"')
+                        tags = (f'<meta property="og:type" content="website">\n'
+                                f'<meta property="og:site_name" content="MyGoldRates">\n'
+                                f'<meta property="og:locale" content="en_IN">\n'
+                                f'<meta property="og:title" content="{t}">\n'
+                                f'<meta property="og:description" content="{d}">\n'
+                                f'<meta property="og:url" content="{m.group(1)}">\n'
+                                f'<meta property="og:image" content="{SITE_URL}/og.png">\n'
+                                f'<meta name="twitter:card" content="summary_large_image">\n'
+                                f'<meta name="twitter:title" content="{t}">\n'
+                                f'<meta name="twitter:description" content="{d}">\n'
+                                f'<meta name="twitter:image" content="{SITE_URL}/og.png">\n')
+                        with open(path, "w", encoding="utf-8") as fh:
+                            fh.write(old[:m.end()] + ("" if m.group(0).endswith("\n") else "\n")
+                                     + tags + old[m.end():])
+                    continue
                 art = re.search(r'<article class="page">(.*)</article>', old, re.S)
                 title = meta(r"<title>(.*?)</title>")
                 canonical = meta(r'<link rel="canonical" href="([^"]*)"')
@@ -4162,28 +4262,34 @@ per gram at {lowest['brands']['name']}
 {mcx_line}- Last updated: {now_ist.isoformat()}
 
 ## Key pages
-- Home (Market Pulse - live, ticking every 3s: gold/silver spot, MCX \
-futures, IBJA reference, vendor rates, 90-day OHLC, economic calendar): \
-{SITE_URL}/
-- Detailed jeweller comparison (14+ brands, per-gram 24K/22K/18K, \
-lowest-first, GST toggle, FAQ): {SITE_URL}/
-- Market news & daily recap: {SITE_URL}/news
-- Machine-readable JSON feed: {SITE_URL}/rates.json
+- Home: today's gold rate in India, live 24K/22K/18K per-gram rates from \
+{len(live)} jewellers lowest-first, with a GST toggle, MCX futures, the IBJA \
+reference, spot gold and silver and this week's economic calendar: {SITE_URL}/
+- Gold market today (daily analysis of what moved gold and why, from the \
+day's prices and world gold news): {SITE_URL}/gold-market-today
+- Gold rate history, day by day for every month: {SITE_URL}/gold-rate-history
+- Making charges compared across jewellers: \
+{SITE_URL}/making-charges-comparison
+- Dhanteras 2026 gold buying report: {SITE_URL}/dhanteras-gold-report-2026
+- Calculators (budget, gold loan, SIP, making charges): {SITE_URL}/calculators
+- Guides: {SITE_URL}/learn/22k-vs-24k-gold, \
+{SITE_URL}/learn/gold-hallmarking, {SITE_URL}/learn/how-gold-rates-are-set, \
+{SITE_URL}/learn/making-charges-explained
+- Gold news: {SITE_URL}/news
+- Machine-readable JSON feed of today's rates: {SITE_URL}/rates.json
 - Daily email alerts: {SITE_URL}/inquiry
-- About: {SITE_URL}/about
-- Methodology: {SITE_URL}/methodology
-- Contact: {SITE_URL}/contact
-- City & state pages: {SITE_URL}/gold-rate-today-in-<city> \
-(e.g. mumbai, delhi, hyderabad, chennai, bengaluru, pune, kolkata)
+- About: {SITE_URL}/about | Methodology: {SITE_URL}/methodology | \
+Contact: {SITE_URL}/contact
 
-## Live market APIs (open, CORS-friendly)
-- Real-time gold + silver spot, MCX futures, IBJA reference: \
-{SITE_URL}/pulse (browser); underlying feed via the CF Worker at \
+## Gold rate by city and state
+{chr(10).join(f"- {p}: {SITE_URL}/gold-rate-today-in-{loc_slug(p)}" for p in sorted(INDEXED_PLACES))}
+
+## Live market data (open, CORS-friendly)
+- Spot gold and silver, MCX futures, IBJA reference: \
 https://mygoldrates-market-api.harshads-priority.workers.dev/market
-- Vendor (bullion dealer) rates: same worker, /vendors
-- 90-day OHLC history (gold + silver futures): /ohlc?symbol=GC=F
+- Bullion dealer rates: same host, /vendors
+- 90-day OHLC history (gold and silver futures): /ohlc?symbol=GC=F
 - This week's economic calendar (gold-relevant events): /calendar
-- Bullion news feed: /news
 
 ## About the data
 - Coverage: {len(live)} major Indian jewellers plus the IBJA bullion \
@@ -5201,6 +5307,14 @@ INQUIRY_TEMPLATE = Template("""<!DOCTYPE html>
 <title>Daily Gold Rate Alerts by Email - GoldRates</title>
 <meta name="description" content="Get one clean email every morning with India's gold rate comparison - the cheapest jeweller, the IBJA bullion premium and the market median. Free sign-up.">
 <link rel="canonical" href="$site_url/inquiry">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MyGoldRates">
+<meta property="og:title" content="Daily Gold Rate Alerts by Email - MyGoldRates">
+<meta property="og:description" content="One email every morning with India's gold rate comparison: the cheapest jeweller, the IBJA premium and the market median. Free.">
+<meta property="og:url" content="$site_url/inquiry">
+<meta property="og:image" content="$site_url/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="$site_url/og.png">
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="96x96" href="$site_url/icon-96.png">
 <link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
@@ -5380,6 +5494,17 @@ PAGE_TEMPLATE = Template("""<!DOCTYPE html>
 <meta property="og:updated_time" content="$updated_iso">
 <meta property="article:modified_time" content="$updated_iso">
 <link rel="canonical" href="$canonical">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MyGoldRates">
+<meta property="og:locale" content="en_IN">
+<meta property="og:title" content="$title">
+<meta property="og:description" content="$desc">
+<meta property="og:url" content="$canonical">
+<meta property="og:image" content="$site_url/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="$title">
+<meta name="twitter:description" content="$desc">
+<meta name="twitter:image" content="$site_url/og.png">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","url":"$canonical","name":"$title","inLanguage":"en-IN","isPartOf":{"@type":"WebSite","url":"$site_url/","name":"MyGoldRates.com"},"dateModified":"$updated_iso"}</script>
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="96x96" href="$site_url/icon-96.png">
@@ -5435,6 +5560,17 @@ CONTENT_TEMPLATE = Template("""<!DOCTYPE html>
 <meta name="description" content="$desc">
 <meta name="robots" content="$robots">
 <link rel="canonical" href="$canonical">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MyGoldRates">
+<meta property="og:locale" content="en_IN">
+<meta property="og:title" content="$title">
+<meta property="og:description" content="$desc">
+<meta property="og:url" content="$canonical">
+<meta property="og:image" content="$site_url/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="$title">
+<meta name="twitter:description" content="$desc">
+<meta name="twitter:image" content="$site_url/og.png">
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="96x96" href="$site_url/icon-96.png">
 <link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">

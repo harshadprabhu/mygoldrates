@@ -3,6 +3,7 @@
 Each test pins a problem that was measured on the live site in October 2026,
 not a best practice in the abstract. The docstrings say what was found.
 """
+import html
 import json
 import os
 import re
@@ -83,7 +84,9 @@ def test_city_pages_lead_with_local_jewellers():
 @built
 def test_city_pages_do_not_repeat_the_national_faq_or_its_markup():
     """Google forbids FAQPage markup for questions not on the page, and the
-    India FAQ is national content - it stays on /compare."""
+    India FAQ is national content - it stays on the homepage. A city page
+    carries its own FAQ, about that place, and every marked-up question is
+    visible on the page."""
     h = _read(f"{DOCS}/gold-rate-today-in-pune.html")
     assert 'id="faqh"' not in h
     types = []
@@ -91,8 +94,13 @@ def test_city_pages_do_not_repeat_the_national_faq_or_its_markup():
         d = json.loads(blk)
         items = d if isinstance(d, list) else d.get("@graph", [d])
         types += [x.get("@type") for x in items]
-    assert "FAQPage" not in types and "Dataset" not in types
-    assert "BreadcrumbList" in types
+    assert "Dataset" not in types and "BreadcrumbList" in types
+    faq = next(x for blk in re.findall(r'<script type="application/ld\+json">(.*?)</script>', h, re.S)
+               for x in json.loads(blk) if x.get("@type") == "FAQPage")
+    for q in faq["mainEntity"]:
+        assert "Pune" in q["name"] or "Maharashtra" in q["name"]
+        assert html.escape(q["name"]) in h, q["name"]
+    assert "India?" not in " ".join(q["name"] for q in faq["mainEntity"])
     # /compare is gone (it redirects to /); the homepage carries the FAQ
     # and its markup now.
     assert not os.path.exists(f"{DOCS}/compare.html")
@@ -170,7 +178,7 @@ def test_city_page_structured_data_describes_the_city_not_the_homepage():
     page = next(x for x in items if x["@type"] == "WebPage")
     assert page["url"].endswith("/gold-rate-today-in-chennai")
     assert {x["@type"] for x in items} == {"WebSite", "Organization", "WebPage",
-                                          "BreadcrumbList"}
+                                          "BreadcrumbList", "FAQPage"}
 
 
 def test_city_section_text_is_coloured_for_the_dark_design():
