@@ -61,7 +61,7 @@ td.path{color:var(--accent);word-break:break-all}
 <body>
 <div class="wrap">
   <h1>My<b>Gold</b>Rates - Private Analytics</h1>
-  <p class="sub">Day-wise visitor activity. Built 19 October 2026. Private: readable only via your secret link (the URL ending in #your-token).</p>
+  <p class="sub">Day-wise visitor activity. Built 20 October 2026. Private: readable only via your secret link (the URL ending in #your-token).</p>
 
   <div class="filters">
     <div><label>From</label><input type="date" id="from"></div>
@@ -92,6 +92,12 @@ td.path{color:var(--accent);word-break:break-all}
   <div class="grid2">
     <div class="card"><h2>Where visitors came from</h2><div id="refs"></div></div>
     <div class="card"><h2>Traffic by host (www vs apex)</h2><div id="hosts"></div></div>
+  </div>
+
+  <div class="card"><h2>Email subscribers &amp; unsubscribes</h2>
+    <div class="kpis" id="subKpis"></div>
+    <div class="grid2"><div><h2 style="font-size:14px">Why people unsubscribed</h2><div id="unsubWhy"></div></div>
+    <div><h2 style="font-size:14px">Latest unsubscribes</h2><div id="unsubRecent"></div></div></div>
   </div>
 
   <div class="card"><h2>All time</h2><div class="kpis" id="lifeBox"></div></div>
@@ -317,6 +323,20 @@ td.path{color:var(--accent);word-break:break-all}
       } else {
         renderTable($('hosts'),d.top_hosts,[{h:'Host',k:'host'},
           {h:'Views',k:'views',num:true}]);
+      }
+      // Unsubscribes. Missing from a report function older than 2026-10-20.
+      if(d.unsubs===undefined){
+        $('subKpis').innerHTML='<div class="msg err">Run the updated '+
+          'sql/analytics_report.sql in Supabase to see subscribers and '+
+          'unsubscribe reasons here.</div>';
+      } else {
+        $('subKpis').innerHTML=tiles([
+          ['Subscribed now',d.unsubs.subscribers_now],
+          ['Unsubscribed in this range',d.unsubs.total]]);
+        renderTable($('unsubWhy'),d.unsubs.by_reason,[{h:'Reason',k:'reason'},
+          {h:'People',k:'count',num:true}]);
+        renderTable($('unsubRecent'),d.unsubs.recent,[{h:'When (IST)',k:'at'},
+          {h:'Reason',k:'reason'}]);
       }
       fillPages(d.pages_list);
       $('foot').textContent='Range '+d.from+' to '+d.to+
