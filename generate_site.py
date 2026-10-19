@@ -4066,7 +4066,9 @@ def main():
         f.write(INDEXNOW_KEY)
     try:
         fresh_now = [f"{SITE_URL}/",
-                     f"{SITE_URL}/news"]
+                     f"{SITE_URL}/news",
+                     # rewritten on every build
+                     f"{SITE_URL}/gold-market-today"]
         fresh_now += [f"{SITE_URL}/{loc}" for loc, dd, _ in daily_meta
                       if dd == now_ist.date()]
         if recaps and recaps[0][1].date() == now_ist.date():
