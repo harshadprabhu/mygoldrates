@@ -34,6 +34,14 @@ def fetch(table, cols, since, until):
 
 
 def main():
+    # Which database functions the service key can call (names only), and
+    # whether any of them can run arbitrary SQL. Read-only.
+    r = requests.get(f"{URL}/rest/v1/", headers=H, timeout=60)
+    try:
+        paths = sorted(p for p in r.json().get("paths", {}) if p.startswith("/rpc/"))
+    except Exception:
+        paths = [f"(no list: HTTP {r.status_code})"]
+    print("RPC functions:", ", ".join(x[5:] for x in paths))
     today = date.today()
     for days in (1, 7, 30):
         lo = (today - timedelta(days=days - 1)).isoformat(); hi = today.isoformat()
