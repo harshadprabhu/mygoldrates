@@ -42,6 +42,22 @@ def main():
     except Exception:
         paths = [f"(no list: HTTP {r.status_code})"]
     print("RPC functions:", ", ".join(x[5:] for x in paths))
+    # Unsubscribe reasons (no personal data is stored with them) and the
+    # current subscriber count.
+    r = requests.get(f"{URL}/rest/v1/unsub_reasons",
+                     params={"select": "created_at,reason", "order": "created_at.desc"},
+                     headers=H, timeout=60)
+    rows = r.json() if r.ok else []
+    print(f"UNSUB REASONS: {len(rows) if r.ok else 'HTTP %s' % r.status_code} recorded")
+    for k, v in Counter(x["reason"] for x in rows).most_common():
+        print(f"   {v:4}  {k}")
+    for x in rows[:25]:
+        print(f"   {x['created_at'][:16].replace('T', ' ')} UTC  {x['reason']}")
+    r = requests.get(f"{URL}/rest/v1/inquiries",
+                     params={"select": "id", "email": "not.is.null",
+                             "unsub_token": "not.is.null"},
+                     headers={**H, "Prefer": "count=exact", "Range": "0-0"}, timeout=60)
+    print("SUBSCRIBED NOW:", r.headers.get("content-range", "?").split("/")[-1])
     today = date.today()
     for days in (1, 7, 30):
         lo = (today - timedelta(days=days - 1)).isoformat(); hi = today.isoformat()
