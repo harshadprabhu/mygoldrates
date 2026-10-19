@@ -4,10 +4,12 @@ name: db-run
 # database, so schema changes no longer need copying into the SQL Editor by
 # hand. Manual only.
 #
-# Needs the repo secret SUPABASE_DB_URL: Supabase -> Connect -> "Session
-# pooler" connection string (IPv4; GitHub runners cannot reach the direct
-# IPv6-only address), with the database password filled in. It is passed to
-# psql through the environment and never printed.
+# Credentials, either of (values are never printed):
+#  - a Postgres connection string, e.g. SUPABASE_DB_URL: Supabase -> Connect ->
+#    "Session pooler" (IPv4; GitHub runners cannot reach the direct IPv6-only
+#    address), password filled in. Other common names are accepted too.
+#  - a Supabase personal access token, e.g. SUPABASE_ACCESS_TOKEN, used with
+#    the Management API's SQL endpoint.
 
 on:
   workflow_dispatch:
@@ -35,22 +37,107 @@ jobs:
           esac
           case "$FILE" in *..*) echo "::error::no .. in the path"; exit 1;; esac
           test -f "$FILE" || { echo "::error::$FILE not found"; exit 1; }
-      - name: Run
+      # Which secrets exist (names only - values are never printed). The
+      # connection can come from a Postgres connection string under any of
+      # the usual names, or from a Supabase personal access token through
+      # the Management API's query endpoint.
+      - name: Find credentials
+        id: creds
+        env:
+          C1: ${{ secrets.SUPABASE_DB_URL }}
+          C2: ${{ secrets.DATABASE_URL }}
+          C3: ${{ secrets.SUPABASE_DATABASE_URL }}
+          C4: ${{ secrets.SUPABASE_DB }}
+          C5: ${{ secrets.DB_URL }}
+          C6: ${{ secrets.POSTGRES_URL }}
+          C7: ${{ secrets.SUPABASE_CONNECTION_STRING }}
+          C8: ${{ secrets.SUPABASE_POOLER_URL }}
+          T1: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          T2: ${{ secrets.SUPABASE_TOKEN }}
+          T3: ${{ secrets.SUPABASE_PAT }}
+          T4: ${{ secrets.SUPABASE_MANAGEMENT_TOKEN }}
+          P1: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          P2: ${{ secrets.DB_PASSWORD }}
+          P3: ${{ secrets.SUPABASE_PASSWORD }}
+        run: |
+          names="C1:SUPABASE_DB_URL C2:DATABASE_URL C3:SUPABASE_DATABASE_URL C4:SUPABASE_DB C5:DB_URL C6:POSTGRES_URL C7:SUPABASE_CONNECTION_STRING C8:SUPABASE_POOLER_URL T1:SUPABASE_ACCESS_TOKEN T2:SUPABASE_TOKEN T3:SUPABASE_PAT T4:SUPABASE_MANAGEMENT_TOKEN P1:SUPABASE_DB_PASSWORD P2:DB_PASSWORD P3:SUPABASE_PASSWORD"
+          found=""
+          for pair in $names; do
+            v="${pair%%:*}"; n="${pair#*:}"
+            if [ -n "$(printenv "$v")" ]; then found="$found $n"; fi
+          done
+          echo "::notice title=db-run credentials::secrets present:${found:- none of the expected names}"
+          url=""; for v in C1 C2 C3 C4 C5 C6 C7 C8; do [ -z "$url" ] && url="$(printenv $v || true)"; done
+          tok=""; for v in T1 T2 T3 T4; do [ -z "$tok" ] && tok="$(printenv $v || true)"; done
+          if [ -n "$url" ]; then echo "mode=psql" >> "$GITHUB_OUTPUT"
+          elif [ -n "$tok" ]; then echo "mode=api" >> "$GITHUB_OUTPUT"
+          else echo "mode=none" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Run (connection string)
+        if: steps.creds.outputs.mode == 'psql'
         env:
           FILE: ${{ inputs.file }}
-          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+          C1: ${{ secrets.SUPABASE_DB_URL }}
+          C2: ${{ secrets.DATABASE_URL }}
+          C3: ${{ secrets.SUPABASE_DATABASE_URL }}
+          C4: ${{ secrets.SUPABASE_DB }}
+          C5: ${{ secrets.DB_URL }}
+          C6: ${{ secrets.POSTGRES_URL }}
+          C7: ${{ secrets.SUPABASE_CONNECTION_STRING }}
+          C8: ${{ secrets.SUPABASE_POOLER_URL }}
         run: |
-          if [ -z "$DATABASE_URL" ]; then
-            echo "::error::SUPABASE_DB_URL secret is not set"; exit 1
-          fi
+          url=""; for v in C1 C2 C3 C4 C5 C6 C7 C8; do [ -z "$url" ] && url="$(printenv $v || true)"; done
           sudo apt-get install -y -qq postgresql-client >/dev/null
           set +e
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -q -f "$FILE" > out.txt 2>&1
+          psql "$url" -v ON_ERROR_STOP=1 -X -q -f "$FILE" > out.txt 2>&1
           code=$?
           set -e
+          echo "$code" > code.txt
+
+      - name: Run (Supabase access token)
+        if: steps.creds.outputs.mode == 'api'
+        env:
+          FILE: ${{ inputs.file }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          T1: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          T2: ${{ secrets.SUPABASE_TOKEN }}
+          T3: ${{ secrets.SUPABASE_PAT }}
+          T4: ${{ secrets.SUPABASE_MANAGEMENT_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, urllib.request, urllib.error
+          tok = next(os.environ[k] for k in ("T1", "T2", "T3", "T4") if os.environ.get(k))
+          ref = re.match(r"https://([a-z0-9]+)\.supabase\.co", os.environ["SUPABASE_URL"]).group(1)
+          sql = open(os.environ["FILE"], encoding="utf-8").read()
+          # psql meta-commands (\pset ...) are not SQL; drop them for the API.
+          sql = "\n".join(l for l in sql.splitlines() if not l.lstrip().startswith("\\"))
+          req = urllib.request.Request(
+              f"https://api.supabase.com/v1/projects/{ref}/database/query",
+              data=json.dumps({"query": sql}).encode(),
+              headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"},
+              method="POST")
+          try:
+              with urllib.request.urlopen(req, timeout=120) as r:
+                  out, code = r.read().decode(), 0
+          except urllib.error.HTTPError as e:
+              out, code = f"HTTP {e.code}: {e.read().decode()[:2000]}", 1
+          open("out.txt", "w").write(out)
+          open("code.txt", "w").write(str(code))
+          PY
+
+      - name: Report
+        if: always()
+        env:
+          MODE: ${{ steps.creds.outputs.mode }}
+        run: |
+          if [ "$MODE" = "none" ]; then
+            echo "::error::No database credentials found. Add SUPABASE_DB_URL (session pooler connection string) or SUPABASE_ACCESS_TOKEN."
+            exit 1
+          fi
+          code=$(cat code.txt 2>/dev/null || echo 1)
           python3 - "$code" <<'PY'
           import sys
-          t = open("out.txt", encoding="utf-8", errors="replace").read()[-3400:]
+          t = open("out.txt", encoding="utf-8", errors="replace").read()[-3400:] if __import__("os").path.exists("out.txt") else "(no output)"
           enc = t.replace("%", "%25").replace("\r", "").replace("\n", "%0A")
           kind = "notice" if sys.argv[1] == "0" else "error"
           print(f"::{kind} title=db-run exit {sys.argv[1]}::{enc}")
