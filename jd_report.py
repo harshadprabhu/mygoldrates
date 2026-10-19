@@ -274,9 +274,12 @@ def sheet_market_note(wb, ai, generated):
     ws.column_dimensions["A"].width = 110
     ws["A1"] = "Daily market note"
     ws["A1"].font = Font(bold=True, size=14, color=INK)
-    ws["A2"] = (f"Written {generated} by Claude from the figures in this "
-                f"workbook. Every rupee figure below is checked against those "
-                f"figures before publication.")
+    ws["A2"] = ((f"Written {generated} by fixed rules from the figures in "
+                 f"this workbook; every number below is read from them.")
+                if (ai or {}).get("source") == "rules" else
+                (f"Written {generated} by Claude from the figures in this "
+                 f"workbook. Every rupee figure below is checked against those "
+                 f"figures before publication."))
     ws["A2"].font = Font(italic=True, color="6B6357")
     ws["A2"].alignment = Alignment(wrap_text=True, vertical="top")
     ws.row_dimensions[2].height = 30
@@ -749,9 +752,8 @@ def build(rates, brands, mc, generated):
     if os.environ.get("ANTHROPIC_API_KEY"):
         import jd_ai_report as AI
         ai = AI.generate({"trend": trend, "stats": stats, "market": market})
-        sheet_market_note(wb, ai, generated)
     else:
-        print("  ai note  skipped (ANTHROPIC_API_KEY not set)")
+        print("  ai note  skipped (ANTHROPIC_API_KEY not set) - rules note instead")
     if mc:
         sheet_making_charges(wb, mc)
     sheet_methodology(wb, notes, excluded, trend, generated)
@@ -760,6 +762,18 @@ def build(rates, brands, mc, generated):
         dates, matrix, market, stats, trend, notes, A.weekday_pattern(market),
         ol, ai, mc, {b["slug"]: b["name"] for b in brands if b.get("slug")},
         excluded, generated, DISCLAIMER)
+    # The morning note: the AI's when it passed its figure check, otherwise
+    # the rules-based one (jd_narrative), which needs no key and reads only
+    # figures already in the issue. Either way the page and workbook carry it.
+    if not (ai and ai.get("ok")):
+        import jd_narrative
+        note = jd_narrative.compose(issue)
+        ai = {"ok": bool(note), "note": note, "source": "rules"}
+        issue["note"] = note or None
+    issue["note_source"] = ai.get("source", "ai") if ai and ai.get("ok") else None
+    sheet_market_note(wb, ai, generated)
+    # Read first: straight after Summary.
+    wb.move_sheet("Market Note", offset=1 - wb.sheetnames.index("Market Note"))
     return wb, {"dates": dates, "matrix": matrix, "market": market,
                 "stats": stats, "trend": trend, "excluded": excluded,
                 "issue": issue}
