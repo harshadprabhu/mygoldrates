@@ -58,6 +58,16 @@ def main():
                              "unsub_token": "not.is.null"},
                      headers={**H, "Prefer": "count=exact", "Range": "0-0"}, timeout=60)
     print("SUBSCRIBED NOW:", r.headers.get("content-range", "?").split("/")[-1])
+    r = requests.get(f"{URL}/rest/v1/page_views",
+                     params={"select": "created_at,page,referrer,host",
+                             "page": "like./dW5z*", "order": "created_at.asc"},
+                     headers=H, timeout=60)
+    odd = r.json() if r.ok else []
+    print(f"ODD /dW5z... VISITS: {len(odd)}; days:",
+          dict(Counter(x["created_at"][:10] for x in odd)),
+          "| referrers:", dict(Counter((x.get("referrer") or "(none)")[:60] for x in odd)),
+          "| hosts:", dict(Counter(x.get("host") for x in odd)),
+          "| pages:", dict(Counter(x["page"][:40] for x in odd)))
     today = date.today()
     for days in (1, 7, 30):
         lo = (today - timedelta(days=days - 1)).isoformat(); hi = today.isoformat()
