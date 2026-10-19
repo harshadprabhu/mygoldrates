@@ -755,8 +755,36 @@ def build(rates, brands, mc, generated):
     if mc:
         sheet_making_charges(wb, mc)
     sheet_methodology(wb, notes, excluded, trend, generated)
+    import jd_issue
+    issue = jd_issue.build(
+        dates, matrix, market, stats, trend, notes, A.weekday_pattern(market),
+        ol, ai, mc, {b["slug"]: b["name"] for b in brands if b.get("slug")},
+        excluded, generated, DISCLAIMER)
     return wb, {"dates": dates, "matrix": matrix, "market": market,
-                "stats": stats, "trend": trend, "excluded": excluded}
+                "stats": stats, "trend": trend, "excluded": excluded,
+                "issue": issue}
+
+
+def upload_issue(issue, trend):
+    """The same day's analysis as JSON, for the members' web page. Same
+    private bucket and naming as the workbook; dated, not overwritten."""
+    key = os.environ.get("SUPABASE_SERVICE_KEY")
+    if not key:
+        return "skipped (no service key)"
+    name = f"jewellers-digest-{trend.get('to')}.json"
+    body = json.dumps(issue, ensure_ascii=False, default=str).encode("utf-8")
+    req = urllib.request.Request(
+        f"{SB}/storage/v1/object/{BUCKET}/{name}", data=body, method="POST",
+        headers={"Authorization": f"Bearer {key}", "apikey": key,
+                 "Content-Type": "application/json", "x-upsert": "true"})
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            return (f"uploaded {BUCKET}/{name} ({len(body)/1024:.0f} KB)"
+                    if r.status in (200, 201) else f"unexpected status {r.status}")
+    except urllib.error.HTTPError as e:
+        return f"FAILED HTTP {e.code}: {e.read().decode('utf-8', 'replace')[:160]}"
+    except Exception as e:
+        return f"FAILED {type(e).__name__}: {str(e)[:120]}"
 
 
 def upload(path, trend):
@@ -824,6 +852,7 @@ def main():
     print(f"  sheets   {', '.join(wb.sheetnames)}")
     up = upload(OUT, t)
     print(f"  storage  {up}")
+    print(f"  issue    {upload_issue(ctx['issue'], t)}")
     return 0
 
 

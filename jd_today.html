@@ -1,0 +1,657 @@
+<!-- Template for docs/jd-today.html, filled by jd_page.build_today().
+     Plain file, not an f-string: the JS braces stay literal. -->
+<style>
+:root{
+  --paper:#0a0804; --card:#15100a; --ink:#F4EDE0; --ink-2:#C8BDA8; --ink-3:#8f8673;
+  --rule:#3a2f1b; --rule-2:#241c10; --brass:#D4A63C; --up:#5CC4A0; --down:#E88AAE;
+  --band:#4a3a1c;
+  --display:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+/* Layout: a rate board — masthead strip, headline figures, band chart, then the tables a jeweller reads down. */
+#jd *{box-sizing:border-box}
+#jd{background:var(--paper);color:var(--ink);font-family:var(--display);
+  font-size:15px;line-height:1.5;margin:0}
+#jd .wrap{max-width:960px;margin:0 auto;padding-inline:20px;padding-block:28px 64px}
+#jd h1,#jd h2,#jd h3{text-wrap:balance;margin:0}
+#jd .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+
+
+/* disclaimer band */
+#jd .disc{border:1px solid var(--rule);border-left:3px solid var(--down);background:var(--card);
+  padding:12px 14px;margin-top:20px;font-size:12px;line-height:1.55;color:var(--ink-2);max-width:78ch}
+#jd .disc b{color:var(--down);display:block;font-size:11px;letter-spacing:.09em;
+  text-transform:uppercase;margin-bottom:5px}
+
+
+
+/* outlook verdict */
+#jd .verdict{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;
+  background:var(--card);border:1px solid var(--rule-2);padding:14px 16px}
+#jd .verdict .lab{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.05}
+#jd .verdict .lab.up{color:var(--up)} #jd .verdict .lab.down{color:var(--down)} #jd .verdict .lab.flat{color:var(--brass)}
+#jd .verdict .meta{font-size:12px;color:var(--ink-3);font-family:var(--mono);margin-top:4px}
+#jd .conv{text-align:right}
+#jd .conv .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+#jd .conv .bars{display:flex;gap:3px;margin-top:5px;justify-content:flex-end}
+#jd .conv .bars i{width:10px;height:14px;border-radius:2px;background:var(--rule)}
+#jd .conv .bars i.on{background:var(--brass)}
+
+
+
+/* signal rows */
+#jd .sig{display:grid;grid-template-columns:minmax(0,1fr) auto 90px;gap:10px;align-items:center;
+  padding:7px 0;border-bottom:1px solid var(--rule-2);font-size:13px}
+#jd .sig:last-child{border-bottom:0}
+#jd .sig .d{font-family:var(--mono);font-size:12px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+#jd .mini{position:relative;height:7px;border-radius:4px;background:var(--rule-2)}
+#jd .mini u{position:absolute;top:0;bottom:0;border-radius:4px;text-decoration:none}
+#jd .mini u.up{background:var(--up)} #jd .mini u.down{background:var(--down)}
+#jd .mini::after{content:'';position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--ink-3);opacity:.4}
+
+
+
+/* level ladder */
+#jd .lad{display:flex;flex-direction:column;gap:5px}
+#jd .lv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:baseline;
+  padding:8px 11px;border-radius:6px;background:var(--card);border-left:3px solid transparent;font-size:13.5px}
+#jd .lv.res{border-left-color:var(--down)} #jd .lv.sup{border-left-color:var(--up)}
+#jd .lv.now{border-left-color:var(--brass);background:color-mix(in srgb,var(--brass) 10%,var(--card));font-weight:700}
+#jd .lv .p{font-family:var(--mono);font-variant-numeric:tabular-nums}
+#jd .lv .band{display:block;font-size:11px;color:var(--ink-3);font-weight:400}
+#jd .lv .m{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+
+
+
+/* event rows */
+#jd .ev{display:flex;gap:10px;align-items:baseline;padding:6px 0;
+  border-bottom:1px solid var(--rule-2);font-size:13px}
+#jd .ev:last-child{border-bottom:0}
+#jd .ev .dt{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);width:56px;flex-shrink:0}
+#jd .ev .ti{flex:1 1 auto;min-width:0}
+#jd .ev .im{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 7px;border-radius:99px;flex-shrink:0}
+#jd .ev .im.high{background:color-mix(in srgb,var(--down) 16%,transparent);color:var(--down)}
+#jd .ev .im.medium{background:color-mix(in srgb,var(--brass) 16%,transparent);color:var(--brass)}
+
+
+
+/* horizon cards */
+#jd .hz{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;
+  background:var(--rule-2);border:1px solid var(--rule-2);margin-top:4px}
+#jd .hzc{background:var(--card);padding:14px 15px;min-width:0}
+#jd .hzc .when{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:600}
+#jd .hzc .v{font-size:20px;font-weight:700;letter-spacing:-.02em;margin-top:6px;line-height:1.1}
+#jd .hzc .v.up{color:var(--up)} #jd .hzc .v.down{color:var(--down)} #jd .hzc .v.flat{color:var(--brass)}
+#jd .hzc .sc{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);margin-top:3px;
+  font-variant-numeric:tabular-nums}
+#jd .hzc .rng{font-family:var(--mono);font-size:12.5px;margin-top:10px;
+  padding-top:9px;border-top:1px solid var(--rule-2);font-variant-numeric:tabular-nums}
+#jd .hzc .rng b{font-weight:600}
+#jd .hzc .rng span{display:block;font-size:11px;color:var(--ink-3);margin-top:2px}
+#jd .hzc .sk{font-size:11.5px;margin-top:10px;padding-top:9px;border-top:1px solid var(--rule-2);
+  line-height:1.45}
+#jd .hzc .sk .tag{display:inline-block;font-size:9.5px;letter-spacing:.07em;
+  text-transform:uppercase;padding:2px 6px;border-radius:99px;margin-bottom:5px}
+#jd .sk-none{background:color-mix(in srgb,var(--down) 15%,transparent);color:var(--down)}
+#jd .sk-weak{background:color-mix(in srgb,var(--brass) 18%,transparent);color:var(--brass)}
+#jd .sk-ok{background:color-mix(in srgb,var(--up) 16%,transparent);color:var(--up)}
+#jd .hzc .sk em{font-style:normal;color:var(--ink-3);font-family:var(--mono);
+  font-variant-numeric:tabular-nums}
+@media (max-width:700px){#jd .hz{grid-template-columns:1fr}#jd }
+
+/* masthead */
+#jd .mast{border-top:3px solid var(--brass);padding-top:14px}
+#jd .mast h1{font-size:clamp(28px,6.5vw,42px);font-weight:700;letter-spacing:-.022em;line-height:1.05}
+#jd .mast .jd{color:var(--brass);font-family:var(--mono);font-weight:600;font-size:13px;
+  letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:6px}
+#jd .mastline{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;
+  margin-top:12px;padding-bottom:14px;border-bottom:1px solid var(--rule)}
+#jd .mastline span{font-size:12.5px;color:var(--ink-2);font-family:var(--mono)}
+#jd .mastline b{color:var(--ink);font-weight:600}
+#jd .flag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--brass);border:1px solid var(--brass);
+  border-radius:2px;padding:2px 7px}
+
+
+
+/* headline figures */
+#jd .figs{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule-2);
+  border:1px solid var(--rule-2);margin-top:22px}
+#jd .fig{background:var(--card);padding:14px 16px;min-width:0}
+#jd .fig .k{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+  font-weight:500;margin-bottom:7px}
+#jd .fig .v{font-family:var(--mono);font-size:clamp(19px,3.4vw,25px);font-weight:600;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+#jd .fig .s{font-size:12px;color:var(--ink-2);margin-top:5px;font-family:var(--mono)}
+#jd .up{color:var(--up)} #jd .down{color:var(--down)} #jd .flat{color:var(--ink-3)}
+
+#jd section{margin-top:44px}
+#jd .h{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;
+  border-bottom:1px solid var(--rule);padding-bottom:9px;margin-bottom:16px}
+#jd .h h2{font-size:17px;font-weight:600;letter-spacing:-.01em}
+#jd .h p{margin:0;font-size:12.5px;color:var(--ink-3);font-family:var(--mono)}
+
+#jd .chartbox{background:var(--card);border:1px solid var(--rule-2);padding:14px 10px 8px}
+#jd svg{display:block;width:100%;height:auto;max-width:100%}
+#jd .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--ink-2);
+  font-family:var(--mono);padding:10px 6px 2px}
+#jd .swatch{display:inline-block;width:11px;height:11px;vertical-align:-1px;margin-right:5px;border-radius:1px}
+
+#jd .scroll{overflow-x:auto}
+#jd table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:520px}
+#jd caption{text-align:left;font-size:12.5px;color:var(--ink-3);padding-bottom:8px;font-family:var(--mono)}
+#jd th,#jd td{padding:8px 10px;border-bottom:1px solid var(--rule-2);text-align:right;white-space:nowrap}
+#jd th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);
+  font-weight:600;border-bottom:1px solid var(--rule)}
+#jd th:first-child,#jd td:first-child{text-align:left;white-space:normal;min-width:130px}
+#jd tbody tr:hover{background:var(--rule-2)}
+#jd td.n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+#jd .rank{color:var(--ink-3);font-family:var(--mono);font-size:12px;margin-right:8px}
+
+#jd .wk{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--rule-2);
+  border:1px solid var(--rule-2);min-width:560px}
+#jd .wk div{background:var(--card);padding:12px 10px;min-width:0}
+#jd .wk .d{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+#jd .wk .m{font-family:var(--mono);font-size:16px;font-weight:600;margin-top:6px;font-variant-numeric:tabular-nums}
+#jd .wk .n{font-size:11.5px;color:var(--ink-3);font-family:var(--mono);margin-top:3px}
+
+#jd ul.limits{list-style:none;padding:0;margin:0;display:grid;gap:11px}
+#jd ul.limits li{font-size:13.5px;color:var(--ink-2);padding-left:16px;position:relative;
+  max-width:66ch;line-height:1.55}
+#jd ul.limits li::before{content:"";position:absolute;left:0;top:.62em;width:6px;height:1px;background:var(--brass)}
+
+#jd .note{background:var(--card);border:1px solid var(--rule-2);border-left:3px solid var(--brass);
+  padding:14px 16px;font-size:13.5px;color:var(--ink-2);max-width:70ch}
+#jd .note b{color:var(--ink)}
+#jd footer{margin-top:52px;padding-top:14px;border-top:1px solid var(--rule);
+  font-size:12px;color:var(--ink-3);font-family:var(--mono)}
+
+@media (max-width:760px){ #jd .figs{grid-template-columns:repeat(2,1fr)} #jd }
+@media (max-width:420px){ .wrap{padding-inline:16px} #jd }
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}
+}
+#jd .dl{border:0;border-radius:10px;padding:13px 18px;font:700 15px var(--display);cursor:pointer;
+  background:linear-gradient(135deg,#F0D080,#D4A63C);color:#1a0a04}
+#jd .gate{max-width:460px;margin:40px auto;text-align:center;background:var(--card);
+  border:1px solid var(--rule);border-radius:16px;padding:28px 22px}
+#jd .gate h1{font-size:24px;margin-bottom:8px}
+#jd .gate p{color:var(--ink-2);font-size:14.5px;margin:8px 0}
+#jd .gate a.btn{display:inline-block;margin-top:12px;padding:12px 20px;border-radius:10px;
+  background:linear-gradient(135deg,#F0D080,#D4A63C);color:#1a0a04;font-weight:700;text-decoration:none}
+#jd [hidden]{display:none!important}
+#jd table.fit{min-width:0}
+#jd table.fit td:first-child{min-width:0}
+@media (max-width:520px){#jd .figs{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+#jd{background:var(--paper);color:var(--ink);font-family:var(--display)}
+</style>
+<main id="jd">
+<div class="gate" id="gate">
+  <h1>Jewellers Digest</h1>
+  <p id="gate-msg">Loading today&rsquo;s issue&hellip;</p>
+  <a class="btn" id="gate-btn" href="__SITE__/jd-sign-in" hidden>Sign in</a>
+</div>
+<div id="issue" hidden>
+<div class="wrap">
+
+  <header class="mast">
+    <span class="jd">Jewellers Digest &middot; JD</span>
+    <h1>The gold board, read back to you</h1>
+    <div class="mastline">
+      <span>Issue <b id="m-date"></b></span>
+      <span>24K &middot; pre-GST &middot; per gram</span>
+      <span><b id="m-brands"></b> jewellers &middot; <b id="m-days"></b> days</span>
+      <span class="flag">Members</span>
+    </div>
+  </header>
+
+  <div class="disc">
+    <b>Important &mdash; please read</b>
+    <span id="disc"></span>
+  </div>
+
+  <div class="figs">
+    <div class="fig"><div class="k">Median, latest</div><div class="v num" id="f-close"></div><div class="s" id="f-closesub"></div></div>
+    <div class="fig"><div class="k">Window change</div><div class="v num" id="f-chg"></div><div class="s" id="f-chgsub"></div></div>
+    <div class="fig"><div class="k">Avg daily spread</div><div class="v num" id="f-spread"></div><div class="s">cheapest to dearest</div></div>
+    <div class="fig"><div class="k">Widest spread</div><div class="v num" id="f-wide"></div><div class="s" id="f-widesub"></div></div>
+  </div>
+
+  <section>
+    <div class="h"><h2>What the market did</h2><p id="c-sub"></p></div>
+    <div class="chartbox">
+      <svg id="chart" viewBox="0 0 760 300" role="img" aria-labelledby="chart-t"><title id="chart-t"></title></svg>
+      <div class="legend">
+        <span><span class="swatch" style="background:var(--band)"></span>cheapest&ndash;dearest range</span>
+        <span><span class="swatch" style="background:var(--brass)"></span>median across jewellers</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h"><h2>Week, month, quarter</h2><p>each scored on the signals that matter over that length of time</p></div>
+    <div class="hz" id="hz"></div>
+    <p id="hz-note" style="font-size:12.5px;color:var(--ink-3);margin:12px 0 0;max-width:72ch"></p>
+  </section>
+
+  <section>
+    <div class="h"><h2>Outlook</h2><p id="o-sub"></p></div>
+    <div class="verdict">
+      <div style="min-width:0">
+        <div class="lab flat" id="o-lab">&mdash;</div>
+        <div class="meta" id="o-meta"></div>
+      </div>
+      <div class="conv">
+        <div class="k">Conviction</div>
+        <div class="bars" id="o-conv"></div>
+        <div class="meta" id="o-pen"></div>
+      </div>
+    </div>
+    <div id="o-body"></div>
+  </section>
+
+  <section>
+    <div class="h"><h2>Today&rsquo;s board</h2><p id="b-sub"></p></div>
+    <div class="scroll">
+      <table class="fit">
+        <caption>Cheapest first. Premium is against the median of the same day&rsquo;s board.</caption>
+        <thead><tr><th>Jeweller</th><th>Rate &#8377;/g</th><th>vs median</th></tr></thead>
+        <tbody id="board"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="h"><h2>Jeweller by jeweller</h2><p>across the full window</p></div>
+    <div class="scroll">
+      <table>
+        <caption>Premium is the mean of the daily gaps, not the gap between two means. Coverage is the share of days that jeweller&rsquo;s published rate was readable.</caption>
+        <thead><tr><th>Jeweller</th><th>Median &#8377;/g</th><th>Premium</th><th>Cheapest</th><th>Avg move</th><th>Coverage</th></tr></thead>
+        <tbody id="stats"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="h"><h2>By weekday</h2><p>mean of the daily median, with the sample size attached</p></div>
+    <div class="scroll"><div class="wk" id="wk"></div></div>
+  </section>
+
+  <section>
+    <div class="h"><h2>What this window supports</h2><p>and what it does not</p></div>
+    <ul class="limits" id="limits"></ul>
+  </section>
+
+  <section id="note-sec" hidden>
+    <div class="h"><h2>Market note</h2><p>written from the figures on this page</p></div>
+    <div class="note" id="note"></div>
+  </section>
+
+  <section>
+    <div class="h"><h2>The full workbook</h2><p>every sheet, every day, to pivot yourself</p></div>
+    <div class="note"><button class="dl" id="dl" type="button">Download today&rsquo;s workbook (.xlsx)</button>
+      <div id="dl-msg" style="margin-top:8px;font-size:12.5px"></div></div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+</div>
+</main>
+<script>
+(function(){
+var API = __WORKER__, token = null;
+try { token = localStorage.getItem('jd_session'); } catch (e) {}
+function gate(msg, btnText, href){
+  document.getElementById('gate-msg').textContent = msg;
+  var b = document.getElementById('gate-btn');
+  if (btnText) { b.textContent = btnText; b.href = href; b.hidden = false; }
+}
+function call(path){
+  return fetch(API + path, {headers: {'Authorization': 'Bearer ' + token}})
+    .then(function(r){ return r.json().catch(function(){ return {}; })
+      .then(function(j){ return {status: r.status, ok: r.ok, j: j}; }); });
+}
+if (!token) { gate('This page is for Jewellers Digest members. Sign in to read today\u2019s issue.', 'Sign in', '__SITE__/jd-sign-in'); return; }
+call('/jd/issue').then(function(r){
+  if (r.ok && r.j.issue) {
+    document.getElementById('gate').hidden = true;
+    document.getElementById('issue').hidden = false;
+    render(r.j.issue);
+    return;
+  }
+  if (r.status === 401) return gate('Your sign-in has ended. Sign in again to read today\u2019s issue.', 'Sign in', '__SITE__/jd-sign-in');
+  if (r.status === 402) return gate('There is no active Jewellers Digest subscription on this account.', 'See Jewellers Digest', '__SITE__/jewellers-digest');
+  if (r.status === 404) return gate('Today\u2019s issue is not ready yet. It is published every morning.');
+  gate('Could not load the issue. Please try again shortly.');
+}).catch(function(){ gate('Could not reach the server. Check your connection.'); });
+
+document.getElementById('dl').addEventListener('click', function(){
+  var m = document.getElementById('dl-msg'); m.textContent = 'Preparing your download\u2026';
+  call('/jd/report').then(function(r){
+    if (r.ok && r.j.url) { m.textContent = 'Downloading ' + r.j.report + '.'; window.location.href = r.j.url; return; }
+    m.textContent = r.j.error || 'Could not get the workbook.';
+  }).catch(function(){ m.textContent = 'Could not reach the server.'; });
+});
+
+function render(D){
+const E = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const inr = n => Math.round(n).toLocaleString('en-IN');
+const pct = n => (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+const cls = n => Math.abs(n) < 0.05 ? 'flat' : (n >= 0 ? 'up' : 'down');
+const dmy = s => { const [y,m,d] = s.split('-');
+  return d + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]; };
+
+/* masthead + headline figures */
+const T = D.trend;
+document.getElementById('m-date').textContent   = dmy(D.last) + ' ' + D.last.slice(0,4);
+document.getElementById('m-brands').textContent = D.stats.length;
+document.getElementById('m-days').textContent   = T.days;
+
+document.getElementById('f-close').textContent    = '₹' + inr(T.close);
+document.getElementById('f-closesub').textContent = 'from ₹' + inr(T.open) + ' on ' + dmy(T.from);
+const chg = document.getElementById('f-chg');
+chg.textContent = pct(T.change_pct);
+chg.className = 'v num ' + cls(T.change_pct);
+document.getElementById('f-chgsub').textContent = (T.change >= 0 ? '+' : '−') + '₹' + inr(Math.abs(T.change)) + ' per gram';
+document.getElementById('f-spread').textContent  = '₹' + inr(T.avg_spread);
+document.getElementById('f-wide').textContent    = '₹' + inr(T.widest_spread);
+document.getElementById('f-widesub').textContent = 'on ' + dmy(T.widest_spread_date);
+document.getElementById('c-sub').textContent =
+  dmy(T.from) + ' – ' + dmy(T.to) + ', peak ₹' + inr(T.high);
+
+/* band chart */
+(function () {
+  const S = D.series, svg = document.getElementById('chart');
+  const W = 760, H = 300, L = 58, R = 14, TP = 16, BT = 28;
+  const x = i => L + i * (W - L - R) / (S.length - 1);
+  let lo = Math.min(...S.map(p => p.lo)), hi = Math.max(...S.map(p => p.hi));
+  const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+  const y = v => TP + (hi - v) * (H - TP - BT) / (hi - lo);
+  const ns = 'http://www.w3.org/2000/svg';
+  const el = (t, a) => { const e = document.createElementNS(ns, t);
+    for (const k in a) e.setAttribute(k, a[k]); return e; };
+
+  // gridlines, labelled with values the chart actually reaches
+  const step = 500, g0 = Math.ceil(lo / step) * step;
+  for (let v = g0; v <= hi; v += step) {
+    svg.appendChild(el('line', { x1: L, x2: W - R, y1: y(v), y2: y(v),
+      stroke: 'var(--rule)', 'stroke-width': 1 }));
+    const t = el('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end',
+      fill: 'var(--ink-3)', 'font-size': 11, 'font-family': 'var(--mono)' });
+    t.textContent = '₹' + inr(v); svg.appendChild(t);
+  }
+
+  const band = S.map((p, i) => `${x(i)},${y(p.hi)}`).join(' ') + ' ' +
+    S.map((p, i) => `${x(S.length - 1 - i)},${y(S[S.length - 1 - i].lo)}`).join(' ');
+  svg.appendChild(el('polygon', { points: band, fill: 'var(--band)', stroke: 'none', opacity: .75 }));
+  svg.appendChild(el('polyline', { points: S.map((p, i) => `${x(i)},${y(p.md)}`).join(' '),
+    fill: 'none', stroke: 'var(--brass)', 'stroke-width': 2,
+    'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+
+  // endpoint
+  const li = S.length - 1;
+  svg.appendChild(el('circle', { cx: x(li), cy: y(S[li].md), r: 3.5,
+    fill: 'var(--brass)', stroke: 'var(--card)', 'stroke-width': 1.5 }));
+
+  [[0, 'start'], [Math.floor(li / 2), 'middle'], [li, 'end']].forEach(([i, anch]) => {
+    const t = el('text', { x: x(i), y: H - 8, 'text-anchor': anch,
+      fill: 'var(--ink-3)', 'font-size': 11, 'font-family': 'var(--mono)' });
+    t.textContent = dmy(S[i].d); svg.appendChild(t);
+  });
+
+  document.getElementById('chart-t').textContent =
+    'Daily median 24K rate from ₹' + inr(T.open) + ' to ₹' + inr(T.close) +
+    ', peaking at ₹' + inr(T.high) + ', with the cheapest-to-dearest range shaded.';
+})();
+
+/* ── Horizons ────────────────────────────────────────────────────────── */
+(function () {
+  const hs = (D.outlook && D.outlook.horizons) || [];
+  const host = document.getElementById('hz');
+  if (!hs.length) { host.parentElement.hidden = true; return; }
+
+  const esc = t => String(t == null ? '' : t)
+    .replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  // The skill tag is colour-coded off the MEASUREMENT, never off the
+  // verdict. A confident "Bearish" whose signal has never worked must not
+  // look the same on the page as one that has.
+  const skillTag = sk => {
+    if (!sk || !sk.usable) return ['sk-weak', 'not yet measurable'];
+    const ic = sk.ic == null ? 0 : sk.ic;
+    if (ic >= 0.10) return ['sk-ok', 'some predictive value'];
+    if (ic >= 0.03) return ['sk-weak', 'weak'];
+    if (ic > -0.03) return ['sk-none', 'no predictive value'];
+    return ['sk-none', 'pointed the wrong way'];
+  };
+
+  host.innerHTML = hs.map(h => {
+    const sk = h.skill || {}, r = h.range;
+    const [tagCls, tagTxt] = skillTag(sk);
+    let out = '<div class="hzc"><div class="when">' + esc(h.label) + '</div>' +
+      '<div class="v ' + h.direction + '">' + esc(h.verdict) + '</div>' +
+      '<div class="sc">score ' + (h.score > 0 ? '+' : '') + h.score +
+      ' \u00B7 ' + h.days + ' trading days</div>';
+    if (r) {
+      out += '<div class="rng"><b>\u20B9' + inr(r.low) + ' \u2013 \u20B9' + inr(r.high) +
+        '</b><span>typical range, \u00B1' + r.pct.toFixed(1) + '%</span></div>';
+    }
+    out += '<div class="sk"><span class="tag ' + tagCls + '">' + tagTxt + '</span><br>';
+    if (sk.usable) {
+      out += 'Right ' + sk.hit_rate + '% of the time, against ' + sk.base_rate +
+        '% for always saying up. <em>IC ' +
+        (sk.ic >= 0 ? '+' : '') + sk.ic.toFixed(3) + ', n = ' + sk.n + '</em>';
+    } else {
+      out += esc(sk.why || 'not measured');
+    }
+    out += '</div></div>';
+    return out;
+  }).join('');
+
+  const cav = hs.map(h => h.skill && h.skill.caveat).find(Boolean);
+  document.getElementById('hz-note').textContent = cav
+    ? cav + ' Each horizon is scored on different signals, so they can and do disagree.'
+    : '';
+})();
+
+/* ── Outlook ─────────────────────────────────────────────────────────── */
+document.getElementById('disc').textContent = String(D.disclaimer || '').replace(/^IMPORTANT\s*-\s*PLEASE READ\.\s*/i, '');
+
+(function () {
+  const O = D.outlook;
+  if (!O || !O.stance) { document.getElementById('o-body').innerHTML =
+    '<p style="color:var(--ink-3);font-size:13px">No outlook available for this issue.</p>'; return; }
+  const st = O.stance, dir = st.direction;
+
+  document.getElementById('o-sub').textContent = 'as of ' + dmy(O.as_of);
+  const lab = document.getElementById('o-lab');
+  lab.textContent = st.label; lab.className = 'lab ' + dir;
+  document.getElementById('o-meta').textContent =
+    'score ' + (st.score > 0 ? '+' : '') + st.score +
+    ' · parity ₹' + inr(O.basis.price) + '/g';
+
+  let bars = '';
+  const filled = Math.max(1, Math.round((st.conviction || 0) * 5));
+  for (let i = 0; i < 5; i++) bars += '<i class="' + (i < filled ? 'on' : '') + '"></i>';
+  document.getElementById('o-conv').innerHTML = bars;
+  document.getElementById('o-pen').textContent = st.penalties && st.penalties.length
+    ? st.penalties.map(p => p.reason).join(', ')
+    : 'agreement ' + st.agreement;
+
+  const esc = t => String(t == null ? '' : t)
+    .replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  // Tile rows size to their own contents: a fixed four-column grid leaves a
+  // stretched empty cell whenever a section has three figures.
+  const tiles = arr => {
+    const inner = arr.join('');
+    // Count the tiles in the MARKUP, not the array: a caller that happens to
+    // concatenate two tiles into one string would otherwise get a grid two
+    // columns too narrow and a row of stretched cells. That is exactly what
+    // it did.
+    const n = (inner.match(/class="fig"/g) || []).length || arr.length;
+    return '<div class="figs" style="margin-top:0;grid-template-columns:repeat(' +
+      Math.min(n, 4) + ',minmax(0,1fr))">' + inner + '</div>';
+  };
+  const sec = (title, inner, note) =>
+    '<div style="margin-top:22px"><div class="h" style="margin-bottom:12px"><h2 style="font-size:15px">' +
+    title + '</h2></div>' + inner +
+    (note ? '<p style="font-size:12.5px;color:var(--ink-3);margin:10px 0 0;max-width:70ch">' + note + '</p>' : '') +
+    '</div>';
+
+  let html = '';
+
+  /* what the signals say */
+  html += sec('What the signals say', st.components.map(c => {
+    const pos = c.score >= 0, w = Math.min(Math.abs(c.score), 1) * 50;
+    return '<div class="sig"><span>' + esc(c.name) + '</span>' +
+      '<span class="d">' + esc(c.detail) + '</span>' +
+      '<span class="mini"><u class="' + (pos ? 'up' : 'down') + '" style="' +
+      (pos ? 'left:50%;width:' : 'right:50%;width:') + w.toFixed(1) + '%"></u></span></div>';
+  }).join(''), st.caveats && st.caveats.length ? esc(st.caveats.join(' ')) : '');
+
+  /* levels, on the board a jeweller reads */
+  const bl = O.board_levels;
+  if (bl && bl.current) {
+    const row = (z, cls) =>
+      '<div class="lv ' + cls + '"><span class="p">₹' + inr(z.price) +
+      '<span class="band">₹' + inr(z.low) + '–₹' + inr(z.high) + '</span></span>' +
+      '<span class="m">' + pct(z.distance_pct, 1) + ' · ' +
+      (z.touches === 1 ? '1 touch' : z.touches + ' touches') + '</span></div>';
+    let lad = '<div class="lad">';
+    (bl.resistance || []).slice().reverse().forEach(z => { lad += row(z, 'res'); });
+    lad += '<div class="lv now"><span class="p">₹' + inr(bl.current) +
+           '</span><span class="m">today</span></div>';
+    (bl.support || []).forEach(z => { lad += row(z, 'sup'); });
+    lad += '</div>';
+    html += sec('Support and resistance',
+      lad,
+      'Touches is how many separate times price turned there, not how often it was crossed. ' +
+      'Levels are computed on the international price and restated on the board at its ' +
+      'measured premium of ' + bl.premium_over_parity_pct.toFixed(2) + '%; the band is that ' +
+      'premium’s own dispersion.');
+  }
+
+  /* tomorrow on the board */
+  const bf = O.board_forecast;
+  if (bf && bf.usable) {
+    html += sec('Tomorrow on the board',
+      tiles([
+      '<div class="fig"><div class="k">Today, international</div><div class="v num">' +
+        pct(bf.international_move_pct) + '</div><div class="s">parity close</div></div>',
+      '<div class="fig"><div class="k">Implied, board</div><div class="v num ' +
+        cls(bf.implied_board_move_pct) + '">' + pct(bf.implied_board_move_pct) +
+        '</div><div class="s">₹' + inr(bf.to_board) + '/g</div></div>' +
+      '<div class="fig"><div class="k">Fit</div><div class="v num">r ' + bf.corr.toFixed(2) +
+        '</div><div class="s">n = ' + bf.n + '</div></div>' +
+      '<div class="fig"><div class="k">Unexplained</div><div class="v num">' +
+        Math.round(bf.unexplained_share * 100) + '%</div><div class="s">of daily movement</div></div>',
+      ]), esc(bf.how));
+  }
+
+  /* how far it travels */
+  const em = (O.expected_move || []).filter(r => r.sigma_pct !== undefined);
+  if (em.length) {
+    const names = {1: 'Tomorrow', 5: 'This week', 21: 'This month'};
+    html += sec('How far it usually travels',
+      tiles(em.map(r =>
+        '<div class="fig"><div class="k">' + (names[r.days] || r.days + ' days') +
+        '</div><div class="v num">±₹' + inr(r.sigma_rupees) + '</div>' +
+        '<div class="s">±' + r.sigma_pct.toFixed(1) + '% · seen ' +
+        r.observed_68_pct.toFixed(1) + '%</div></div>')),
+      'About two days in three land inside these. The second figure is what actually ' +
+      'happened over the last year, which runs wider at longer horizons — big moves cluster.');
+  }
+
+  /* what moved it */
+  const dr = O.drivers;
+  if (dr) {
+    html += sec('What moved it, last ' + dr.days + ' days',
+      tiles([
+      '<div class="fig"><div class="k">Total</div><div class="v num ' + cls(dr.total_pct) + '">' +
+        pct(dr.total_pct) + '</div><div class="s">in rupee terms</div></div>',
+      '<div class="fig"><div class="k">Gold, USD</div><div class="v num ' + cls(dr.gold_usd_pct) + '">' +
+        pct(dr.gold_usd_pct) + '</div><div class="s">international</div></div>',
+      '<div class="fig"><div class="k">Rupee</div><div class="v num ' + cls(dr.rupee_pct) + '">' +
+        pct(dr.rupee_pct) + '</div><div class="s">USD/INR</div></div>',
+      ]),
+      'Driven mainly by ' + (dr.driver === 'gold' ? 'the dollar gold price'
+        : dr.driver === 'rupee' ? 'the rupee' : 'gold and the rupee together') +
+      '. A move that came from the currency turns for different reasons than one ' +
+      'that came from the metal.');
+  }
+
+  /* event risk */
+  if ((O.events || []).length) {
+    html += sec('Scheduled to move it this week',
+      O.events.map(e =>
+        '<div class="ev"><span class="dt">' + dmy(e.date) + '</span>' +
+        '<span class="ti">' + esc(e.title) + '</span>' +
+        '<span class="im ' + esc(e.impact) + '">' + esc(e.impact) + '</span></div>').join(''),
+      'US releases that reliably reprice gold. Nobody here knows what they will say — ' +
+      'this is when to expect the move, not which way.');
+  }
+
+  /* seasonality */
+  const se = O.seasonality;
+  if (se && se.mean_pct !== undefined) {
+    html += sec(se.month + ', in past years',
+      tiles([
+      '<div class="fig"><div class="k">Average</div><div class="v num ' + cls(se.mean_pct) + '">' +
+        pct(se.mean_pct, 1) + '</div><div class="s">n = ' + se.n + ' years</div></div>',
+      '<div class="fig"><div class="k">Spread</div><div class="v num">±' +
+        se.stdev_pct.toFixed(1) + '%</div><div class="s">year to year</div></div>',
+      '<div class="fig"><div class="k">Up years</div><div class="v num">' + se.positive_years +
+        ' of ' + se.n + '</div><div class="s">same month</div></div>',
+      ]),
+      se.n + ' years is ' + se.n + ' observations, and the year-to-year spread here is wider ' +
+      'than the average itself. Festival demand reaches local premiums and stock availability ' +
+      'well before it reaches the rate, which is set internationally.');
+  }
+
+  document.getElementById('o-body').innerHTML = html;
+})();
+
+/* today's board */
+document.getElementById('b-sub').textContent = D.board.length + ' jewellers quoting on ' + dmy(D.last);
+document.getElementById('board').innerHTML = D.board.map((b, i) =>
+  `<tr><td><span class="rank">${String(i + 1).padStart(2, '0')}</span>${E(b.n)}</td>` +
+  `<td class="n">${inr(b.v)}</td>` +
+  `<td class="n ${cls(-b.p)}">${pct(b.p)}</td></tr>`).join('');
+
+/* per-jeweller stats, cheapest-premium first */
+document.getElementById('stats').innerHTML = D.stats.slice()
+  .sort((a, b) => a.prem - b.prem).map(s =>
+    `<tr><td>${E(s.n)}</td><td class="n">${inr(s.med)}</td>` +
+    `<td class="n ${cls(-s.prem)}">${pct(s.prem)}</td>` +
+    `<td class="n">${s.cheap.toFixed(1)}%</td>` +
+    `<td class="n">₹${inr(s.move)}</td>` +
+    `<td class="n">${s.cov.toFixed(0)}%</td></tr>`).join('');
+
+/* weekday */
+document.getElementById('wk').innerHTML = D.weekday.map(w =>
+  `<div><div class="d">${w.weekday.slice(0, 3)}</div>` +
+  `<div class="m">₹${inr(w.mean_median)}</div>` +
+  `<div class="n">n = ${w.n}</div></div>`).join('');
+
+/* limits */
+document.getElementById('limits').innerHTML =
+  D.confidence.map(c => `<li>${E(c)}</li>`).join('');
+
+document.getElementById('foot').textContent = 'Issue built ' + (D.generated || '') + '. ' +
+  'Jewellers Digest — MyGoldRates. Excluded for thin coverage: ' +
+  (D.excluded.length ? D.excluded.join(', ') : 'none') +
+  '. Every figure on this page is computed from rates each jeweller published, not estimated.';
+  if (D.note) {
+    document.getElementById('note-sec').hidden = false;
+    document.getElementById('note').innerHTML = String(D.note).split(/\n+/)
+      .filter(function(p){ return p.trim(); })
+      .map(function(p){ return '<p style="margin:0 0 10px">' + E(p) + '</p>'; }).join('');
+  }
+}
+})();
+</script>

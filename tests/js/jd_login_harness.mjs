@@ -17,6 +17,8 @@ const db = { jd_accounts: [], jd_login_codes: [], jd_subscriptions: [] };
 let nextId = 1;
 const mail = [];
 let storageListBody = null;
+let signedName = null;
+let issueName = null;
 
 function match(row, params) {
   for (const [k, v] of params) {
@@ -40,9 +42,18 @@ globalThis.fetch = async (url, opts = {}) => {
   if (u.pathname.startsWith('/storage/v1/object/list/')) {
     storageListBody = JSON.parse(opts.body);
     if (!('prefix' in storageListBody)) return reply({ error: 'prefix required' }, 400);
-    return reply([{ name: 'jewellers-digest-2026-10-14.xlsx' }]);
+    return reply([{ name: 'jewellers-digest-2026-10-14.xlsx' },
+                  { name: 'jewellers-digest-2026-10-14.json' },
+                  { name: 'jewellers-digest-2026-10-13.xlsx' }]);
   }
-  if (u.pathname.startsWith('/storage/v1/object/sign/')) return reply({ signedURL: '/object/sign/jd-reports/x?token=t' });
+  if (u.pathname.startsWith('/storage/v1/object/sign/')) {
+    signedName = u.pathname.split('/').pop();
+    return reply({ signedURL: '/object/sign/jd-reports/x?token=t' });
+  }
+  if (u.pathname.startsWith('/storage/v1/object/authenticated/')) {
+    issueName = u.pathname.split('/').pop();
+    return reply({ last: '2026-10-14', trend: { days: 87 } });
+  }
   const table = u.pathname.replace('/rest/v1/', '');
   const rows = db[table];
   if (!rows) return reply({ code: 'PGRST205' }, 404);
@@ -103,7 +114,11 @@ res.reuse = { status: r.status };
 r = await call('GET', '/jd/status', null, token);
 res.status = { status: r.status, email: r.j?.email, ent: r.j?.entitlement };
 r = await call('GET', '/jd/report', null, token);
-res.report = { status: r.status, has_url: !!r.j?.url, list_body: storageListBody };
+res.report = { status: r.status, has_url: !!r.j?.url, list_body: storageListBody, signed: signedName };
+r = await call('GET', '/jd/issue', null, token);
+res.issue = { status: r.status, name: r.j?.name, read: issueName, last: r.j?.issue?.last };
+r = await call('GET', '/jd/issue');
+res.issue_anon = { status: r.status };
 // a tampered token is refused
 const forged = token.replace('jds.900.', 'jds.901.');
 r = await call('GET', '/jd/status', null, forged);
