@@ -27,6 +27,11 @@ h1 b{color:var(--gold)}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
   gap:12px;margin-bottom:18px}
+.range-lbl{font-size:13px;color:var(--muted,#9aa3ad);margin:0 0 8px;font-weight:600}
+/* Today's three numbers side by side, even on a phone. */
+#kpis{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media(max-width:480px){#kpis .kpi{padding:12px 10px}#kpis .n{font-size:24px}
+  #kpis .l{font-size:10px;letter-spacing:.03em}}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
 .kpi .n{font-size:28px;font-weight:700;letter-spacing:.01em}
 .kpi .l{color:var(--ink2);font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
@@ -71,6 +76,7 @@ td.path{color:var(--accent);word-break:break-all}
     <span class="status" id="status"></span>
   </div>
 
+  <div class="range-lbl" id="rangeLbl"></div>
   <div class="kpis" id="kpis"></div>
 
   <div class="card">
@@ -87,6 +93,8 @@ td.path{color:var(--accent);word-break:break-all}
     <div class="card"><h2>Where visitors came from</h2><div id="refs"></div></div>
     <div class="card"><h2>Traffic by host (www vs apex)</h2><div id="hosts"></div></div>
   </div>
+
+  <div class="card"><h2>All time</h2><div class="kpis" id="lifeBox"></div></div>
 
   <p class="foot" id="foot"></p>
 </div>
@@ -120,14 +128,11 @@ td.path{color:var(--accent);word-break:break-all}
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
-  // default range: last 30 days (was today only, which made the KPIs read
-  // as if the site had only ever had today's traffic - a bad first-look
-  // impression when the site has hundreds of pageviews/day for months).
-  // 30d is a common default across analytics tools; users can drop back
-  // to Today or extend to All time with the buttons below.
+  // Default range: today. The owner reads this daily, so the top row is
+  // today's views, visitors and clicks; the all-time totals sit in their
+  // own card at the bottom, so the two are never mistaken for each other.
   var today=todayIST();
-  var d30=todayIST(); d30.setUTCDate(d30.getUTCDate()-29);
-  $('from').value=iso(d30); $('to').value=iso(today);
+  $('from').value=iso(today); $('to').value=iso(today);
 
   // Readable names for click keys. The map is generated from CLICK_LABELS
   // in generate_site.py (one source, tested); rules below cover the
@@ -214,25 +219,35 @@ td.path{color:var(--accent);word-break:break-all}
       .catch(function(){/* leave null - tile renders as an em dash */});
   }
 
-  function renderKPIs(t,life){
-    var k=$('kpis');
-    // All-time figure from page_views (every page) when the report function
-    // provides it; the older hits counter only counts the homepage and city
-    // pages, once per browser tab, so it reads well below the real total.
-    var items=[
-      life ? ['Page views (all time)',life.views,'life'] : ['Total visits (all time)',LIFETIME,'hits'],
-      ['Page views',t.views,'range'],
-      ['Unique visitors',t.visitors,'range'],
-      ['Clicks',t.clicks,'range']];
-    k.innerHTML=items.map(function(it){
+  function tiles(items){
+    return items.map(function(it){
       var val=(it[1]==null)?'&mdash;':nfmt(it[1]||0);
-      var note=(it[2]==='hits')
-        ? '<div class="l" style="font-size:10px;opacity:.65;text-transform:none;letter-spacing:0">from hits table &middot; ignores date filter</div>'
-        : (it[2]==='life')
-        ? '<div class="l" style="font-size:10px;opacity:.65;text-transform:none;letter-spacing:0">every page since '+esc(life.since)+' &middot; '+nfmt(life.visitors)+' visitors &middot; ignores date filter</div>'
-        : '';
+      var note=it[2]?'<div class="l" style="font-size:10px;opacity:.65;'+
+        'text-transform:none;letter-spacing:0">'+it[2]+'</div>':'';
       return '<div class="kpi"><div class="n">'+val+
         '</div><div class="l">'+it[0]+'</div>'+note+'</div>';}).join('');
+  }
+  function rangeName(f,t){
+    var td=iso(todayIST()),y=todayIST();y.setUTCDate(y.getUTCDate()-1);
+    var fmt=function(x){return new Date(x+'T00:00:00Z').toLocaleDateString('en-IN',
+      {day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});};
+    if(f===t)return (f===td?'Today, ':f===iso(y)?'Yesterday, ':'')+fmt(f);
+    return fmt(f)+' – '+fmt(t);
+  }
+  function renderKPIs(t,life){
+    // Top row: the selected range only (today by default).
+    $('rangeLbl').textContent=rangeName($('from').value,$('to').value);
+    $('kpis').innerHTML=tiles([
+      ['Page views',t.views],
+      ['Unique visitors',t.visitors],
+      ['Clicks',t.clicks]]);
+    // Bottom card: all-time totals from page_views (every page). Falls back
+    // to the older hits counter only if the database function predates
+    // the lifetime figure; that counter covers fewer pages.
+    $('lifeBox').innerHTML=life
+      ? tiles([['Page views',life.views,'every page since '+esc(life.since)],
+               ['Unique visitors',life.visitors,'since '+esc(life.since)]])
+      : tiles([['Total visits',LIFETIME,'from hits table']]);
   }
 
   function renderChart(daily){
