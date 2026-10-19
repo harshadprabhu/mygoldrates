@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-19",
-  "last_updated": "2026-10-19T17:03:37.223288+05:30",
+  "last_updated": "2026-10-19T23:16:28.954647+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -16,28 +16,28 @@
     "jeweller": "PN Gadgil",
     "rate_per_gram_inr": 14656.0
   },
-  "ibja_reference_24k_999_per_gram_inr": 14641.0,
+  "ibja_reference_24k_999_per_gram_inr": 14594.0,
   "akgsma_south_india_22k_per_gram_inr": 13570.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 147891.0,
-      "change_pct": -0.02
+      "price_per_10g_inr": 147300.0,
+      "change_pct": -0.42
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 146429.0,
-      "change_pct": 0.0
+      "price_per_10g_inr": 145736.0,
+      "change_pct": -0.47
     }
   ],
   "jewellers": [
     {
       "jeweller": "Chandukaka Saraf",
-      "rate_24k_per_gram_inr": 14640.0,
-      "rate_22k_per_gram_inr": 13420.0,
-      "rate_18k_per_gram_inr": 10980.0
+      "rate_24k_per_gram_inr": 14580.0,
+      "rate_22k_per_gram_inr": 13365.0,
+      "rate_18k_per_gram_inr": 10935.0
     },
     {
       "jeweller": "PN Gadgil",
@@ -58,16 +58,16 @@
       "rate_18k_per_gram_inr": 11059.5
     },
     {
-      "jeweller": "Indriya",
-      "rate_24k_per_gram_inr": 14761.42,
-      "rate_22k_per_gram_inr": 13531.3,
-      "rate_18k_per_gram_inr": 11071.07
-    },
-    {
       "jeweller": "Kalyan Jewellers",
       "rate_24k_per_gram_inr": 14784.5,
       "rate_22k_per_gram_inr": 13552.46,
       "rate_18k_per_gram_inr": 11088.38
+    },
+    {
+      "jeweller": "Indriya",
+      "rate_24k_per_gram_inr": 14799.6,
+      "rate_22k_per_gram_inr": 13566.3,
+      "rate_18k_per_gram_inr": 11099.7
     },
     {
       "jeweller": "Malabar Gold",
@@ -131,9 +131,9 @@
     },
     {
       "jeweller": "ORRA",
-      "rate_24k_per_gram_inr": 14911.39,
-      "rate_22k_per_gram_inr": 13668.77,
-      "rate_18k_per_gram_inr": 11183.54
+      "rate_24k_per_gram_inr": 14905.27,
+      "rate_22k_per_gram_inr": 13663.16,
+      "rate_18k_per_gram_inr": 11178.95
     },
     {
       "jeweller": "BlueStone",
