@@ -16,10 +16,11 @@ from googleapiclient.discovery import build
 
 SITE_BASE = "https://mygoldrates.com/"
 INSPECT = [
-    "", "compare", "gold-rate-today-in-pune", "gold-rate-today-in-mumbai",
-    "gold-rate-today-in-chennai", "gold-rate-today-in-agra", "calculators",
-    "gold-loan-calculator", "news", "making-charges-comparison",
-    "jewellers-digest", "city/pune/",
+    "", "gold-rate-today-in-surat", "gold-rate-today-in-mumbai",
+    "gold-rate-today-in-chennai", "gold-rate-today-in-pune",
+    "gold-rate-today-in-delhi", "making-charges-comparison",
+    "dhanteras-gold-report-2026", "calculators", "gold-loan-calculator",
+    "news", "jewellers-digest",
 ]
 
 
@@ -58,6 +59,30 @@ def main():
     for m in sorted(wk):
         c, i, pw, n = wk[m]
         print(f"{m}  clicks={c:5}  impr={i:7}  pos={pw/i if i else 0:5.1f}  days={n}")
+    # Discover, Google News and image results are reported separately from
+    # web search, and Discover and the Google app usually arrive with no
+    # referrer - in the site's own analytics they look like direct visits.
+    for st in ("discover", "googleNews", "news", "image"):
+        try:
+            body = {"startDate": (today - timedelta(days=120)).isoformat(),
+                    "endDate": today.isoformat(), "dimensions": ["date"],
+                    "type": st, "rowLimit": 25000}
+            rs = svc.searchanalytics().query(siteUrl=site, body=body).execute().get("rows", [])
+        except Exception as e:
+            print(f"\n== {st.upper()}: ERROR {str(e)[:120]}"); continue
+        w2 = defaultdict(lambda: [0, 0])
+        for r in rs:
+            d = date.fromisoformat(r["keys"][0]); m = d - timedelta(days=d.weekday())
+            w2[m][0] += r["clicks"]; w2[m][1] += r["impressions"]
+        print(f"\n== {st.upper()} WEEKLY (clicks, impressions) - {len(rs)} days with data ==")
+        for m in sorted(w2):
+            print(f"{m}  clicks={w2[m][0]:5}  impr={w2[m][1]:7}")
+        if st == "discover" and rs:
+            pg = svc.searchanalytics().query(siteUrl=site, body={
+                **body, "dimensions": ["page"], "rowLimit": 15}).execute().get("rows", [])
+            for r in pg:
+                print(f"   {r['clicks']:5} clicks  {r['impressions']:7} impr  {r['keys'][0].replace(SITE_BASE, '/')}")
+
     print("\n== LAST 21 DAYS, DAILY ==")
     for r in rows[-21:]:
         print(f"{r['keys'][0]}  clicks={r['clicks']:4}  impr={r['impressions']:6}  pos={r['position']:5.1f}")

@@ -6257,7 +6257,7 @@ td.path{color:var(--accent);word-break:break-all}
   </div>
 
   <div class="grid2">
-    <div class="card"><h2>Traffic sources (referrers)</h2><div id="refs"></div></div>
+    <div class="card"><h2>Where visitors came from</h2><div id="refs"></div></div>
     <div class="card"><h2>Traffic by host (www vs apex)</h2><div id="hosts"></div></div>
   </div>
 
@@ -6387,10 +6387,13 @@ td.path{color:var(--accent);word-break:break-all}
       .catch(function(){/* leave null - tile renders as an em dash */});
   }
 
-  function renderKPIs(t){
+  function renderKPIs(t,life){
     var k=$('kpis');
+    // All-time figure from page_views (every page) when the report function
+    // provides it; the older hits counter only counts the homepage and city
+    // pages, once per browser tab, so it reads well below the real total.
     var items=[
-      ['Total visits (all time)',LIFETIME,'hits'],
+      life ? ['Page views (all time)',life.views,'life'] : ['Total visits (all time)',LIFETIME,'hits'],
       ['Page views',t.views,'range'],
       ['Unique visitors',t.visitors,'range'],
       ['Clicks',t.clicks,'range']];
@@ -6398,6 +6401,8 @@ td.path{color:var(--accent);word-break:break-all}
       var val=(it[1]==null)?'&mdash;':nfmt(it[1]||0);
       var note=(it[2]==='hits')
         ? '<div class="l" style="font-size:10px;opacity:.65;text-transform:none;letter-spacing:0">from hits table &middot; ignores date filter</div>'
+        : (it[2]==='life')
+        ? '<div class="l" style="font-size:10px;opacity:.65;text-transform:none;letter-spacing:0">every page since '+esc(life.since)+' &middot; '+nfmt(life.visitors)+' visitors &middot; ignores date filter</div>'
         : '';
       return '<div class="kpi"><div class="n">'+val+
         '</div><div class="l">'+it[0]+'</div>'+note+'</div>';}).join('');
@@ -6448,7 +6453,7 @@ td.path{color:var(--accent);word-break:break-all}
         return;
       }
       var t=d.totals||{views:0,visitors:0,clicks:0};
-      renderKPIs(t);
+      renderKPIs(t,d.lifetime||null);
       renderChart(d.daily);
       renderTable($('pages'),d.top_pages,[{h:'Page',k:'page',path:true},
         {h:'Views',k:'views',num:true},{h:'Visitors',k:'visitors',num:true}]);
@@ -6458,10 +6463,19 @@ td.path{color:var(--accent);word-break:break-all}
       d.top_pages=(d.top_pages||[]).filter(function(r){return !isSynthetic(r.page);});
       renderTable($('clicks'),d.top_clicks,[{h:'Action',k:'target'},
         {h:'Clicks',k:'clicks',num:true}]);
-      renderTable($('refs'),d.top_referrers,[{h:'Referrer',k:'referrer',path:true},
-        {h:'Views',k:'views',num:true}]);
-      renderTable($('hosts'),d.top_hosts,[{h:'Host',k:'host'},
-        {h:'Views',k:'views',num:true}]);
+      renderTable($('refs'),d.top_referrers,[{h:'Source',k:'referrer',path:true},
+        {h:'Visits',k:'views',num:true}]);
+      // An older report function in the database returns no host data at
+      // all. Say so, rather than showing "No data yet" for a table that
+      // can never fill.
+      if(d.top_hosts===undefined){
+        $('hosts').innerHTML='<div class="msg err">The report function in the '+
+          'database is out of date, so host data is not returned. Run '+
+          'sql/analytics_report.sql in the Supabase SQL Editor.</div>';
+      } else {
+        renderTable($('hosts'),d.top_hosts,[{h:'Host',k:'host'},
+          {h:'Views',k:'views',num:true}]);
+      }
       fillPages(d.pages_list);
       $('foot').textContent='Range '+d.from+' to '+d.to+
         (d.page_filter?(' - filtered to '+d.page_filter):'')+
