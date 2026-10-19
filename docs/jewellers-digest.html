@@ -120,6 +120,7 @@ footer a{color:var(--ink2)}
 .sl a{color:#C8BDA8;text-decoration:none;margin:0 7px;white-space:nowrap}
 .sl a:hover{text-decoration:underline;color:#E8C766}
 
+[hidden]{display:none!important}
 .jd-disclosure{max-width:720px;margin:30px auto 0;padding:0 20px;text-align:center;font-size:13px;opacity:.7}</style>
 <script>(function(){var SB="https://opwrfflzzowhobesysmr.supabase.co",KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE";if(!SB||!KEY)return;var SID="";try{SID=localStorage.getItem("gr_sid")||"";if(!SID){SID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(Date.now().toString(36)+Math.random().toString(36).slice(2));localStorage.setItem("gr_sid",SID);}}catch(e){SID="";}window.GR_SID=SID;function send(table,row,retried){try{fetch(SB+"/rest/v1/"+table,{method:"POST",keepalive:true,headers:{"Content-Type":"application/json","apikey":KEY,"Authorization":"Bearer "+KEY,"Prefer":"return=minimal"},body:JSON.stringify(row)}).then(function(r){if(!r.ok&&!retried&&row.host!==undefined){var r2={};for(var k in row){if(k!=="host")r2[k]=row[k];}send(table,r2,true);}}).catch(function(){});}catch(e){}}window.GR_TRACK=send;send("page_views",{page:location.pathname,referrer:document.referrer||null,session_id:SID,host:location.hostname});})();</script>
 <script>/* ---- click analytics ----------------------------------------------------
@@ -160,7 +161,18 @@ footer a{color:var(--ink2)}
     trade. Every jeweller's rate, what the spread has been, where price has turned
     before, and what is scheduled to move it this week.</p>
 
-    <div class="price">
+    <!-- Shown instead of the offer when the visitor is signed in with access. -->
+    <div class="price" id="member" hidden>
+      <span class="badge">Your Jewellers Digest</span>
+      <p class="per" style="margin-top:14px">Signed in as <b id="m-who"></b></p>
+      <p class="save" id="m-access"></p>
+      <form id="m-dl" style="margin-top:16px"><button id="m-btn" type="submit">Download today&rsquo;s workbook</button></form>
+      <div class="msg" id="m-msg"></div>
+      <p class="fineprint"><a href="https://mygoldrates.com/jd-sign-in">Your account</a> &middot;
+        <a href="#" id="m-out">Sign out</a></p>
+    </div>
+
+    <div class="price" id="buy">
       <span class="badge">Launch offer</span>
       <div class="amt">
         <span class="was">&#8377;499</span>
@@ -247,6 +259,52 @@ footer a{color:var(--ink2)}
      there, correctly refusing an anonymous caller — so treating that as
      health would have opened the form against a Worker that could not charge
      anyone. /jd/ready checks the live plan and says open: true or nothing. */
+  /* Signed in (a session from /jd-sign-in) with live access: show the
+     member panel and the download, not the offer. Access is checked live
+     by the Worker on every call, so a lapsed subscription falls back to
+     the offer. */
+  var token = null;
+  try { token = localStorage.getItem('jd_session'); } catch (e) {}
+  function authed(path){
+    return fetch(API + path, {headers: {'Authorization': 'Bearer ' + token}})
+      .then(function(r){ return r.json().catch(function(){ return {}; })
+        .then(function(j){ return {status: r.status, ok: r.ok, j: j}; }); });
+  }
+  if (token) {
+    authed('/jd/status').then(function(r){
+      var e = r.j && r.j.entitlement;
+      if (!r.ok || !e || !e.active) return;
+      document.getElementById('buy').hidden = true;
+      document.getElementById('member').hidden = false;
+      document.getElementById('m-who').textContent = r.j.email || '';
+      var end = e.current_end ? new Date(e.current_end) : null;
+      document.getElementById('m-access').textContent = e.status === 'complimentary'
+        ? (end && end.getFullYear() > 2090 ? 'Complimentary access'
+           : 'Complimentary access until ' + end.toLocaleDateString('en-IN'))
+        : 'Subscription active' + (end ? ', paid until ' + end.toLocaleDateString('en-IN') : '');
+    }).catch(function(){});
+  }
+  document.getElementById('m-dl').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var b = document.getElementById('m-btn'), m = document.getElementById('m-msg');
+    b.disabled = true; m.className = 'msg'; m.textContent = 'Preparing your download…';
+    authed('/jd/report').then(function(r){
+      b.disabled = false;
+      if (r.ok && r.j.url) { m.className = 'msg ok'; m.textContent = 'Downloading ' + r.j.report + '.';
+        window.location.href = r.j.url; return; }
+      m.className = 'msg err';
+      m.textContent = r.status === 404 ? 'Today’s workbook is not ready yet. It is published every morning.'
+        : r.status === 401 ? 'Your session has ended. Sign in again.'
+        : (r.j.error || 'Could not get the workbook. Try again shortly.');
+    }).catch(function(){ b.disabled = false; m.className = 'msg err';
+      m.textContent = 'Could not reach the server. Check your connection.'; });
+  });
+  document.getElementById('m-out').addEventListener('click', function(ev){
+    ev.preventDefault();
+    try { localStorage.removeItem('jd_session'); } catch (e) {}
+    location.reload();
+  });
+
   fetch(API + '/jd/ready', {method:'GET'})
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(d){
