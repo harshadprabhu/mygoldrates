@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-19",
-  "last_updated": "2026-10-19T11:04:41.657043+05:30",
+  "last_updated": "2026-10-19T14:05:00.997104+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -16,20 +16,20 @@
     "jeweller": "PN Gadgil",
     "rate_per_gram_inr": 14656.0
   },
-  "ibja_reference_24k_999_per_gram_inr": 14643.0,
+  "ibja_reference_24k_999_per_gram_inr": 14641.0,
   "akgsma_south_india_22k_per_gram_inr": 13570.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 148281.0,
-      "change_pct": 0.25
+      "price_per_10g_inr": 148305.0,
+      "change_pct": 0.26
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 146736.0,
-      "change_pct": 0.21
+      "price_per_10g_inr": 146715.0,
+      "change_pct": 0.2
     }
   ],
   "jewellers": [
@@ -58,24 +58,6 @@
       "rate_18k_per_gram_inr": 11059.5
     },
     {
-      "jeweller": "Vaibhav Jewellers",
-      "rate_24k_per_gram_inr": 14765.0,
-      "rate_22k_per_gram_inr": 13534.58,
-      "rate_18k_per_gram_inr": 11073.75
-    },
-    {
-      "jeweller": "Bhima Jewels",
-      "rate_24k_per_gram_inr": 14769.0,
-      "rate_22k_per_gram_inr": 13538.25,
-      "rate_18k_per_gram_inr": 11076.75
-    },
-    {
-      "jeweller": "Vummidi Bangaru",
-      "rate_24k_per_gram_inr": 14776.0,
-      "rate_22k_per_gram_inr": 13544.67,
-      "rate_18k_per_gram_inr": 11082.0
-    },
-    {
       "jeweller": "Kalyan Jewellers",
       "rate_24k_per_gram_inr": 14784.5,
       "rate_22k_per_gram_inr": 13552.46,
@@ -100,16 +82,22 @@
       "rate_18k_per_gram_inr": 11103.0
     },
     {
+      "jeweller": "Vaibhav Jewellers",
+      "rate_24k_per_gram_inr": 14804.0,
+      "rate_22k_per_gram_inr": 13570.33,
+      "rate_18k_per_gram_inr": 11103.0
+    },
+    {
       "jeweller": "Jos Alukkas",
       "rate_24k_per_gram_inr": 14809.0,
       "rate_22k_per_gram_inr": 13574.92,
       "rate_18k_per_gram_inr": 11106.75
     },
     {
-      "jeweller": "Tanishq",
-      "rate_24k_per_gram_inr": 14809.09,
-      "rate_22k_per_gram_inr": 13575.0,
-      "rate_18k_per_gram_inr": 11106.82
+      "jeweller": "Bhima Jewels",
+      "rate_24k_per_gram_inr": 14809.0,
+      "rate_22k_per_gram_inr": 13574.92,
+      "rate_18k_per_gram_inr": 11106.75
     },
     {
       "jeweller": "Kisna",
@@ -130,10 +118,16 @@
       "rate_18k_per_gram_inr": 11110.5
     },
     {
-      "jeweller": "C Krishniah Chetty",
-      "rate_24k_per_gram_inr": 14908.78,
-      "rate_22k_per_gram_inr": 13666.38,
-      "rate_18k_per_gram_inr": 11181.59
+      "jeweller": "Vummidi Bangaru",
+      "rate_24k_per_gram_inr": 14814.0,
+      "rate_22k_per_gram_inr": 13579.5,
+      "rate_18k_per_gram_inr": 11110.5
+    },
+    {
+      "jeweller": "Tanishq",
+      "rate_24k_per_gram_inr": 14847.27,
+      "rate_22k_per_gram_inr": 13610.0,
+      "rate_18k_per_gram_inr": 11135.45
     },
     {
       "jeweller": "ORRA",
@@ -148,19 +142,19 @@
       "rate_18k_per_gram_inr": 11199.8
     },
     {
-      "jeweller": "CaratLane",
-      "rate_24k_per_gram_inr": 14954.0,
-      "rate_22k_per_gram_inr": 13707.83,
-      "rate_18k_per_gram_inr": 11215.5
+      "jeweller": "C Krishniah Chetty",
+      "rate_24k_per_gram_inr": 14947.34,
+      "rate_22k_per_gram_inr": 13701.73,
+      "rate_18k_per_gram_inr": 11210.51
     },
     {
       "jeweller": "Ranka Jewellers",
-      "rate_24k_per_gram_inr": 15060.0,
-      "rate_22k_per_gram_inr": 13805.0,
-      "rate_18k_per_gram_inr": 11295.0
+      "rate_24k_per_gram_inr": 15090.0,
+      "rate_22k_per_gram_inr": 13832.5,
+      "rate_18k_per_gram_inr": 11317.5
     }
   ],
-  "jeweller_count": 21,
+  "jeweller_count": 20,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
