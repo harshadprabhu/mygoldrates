@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-19",
-  "last_updated": "2026-10-19T10:46:07.320620+05:30",
+  "last_updated": "2026-10-19T11:04:41.657043+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14804.0,
-    "22k": 13570.33,
-    "18k": 11103.0
+    "24k": 14809.0,
+    "22k": 13574.92,
+    "18k": 11106.75
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 148354.0,
-      "change_pct": 0.29
+      "price_per_10g_inr": 148281.0,
+      "change_pct": 0.25
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 146751.0,
-      "change_pct": 0.22
+      "price_per_10g_inr": 146736.0,
+      "change_pct": 0.21
     }
   ],
   "jewellers": [
@@ -58,12 +58,6 @@
       "rate_18k_per_gram_inr": 11059.5
     },
     {
-      "jeweller": "Kalyan Jewellers",
-      "rate_24k_per_gram_inr": 14765.0,
-      "rate_22k_per_gram_inr": 13534.58,
-      "rate_18k_per_gram_inr": 11073.75
-    },
-    {
       "jeweller": "Vaibhav Jewellers",
       "rate_24k_per_gram_inr": 14765.0,
       "rate_22k_per_gram_inr": 13534.58,
@@ -76,16 +70,16 @@
       "rate_18k_per_gram_inr": 11076.75
     },
     {
-      "jeweller": "Candere",
+      "jeweller": "Vummidi Bangaru",
       "rate_24k_per_gram_inr": 14776.0,
       "rate_22k_per_gram_inr": 13544.67,
       "rate_18k_per_gram_inr": 11082.0
     },
     {
-      "jeweller": "Vummidi Bangaru",
-      "rate_24k_per_gram_inr": 14776.0,
-      "rate_22k_per_gram_inr": 13544.67,
-      "rate_18k_per_gram_inr": 11082.0
+      "jeweller": "Kalyan Jewellers",
+      "rate_24k_per_gram_inr": 14784.5,
+      "rate_22k_per_gram_inr": 13552.46,
+      "rate_18k_per_gram_inr": 11088.38
     },
     {
       "jeweller": "Indriya",
@@ -122,6 +116,12 @@
       "rate_24k_per_gram_inr": 14813.98,
       "rate_22k_per_gram_inr": 13579.48,
       "rate_18k_per_gram_inr": 11110.49
+    },
+    {
+      "jeweller": "Candere",
+      "rate_24k_per_gram_inr": 14814.0,
+      "rate_22k_per_gram_inr": 13579.5,
+      "rate_18k_per_gram_inr": 11110.5
     },
     {
       "jeweller": "GRT Jewellers",
