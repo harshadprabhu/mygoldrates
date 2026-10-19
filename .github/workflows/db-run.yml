@@ -1,0 +1,58 @@
+name: db-run
+
+# Runs one SQL file from this repository's sql/ folder against the Supabase
+# database, so schema changes no longer need copying into the SQL Editor by
+# hand. Manual only.
+#
+# Needs the repo secret SUPABASE_DB_URL: Supabase -> Connect -> "Session
+# pooler" connection string (IPv4; GitHub runners cannot reach the direct
+# IPv6-only address), with the database password filled in. It is passed to
+# psql through the environment and never printed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "SQL file to run (must be under sql/)"
+        default: "sql/analytics_report.sql"
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the file
+        env:
+          FILE: ${{ inputs.file }}
+        run: |
+          case "$FILE" in
+            sql/*.sql) ;;
+            *) echo "::error::only files under sql/ ending in .sql"; exit 1;;
+          esac
+          case "$FILE" in *..*) echo "::error::no .. in the path"; exit 1;; esac
+          test -f "$FILE" || { echo "::error::$FILE not found"; exit 1; }
+      - name: Run
+        env:
+          FILE: ${{ inputs.file }}
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::SUPABASE_DB_URL secret is not set"; exit 1
+          fi
+          sudo apt-get install -y -qq postgresql-client >/dev/null
+          set +e
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -q -f "$FILE" > out.txt 2>&1
+          code=$?
+          set -e
+          python3 - "$code" <<'PY'
+          import sys
+          t = open("out.txt", encoding="utf-8", errors="replace").read()[-3400:]
+          enc = t.replace("%", "%25").replace("\r", "").replace("\n", "%0A")
+          kind = "notice" if sys.argv[1] == "0" else "error"
+          print(f"::{kind} title=db-run exit {sys.argv[1]}::{enc}")
+          PY
+          exit $code
