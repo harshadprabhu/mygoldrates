@@ -346,6 +346,8 @@ def site_links_html():
         f'<a href="{SITE_URL}/dhanteras-gold-report-2026">Dhanteras 2026 report</a>'
         f'<a href="{SITE_URL}/calculators">Gold calculators</a>'
         f'<a href="{SITE_URL}/making-charges-comparison">Making charges</a>'
+        f'<a href="{SITE_URL}/gold-market-today">Gold market today</a>'
+        f'<a href="{SITE_URL}/gold-rate-history">Gold rate history</a>'
         f'<a href="{SITE_URL}/news">Gold news</a>'
         f'<a href="{SITE_URL}/jewellers-digest">Jewellers Digest</a>'
         f'<a href="{SITE_URL}/inquiry">Daily rate alerts</a>'
@@ -599,6 +601,81 @@ CITY_ENRICHMENT_DATA = {
         "regional_brands": ["Tanishq", "Kalyan Jewellers", "PC Jeweller"],
         "intro": "Bhopal's Chowk Bazaar in Old City and MP Nagar in New City feature a mix of traditional gold craft and modern retail chains. Daily rates reflect national median gold prices.",
     },
+    # ---- 2026-10-20: local content for the 10 high-demand pages brought
+    # back into the index (see INDEXED_PLACES). Markets, traditions and
+    # seasons only; nothing here is a price or a claim about a jeweller.
+    "Punjab": {
+        "state": "Punjab",
+        "hubs": "Sarafa Bazaar in old Ludhiana, Guru Bazaar near the Golden Temple in Amritsar, and the jewellery lanes of Jalandhar",
+        "intro": "Punjab's gold buying is driven above all by weddings. Ludhiana's Sarafa Bazaar and Amritsar's Guru Bazaar are the traditional centres, with Jalandhar serving the Doaba region, where families with relatives abroad often buy during the winter wedding season. Heavy 22K sets, kadas and traditional bridal pieces dominate, so the per-gram rate and the making charge on a large piece matter more here than on light everyday jewellery.",
+        "seasons": "The winter wedding season (roughly November to February), Dhanteras and Diwali, and Akshaya Tritiya.",
+        "tip": "On heavy bridal sets the making charge can add more than a whole month's movement in the gold rate, so compare making charges as carefully as the rate.",
+    },
+    "Rajasthan": {
+        "state": "Rajasthan",
+        "hubs": "Johari Bazaar and Gopalji ka Rasta in Jaipur, and the old-city markets of Jodhpur and Udaipur",
+        "intro": "Rajasthan is famous for kundan and meenakari work, and Jaipur's Johari Bazaar is one of India's best-known jewellery and gemstone markets. Much traditional Rajasthani jewellery combines gold with gemstones and enamel, so the gold content of a piece can be a smaller share of its price than in plain gold jewellery. Akha Teej (Akshaya Tritiya) is a traditionally auspicious day for weddings and gold buying across the state.",
+        "seasons": "Akha Teej (Akshaya Tritiya), Dhanteras and Diwali, and the winter wedding season.",
+        "tip": "For kundan, meenakari or gem-set pieces, ask for the gold weight and the stone weight separately, and check that the per-gram gold rate is applied only to the gold.",
+    },
+    "Uttar Pradesh": {
+        "state": "Uttar Pradesh",
+        "hubs": "Chowk and Aminabad in Lucknow, the Chowk area of Varanasi, and Atta Market in Noida",
+        "intro": "Uttar Pradesh is a large and varied gold market. Lucknow's old Chowk is its traditional jewellery quarter, Varanasi has a long history of gold and silver craft, and western UP cities such as Noida and Ghaziabad trade much like neighbouring Delhi. Wedding and festival demand is strong across the state, and most jewellers quote 22K (916) hallmarked jewellery alongside 24K coins and bars.",
+        "seasons": "Dhanteras and Diwali, Akshaya Tritiya, and the winter wedding season.",
+        "tip": "Check the BIS hallmark and the 6-digit HUID on every piece; it is the only reliable proof of purity, whichever city you buy in.",
+    },
+    "Madhya Pradesh": {
+        "state": "Madhya Pradesh",
+        "hubs": "Sarafa Bazaar in Indore, Chowk Bazaar in Bhopal, and the jewellery markets of Jabalpur and Gwalior",
+        "intro": "Indore's Sarafa Bazaar is the best-known gold market in Madhya Pradesh; its jewellery lanes turn into a famous street-food market after the shops close at night. Bhopal's Chowk Bazaar is the capital's traditional jewellery centre. Rates in the state follow the national board, so differences between jewellers come mainly from making charges and each jeweller's own premium.",
+        "seasons": "Dhanteras and Diwali, Akshaya Tritiya, and the winter wedding season.",
+        "tip": "Ask for the rate and the making charge separately on the bill; a 'net price' quote makes two jewellers hard to compare.",
+    },
+    "Haryana": {
+        "state": "Haryana",
+        "hubs": "Sadar Bazaar in Gurugram, the markets of Faridabad, and the jewellery bazaars of Rohtak and Hisar",
+        "intro": "Haryana's gold market is closely tied to Delhi: buyers in Gurugram and Faridabad often compare prices with Delhi's Dariba Kalan and Karol Bagh, and national chains quote the same board rate on both sides of the border. Wedding demand is strong, and traditional pieces such as heavy necklaces and bangles in 22K remain popular alongside lighter modern designs in the NCR cities.",
+        "seasons": "Dhanteras and Diwali, Akshaya Tritiya, and the winter wedding season.",
+        "tip": "Because NCR jewellers compete closely, it is worth comparing two or three quotes for the same piece; the gold rate is near-identical, the making charge is not.",
+    },
+    "West Bengal": {
+        "state": "West Bengal",
+        "hubs": "Bowbazar (BB Ganguly Street) in Kolkata, Gariahat, and the jewellery markets of Howrah and Siliguri",
+        "regional_brands": ["Senco Gold", "PC Chandra Jewellers"],
+        "intro": "Kolkata's Bowbazar is one of India's oldest gold jewellery markets, and Bengal's karigars (goldsmiths) are known across the country for fine handcrafted work; many work in jewellery workshops far beyond the state. Bengali bridal jewellery favours intricate, often lighter 22K designs. Kolkata is also home to well-known chains such as Senco Gold and PC Chandra Jewellers.",
+        "seasons": "Akshaya Tritiya, Poila Baishakh (Bengali New Year), Dhanteras and Diwali, Durga Puja, and the wedding season.",
+        "tip": "Fine handcrafted work carries higher making charges by nature; compare like with like, and ask whether the making charge is per gram or a flat percentage.",
+    },
+    "Thiruvananthapuram": {
+        "state": "Kerala",
+        "hubs": "Chalai Bazaar (the city's oldest market), MG Road, and the shopping streets of East Fort and Kowdiar",
+        "regional_brands": ["Malabar Gold", "Joyalukkas", "Bhima Jewellers"],
+        "intro": "Kerala is one of India's largest gold-buying states for its size, with brides traditionally wearing substantial 22K gold. In Thiruvananthapuram, the old Chalai Bazaar sits alongside large showrooms of Kerala-founded chains such as Malabar Gold, Joyalukkas and Bhima. Many Kerala jewellers follow the daily rate set by the All Kerala Gold and Silver Merchants Association (AKGSMA), which is shown on this site.",
+        "seasons": "Onam, Akshaya Tritiya, Vishu, and the wedding season.",
+        "tip": "Compare a jeweller's quote with the day's AKGSMA rate; it is the benchmark most Kerala jewellers price from.",
+    },
+    "Hubli": {
+        "state": "Karnataka",
+        "hubs": "Durgadbail and the old market area around it, Koppikar Road, and the markets of twin city Dharwad",
+        "intro": "Hubballi-Dharwad is north Karnataka's main commercial centre, and its old market area around Durgadbail has long been where the region buys gold. Buyers from surrounding districts come to the city for wedding purchases. Rates follow the Karnataka board, where regional chains that serve the state, listed on this page, can quote differently from national brands.",
+        "seasons": "Akshaya Tritiya, Ugadi, Dhanteras and Diwali, and the wedding season.",
+        "tip": "Check whether a regional chain on today's board is cheaper than the national brands for your purity; the gap can be worth more than a day's price move.",
+    },
+    "Rajkot": {
+        "state": "Gujarat",
+        "hubs": "Soni Bazaar in the old city, and the jewellery manufacturing clusters around it",
+        "intro": "Rajkot is one of India's major centres for gold jewellery manufacturing, especially machine-made chains and light jewellery that are sold across the country and abroad. Its Soni Bazaar is the traditional heart of the trade. Because so much is made locally, Rajkot buyers can often see a wide choice of lightweight 22K and 18K designs, where making charges are a larger share of the price than on heavy pieces.",
+        "seasons": "Dhanteras and Diwali, Akshaya Tritiya, and the wedding season.",
+        "tip": "On light chains and everyday jewellery, the making charge can be a large share of the total; compare it per gram, not just as a percentage.",
+    },
+    "Noida": {
+        "state": "Uttar Pradesh",
+        "hubs": "Atta Market in Sector 18, the malls along the Noida Expressway, and neighbouring Greater Noida",
+        "intro": "Noida's gold market centres on Atta Market in Sector 18, alongside large showrooms of national chains. As part of the National Capital Region, Noida trades much like Delhi: national jewellers quote the same board rate, and many buyers also compare prices in Delhi's Karol Bagh and Chandni Chowk before a large purchase.",
+        "seasons": "Dhanteras and Diwali, Akshaya Tritiya, and the winter wedding season.",
+        "tip": "With many showrooms close together, compare two or three quotes for the same design; the board rate barely differs, the making charge often does.",
+    },
 }
 
 
@@ -622,6 +699,10 @@ INDEXED_PLACES = {
     "Bhopal",
     "Maharashtra", "Gujarat", "Tamil Nadu", "Karnataka", "Kerala",
     "Andhra Pradesh", "Telangana", "Odisha",
+    # 2026-10-20: given local content (markets, traditions, seasons, a
+    # local buying tip) in CITY_ENRICHMENT_DATA, so back in the index.
+    "Punjab", "Rajasthan", "Uttar Pradesh", "Madhya Pradesh", "Haryana",
+    "West Bengal", "Thiruvananthapuram", "Hubli", "Rajkot", "Noida",
 }
 
 
@@ -2017,6 +2098,8 @@ def main():
         data = CITY_ENRICHMENT_DATA.get(nm, {})
         hubs_info = f'<p><strong>Key Shopping Hubs in {nm}:</strong> {data["hubs"]}.</p>' if data.get("hubs") else ""
         brands_info = f'<p><strong>Featured Regional & National Jewellers in {nm}:</strong> {", ".join(data["regional_brands"])} and leading national brands.</p>' if data.get("regional_brands") else ""
+        seasons_info = f'<p><strong>When {nm} buys gold:</strong> {data["seasons"]}</p>' if data.get("seasons") else ""
+        tip_info = f'<p><strong>Buying tip for {nm}:</strong> {data["tip"]}</p>' if data.get("tip") else ""
         custom_desc = data.get("intro", f"Gold rates in {nm} follow national board rates across major jewellers. Compare live 24K, 22K, and 18K per-gram prices pre-GST below.")
         
         return board_html + (
@@ -2029,6 +2112,8 @@ def main():
             f'<strong>{low_g} per gram</strong>.</p>'
             f'{hubs_info}'
             f'{brands_info}'
+            f'{seasons_info}'
+            f'{tip_info}'
             f'<p>Before buying gold in {nm}, use our <a href="{SITE_URL}/making-charges-calculator">making charges calculator</a> '
             f'to estimate total billed costs with 3% GST, or read our <a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K guide</a>. '
             f'You can also <a href="{SITE_URL}/inquiry">subscribe to free daily {nm} rate alerts</a>.</p>'
@@ -2903,6 +2988,11 @@ def main():
         prev = trend[i - 1][1] if i else None
         by_month.setdefault((d.year, d.month), []).append((d, m24, prev))
     month_list = sorted(by_month, reverse=True)
+    try:
+        import gold_brief as _GB
+        _briefs = _GB.load().get("days", {})
+    except Exception:
+        _briefs = {}
     for ym in month_list:
         rows = by_month[ym]
         first, last = rows[0], rows[-1]
@@ -2957,6 +3047,14 @@ def main():
             f"making charges. 22K and 18K are derived from 24K by purity. "
             f'Today&rsquo;s rates at every jeweller are on the '
             f'<a href="{SITE_URL}/">live board</a>.</p>'
+            + ("<h2>What moved gold, day by day</h2><ul>" + "".join(
+                f'<li><strong>{datetime.fromisoformat(k).strftime("%d %b")}</strong>: '
+                f'{_html.escape(_briefs[k].get("summary") or "")}</li>'
+                for k in sorted(_briefs, reverse=True)
+                if k.startswith(f"{ym[0]}-{ym[1]:02d}") and _briefs[k].get("summary"))
+               + f'</ul><p>Today&rsquo;s full analysis: <a href="{SITE_URL}/'
+                 f'gold-market-today">gold market today</a>.</p>'
+               if any(k.startswith(f"{ym[0]}-{ym[1]:02d}") for k in _briefs) else "")
             + (f"<h2>Other months</h2><p>{others}</p>" if others else ""))
         ld = ('<script type="application/ld+json">' + json.dumps({
             "@context": "https://schema.org", "@type": "Dataset",
@@ -3110,6 +3208,9 @@ def main():
         "<p>The latest gold price headlines from across the web, today&rsquo;s "
         "gold-rate report, and the full day-by-day rate history by month.</p>"
         f'<h2>Today\'s Gold Rate Report - {display_date}</h2>' + daily_cards +
+        f'<a class="newscard" href="{SITE_URL}/gold-market-today"><div class="nt">'
+        f'Gold market today: what moved gold and why</div><div class="nd">'
+        f'Daily analysis of the world&rsquo;s gold news &middot; {display_date}</div></a>' +
         live_block +
         '<h2>Gold Rate History</h2>' + news_cards)
     extra_urls.append(("news", "hourly", "0.8"))
@@ -3153,6 +3254,69 @@ def main():
 
     _calendar_events = fetch_calendar()
     print(f"calendar: {len(_calendar_events)} US events this week")
+
+    # ---- Gold market today: the daily brief (gold_brief.py) -------------
+    # One always-current page, refreshed on every build; each day's brief is
+    # kept in docs/market-brief.json and summarised on the history pages.
+    try:
+        import gold_brief as GB
+        _bday = now_ist.date()
+        _bstate = GB.load()
+        _heads = GB.fetch_global_news() + [
+            {"title": n["title"], "link": n["link"], "source": n.get("source", "")}
+            for n in news_items]
+        _vals = [float(r["canonical_24k_pre_gst"]) for r in live
+                 if r.get("canonical_24k_pre_gst")]
+        _brief = GB.compose(
+            _bday, {"gold_usd": gold_usd, "usdinr": usdinr, "board24": median24},
+            GB.previous(_bstate, _bday), GB.classify(_heads), _calendar_events,
+            (max(_vals) - min(_vals)) if len(_vals) > 1 else None)
+        _bstate.setdefault("days", {})[_bday.isoformat()] = _brief
+        GB.save(_bstate)
+        _earlier = ""
+        for _k in sorted(_bstate["days"], reverse=True)[1:7]:
+            _d = _bstate["days"][_k]
+            _earlier += (
+                f'<details class="brief-day"><summary><strong>'
+                f'{datetime.fromisoformat(_k).strftime("%A %d %B")}</strong>'
+                f' &middot; {_html.escape(_d.get("summary") or "")}</summary>'
+                + "".join(f"<p>{p}</p>" for p in _d.get("paragraphs", []))
+                + "</details>")
+        _body = (
+            crumbs(("News", f"{SITE_URL}/news"), ("Gold market today", None))
+            + f"<h1>Gold Market Today: What Moved Gold on {display_date}</h1>"
+            + f'<p class="updated-on">Updated {display_time}, {display_date} '
+              f"&middot; refreshed through the day</p>"
+            + '<style>.brief p{margin:0 0 14px}.brief-day{margin:10px 0}'
+              '.brief-day summary{cursor:pointer}</style><div class="brief">'
+            + "".join(f"<p>{p}</p>" for p in _brief["paragraphs"])
+            + "</div>"
+            + '<p style="font-size:13px;opacity:.75">Written automatically from '
+              "the day&rsquo;s prices and the world&rsquo;s gold headlines, which "
+              "are linked to their publishers. Analysis, not investment advice.</p>"
+            + (f"<h2>Earlier this week</h2>{_earlier}" if _earlier else "")
+            + f'<p>Every day&rsquo;s rate is in the <a href="{SITE_URL}/'
+              f'gold-rate-history">gold rate history</a>.</p>')
+        _bld = ('<script type="application/ld+json">' + json.dumps({
+            "@context": "https://schema.org", "@type": "Article",
+            "headline": f"Gold Market Today: What Moved Gold on {display_date}",
+            "dateModified": now_ist.isoformat(),
+            "datePublished": f"{_bday.isoformat()}T09:00:00+05:30",
+            "author": {"@type": "Organization", "name": "MyGoldRates.com"},
+            "publisher": {"@type": "Organization", "name": "MyGoldRates.com"},
+            "mainEntityOfPage": f"{SITE_URL}/gold-market-today",
+        }, ensure_ascii=False) + "</script>")
+        render_content(
+            "gold-market-today",
+            f"Gold Market Today ({display_date}): What Moved Gold and Why | MyGoldRates",
+            (f"What moved gold today: {_brief['summary']}. International price, "
+             "rupee, India's jeweller board and the world's gold news, "
+             "explained.")[:300],
+            _body, jsonld_block=_bld)
+        extra_urls.append(("gold-market-today", "hourly", "0.8"))
+        print(f"brief: {_brief['summary']} | themes {_brief['themes']}")
+    except Exception as e:
+        print("brief: skipped -", type(e).__name__, str(e)[:120])
 
     _ibja_anchor_spot = ((gold_usd / 31.1034768) * usdinr
                          if gold_usd and usdinr else 0)
