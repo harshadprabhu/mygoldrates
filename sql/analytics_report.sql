@@ -1,5 +1,7 @@
 -- Secret-gated analytics read function for the private dashboard page.
 -- Paste into Supabase -> SQL Editor -> Run. Safe to run more than once.
+-- Three blocks; each can also be pasted and run on its own, in order.
+-- No backslashes or regex patterns, so a phone copy-paste cannot mangle them.
 --
 -- WHY a secret: page_views / click_events are insert-only to the public (anon)
 -- key by RLS, so the browser can log hits but cannot read them back. This
@@ -36,57 +38,54 @@
 -- Health probes and test traffic (paths starting /__, and the probe, health
 -- and test.local hosts) are excluded from every figure.
 
--- Unsubscribe reasons (same as sql/unsub_reason.sql; safe to re-run). The
--- report below reads this table, so it must exist first.
+-- ---- Block 1: unsubscribe reasons table and its save function
 create table if not exists public.unsub_reasons (
-  id         bigint generated always as identity primary key,
-  reason     text not null,
+  id bigint generated always as identity primary key,
+  reason text not null,
   created_at timestamptz not null default now()
 );
 revoke all on public.unsub_reasons from anon, authenticated;
+
 create or replace function public.save_unsub_reason(t text, reason text)
-returns void language plpgsql security definer set search_path = public as $f$
+returns void language plpgsql security definer
+set search_path = public as $f$
 begin
-  if t is not null and exists (select 1 from public.inquiries where unsub_token = t) then
-    insert into public.unsub_reasons(reason) values (left(coalesce(reason, ''), 200));
+  if t is not null and exists (
+    select 1 from public.inquiries where unsub_token = t
+  ) then
+    insert into public.unsub_reasons(reason)
+    values (left(coalesce(reason, ''), 200));
   end if;
 end $f$;
-grant execute on function public.save_unsub_reason(text, text) to anon, authenticated;
 
-do $$
+grant execute on function public.save_unsub_reason(text, text)
+  to anon, authenticated;
+
+-- ---- Block 2: keep the existing token check as analytics_gate
+do $g$
 begin
   if to_regprocedure('public.analytics_gate(text,date,date,text)') is null then
-    if to_regprocedure('public.analytics_report(text,date,date,text)') is null then
-      raise exception 'No analytics_report to take the token from. See the '
-        'note at the top of this file for a fresh database.';
-    end if;
     alter function public.analytics_report(text,date,date,text)
       rename to analytics_gate;
   end if;
-end $$;
+end $g$;
 
 revoke all on function public.analytics_gate(text,date,date,text)
   from public, anon, authenticated;
 
+-- ---- Block 3: the report (check line at the end should say unauthorized)
 create or replace function public.analytics_report(
-  p_secret text,
-  p_from   date default null,
-  p_to     date default null,
-  p_page   text default null
-) returns json
-language plpgsql
-security definer
-set search_path = public
-as $$
+  p_secret text, p_from date default null,
+  p_to date default null, p_page text default null)
+returns json language plpgsql security definer
+set search_path = public as $r$
 declare
   v_from date := coalesce(p_from, (now() at time zone 'Asia/Kolkata')::date - 13);
-  v_to   date := coalesce(p_to,   (now() at time zone 'Asia/Kolkata')::date);
-  v_out  json;
+  v_to date := coalesce(p_to, (now() at time zone 'Asia/Kolkata')::date);
+  v_out json;
 begin
-  -- The old function answers {"error": ...} to a wrong token. '__gate__' is a
-  -- page that never exists, so the check reads next to nothing.
-  if p_secret is null
-     or (public.analytics_gate(p_secret, v_to, v_to, '__gate__') ->> 'error') is not null then
+  if p_secret is null or (public.analytics_gate(
+       p_secret, v_to, v_to, 'gate-check') ->> 'error') is not null then
     return json_build_object('error', 'unauthorized');
   end if;
 
@@ -94,7 +93,7 @@ begin
     select * from page_views
     where day between v_from and v_to
       and (p_page is null or page = p_page)
-      and page not like '/\_\_%'
+      and left(page, 3) <> '/__'
       and coalesce(host, '') not like 'health.%'
       and coalesce(host, '') not like 'probe.%'
       and coalesce(host, '') <> 'test.local'
@@ -102,85 +101,71 @@ begin
     select * from click_events
     where day between v_from and v_to
       and (p_page is null or page = p_page)
-      and page not like '/\_\_%'
+      and left(page, 3) <> '/__'
   ), src as (
-    select case
-             when coalesce(referrer, '') = '' then '(direct)'
-             else coalesce(lower(substring(referrer from '^[a-zA-Z]+://([^/:?#]+)')),
-                           '(other)')
+    select case when coalesce(referrer, '') = '' then '(direct)'
+           else lower(split_part(split_part(referrer, '://', 2), '/', 1))
            end as source
     from pv
+  ), un as (
+    select * from unsub_reasons
+    where (created_at at time zone 'Asia/Kolkata')::date
+          between v_from and v_to
   )
   select json_build_object(
-    'from', v_from,
-    'to',   v_to,
-    'page_filter', p_page,
+    'from', v_from, 'to', v_to, 'page_filter', p_page,
     'version', '2026-10-20',
     'totals', json_build_object(
-      'views',    (select count(*) from pv),
+      'views', (select count(*) from pv),
       'visitors', (select count(distinct session_id) from pv),
-      'clicks',   (select count(*) from ce)),
-    'daily', (
-      select coalesce(json_agg(row_to_json(t) order by t.day), '[]'::json) from (
-        select day::text as day, count(*) as views,
-               count(distinct session_id) as visitors
-        from pv group by day) t),
-    'top_pages', (
-      select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
-        select page, count(*) as views, count(distinct session_id) as visitors
-        from pv group by page order by count(*) desc limit 40) t),
-    'top_clicks', (
-      select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
-        select target, count(*) as clicks
-        from ce group by target order by count(*) desc limit 40) t),
-    'top_referrers', (
-      select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
-        select source as referrer, count(*) as views
-        from src where source not like '%mygoldrates%'
-        group by source order by count(*) desc limit 20) t),
-    'top_hosts', (
-      select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
-        select coalesce(nullif(host, ''), '(unknown)') as host, count(*) as views
-        from pv group by 1 order by count(*) desc limit 10) t),
+      'clicks', (select count(*) from ce)),
+    'daily', (select coalesce(json_agg(row_to_json(t) order by t.day), '[]')
+      from (select day::text as day, count(*) as views,
+                   count(distinct session_id) as visitors
+            from pv group by day) t),
+    'top_pages', (select coalesce(json_agg(row_to_json(t)), '[]')
+      from (select page, count(*) as views,
+                   count(distinct session_id) as visitors
+            from pv group by page order by count(*) desc limit 40) t),
+    'top_clicks', (select coalesce(json_agg(row_to_json(t)), '[]')
+      from (select target, count(*) as clicks
+            from ce group by target order by count(*) desc limit 40) t),
+    'top_referrers', (select coalesce(json_agg(row_to_json(t)), '[]')
+      from (select source as referrer, count(*) as views
+            from src where source not like '%mygoldrates%'
+            group by source order by count(*) desc limit 20) t),
+    'top_hosts', (select coalesce(json_agg(row_to_json(t)), '[]')
+      from (select coalesce(nullif(host, ''), '(unknown)') as host,
+                   count(*) as views
+            from pv group by 1 order by count(*) desc limit 10) t),
     'unsubs', json_build_object(
-      'total', (select count(*) from unsub_reasons
-                where (created_at at time zone 'Asia/Kolkata')::date between v_from and v_to),
-      'by_reason', (
-        select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
-          select case when reason like 'Other:%' then 'Other' else reason end as reason,
-                 count(*) as count
-          from unsub_reasons
-          where (created_at at time zone 'Asia/Kolkata')::date between v_from and v_to
-          group by 1 order by count(*) desc) t),
-      'recent', (
-        select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
-          select to_char(created_at at time zone 'Asia/Kolkata', 'YYYY-MM-DD HH24:MI') as at,
-                 reason
-          from unsub_reasons
-          where (created_at at time zone 'Asia/Kolkata')::date between v_from and v_to
-          order by created_at desc limit 20) t),
+      'total', (select count(*) from un),
+      'by_reason', (select coalesce(json_agg(row_to_json(t)), '[]')
+        from (select case when reason like 'Other:%' then 'Other'
+                     else reason end as reason, count(*) as count
+              from un group by 1 order by count(*) desc) t),
+      'recent', (select coalesce(json_agg(row_to_json(t)), '[]')
+        from (select to_char(created_at at time zone 'Asia/Kolkata',
+                             'YYYY-MM-DD HH24:MI') as at, reason
+              from un order by created_at desc limit 20) t),
       'subscribers_now', (select count(*) from inquiries
-                          where email is not null and unsub_token is not null)),
-    'lifetime', (
-      select json_build_object('views', count(*),
-                               'visitors', count(distinct session_id),
-                               'since', min(day)::text)
+        where email is not null and unsub_token is not null)),
+    'lifetime', (select json_build_object(
+        'views', count(*), 'visitors', count(distinct session_id),
+        'since', min(day)::text)
       from page_views
-      where page not like '/\_\_%'
+      where left(page, 3) <> '/__'
         and coalesce(host, '') not like 'health.%'
         and coalesce(host, '') not like 'probe.%'
         and coalesce(host, '') <> 'test.local'),
-    'pages_list', (
-      select coalesce(json_agg(page order by page), '[]'::json) from (
-        select distinct page from page_views
-        where day between v_from and v_to and page not like '/\_\_%') p)
+    'pages_list', (select coalesce(json_agg(page order by page), '[]')
+      from (select distinct page from page_views
+            where day between v_from and v_to
+              and left(page, 3) <> '/__') p)
   ) into v_out;
-
   return v_out;
-end $$;
+end $r$;
 
 revoke all on function public.analytics_report(text,date,date,text) from public;
 grant execute on function public.analytics_report(text,date,date,text) to anon;
-
--- Check: should say 'unauthorized' (wrong token on purpose).
 select public.analytics_report('wrong-token');
