@@ -239,6 +239,16 @@ it shipped once under the name `b2b` and was renamed wholesale.
 - The rate history is fetched page by page: Supabase caps a request at 1,000
   rows, which once froze the trend in mid-September.
 
+## Gold market today (`gold_brief.py`)
+- Runs in every site build (so several times a day). Reads international gold
+  (XAU), USD/INR, the jeweller board median, global gold headlines (Google News
+  RSS) and this week's US calendar; sorts headlines into the forces that move
+  gold (THEMES) with fixed rules; writes `/gold-market-today`.
+- One always-current page, not a page per day (see the search clean-up).
+  Each day's brief is kept in `docs/market-brief.json`; the page shows the
+  last week and each month's history page has one line per day.
+- Headlines are titles linked to the publisher, never copied text.
+
 ## Supabase schema (key tables)
 
 **`brands`** — jeweller catalogue. `slug` is the stable identifier used in `NEEDS_PROXY`, `REGION_MAP`, and URL paths. `active=false` brands are skipped by the collector.
