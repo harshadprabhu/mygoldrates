@@ -42,6 +42,16 @@ def main():
     except Exception:
         paths = [f"(no list: HTTP {r.status_code})"]
     print("RPC functions:", ", ".join(x[5:] for x in paths))
+    # Can the service key run SQL directly through any endpoint? Read-only
+    # probe ("select 1"); prints only the HTTP status and a short body.
+    for ep in ("/pg/query", "/pg-meta/query", "/rest/v1/rpc/exec_sql",
+               "/rest/v1/rpc/execute_sql", "/rest/v1/rpc/query"):
+        try:
+            r = requests.post(f"{URL}{ep}", headers={**H, "Content-Type": "application/json"},
+                              json={"query": "select 1 as ok", "sql": "select 1 as ok"}, timeout=30)
+            print(f"SQL probe {ep}: HTTP {r.status_code} {r.text[:80]!r}")
+        except Exception as e:
+            print(f"SQL probe {ep}: {type(e).__name__}")
     # Unsubscribe reasons (no personal data is stored with them) and the
     # current subscriber count.
     r = requests.get(f"{URL}/rest/v1/unsub_reasons",
