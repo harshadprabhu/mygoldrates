@@ -80,3 +80,15 @@ def test_expired_complimentary_access_is_not_access(run):
 
 def test_expired_code_is_refused(run):
     assert run["expired_code"]["status"] == 401
+
+
+def test_download_picks_the_workbook_not_the_issue_json(run):
+    assert run["report"]["signed"] == "jewellers-digest-2026-10-14.xlsx"
+
+
+def test_issue_is_served_to_members_only(run):
+    assert run["issue"]["status"] == 200
+    assert run["issue"]["name"] == "jewellers-digest-2026-10-14.json"
+    assert run["issue"]["read"] == "jewellers-digest-2026-10-14.json"
+    assert run["issue"]["last"] == "2026-10-14"
+    assert run["issue_anon"]["status"] == 401

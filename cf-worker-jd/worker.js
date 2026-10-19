@@ -15,6 +15,7 @@
  *   GET  /jd/status        entitlement for the calling API key
  *   GET  /jd/report        short-lived signed URL for the latest workbook
  *   GET  /jd/rates         the rate history as JSON, for programmatic use
+ *   GET  /jd/issue         today's analysis as JSON, for the /jd-today page
  *   GET  /jd/ready         public: can a signup actually be taken right now
  *   POST /jd/login/start   email a 6-digit sign-in code (website login)
  *   POST /jd/login/verify  code -> 30-day session token
@@ -260,6 +261,7 @@ export default {
         case 'GET /jd/status':    return wrap(await handleStatus(request, env));
         case 'GET /jd/report':    return wrap(await handleReport(request, env));
         case 'GET /jd/rates':     return wrap(await handleRates(request, env, url));
+        case 'GET /jd/issue':     return wrap(await handleIssue(request, env));
         default:                   return wrap(json({ error: 'not found' }, 404));
       }
     } catch (e) {
@@ -574,27 +576,11 @@ async function handleReport(request, env) {
   const gate = await requireEntitled(env, request);
   if (gate.resp) return gate.resp;
 
-  const list = await fetch(
-    `${env.SUPABASE_URL}/storage/v1/object/list/jd-reports`, {
-      method: 'POST',
-      headers: {
-        apikey: env.SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${env.SUPABASE_SERVICE_KEY}`,
-        'content-type': 'application/json',
-      },
-      // prefix is required by the Storage API; without it the call is a
-      // 400 and every subscriber would be told no report exists.
-      body: JSON.stringify({ prefix: '', limit: 1,
-                             sortBy: { column: 'name', order: 'desc' } }),
-    });
-  const files = await list.json().catch(() => null);
-  const latest = Array.isArray(files) ? files[0] : null;
-  if (!latest?.name) {
-    return json({ error: 'no report available yet' }, 404);
-  }
+  const latest = await latestObject(env, '.xlsx');
+  if (!latest) return json({ error: 'no report available yet' }, 404);
 
   const signed = await fetch(
-    `${env.SUPABASE_URL}/storage/v1/object/sign/jd-reports/${latest.name}`, {
+    `${env.SUPABASE_URL}/storage/v1/object/sign/jd-reports/${latest}`, {
       method: 'POST',
       headers: {
         apikey: env.SUPABASE_SERVICE_KEY,
@@ -607,10 +593,56 @@ async function handleReport(request, env) {
   if (!s?.signedURL) return json({ error: 'could not sign report URL' }, 502);
 
   return json({
-    report: latest.name,
+    report: latest,
     url: `${env.SUPABASE_URL}/storage/v1${s.signedURL}`,
     expires_in_seconds: 600,
   });
+}
+
+// Newest object in the private bucket with the given extension. The bucket
+// holds a workbook (.xlsx) and its analysis (.json) per day under dated
+// names, so sorting by name, newest first, and filtering by extension finds
+// the latest of either.
+async function latestObject(env, ext) {
+  const list = await fetch(
+    `${env.SUPABASE_URL}/storage/v1/object/list/jd-reports`, {
+      method: 'POST',
+      headers: {
+        apikey: env.SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+        'content-type': 'application/json',
+      },
+      // prefix is required by the Storage API; without it the call is a
+      // 400 and every subscriber would be told no report exists.
+      body: JSON.stringify({ prefix: '', limit: 30,
+                             sortBy: { column: 'name', order: 'desc' } }),
+    });
+  const files = await list.json().catch(() => null);
+  if (!Array.isArray(files)) return null;
+  const hit = files.find((f) => typeof f?.name === 'string' && f.name.endsWith(ext));
+  return hit ? hit.name : null;
+}
+
+// ─── GET /jd/issue ──────────────────────────────────────────────────────
+// The latest day's analysis, for the members' page. Returned inline rather
+// than as a signed URL: it is small, and the page renders it directly.
+async function handleIssue(request, env) {
+  const gate = await requireEntitled(env, request);
+  if (gate.resp) return gate.resp;
+
+  const latest = await latestObject(env, '.json');
+  if (!latest) return json({ error: 'no issue available yet' }, 404);
+  const r = await fetch(
+    `${env.SUPABASE_URL}/storage/v1/object/authenticated/jd-reports/${latest}`, {
+      headers: {
+        apikey: env.SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+      },
+    });
+  if (!r.ok) return json({ error: 'could not read the issue' }, 502);
+  const issue = await r.json().catch(() => null);
+  if (!issue) return json({ error: 'could not read the issue' }, 502);
+  return json({ name: latest, issue });
 }
 
 // ─── GET /jd/rates ──────────────────────────────────────────────────────

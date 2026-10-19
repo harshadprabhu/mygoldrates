@@ -155,7 +155,11 @@ footer a{{color:var(--ink2)}}
       <span class="badge">Your Jewellers Digest</span>
       <p class="per" style="margin-top:14px">Signed in as <b id="m-who"></b></p>
       <p class="save" id="m-access"></p>
-      <form id="m-dl" style="margin-top:16px"><button id="m-btn" type="submit">Download today&rsquo;s workbook</button></form>
+      <p style="margin-top:16px"><a href="{SITE}/jd-today" id="m-open"
+        style="display:block;padding:16px;border-radius:10px;font-weight:700;text-decoration:none;
+        background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#1a0a04;text-align:center">Open today&rsquo;s issue</a></p>
+      <form id="m-dl" style="margin-top:10px"><button id="m-btn" type="submit"
+        style="background:transparent;color:var(--gold-l);border:1px solid var(--line)">Download the workbook (.xlsx)</button></form>
       <div class="msg" id="m-msg"></div>
       <p class="fineprint"><a href="{SITE}/jd-sign-in">Your account</a> &middot;
         <a href="#" id="m-out">Sign out</a></p>
@@ -350,6 +354,38 @@ footer a{{color:var(--ink2)}}
 
 
 SIGNIN_OUT = os.environ.get("JD_SIGNIN_OUT", "docs/jd-sign-in.html")
+TODAY_OUT = os.environ.get("JD_TODAY_OUT", "docs/jd-today.html")
+
+
+def build_today():
+    """The members-only issue page: the day's analysis in the Jewellers
+    Digest design. The page holds no data; it asks the Worker for the
+    latest issue with the visitor's session, and the Worker only answers
+    an account whose access is current."""
+    import json as _json
+    import generate_site as _gs
+    from datetime import date as _date
+    here = os.path.dirname(os.path.abspath(__file__))
+    tpl = open(os.path.join(here, "jd_today.html"), encoding="utf-8").read()
+    tpl = tpl.split("-->", 1)[1]          # drop the template's own comment
+    tpl = tpl.replace("__WORKER__", _json.dumps(WORKER)).replace("__SITE__", SITE)
+    return f"""<!doctype html>
+<html lang="en-IN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Today&rsquo;s issue &mdash; Jewellers Digest | MyGoldRates</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="{SITE}/jd-today">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>body{{margin:0;background:#0a0804;color:#F4EDE0}}</style>
+<style>{_gs.ND_CHROME_CSS}</style>
+{_analytics()}</head><body>
+{_gs.nd_header_html()}
+{tpl}
+{_gs.nd_footer_html(_date.today().year)}
+</body></html>
+"""
 
 
 def build_signin():
@@ -437,7 +473,10 @@ button:disabled{{opacity:.45;cursor:not-allowed}}
   <div id="v-in" hidden>
     <p class="sub">Signed in as <b id="who"></b></p>
     <div class="acc" id="acc"></div>
-    <form id="f-dl" style="margin-top:16px"><button id="b-dl" type="submit">Download today&rsquo;s workbook</button></form>
+    <p style="margin-top:16px" id="open-wrap"><a href="{SITE}/jd-today"
+      style="display:block;padding:15px;border-radius:10px;font-weight:700;text-decoration:none;text-align:center;
+      background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#1a0a04">Open today&rsquo;s issue</a></p>
+    <form id="f-dl" style="margin-top:10px"><button id="b-dl" type="submit">Download today&rsquo;s workbook</button></form>
     <button class="link" id="b-out" type="button">Sign out</button>
   </div>
 
@@ -476,6 +515,7 @@ button:disabled{{opacity:.45;cursor:not-allowed}}
       a.textContent = 'There is no active subscription on this email.';
     }}
     dl.hidden = !(e && e.active);
+    $('open-wrap').hidden = !(e && e.active);
     show('v-in');
   }}
 
@@ -563,6 +603,10 @@ def main():
     with open(SIGNIN_OUT, "w", encoding="utf-8") as f:
         f.write(signin)
     print(f"jd-page: wrote {SIGNIN_OUT} ({len(signin):,} bytes)")
+    today = build_today()
+    with open(TODAY_OUT, "w", encoding="utf-8") as f:
+        f.write(today)
+    print(f"jd-page: wrote {TODAY_OUT} ({len(today):,} bytes)")
     return 0
 
 
