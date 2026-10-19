@@ -136,6 +136,7 @@ footer a{{color:var(--ink2)}}
 @media(max-width:520px){{.now{{font-size:52px}}}}
 </style>
 <style>{nd_chrome}
+[hidden]{{display:none!important}}
 .jd-disclosure{{max-width:720px;margin:30px auto 0;padding:0 20px;text-align:center;font-size:13px;opacity:.7}}</style>
 {analytics}</head><body>
 
@@ -149,7 +150,18 @@ footer a{{color:var(--ink2)}}
     trade. Every jeweller's rate, what the spread has been, where price has turned
     before, and what is scheduled to move it this week.</p>
 
-    <div class="price">
+    <!-- Shown instead of the offer when the visitor is signed in with access. -->
+    <div class="price" id="member" hidden>
+      <span class="badge">Your Jewellers Digest</span>
+      <p class="per" style="margin-top:14px">Signed in as <b id="m-who"></b></p>
+      <p class="save" id="m-access"></p>
+      <form id="m-dl" style="margin-top:16px"><button id="m-btn" type="submit">Download today&rsquo;s workbook</button></form>
+      <div class="msg" id="m-msg"></div>
+      <p class="fineprint"><a href="{SITE}/jd-sign-in">Your account</a> &middot;
+        <a href="#" id="m-out">Sign out</a></p>
+    </div>
+
+    <div class="price" id="buy">
       <span class="badge">Launch offer</span>
       <div class="amt">
         <span class="was">&#8377;{price.REGULAR_INR}</span>
@@ -236,6 +248,52 @@ footer a{{color:var(--ink2)}}
      there, correctly refusing an anonymous caller — so treating that as
      health would have opened the form against a Worker that could not charge
      anyone. /jd/ready checks the live plan and says open: true or nothing. */
+  /* Signed in (a session from /jd-sign-in) with live access: show the
+     member panel and the download, not the offer. Access is checked live
+     by the Worker on every call, so a lapsed subscription falls back to
+     the offer. */
+  var token = null;
+  try {{ token = localStorage.getItem('jd_session'); }} catch (e) {{}}
+  function authed(path){{
+    return fetch(API + path, {{headers: {{'Authorization': 'Bearer ' + token}}}})
+      .then(function(r){{ return r.json().catch(function(){{ return {{}}; }})
+        .then(function(j){{ return {{status: r.status, ok: r.ok, j: j}}; }}); }});
+  }}
+  if (token) {{
+    authed('/jd/status').then(function(r){{
+      var e = r.j && r.j.entitlement;
+      if (!r.ok || !e || !e.active) return;
+      document.getElementById('buy').hidden = true;
+      document.getElementById('member').hidden = false;
+      document.getElementById('m-who').textContent = r.j.email || '';
+      var end = e.current_end ? new Date(e.current_end) : null;
+      document.getElementById('m-access').textContent = e.status === 'complimentary'
+        ? (end && end.getFullYear() > 2090 ? 'Complimentary access'
+           : 'Complimentary access until ' + end.toLocaleDateString('en-IN'))
+        : 'Subscription active' + (end ? ', paid until ' + end.toLocaleDateString('en-IN') : '');
+    }}).catch(function(){{}});
+  }}
+  document.getElementById('m-dl').addEventListener('submit', function(ev){{
+    ev.preventDefault();
+    var b = document.getElementById('m-btn'), m = document.getElementById('m-msg');
+    b.disabled = true; m.className = 'msg'; m.textContent = 'Preparing your download\u2026';
+    authed('/jd/report').then(function(r){{
+      b.disabled = false;
+      if (r.ok && r.j.url) {{ m.className = 'msg ok'; m.textContent = 'Downloading ' + r.j.report + '.';
+        window.location.href = r.j.url; return; }}
+      m.className = 'msg err';
+      m.textContent = r.status === 404 ? 'Today\u2019s workbook is not ready yet. It is published every morning.'
+        : r.status === 401 ? 'Your session has ended. Sign in again.'
+        : (r.j.error || 'Could not get the workbook. Try again shortly.');
+    }}).catch(function(){{ b.disabled = false; m.className = 'msg err';
+      m.textContent = 'Could not reach the server. Check your connection.'; }});
+  }});
+  document.getElementById('m-out').addEventListener('click', function(ev){{
+    ev.preventDefault();
+    try {{ localStorage.removeItem('jd_session'); }} catch (e) {{}}
+    location.reload();
+  }});
+
   fetch(API + '/jd/ready', {{method:'GET'}})
     .then(function(r){{ return r.ok ? r.json() : null; }})
     .then(function(d){{
