@@ -12,25 +12,66 @@
 - Lowest 24K today: ₹14,656 per gram at PN Gadgil
 - IBJA 24K (999) reference: ₹14,594 per gram (pre-GST)
 - MCX gold futures (04DEC2026): ₹147,300 per 10g (995), -0.42%
-- Last updated: 2026-10-20T02:17:41.865320+05:30
+- Last updated: 2026-10-20T02:25:02.369270+05:30
 
 ## Key pages
-- Home (Market Pulse - live, ticking every 3s: gold/silver spot, MCX futures, IBJA reference, vendor rates, 90-day OHLC, economic calendar): https://mygoldrates.com/
-- Detailed jeweller comparison (14+ brands, per-gram 24K/22K/18K, lowest-first, GST toggle, FAQ): https://mygoldrates.com/
-- Market news & daily recap: https://mygoldrates.com/news
-- Machine-readable JSON feed: https://mygoldrates.com/rates.json
+- Home: today's gold rate in India, live 24K/22K/18K per-gram rates from 21 jewellers lowest-first, with a GST toggle, MCX futures, the IBJA reference, spot gold and silver and this week's economic calendar: https://mygoldrates.com/
+- Gold market today (daily analysis of what moved gold and why, from the day's prices and world gold news): https://mygoldrates.com/gold-market-today
+- Gold rate history, day by day for every month: https://mygoldrates.com/gold-rate-history
+- Making charges compared across jewellers: https://mygoldrates.com/making-charges-comparison
+- Dhanteras 2026 gold buying report: https://mygoldrates.com/dhanteras-gold-report-2026
+- Calculators (budget, gold loan, SIP, making charges): https://mygoldrates.com/calculators
+- Guides: https://mygoldrates.com/learn/22k-vs-24k-gold, https://mygoldrates.com/learn/gold-hallmarking, https://mygoldrates.com/learn/how-gold-rates-are-set, https://mygoldrates.com/learn/making-charges-explained
+- Gold news: https://mygoldrates.com/news
+- Machine-readable JSON feed of today's rates: https://mygoldrates.com/rates.json
 - Daily email alerts: https://mygoldrates.com/inquiry
-- About: https://mygoldrates.com/about
-- Methodology: https://mygoldrates.com/methodology
-- Contact: https://mygoldrates.com/contact
-- City & state pages: https://mygoldrates.com/gold-rate-today-in-<city> (e.g. mumbai, delhi, hyderabad, chennai, bengaluru, pune, kolkata)
+- About: https://mygoldrates.com/about | Methodology: https://mygoldrates.com/methodology | Contact: https://mygoldrates.com/contact
 
-## Live market APIs (open, CORS-friendly)
-- Real-time gold + silver spot, MCX futures, IBJA reference: https://mygoldrates.com/pulse (browser); underlying feed via the CF Worker at https://mygoldrates-market-api.harshads-priority.workers.dev/market
-- Vendor (bullion dealer) rates: same worker, /vendors
-- 90-day OHLC history (gold + silver futures): /ohlc?symbol=GC=F
+## Gold rate by city and state
+- Ahmedabad: https://mygoldrates.com/gold-rate-today-in-ahmedabad
+- Andhra Pradesh: https://mygoldrates.com/gold-rate-today-in-andhra-pradesh
+- Bengaluru: https://mygoldrates.com/gold-rate-today-in-bengaluru
+- Bhopal: https://mygoldrates.com/gold-rate-today-in-bhopal
+- Chandigarh: https://mygoldrates.com/gold-rate-today-in-chandigarh
+- Chennai: https://mygoldrates.com/gold-rate-today-in-chennai
+- Coimbatore: https://mygoldrates.com/gold-rate-today-in-coimbatore
+- Delhi: https://mygoldrates.com/gold-rate-today-in-delhi
+- Gujarat: https://mygoldrates.com/gold-rate-today-in-gujarat
+- Haryana: https://mygoldrates.com/gold-rate-today-in-haryana
+- Hubli: https://mygoldrates.com/gold-rate-today-in-hubli
+- Hyderabad: https://mygoldrates.com/gold-rate-today-in-hyderabad
+- Indore: https://mygoldrates.com/gold-rate-today-in-indore
+- Jaipur: https://mygoldrates.com/gold-rate-today-in-jaipur
+- Karnataka: https://mygoldrates.com/gold-rate-today-in-karnataka
+- Kerala: https://mygoldrates.com/gold-rate-today-in-kerala
+- Kochi: https://mygoldrates.com/gold-rate-today-in-kochi
+- Kolkata: https://mygoldrates.com/gold-rate-today-in-kolkata
+- Lucknow: https://mygoldrates.com/gold-rate-today-in-lucknow
+- Madhya Pradesh: https://mygoldrates.com/gold-rate-today-in-madhya-pradesh
+- Maharashtra: https://mygoldrates.com/gold-rate-today-in-maharashtra
+- Mumbai: https://mygoldrates.com/gold-rate-today-in-mumbai
+- Nagpur: https://mygoldrates.com/gold-rate-today-in-nagpur
+- Noida: https://mygoldrates.com/gold-rate-today-in-noida
+- Odisha: https://mygoldrates.com/gold-rate-today-in-odisha
+- Patna: https://mygoldrates.com/gold-rate-today-in-patna
+- Pune: https://mygoldrates.com/gold-rate-today-in-pune
+- Punjab: https://mygoldrates.com/gold-rate-today-in-punjab
+- Rajasthan: https://mygoldrates.com/gold-rate-today-in-rajasthan
+- Rajkot: https://mygoldrates.com/gold-rate-today-in-rajkot
+- Surat: https://mygoldrates.com/gold-rate-today-in-surat
+- Tamil Nadu: https://mygoldrates.com/gold-rate-today-in-tamil-nadu
+- Telangana: https://mygoldrates.com/gold-rate-today-in-telangana
+- Thiruvananthapuram: https://mygoldrates.com/gold-rate-today-in-thiruvananthapuram
+- Uttar Pradesh: https://mygoldrates.com/gold-rate-today-in-uttar-pradesh
+- Vadodara: https://mygoldrates.com/gold-rate-today-in-vadodara
+- Visakhapatnam: https://mygoldrates.com/gold-rate-today-in-visakhapatnam
+- West Bengal: https://mygoldrates.com/gold-rate-today-in-west-bengal
+
+## Live market data (open, CORS-friendly)
+- Spot gold and silver, MCX futures, IBJA reference: https://mygoldrates-market-api.harshads-priority.workers.dev/market
+- Bullion dealer rates: same host, /vendors
+- 90-day OHLC history (gold and silver futures): /ohlc?symbol=GC=F
 - This week's economic calendar (gold-relevant events): /calendar
-- Bullion news feed: /news
 
 ## About the data
 - Coverage: 21 major Indian jewellers plus the IBJA bullion benchmark and MCX gold futures.
