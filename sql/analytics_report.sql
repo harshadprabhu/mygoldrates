@@ -19,7 +19,7 @@
 --   returns json language sql as $$ select case when p_secret = 'YOUR-TOKEN'
 --     then '{}'::json else '{"error":"unauthorized"}'::json end $$;
 --
--- WHAT IT RETURNS (2026-10-19 version)
+-- WHAT IT RETURNS (2026-10-20 version)
 --   totals, daily, top_pages, top_clicks  - as before
 --   top_referrers  - where visitors CAME FROM: the referring site's host,
 --                    or "(direct)". Navigation inside the site is left out;
@@ -27,11 +27,31 @@
 --   top_hosts      - which hostname served the view (www vs apex check).
 --                    The function in the database predated this, so the
 --                    dashboard's host table was always empty.
+--   unsubs         - unsubscribes in the range (every one, with or without
+--                    a reason), counts by reason, the 20 most recent, and
+--                    how many people are subscribed right now.
 --   lifetime       - all-time page views and visitors from page_views, so
 --                    the "all time" tile counts every page, not only the
 --                    pages that bump the older `hits` counter.
 -- Health probes and test traffic (paths starting /__, and the probe, health
 -- and test.local hosts) are excluded from every figure.
+
+-- Unsubscribe reasons (same as sql/unsub_reason.sql; safe to re-run). The
+-- report below reads this table, so it must exist first.
+create table if not exists public.unsub_reasons (
+  id         bigint generated always as identity primary key,
+  reason     text not null,
+  created_at timestamptz not null default now()
+);
+revoke all on public.unsub_reasons from anon, authenticated;
+create or replace function public.save_unsub_reason(t text, reason text)
+returns void language plpgsql security definer set search_path = public as $f$
+begin
+  if t is not null and exists (select 1 from public.inquiries where unsub_token = t) then
+    insert into public.unsub_reasons(reason) values (left(coalesce(reason, ''), 200));
+  end if;
+end $f$;
+grant execute on function public.save_unsub_reason(text, text) to anon, authenticated;
 
 do $$
 begin
@@ -95,7 +115,7 @@ begin
     'from', v_from,
     'to',   v_to,
     'page_filter', p_page,
-    'version', '2026-10-19',
+    'version', '2026-10-20',
     'totals', json_build_object(
       'views',    (select count(*) from pv),
       'visitors', (select count(distinct session_id) from pv),
@@ -122,6 +142,25 @@ begin
       select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
         select coalesce(nullif(host, ''), '(unknown)') as host, count(*) as views
         from pv group by 1 order by count(*) desc limit 10) t),
+    'unsubs', json_build_object(
+      'total', (select count(*) from unsub_reasons
+                where (created_at at time zone 'Asia/Kolkata')::date between v_from and v_to),
+      'by_reason', (
+        select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
+          select case when reason like 'Other:%' then 'Other' else reason end as reason,
+                 count(*) as count
+          from unsub_reasons
+          where (created_at at time zone 'Asia/Kolkata')::date between v_from and v_to
+          group by 1 order by count(*) desc) t),
+      'recent', (
+        select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
+          select to_char(created_at at time zone 'Asia/Kolkata', 'YYYY-MM-DD HH24:MI') as at,
+                 reason
+          from unsub_reasons
+          where (created_at at time zone 'Asia/Kolkata')::date between v_from and v_to
+          order by created_at desc limit 20) t),
+      'subscribers_now', (select count(*) from inquiries
+                          where email is not null and unsub_token is not null)),
     'lifetime', (
       select json_build_object('views', count(*),
                                'visitors', count(distinct session_id),
