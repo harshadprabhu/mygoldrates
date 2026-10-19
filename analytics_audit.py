@@ -49,6 +49,8 @@ def main():
         if isinstance(d, dict) and "error" in d:
             print("RPC error:", d); continue
         t = d.get("totals", {})
+        print("RPC version:", d.get("version", "OLD (pre 2026-10-19)"),
+              "| lifetime:", d.get("lifetime", "MISSING"))
         print("RPC totals:", t, "| top_hosts:", d.get("top_hosts", "MISSING"))
         print("RPC daily rows:", len(d.get("daily") or []),
               "| sum of daily views:", sum(x["views"] for x in d.get("daily") or []))

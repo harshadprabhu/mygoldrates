@@ -488,7 +488,10 @@ def _analytics():
     if not url or not key:
         return ""
     import generate_site
-    return generate_site.analytics_snippet(url, key)
+    # The pageview beacon, plus the shared click listener: these pages load
+    # no signup.js, which is where every other page gets it.
+    return (generate_site.analytics_snippet(url, key)
+            + "<script>" + generate_site.CLICK_JS + "</script>")
 
 
 def main():
