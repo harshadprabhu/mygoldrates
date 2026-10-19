@@ -134,7 +134,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <div id="v-in" hidden>
     <p class="sub">Signed in as <b id="who"></b></p>
     <div class="acc" id="acc"></div>
-    <form id="f-dl" style="margin-top:16px"><button id="b-dl" type="submit">Download today&rsquo;s workbook</button></form>
+    <p style="margin-top:16px" id="open-wrap"><a href="https://mygoldrates.com/jd-today"
+      style="display:block;padding:15px;border-radius:10px;font-weight:700;text-decoration:none;text-align:center;
+      background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#1a0a04">Open today&rsquo;s issue</a></p>
+    <form id="f-dl" style="margin-top:10px"><button id="b-dl" type="submit">Download today&rsquo;s workbook</button></form>
     <button class="link" id="b-out" type="button">Sign out</button>
   </div>
 
@@ -173,6 +176,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
       a.textContent = 'There is no active subscription on this email.';
     }
     dl.hidden = !(e && e.active);
+    $('open-wrap').hidden = !(e && e.active);
     show('v-in');
   }
 
