@@ -112,6 +112,14 @@ def main():
         print(f"impr {b.get('impressions',0):6} -> {n.get('impressions',0):6} | clicks {b.get('clicks',0):4} -> {n.get('clicks',0):4} | "
               f"pos {b.get('position',0):5.1f} -> {n.get('position',0):5.1f} | {k.replace(SITE_BASE,'/')}")
 
+    # 3b. Every page with impressions over 90 days, for deciding which pages
+    # earn their place in the index.
+    allp = q(svc, site, today - timedelta(days=90), today, ["page"])
+    print(f"\n== ALL PAGES WITH IMPRESSIONS, LAST 90 DAYS ({len(allp)}) ==")
+    for r in sorted(allp, key=lambda r: -r["impressions"]):
+        print(f"impr {r['impressions']:6} clicks {r['clicks']:4} pos {r['position']:5.1f} | "
+              f"{r['keys'][0].replace(SITE_BASE, '/')}")
+
     # 4. Device and country split, last 28d
     for dim in ("device", "country"):
         rs = q(svc, site, a_start, a_end, [dim], limit=8)

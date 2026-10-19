@@ -3587,6 +3587,20 @@ def main():
                 f"<changefreq>{cf}</changefreq>"
                 f"<priority>{pr:.1f}</priority></url>\n")
 
+    def _unique(entries):
+        """Drop repeated <url> entries, keeping the first. Some pages are
+        added both by name and through extra_urls; a sitemap should list
+        each address once."""
+        seen, out = set(), []
+        for line in entries.splitlines(keepends=True):
+            m = re.search(r"<loc>([^<]+)</loc>", line)
+            if m and m.group(1) in seen:
+                continue
+            if m:
+                seen.add(m.group(1))
+            out.append(line)
+        return "".join(out)
+
     # main: home (Market Pulse) + /compare (SEO comparison) + evergreen.
     # /pulse is deliberately absent - it 301-redirects to / (see
     # docs/_redirects), so keeping it in the sitemap would advertise a
@@ -3609,7 +3623,7 @@ def main():
     with open("docs/sitemap_main.xml", "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-                + main_urls
+                + _unique(main_urls)
                 + "</urlset>\n")
 
     # cities: state + city rate pages, refreshed hourly (rates re-fetch
@@ -3635,19 +3649,17 @@ def main():
                 + daily_urls
                 + "</urlset>\n")
 
-    # sitemap.xml is now the INDEX; sitemap_news.xml is written above and
-    # referenced here so Google finds it via one canonical entry point.
-    subs = ["sitemap_main.xml", "sitemap_cities.xml",
-            "sitemap_daily.xml", "sitemap_news.xml"]
+    # sitemap.xml lists EVERY page itself - homepage, tools, articles,
+    # reports, all city and state pages and the current daily pages - so
+    # opening it shows the whole site, not four links to other files. The
+    # section sitemaps above are still written and still listed in
+    # robots.txt; a URL appearing in two sitemaps is normal and harmless.
+    # Nothing is left out of it unless the owner has agreed to that.
     with open("docs/sitemap.xml", "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
-                '<sitemapindex xmlns="http://www.sitemaps.org/schemas/'
-                'sitemap/0.9">\n'
-                + "".join(
-                    f"  <sitemap><loc>{SITE_URL}/{s}</loc>"
-                    f"<lastmod>{lastmod_full}</lastmod></sitemap>\n"
-                    for s in subs)
-                + "</sitemapindex>\n")
+                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+                + _unique(main_urls + city_urls + daily_urls)
+                + "</urlset>\n")
 
     # ---- Cloudflare Pages _headers: freshness + edge caching --------------
     # Two things wrangler's pages-deploy upload flow strips that Google
@@ -5267,6 +5279,8 @@ $nd_header
       <label class="r"><input type="radio" name="reason" value="No longer tracking gold"> I no longer track gold rates</label>
       <label class="r"><input type="radio" name="reason" value="Did not sign up"> I didn&rsquo;t sign up for this</label>
       <label class="r"><input type="radio" name="reason" value="Other"> Other</label>
+      <textarea id="other-text" maxlength="180" rows="2" placeholder="Tell us more (optional)"
+        style="display:none;width:100%;margin-top:4px;padding:10px;border-radius:10px;border:1px solid var(--line);background:transparent;color:inherit;font:inherit"></textarea>
       <button class="btn" id="u-btn" type="submit">Unsubscribe</button>
       <p class="skip"><a href="#" id="skip-link">Unsubscribe without a reason</a></p>
     </form>
@@ -5292,12 +5306,20 @@ $nd_footer
       headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
       body:JSON.stringify(body)});
   }
+  var other=document.getElementById('other-text');
+  form.addEventListener('change',function(){
+    var sel=form.querySelector('input[name=reason]:checked');
+    other.style.display=(sel&&sel.value==='Other')?'block':'none';
+  });
   function unsub(reason){
     btn.disabled=true; btn.textContent='Unsubscribing...';
     /* Save the reason first (best effort - never block the unsubscribe), then
-       run the actual unsubscribe. Reason storage keeps no personal data. */
-    var saved = reason ? rpc('save_unsub_reason',{t:t,reason:reason}).catch(function(){})
-                       : Promise.resolve();
+       run the actual unsubscribe. Reason storage keeps no personal data.
+       Every unsubscribe is recorded, including the ones that give no
+       reason, so the dashboard's count is the real number who left. */
+    if(reason==='Other'&&other.value.trim())reason='Other: '+other.value.trim();
+    var saved = rpc('save_unsub_reason',{t:t,reason:reason||'(no reason given)'})
+                  .catch(function(){});
     saved.then(function(){return rpc('unsubscribe',{t:t});})
       .then(function(r){if(!r.ok)throw 0;
         show("You've been unsubscribed. You won't receive any more daily gold-rate emails.");})
@@ -6267,6 +6289,12 @@ td.path{color:var(--accent);word-break:break-all}
     <div class="card"><h2>Traffic by host (www vs apex)</h2><div id="hosts"></div></div>
   </div>
 
+  <div class="card"><h2>Email subscribers &amp; unsubscribes</h2>
+    <div class="kpis" id="subKpis"></div>
+    <div class="grid2"><div><h2 style="font-size:14px">Why people unsubscribed</h2><div id="unsubWhy"></div></div>
+    <div><h2 style="font-size:14px">Latest unsubscribes</h2><div id="unsubRecent"></div></div></div>
+  </div>
+
   <div class="card"><h2>All time</h2><div class="kpis" id="lifeBox"></div></div>
 
   <p class="foot" id="foot"></p>
@@ -6490,6 +6518,20 @@ td.path{color:var(--accent);word-break:break-all}
       } else {
         renderTable($('hosts'),d.top_hosts,[{h:'Host',k:'host'},
           {h:'Views',k:'views',num:true}]);
+      }
+      // Unsubscribes. Missing from a report function older than 2026-10-20.
+      if(d.unsubs===undefined){
+        $('subKpis').innerHTML='<div class="msg err">Run the updated '+
+          'sql/analytics_report.sql in Supabase to see subscribers and '+
+          'unsubscribe reasons here.</div>';
+      } else {
+        $('subKpis').innerHTML=tiles([
+          ['Subscribed now',d.unsubs.subscribers_now],
+          ['Unsubscribed in this range',d.unsubs.total]]);
+        renderTable($('unsubWhy'),d.unsubs.by_reason,[{h:'Reason',k:'reason'},
+          {h:'People',k:'count',num:true}]);
+        renderTable($('unsubRecent'),d.unsubs.recent,[{h:'When (IST)',k:'at'},
+          {h:'Reason',k:'reason'}]);
       }
       fillPages(d.pages_list);
       $('foot').textContent='Range '+d.from+' to '+d.to+

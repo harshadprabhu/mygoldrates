@@ -151,6 +151,19 @@ def main():
                     f"{100 * groups[g][h] / tot[g]:3.0f}" for h in range(0, 24, 3))
                     + f"  {100 * single[g] / tot[g]:4.0f}%")
 
+    # Every page's views and visitors over the window, for deciding which
+    # pages earn their place.
+    pv = Counter(); vis = defaultdict(set); ext = Counter()
+    for x in rows:
+        pg = x.get("page") or ""
+        pv[pg] += 1; vis[pg].add(x.get("session_id"))
+        if source(x.get("referrer")) not in (None, "direct"):
+            ext[pg] += 1
+    print("\n== PER PAGE (views, visitors, arrivals from other sites) ==")
+    for pg, n in sorted(pv.items(), key=lambda kv: -kv[1]):
+        if pg.startswith(("/gold-rate-today-in-", "/news/", "/learn/")) or n >= 20:
+            print(f"{n:6} {len(vis[pg]):6} {ext[pg]:4}  {pg[:80]}")
+
     print("\n== TOP OTHER SITES (last 30 days) ==")
     cut = (date.today() - timedelta(days=30)).isoformat()
     hosts = Counter()
