@@ -606,7 +606,23 @@ CITY_ENRICHMENT_DATA = {
 # Cities that get their own dated daily gold-news page. Kept small on purpose:
 # a new domain shouldn't flood Google with near-duplicate dated pages (that
 # triggers "discovered - not indexed" and can dent overall site quality).
-DAILY_NEWS_CITIES = ["Mumbai", "Delhi", "Bengaluru", "Chennai"]
+# Places whose page has content no other page has, so search engines are
+# asked to index them: the 20 cities with their own local write-up (markets,
+# hubs, regional jewellers in CITY_ENRICHMENT_DATA) and the 8 states where
+# regional jewellers change the board itself (REGION_MAP). Every other city
+# and state page stays live for visitors but carries noindex and is left out
+# of the sitemaps: they were near-copies of each other (87% median overlap),
+# the pattern search engines demote a whole site for. Agreed with the owner
+# on 2026-10-20. To bring a page back, give it genuinely local content first,
+# then add it here.
+INDEXED_PLACES = {
+    "Mumbai", "Delhi", "Bengaluru", "Chennai", "Hyderabad", "Kolkata", "Pune",
+    "Ahmedabad", "Jaipur", "Kochi", "Coimbatore", "Lucknow", "Surat",
+    "Chandigarh", "Patna", "Indore", "Visakhapatnam", "Vadodara", "Nagpur",
+    "Bhopal",
+    "Maharashtra", "Gujarat", "Tamil Nadu", "Karnataka", "Kerala",
+    "Andhra Pradesh", "Telangana", "Odisha",
+}
 
 
 # Regional jewellers -> states they serve. Brands not listed here are treated
@@ -1812,11 +1828,22 @@ def main():
 
 
     # ------------------------------------------------- markets side drawer
-    since = (datetime.now(timezone.utc).date() - timedelta(days=120)).isoformat()
+    # The whole published history, page by page. Supabase returns at most
+    # 1,000 rows per request; a single query silently stopped in mid-
+    # September, so the "previous session" on the daily page and the recaps
+    # were reading a month-old median. The history pages need every day.
+    hist_rows = []
     try:
-        hist_rows = sb.table("rates") \
-            .select("rate_date, canonical_24k_pre_gst, status") \
-            .eq("status", "published").gte("rate_date", since).execute().data
+        _off = 0
+        while True:
+            _b = sb.table("rates") \
+                .select("rate_date, canonical_24k_pre_gst, status") \
+                .eq("status", "published").order("rate_date") \
+                .range(_off, _off + 999).execute().data
+            hist_rows += _b
+            if len(_b) < 1000:
+                break
+            _off += 1000
     except Exception as e:
         print("trend: history query failed:", e)
         hist_rows = []
@@ -2246,10 +2273,17 @@ def main():
                         f'<div class="city-local">{local}</div></div></section>\n  ')
                 h = sub(r'(<section class="site-section alt" id="s-market">)',
                         desk.replace("\\", "\\\\") + r"\g<1>", h)
+            if nm not in INDEXED_PLACES:
+                # Live for visitors, not offered to search engines.
+                h, n = re.subn(r'<meta name="robots" content="[^"]*">',
+                               '<meta name="robots" content="noindex,follow">', h, count=1)
+                if not n:
+                    raise RuntimeError(f"city page {nm}: no robots tag to set")
             with open(f"docs/gold-rate-today-in-{sl}.html", "w",
                       encoding="utf-8") as f:
                 f.write(h)
-        print(f"city pages: wrote {len(LOCATIONS)} in the new design")
+        print(f"city pages: wrote {len(LOCATIONS)} in the new design, "
+              f"{sum(1 for nm in LOCATIONS if nm in INDEXED_PLACES)} indexed")
 
     # ---- programmatic city/state pages (same board, local landing page) ----
     # City pages used to be /compare with the place name swapped in: the
@@ -2849,64 +2883,122 @@ def main():
             extra_js=budget_js)
         extra_urls.append(("budget-gold-calculator", "weekly", "0.7"))
 
-    # ---- News: auto daily market recap from the rate history ----
-    # RECAP_INDEX_DAYS: a recap has real, standalone reference value (one
-    # page per day, genuinely distinct content - not the same-day
-    # near-duplication daily city pages have, see gen_daily below), so it
-    # stays indexed far longer than a daily page. Still finite though - an
-    # unbounded, ever-growing set of indexed near-identical "recap for date
-    # X" pages is exactly the kind of thin-content-at-scale pattern that
-    # drags down Search Console's view of the whole site, so recaps past
-    # this window are noindexed (content stays live, just stops being
-    # advertised for indexing) rather than left indexed forever.
-    RECAP_INDEX_DAYS = 90
-    recap_cutoff = now_ist.date() - timedelta(days=RECAP_INDEX_DAYS)
-    os.makedirs("docs/news/recap", exist_ok=True)
-    recaps = []              # (slug, date_obj, disp, med24, move, pct)
-    for i in range(1, len(trend)):
-        d_iso, m24 = trend[i]
-        pm24 = trend[i - 1][1]
-        move = m24 - pm24
-        pct = (move / pm24 * 100) if pm24 else 0
-        dt = datetime.fromisoformat(d_iso)
-        slug = f"daily-recap-{dt.day}-{dt.strftime('%b').lower()}-{dt.year}"
-        disp = dt.strftime("%d %B %Y")
-        lad = ladder(m24)
-        arrow = "rose" if move > 0.5 else ("fell" if move < -0.5 else "held")
-        cls = "up" if move > 0.5 else ("dn" if move < -0.5 else "")
-        sign = "+" if move >= 0 else "-"
-        body = (
-            f"<h1>Gold Rate Daily Recap - {disp}</h1>"
-            f'<p class="updated-on">Market recap - {disp}</p>'
-            f"<p>On {disp}, the median <strong>24K gold rate</strong> across "
-            f"India's leading jewellers was <strong>{inr(m24)} per gram</strong> "
-            f"(pre-GST). It <strong>{arrow}</strong> "
-            f'<span class="recap-move {cls}">{sign}{inr(abs(move))} '
-            f"({sign}{abs(pct):.2f}%)</span> from {inr(pm24)} the previous "
-            f"session.</p>"
-            f"<h2>Today's median rates</h2><ul>"
-            f"<li>24K (999): <strong>{inr(lad['24K'])}/g</strong></li>"
-            f"<li>22K (916): <strong>{inr(lad['22K'])}/g</strong></li>"
-            f"<li>18K (750): <strong>{inr(lad['18K'])}/g</strong></li></ul>"
-            f"<p>All figures are per gram, pre-GST, across {len(live)} "
-            f"jewellers. Add 3% GST for the billed price. Compare live rates on "
-            f'the <a href="{SITE_URL}/">gold rate today</a> page.</p>')
-        recap_fresh = dt.date() >= recap_cutoff
-        render_content(f"news/recap/{slug}",
-                       f"Gold Rate Daily Recap - {disp} | MyGoldRates",
-                       f"Gold price recap for {disp}: 24K median {inr(m24)}/g, "
-                       f"{sign}{abs(pct):.2f}% vs the previous session. 22K, 18K "
-                       "and jeweller medians.",
-                       body,
-                       robots=("index, follow, max-image-preview:large"
-                               if recap_fresh else "noindex, follow"))
-        recaps.append((slug, dt, disp, m24, move, pct))
-        # Keep noindexed recaps out of the sitemap too - no point advertising
-        # a URL for indexing that's explicitly told not to be indexed.
-        if recap_fresh:
-            extra_urls.append((f"news/recap/{slug}", "monthly", "0.5"))
+    # ---- Gold rate history: one page per month, plus an index ----------
+    # Replaced the one-page-per-day recaps on 2026-10-20 (search clean-up,
+    # agreed with the owner). A month page holds every day's 24K/22K/18K
+    # median and the day's change in one table: it answers "what was the
+    # gold rate on <date>" for search and AI engines, where 30 near-identical
+    # recap pages a month were the thin-content pattern that drags a site
+    # down. Old recap and daily addresses 301 here (docs/retired-urls.json).
+    MONTH_NAMES = ["january", "february", "march", "april", "may", "june",
+                   "july", "august", "september", "october", "november",
+                   "december"]
 
-    recaps.sort(key=lambda x: x[1], reverse=True)
+    def history_slug(d):
+        return f"gold-rate-history/{MONTH_NAMES[d.month - 1]}-{d.year}"
+
+    by_month = {}
+    for i, (d_iso, m24) in enumerate(trend):
+        d = datetime.fromisoformat(d_iso).date()
+        prev = trend[i - 1][1] if i else None
+        by_month.setdefault((d.year, d.month), []).append((d, m24, prev))
+    month_list = sorted(by_month, reverse=True)
+    for ym in month_list:
+        rows = by_month[ym]
+        first, last = rows[0], rows[-1]
+        mname = first[0].strftime("%B %Y")
+        hi = max(rows, key=lambda r: r[1])
+        lo = min(rows, key=lambda r: r[1])
+        chg = last[1] - first[1]
+        chg_pct = chg / first[1] * 100 if first[1] else 0
+        trs = ""
+        for d, m24, prev in reversed(rows):
+            lad = ladder(m24)
+            mv = (m24 - prev) if prev else None
+            mv_txt = ("&mdash;" if mv is None else "0" if abs(mv) < 0.5 else
+                      f'<span class="recap-move {"up" if mv > 0 else "dn"}">'
+                      f'{"+" if mv > 0 else "-"}{inr(abs(mv))}</span>')
+            trs += (f'<tr id="d-{d.day}"><td>{d.strftime("%d %b")}</td>'
+                    f"<td>{inr(lad['24K'])}</td><td>{inr(lad['22K'])}</td>"
+                    f"<td>{inr(lad['18K'])}</td><td>{mv_txt}</td></tr>")
+        others = "".join(
+            f'<a href="{SITE_URL}/{history_slug(datetime(y, m, 1).date())}">'
+            f'{datetime(y, m, 1).strftime("%B %Y")}</a> '
+            for (y, m) in month_list if (y, m) != ym)
+        body = (
+            crumbs(("Gold rate history", f"{SITE_URL}/gold-rate-history"),
+                   (mname, None)) +
+            f"<h1>Gold Rate History: {mname}</h1>"
+            f'<p class="updated-on">Every day of {mname} &middot; per gram, '
+            f"pre-GST, median of India&rsquo;s leading jewellers</p>"
+            f"<p>In <strong>{mname}</strong> the 24K (999) gold rate "
+            f"{'rose' if chg > 0.5 else ('fell' if chg < -0.5 else 'held')} "
+            f"from <strong>{inr(first[1])}/g</strong> on "
+            f"{first[0].strftime('%d %B')} to <strong>{inr(last[1])}/g</strong> "
+            f"on {last[0].strftime('%d %B')} "
+            f"({'+' if chg >= 0 else '-'}{inr(abs(chg))}, "
+            f"{'+' if chg >= 0 else '-'}{abs(chg_pct):.2f}%). The highest was "
+            f"<strong>{inr(hi[1])}/g</strong> on {hi[0].strftime('%d %B')} and "
+            f"the lowest <strong>{inr(lo[1])}/g</strong> on "
+            f"{lo[0].strftime('%d %B')}.</p>"
+            '<style>.hist{width:100%;border-collapse:collapse;font-size:14px;'
+            'font-variant-numeric:tabular-nums}.hist th,.hist td{padding:8px 6px;'
+            'text-align:right;border-bottom:1px solid rgba(201,162,39,.16);'
+            'white-space:nowrap}.hist th{font-size:11px;text-transform:uppercase;'
+            'letter-spacing:.04em;opacity:.75}.hist th:first-child,.hist td:first-child'
+            '{text-align:left}.tbl-wrap{overflow-x:auto;margin:14px 0}'
+            '@media(max-width:480px){.hist{font-size:12.5px}.hist th,.hist td'
+            '{padding:7px 3px}}</style>'
+            f'<div class="tbl-wrap"><table class="hist"><thead><tr><th>Date</th>'
+            f"<th>24K /g</th><th>22K /g</th><th>18K /g</th><th>Change</th>"
+            f"</tr></thead><tbody>{trs}</tbody></table></div>"
+            f"<p>Rates are the median of the per-gram rates published by "
+            f"India&rsquo;s leading jewellers on each day, before 3% GST and "
+            f"making charges. 22K and 18K are derived from 24K by purity. "
+            f'Today&rsquo;s rates at every jeweller are on the '
+            f'<a href="{SITE_URL}/">live board</a>.</p>'
+            + (f"<h2>Other months</h2><p>{others}</p>" if others else ""))
+        ld = ('<script type="application/ld+json">' + json.dumps({
+            "@context": "https://schema.org", "@type": "Dataset",
+            "name": f"Gold rate history, {mname} (India)",
+            "description": (f"Daily median 24K, 22K and 18K gold rate per gram "
+                            f"across leading Indian jewellers, {mname}."),
+            "url": f"{SITE_URL}/{history_slug(first[0])}",
+            "temporalCoverage": f"{first[0].isoformat()}/{last[0].isoformat()}",
+            "spatialCoverage": "India",
+            "creator": {"@type": "Organization", "name": "MyGoldRates.com"},
+            "isAccessibleForFree": True,
+        }, ensure_ascii=False) + "</script>")
+        render_content(
+            history_slug(first[0]),
+            f"Gold Rate History {mname}: Daily 24K, 22K, 18K Prices | MyGoldRates",
+            f"Gold rate for every day of {mname}: 24K {inr(first[1])} to "
+            f"{inr(last[1])}/g, high {inr(hi[1])} on {hi[0].strftime('%d %b')}, "
+            f"low {inr(lo[1])} on {lo[0].strftime('%d %b')}. Pre-GST, per gram.",
+            body, jsonld_block=ld)
+        extra_urls.append((history_slug(first[0]), "daily", "0.7"))
+
+    hist_cards = "".join(
+        f'<a class="newscard" href="{SITE_URL}/{history_slug(by_month[ym][0][0])}">'
+        f'<div class="nt">Gold rate history &ndash; '
+        f'{by_month[ym][0][0].strftime("%B %Y")}</div>'
+        f'<div class="nd">{len(by_month[ym])} days &middot; 24K '
+        f'{inr(by_month[ym][0][1])} &rarr; {inr(by_month[ym][-1][1])}/g</div></a>'
+        for ym in month_list)
+    render_content(
+        "gold-rate-history",
+        "Gold Rate History in India: Daily Prices by Month | MyGoldRates",
+        "Daily gold rate history for India by month: 24K, 22K and 18K per "
+        "gram, median of leading jewellers, pre-GST.",
+        crumbs(("Gold rate history", None)) +
+        "<h1>Gold Rate History</h1>"
+        "<p>Every day&rsquo;s gold rate since we started recording, one page "
+        "per month: 24K, 22K and 18K per gram, the median of India&rsquo;s "
+        "leading jewellers, before GST and making charges.</p>" + hist_cards)
+    extra_urls.append(("gold-rate-history", "daily", "0.7"))
+    # The per-day recap pages are no longer written; kept as an empty list
+    # so the code below that once listed them has nothing to list.
+    recaps = []
 
     # ---- dated DAILY news pages (India + top cities), GoodReturns-style ----
     # Each build writes today's dated pages; past ones persist in docs/ and are
@@ -2972,9 +3064,10 @@ def main():
             body)
         today_daily.append((slug, place))
 
+    # One national page a day. The per-city copies (same figures, city
+    # name swapped) stopped on 2026-10-20; their addresses 301 to each city's
+    # own page.
     gen_daily("India", "india")
-    for _c in DAILY_NEWS_CITIES:
-        gen_daily(_c, loc_slug(_c))
 
     # today's dated articles, featured at the top of /news
     daily_cards = "".join(
@@ -2983,7 +3076,7 @@ def main():
         f'<div class="nd">{display_date} &middot; 24K {inr(med["24K"])}/g</div>'
         f'</a>' for slug, place in today_daily)
 
-    news_cards = ""
+    news_cards = hist_cards
     for slug, dt, disp, m24, move, pct in recaps[:20]:
         cls = "up" if move > 0.5 else ("dn" if move < -0.5 else "")
         sign = "+" if move >= 0 else "-"
@@ -3009,23 +3102,23 @@ def main():
 
     render_content(
         "news",
-        "Gold News Today & Daily Rate Recap (India) | MyGoldRates",
-        "Latest gold price news for India plus a daily data-driven recap of how "
-        "24K, 22K and 18K rates moved - refreshed through the day.",
+        "Gold News Today & Gold Rate History (India) | MyGoldRates",
+        "Latest gold price news for India, today's gold rate report and the "
+        "day-by-day 24K, 22K and 18K rate history by month.",
         crumbs(("News", None)) +
-        "<h1>Gold News &amp; Daily Rate Recap</h1>"
-        "<p>The latest gold price headlines from across the web, plus our own "
-        "dated daily gold-rate reports and a data-driven market recap.</p>"
-        f'<h2>Today\'s Gold Rate Reports - {display_date}</h2>' + daily_cards +
+        "<h1>Gold News &amp; Rate History</h1>"
+        "<p>The latest gold price headlines from across the web, today&rsquo;s "
+        "gold-rate report, and the full day-by-day rate history by month.</p>"
+        f'<h2>Today\'s Gold Rate Report - {display_date}</h2>' + daily_cards +
         live_block +
-        '<h2>Daily Market Recap</h2>' + news_cards)
+        '<h2>Gold Rate History</h2>' + news_cards)
     extra_urls.append(("news", "hourly", "0.8"))
     extra_urls.append(("about", "monthly", "0.7"))
     extra_urls.append(("methodology", "monthly", "0.7"))
     extra_urls.append(("contact", "monthly", "0.5"))
     print(f"content pages: 4 calculators, "
           f"{len(list(_articles(rate_str, med, inr)))} articles, "
-          f"{len(recaps)} recaps")
+          f"{len(month_list)} history months")
     # ---- private analytics dashboard (secret-gated read; noindex; unlinked) ----
     # The access token is NOT baked into the page; it is supplied at view time
     # via the URL fragment (.../analytics#token). So the hosted file holds no
@@ -3515,38 +3608,53 @@ def main():
     # of buffer, not the longer recap window - these pages need it.
     DAILY_INDEX_DAYS = 3
     daily_index_cutoff = now_ist.date() - timedelta(days=DAILY_INDEX_DAYS)
-    # Daily pages, unlike recaps, are NOT rewritten by render_content() once
-    # written (gen_daily only ever runs for "today"), so past ones can't be
-    # noindexed by passing a robots= kwarg at generation time - they have to
-    # be patched in place, on disk, as they age past the cutoff on a later
-    # run. Idempotent (skips files already patched) and safe to run every
-    # build.
-    for pth, dd, _ in daily_meta:
-        if not dd or dd >= daily_index_cutoff:
+    # ---- retire pages that left the site in the 2026-10-20 clean-up ----
+    # Agreed with the owner. Retired pages are deleted and their addresses
+    # recorded in docs/retired-urls.json, which outlives the files: every
+    # build turns it into permanent 301s in _redirects, so old links and
+    # search results land on the page that replaced each one.
+    #  - per-city daily copies   -> that city's gold-rate-today-in-<city> page
+    #  - national daily pages older than DAILY_INDEX_DAYS -> their month's
+    #    gold rate history page
+    #  - per-day recaps          -> their month's history page
+    retired_path = "docs/retired-urls.json"
+    try:
+        with open(retired_path, encoding="utf-8") as f:
+            retired_doc = json.load(f)
+    except (OSError, ValueError):
+        retired_doc = {"redirects": {}}
+    retired = retired_doc.setdefault("redirects", {})
+    kept_meta = []
+    for pth, dd, ttl in daily_meta:
+        stem = pth.rsplit("/", 1)[-1]
+        place_slug = stem[len("gold-rate-"):].rsplit("-", 3)[0]
+        target = None
+        if place_slug != "india":
+            target = (f"/gold-rate-today-in-{place_slug}"
+                      if os.path.exists(f"docs/gold-rate-today-in-{place_slug}.html")
+                      else "/")
+        elif dd and dd < daily_index_cutoff:
+            target = f"/{history_slug(dd)}"
+        if target:
+            retired[f"/{pth}"] = target
+            try:
+                os.remove(f"docs/{pth}.html")
+            except OSError:
+                pass
             continue
-        fpath = f"docs/{pth}.html"
-        with open(fpath, encoding="utf-8") as f:
-            html = f.read()
-        if 'name="robots" content="noindex' in html:
-            continue
-        if 'name="robots" content="index, follow, max-image-preview:large">' in html:
-            new_html = html.replace(
-                '<meta name="robots" content="index, follow, '
-                'max-image-preview:large">',
-                '<meta name="robots" content="noindex, follow">', 1)
-        else:
-            # Pages written before this fix have no robots tag at all
-            # (CONTENT_TEMPLATE didn't emit one) - insert one after viewport.
-            new_html = html.replace(
-                '<meta name="viewport" content="width=device-width, '
-                'initial-scale=1">',
-                '<meta name="viewport" content="width=device-width, '
-                'initial-scale=1">\n'
-                '<meta name="robots" content="noindex, follow">', 1)
-        if new_html == html:
-            continue          # unexpected head shape - don't guess, skip
-        with open(fpath, "w", encoding="utf-8") as f:
-            f.write(new_html)
+        kept_meta.append((pth, dd, ttl))
+    daily_meta = kept_meta
+    for fp in glob.glob("docs/news/recap/*.html"):
+        stem = os.path.basename(fp)[:-5]
+        try:
+            rd = datetime.strptime(stem[len("daily-recap-"):], "%d-%b-%Y").date()
+            retired[f"/news/recap/{stem}"] = f"/{history_slug(rd)}"
+        except ValueError:
+            retired[f"/news/recap/{stem}"] = "/gold-rate-history"
+        os.remove(fp)
+    with open(retired_path, "w", encoding="utf-8") as f:
+        json.dump(retired_doc, f, indent=1, sort_keys=True)
+    print(f"retired: {len(retired)} addresses redirect to their replacements")
 
     # ---- Google News sitemap: recaps + daily pages from the last 2 days ----
     cutoff = datetime.now(IST).date() - timedelta(days=2)
@@ -3628,10 +3736,12 @@ def main():
 
     # cities: state + city rate pages, refreshed hourly (rates re-fetch
     # multiple times per day)
+    # Only the places search engines are asked to index (INDEXED_PLACES); a
+    # noindexed page listed in a sitemap is reported as an error.
     city_urls = "".join(
         _url(f"gold-rate-today-in-{loc_slug(nm)}", lastmod_full,
              "hourly", 0.8)
-        for nm in LOCATIONS)
+        for nm in LOCATIONS if nm in INDEXED_PLACES)
     with open("docs/sitemap_cities.xml", "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -3778,9 +3888,13 @@ def main():
                 "# next click compounded the relative href into\n"
                 "# /city/jaipur/city/pune/city/nashik/. Single-segment URLs are\n"
                 "# rescued here; the chains fall through to 404.html.\n"
-                + city_rules)
+                + city_rules
+                + "\n# Retired in the 2026-10-20 search clean-up "
+                  "(docs/retired-urls.json).\n"
+                + "".join(f"{src}    {dst}    301\n"
+                          for src, dst in sorted(retired.items())))
     print(f"_redirects: /pulse -> / (301), {len(city_rules.splitlines())} "
-          "legacy /city/ rules")
+          f"legacy /city/ rules, {len(retired)} retired pages")
 
     # ---- IndexNow: instantly notify Bing/Yandex/Seznam of fresh URLs ----
     INDEXNOW_KEY = "b7f3c9a1e04d4f6a8c2b5d9e1f0a3c7d"

@@ -225,6 +225,20 @@ it shipped once under the name `b2b` and was renamed wholesale.
 5. Point the Razorpay webhook at `…/jd/webhook`.
 6. Optional: add `ANTHROPIC_API_KEY` as a GitHub secret for the AI note.
 
+## Search clean-up (2026-10-20, agreed with the owner)
+- City/state pages: only `INDEXED_PLACES` (28) are indexed and in the sitemaps;
+  the other 67 stay live with `noindex,follow`. Add a place only after giving
+  its page genuinely local content.
+- Daily pages: one national page a day (`gen_daily("India")`), indexed for
+  `DAILY_INDEX_DAYS`; per-city copies and per-day recaps are retired.
+- `docs/retired-urls.json` records every retired address and its replacement;
+  each build deletes retired files and writes the 301s into `_redirects`.
+  Never remove entries. Watch the Cloudflare 2,000 static-rule limit
+  (`tests/test_search_cleanup.py`).
+- `gold-rate-history/<month>-<year>` replaces the recaps (Dataset JSON-LD).
+- The rate history is fetched page by page: Supabase caps a request at 1,000
+  rows, which once froze the trend in mid-September.
+
 ## Supabase schema (key tables)
 
 **`brands`** — jeweller catalogue. `slug` is the stable identifier used in `NEEDS_PROXY`, `REGION_MAP`, and URL paths. `active=false` brands are skipped by the collector.
