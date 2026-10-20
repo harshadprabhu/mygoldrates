@@ -106,7 +106,54 @@ def ladder_sane(found):
 
 
 def probe(cand, session):
-    """-> verdict dict for one candidate."""
+    """-> verdict dict for one candidate.
+
+    Many jewellers' sites answer only on www. (the bare domain has no DNS
+    record or refuses the connection), which used to come back "dead". A
+    dead bare domain is retried once as www.<domain>."""
+    r = _probe(cand, session)
+    host = cand["domain"].lower().lstrip("/")
+    if r["verdict"] == "dead" and not host.startswith(("www.", "http")):
+        r2 = _probe({**cand, "domain": "www." + host}, session)
+        if r2["verdict"] != "dead":
+            r = {**r2, "domain": cand["domain"]}
+    if r["verdict"] in ("dead", "no-rate", "blocked"):
+        r = _rendered(cand, r, session)
+    return r
+
+
+def _rendered(cand, r, session):
+    """Many jewellers fill the rate in with JavaScript (Khazana, Thangamayil,
+    AVR Swarna Mahal all do), and single-page storefronts answer every path
+    with the same shell, which the soft-404 check reads as "dead". Load the
+    homepage once in the collector's own headless browser and read it with
+    the same extractors - the same path collect.py takes daily, so a rate
+    found here is one the collector will read. One render per candidate."""
+    host = cand["domain"].lower().lstrip("/")
+    for h in ([host] if host.startswith("www.") else ["www." + host, host]):
+        url = f"https://{h}/"
+        if not collect.robots_ok(url, session):
+            continue
+        html = collect.render(url)
+        if not html:
+            continue
+        found, counts, how, note = collect.try_html(html)
+        if not found:
+            continue
+        best = max(found.items(), key=lambda kv: collect.PURITY_FRACTION[kv[0]])
+        res = {**cand, "rate_url": url, "method": f"rendered/{how}",
+               "purities": sorted(found),
+               "canonical_24k": round(best[1] / collect.PURITY_FRACTION[best[0]], 2),
+               "slug": slugify(cand["name"])}
+        sane, why = ladder_sane(found)
+        res.update(verdict="verified" if sane else "suspect",
+                   note=(f"read {len(found)} purity/purities after render"
+                         if sane else why))
+        return res
+    return r
+
+
+def _probe(cand, session):
     host = cand["domain"].lower().lstrip("/")
     if host.startswith("www."):
         bare = host[4:]
