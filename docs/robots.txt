@@ -54,6 +54,8 @@ User-agent: *
 Allow: /
 Disallow: /analytics
 Disallow: /analytics.html
+Disallow: /rest/
+Disallow: /jd/
 
 Sitemap: https://mygoldrates.com/sitemap.xml
 Sitemap: https://mygoldrates.com/sitemap_main.xml
