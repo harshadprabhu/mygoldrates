@@ -326,6 +326,36 @@ def extract_labeled_rates(text):
     return buckets
 
 
+# Karat, then the unit in brackets, then the rate: "GOLD RATE 22k (1gm):
+# ₹13,535" (Thangamayil). The explicit "(1 gm)" is what makes this safe:
+# a per-gram rate is stated as such, so a product price next to a karat
+# label never matches.
+_KARAT_UNIT_VALUE_RE = re.compile(
+    r"(\d{2})\s*K(?:T|ARAT)?\s*\(\s*1\s*(?:g|gm|gms|gram)\s*\)\s*[:\-\u2013]?\s*"
+    r"(?:₹|Rs\.?|INR)\s*([\d,]+(?:\.\d{1,2})?)",
+    re.I)
+
+
+# "Gold Rate 22K - Rs.13570/-" (AVR Swarna Mahal): the "Gold Rate" label
+# and the "/-" rupee terminator together mark a quoted per-gram rate.
+_GOLD_RATE_KARAT_RE = re.compile(
+    r"gold\s*rate\s*(\d{2})\s*K(?:T)?\s*[:\-\u2013]\s*(?:₹|Rs\.?)\s*"
+    r"([\d,]+(?:\.\d{1,2})?)\s*/-", re.I)
+
+
+def extract_karat_unit_value(text):
+    buckets = {}
+    for m in (list(_KARAT_UNIT_VALUE_RE.finditer(text))
+              or list(_GOLD_RATE_KARAT_RE.finditer(text))):
+        karat = f"{m.group(1)}K"
+        if karat not in PURITY_FRACTION:
+            continue
+        pg = _per_gram(_f(m.group(2)))
+        if pg:
+            buckets.setdefault(karat, []).append(pg)
+    return buckets
+
+
 # Some jewellers (Malabar) print the rate BEFORE the karat label, in the
 # opposite order to _LABELED_RE: "13220.00 INR/gms" ... "22k (916)". The
 # fineness in parens right after the karat ("(916)"/"(999)"/"(750)") is what
@@ -607,6 +637,7 @@ def extract(html):
     if not buckets:
         text = soup.get_text(" ", strip=True)
         for fn, name in ((extract_labeled_rates, "labeled"),
+                         (extract_karat_unit_value, "karatunit"),
                          (extract_value_then_karat, "valuekarat"),
                          (extract_value_then_ct, "valuect"),
                          (extract_value_per_gm_karat, "valuepergm"),
@@ -1116,8 +1147,13 @@ def collect_brand(b, session):
                 return url, f, c, f"static/{h}", n
             continue
 
-        if reason.startswith("blocked"):
-            blocked = True
+        # A single-page storefront serves the same shell for every path, so
+        # its homepage matches the soft-404 fingerprint (AVR Swarna Mahal).
+        # A site's root cannot be a not-found page, so render it there; any
+        # other path that looks like a soft-404 stays rejected.
+        spa_root = reason == "soft-404" and urlsplit(url).path in ("", "/")
+        if reason.startswith("blocked") or spa_root:
+            blocked = blocked or not spa_root
             rhtml = render(url, wait_selector=ws)
             if rhtml:
                 found, counts, how, note = try_html(rhtml)
@@ -1260,7 +1296,11 @@ def main():
             continue
 
         ok, why = basis_confirmed(found)
-        purity = max(found, key=lambda k: PURITY_FRACTION[k])
+        # purity_override pins the purity a brand's rate is read from, for a
+        # jeweller whose other purities are priced differently (AVR Swarna
+        # Mahal's 24K is a coin price, not 24/22 of its 22K board rate).
+        purity = (b["purity_override"] if b.get("purity_override") in found
+                  else max(found, key=lambda k: PURITY_FRACTION[k]))
         canonical = found[purity] / PURITY_FRACTION[purity]
         if b.get("includes_gst"):
             canonical /= 1.03

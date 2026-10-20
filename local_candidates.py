@@ -157,4 +157,88 @@ CANDIDATES = [
     # bracelet-..."), i.e. product names, not a rate board.
     {"state": "Maharashtra", "city": "Mumbai", "name": "Bhindi Jewellers",
      "domain": "bhindi.com"},
+
+    # ---- 2026-10-20 sweep: 56 regional jewellers, probed and rendered ----
+    # Added to the board the same day, after a hand check against the
+    # market median (not listed here, they are brands now): Thangamayil
+    # (Madurai), Khazana (Chennai), AVR Swarna Mahal (Salem, 22K only - its
+    # 24K is a coin price) and Mahesh Jewellers (Thane, 22K only - its 24K
+    # is 995 fineness).
+    #
+    # Read a rate but NOT added, kept here so the weekly run re-checks them:
+    # NAVRATAN - rate page says "updated on 11 October" on 20 October: not
+    # maintained daily.
+    {"state": "Madhya Pradesh", "city": "Indore", "name": "Navratan Jewellers",
+     "domain": "navratanjewellers.com"},
+    # BHIMA (Kerala, bhimajewellery.com) - 22K banner 5.5% under the market
+    # with no date shown; most likely a stale banner.
+    {"state": "Kerala", "city": "Kozhikode", "name": "Bhima Jewellery Kerala",
+     "domain": "bhimajewellery.com"},
+    # ABHARAN - per-gram table shows 22K at Rs 4,735: years out of date.
+    {"state": "Karnataka", "city": "Udupi", "name": "Abharan Jewellers",
+     "domain": "www.abharan.com"},
+    #
+    # Responded, no rate on the homepage even after render. Several link a
+    # rate page or app (Muliya "Today's Gold Rate", Chungath) - worth a
+    # pinned-URL look by hand.
+    {"state": "Tamil Nadu", "city": "Chennai", "name": "NAC Jewellers",
+     "domain": "www.nacjewellers.com"},
+    {"state": "Tamil Nadu", "city": "Chennai", "name": "Prince Jewellery",
+     "domain": "www.princejewellery.com"},
+    {"state": "Tamil Nadu", "city": "Chennai", "name": "Saravana Selvarathnam",
+     "domain": "www.saravanaselvarathnam.com"},
+    {"state": "Tamil Nadu", "city": "Coimbatore", "name": "Sree Devi Jewellers",
+     "domain": "www.sreedevijewellers.com"},
+    {"state": "Kerala", "city": "Kozhikode", "name": "Chemmanur Jewellers",
+     "domain": "www.chemmanurinternational.com"},
+    {"state": "Kerala", "city": "Thrissur", "name": "Alapatt Jewellers",
+     "domain": "www.alapatt.com"},
+    {"state": "Kerala", "city": "Thrissur", "name": "Chungath Jewellery",
+     "domain": "www.chungathjewellery.com"},
+    {"state": "Kerala", "city": "Thrissur", "name": "Manappuram Jewellers",
+     "domain": "www.manappuramjewellers.com"},
+    {"state": "Karnataka", "city": "Puttur", "name": "Muliya Jewels",
+     "domain": "www.muliya.in"},
+    {"state": "Karnataka", "city": "Bengaluru", "name": "Navrathan Jewellers",
+     "domain": "www.navrathan.com"},
+    {"state": "Telangana", "city": "Hyderabad", "name": "Manepally Jewellers",
+     "domain": "www.manepallyjewellers.com"},
+    {"state": "Telangana", "city": "Hyderabad", "name": "PMJ Jewels",
+     "domain": "www.pmjjewels.com"},
+    {"state": "Telangana", "city": "Hyderabad", "name": "Sri Krishna Jewellers",
+     "domain": "www.srikrishnajewellers.com"},
+    {"state": "Andhra Pradesh", "city": "Visakhapatnam", "name": "CMR Jewellery",
+     "domain": "www.cmrjewellery.com"},
+    {"state": "West Bengal", "city": "Kolkata", "name": "Anjali Jewellers",
+     "domain": "www.anjalijewellers.in"},
+    {"state": "West Bengal", "city": "Kolkata", "name": "P C Chandra Jewellers",
+     "domain": "www.pcchandraindia.com"},
+    {"state": "West Bengal", "city": "Kolkata", "name": "B C Sen Jewellers",
+     "domain": "www.bcsenjewellers.com"},
+    {"state": "West Bengal", "city": "Kolkata", "name": "Shyam Sundar Co Jewellers",
+     "domain": "www.shyamsundarco.com"},
+    {"state": "Maharashtra", "city": "Mumbai", "name": "Popley",
+     "domain": "www.popley.com"},
+    {"state": "Maharashtra", "city": "Pune", "name": "Kothari Jewellers",
+     "domain": "www.kotharijewellers.com"},
+    {"state": "Gujarat", "city": "Ahmedabad", "name": "Shree Hari Jewellers",
+     "domain": "www.shreeharijewellers.com"},
+    {"state": "Gujarat", "city": "Surat", "name": "Laxmi Diamonds Jewels",
+     "domain": "www.laxmidiamond.com"},
+    {"state": "Rajasthan", "city": "Jaipur", "name": "Surana Jewellers",
+     "domain": "www.suranajewellers.com"},
+    {"state": "Rajasthan", "city": "Jaipur", "name": "Gem Palace",
+     "domain": "www.gempalacejaipur.com"},
+    {"state": "Uttar Pradesh", "city": "Lucknow", "name": "Lala Jugal Kishore Jewellers",
+     "domain": "www.lalajugalkishore.com"},
+    {"state": "Odisha", "city": "Bhubaneswar", "name": "Abhushan Jewellers",
+     "domain": "www.abhushan.com"},
+    {"state": "Assam", "city": "Guwahati", "name": "Rambhajo Jewellers",
+     "domain": "www.rambhajo.com"},
+    {"state": "Delhi", "city": "New Delhi", "name": "Sawansukha Jewellers",
+     "domain": "www.sawansukha.com"},
+    {"state": "Bihar", "city": "Patna", "name": "Chandan Jewellers",
+     "domain": "www.chandanjewellers.com"},
+    {"state": "Goa", "city": "Margao", "name": "Damodar Jewellers",
+     "domain": "www.damodarjewellers.com"},
 ]

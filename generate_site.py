@@ -347,6 +347,7 @@ def site_links_html():
         f'<a href="{SITE_URL}/calculators">Gold calculators</a>'
         f'<a href="{SITE_URL}/making-charges-comparison">Making charges</a>'
         f'<a href="{SITE_URL}/gold-market-today">Gold market today</a>'
+        f'<a href="{SITE_URL}/gold-rate-near-me">Gold rate near me</a>'
         f'<a href="{SITE_URL}/gold-rate-history">Gold rate history</a>'
         f'<a href="{SITE_URL}/news">Gold news</a>'
         f'<a href="{SITE_URL}/jewellers-digest">Jewellers Digest</a>'
@@ -723,6 +724,61 @@ REGION_MAP = {
     "bhindi": ["Maharashtra", "Gujarat"],
     "chandukaka": ["Maharashtra"],
     "ckc": ["Karnataka"],
+    # added 2026-10-20 (local jeweller sweep)
+    "thangamayil": ["Tamil Nadu"],
+    "khazana": ["Tamil Nadu"],
+    "avr": ["Tamil Nadu"],
+    "mahesh": ["Maharashtra"],
+}
+
+
+# Where each chain on the board is based: its home city, from the
+# jeweller's own "about" information. City pages tag a chain "Based in
+# <city>" on its home city's page, and /gold-rate-near-me names the chains
+# based in the nearest city. Only places on LOCATIONS; a chain that quotes
+# one national price (Tanishq, CaratLane, ...) is not tied to a city.
+BRAND_HOME = {
+    "chandukaka": ["Pune"], "pngsons": ["Pune"], "png": ["Pune"],
+    "ranka": ["Pune"], "ckc": ["Bengaluru"], "vummidi": ["Chennai"],
+    "grt": ["Chennai"], "lalithaa": ["Chennai"],
+    "vaibhav": ["Visakhapatnam"], "josalukkas": ["Thrissur"],
+    "joyalukkas": ["Thrissur"], "kalyan": ["Thrissur"],
+    "malabar": ["Kozhikode"], "senco": ["Kolkata"], "kirtilals": ["Coimbatore"],
+    "rbz": ["Ahmedabad"], "bhindi": ["Mumbai"], "tbz": ["Mumbai"],
+    "whp": ["Mumbai"], "thangamayil": ["Madurai"], "khazana": ["Chennai"],
+    "avr": ["Salem"],
+}
+
+# Approximate centre of each city on LOCATIONS (lat, lon), for the
+# nearest-city lookup on /gold-rate-near-me. Runs in the visitor's browser;
+# the location never leaves the device.
+CITY_COORDS = {
+    "Mumbai": (19.08, 72.88), "Delhi": (28.64, 77.22), "Bengaluru": (12.97, 77.59),
+    "Chennai": (13.08, 80.27), "Hyderabad": (17.39, 78.49), "Kolkata": (22.57, 88.36),
+    "Pune": (18.52, 73.86), "Ahmedabad": (23.02, 72.57), "Jaipur": (26.91, 75.79),
+    "Kochi": (9.93, 76.27), "Coimbatore": (11.02, 76.96), "Lucknow": (26.85, 80.95),
+    "Surat": (21.17, 72.83), "Chandigarh": (30.73, 76.78), "Patna": (25.59, 85.14),
+    "Indore": (22.72, 75.86), "Visakhapatnam": (17.69, 83.22), "Vadodara": (22.31, 73.18),
+    "Nagpur": (21.15, 79.09), "Bhopal": (23.26, 77.41), "Kanpur": (26.45, 80.33),
+    "Nashik": (20.00, 73.79), "Ranchi": (23.34, 85.31), "Madurai": (9.93, 78.12),
+    "Vijayawada": (16.51, 80.65), "Mysuru": (12.30, 76.64), "Thrissur": (10.53, 76.21),
+    "Kozhikode": (11.26, 75.78), "Thiruvananthapuram": (8.52, 76.94),
+    "Guwahati": (26.14, 91.74), "Bhubaneswar": (20.30, 85.82), "Ludhiana": (30.90, 75.86),
+    "Amritsar": (31.63, 74.87), "Rajkot": (22.30, 70.80), "Varanasi": (25.32, 82.97),
+    "Agra": (27.18, 78.01), "Meerut": (28.98, 77.71), "Faridabad": (28.41, 77.32),
+    "Ghaziabad": (28.67, 77.45), "Gurugram": (28.46, 77.03), "Noida": (28.54, 77.39),
+    "Raipur": (21.25, 81.63), "Jodhpur": (26.24, 73.02), "Udaipur": (24.59, 73.71),
+    "Kota": (25.21, 75.86), "Dehradun": (30.32, 78.03), "Jamshedpur": (22.80, 86.20),
+    "Dhanbad": (23.80, 86.43), "Aurangabad": (19.88, 75.34), "Solapur": (17.66, 75.91),
+    "Tiruchirappalli": (10.79, 78.70), "Salem": (11.66, 78.15), "Tirupati": (13.63, 79.42),
+    "Guntur": (16.31, 80.44), "Warangal": (17.97, 79.59), "Mangaluru": (12.91, 74.86),
+    "Hubli": (15.36, 75.12), "Belagavi": (15.85, 74.50), "Kolhapur": (16.70, 74.24),
+    "Jalandhar": (31.33, 75.58), "Siliguri": (26.73, 88.40), "Cuttack": (20.46, 85.88),
+    "Ajmer": (26.45, 74.64), "Gwalior": (26.22, 78.18), "Jabalpur": (23.18, 79.99),
+    "Allahabad": (25.44, 81.85), "Bareilly": (28.37, 79.43), "Moradabad": (28.84, 78.77),
+    "Aligarh": (27.88, 78.08), "Vijayapura": (16.83, 75.71), "Davanagere": (14.46, 75.92),
+    "Erode": (11.34, 77.72), "Tirunelveli": (8.71, 77.76), "Kollam": (8.89, 76.61),
+    "Kannur": (11.87, 75.37), "Goa": (15.49, 73.83),
 }
 
 
@@ -2219,6 +2275,9 @@ def main():
         trs = "".join(
             f'<tr><td class="lb-name">{_html.escape(r["brands"]["name"])}'
             + ('<span class="lb-tag">Regional</span>' if r in regional else '')
+            + (f'<span class="lb-tag">Based in {_html.escape(nm)}</span>'
+               if nm in BRAND_HOME.get((r["brands"] or {}).get("slug") or "", [])
+               else '')
             + f'</td><td><strong>{inr(k22(r))}</strong></td>'
             f'<td>{inr(ladder(r["canonical_24k_pre_gst"])["24K"])}</td></tr>'
             for r in rows_here)
@@ -3392,6 +3451,116 @@ def main():
     except Exception as e:
         print("brief: skipped -", type(e).__name__, str(e)[:120])
 
+    # ---- /gold-rate-near-me ----
+    # "Gold rate near me" is how most phone searches for a gold price are
+    # worded. This page answers it honestly: the visitor's browser finds the
+    # nearest city we cover (the location is used on the device only, never
+    # sent anywhere) and links to that city's page, with the chains based
+    # there. Without location it is a list of every city by state.
+    try:
+        _names = {(r["brands"] or {}).get("slug"): r["brands"]["name"] for r in live}
+        _cities = []
+        for _c, (_lat, _lon) in CITY_COORDS.items():
+            _cities.append({
+                "n": _c, "u": f"/gold-rate-today-in-{loc_slug(_c)}",
+                "a": _lat, "o": _lon, "s": PLACE_STATE.get(_c) or "",
+                "h": sorted(_names[sl] for sl, cs in BRAND_HOME.items()
+                            if _c in cs and sl in _names)})
+        _by_state = {}
+        for _c in _cities:
+            _by_state.setdefault(_c["s"] or _c["n"], []).append(_c)
+        _list = "".join(
+            f'<h3>{_html.escape(st)}</h3><div class="city-links">'
+            + "".join(f'<a href="{c["u"]}">{_html.escape(c["n"])}</a>'
+                      for c in sorted(cs, key=lambda c: c["n"]))
+            + "</div>"
+            for st, cs in sorted(_by_state.items()))
+        _faq = [
+            ("What is the gold rate near me today?",
+             f"On {display_date} the median rate across the {len(live)} "
+             f"jewellers we track is {inr(med['24K'])} per gram for 24K, "
+             f"{inr(med['22K'])} for 22K and {inr(med['18K'])} for 18K, "
+             "before 3% GST and making charges. National chains charge the "
+             "same rate everywhere; regional chains set their own, so the "
+             "rate at a jeweller near you can differ by a few hundred rupees "
+             "a gram."),
+            ("How do I find the cheapest gold rate near me?",
+             "Use your location above to open the page for your nearest "
+             "city. It lists the national chains and the regional chains "
+             "serving your state, cheapest 22K first, with today's rate "
+             "from each."),
+            ("Is the gold rate the same at every jeweller near me?",
+             "No. Each jeweller sets its own daily rate, and making charges "
+             "vary even more, from a few percent on plain chains and coins "
+             "to 20% or more on detailed designs. Ask for the rate, the "
+             "making charge and the hallmark (HUID) before you buy."),
+            ("Do you use my location?",
+             "Only in your browser, to pick the nearest city on this page. "
+             "It is not sent to us or stored."),
+        ]
+        _faq_html = "".join(f"<h3>{_html.escape(q)}</h3><p>{_html.escape(a)}</p>"
+                            for q, a in _faq)
+        _body = (
+            crumbs(("Gold rate near me", None))
+            + "<h1>Gold Rate Near Me Today</h1>"
+            + f'<p class="updated-on">Updated {display_date}, {display_time}</p>'
+            + f"<p>Today's gold rate in India: <strong>24K {inr(med['24K'])}/g"
+              f"</strong>, <strong>22K {inr(med['22K'])}/g</strong> and "
+              f"<strong>18K {inr(med['18K'])}/g</strong> (median of "
+              f"{len(live)} jewellers, pre-GST). Find the rate at jewellers "
+              "near you:</p>"
+            + '<div class="calcbox"><button id="nm-go" type="button" '
+              'style="width:100%;padding:13px;border-radius:10px;border:0;'
+              'font-weight:700;font-size:15px;cursor:pointer;'
+              'background:var(--gold);color:#1a1405">Use my location</button>'
+              '<div id="nm-out" class="calcout" style="display:none" '
+              'aria-live="polite"></div>'
+              '<p style="font-size:12.5px;margin:10px 0 0">Your location '
+              "stays on your device; it is only used to pick the nearest "
+              "city.</p></div>"
+            + "<h2>Gold rate by city</h2>" + _list
+            + "<h2>Questions about the gold rate near you</h2>" + _faq_html)
+        _js = ("<script>(function(){var C=" + json.dumps(_cities, ensure_ascii=False)
+               + r""";
+var b=document.getElementById('nm-go'),o=document.getElementById('nm-out');
+function km(a,b,c,d){var r=Math.PI/180,x=Math.sin((c-a)*r/2),y=Math.sin((d-b)*r/2);
+return 12742*Math.asin(Math.sqrt(x*x+Math.cos(a*r)*Math.cos(c*r)*y*y));}
+function esc(s){return s.replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function show(t){o.style.display='block';o.innerHTML=t;}
+b.addEventListener('click',function(){
+ if(!navigator.geolocation){show('Location is not available in this browser. Pick your city below.');return;}
+ show('Finding your nearest city&hellip;');
+ navigator.geolocation.getCurrentPosition(function(p){
+  var la=p.coords.latitude,lo=p.coords.longitude;
+  var s=C.map(function(c){return{c:c,d:km(la,lo,c.a,c.o)};}).sort(function(x,y){return x.d-y.d;});
+  var n=s[0];
+  var h='<p style="margin:0 0 8px"><strong>Nearest city we cover: <a href="'+n.c.u+'">'+esc(n.c.n)+'</a></strong> (about '+Math.round(n.d)+' km).</p>';
+  if(n.c.h.length)h+='<p style="margin:0 0 8px">Jewellers based in '+esc(n.c.n)+': '+n.c.h.map(esc).join(', ')+'.</p>';
+  h+='<p style="margin:0 0 8px"><a href="'+n.c.u+'">See today&rsquo;s gold rate in '+esc(n.c.n)+' &rarr;</a></p>';
+  h+='<p style="margin:0;font-size:13px">Also near you: '+s.slice(1,4).map(function(x){return '<a href="'+x.c.u+'">'+esc(x.c.n)+'</a> ('+Math.round(x.d)+' km)';}).join(', ')+'</p>';
+  show(h);
+ },function(){show('Location was not shared. Pick your city from the list below.');},{timeout:10000,maximumAge:600000});
+});})();</script>""")
+        _nld = ('<script type="application/ld+json">' + json.dumps([
+            {"@context": "https://schema.org", "@type": "WebPage",
+             "url": f"{SITE_URL}/gold-rate-near-me",
+             "name": "Gold Rate Near Me Today", "inLanguage": "en-IN",
+             "dateModified": now_ist.isoformat()},
+            {"@context": "https://schema.org", "@type": "FAQPage",
+             "mainEntity": [{"@type": "Question", "name": q,
+                             "acceptedAnswer": {"@type": "Answer", "text": a}}
+                            for q, a in _faq]}], ensure_ascii=False) + "</script>")
+        render_content(
+            "gold-rate-near-me",
+            f"Gold Rate Near Me Today ({now_ist.strftime('%-d %b')}): 24K & 22K | MyGoldRates",
+            (f"Gold rate near me today: 24K {inr(med['24K'])}/g, 22K "
+             f"{inr(med['22K'])}/g. Find your nearest city and compare "
+             f"{len(live)} jewellers' live rates near you."),
+            _body, extra_js=_js, jsonld_block=_nld)
+        extra_urls.append(("gold-rate-near-me", "daily", "0.8"))
+    except Exception as e:
+        print("near-me: skipped -", type(e).__name__, str(e)[:120])
+
     _ibja_anchor_spot = ((gold_usd / 31.1034768) * usdinr
                          if gold_usd and usdinr else 0)
 
@@ -3427,6 +3596,8 @@ def main():
             "ckc": "south", "joyalukkas": "south",
             "pngsons": "west", "ranka": "west", "rbz": "west",
             "chandukaka": "west", "bhindi": "west",
+            "thangamayil": "south", "khazana": "south", "avr": "south",
+            "mahesh": "west",
         }
         pulse_brands = []
         for _r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):
@@ -4268,6 +4439,8 @@ reference, spot gold and silver and this week's economic calendar: {SITE_URL}/
 - Gold market today (daily analysis of what moved gold and why, from the \
 day's prices and world gold news): {SITE_URL}/gold-market-today
 - Gold rate history, day by day for every month: {SITE_URL}/gold-rate-history
+- Gold rate near me (finds the nearest city we cover, on the device): \
+{SITE_URL}/gold-rate-near-me
 - Making charges compared across jewellers: \
 {SITE_URL}/making-charges-comparison
 - Dhanteras 2026 gold buying report: {SITE_URL}/dhanteras-gold-report-2026
