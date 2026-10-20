@@ -400,3 +400,16 @@ def test_gold_karat_dash_rate_strip():
     found, _, _ = _extract("Gold 18 KT - ₹ 11037 Gold 22 KT - ₹ 13490 Gold 24 KT - "
                            "₹ 14727 Silver - ₹ 240 Platinum 950 - ₹ 6777")
     assert found == {"18K": 11037.0, "22K": 13490.0, "24K": 14727.0}
+
+
+def test_near_me_matches_regional_jewellers_by_state():
+    # The board's near-me filter used four lat/lon boxes, which put Lucknow,
+    # Bhopal and Nagpur in "South". It now takes the state of the nearest
+    # city we cover and shows the regional jewellers serving that state.
+    import generate_site
+    src = open("pulse_app.html", encoding="utf-8").read()
+    assert "var NEAR_CITIES=[];" in src, "build injects city coordinates here"
+    assert "(x.b.st||[]).indexOf(nearRegion)>-1" in src
+    assert all(generate_site.PLACE_STATE.get(c) for c in generate_site.CITY_COORDS)
+    gen = open("generate_site.py", encoding="utf-8").read()
+    assert '"st": REGION_MAP.get(_slug, [])' in gen

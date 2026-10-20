@@ -227,6 +227,8 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
 .br.best{background:var(--mint-soft)}
 .b-rk{width:18px;font-size:10px;font-weight:700;color:var(--text3);flex-shrink:0}
 .br.best .b-rk{color:var(--mint)}
+.b-ini{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:5px;flex-shrink:0;margin-right:8px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#1a1405;font:700 11px/1 'DM Sans',system-ui,sans-serif}
+.site-td-brand .b-ini{width:22px;height:22px;margin-right:0}
 .b-logo{width:20px;height:20px;border-radius:5px;flex-shrink:0;object-fit:contain;margin-right:8px;background:#fff;border:1px solid var(--border);padding:1px}
 .b-inf{flex:1;min-width:0;display:flex;align-items:center;gap:5px}
 .b-nm{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -660,7 +662,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 
   <!-- Near Me toggle (adds regional jewellers from your area) -->
   <div class="region-row" id="regionRow">
-    <button class="rc" id="nearBtn" data-r="near"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Include brands near me</button>
+    <button class="rc" id="nearBtn" data-r="near"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Include stores near me</button>
   </div>
 
   <!-- Brands -->
@@ -1019,7 +1021,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
           <h2>Compare Every Jeweller</h2>
           <p id="brandsCountS">14 national brands</p>
         </div>
-        <button class="rc" id="nearBtnS"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Include brands near me</button>
+        <button class="rc" id="nearBtnS"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Include stores near me</button>
       </div>
       <div class="site-table-wrap">
         <table class="site-table">
@@ -2571,6 +2573,13 @@ function handleCredentialResponse(resp){
   function $(id,suf){return document.getElementById(id+suf)}
   function num(s){return parseFloat(String(s).replace(/,/g,''))}
   function fmt(n){return '₹'+Math.round(n).toLocaleString('en-IN')}
+  // A jeweller without a usable favicon gets its initial instead of a gap.
+  window.logoFail=function(el){
+    var s=document.createElement('span');
+    s.className=(el.className||'')+' b-ini';
+    s.textContent=(el.getAttribute('data-n')||'?').charAt(0);
+    if(el.parentNode)el.parentNode.replaceChild(s,el);
+  };
   function fmtG(g){return g.toFixed(3)+' g'}
   function perG(brand){return brand.rate*PURITY[currentK]}
   function rateFor(brandIdx,karat){return BRANDS[brandIdx].rate*PURITY[karat]}
@@ -2589,7 +2598,7 @@ function handleCredentialResponse(resp){
       .map(function(b,i){return {b:b,i:i}})
       .filter(function(x){
         if(x.b.nat)return true;
-        return nearMe && nearRegion && x.b.r===nearRegion;
+        return nearMe && nearRegion && (x.b.st||[]).indexOf(nearRegion)>-1;
       })
       .sort(function(a,b){return a.b.rate-b.b.rate});
   }
@@ -2605,7 +2614,7 @@ function handleCredentialResponse(resp){
       var dtxt=delta===0?'±0':(delta<0?'−':'+')+'₹'+Math.abs(delta);
       return '<div class="br'+(isBest?' best':'')+(isSel?' selected':'')+'" data-bi="'+x.i+'">'+
         '<span class="b-rk">'+(rank+1)+'</span>'+
-        '<img class="b-logo" alt="" loading="lazy" src="https://www.google.com/s2/favicons?domain='+x.b.d+'&sz=64" onerror="this.style.visibility=\'hidden\'">'+
+        '<img class="b-logo" alt="" loading="lazy" data-n="'+x.b.n+'" src="https://www.google.com/s2/favicons?domain='+x.b.d+'&sz=64" onerror="logoFail(this)">'+
         '<div class="b-inf"><span class="b-nm">'+x.b.n+'</span>'+(isBest?'<span class="b-tg">Lowest</span>':'')+'</div>'+
         '<div class="b-pr"><div class="b-rt">'+fmt(shown)+'</div><div class="b-dl '+dcls+'">'+dtxt+'</div></div>'+
         '</div>';
@@ -2628,7 +2637,7 @@ function handleCredentialResponse(resp){
       var dtxt=delta===0?'±0':(delta<0?'−':'+')+'₹'+Math.abs(delta);
       return '<tr class="'+(isBest?'best ':'')+(isSel?'selected':'')+'" data-bi="'+x.i+'">'+
         '<td><span class="rk">'+(rank+1)+'</span></td>'+
-        '<td><div class="site-td-brand"><img alt="" loading="lazy" src="https://www.google.com/s2/favicons?domain='+x.b.d+'&sz=64" onerror="this.style.visibility=\'hidden\'"><span>'+x.b.n+'</span>'+(isBest?'<span class="site-tg">Lowest</span>':'')+'</div></td>'+
+        '<td><div class="site-td-brand"><img alt="" loading="lazy" data-n="'+x.b.n+'" src="https://www.google.com/s2/favicons?domain='+x.b.d+'&sz=64" onerror="logoFail(this)"><span>'+x.b.n+'</span>'+(isBest?'<span class="site-tg">Lowest</span>':'')+'</div></td>'+
         '<td class="num">'+fmt(shown)+'<span class="site-delta '+dcls+'">'+dtxt+'</span></td>'+
         '</tr>';
     }).join('');
@@ -2710,7 +2719,7 @@ function handleCredentialResponse(resp){
     }
     var optHtml=avail.map(function(b){
       return '<button class="mc-brand-opt'+(b.n===mcSelectedBrand?' active':'')+'" type="button" role="option" aria-selected="'+(b.n===mcSelectedBrand)+'" data-brand="'+b.n+'">'+
-        '<img class="mc-brand-logo" alt="" loading="lazy" src="https://www.google.com/s2/favicons?domain='+b.d+'&sz=64" onerror="this.style.visibility=\'hidden\'">'+
+        '<img class="mc-brand-logo" alt="" loading="lazy" data-n="'+b.n+'" src="https://www.google.com/s2/favicons?domain='+b.d+'&sz=64" onerror="logoFail(this)">'+
         '<span>'+b.n+'</span>'+
         '<svg class="mc-brand-opt-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>';
     }).join('');
@@ -2869,12 +2878,22 @@ function handleCredentialResponse(resp){
   wireKarats('karatRow');wireKarats('karatRowS');
 
   // ─── Near-me toggle (both scopes, shared state) ───
+  // Near me = the state of the nearest city we cover (computed on the
+  // device; the location is never sent anywhere). Regional jewellers are
+  // tagged with the states they serve, so a visitor in Lucknow sees Uttar
+  // Pradesh chains and one in Chennai sees Tamil Nadu chains. The old
+  // four-box split put Lucknow, Bhopal and Nagpur in "South".
+  var NEAR_CITIES=[];
+  var nearCity=null;
   function nearestRegion(lat,lon){
-    if(lat<=17) return 'south';
-    if(lat>=27) return 'north';
-    if(lon<=77) return 'west';
-    if(lon>=85) return 'east';
-    return 'south';
+    var best=null,bd=1e9;
+    NEAR_CITIES.forEach(function(c){
+      var dx=(c[1]-lon)*Math.cos(lat*Math.PI/180),dy=c[0]-lat,d=dx*dx+dy*dy;
+      if(d<bd){bd=d;best=c}
+    });
+    if(!best)return null;
+    nearCity=best[3];
+    return best[2];
   }
   var pinSvg='<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
   var REGION_LABEL={south:'South',west:'West',north:'North',east:'East'};
@@ -2882,7 +2901,8 @@ function handleCredentialResponse(resp){
     SCOPES.forEach(function(suf){
       var btn=$('nearBtn',suf);if(!btn)return;
       btn.classList.toggle('active',nearMe);
-      btn.innerHTML=pinSvg+(locating?'Locating…':nearMe?('Showing brands near you · '+REGION_LABEL[nearRegion]+' (tap to hide)'):'Include brands near me');
+      var nReg=BRANDS.filter(function(b){return (b.st||[]).indexOf(nearRegion)>-1}).length;
+      btn.innerHTML=pinSvg+(locating?'Locating…':nearMe?((nReg?'Showing '+nReg+' jeweller'+(nReg===1?'':'s')+' near you · ':'No regional jewellers tracked near you yet · ')+(nearCity||nearRegion)+' (tap to hide)'):'Include stores near me');
     });
   }
   function setNear(on,reg){
