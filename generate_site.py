@@ -348,6 +348,7 @@ def site_links_html():
         f'<a href="{SITE_URL}/making-charges-comparison">Making charges</a>'
         f'<a href="{SITE_URL}/gold-market-today">Gold market today</a>'
         f'<a href="{SITE_URL}/gold-rate-near-me">Gold rate near me</a>'
+        f'<a href="{SITE_URL}/list-your-jewellery">List your jewellery</a>'
         f'<a href="{SITE_URL}/gold-rate-history">Gold rate history</a>'
         f'<a href="{SITE_URL}/news">Gold news</a>'
         f'<a href="{SITE_URL}/jewellers-digest">Jewellers Digest</a>'
@@ -735,6 +736,8 @@ REGION_MAP = {
     "abharan": ["Karnataka"],
     "nac": ["Tamil Nadu"],
     "prince": ["Tamil Nadu"],
+    "whp": ["Maharashtra"],
+    "khimji": ["Odisha"],
 }
 
 
@@ -3568,6 +3571,100 @@ b.addEventListener('click',function(){
     except Exception as e:
         print("near-me: skipped -", type(e).__name__, str(e)[:120])
 
+    # ---- /list-your-jewellery: jewellers send their own rate ----
+    # Most local jewellers publish no rate online, so the board cannot read
+    # one. This page lets them send it: a new jeweller applies (held for
+    # review, nothing is published from an application); an approved one
+    # posts each day's rate with its personal code. Both go through
+    # security-definer functions in sql/jeweller_submissions.sql, which
+    # validate the input; the tables themselves are closed to the public key.
+    _states = ["Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh",
+               "Assam", "Bihar", "Chandigarh", "Chhattisgarh",
+               "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa",
+               "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir",
+               "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep",
+               "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
+               "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim",
+               "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh",
+               "Uttarakhand", "West Bengal"]
+    _opt = "".join(f"<option>{_html.escape(x)}</option>" for x in _states)
+    _rates = ('<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'
+              '<div><label for="{p}24">24K / g</label><input id="{p}24" inputmode="decimal" placeholder="e.g. 14800"></div>'
+              '<div><label for="{p}22">22K / g</label><input id="{p}22" inputmode="decimal" placeholder="e.g. 13570"></div>'
+              '<div><label for="{p}18">18K / g</label><input id="{p}18" inputmode="decimal" placeholder="e.g. 11100"></div></div>'
+              '<label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-weight:500">'
+              '<input type="checkbox" id="{p}gst" style="width:auto"> These rates include 3% GST</label>')
+    _lbody = (
+        crumbs(("List your jewellery", None))
+        + "<h1>List Your Jewellery Store on MyGoldRates</h1>"
+        + f"<p>MyGoldRates compares today's gold rate across {len(live)} "
+          "jewellers for buyers searching their city. If your store publishes "
+          "no rate online, send it here and buyers near you will see it next "
+          "to the big chains, with a link to your store. Free.</p>"
+        + "<h2>How it works</h2><ol>"
+          "<li>Apply below with your store details and today's rate.</li>"
+          "<li>We check the details and call or email you, usually within two days.</li>"
+          "<li>Once approved you get a personal code. Each morning, enter your "
+          "rates with it below; they appear on your city's page and, for "
+          "visitors near you, on the homepage.</li></ol>"
+          "<p>Rates are checked against the market every day; a rate far from "
+          "it is held back rather than shown.</p>"
+        + '<h2 id="apply">New jeweller: apply</h2><div class="calcbox" id="ap">'
+          '<label for="apN">Store name *</label><input id="apN" maxlength="120" autocomplete="organization">'
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+          '<div><label for="apC">City *</label><input id="apC" maxlength="80"></div>'
+          f'<div><label for="apS">State *</label><select id="apS"><option value="">Choose</option>{_opt}</select></div></div>'
+          '<label for="apP">Phone</label><input id="apP" inputmode="tel" maxlength="20" autocomplete="tel">'
+          '<label for="apE">Email</label><input id="apE" type="email" maxlength="160" autocomplete="email">'
+          '<label for="apK">Contact person</label><input id="apK" maxlength="120" autocomplete="name">'
+          '<label for="apW">Website (if any)</label><input id="apW" maxlength="200" placeholder="https://">'
+          '<label for="apI">Instagram (if any)</label><input id="apI" maxlength="120" placeholder="@yourstore">'
+          '<p style="margin:14px 0 0;font-size:13.5px">Today&rsquo;s selling rate per gram, before making charges:</p>'
+        + _rates.format(p="ap")
+        + '<label for="apX">Anything else</label><input id="apX" maxlength="500">'
+          '<button type="button" id="apGo" class="nm-btn">Send application</button>'
+          '<div id="apOut" class="calcout" style="display:none" aria-live="polite"></div></div>'
+        + '<h2 id="daily">Listed jeweller: today&rsquo;s rate</h2><div class="calcbox" id="dr">'
+          '<label for="drK">Your code</label><input id="drK" maxlength="40" autocomplete="off">'
+        + _rates.format(p="dr")
+        + '<button type="button" id="drGo" class="nm-btn">Update today&rsquo;s rate</button>'
+          '<div id="drOut" class="calcout" style="display:none" aria-live="polite"></div></div>'
+        + "<p style='font-size:13px'>We use your details only to verify and list your "
+          "store, and never share your phone or email. "
+          f'Questions: <a href="{SITE_URL}/contact">contact us</a>.</p>')
+    _ljs = ("<style>.nm-btn{width:100%;margin-top:16px;padding:13px;border-radius:10px;border:0;"
+            "font-weight:700;font-size:15px;cursor:pointer;background:var(--gold);color:#1a1405}"
+            ".nm-btn[disabled]{opacity:.6}</style><script>(function(){var SB="
+            + json.dumps(supabase_url) + ",K=" + json.dumps(anon_key) + r""";
+function v(id){var e=document.getElementById(id);return e?(e.type==='checkbox'?e.checked:e.value.trim()):''}
+function n(id){var x=v(id).replace(/[,₹\s]/g,'');return x===''?null:Number(x)}
+function out(id,ok,t){var o=document.getElementById(id);o.style.display='block';o.style.borderColor=ok?'':'#c0392b';o.textContent=t}
+function call(fn,body,btn,o,msgs){btn.disabled=true;
+ fetch(SB+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json'},body:JSON.stringify(body)})
+ .then(function(r){return r.json()}).then(function(r){btn.disabled=false;out(o,r==='ok',msgs[r]||'Something went wrong. Please try again.')})
+ .catch(function(){btn.disabled=false;out(o,false,'Could not send. Check your connection and try again.')});}
+var RM={rate:'Enter at least one rate (24K, 22K or 18K, per gram).',range:'A rate per gram should be between ₹3,000 and ₹30,000. Please check the figures.'};
+document.getElementById('apGo').addEventListener('click',function(){
+ if(!v('apN')||!v('apC')||!v('apS'))return out('apOut',false,'Please fill in store name, city and state.');
+ if(!v('apP')&&!v('apE'))return out('apOut',false,'Please give a phone number or email so we can verify your store.');
+ call('apply_as_jeweller',{jeweller:v('apN'),city:v('apC'),state:v('apS'),website:v('apW')||null,contact_name:v('apK')||null,phone:v('apP')||null,email:v('apE')||null,instagram:v('apI')||null,r24:n('ap24'),r22:n('ap22'),r18:n('ap18'),gst:v('apgst'),note:v('apX')||null},this,'apOut',
+  Object.assign({ok:'Thank you. We will check your details and contact you within two days.',missing:'Please fill in store name, city and state.',contact:'Please give a phone number or email.',limit:'We already have your application; we will be in touch.'},RM));
+});
+document.getElementById('drGo').addEventListener('click',function(){
+ if(!v('drK'))return out('drOut',false,'Enter your code.');
+ call('submit_daily_rate',{code:v('drK'),r24:n('dr24'),r22:n('dr22'),r18:n('dr18'),gst:v('drgst')},this,'drOut',
+  Object.assign({ok:'Today’s rate is saved. It appears on the site after the next update.',code:'That code is not recognised. Check it, or apply above.'},RM));
+});
+})();</script>""")
+    render_content(
+        "list-your-jewellery",
+        "List Your Jewellery Store: Show Your Gold Rate | MyGoldRates",
+        ("Jewellers: list your store's daily gold rate on MyGoldRates for free. "
+         "Buyers in your city compare rates here; send yours and appear next "
+         "to the big chains."),
+        _lbody, extra_js=_ljs)
+    extra_urls.append(("list-your-jewellery", "monthly", "0.5"))
+
     _ibja_anchor_spot = ((gold_usd / 31.1034768) * usdinr
                          if gold_usd and usdinr else 0)
 
@@ -3606,7 +3703,8 @@ b.addEventListener('click',function(){
             "thangamayil": "south", "khazana": "south", "avr": "south",
             "mahesh": "west", "mehta": "north", "jewelone": "south",
             "pcchandra": "east", "abharan": "south", "nac": "south",
-            "prince": "south",
+            "prince": "south", "whp": "west",
+            "khimji": "east",
         }
         pulse_brands = []
         for _r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):
@@ -3637,6 +3735,10 @@ b.addEventListener('click',function(){
                 # 'all' for national brands and any regional we don't have a
                 # mapping for (harmless - just always visible in Near-me).
                 "r": _region_pulse.get(_slug, "all"),
+                # states the jeweller serves: the near-me filter shows a
+                # regional jeweller when the visitor's nearest city is in
+                # one of them
+                "st": REGION_MAP.get(_slug, []),
                 # 24K per-gram pre-GST INR - same value classic /compare uses
                 "rate": round(float(_r["canonical_24k_pre_gst"]), 2),
             })
@@ -3654,6 +3756,12 @@ b.addEventListener('click',function(){
                 "pulse_app.html: BRANDS array literal not found - patch the "
                 "hydration regex or the source file has drifted")
         pulse_html = _new_pulse_html
+        _near = [[a, o, PLACE_STATE.get(c) or c, c] for c, (a, o) in CITY_COORDS.items()]
+        pulse_html, _n2 = _re.subn(r"var NEAR_CITIES=\[\];",
+                                   lambda m: "var NEAR_CITIES=" + json.dumps(_near, ensure_ascii=False) + ";",
+                                   pulse_html, count=1)
+        if _n2 != 1:
+            raise RuntimeError("pulse_app.html: NEAR_CITIES placeholder missing")
         print(f"pulse: hydrated BRANDS with {len(pulse_brands)} live jewellers "
               f"({pulse_brands[0]['n']} lowest at "
               f"₹{pulse_brands[0]['rate']:,.2f}/g)")

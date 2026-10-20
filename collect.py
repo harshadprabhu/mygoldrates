@@ -28,7 +28,7 @@ import os
 import re
 import statistics
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 from urllib.robotparser import RobotFileParser
 
@@ -1294,6 +1294,31 @@ def collect_brand(b, session):
 
 # ------------------------------------------------------------------- main
 
+def from_submission(sb, b):
+    """A jeweller with no website rate that sends its own (rate_url
+    'submitted:<slug>', see sql/jeweller_submissions.sql). Uses the latest
+    rate it posted in the last 24 hours; older than that is not today's.
+    GST-inclusive figures are brought to pre-GST like every other source.
+    The 4% market check after collection applies to it unchanged."""
+    slug = b["rate_url"].split(":", 1)[1] or b.get("slug")
+    since = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+    rows = (sb.table("jeweller_daily_rates")
+              .select("rate_24k, rate_22k, rate_18k, includes_gst, submitted_at")
+              .eq("slug", slug).gte("submitted_at", since)
+              .order("submitted_at", desc=True).limit(1).execute().data)
+    if not rows:
+        return b["rate_url"], None, None, None, "no rate submitted in 24h"
+    r = rows[0]
+    div = 1.03 if r.get("includes_gst") else 1.0
+    found = {k: float(r[c]) / div for k, c in
+             (("24K", "rate_24k"), ("22K", "rate_22k"), ("18K", "rate_18k"))
+             if r.get(c)}
+    ok, why = ordering_sane(found)
+    if not found or not ok:
+        return b["rate_url"], None, None, None, f"submitted rate rejected: {why}"
+    return b["rate_url"], found, {k: 1 for k in found}, "submitted", "ok"
+
+
 def main():
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
     session = requests.Session()
@@ -1358,7 +1383,10 @@ def main():
     for b in pending:
         print(f"-> {b['name']:22s} ", end="", flush=True)
         try:
-            url, found, counts, method, note = collect_brand(b, session)
+            if (b.get("rate_url") or "").startswith("submitted:"):
+                url, found, counts, method, note = from_submission(sb, b)
+            else:
+                url, found, counts, method, note = collect_brand(b, session)
         except Exception as e:
             print(f"ERROR {type(e).__name__}: {e}")
             time.sleep(POLITE_DELAY)
