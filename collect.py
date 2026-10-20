@@ -1147,8 +1147,13 @@ def collect_brand(b, session):
                 return url, f, c, f"static/{h}", n
             continue
 
-        if reason.startswith("blocked"):
-            blocked = True
+        # A single-page storefront serves the same shell for every path, so
+        # its homepage matches the soft-404 fingerprint (AVR Swarna Mahal).
+        # A site's root cannot be a not-found page, so render it there; any
+        # other path that looks like a soft-404 stays rejected.
+        spa_root = reason == "soft-404" and urlsplit(url).path in ("", "/")
+        if reason.startswith("blocked") or spa_root:
+            blocked = blocked or not spa_root
             rhtml = render(url, wait_selector=ws)
             if rhtml:
                 found, counts, how, note = try_html(rhtml)
