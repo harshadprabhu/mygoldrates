@@ -348,6 +348,7 @@ def site_links_html():
         f'<a href="{SITE_URL}/making-charges-comparison">Making charges</a>'
         f'<a href="{SITE_URL}/gold-market-today">Gold market today</a>'
         f'<a href="{SITE_URL}/gold-rate-near-me">Gold rate near me</a>'
+        f'<a href="{SITE_URL}/gold-rate-by-jeweller">Gold rate by jeweller</a>'
         f'<a href="{SITE_URL}/list-your-jewellery">List your jewellery</a>'
         f'<a href="{SITE_URL}/gold-rate-history">Gold rate history</a>'
         f'<a href="{SITE_URL}/news">Gold news</a>'
@@ -2283,7 +2284,11 @@ def main():
         nat_med22 = med["22K"]
         where = nm if nm == state else f"{nm} ({state})"
         trs = "".join(
-            f'<tr><td class="lb-name">{_html.escape(r["brands"]["name"])}'
+            f'<tr><td class="lb-name">'
+            + (f'<a href="/{jeweller_pages[r["brands"]["slug"]]}" style="color:inherit">'
+               f'{_html.escape(r["brands"]["name"])}</a>'
+               if r["brands"].get("slug") in jeweller_pages
+               else _html.escape(r["brands"]["name"]))
             + ('<span class="lb-tag">Regional</span>' if r in regional else '')
             + (f'<span class="lb-tag">Based in {_html.escape(nm)}</span>'
                if nm in BRAND_HOME.get((r["brands"] or {}).get("slug") or "", [])
@@ -3571,6 +3576,232 @@ b.addEventListener('click',function(){
     except Exception as e:
         print("near-me: skipped -", type(e).__name__, str(e)[:120])
 
+    # ---- a page per jeweller, and /gold-rate-by-jeweller ----
+    # "Tanishq gold rate today", "Kalyan jewellers gold rate today" are how
+    # many people search, and Search Console shows them reaching the site
+    # with nowhere specific to land. Each page is that jeweller's own data:
+    # today's rate, its place on today's board, 30 days of its own rates
+    # against the market, its making charges where measured, and where it
+    # sells. A page goes to search engines only once the jeweller has 30
+    # days of history; until then it is live but noindex, so a new jeweller
+    # never produces a thin page. No price markup is used: these are rates,
+    # not offers.
+    def jeweller_slug(name):
+        n = re.sub(r"[.]", "", name.lower()).strip()
+        n = re.sub(r"\s+gold$", "", n)
+        return loc_slug(n) + "-gold-rate-today"
+
+    jeweller_pages = {}          # brand slug -> page slug, for links
+
+    def _write_jeweller_pages():
+        # its own scope: the many short names below must not shadow the
+        # build's own (_ld, used by the city pages, did)
+        try:
+            _since = (now_ist.date() - timedelta(days=45)).isoformat()
+            _jrows, _off = [], 0
+            while True:
+                _pg = (sb.table("rates")
+                       .select("rate_date, canonical_24k_pre_gst, brands(slug)")
+                       .eq("status", "published").gte("rate_date", _since)
+                       .order("rate_date").range(_off, _off + 999).execute().data)
+                _jrows += _pg
+                if len(_pg) < 1000:
+                    break
+                _off += 1000
+            _jhist, _jnat = {}, {}
+            for _r in _jrows:
+                _sl = ((_r.get("brands") or {}).get("slug") or "")
+                _v = _r.get("canonical_24k_pre_gst")
+                if not _sl or not _v:
+                    continue
+                _jhist.setdefault(_sl, {})[_r["rate_date"]] = float(_v)
+                if _sl not in REGION_MAP:
+                    _jnat.setdefault(_r["rate_date"], []).append(float(_v))
+            _jmed = {d: statistics.median(v) for d, v in _jnat.items()}
+            # days with a published rate in the last 45: 30 or more and the
+            # jeweller's page has enough of its own history to be indexed
+            _jdays = {sl: len(v) for sl, v in _jhist.items()}
+            try:
+                with open("docs/making-charges.json", encoding="utf-8") as f:
+                    _mcb = {b["brand"].lower(): b for b in json.load(f).get("brands", [])}
+            except (OSError, ValueError):
+                _mcb = {}
+            _ranked = sorted(live, key=lambda r: r["canonical_24k_pre_gst"])
+            _hub_rows = []
+            for _i, _r in enumerate(_ranked, 1):
+                _b = _r.get("brands") or {}
+                _sl, _nm = _b.get("slug") or "", _b.get("name") or ""
+                if not _sl or not _nm:
+                    continue
+                _ps = jeweller_slug(_nm)
+                jeweller_pages[_sl] = _ps
+                _c24 = float(_r["canonical_24k_pre_gst"])
+                _lad = ladder(_c24)
+                _prem = (_c24 / median24 - 1) * 100
+                _states = REGION_MAP.get(_sl, [])
+                _where = (f"a regional chain with stores in {', '.join(_states)}"
+                          if _states else "listed here as a national chain")
+                _m = (_r.get("method") or "")
+                if "submitted" in _m:
+                    _how = f"sent to us each day by {_nm}"
+                elif any(k in _m for k in ("metalnet", "goldvalue", "product", "jsonbreakup")):
+                    _how = (f"worked out each day from the gold value and weight in "
+                            f"the price breakup of a plain gold item on {_nm}'s website")
+                else:
+                    _how = f"read each day from the rate {_nm} publishes on its website"
+                _h = sorted(_jhist.get(_sl, {}).items())[-30:]
+                _rows_html, _prems = "", []
+                for _d, _v in reversed(_h):
+                    _md = _jmed.get(_d)
+                    _pp = ((_v / _md - 1) * 100) if _md else None
+                    if _pp is not None:
+                        _prems.append(_pp)
+                    _dd = datetime.strptime(_d, "%Y-%m-%d").strftime("%d %b")
+                    _rows_html += (f"<tr><td>{_dd}</td><td>{inr(_v)}</td>"
+                                   f"<td>{inr(ladder(_v)['22K'])}</td>"
+                                   f"<td>{'' if _pp is None else f'{_pp:+.2f}%'}</td></tr>")
+                _vals = [v for _, v in _h]
+                _stats = ""
+                if len(_vals) >= 5:
+                    _hi, _lo = max(_h, key=lambda x: x[1]), min(_h, key=lambda x: x[1])
+                    _chg = (_vals[-1] / _vals[0] - 1) * 100
+                    _stats = (f"<p>Over the last {len(_vals)} days with a rate, {_nm}'s 24K rate "
+                              f"ranged from {inr(_lo[1])} ({datetime.strptime(_lo[0], '%Y-%m-%d').strftime('%d %b')}) "
+                              f"to {inr(_hi[1])} ({datetime.strptime(_hi[0], '%Y-%m-%d').strftime('%d %b')}), "
+                              f"a change of {_chg:+.1f}% across the period"
+                              + (f", and averaged {statistics.mean(_prems):+.2f}% against the "
+                                 f"market median" if _prems else "") + ".</p>")
+                _mc = _mcb.get(_nm.lower())
+                _mc_html, _mc_faq = "", None
+                if _mc and _mc.get("categories"):
+                    _cats = [c for c in _mc["categories"] if c.get("making_pct_median") is not None]
+                    if _cats:
+                        _mc_html = ("<h2>Making charges</h2><p>Measured from "
+                                    f"{_nm}'s own product prices:</p><table class='jt'><tr>"
+                                    "<th>Item</th><th>Typical making charge</th><th>Range</th></tr>"
+                                    + "".join(f"<tr><td>{_html.escape(c['category'])}</td>"
+                                              f"<td>{c['making_pct_median']:.0f}%</td>"
+                                              f"<td>{c.get('making_pct_min', 0):.0f}-{c.get('making_pct_max', 0):.0f}%</td></tr>"
+                                              for c in _cats)
+                                    + f"</table><p>Compare across jewellers on the "
+                                      f'<a href="{SITE_URL}/making-charges-comparison">making charges page</a>.</p>')
+                        _mc_faq = (f"What making charges does {_nm} charge?",
+                                   f"Measured from {_nm}'s product prices: "
+                                   + "; ".join(f"{c['category']} about {c['making_pct_median']:.0f}%"
+                                               for c in _cats[:4])
+                                   + ". Making charges are added to the gold value, then 3% GST.")
+                _faq = [
+                    (f"What is {_nm}'s gold rate today?",
+                     f"On {display_date}, {_nm}'s rate is {inr(_lad['24K'])} per gram for 24K, "
+                     f"{inr(_lad['22K'])} for 22K and {inr(_lad['18K'])} for 18K, before 3% GST "
+                     f"and making charges."),
+                    (f"Is {_nm} cheaper than other jewellers today?",
+                     f"{_nm} is number {_i} of {len(_ranked)} jewellers we track today, cheapest "
+                     f"first: {abs(_prem):.2f}% {'below' if _prem < 0 else 'above'} the market "
+                     f"median of {inr(median24)} per gram for 24K."),
+                    (f"Does {_nm}'s rate include GST?",
+                     f"The rates on this page are before GST. With 3% GST, 10 grams of 22K at "
+                     f"{_nm} today cost {inr(round(_lad['22K'] * 10 * 1.03))} plus making charges."),
+                ] + ([_mc_faq] if _mc_faq else [])
+                _faq_html = "".join(f"<h3>{_html.escape(q)}</h3><p>{_html.escape(a)}</p>" for q, a in _faq)
+                _site = (_b.get("domain") or "").replace("https://", "").replace("http://", "").split("/")[0]
+                _body = (
+                    crumbs(("Gold rate by jeweller", f"{SITE_URL}/gold-rate-by-jeweller"), (_nm, None))
+                    + f"<h1>{_html.escape(_nm)} Gold Rate Today</h1>"
+                    + f'<p class="updated-on">{display_date}, {display_time}</p>'
+                    + "<table class='jt'><tr><th>Purity</th><th>Per gram</th><th>With 3% GST</th><th>10 grams</th></tr>"
+                    + "".join(f"<tr><td>{k}</td><td><strong>{inr(_lad[k])}</strong></td>"
+                              f"<td>{inr(_lad[k] * 1.03)}</td><td>{inr(_lad[k] * 10)}</td></tr>"
+                              for k in ("24K", "22K", "18K"))
+                    + "</table>"
+                    + f"<p>{_html.escape(_nm)} is <strong>number {_i} of {len(_ranked)}</strong> jewellers "
+                      f"we track today, cheapest first, at <strong>{abs(_prem):.2f}% "
+                      f"{'below' if _prem < 0 else 'above'}</strong> the market median "
+                      f"({inr(median24)} per gram for 24K). It is {_where}. Its rate is {_how}"
+                      + (f' (<a href="https://{_site}" rel="nofollow noopener" target="_blank">{_html.escape(_site)}</a>)' if _site else "")
+                      + ". Rates are before GST and making charges; confirm at the store before buying.</p>"
+                    + (f"<h2>{_html.escape(_nm)}'s rate, last 30 days</h2>{_stats}"
+                       "<div style='overflow-x:auto'><table class='jt'><tr><th>Date</th><th>24K / g</th>"
+                       f"<th>22K / g</th><th>vs market</th></tr>{_rows_html}</table></div>" if _rows_html else "")
+                    + _mc_html
+                    + f"<h2>Questions about {_html.escape(_nm)}'s gold rate</h2>{_faq_html}"
+                    + f'<p>See <a href="{SITE_URL}/">all {len(_ranked)} jewellers\' rates today</a>, '
+                      f'<a href="{SITE_URL}/gold-rate-by-jeweller">gold rate by jeweller</a> or '
+                      f'<a href="{SITE_URL}/gold-rate-near-me">the gold rate near you</a>.</p>'
+                    + "<style>.jt{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:14px}"
+                      ".jt th,.jt td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right}"
+                      ".jt th:first-child,.jt td:first-child{text-align:left}"
+                      ".jt th{font-size:12px;color:var(--ink-3);font-weight:600}</style>")
+                _ld = ('<script type="application/ld+json">' + json.dumps([
+                    {"@context": "https://schema.org", "@type": "WebPage",
+                     "url": f"{SITE_URL}/{_ps}", "name": f"{_nm} Gold Rate Today",
+                     "inLanguage": "en-IN", "dateModified": now_ist.isoformat(),
+                     "about": {"@type": "Organization", "name": _nm,
+                               **({"url": f"https://{_site}"} if _site else {})}},
+                    {"@context": "https://schema.org", "@type": "BreadcrumbList",
+                     "itemListElement": [
+                         {"@type": "ListItem", "position": 1, "name": "Home", "item": f"{SITE_URL}/"},
+                         {"@type": "ListItem", "position": 2, "name": "Gold rate by jeweller",
+                          "item": f"{SITE_URL}/gold-rate-by-jeweller"},
+                         {"@type": "ListItem", "position": 3, "name": _nm, "item": f"{SITE_URL}/{_ps}"}]},
+                    {"@context": "https://schema.org", "@type": "FAQPage",
+                     "mainEntity": [{"@type": "Question", "name": q,
+                                     "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in _faq]},
+                ], ensure_ascii=False) + "</script>")
+                _ready = _jdays.get(_sl, 0) >= 30
+                render_content(
+                    _ps,
+                    f"{_nm} Gold Rate Today ({now_ist.strftime('%-d %b')}): 24K, 22K | MyGoldRates",
+                    (f"{_nm} gold rate today: 24K {inr(_lad['24K'])}/g, 22K {inr(_lad['22K'])}/g "
+                     f"(pre-GST), number {_i} of {len(_ranked)} jewellers. 30-day history"
+                     + (" and making charges." if _mc_html else ".")),
+                    _body, jsonld_block=_ld,
+                    robots=("index, follow, max-image-preview:large" if _ready else "noindex, follow"))
+                if _ready:
+                    extra_urls.append((_ps, "daily", "0.7"))
+                _hub_rows.append((_i, _nm, _ps, _lad, _prem, _states, _ready))
+            _hub = (
+                crumbs(("Gold rate by jeweller", None))
+                + "<h1>Gold Rate Today by Jeweller</h1>"
+                + f'<p class="updated-on">{display_date}, {display_time}</p>'
+                + f"<p>Today's gold rate at each of the {len(_hub_rows)} jewellers we track, "
+                  f"cheapest first, per gram before 3% GST and making charges. The market "
+                  f"median is {inr(median24)} for 24K. Open a jeweller for its last 30 days "
+                  "and making charges.</p>"
+                + "<div style='overflow-x:auto'><table class='jt'><tr><th>#</th><th>Jeweller</th>"
+                  "<th>24K / g</th><th>22K / g</th><th>vs market</th></tr>"
+                + "".join(f"<tr><td>{i}</td><td style='text-align:left'><a href=\"{SITE_URL}/{ps}\">"
+                          f"{_html.escape(nm)}</a>{' <small>(' + ', '.join(st) + ')</small>' if st else ''}</td>"
+                          f"<td>{inr(lad['24K'])}</td><td>{inr(lad['22K'])}</td><td>{pr:+.2f}%</td></tr>"
+                          for i, nm, ps, lad, pr, st, _ in _hub_rows)
+                + "</table></div>"
+                + f'<p>Jewellers marked with a state are regional chains. A jeweller not listed? '
+                  f'<a href="{SITE_URL}/list-your-jewellery">Jewellers can list their store here</a>.</p>'
+                + "<style>.jt{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:14px}"
+                  ".jt th,.jt td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right}"
+                  ".jt th:nth-child(2),.jt td:nth-child(2){text-align:left}"
+                  ".jt th{font-size:12px;color:var(--ink-3);font-weight:600}</style>")
+            _hld = ('<script type="application/ld+json">' + json.dumps({
+                "@context": "https://schema.org", "@type": "ItemList",
+                "name": "Gold rate today by jeweller",
+                "itemListElement": [{"@type": "ListItem", "position": i, "name": nm,
+                                     "url": f"{SITE_URL}/{ps}"} for i, nm, ps, *_ in _hub_rows]},
+                ensure_ascii=False) + "</script>")
+            render_content(
+                "gold-rate-by-jeweller",
+                f"Gold Rate Today by Jeweller ({now_ist.strftime('%-d %b')}): {len(_hub_rows)} Compared | MyGoldRates",
+                (f"Gold rate today at {len(_hub_rows)} jewellers - Tanishq, Kalyan, Malabar, "
+                 f"Joyalukkas, GRT and more - cheapest first, per gram before GST."),
+                _hub, jsonld_block=_hld)
+            extra_urls.append(("gold-rate-by-jeweller", "daily", "0.8"))
+            print(f"jeweller pages: {len(_hub_rows)} written, "
+                  f"{sum(1 for x in _hub_rows if x[6])} indexed")
+        except Exception as e:
+            print("jeweller pages: skipped -", type(e).__name__, str(e)[:160])
+
+
+    _write_jeweller_pages()
+
     # ---- /list-your-jewellery: jewellers send their own rate ----
     # Most local jewellers publish no rate online, so the board cannot read
     # one. This page lets them send it: a new jeweller applies (held for
@@ -4110,7 +4341,10 @@ document.getElementById('drGo').addEventListener('click',function(){
         f.write("# All crawlers welcome, including AI/LLM assistants.\n")
         for bot in ai_bots:
             f.write(f"User-agent: {bot}\nAllow: /\n\n")
-        f.write(f"User-agent: *\nAllow: /\nDisallow: /analytics\nDisallow: /analytics.html\n\n"
+        f.write(f"User-agent: *\nAllow: /\nDisallow: /analytics\nDisallow: /analytics.html\n"
+                # API paths that appear in page scripts; Google listed
+                # /rest/v1/rpc/ as a page in search results
+                f"Disallow: /rest/\nDisallow: /jd/\n\n"
                 # sitemap.xml is a sitemap-index that references the four
                 # per-section sub-sitemaps (main, cities, daily, news).
                 # Listing every one here as well is redundant but harmless
@@ -4613,6 +4847,8 @@ day's prices and world gold news): {SITE_URL}/gold-market-today
 - Gold rate history, day by day for every month: {SITE_URL}/gold-rate-history
 - Gold rate near me (finds the nearest city we cover, on the device): \
 {SITE_URL}/gold-rate-near-me
+- Gold rate by jeweller (each jeweller's rate today, 30-day history, making \
+charges): {SITE_URL}/gold-rate-by-jeweller
 - Making charges compared across jewellers: \
 {SITE_URL}/making-charges-comparison
 - Dhanteras 2026 gold buying report: {SITE_URL}/dhanteras-gold-report-2026
