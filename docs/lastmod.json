@@ -1,0 +1,266 @@
+{
+"": {
+"h": "2d71fa1bbf2d13f4",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"about": {
+"h": "fffc9ed2ec4f0e34",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"budget-gold-calculator": {
+"h": "833a85f000204e87",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"calculators": {
+"h": "0988ca975eff5c6e",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"contact": {
+"h": "4d56941653933021",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"dhanteras-gold-report-2026": {
+"h": "cfd89577fc33feb9",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-loan-calculator": {
+"h": "4deac45581075009",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-market-today": {
+"h": "e5c0229f94921253",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-history": {
+"h": "c75e494bb55f15ab",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-history/august-2026": {
+"h": "756345ef2fccc27c",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-history/july-2026": {
+"h": "24877f953c102fc3",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-history/october-2026": {
+"h": "b8766f9279a1a733",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-history/september-2026": {
+"h": "b1a19e6f408786a7",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-near-me": {
+"h": "1e0e299513291247",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-ahmedabad": {
+"h": "a94456da33311a70",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-andhra-pradesh": {
+"h": "5fba81732b3a6dc2",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-bengaluru": {
+"h": "d02c09bbb4b8018f",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-bhopal": {
+"h": "bc075f5be35b1f39",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-chandigarh": {
+"h": "734250469014614b",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-chennai": {
+"h": "2310a9a231a51b3c",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-coimbatore": {
+"h": "0c12ab2465be7c34",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-delhi": {
+"h": "5f46d12f90dc7e9e",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-gujarat": {
+"h": "c49aa71743e65392",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-haryana": {
+"h": "5fd61c3c827f0074",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-hubli": {
+"h": "777ff94945674b34",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-hyderabad": {
+"h": "2fa4ed48bbb4b375",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-indore": {
+"h": "068d68727b157bb5",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-jaipur": {
+"h": "aff08206e0f1d50e",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-karnataka": {
+"h": "7d0093b2ddc691b0",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-kerala": {
+"h": "2dc85afe2682220d",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-kochi": {
+"h": "2f71a0915cb32693",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-kolkata": {
+"h": "1dddefe95381df3b",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-lucknow": {
+"h": "610cd47febfefeb1",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-madhya-pradesh": {
+"h": "93e63bbdcac38d85",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-maharashtra": {
+"h": "88d708a182862b21",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-mumbai": {
+"h": "681116a166fa8580",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-nagpur": {
+"h": "5de0edf524c87e5d",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-noida": {
+"h": "31ab314c4aeb38a0",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-odisha": {
+"h": "c572ff57832767ce",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-patna": {
+"h": "aadfd360e9994a22",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-pune": {
+"h": "dbd3328e78a50456",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-punjab": {
+"h": "33854590254e89e4",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-rajasthan": {
+"h": "60eab6ffd42bccb9",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-rajkot": {
+"h": "97073e90a4bbd85d",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-surat": {
+"h": "9812909bf81a537c",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-tamil-nadu": {
+"h": "f8d611945c2918fc",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-telangana": {
+"h": "daf3917ec0bb2bca",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-thiruvananthapuram": {
+"h": "6549f8da8ae4efd0",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-uttar-pradesh": {
+"h": "f830408a222751c4",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-vadodara": {
+"h": "d09d578adccc3459",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-visakhapatnam": {
+"h": "04b58c78425ba31c",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-rate-today-in-west-bengal": {
+"h": "8f856d4cce7df070",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"gold-sip-calculator": {
+"h": "587b1622ae92b52c",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"inquiry": {
+"h": "3ee96c440121fbb5",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"jewellers-digest": {
+"h": "e6f5c4b003444a8e",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"learn/22k-vs-24k-gold": {
+"h": "9b32feca171678aa",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"learn/gold-hallmarking": {
+"h": "c259742f1cb9419e",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"learn/how-gold-rates-are-set": {
+"h": "255eb6c16e1472de",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"learn/making-charges-explained": {
+"h": "670c5c053ae6ac02",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"list-your-jewellery": {
+"h": "a66a544a44d18f1a",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"making-charges-calculator": {
+"h": "0b2dd71b0e239c65",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"making-charges-comparison": {
+"h": "841f18a1cc6aba81",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"methodology": {
+"h": "c8db1e912688bf8b",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"news": {
+"h": "57c9ef69979959e1",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"privacy": {
+"h": "c3b190273143dc3f",
+"lm": "2026-10-20T16:41:36+05:30"
+},
+"terms": {
+"h": "b535925f58959be7",
+"lm": "2026-10-20T16:41:36+05:30"
+}
+}
