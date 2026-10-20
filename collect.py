@@ -343,14 +343,32 @@ _GOLD_RATE_KARAT_RE = re.compile(
     r"([\d,]+(?:\.\d{1,2})?)\s*/-", re.I)
 
 
+# "Today's Gold Rate : 13399.00/gm (22K)" (Mehta Jewellers, Delhi): rate,
+# per-gram unit, then the karat in brackets. Value first, so the groups
+# are swapped relative to the two patterns above.
+_GOLD_RATE_VALUE_KARAT_RE = re.compile(
+    r"gold\s*rate\s*:?\s*(?:₹|Rs\.?)?\s*([\d,]+(?:\.\d{1,2})?)\s*/\s*"
+    r"(?:g|gm|gms|gram)\s*\(\s*(\d{2})\s*K(?:T)?\s*\)", re.I)
+
+
+# "1 GRM (22KT) Gold : ₹13570" (Jewel One): unit, karat, then rate.
+_UNIT_KARAT_GOLD_RE = re.compile(
+    r"\b1\s*(?:g|gm|grm|gram)\s*\(\s*(\d{2})\s*K(?:T)?\s*\)\s*gold\s*:?\s*"
+    r"(?:₹|Rs\.?)\s*([\d,]+(?:\.\d{1,2})?)", re.I)
+
+
 def extract_karat_unit_value(text):
     buckets = {}
-    for m in (list(_KARAT_UNIT_VALUE_RE.finditer(text))
-              or list(_GOLD_RATE_KARAT_RE.finditer(text))):
-        karat = f"{m.group(1)}K"
+    hits = (list(_KARAT_UNIT_VALUE_RE.finditer(text))
+            or list(_GOLD_RATE_KARAT_RE.finditer(text))
+            or list(_UNIT_KARAT_GOLD_RE.finditer(text)))
+    pairs = [(m.group(1), m.group(2)) for m in hits] or [
+        (m.group(2), m.group(1)) for m in _GOLD_RATE_VALUE_KARAT_RE.finditer(text)]
+    for k, v in pairs:
+        karat = f"{k}K"
         if karat not in PURITY_FRACTION:
             continue
-        pg = _per_gram(_f(m.group(2)))
+        pg = _per_gram(_f(v))
         if pg:
             buckets.setdefault(karat, []).append(pg)
     return buckets

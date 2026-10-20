@@ -241,4 +241,52 @@ CANDIDATES = [
      "domain": "www.chandanjewellers.com"},
     {"state": "Goa", "city": "Margao", "name": "Damodar Jewellers",
      "domain": "www.damodarjewellers.com"},
+
+    # ---- 2026-10-20 second sweep: Hyderabad, Kolkata and North India ----
+    # 125 more names checked (homepage and rate pages, plain and rendered).
+    # Added to the board: Mehta Jewellers (Prashant Vihar, Delhi; 22K),
+    # Reliance Jewels (national; 24K only - its own 22K figure reads Rs 6,682,
+    # a site error) and Jewel One (15 showrooms in Tamil Nadu; 22K).
+    # Nothing in Hyderabad or Kolkata qualified: the chains there that have
+    # websites (PMJ, Manepally, Musaddilal, Kalasha, Mangatrai, Krishna
+    # Pearls, Anjali, P C Chandra, B C Sen, M P Jewellers, Sankar) show no
+    # rate online. Re-checked weekly in case that changes.
+    {"state": "Telangana", "city": "Hyderabad", "name": "Mangatrai Pearls & Jewellers",
+     "domain": "www.mangatrai.com"},
+    {"state": "Telangana", "city": "Hyderabad", "name": "Krishna Pearls & Jewellers",
+     "domain": "www.krishnapearls.com"},
+    {"state": "Telangana", "city": "Hyderabad", "name": "Musaddilal Jewellers",
+     "domain": "www.musaddilal.com"},
+    {"state": "Telangana", "city": "Hyderabad", "name": "Kalasha Fine Jewels",
+     "domain": "www.kalashajewels.com"},
+    {"state": "Telangana", "city": "Hyderabad", "name": "Chandana Brothers",
+     "domain": "www.chandanabrothers.com"},
+    {"state": "Telangana", "city": "Hyderabad", "name": "RS Brothers Jewellery",
+     "domain": "www.rsbrothers.com"},
+    {"state": "Telangana", "city": "Hyderabad", "name": "South India Shopping Mall",
+     "domain": "www.southindiashoppingmall.com"},
+    {"state": "Telangana", "city": "Hyderabad", "name": "AGS Jewellers",
+     "domain": "www.agsjewellers.com"},
+    {"state": "West Bengal", "city": "Kolkata", "name": "M P Jewellers",
+     "domain": "www.mpjewellers.com"},
+    {"state": "West Bengal", "city": "Kolkata", "name": "Sankar Jewellers",
+     "domain": "www.sankarjewellers.com"},
+    {"state": "West Bengal", "city": "Kolkata", "name": "P C Chandra (jewellers)",
+     "domain": "www.pcchandrajewellers.com"},
+    {"state": "West Bengal", "city": "Kolkata", "name": "Kalpataru Jewellers",
+     "domain": "www.kalpatarujewellers.com"},
+    {"state": "Odisha", "city": "Bhubaneswar", "name": "Lalchand Jewellers",
+     "domain": "www.lalchandjewellers.com"},
+    {"state": "Delhi", "city": "New Delhi", "name": "Hazoorilal Legacy",
+     "domain": "www.hazoorilal.com"},
+    {"state": "Delhi", "city": "New Delhi", "name": "Dwarkadas Chandumal",
+     "domain": "www.dcjewellers.com"},
+    {"state": "Delhi", "city": "New Delhi", "name": "Bhola Sons Jewellers",
+     "domain": "www.bholasons.com"},
+    {"state": "Uttar Pradesh", "city": "Kanpur", "name": "Paras Jewellers",
+     "domain": "www.parasjewellers.com"},
+    {"state": "Rajasthan", "city": "Jaipur", "name": "Amrapali Jewels",
+     "domain": "www.amrapalijewels.com"},
+    {"state": "Rajasthan", "city": "Jaipur", "name": "Birdhichand Ghanshyamdas",
+     "domain": "www.birdhichand.com"},
 ]
