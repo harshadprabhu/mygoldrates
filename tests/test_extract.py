@@ -321,3 +321,45 @@ def test_non_gold_and_undefined_purities_are_skipped():
     assert 6128.0 not in found.values(), "9K has no PURITY_FRACTION entry"
     assert 232.0 not in found.values(), "silver leaked in"
     assert 7500.0 not in found.values(), "platinum leaked in"
+
+
+# --------------------------------------------------------------------------
+# Regional jewellers added 2026-10-20. Each prints karat, unit and rate in
+# its own order; none matched the existing patterns.
+
+def test_karat_then_unit_then_rate():
+    # Thangamayil (Madurai)
+    found, _, how = _extract("GOLD RATE 22k (1gm): ₹13,535 GOLD RATE 24k (1gm): "
+                             "₹14,765 GOLD RATE 18k (1gm): ₹11,074 SILVER RATE "
+                             "(1gm): ₹240")
+    assert found == {"22K": 13535.0, "24K": 14765.0, "18K": 11074.0}
+    assert how == "karatunit"
+
+
+def test_gold_rate_karat_dash_rupees():
+    # AVR Swarna Mahal (Salem): 24K here is a coin price, read 22K only
+    # (brands.purity_override), but all three must still parse.
+    found, _, _ = _extract("Today's Gold Rate 22K - Rs.13570/- Gold Rate 24K - "
+                           "Rs.15105/- Gold Rate 18K - Rs.11103/- Platinum Rate "
+                           "- Rs.6777/-")
+    assert found["22K"] == 13570.0 and found["18K"] == 11103.0
+
+
+def test_rate_per_gram_then_karat_in_brackets():
+    # Mehta Jewellers (Delhi)
+    found, _, _ = _extract("Mehta Jewellers Today's Gold Rate : 13399.00/gm (22K) "
+                           "My Account / Login")
+    assert found == {"22K": 13399.0}
+
+
+def test_karat_unit_needs_the_per_gram_marker():
+    # A product price next to a karat label is not a rate.
+    found, _, _ = _extract("22K Gold Chain ₹1,35,990 Add to cart")
+    assert found.get("22K") != 135990.0
+
+
+def test_unit_then_karat_then_rate():
+    # Jewel One (Tamil Nadu)
+    found, _, _ = _extract("Todays Rate: 20, Oct 2026 1 GRM (22KT) Gold : ₹13570 "
+                           "1 GRM (18KT) Gold : ₹11107 1 GRM Silver : ₹216")
+    assert found == {"22K": 13570.0, "18K": 11107.0}
