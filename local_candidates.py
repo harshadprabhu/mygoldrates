@@ -285,4 +285,22 @@ CANDIDATES = [
      "domain": "www.amrapalijewels.com"},
     {"state": "Rajasthan", "city": "Jaipur", "name": "Birdhichand Ghanshyamdas",
      "domain": "www.birdhichand.com"},
+
+    # ---- 2026-10-20 North East, Central India and the rest ----
+    # 55 more addresses checked. Added: Khimji Jewellers (Odisha; "Live
+    # Rates" strip). Not added: Swarn Jewellers (Panchkula, Haryana) shows a
+    # rate dated two days back, so it is not updated daily - re-checked
+    # weekly. D.P. Jewellers (Cloudflare challenge) and Kataria Jewellers
+    # (BitNinja) block automated visits, so they are not tried; Nemichand
+    # Bamalwa, Nanda, Mayfair, Rokde and others show no rate.
+    {"state": "Haryana", "city": "Panchkula", "name": "Swarn Jewellers",
+     "domain": "www.swarnjewellers.com"},
+    {"state": "Assam", "city": "Guwahati", "name": "Nemichand Bamalwa Jewellers",
+     "domain": "www.ncbjewellers.com"},
+    {"state": "Uttarakhand", "city": "Dehradun", "name": "Nanda Jewellers",
+     "domain": "www.nandajewellers.com"},
+    {"state": "Goa", "city": "Panaji", "name": "Mayfair Jewellers",
+     "domain": "www.mayfairjewellers.com"},
+    {"state": "Maharashtra", "city": "Nagpur", "name": "Rokde Jewellers",
+     "domain": "www.rokdejewellers.com"},
 ]

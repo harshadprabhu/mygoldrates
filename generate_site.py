@@ -737,6 +737,7 @@ REGION_MAP = {
     "nac": ["Tamil Nadu"],
     "prince": ["Tamil Nadu"],
     "whp": ["Maharashtra"],
+    "khimji": ["Odisha"],
 }
 
 
@@ -3703,6 +3704,7 @@ document.getElementById('drGo').addEventListener('click',function(){
             "mahesh": "west", "mehta": "north", "jewelone": "south",
             "pcchandra": "east", "abharan": "south", "nac": "south",
             "prince": "south", "whp": "west",
+            "khimji": "east",
         }
         pulse_brands = []
         for _r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):
