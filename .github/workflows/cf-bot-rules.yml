@@ -1,0 +1,109 @@
+name: cf-bot-rules
+
+# Owner-approved 2026-10-20. Search Console reported 403 for six pages
+# crawled 15-18 Oct while Browser Integrity Check was on. This keeps BIC on
+# for everyone except crawlers Cloudflare has verified (cf.client.bot -
+# checked by network, not by user agent, so a scraper claiming to be
+# Googlebot is still filtered), adds a per-IP rate limit for everyone else,
+# and turns Bot Fight Mode off (it cannot exempt verified bots on the free
+# plan). Existing rules are never removed: a rule is added only if one with
+# the same description is not already there. Results are job annotations.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Apply
+        env:
+          CF_WORKERS_TOKEN: ${{ secrets.CF_WORKERS_TOKEN }}
+          CLOUDFLARE_ZONE_TOKEN: ${{ secrets.CLOUDFLARE_ZONE_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          API = "https://api.cloudflare.com/client/v4"
+          out = []
+          def call(method, path, tok, body=None):
+              req = urllib.request.Request(API + path, method=method,
+                  data=json.dumps(body).encode() if body is not None else None,
+                  headers={"Authorization": "Bearer " + tok, "Content-Type": "application/json"})
+              try:
+                  return json.loads(urllib.request.urlopen(req, timeout=20).read())
+              except urllib.error.HTTPError as e:
+                  try: return json.loads(e.read())
+                  except Exception: return {"success": False, "errors": [{"message": str(e)}]}
+          def err(r):
+              return "; ".join(e.get("message", "") for e in r.get("errors") or [])[:300]
+          toks = [(k, os.environ.get(k, "")) for k in ("CF_WORKERS_TOKEN", "CLOUDFLARE_ZONE_TOKEN", "CLOUDFLARE_API_TOKEN")]
+          toks = [(k, v) for k, v in toks if v]
+
+          RULES = {
+            "http_config_settings": {
+              "description": "Let search engines through (BIC off for verified bots)",
+              "expression": "(cf.client.bot)",
+              "action": "set_config",
+              "action_parameters": {"bic": False},
+              "enabled": True},
+            "http_ratelimit": {
+              "description": "Rate limit fast downloads (not verified bots)",
+              "expression": '(http.host eq "mygoldrates.com" and not cf.client.bot)',
+              "action": "block",
+              "ratelimit": {"characteristics": ["cf.colo.id", "ip.src"], "period": 10,
+                            "requests_per_period": 60, "mitigation_timeout": 10},
+              "enabled": True},
+          }
+          FALLBACK_RL = '(http.host eq "mygoldrates.com")'
+
+          def add_rule(zid, phase, rule):
+              for k, tok in toks:
+                  ep = call("GET", f"/zones/{zid}/rulesets/phases/{phase}/entrypoint", tok)
+                  if ep.get("success"):
+                      rules = ep["result"].get("rules") or []
+                      if any(r.get("description") == rule["description"] for r in rules):
+                          return f"{phase}: already present (seen with {k})"
+                      r = call("POST", f"/zones/{zid}/rulesets/{ep['result']['id']}/rules", tok, rule)
+                  else:
+                      # no entrypoint yet (404) or no permission: try creating it
+                      r = call("PUT", f"/zones/{zid}/rulesets/phases/{phase}/entrypoint", tok, {"rules": [rule]})
+                  if r.get("success"):
+                      return f"{phase}: ADDED with {k}"
+                  last = f"{phase} with {k}: {err(r)}"
+                  out.append("  tried " + last)
+              return f"{phase}: NOT added"
+
+          zid = None
+          for k, tok in toks:
+              z = call("GET", "/zones?name=mygoldrates.com", tok)
+              if z.get("success") and z.get("result"):
+                  zid = z["result"][0]["id"]; break
+          if not zid:
+              out.append("no token can see the zone")
+          else:
+              out.append(add_rule(zid, "http_config_settings", RULES["http_config_settings"]))
+              res = add_rule(zid, "http_ratelimit", RULES["http_ratelimit"])
+              if "NOT" in res:
+                  rl = dict(RULES["http_ratelimit"], expression=FALLBACK_RL,
+                            description="Rate limit fast downloads")
+                  res = add_rule(zid, "http_ratelimit", rl) + " (without the verified-bot exception)"
+              out.append(res)
+              done = False
+              for k, tok in toks:
+                  r = call("PUT", f"/zones/{zid}/bot_management", tok, {"fight_mode": False})
+                  if r.get("success"):
+                      out.append(f"Bot Fight Mode: OFF (with {k}) -> {json.dumps(r['result'])[:200]}")
+                      done = True; break
+                  out.append(f"  Bot Fight Mode with {k}: {err(r)}")
+              if not done:
+                  out.append("Bot Fight Mode: NOT changed")
+              s = call("GET", f"/zones/{zid}/settings/browser_check", toks[0][1])
+              out.append("Browser Integrity Check (site-wide) now: " + str((s.get("result") or {}).get("value", "unknown")))
+          t = "\n".join(out)
+          print("::notice title=cf-bot-rules::" + t.replace("%", "%25").replace("\n", "%0A"))
+          PY
