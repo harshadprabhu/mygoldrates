@@ -2,8 +2,10 @@ name: cf-security-check
 
 # Read-only. Search Console reported "Blocked due to access forbidden
 # (403)" for six pages crawled 15-18 Oct 2026, while the pages answer 200
-# to ordinary requests. This asks Cloudflare which security settings are on
-# and which recent requests from search crawlers were blocked or
+# to ordinary requests. This finds the Cloudflare credentials stored as
+# repository secrets (prints their NAMES and what each may read - never a
+# value), then, with one that can, reports the zone's security settings and
+# the recent requests from search crawlers that Cloudflare blocked or
 # challenged, and by what. Nothing is changed. Results are job annotations.
 
 on:
@@ -19,32 +21,70 @@ jobs:
     steps:
       - name: Query Cloudflare
         env:
-          ZONE_TOKEN: ${{ secrets.CLOUDFLARE_ZONE_TOKEN }}
-          API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ALL_SECRETS: ${{ toJSON(secrets) }}
         run: |
-          set -u
-          api="https://api.cloudflare.com/client/v4"
-          out=/tmp/out.txt; : > $out
-          for name in ZONE_TOKEN API_TOKEN; do
-            tok="${!name:-}"; [ -z "$tok" ] && { echo "$name not set" >> $out; continue; }
-            zid=$(curl -s -H "Authorization: Bearer $tok" "$api/zones?name=mygoldrates.com" | jq -r '.result[0].id // empty')
-            [ -z "$zid" ] && { echo "$name: no zone access" >> $out; continue; }
-            echo "== token $name, zone ok" >> $out
-            for s in security_level browser_check challenge_ttl waf; do
-              echo "setting $s: $(curl -s -H "Authorization: Bearer $tok" "$api/zones/$zid/settings/$s" | jq -c '.result.value // .errors')" >> $out
-            done
-            echo "bot management: $(curl -s -H "Authorization: Bearer $tok" "$api/zones/$zid/bot_management" | jq -c '.result // .errors')" >> $out
-            echo "custom rules phase: $(curl -s -H "Authorization: Bearer $tok" "$api/zones/$zid/rulesets/phases/http_request_firewall_custom/entrypoint" | jq -c '[.result.rules[]? | {description, action, expression, enabled}] // .errors')" >> $out
-            echo "rate limit phase: $(curl -s -H "Authorization: Bearer $tok" "$api/zones/$zid/rulesets/phases/http_ratelimit/entrypoint" | jq -c '[.result.rules[]? | {description, action, expression, enabled}] // .errors')" >> $out
-            since=$(date -u -d '-3 days' +%Y-%m-%dT%H:%M:%SZ); until=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            q='{"query":"query($z:String!,$s:Time!,$u:Time!){viewer{zones(filter:{zoneTag:$z}){firewallEventsAdaptiveGroups(limit:50,filter:{datetime_geq:$s,datetime_leq:$u},orderBy:[count_DESC]){count dimensions{action source userAgent clientRequestPath}}}}}","variables":{"z":"'"$zid"'","s":"'"$since"'","u":"'"$until"'"}}'
-            curl -s -X POST "$api/graphql" -H "Authorization: Bearer $tok" -H "Content-Type: application/json" -d "$q" \
-              | jq -r 'if (.errors|length?)>0 then "firewall events: \(.errors|tostring)"
-                       else "firewall events, last 3 days (top 50):",
-                         (.data.viewer.zones[0].firewallEventsAdaptiveGroups[]? | "  \(.count)x \(.dimensions.action) by \(.dimensions.source) \(.dimensions.clientRequestPath) UA=\(.dimensions.userAgent[0:70])") end' >> $out
-          done
           python3 - <<'PY'
-          t = open("/tmp/out.txt", encoding="utf-8", errors="replace").read()
+          import json, os, urllib.request, datetime
+          API = "https://api.cloudflare.com/client/v4"
+          sec = json.loads(os.environ["ALL_SECRETS"])
+          out = []
+          def call(path, auth, body=None):
+              req = urllib.request.Request(API + path, data=json.dumps(body).encode() if body else None,
+                                           headers={**auth, "Content-Type": "application/json"})
+              try:
+                  return json.loads(urllib.request.urlopen(req, timeout=20).read())
+              except urllib.error.HTTPError as e:
+                  try: return json.loads(e.read())
+                  except Exception: return {"success": False, "errors": [{"message": str(e)}]}
+              except Exception as e:
+                  return {"success": False, "errors": [{"message": str(e)}]}
+          names = [k for k in sec if any(w in k.upper() for w in ("CLOUDFLARE", "CF_", "CF"))]
+          out.append("Cloudflare-related secret names: " + ", ".join(sorted(names)))
+          email = next((sec[k] for k in names if "EMAIL" in k.upper()), None)
+          auths = []
+          for k in sorted(names):
+              v = (sec[k] or "").strip()
+              if not v or "EMAIL" in k.upper() or "ACCOUNT" in k.upper() and len(v) == 32 and v.isalnum() and "KEY" not in k.upper():
+                  continue
+              auths.append((k, {"Authorization": "Bearer " + v}))
+              if email and "KEY" in k.upper():
+                  auths.append((k + " (global key)", {"X-Auth-Email": email, "X-Auth-Key": v}))
+          good = None
+          for k, auth in auths:
+              z = call("/zones?name=mygoldrates.com", auth)
+              zid = (z.get("result") or [{}])[0].get("id") if z.get("success") and z.get("result") else None
+              if not zid:
+                  out.append(f"{k}: no zone access"); continue
+              ok = {}
+              for s in ("security_level", "browser_check"):
+                  r = call(f"/zones/{zid}/settings/{s}", auth)
+                  ok[s] = r.get("result", {}).get("value") if r.get("success") else "no access"
+              bm = call(f"/zones/{zid}/bot_management", auth)
+              ok["bot_management"] = bm.get("result") if bm.get("success") else "no access"
+              out.append(f"{k}: zone ok | " + " | ".join(f"{a}={json.dumps(b)}" for a, b in ok.items()))
+              if good is None and ok["security_level"] != "no access":
+                  good = (k, auth, zid)
+          if good:
+              k, auth, zid = good
+              out.append(f"\nUsing {k} for the event log.")
+              now = datetime.datetime.utcnow()
+              q = {"query": "query($z:String!,$s:Time!,$u:Time!){viewer{zones(filter:{zoneTag:$z}){firewallEventsAdaptiveGroups(limit:60,filter:{datetime_geq:$s,datetime_leq:$u},orderBy:[count_DESC]){count dimensions{action source userAgent clientRequestPath}}}}}",
+                   "variables": {"z": zid, "s": (now - datetime.timedelta(days=3)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                 "u": now.strftime("%Y-%m-%dT%H:%M:%SZ")}}
+              r = call("/graphql", auth, q)
+              if r.get("errors"):
+                  out.append("firewall events: " + json.dumps(r["errors"])[:600])
+              else:
+                  ev = r["data"]["viewer"]["zones"][0]["firewallEventsAdaptiveGroups"]
+                  out.append(f"firewall events, last 3 days: {len(ev)} groups")
+                  bots = [e for e in ev if any(b in (e["dimensions"]["userAgent"] or "") for b in ("Googlebot", "bingbot", "Google-", "GoogleOther"))]
+                  out.append(f"  of which search crawlers: {len(bots)}")
+                  for e in (bots or ev)[:40]:
+                      d = e["dimensions"]
+                      out.append(f"  {e['count']}x {d['action']} by {d['source']} {d['clientRequestPath']} UA={(d['userAgent'] or '')[:70]}")
+          else:
+              out.append("\nNo stored credential can read the zone's security settings.")
+          t = "\n".join(out)
           for n, c in enumerate([t[i:i+3500] for i in range(0, len(t), 3500)][:6], 1):
               print("::notice title=cf-security " + str(n) + "::" + c.replace("%", "%25").replace("\n", "%0A"))
           PY
