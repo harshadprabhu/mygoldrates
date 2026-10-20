@@ -60,6 +60,7 @@ could not be written - a candidate failing to verify is the expected case,
 not an error.
 """
 import json
+import re
 import os
 import sys
 from datetime import datetime, timezone
@@ -119,7 +120,57 @@ def probe(cand, session):
             r = {**r2, "domain": cand["domain"]}
     if r["verdict"] in ("dead", "no-rate", "blocked"):
         r = _rendered(cand, r, session)
+    if r["verdict"] in ("dead", "no-rate", "blocked"):
+        r = _from_products(cand, r, session)
     return r
+
+
+# Breakup readers: these derive a rate from one product's own figures
+# (metal value / net weight, or a "Metal Rate" line), never from a guess.
+_STRUCTURED = ("metalnet", "goldvalue", "product", "jsonbreakup", "ratejson")
+_NOT_PLAIN = re.compile(r"diamond|polki|kundan|stone|enamel|meena|pearl|ruby|"
+                        r"emerald|gemstone|silver|platinum", re.I)
+
+
+def _from_products(cand, r, session):
+    """A jeweller that prints no rate still charges one: a plain gold
+    product's price breakup gives metal value and net weight, and value /
+    weight is its per-gram rate for that purity (P.C. Chandra, Abharan and
+    NAC are read this way). Reads up to four plain gold products found
+    through the site's own catalogue or sitemap, and accepts only when two
+    of them give the same rate within 1% - one product could carry a
+    special price, two agreeing is the jeweller's rate."""
+    host = cand["domain"].lower().lstrip("/")
+    urls = []
+    for h in dict.fromkeys(["www." + host.removeprefix("www."), host]):
+        try:
+            urls = collect.discover_products({"domain": h, "slug": "x"}, session, limit=8)
+        except Exception:
+            urls = []
+        if urls:
+            break
+    urls = [u for u in urls if not _NOT_PLAIN.search(u)][:4]
+    reads = []
+    for url in urls:
+        if not collect.robots_ok(url, session):
+            continue
+        html, _ = collect.fetch(url, session, TIMEOUT)
+        found, _, how, _ = collect.try_html(html) if html else (None, None, None, None)
+        if not (found and how in _STRUCTURED):
+            html = collect.render(url)
+            found, _, how, _ = collect.try_html(html) if html else (None, None, None, None)
+        if found and how in _STRUCTURED:
+            k, v = max(found.items(), key=lambda kv: collect.PURITY_FRACTION[kv[0]])
+            reads.append((url, k, v, how, v / collect.PURITY_FRACTION[k]))
+        if len(reads) >= 2:
+            break
+    if len(reads) < 2 or abs(reads[0][4] - reads[1][4]) / reads[0][4] > 0.01:
+        return r
+    url, k, v, how, c24 = reads[0]
+    return {**cand, "rate_url": url, "method": f"product/{how}",
+            "purities": [k], "canonical_24k": round(c24, 2),
+            "slug": slugify(cand["name"]), "verdict": "verified",
+            "note": f"{k} {v:,.0f}/g from two products' breakups"}
 
 
 def _rendered(cand, r, session):

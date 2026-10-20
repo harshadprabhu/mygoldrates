@@ -174,17 +174,10 @@ CANDIDATES = [
     # with no date shown; most likely a stale banner.
     {"state": "Kerala", "city": "Kozhikode", "name": "Bhima Jewellery Kerala",
      "domain": "bhimajewellery.com"},
-    # ABHARAN - per-gram table shows 22K at Rs 4,735: years out of date.
-    {"state": "Karnataka", "city": "Udupi", "name": "Abharan Jewellers",
-     "domain": "www.abharan.com"},
     #
     # Responded, no rate on the homepage even after render. Several link a
     # rate page or app (Muliya "Today's Gold Rate", Chungath) - worth a
     # pinned-URL look by hand.
-    {"state": "Tamil Nadu", "city": "Chennai", "name": "NAC Jewellers",
-     "domain": "www.nacjewellers.com"},
-    {"state": "Tamil Nadu", "city": "Chennai", "name": "Prince Jewellery",
-     "domain": "www.princejewellery.com"},
     {"state": "Tamil Nadu", "city": "Chennai", "name": "Saravana Selvarathnam",
      "domain": "www.saravanaselvarathnam.com"},
     {"state": "Tamil Nadu", "city": "Coimbatore", "name": "Sree Devi Jewellers",
@@ -211,8 +204,6 @@ CANDIDATES = [
      "domain": "www.cmrjewellery.com"},
     {"state": "West Bengal", "city": "Kolkata", "name": "Anjali Jewellers",
      "domain": "www.anjalijewellers.in"},
-    {"state": "West Bengal", "city": "Kolkata", "name": "P C Chandra Jewellers",
-     "domain": "www.pcchandraindia.com"},
     {"state": "West Bengal", "city": "Kolkata", "name": "B C Sen Jewellers",
      "domain": "www.bcsenjewellers.com"},
     {"state": "West Bengal", "city": "Kolkata", "name": "Shyam Sundar Co Jewellers",
@@ -242,6 +233,13 @@ CANDIDATES = [
     {"state": "Goa", "city": "Margao", "name": "Damodar Jewellers",
      "domain": "www.damodarjewellers.com"},
 
+    # ---- 2026-10-20 product breakups ----
+    # Added the same day from product pages rather than a rate board:
+    # P.C. Chandra (Kolkata; metal value / net weight on a 22KT bangle),
+    # Abharan (Udupi; its "Daily Rates" popup is years stale but each coin's
+    # breakup uses today's rate), NAC (Chennai; "Metal Rate" line in the
+    # breakup) and Prince Jewellery (Chennai; a rate strip on every page).
+    #
     # ---- 2026-10-20 second sweep: Hyderabad, Kolkata and North India ----
     # 125 more names checked (homepage and rate pages, plain and rendered).
     # Added to the board: Mehta Jewellers (Prashant Vihar, Delhi; 22K),
@@ -271,8 +269,6 @@ CANDIDATES = [
      "domain": "www.mpjewellers.com"},
     {"state": "West Bengal", "city": "Kolkata", "name": "Sankar Jewellers",
      "domain": "www.sankarjewellers.com"},
-    {"state": "West Bengal", "city": "Kolkata", "name": "P C Chandra (jewellers)",
-     "domain": "www.pcchandrajewellers.com"},
     {"state": "West Bengal", "city": "Kolkata", "name": "Kalpataru Jewellers",
      "domain": "www.kalpatarujewellers.com"},
     {"state": "Odisha", "city": "Bhubaneswar", "name": "Lalchand Jewellers",

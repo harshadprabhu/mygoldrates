@@ -351,6 +351,10 @@ _GOLD_RATE_VALUE_KARAT_RE = re.compile(
     r"(?:g|gm|gms|gram)\s*\(\s*(\d{2})\s*K(?:T)?\s*\)", re.I)
 
 
+# "Gold 22 KT - ₹ 13490" (Prince Jewellery's rate strip).
+_GOLD_KARAT_DASH_RE = re.compile(
+    r"\bGold\s*(\d{2})\s*K(?:T)?\s*[-:\u2013]\s*(?:₹|Rs\.?)\s*([\d,]+(?:\.\d{1,2})?)", re.I)
+
 # "1 GRM (22KT) Gold : ₹13570" (Jewel One): unit, karat, then rate.
 _UNIT_KARAT_GOLD_RE = re.compile(
     r"\b1\s*(?:g|gm|grm|gram)\s*\(\s*(\d{2})\s*K(?:T)?\s*\)\s*gold\s*:?\s*"
@@ -361,7 +365,8 @@ def extract_karat_unit_value(text):
     buckets = {}
     hits = (list(_KARAT_UNIT_VALUE_RE.finditer(text))
             or list(_GOLD_RATE_KARAT_RE.finditer(text))
-            or list(_UNIT_KARAT_GOLD_RE.finditer(text)))
+            or list(_UNIT_KARAT_GOLD_RE.finditer(text))
+            or list(_GOLD_KARAT_DASH_RE.finditer(text)))
     pairs = [(m.group(1), m.group(2)) for m in hits] or [
         (m.group(2), m.group(1)) for m in _GOLD_RATE_VALUE_KARAT_RE.finditer(text)]
     for k, v in pairs:
@@ -495,6 +500,56 @@ def extract_gold_value_breakup(text):
     if karat not in PURITY_FRACTION:
         return {}
     pg = _per_gram(value / weight)
+    return {karat: [pg]} if pg else {}
+
+
+# Product price breakups that list the metal's value as its own line and the
+# net weight in the specifications, but print no per-gram rate (P.C.
+# Chandra: "8.1 Net Weight (Gram) ... 22 KT Gold Purity (Karat) ... Metal:
+# Rs 111699 Diamond: Rs 0 Stone: Rs 0 Making Charges: ..."). The metal line
+# is the gold alone - making, stones and GST are separate lines - so
+# metal / net weight is the per-gram rate the jeweller charged for that
+# purity. Needs all three: a metal value, a net weight and a purity.
+_METAL_LINE_RE = re.compile(
+    r"\bMetal\s*(?:(?:Value|Amount|Price|Cost)\s*:?|:)\s*(?:₹|Rs\.?|INR)\s*"
+    r"([\d,]+(?:\.\d{1,2})?)", re.I)
+_NET_WT_RES = (
+    re.compile(r"([\d]+(?:\.\d+)?)\s*Net\s*(?:Metal\s*)?Weight\s*\(\s*(?:g|gm|gms|gram|grams)\s*\)", re.I),
+    re.compile(r"Net\s*(?:Metal\s*)?Weight\s*(?:\(\s*(?:g|gm|gram)s?\s*\))?\s*[:\-]?\s*([\d]+(?:\.\d+)?)\s*(?:g|gm|gms|gram|grams)?\b", re.I),
+    # Abharan: "Metal Gold Purity 24 Gold Weight 9.99 GM"
+    re.compile(r"Gold\s*Weight\s*:?\s*([\d]+(?:\.\d+)?)\s*(?:g|gm|gms|gram|grams)\b", re.I),
+)
+_KARAT_PURITY_RE = re.compile(
+    r"(\d{2})\s*K(?:T|ARAT)?\s*(?:Gold\s*)?Purity|Purity\s*(?:\(\s*Karat\s*\))?\s*:?\s*(\d{2})\s*(?:K|Gold\b)", re.I)
+# NAC: "Metal Purity 22KT ... Price Break Up Metal Rate ₹13,490/g × 4 g"
+_METAL_RATE_RE = re.compile(
+    r"Metal\s*Rate\s*:?\s*(?:₹|Rs\.?|INR)\s*([\d,]+(?:\.\d{1,2})?)\s*/\s*(?:g|gm|gram)\b", re.I)
+
+
+def extract_metal_net_weight(text):
+    km = _KARAT_PURITY_RE.search(text)
+    mr = _METAL_RATE_RE.search(text)
+    if mr and km:
+        karat = f"{km.group(1) or km.group(2)}K"
+        pg = _per_gram(_f(mr.group(1)))
+        if karat in PURITY_FRACTION and pg:
+            return {karat: [pg]}
+    mv = _METAL_LINE_RE.search(text)
+    if not mv:
+        return {}
+    nw = None
+    for rx in _NET_WT_RES:
+        m = rx.search(text)
+        if m:
+            nw = _f(m.group(1))
+            break
+    if not (nw and km):
+        return {}
+    karat = f"{km.group(1) or km.group(2)}K"
+    value = _f(mv.group(1))
+    if karat not in PURITY_FRACTION or not value:
+        return {}
+    pg = _per_gram(value / nw)
     return {karat: [pg]} if pg else {}
 
 
@@ -654,7 +709,8 @@ def extract(html):
         buckets, how = extract_rate_json(html), "ratejson"
     if not buckets:
         text = soup.get_text(" ", strip=True)
-        for fn, name in ((extract_labeled_rates, "labeled"),
+        for fn, name in ((extract_metal_net_weight, "metalnet"),
+                         (extract_labeled_rates, "labeled"),
                          (extract_karat_unit_value, "karatunit"),
                          (extract_value_then_karat, "valuekarat"),
                          (extract_value_then_ct, "valuect"),
