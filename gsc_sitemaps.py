@@ -2,10 +2,16 @@
 
     python gsc_sitemaps.py list
     python gsc_sitemaps.py cleanup
+    python gsc_sitemaps.py submit
 
 cleanup removes every registered sitemap that is not one of the site's own
 real sitemaps (SITE_SITEMAPS below), then submits sitemap.xml so Google
-re-reads it. It never touches the real ones. Built for the entry
+re-reads it. It never touches the real ones.
+
+submit registers every one of the site's sitemaps and asks Google to
+re-read them. On 2026-10-20 only two of the five were registered and
+Google had last read sitemap.xml on 26 September; the weekly run keeps
+them all registered and fresh. Built for the entry
 "sitemap.xmlSitemap1 Aug 2026..." - text pasted into the Add-a-sitemap box,
 which the Search Console UI would not let the owner remove.
 """
@@ -26,7 +32,7 @@ SITE_SITEMAPS = {
 
 
 def main(mode):
-    scope = ("https://www.googleapis.com/auth/webmasters" if mode == "cleanup"
+    scope = ("https://www.googleapis.com/auth/webmasters" if mode in ("cleanup", "submit")
              else "https://www.googleapis.com/auth/webmasters.readonly")
     creds = service_account.Credentials.from_service_account_info(
         json.loads(os.environ["GSC_SERVICE_ACCOUNT_JSON"]), scopes=[scope])
@@ -40,6 +46,18 @@ def main(mode):
         tag = "ours" if e["path"] in SITE_SITEMAPS else "NOT OURS"
         print(f"  [{tag}] {e['path']!r}  errors={e.get('errors')} "
               f"lastDownloaded={e.get('lastDownloaded', 'never')}")
+    if mode == "submit":
+        for path in sorted(SITE_SITEMAPS):
+            try:
+                svc.sitemaps().submit(siteUrl=site["siteUrl"], feedpath=path).execute()
+                print(f"SUBMITTED {path}")
+            except Exception as ex:
+                print(f"COULD NOT SUBMIT {path}: {str(ex)[:300]}")
+        for e in svc.sitemaps().list(siteUrl=site["siteUrl"]).execute().get("sitemap", []):
+            print(f"  now: {e['path']} pending={e.get('isPending')} "
+                  f"errors={e.get('errors')} warnings={e.get('warnings')} "
+                  f"submitted={e.get('lastSubmitted')} read={e.get('lastDownloaded', 'not yet')}")
+        return
     if mode != "cleanup":
         return
     for e in entries:

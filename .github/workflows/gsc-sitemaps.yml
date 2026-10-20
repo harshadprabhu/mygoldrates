@@ -8,8 +8,12 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "list (read-only) or cleanup"
+        description: "list (read-only), submit (register all sitemaps) or cleanup"
         default: "list"
+  # Weekly: keep all five sitemaps registered and ask Google to re-read
+  # them (on 2026-10-20 it had not read sitemap.xml since 26 September).
+  schedule:
+    - cron: "17 3 * * 1"   # Mondays ~08:47 IST
 
 permissions:
   contents: read
@@ -27,7 +31,7 @@ jobs:
       - name: Run
         env:
           GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
-        run: python gsc_sitemaps.py "${{ inputs.mode }}" > out.txt 2>&1 || true
+        run: python gsc_sitemaps.py "${{ inputs.mode || 'submit' }}" > out.txt 2>&1 || true
       - name: Report
         run: |
           python - <<'PY'
