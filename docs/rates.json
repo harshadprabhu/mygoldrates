@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-20",
-  "last_updated": "2026-10-21T02:04:51.533811+05:30",
+  "last_updated": "2026-10-21T04:58:42.612515+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14700.25,
-    "22k": 13475.23,
-    "18k": 11025.19
+    "24k": 14672.95,
+    "22k": 13450.21,
+    "18k": 11004.72
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -65,6 +65,12 @@
     },
     {
       "jeweller": "Joyalukkas",
+      "rate_24k_per_gram_inr": 14607.0,
+      "rate_22k_per_gram_inr": 13389.75,
+      "rate_18k_per_gram_inr": 10955.25
+    },
+    {
+      "jeweller": "Thangamayil Jewellery",
       "rate_24k_per_gram_inr": 14607.0,
       "rate_22k_per_gram_inr": 13389.75,
       "rate_18k_per_gram_inr": 10955.25
@@ -142,6 +148,12 @@
       "rate_18k_per_gram_inr": 10963.5
     },
     {
+      "jeweller": "Tanishq",
+      "rate_24k_per_gram_inr": 14650.91,
+      "rate_22k_per_gram_inr": 13430.0,
+      "rate_18k_per_gram_inr": 10988.18
+    },
+    {
       "jeweller": "Reliance Jewels",
       "rate_24k_per_gram_inr": 14695.0,
       "rate_22k_per_gram_inr": 13470.42,
@@ -178,12 +190,6 @@
       "rate_18k_per_gram_inr": 11069.55
     },
     {
-      "jeweller": "Tanishq",
-      "rate_24k_per_gram_inr": 14760.0,
-      "rate_22k_per_gram_inr": 13530.0,
-      "rate_18k_per_gram_inr": 11070.0
-    },
-    {
       "jeweller": "Kisna",
       "rate_24k_per_gram_inr": 14764.74,
       "rate_22k_per_gram_inr": 13534.34,
@@ -191,12 +197,6 @@
     },
     {
       "jeweller": "Vaibhav Jewellers",
-      "rate_24k_per_gram_inr": 14804.0,
-      "rate_22k_per_gram_inr": 13570.33,
-      "rate_18k_per_gram_inr": 11103.0
-    },
-    {
-      "jeweller": "Thangamayil Jewellery",
       "rate_24k_per_gram_inr": 14804.0,
       "rate_22k_per_gram_inr": 13570.33,
       "rate_18k_per_gram_inr": 11103.0
