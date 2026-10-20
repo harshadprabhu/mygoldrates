@@ -4209,7 +4209,9 @@ document.getElementById('drGo').addEventListener('click',function(){
     print(f"retired: {len(retired)} addresses redirect to their replacements")
 
     # ---- Google News sitemap: recaps + daily pages from the last 2 days ----
-    cutoff = datetime.now(IST).date() - timedelta(days=2)
+    # Google News reads articles published in the last two days; a page
+    # from three days ago in this file is an error in Search Console.
+    cutoff = datetime.now(IST).date() - timedelta(days=1)
     news_urls = "".join(
         f"  <url><loc>{SITE_URL}/news/recap/{s}</loc>\n"
         f"    <news:news><news:publication><news:name>MyGoldRates</news:name>"
@@ -4237,6 +4239,48 @@ document.getElementById('drGo').addEventListener('click',function(){
     # freshness signal to Google than a bare date, and matches what our
     # Last-Modified HTTP header serves - so IMS conditional GETs line up.
     lastmod_full = now_ist.strftime("%Y-%m-%dT%H:%M:%S+05:30")
+
+    # Honest lastmod. Every URL used to get this build's time on every
+    # build - About and Privacy "changed" eight times a day - and Google
+    # stops trusting a sitemap whose dates are always new. Now a page's
+    # lastmod moves only when its content does: each page is fingerprinted
+    # with its clock times and timestamps removed (they change every build
+    # without the content changing), and the date it last changed is kept
+    # in docs/lastmod.json. A city page still moves whenever a rate moves.
+    # The changed URLs are also what IndexNow is told about below.
+    _lm_file = "docs/lastmod.json"
+    try:
+        with open(_lm_file, encoding="utf-8") as f:
+            _lm_state = json.load(f)
+    except (OSError, ValueError):
+        _lm_state = {}
+    _lm_changed = []
+    _VOLATILE = re.compile(
+        r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?"
+        r"|\b\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?(?:\s*IST)?"
+        r"|\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} \w{3} \d{4} [\d:]+ GMT"
+        r"|\b(?:just now|\d+ (?:min|mins|minutes|hours?) ago)\b"
+        # live extras on the homepage and city pages that refresh every
+        # build without the jewellers' rates changing: the build epoch,
+        # the live spot anchor and the headline strip
+        r'|data-rates-epoch="\d+"'
+        r'|IBJA_ANCHOR_SPOT=Number\("[\d.]+"\)'
+        r"|var NEWS_BUILD\s*=\s*\[.*?\];", re.S)
+
+    def _lm(loc, fallback=None):
+        path = "docs/index.html" if loc == "" else f"docs/{loc}.html"
+        try:
+            with open(path, encoding="utf-8") as f:
+                raw = f.read()
+        except OSError:
+            return fallback or lastmod_full
+        h = hashlib.sha1(_VOLATILE.sub("", raw).encode()).hexdigest()[:16]
+        prev = _lm_state.get(loc)
+        if prev and prev.get("h") == h:
+            return prev["lm"]
+        _lm_state[loc] = {"h": h, "lm": lastmod_full}
+        _lm_changed.append(loc)
+        return lastmod_full
 
     # Split into per-section sub-sitemaps + a sitemap-index root so Google
     # can process them independently, spot per-section drops, and requeue
@@ -4268,16 +4312,16 @@ document.getElementById('drGo').addEventListener('click',function(){
     # page lives at /compare and gets its own sitemap entry so it retains
     # its Dataset/FAQPage schema anchor.
     main_urls = (
-        _url("", lastmod_full, "hourly", 1.0)
-        + _url("news", lastmod_full, "hourly", 0.85)
-        + _url("inquiry", lastmod_full, "monthly", 0.6)
+        _url("", _lm(""), "hourly", 1.0)
+        + _url("news", _lm("news"), "hourly", 0.85)
+        + _url("inquiry", _lm("inquiry"), "monthly", 0.6)
         # The paid product's landing page. Weekly rather than monthly: the
         # price and the offer on it change, and a stale cached version would
         # advertise a price that is no longer on sale.
-        + _url("jewellers-digest", today, "weekly", 0.7)
-        + "".join(_url(p, today, "monthly", 0.4)
-                  for p in ("about", "contact", "privacy", "methodology"))
-        + "".join(_url(loc, today, cf, float(pr))
+        + _url("jewellers-digest", _lm("jewellers-digest"), "weekly", 0.7)
+        + "".join(_url(p, _lm(p), "monthly", 0.4)
+                  for p in ("about", "contact", "privacy", "terms", "methodology"))
+        + "".join(_url(loc, _lm(loc), cf, float(pr))
                   for loc, cf, pr in extra_urls)
     )
     with open("docs/sitemap_main.xml", "w", encoding="utf-8") as f:
@@ -4291,8 +4335,8 @@ document.getElementById('drGo').addEventListener('click',function(){
     # Only the places search engines are asked to index (INDEXED_PLACES); a
     # noindexed page listed in a sitemap is reported as an error.
     city_urls = "".join(
-        _url(f"gold-rate-today-in-{loc_slug(nm)}", lastmod_full,
-             "hourly", 0.8)
+        _url(f"gold-rate-today-in-{loc_slug(nm)}",
+             _lm(f"gold-rate-today-in-{loc_slug(nm)}"), "hourly", 0.8)
         for nm in LOCATIONS if nm in INDEXED_PLACES)
     with open("docs/sitemap_cities.xml", "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -4322,6 +4366,9 @@ document.getElementById('drGo').addEventListener('click',function(){
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                 + _unique(main_urls + city_urls + daily_urls)
                 + "</urlset>\n")
+    with open(_lm_file, "w", encoding="utf-8") as f:
+        json.dump(_lm_state, f, indent=0, sort_keys=True)
+    print(f"lastmod: {len(_lm_changed)} of {len(_lm_state)} pages changed this build")
 
     # ---- Cloudflare Pages _headers: freshness + edge caching --------------
     # Two things wrangler's pages-deploy upload flow strips that Google
@@ -4461,11 +4508,19 @@ document.getElementById('drGo').addEventListener('click',function(){
                       if dd == now_ist.date()]
         if recaps and recaps[0][1].date() == now_ist.date():
             fresh_now.append(f"{SITE_URL}/news/recap/{recaps[0][0]}")
+        # plus every indexable page whose content changed this build
+        # (see _lm above), so Bing and the others re-read exactly those
+        _ix = set(re.findall(r"<loc>([^<]+)</loc>",
+                             open("docs/sitemap.xml", encoding="utf-8").read()))
+        for loc in _lm_changed:
+            u = f"{SITE_URL}/{loc}" if loc else f"{SITE_URL}/"
+            if u in _ix and u not in fresh_now:
+                fresh_now.append(u)
         rr = requests.post(
             "https://api.indexnow.org/indexnow",
             json={"host": CUSTOM_DOMAIN, "key": INDEXNOW_KEY,
                   "keyLocation": f"{SITE_URL}/{INDEXNOW_KEY}.txt",
-                  "urlList": fresh_now[:100]},
+                  "urlList": fresh_now[:1000]},
             headers={"Content-Type": "application/json"}, timeout=20)
         print(f"indexnow: pinged {len(fresh_now)} urls -> {rr.status_code}")
     except Exception as e:
