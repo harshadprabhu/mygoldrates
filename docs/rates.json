@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-20",
-  "last_updated": "2026-10-20T22:26:05.513776+05:30",
+  "last_updated": "2026-10-21T02:04:51.533811+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14712.25,
-    "22k": 13486.23,
-    "18k": 11034.19
+    "24k": 14700.25,
+    "22k": 13475.23,
+    "18k": 11025.19
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 146488.0,
-      "change_pct": -0.53
+      "price_per_10g_inr": 146482.0,
+      "change_pct": -0.03
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 144957.0,
-      "change_pct": -0.53
+      "price_per_10g_inr": 145021.0,
+      "change_pct": 0.0
     }
   ],
   "jewellers": [
@@ -118,6 +118,12 @@
       "rate_18k_per_gram_inr": 10959.75
     },
     {
+      "jeweller": "Candere",
+      "rate_24k_per_gram_inr": 14618.0,
+      "rate_22k_per_gram_inr": 13399.83,
+      "rate_18k_per_gram_inr": 10963.5
+    },
+    {
       "jeweller": "GRT Jewellers",
       "rate_24k_per_gram_inr": 14618.0,
       "rate_22k_per_gram_inr": 13399.83,
@@ -158,12 +164,6 @@
       "rate_24k_per_gram_inr": 14719.0,
       "rate_22k_per_gram_inr": 13492.42,
       "rate_18k_per_gram_inr": 11039.25
-    },
-    {
-      "jeweller": "Candere",
-      "rate_24k_per_gram_inr": 14727.0,
-      "rate_22k_per_gram_inr": 13499.75,
-      "rate_18k_per_gram_inr": 11045.25
     },
     {
       "jeweller": "Senco Gold",
