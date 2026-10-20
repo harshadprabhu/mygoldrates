@@ -42,7 +42,6 @@ jobs:
               | jq -r 'if (.errors|length?)>0 then "firewall events: \(.errors|tostring)"
                        else "firewall events, last 3 days (top 50):",
                          (.data.viewer.zones[0].firewallEventsAdaptiveGroups[]? | "  \(.count)x \(.dimensions.action) by \(.dimensions.source) \(.dimensions.clientRequestPath) UA=\(.dimensions.userAgent[0:70])") end' >> $out
-            break
           done
           python3 - <<'PY'
           t = open("/tmp/out.txt", encoding="utf-8", errors="replace").read()
