@@ -78,6 +78,30 @@ jobs:
                   good = (k, auth, zid)
           if good:
               k, auth, zid = good
+              allset = call(f"/zones/{zid}/settings", auth)
+              if allset.get("success"):
+                  keep = ("security_level", "browser_check", "challenge_ttl", "waf", "ssl",
+                          "always_use_https", "automatic_https_rewrites", "email_obfuscation",
+                          "hotlink_protection", "server_side_exclude", "rocket_loader",
+                          "privacy_pass", "security_header", "min_tls_version")
+                  out.append("zone settings: " + ", ".join(
+                      f"{x['id']}={json.dumps(x.get('value'))[:40]}" for x in allset["result"] if x["id"] in keep))
+              else:
+                  out.append("zone settings list: no access")
+              rs = call(f"/zones/{zid}/rulesets", auth)
+              if rs.get("success"):
+                  out.append("rulesets: " + "; ".join(f"{r.get('name')} [{r.get('phase')}/{r.get('kind')}]" for r in rs["result"]))
+                  for r in rs["result"]:
+                      if r.get("kind") == "zone":
+                          d = call(f"/zones/{zid}/rulesets/{r['id']}", auth)
+                          for rule in (d.get("result") or {}).get("rules", []) or []:
+                              out.append(f"  rule in {r.get('phase')}: {rule.get('action')} enabled={rule.get('enabled')} "
+                                         f"{(rule.get('description') or '')[:60]} :: {(rule.get('expression') or '')[:160]}")
+              else:
+                  out.append("rulesets: no access")
+              for path in ("/bot_management", "/settings/bot_fight_mode"):
+                  r = call(f"/zones/{zid}{path}", auth)
+                  out.append(f"{path}: " + (json.dumps(r.get('result'))[:300] if r.get('success') else 'no access'))
               out.append(f"\nUsing {k} for the event log.")
               now = datetime.datetime.utcnow()
               q = {"query": "query($z:String!,$s:Time!,$u:Time!){viewer{zones(filter:{zoneTag:$z}){firewallEventsAdaptiveGroups(limit:60,filter:{datetime_geq:$s,datetime_leq:$u},orderBy:[count_DESC]){count dimensions{action source userAgent clientRequestPath}}}}}",
