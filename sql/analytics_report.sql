@@ -29,6 +29,7 @@
 --   top_hosts      - which hostname served the view (www vs apex check).
 --                    The function in the database predated this, so the
 --                    dashboard's host table was always empty.
+--   jewellers      - jeweller applications and posted daily rates
 --   unsubs         - unsubscribes in the range (every one, with or without
 --                    a reason), counts by reason, the 20 most recent, and
 --                    how many people are subscribed right now.
@@ -114,7 +115,7 @@ begin
   )
   select json_build_object(
     'from', v_from, 'to', v_to, 'page_filter', p_page,
-    'version', '2026-10-20',
+    'version', '2026-10-20b',
     'totals', json_build_object(
       'views', (select count(*) from pv),
       'visitors', (select count(distinct session_id) from pv),
@@ -158,6 +159,25 @@ begin
         and coalesce(host, '') not like 'health.%'
         and coalesce(host, '') not like 'probe.%'
         and coalesce(host, '') <> 'test.local'),
+    -- jewellers applying on /list-your-jewellery: every pending one, plus
+    -- anything decided in the last 30 days; and the latest rates posted by
+    -- approved jewellers (sql/jeweller_submissions.sql)
+    'jewellers', json_build_object(
+      'applications', (select coalesce(json_agg(row_to_json(t)), '[]')
+        from (select id, to_char(created_at at time zone 'Asia/Kolkata',
+                                 'YYYY-MM-DD HH24:MI') as at,
+                     jeweller, city, state, phone, email, website, instagram,
+                     contact_name, rate_24k, rate_22k, rate_18k,
+                     includes_gst, note, status
+              from jeweller_applications
+              where status = 'pending'
+                 or created_at > now() - interval '30 days'
+              order by created_at desc limit 50) t),
+      'daily', (select coalesce(json_agg(row_to_json(t)), '[]')
+        from (select slug, rate_date::text as day, rate_24k, rate_22k,
+                     rate_18k, includes_gst
+              from jeweller_daily_rates
+              order by submitted_at desc limit 30) t)),
     'pages_list', (select coalesce(json_agg(page order by page), '[]')
       from (select distinct page from page_views
             where day between v_from and v_to
