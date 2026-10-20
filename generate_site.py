@@ -6995,6 +6995,14 @@ td.path{color:var(--accent);word-break:break-all}
     <div class="card"><h2>Traffic by host (www vs apex)</h2><div id="hosts"></div></div>
   </div>
 
+  <div class="card"><h2>Jewellers wanting to be listed</h2>
+    <div class="kpis" id="jwKpis"></div>
+    <style>#jwApps th{white-space:nowrap}#jwApps td{overflow-wrap:anywhere}</style>
+    <div id="jwApps" style="overflow-x:auto"></div>
+    <h2 style="font-size:14px;margin-top:14px">Rates posted by listed jewellers</h2>
+    <div id="jwDaily" style="overflow-x:auto"></div>
+  </div>
+
   <div class="card"><h2>Email subscribers &amp; unsubscribes</h2>
     <div class="kpis" id="subKpis"></div>
     <div class="grid2"><div><h2 style="font-size:14px">Why people unsubscribed</h2><div id="unsubWhy"></div></div>
@@ -7238,6 +7246,26 @@ td.path{color:var(--accent);word-break:break-all}
           {h:'People',k:'count',num:true}]);
         renderTable($('unsubRecent'),d.unsubs.recent,[{h:'When (IST)',k:'at'},
           {h:'Reason',k:'reason'}]);
+      }
+      // Jeweller applications from /list-your-jewellery (report 2026-10-20b).
+      // Approve one by asking Claude, who shows the SQL first.
+      if(d.jewellers===undefined){
+        $('jwKpis').innerHTML='<div class="msg err">Run the updated '+
+          'sql/analytics_report.sql to see jeweller applications here.</div>';
+      } else {
+        var ja=d.jewellers.applications||[];
+        $('jwKpis').innerHTML=tiles([
+          ['Waiting for review',ja.filter(function(a){return a.status==='pending'}).length],
+          ['Applications (30 days)',ja.length]]);
+        renderTable($('jwApps'),ja.map(function(a){return {
+            at:a.at, who:a.jeweller+' ('+a.city+', '+a.state+')',
+            contact:[a.contact_name,a.phone,a.email,a.instagram,a.website].filter(Boolean).join(' / '),
+            rate:['24K '+(a.rate_24k||'-'),'22K '+(a.rate_22k||'-'),'18K '+(a.rate_18k||'-')].join(', ')+(a.includes_gst?' incl. GST':''),
+            status:a.status+' #'+a.id}}),
+          [{h:'When (IST)',k:'at'},{h:'Jeweller',k:'who'},{h:'Contact',k:'contact'},
+           {h:'Rate / g',k:'rate'},{h:'Status',k:'status'}]);
+        renderTable($('jwDaily'),d.jewellers.daily,[{h:'Jeweller',k:'slug'},{h:'Day',k:'day'},
+          {h:'24K',k:'rate_24k',num:true},{h:'22K',k:'rate_22k',num:true},{h:'18K',k:'rate_18k',num:true}]);
       }
       fillPages(d.pages_list);
       $('foot').textContent='Range '+d.from+' to '+d.to+
