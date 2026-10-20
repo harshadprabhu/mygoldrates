@@ -1,0 +1,32 @@
+name: gsc-inspect
+
+# Google's index status for every page in sitemap.xml, read-only, reported
+# as job annotations (this repo is public: nothing is committed).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install google-auth google-api-python-client requests
+      - name: Run
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+        run: python gsc_inspect.py > out.txt 2>&1 || true
+      - name: Report
+        run: |
+          python - <<'PY'
+          t = open("out.txt", encoding="utf-8", errors="replace").read()
+          for n, c in enumerate([t[i:i+3500] for i in range(0, len(t), 3500)][:9], 1):
+              print("::notice title=gsc-inspect " + str(n) + "::" + c.replace("%", "%25").replace("\n", "%0A"))
+          PY
