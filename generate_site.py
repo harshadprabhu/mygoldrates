@@ -731,6 +731,10 @@ REGION_MAP = {
     "mahesh": ["Maharashtra"],
     "mehta": ["Delhi"],
     "jewelone": ["Tamil Nadu"],
+    "pcchandra": ["West Bengal"],
+    "abharan": ["Karnataka"],
+    "nac": ["Tamil Nadu"],
+    "prince": ["Tamil Nadu"],
 }
 
 
@@ -749,6 +753,7 @@ BRAND_HOME = {
     "rbz": ["Ahmedabad"], "bhindi": ["Mumbai"], "tbz": ["Mumbai"],
     "whp": ["Mumbai"], "thangamayil": ["Madurai"], "khazana": ["Chennai"],
     "avr": ["Salem"], "mehta": ["Delhi"], "jewelone": ["Coimbatore"],
+    "pcchandra": ["Kolkata"], "nac": ["Chennai"], "prince": ["Chennai"],
 }
 
 # Approximate centre of each city on LOCATIONS (lat, lon), for the
@@ -3600,6 +3605,8 @@ b.addEventListener('click',function(){
             "chandukaka": "west", "bhindi": "west",
             "thangamayil": "south", "khazana": "south", "avr": "south",
             "mahesh": "west", "mehta": "north", "jewelone": "south",
+            "pcchandra": "east", "abharan": "south", "nac": "south",
+            "prince": "south",
         }
         pulse_brands = []
         for _r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):

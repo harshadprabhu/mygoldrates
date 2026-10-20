@@ -363,3 +363,40 @@ def test_unit_then_karat_then_rate():
     found, _, _ = _extract("Todays Rate: 20, Oct 2026 1 GRM (22KT) Gold : ₹13570 "
                            "1 GRM (18KT) Gold : ₹11107 1 GRM Silver : ₹216")
     assert found == {"22K": 13570.0, "18K": 11107.0}
+
+
+def test_metal_value_over_net_weight():
+    # P.C. Chandra product page: no rate printed, but the breakup gives the
+    # metal value and the specifications the net weight and purity.
+    text = ("Product Specifications Price Breakup Metal Details 8.1 Gross Weight "
+            "(Gram) 8.1 Net Weight (Gram) 22 KT Gold Purity (Karat) Yellow Gold "
+            "Gold Color Metal: ₹111699.0 ₹111699 Diamond: ₹0.0 ₹0 Stone: ₹0.0 ₹0 "
+            "Making Charges: ₹33868.0 ₹30964 GST(3%): ₹4367.0 ₹4279 TOTAL: ₹149934.0")
+    found, _, how = _extract(text)
+    assert how == "metalnet"
+    assert round(found["22K"]) == 13790     # 111699 / 8.1
+
+
+def test_metal_price_with_gold_weight_spec():
+    # Abharan coin: purity and gold weight in the specs, metal price in the
+    # breakup. 147012.84 / 9.99 = 14716 per gram of 24K.
+    text = ("Metal Details Metal Gold Purity 24 Gold Weight 9.99 GM Stone Details "
+            "Stone Weight NA Stone Value NA Price Breakup Metal Price ₹ 1,47,012.84 "
+            "Making Charges ₹ 4,410.39 GST ₹ 4,542.7 Total ₹ 1,55,965.92")
+    found, _, how = _extract(text)
+    assert how == "metalnet" and round(found["24K"]) == 14716
+
+
+def test_metal_rate_per_gram_in_breakup():
+    # NAC Jewellers: the breakup states the rate itself.
+    found, _, _ = _extract("Base Metal Gold Metal Purity 22KT Collection Coin Price "
+                           "Break Up Metal Rate ₹13,490/g × 4 g ₹53,960 Wastage "
+                           "₹1,079.20 Total (incl. 3% GST) ₹56,690")
+    assert found == {"22K": 13490.0}
+
+
+def test_gold_karat_dash_rate_strip():
+    # Prince Jewellery's site-wide strip.
+    found, _, _ = _extract("Gold 18 KT - ₹ 11037 Gold 22 KT - ₹ 13490 Gold 24 KT - "
+                           "₹ 14727 Silver - ₹ 240 Platinum 950 - ₹ 6777")
+    assert found == {"18K": 11037.0, "22K": 13490.0, "24K": 14727.0}
