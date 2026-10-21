@@ -2,8 +2,8 @@
   "source": "MyGoldRates.com",
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
-  "date": "2026-10-20",
-  "last_updated": "2026-10-21T04:58:42.612515+05:30",
+  "date": "2026-10-21",
+  "last_updated": "2026-10-21T07:33:44.056303+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -64,25 +64,25 @@
       "rate_18k_per_gram_inr": 10952.46
     },
     {
-      "jeweller": "Joyalukkas",
-      "rate_24k_per_gram_inr": 14607.0,
-      "rate_22k_per_gram_inr": 13389.75,
-      "rate_18k_per_gram_inr": 10955.25
-    },
-    {
-      "jeweller": "Thangamayil Jewellery",
-      "rate_24k_per_gram_inr": 14607.0,
-      "rate_22k_per_gram_inr": 13389.75,
-      "rate_18k_per_gram_inr": 10955.25
-    },
-    {
       "jeweller": "Abharan Jewellers",
       "rate_24k_per_gram_inr": 14607.0,
       "rate_22k_per_gram_inr": 13389.75,
       "rate_18k_per_gram_inr": 10955.25
     },
     {
+      "jeweller": "Joyalukkas",
+      "rate_24k_per_gram_inr": 14607.0,
+      "rate_22k_per_gram_inr": 13389.75,
+      "rate_18k_per_gram_inr": 10955.25
+    },
+    {
       "jeweller": "Khimji Jewellers",
+      "rate_24k_per_gram_inr": 14607.0,
+      "rate_22k_per_gram_inr": 13389.75,
+      "rate_18k_per_gram_inr": 10955.25
+    },
+    {
+      "jeweller": "Thangamayil Jewellery",
       "rate_24k_per_gram_inr": 14607.0,
       "rate_22k_per_gram_inr": 13389.75,
       "rate_18k_per_gram_inr": 10955.25
