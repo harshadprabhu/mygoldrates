@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-21",
-  "last_updated": "2026-10-21T23:50:47.747458+05:30",
+  "last_updated": "2026-10-22T03:34:12.457299+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -190,12 +190,6 @@
       "rate_18k_per_gram_inr": 10988.18
     },
     {
-      "jeweller": "Kisna",
-      "rate_24k_per_gram_inr": 14654.41,
-      "rate_22k_per_gram_inr": 13433.21,
-      "rate_18k_per_gram_inr": 10990.81
-    },
-    {
       "jeweller": "ORRA",
       "rate_24k_per_gram_inr": 14725.75,
       "rate_22k_per_gram_inr": 13498.6,
@@ -224,6 +218,12 @@
       "rate_24k_per_gram_inr": 14757.0,
       "rate_22k_per_gram_inr": 13527.25,
       "rate_18k_per_gram_inr": 11067.75
+    },
+    {
+      "jeweller": "Kisna",
+      "rate_24k_per_gram_inr": 14764.74,
+      "rate_22k_per_gram_inr": 13534.34,
+      "rate_18k_per_gram_inr": 11073.56
     },
     {
       "jeweller": "Ranka Jewellers",
