@@ -1,0 +1,42 @@
+name: cf-bic-off
+
+# Owner-approved 2026-10-22. Turns Cloudflare Browser Integrity Check OFF
+# for mygoldrates.com: Googlebot has been refused (403) since mid-October,
+# no sitemap has been readable since early October, and no page has been
+# crawled since 20 October. BIC was the one suspect the stored token may
+# change. Switch it back in Cloudflare -> Security -> Settings, or run with
+# value=on.
+
+on:
+  workflow_dispatch:
+    inputs:
+      value:
+        description: "off (default) or on"
+        default: "off"
+
+permissions:
+  contents: read
+
+jobs:
+  set:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - env:
+          TOK: ${{ secrets.CF_WORKERS_TOKEN }}
+          VALUE: ${{ inputs.value || 'off' }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          API = "https://api.cloudflare.com/client/v4"; tok = os.environ["TOK"]; val = os.environ["VALUE"]
+          def call(m, p, body=None):
+              req = urllib.request.Request(API + p, method=m, data=json.dumps(body).encode() if body is not None else None,
+                                           headers={"Authorization": "Bearer " + tok, "Content-Type": "application/json"})
+              try: return json.loads(urllib.request.urlopen(req, timeout=20).read())
+              except urllib.error.HTTPError as e: return json.loads(e.read())
+          zid = call("GET", "/zones?name=mygoldrates.com")["result"][0]["id"]
+          before = call("GET", f"/zones/{zid}/settings/browser_check")["result"]["value"]
+          r = call("PATCH", f"/zones/{zid}/settings/browser_check", {"value": val})
+          after = call("GET", f"/zones/{zid}/settings/browser_check")["result"]["value"]
+          print(f"::notice title=cf-bic::Browser Integrity Check {before} -> {after} (write ok: {r.get('success')})")
+          PY
