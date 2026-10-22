@@ -434,6 +434,14 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 .sp-later{display:block;width:100%;margin-top:8px;background:none;border:none;color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;padding:6px;font-family:inherit}
 .sp-later:hover{color:var(--text)}
 @media(max-width:420px){.sp-box{padding:20px 16px 16px}.sp-t{font-size:16px}}
+/* Phones: slide up from the bottom and keep the top of the page (the rate
+   the visitor came for) visible - a full-screen cover on arrival from
+   search is what Google's intrusive-interstitial rule penalises. */
+@media(max-width:760px){
+  #subPop{align-items:flex-end;padding:0;background:rgba(0,0,0,.35);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .sp-box{max-width:none;max-height:72vh;border-radius:18px 18px 0 0;border-bottom:none;animation:spUp .3s cubic-bezier(.2,.8,.3,1)}
+  @keyframes spUp{from{transform:translateY(100%)}to{transform:none}}
+}
 .alcard{margin:0 12px;background:linear-gradient(135deg,rgba(232,138,174,0.1),rgba(212,166,60,0.08));backdrop-filter:blur(20px);border-radius:16px;border:1px solid rgba(232,138,174,0.15);padding:20px 16px;text-align:center;position:relative;overflow:hidden}
 .alcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--rose),var(--gold),transparent)}
 .al-em{font-size:24px;margin-bottom:4px}
@@ -632,7 +640,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",tick);else tick();
   setInterval(tick,30000);
 })();</script>
-<script type="application/ld+json">[{"@context": "https://schema.org", "@type": "WebSite", "name": "GoldRates - Daily Gold Rate Comparison India", "url": "https://mygoldrates.com"}, {"@context": "https://schema.org", "@type": "Organization", "name": "MyGoldRates.com", "alternateName": "GoldRates", "url": "https://mygoldrates.com", "logo": "https://mygoldrates.com/icon-512.png", "image": "https://mygoldrates.com/og.png", "description": "India's gold rate comparison platform - compare today's 24K, 22K and 18K gold rates across leading jewellers, with the IBJA bullion reference, updated daily.", "areaServed": {"@type": "Country", "name": "India"}, "knowsAbout": ["Gold rate", "Gold rate today", "24 carat gold rate", "22K gold rate", "IBJA gold rate", "Gold price India"]}, {"@context": "https://schema.org", "@type": "WebPage", "url": "https://mygoldrates.com/gold-rate-today-in-patna", "name": "Gold Rate Today in Patna (22 Oct): 24K, 22K, 18K | MyGoldRates", "inLanguage": "en-IN", "dateModified": "2026-10-22T06:13:17+05:30", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/"}}, {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}, {"@type": "ListItem", "position": 2, "name": "Gold Rate Today in Patna", "item": "https://mygoldrates.com/gold-rate-today-in-patna"}]}, {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the gold rate today in Patna?", "acceptedAnswer": {"@type": "Answer", "text": "On 22 October 2026 the median gold rate across the 33 jewellers we track is ₹14,609 per gram for 24K (999), ₹13,392 for 22K (916) and ₹10,957 for 18K (750), before 3% GST and making charges."}}, {"@type": "Question", "name": "Which jeweller has the lowest gold rate for Patna today?", "acceptedAnswer": {"@type": "Answer", "text": "Among the national chains and the regional chains serving Bihar that published a rate today, PN Gadgil is lowest for 22K at ₹13,251 per gram, and CaratLane highest at ₹13,527, a gap of ₹276 per gram."}}, {"@type": "Question", "name": "How much do 10 grams of 22K gold cost in Patna with GST?", "acceptedAnswer": {"@type": "Answer", "text": "At today's 22K median of ₹13,392 per gram, 10 grams cost ₹133,916 before tax and ₹137,933 with 3% GST. Jewellery also carries a making charge, usually quoted as a percentage of the gold value or per gram, which is added before GST."}}, {"@type": "Question", "name": "Is the gold rate the same at every jeweller in Patna?", "acceptedAnswer": {"@type": "Answer", "text": "No. Each jeweller sets its own daily rate, and making charges differ even more than rates, so compare both before buying."}}, {"@type": "Question", "name": "Where do people buy gold in Patna?", "acceptedAnswer": {"@type": "Answer", "text": "The main gold markets are Hathwa Market, Maurya Lok, Boring Road."}}, {"@type": "Question", "name": "Does the gold rate in Patna change every day?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Jewellers revise their rates each morning, and some again during the day, following the international gold price and the rupee. We refresh this page several times a day."}}]}]</script>
+<script type="application/ld+json">[{"@context": "https://schema.org", "@type": "WebSite", "name": "GoldRates - Daily Gold Rate Comparison India", "url": "https://mygoldrates.com"}, {"@context": "https://schema.org", "@type": "Organization", "name": "MyGoldRates.com", "alternateName": "GoldRates", "url": "https://mygoldrates.com", "logo": "https://mygoldrates.com/icon-512.png", "image": "https://mygoldrates.com/og.png", "description": "India's gold rate comparison platform - compare today's 24K, 22K and 18K gold rates across leading jewellers, with the IBJA bullion reference, updated daily.", "areaServed": {"@type": "Country", "name": "India"}, "knowsAbout": ["Gold rate", "Gold rate today", "24 carat gold rate", "22K gold rate", "IBJA gold rate", "Gold price India"]}, {"@context": "https://schema.org", "@type": "WebPage", "url": "https://mygoldrates.com/gold-rate-today-in-patna", "name": "Gold Rate Today in Patna (22 Oct): 24K, 22K, 18K | MyGoldRates", "inLanguage": "en-IN", "dateModified": "2026-10-22T07:58:29+05:30", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/"}}, {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}, {"@type": "ListItem", "position": 2, "name": "Gold Rate Today in Patna", "item": "https://mygoldrates.com/gold-rate-today-in-patna"}]}, {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the gold rate today in Patna?", "acceptedAnswer": {"@type": "Answer", "text": "On 22 October 2026 the median gold rate across the 33 jewellers we track is ₹14,609 per gram for 24K (999), ₹13,392 for 22K (916) and ₹10,957 for 18K (750), before 3% GST and making charges."}}, {"@type": "Question", "name": "Which jeweller has the lowest gold rate for Patna today?", "acceptedAnswer": {"@type": "Answer", "text": "Among the national chains and the regional chains serving Bihar that published a rate today, PN Gadgil is lowest for 22K at ₹13,251 per gram, and CaratLane highest at ₹13,527, a gap of ₹276 per gram."}}, {"@type": "Question", "name": "How much do 10 grams of 22K gold cost in Patna with GST?", "acceptedAnswer": {"@type": "Answer", "text": "At today's 22K median of ₹13,392 per gram, 10 grams cost ₹133,916 before tax and ₹137,933 with 3% GST. Jewellery also carries a making charge, usually quoted as a percentage of the gold value or per gram, which is added before GST."}}, {"@type": "Question", "name": "Is the gold rate the same at every jeweller in Patna?", "acceptedAnswer": {"@type": "Answer", "text": "No. Each jeweller sets its own daily rate, and making charges differ even more than rates, so compare both before buying."}}, {"@type": "Question", "name": "Where do people buy gold in Patna?", "acceptedAnswer": {"@type": "Answer", "text": "The main gold markets are Hathwa Market, Maurya Lok, Boring Road."}}, {"@type": "Question", "name": "Does the gold rate in Patna change every day?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Jewellers revise their rates each morning, and some again during the day, following the international gold price and the rupee. We refresh this page several times a day."}}]}]</script>
 </head>
 <body>
 
@@ -652,8 +660,8 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 <!-- When the JEWELLER board rates were last collected. Distinct from the live
      chip above, which tracks the spot/MCX feed refreshing every 3s. Values
      are substituted at build time by generate_site.py. -->
-<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1792629797">
-  Jeweller rates updated <b>22 October 2026, 6:13 AM IST</b><span id="ratesStampAgo"></span>
+<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1792636109">
+  Jeweller rates updated <b>22 October 2026, 7:58 AM IST</b><span id="ratesStampAgo"></span>
 </div>
 
 <!-- Google One Tap (uses Google Identity Services) -->
@@ -965,7 +973,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
     <button class="sp-x" id="spClose" type="button" aria-label="Close">&times;</button>
     <div class="sp-em">&#128140;</div>
     <div class="sp-t" id="spTitle">Never miss the cheapest rate</div>
-    <div class="sp-d">One free email each morning &mdash; who&rsquo;s cheapest today, the bullion premium and the market median across 21 jewellers.</div>
+    <div class="sp-d">One free email each morning &mdash; who&rsquo;s cheapest today, the bullion premium and the market median across every jeweller we track.</div>
     <div class="al-form">
       <input class="al-inp" id="alNameP" type="text" placeholder="Your name" autocomplete="name">
       <input class="al-inp" id="alEmailP" type="email" placeholder="Your email *" inputmode="email" autocomplete="email">
@@ -1407,7 +1415,7 @@ function handleCredentialResponse(resp){
   // movement from a TRUE anchor instead of a guessed premium. Zero when
   // the IBJA fetch failed - applyLive falls back to the old estimate then.
   var IBJA_ANCHOR_24=Number("14411.0000")||0;
-  var IBJA_ANCHOR_SPOT=Number("12516.6247")||0;
+  var IBJA_ANCHOR_SPOT=Number("12527.5735")||0;
   // Every `delta*` here is the change against the PREVIOUS CLOSE, not
   // against the last poll. The previous close for each metric arrives from
   // the worker as `*_prev` and is held in the `prev*` fields below.
@@ -2347,7 +2355,7 @@ function handleCredentialResponse(resp){
   // business feed was the wrong shape anyway. Headlines now come from the
   // worker's /news (gold-specific Google News query across Indian
   // publishers), so the page no longer fetches or filters RSS itself.
-  var NEWS_BUILD = [{"title":"Bullion Market Update: Gold, Silver Witness Downward Trend","url":"https://news.google.com/rss/articles/CBMijAFBVV95cUxQS2I5VVQ2Q2ZRbzJUTFgyR2NNZ0NqUnJlMkhwaExpdlRFVEEwbUhlRXNFVEFPTzJJNTBVTGpIUk9hUDk3a2I5VFBnd3JVUkdTZmJLR2MtNGFRQ3ZBdkNySV9Xdmx1OXZ4bWxpeUVoSVVzSlZOTVNpV1RuX1J3UHZIa3NabmRCLTRSdzVoYg?oc=5","source":"The Indian Awaaz","published":"2026-10-21T18:37:29"},{"title":"Silver Rate Today in Chittorgarh 22nd October 2026 : 1 KG, Todays Silver Price in Chittorgarh","url":"https://news.google.com/rss/articles/CBMie0FVX3lxTE1STXlVLVNMRGlldDRKelE0VUcxYjJSN3lVNmtwZ1p3WUx4c0F5eVRSWGxuQ2tUMEljOEJpdGt3VjM0Q3NaRnpfUkFpQ2tMOGxfWC0xYm9GZ2FqbUt2LUdkUTFqazE4bGUzRnlPaFJiYUV0VEYxZ0pLZGhiQQ?oc=5","source":"Business Today","published":"2026-10-21T21:44:57"},{"title":"Silver Rate Today Live, Latest Silver Price In India","url":"https://news.google.com/rss/articles/CBMiUEFVX3lxTFAyQjk1SkZteFJRaW93a29mWFRWOVVFRjl6OHk3X1RRSElIR0Z5MC1hTi1hRkU2QWFkbVJ4VGNRX08xYkFFN2Zuam52MHR0SVhC?oc=5","source":"NDTV Profit","published":"2026-10-21T07:41:07"},{"title":"Silver Rate Today in Mumbai \u2013 Silver Price per Gram & Kg | 22 October 2026","url":"https://news.google.com/rss/articles/CBMijwFBVV95cUxOSW10WklQMFBGMTIzdU9GT05rbkY0MEFRODBlZEt2Rm1Md0J3dDF3d0hNSl9sWmNNRklWS3F4WXA5Y0wxNDVqcFV0cWhuaUc4cDdYUzhVd2Y4MGdUc01taTlFNnZHTnl4UDNRckFKUnFZZlNEdzhqbXV0RjhUTm1MNmtDeEJCWFh6MkhjN2JMZw?oc=5","source":"The Times of India","published":"2026-10-21T22:00:31"},{"title":"Gold Rate Today In Noida, Check Live 22 And 24 Carat Gold Price","url":"https://news.google.com/rss/articles/CBMicEFVX3lxTE9ST0txZEdzdGxrMHRNYXZfazY1R20waTV3T1hTU29jMHZETzlsOG5tWFBNVXIzR25zU191MGVmZEVEMXhUTzV3bFB4cm4wU2FDOTJOLUhmOW8yLW56LU9nc2NtSWlmbUwtR1U3UElrZE0?oc=5","source":"NDTV Profit","published":"2026-10-21T22:26:09"},{"title":"Gold Price Today in Amravati \u2013 18K, 22K & 24K Rate | 22 October 2026","url":"https://news.google.com/rss/articles/CBMijAFBVV95cUxQS2RCNXlLQzEtY3hZeTQtbDlfbG82eUhpdi1vMy1YYnlNcEZjRkl6eWthTFFJODVrV1Zwbll0WDRKOWhsWDFqa2dSZ0tyRXR6UFBVaEFNVGp4VVBMUTJ0VlpZbE5UVzY1el85VFF0b1otWXl3Q3h4aW9rUGdfRldfeVl4QjRpRmVpXzE2UQ?oc=5","source":"The Times of India","published":"2026-10-21T22:02:19"},{"title":"Gold Rate Today In Rourkela, Check Live 22 And 24 Carat Gold Price","url":"https://news.google.com/rss/articles/CBMidEFVX3lxTFBqMVYzMnlCRWQ5ZVo0S2xsWWhiSkRmOHUtNFRyNTNhUm1pcDItMHpqVjFqUHZGYmFhb0poTm5RTkl4OFZZejFTUVRxMTBnZV9nQTRjQWpfd0hOWTFnVFNmWlM3SkFfemNOWnlqcERtYWFpTmZ2?oc=5","source":"NDTV Profit","published":"2026-10-21T17:17:33"},{"title":"Gold Rate Today in Bengaluru 21st October 2026 : 22 & 24 Carat, Todays Gold Price in Bengaluru","url":"https://news.google.com/rss/articles/CBMidkFVX3lxTFAyRmx3MDFiNFBnS2E1T3plWVliNlhfaFJaMC00ZVNOWDdaY3FBenRHeEt2QlllQ09lTGtQUF9aRTFGR1BFZ0kya254TXptZGtUenNtYmhSZUZxT0gxbUFGSmZ1QTZibjBmZjR3TTNUaHczOF9jWEE?oc=5","source":"Business Today","published":"2026-10-21T17:56:10"}];
+  var NEWS_BUILD = [{"title":"Silver Rate Today in Gulbarga 22nd October 2026 : 1 KG, Todays Silver Price in Gulbarga","url":"https://news.google.com/rss/articles/CBMid0FVX3lxTE5LTFkxVjNQX3RHYThzX0wtWjhDU3Z2ZHBIdEk2c1RFT29tWXBRRnBKZGt3V2dMRDlwb25FWWJ6ejhhOFdNVE92MV81WUN1MWJ2amZ1Ui11TU5MLWxqQ3ZVSks2X2RnZThoYnpUeXRPWnBfeWRiUFQ4?oc=5","source":"Business Today","published":"2026-10-22T00:33:30"},{"title":"Bullion Market Update: Gold, Silver Witness Downward Trend","url":"https://news.google.com/rss/articles/CBMijAFBVV95cUxQS2I5VVQ2Q2ZRbzJUTFgyR2NNZ0NqUnJlMkhwaExpdlRFVEEwbUhlRXNFVEFPTzJJNTBVTGpIUk9hUDk3a2I5VFBnd3JVUkdTZmJLR2MtNGFRQ3ZBdkNySV9Xdmx1OXZ4bWxpeUVoSVVzSlZOTVNpV1RuX1J3UHZIa3NabmRCLTRSdzVoYg?oc=5","source":"The Indian Awaaz","published":"2026-10-21T18:37:29"},{"title":"Silver Rate Today Live, Latest Silver Price In India","url":"https://news.google.com/rss/articles/CBMiUEFVX3lxTFAyQjk1SkZteFJRaW93a29mWFRWOVVFRjl6OHk3X1RRSElIR0Z5MC1hTi1hRkU2QWFkbVJ4VGNRX08xYkFFN2Zuam52MHR0SVhC?oc=5","source":"NDTV Profit","published":"2026-10-21T07:41:07"},{"title":"Silver Rate Today in Mumbai \u2013 Silver Price per Gram & Kg | 22 October 2026","url":"https://news.google.com/rss/articles/CBMijwFBVV95cUxOSW10WklQMFBGMTIzdU9GT05rbkY0MEFRODBlZEt2Rm1Md0J3dDF3d0hNSl9sWmNNRklWS3F4WXA5Y0wxNDVqcFV0cWhuaUc4cDdYUzhVd2Y4MGdUc01taTlFNnZHTnl4UDNRckFKUnFZZlNEdzhqbXV0RjhUTm1MNmtDeEJCWFh6MkhjN2JMZw?oc=5","source":"The Times of India","published":"2026-10-21T22:00:31"},{"title":"Gold Rate Today in Uttar Pradesh 22nd October 2026 : 22 & 24 Carat, Todays Gold Price in Uttar Pradesh","url":"https://news.google.com/rss/articles/CBMie0FVX3lxTE5SeGZIWl9hZERFamdMT3dQR0g5WUI3elBZYm54V2FuZlQ2ZUpuT0JlVG9NUkxwSXZieDZYeDlDdDR6Z0tyM2x6VWctQ3RIRGtRWXVDVkQwbTZyNW1vYWtxbjMyX3lHRW8wN0xuRFdNODdURVBlN1BmbVplZw?oc=5","source":"Business Today","published":"2026-10-22T00:28:21"},{"title":"Silver Rate Today In Chennai Live, Latest Silver Price","url":"https://news.google.com/rss/articles/CBMieEFVX3lxTE03dHRGWk5RWW9pMmFXTTlNbjZ6V3dxX0N2a1E4N1JONThTelVtb1Nmd2tVakExdFNLazVtZjE4d0V2QTJyUmd5X2V0RWh6c1hlVV9WNGFuMWQ4T1dKczhQN2lIMVBibjFNUkZWSk5pZVZrZDl6QzRvXw?oc=5","source":"NDTV Profit","published":"2026-10-22T00:11:56"},{"title":"Gold Price Today in Amravati \u2013 18K, 22K & 24K Rate | 22 October 2026","url":"https://news.google.com/rss/articles/CBMijAFBVV95cUxQS2RCNXlLQzEtY3hZeTQtbDlfbG82eUhpdi1vMy1YYnlNcEZjRkl6eWthTFFJODVrV1Zwbll0WDRKOWhsWDFqa2dSZ0tyRXR6UFBVaEFNVGp4VVBMUTJ0VlpZbE5UVzY1el85VFF0b1otWXl3Q3h4aW9rUGdfRldfeVl4QjRpRmVpXzE2UQ?oc=5","source":"The Times of India","published":"2026-10-21T23:43:52"},{"title":"Gold Rate Today In Noida, Check Live 22 And 24 Carat Gold Price","url":"https://news.google.com/rss/articles/CBMicEFVX3lxTE9ST0txZEdzdGxrMHRNYXZfazY1R20waTV3T1hTU29jMHZETzlsOG5tWFBNVXIzR25zU191MGVmZEVEMXhUTzV3bFB4cm4wU2FDOTJOLUhmOW8yLW56LU9nc2NtSWlmbUwtR1U3UElrZE0?oc=5","source":"NDTV Profit","published":"2026-10-21T22:26:09"}];
   var NEWS_CACHE_KEY='mgr_news_cache_v1';
   var NEWS_TTL_MS=30*60*1000;
   var NEWS_MAX=8;
@@ -3164,7 +3172,9 @@ function handleCredentialResponse(resp){
   window.GR_CLOSE_SUBPOP=closeSubPop;
   function openSubPop(){
     if(!subPop)return;
-    lsSet(SP_SEEN,'1');          // once ever, whatever happens next
+    lsSet(SP_SEEN,'1');
+    lsSet(SP_LAST,String(Date.now()));
+    lsSet(SP_N,String((parseInt(lsGet(SP_N)||'0',10)||0)+1));
     subPop.classList.add('open');
     document.body.style.overflow='hidden';
     var em=document.getElementById('alEmailP');
@@ -3209,11 +3219,19 @@ function handleCredentialResponse(resp){
     });
   }
 
+  // Show policy, shared with every other page through /alerts-pop.js and
+  // the same storage keys: a visitor who has not subscribed sees the popup
+  // on their first visit to ANY page; if they close it, it may come back
+  // after 7 days, at most 3 times in all. "Once ever" (the old rule) meant
+  // a visitor who closed it on day one was never asked again.
+  var SP_LAST='gr_pop_last', SP_N='gr_pop_n', SP_GAP=7*864e5, SP_MAX=3;
   function subPopEligible(){
     if(!subPop)return false;
     if(lsGet(SP_SUB)==='1')return false;   // complete, mobile and all
-    if(lsGet(SP_SEEN))return false;
     if(ssGet(SP_DISMISS))return false;
+    var n=parseInt(lsGet(SP_N)||'0',10)||0, last=parseInt(lsGet(SP_LAST)||'0',10)||0;
+    if(n>=SP_MAX)return false;
+    if(last&&Date.now()-last<SP_GAP)return false;
     // Don't stack behind Google's own prompt.
     if(document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi"]'))return false;
     return true;
@@ -3232,9 +3250,13 @@ function handleCredentialResponse(resp){
       var el=document.getElementById('sections')||document.documentElement;
       var top=el.scrollTop||window.scrollY||0;
       var h=(el.scrollHeight||0)-(el.clientHeight||window.innerHeight||0);
-      if(h>0&&top/h>0.35)fire();
+      if(h>0&&top/h>0.12)fire();
     }
-    var t=setTimeout(fire,30000);
+    // 5 s, or as soon as they start scrolling: long enough to see the rate
+    // they searched for, early enough that most visitors are still here
+    // (the old 30 s and 35%-scroll lost nearly everyone arriving from
+    // search, who read the rate and leave).
+    var t=setTimeout(fire,5000);
     function cleanup(){
       clearTimeout(t);
       window.removeEventListener('scroll',onScroll,true);
