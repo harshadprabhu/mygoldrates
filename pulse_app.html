@@ -98,8 +98,8 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
 
 /* ─── BG image layer ─── */
 .bg-layer{position:absolute;inset:0;z-index:0;background:url('/bg.jpg') center/cover no-repeat;background-image:image-set(url('/bg.webp') type('image/webp'),url('/bg.jpg') type('image/jpeg'));transition:filter 1.2s cubic-bezier(.4,0,.2,1)}
-.bg-layer.blurred{filter:blur(18px) brightness(0.5)}
-.bg-layer.clear{filter:blur(0) brightness(0.7)}
+.bg-layer.blurred{filter:blur(10px) brightness(0.55)}
+.bg-layer.clear{filter:blur(10px) brightness(0.55)}
 .bg-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(10,8,4,0.5) 0%,rgba(10,8,4,0.3) 30%,rgba(10,8,4,0.6) 70%,rgba(10,8,4,0.85) 100%);pointer-events:none;transition:opacity 1.2s}
 
 .app>*:not(.bg-layer):not(.bg-overlay){position:relative;z-index:2}
@@ -110,9 +110,9 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
    chip, which tracks the 3s spot feed. Sits directly under the topbar so it
    is the first thing read after the brand. */
 .rates-stamp{flex-shrink:0;padding:2px 16px 6px;font-family:'DM Sans',sans-serif;
-  font-size:11px;color:var(--text3);letter-spacing:.01em}
-.rates-stamp b{color:var(--text2);font-weight:600}
-.rates-stamp #ratesStampAgo{color:var(--text3)}
+  font-size:11px;color:var(--text2);letter-spacing:.01em;text-shadow:0 1px 3px rgba(0,0,0,.85)}
+.rates-stamp b{color:var(--text);font-weight:600}
+.rates-stamp #ratesStampAgo{color:var(--text2);opacity:.8}
 .rates-stamp #ratesStampAgo:not(:empty)::before{content:" \00b7 "}
 .logo{font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;color:var(--text);text-shadow:0 1px 8px rgba(0,0,0,0.5)}
 .logo .g{background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -142,7 +142,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
 .trend-tip.show{opacity:1}
 .trend-tip .v{font-weight:700;color:var(--gold-light)}
 .trend-tip .t{color:var(--text3);font-size:9.5px;margin-top:1px}
-.trend-note{font-size:10.5px;color:var(--text3);text-align:center;padding:6px 4px 4px}
+.trend-note{font-size:10.5px;color:var(--text2);text-align:center;padding:6px 4px 4px;text-shadow:0 1px 3px rgba(0,0,0,.85)}
 #s-market .trend-svg{height:220px}
 
 /* ─── Trend range filter chips ─── */
@@ -359,7 +359,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
 .qc-tabs{display:flex;gap:4px;margin-bottom:10px;background:rgba(0,0,0,0.25);border-radius:9px;padding:3px}
 .qc-tab{flex:1;background:transparent;border:none;color:var(--text3);font-size:11px;font-weight:700;padding:6px;border-radius:7px;cursor:pointer;font-family:inherit;text-transform:uppercase;letter-spacing:.4px;transition:all .2s}
 .qc-tab.active{background:var(--gold-soft);color:var(--gold-light);box-shadow:inset 0 0 0 1px var(--glass-border2)}
-p.calc-note{font-size:10px;color:var(--text3);text-align:center;padding:10px 20px 0;line-height:1.5}
+p.calc-note{font-size:10.5px;color:var(--text2);text-align:center;padding:10px 20px 0;line-height:1.5;text-shadow:0 1px 3px rgba(0,0,0,.85)}
 
 /* ─── Making Charges Comparison ─── */
 p.mc-intro{font-size:11px;color:var(--text2);line-height:1.6;padding:0 16px 12px}
@@ -509,7 +509,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 
 /* fixed bg, shared image, less blur than the app */
 .site-bg{position:fixed;inset:0;z-index:0;background:url('/bg.jpg') center 30%/cover no-repeat;background-image:image-set(url('/bg.webp') type('image/webp'),url('/bg.jpg') type('image/jpeg'))}
-.site-scrim{position:fixed;inset:0;z-index:0;background:linear-gradient(180deg,rgba(8,6,3,0.55) 0%,rgba(8,6,3,0.72) 40%,#0a0804 88%)}
+.site-scrim{position:fixed;inset:0;z-index:0;background:linear-gradient(180deg,rgba(8,6,3,0.62) 0%,rgba(8,6,3,0.8) 40%,#0a0804 80%)}
 .site>*:not(.site-bg):not(.site-scrim){position:relative;z-index:1}
 
 /* Nav */
@@ -1351,8 +1351,14 @@ function handleCredentialResponse(resp){
   function onScroll(){
     var s=Math.max(sections.scrollTop,window.scrollY||document.documentElement.scrollTop||0);
     var pct=Math.min(s/400,1);
-    bg.style.filter='blur('+(18*(1-pct))+'px) brightness('+(0.5+0.3*pct)+')';
-    overlay.style.opacity=1-pct*0.4;
+    // The gold photo is the backdrop for the price at the top only. As the
+    // reader scrolls into the sections it dims and blurs to a dark warm
+    // ground. This used to run the other way - sharpening and brightening
+    // the photo (brightness 0.5 -> 0.8) and fading the tint - so the news
+    // and dealer sections sat on the brightest part of it and the notes
+    // between cards could not be read.
+    bg.style.filter='blur('+(10+12*pct)+'px) brightness('+(0.55-0.27*pct)+')';
+    overlay.style.opacity=1;
   }
   sections.addEventListener('scroll',onScroll);
   window.addEventListener('scroll',onScroll);
