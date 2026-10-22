@@ -31,6 +31,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timezone
 
 WORKER = os.environ.get(
     "MARKET_API_BASE",
@@ -60,7 +61,13 @@ def get_json(url, timeout=30):
 
 
 def sb_write(table, rows, on_conflict=None):
-    """POST rows to PostgREST. on_conflict makes it an upsert."""
+    """POST rows to PostgREST. on_conflict makes it an upsert.
+
+    An upsert batch may not contain the same key twice (Postgres refuses
+    the whole batch), so repeats are dropped first, keeping the last."""
+    if on_conflict:
+        keys = on_conflict.split(",")
+        rows = list({tuple(r.get(k) for k in keys): r for r in rows}.values())
     url = os.environ["SUPABASE_URL"].rstrip("/") + f"/rest/v1/{table}"
     if on_conflict:
         url += f"?on_conflict={on_conflict}"
@@ -107,43 +114,104 @@ def snap_market():
     return 1
 
 
-def snap_vendors():
-    v = get_json(f"{WORKER}/vendors")
+def vendor_rows(v):
+    """Rows for vendor_rates from the worker's /vendors payload.
+
+    Current shape (since September 2026):
+      {"vendors": [{"dealer_id": "arihant", "dealer": "Arihant Spot",
+                    "all_rows": [{"name": "GOLD 995 (1kg) ...", "buy": ..,
+                                  "sell": .., "high": .., "low": ..}, ...]}]}
+    The original shape, still accepted:
+      {"dealers": [{"dealer": "x", "rates": {"GOLD_995": {"buy": ..}}}]}
+    Reading only the original shape is why vendor_rates stayed empty.
+    """
     rows = []
-    # Worker shape: {"dealers":[{"dealer":"x","rates":{"GOLD_995":{...}}}]}
-    for d in (v.get("dealers") or []):
-        dealer = d.get("dealer") or d.get("name")
+    for d in (v.get("vendors") or v.get("dealers") or []):
+        dealer = d.get("dealer_id") or d.get("dealer") or d.get("name")
+        for r in (d.get("all_rows") or []):
+            if isinstance(r, dict) and r.get("name"):
+                rows.append({"dealer": dealer, "metal": r["name"],
+                             "buy": r.get("buy"), "sell": r.get("sell"),
+                             "high": r.get("high"), "low": r.get("low")})
         for metal, vals in (d.get("rates") or {}).items():
-            if not isinstance(vals, dict):
-                continue
-            rows.append({
-                "dealer": dealer, "metal": metal,
-                "buy": vals.get("buy"), "sell": vals.get("sell"),
-                "high": vals.get("high"), "low": vals.get("low"),
-            })
+            if isinstance(vals, dict):
+                rows.append({"dealer": dealer, "metal": metal,
+                             "buy": vals.get("buy"), "sell": vals.get("sell"),
+                             "high": vals.get("high"), "low": vals.get("low")})
+    return [r for r in rows if r["dealer"]]
+
+
+def snap_vendors():
+    rows = vendor_rows(get_json(f"{WORKER}/vendors"))
     if rows:
         sb_write("vendor_rates", rows)
     return len(rows)
 
 
+def ohlc_rows(sym, o):
+    """Rows for ohlc_history. Candles now come as {"t": epoch seconds,
+    "o","h","l","c"}; the original {"date","open","high","low","close"}
+    is still accepted. Reading only the original is why ohlc_history
+    stayed empty. One row per day: a repeated day keeps the last candle."""
+    by_day = {}
+    for c in (o.get("candles") or o.get("data") or []):
+        d = c.get("date") or c.get("d")
+        if not d and c.get("t") is not None:
+            d = datetime.fromtimestamp(int(c["t"]), tz=timezone.utc).date().isoformat()
+        if not d:
+            continue
+        by_day[str(d)[:10]] = {
+            "symbol": sym, "d": str(d)[:10],
+            "open": c.get("open", c.get("o")), "high": c.get("high", c.get("h")),
+            "low": c.get("low", c.get("l")), "close": c.get("close", c.get("c"))}
+    return list(by_day.values())
+
+
 def snap_ohlc():
     total = 0
-    for sym in ("GC=F", "SI=F"):
+    # The worker takes ?sym=XAU|XAG. This used to send ?symbol=GC=F, which
+    # the worker ignores, so both requests returned gold and silver would
+    # have been stored with gold's prices.
+    for sym, wsym in (("GC=F", "XAU"), ("SI=F", "XAG")):
         try:
-            o = get_json(f"{WORKER}/ohlc?symbol={urllib.parse.quote(sym)}")
+            o = get_json(f"{WORKER}/ohlc?sym={wsym}")
         except Exception as e:
             print(f"  ohlc {sym}: {type(e).__name__}: {e}")
             continue
-        rows = [{
-            "symbol": sym, "d": c.get("date") or c.get("d"),
-            "open": c.get("open"), "high": c.get("high"),
-            "low": c.get("low"), "close": c.get("close"),
-        } for c in (o.get("candles") or o.get("data") or [])
-            if (c.get("date") or c.get("d"))]
+        rows = ohlc_rows(sym, o)
         if rows:
             sb_write("ohlc_history", rows, on_conflict="symbol,d")
             total += len(rows)
     return total
+
+
+NEWS_FEED = ("https://news.google.com/rss/search?q="
+             "gold%20rate%20OR%20gold%20price%20India%20when:1d"
+             "&hl=en-IN&gl=IN&ceid=IN:en")
+
+
+def news_rows_from_rss(xml):
+    """Headlines (title, link, source, time) from a Google News RSS page -
+    the same source the site build's news strip uses."""
+    import html as _h
+    import re
+    from email.utils import parsedate_to_datetime
+    out = []
+    for it in re.findall(r"<item>(.*?)</item>", xml, re.S):
+        def f(tag):
+            m = re.search(r"<" + tag + r"[^>]*>(.*?)</" + tag + ">", it, re.S)
+            return _h.unescape(re.sub(r"<[^>]+>", "", m.group(1))).strip() if m else ""
+        title, link, src = f("title"), f("link"), f("source")
+        if src and title.endswith(" - " + src):
+            title = title[:-(len(src) + 3)].strip()
+        try:
+            when = parsedate_to_datetime(f("pubDate")).isoformat()
+        except (TypeError, ValueError):
+            when = None
+        if title and link:
+            out.append({"title": title, "url": link, "published_at": when,
+                        "source": src or None})
+    return out
 
 
 def snap_news():
@@ -154,21 +222,38 @@ def snap_news():
         "source": it.get("source"),
     } for it in (n.get("items") or n.get("news") or [])
         if it.get("title") and (it.get("url") or it.get("link"))]
+    if not rows:
+        # the worker's news upstream has returned an empty list since
+        # October 2026; read the headlines directly instead
+        req = urllib.request.Request(NEWS_FEED, headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            rows = news_rows_from_rss(r.read().decode("utf-8", errors="replace"))
     if rows:
         sb_write("market_news", rows, on_conflict="url")
     return len(rows)
 
 
-def snap_calendar():
-    c = get_json(f"{WORKER}/calendar")
-    rows = [{
-        "event_at": it.get("event_at") or it.get("date"),
-        "title": it.get("title") or it.get("event"),
+CALENDAR_FEED = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
+
+
+def calendar_rows(events):
+    """US events from the FairEconomy weekly feed: they are what moves gold,
+    and the same filter the site's calendar strip uses."""
+    return [{
+        "event_at": it.get("date"), "title": it.get("title"),
         "country": it.get("country"), "impact": it.get("impact"),
-        "actual": it.get("actual"), "forecast": it.get("forecast"),
-        "previous": it.get("previous"),
-    } for it in (c.get("events") or c.get("items") or [])
-        if (it.get("title") or it.get("event"))]
+        "actual": it.get("actual") or None, "forecast": it.get("forecast") or None,
+        "previous": it.get("previous") or None,
+    } for it in (events or [])
+        if it.get("title") and (it.get("country") or "").upper() in ("USD", "US")]
+
+
+def snap_calendar():
+    # Straight from the feed, not through the worker: the feed sits behind
+    # Cloudflare, which refuses the worker's subrequests, so /calendar
+    # answered 502 on every call (generate_site.fetch_calendar documents
+    # the same). From a GitHub runner the feed answers normally.
+    rows = calendar_rows(get_json(CALENDAR_FEED))
     if rows:
         sb_write("economic_calendar", rows,
                  on_conflict="event_at,title,country")
