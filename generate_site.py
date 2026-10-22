@@ -2421,6 +2421,8 @@ def main():
         # Click tracking rides along in the deferred bundle; it has no
         # urgency. The pageview does not - it is inline in the head.
         f.write(SIGNUP_JS + "\n" + CLICK_JS)
+    with open("docs/alerts-pop.js", "w", encoding="utf-8") as f:
+        f.write(ALERTS_POP_JS)
 
     def write_city_pages(home_html):
         """Every city and state page, in the new design.
@@ -3628,7 +3630,24 @@ b.addEventListener('click',function(){
                 _mcb = {}
             _ranked = sorted(live, key=lambda r: r["canonical_24k_pre_gst"])
             _hub_rows = []
-            for _i, _r in enumerate(_ranked, 1):
+            # A jeweller with no published rate yet today (its site was
+            # unreadable this morning) still gets its page rebuilt, from
+            # its latest published rate if that is under 3 days old, dated
+            # and labelled as such - otherwise the page kept an old build
+            # whose "today" was no longer true.
+            _live_sl = {(r.get("brands") or {}).get("slug") for r in live}
+            _cut = (now_ist.date() - timedelta(days=3)).isoformat()
+            _late = []
+            for _bb in (sb.table("brands").select("slug, name, domain")
+                        .eq("active", True).execute().data or []):
+                _hh = _jhist.get(_bb["slug"]) or {}
+                if _bb["slug"] in _live_sl or not _hh:
+                    continue
+                _dd = max(_hh)
+                if _dd >= _cut:
+                    _late.append({"brands": _bb, "canonical_24k_pre_gst": _hh[_dd],
+                                  "method": "", "_asof": _dd})
+            for _i, _r in list(enumerate(_ranked, 1)) + [(None, x) for x in _late]:
                 _b = _r.get("brands") or {}
                 _sl, _nm = _b.get("slug") or "", _b.get("name") or ""
                 if not _sl or not _nm:
@@ -3637,7 +3656,11 @@ b.addEventListener('click',function(){
                 jeweller_pages[_sl] = _ps
                 _c24 = float(_r["canonical_24k_pre_gst"])
                 _lad = ladder(_c24)
-                _prem = (_c24 / median24 - 1) * 100
+                _asof = _r.get("_asof")
+                _asof_disp = (datetime.strptime(_asof, "%Y-%m-%d").strftime("%d %B %Y")
+                              if _asof else "")
+                _mref = _jmed.get(_asof, median24) if _asof else median24
+                _prem = (_c24 / _mref - 1) * 100
                 _states = REGION_MAP.get(_sl, [])
                 _where = (f"a regional chain with stores in {', '.join(_states)}"
                           if _states else "listed here as a national chain")
@@ -3692,32 +3715,44 @@ b.addEventListener('click',function(){
                                    + ". Making charges are added to the gold value, then 3% GST.")
                 _faq = [
                     (f"What is {_nm}'s gold rate today?",
-                     f"On {display_date}, {_nm}'s rate is {inr(_lad['24K'])} per gram for 24K, "
-                     f"{inr(_lad['22K'])} for 22K and {inr(_lad['18K'])} for 18K, before 3% GST "
+                     (f"{_nm} has not published a rate yet today. Its latest, on {_asof_disp}, "
+                      f"was {inr(_lad['24K'])} per gram for 24K, " if _asof else
+                      f"On {display_date}, {_nm}'s rate is {inr(_lad['24K'])} per gram for 24K, ")
+                     + f"{inr(_lad['22K'])} for 22K and {inr(_lad['18K'])} for 18K, before 3% GST "
                      f"and making charges."),
                     (f"Is {_nm} cheaper than other jewellers today?",
-                     f"{_nm} is number {_i} of {len(_ranked)} jewellers we track today, cheapest "
-                     f"first: {abs(_prem):.2f}% {'below' if _prem < 0 else 'above'} the market "
-                     f"median of {inr(median24)} per gram for 24K."),
+                     (f"{_nm} has not published a rate yet today. On {_asof_disp}, its latest, "
+                      f"it was {abs(_prem):.2f}% {'below' if _prem < 0 else 'above'} that day's "
+                      f"market median." if _asof else
+                      f"{_nm} is number {_i} of {len(_ranked)} jewellers we track today, cheapest "
+                      f"first: {abs(_prem):.2f}% {'below' if _prem < 0 else 'above'} the market "
+                      f"median of {inr(median24)} per gram for 24K.")),
                     (f"Does {_nm}'s rate include GST?",
                      f"The rates on this page are before GST. With 3% GST, 10 grams of 22K at "
-                     f"{_nm} today cost {inr(round(_lad['22K'] * 10 * 1.03))} plus making charges."),
+                     f"{_nm} {'cost on ' + _asof_disp if _asof else 'today cost'} "
+                     f"{inr(round(_lad['22K'] * 10 * 1.03))} plus making charges."),
                 ] + ([_mc_faq] if _mc_faq else [])
                 _faq_html = "".join(f"<h3>{_html.escape(q)}</h3><p>{_html.escape(a)}</p>" for q, a in _faq)
                 _site = (_b.get("domain") or "").replace("https://", "").replace("http://", "").split("/")[0]
                 _body = (
                     crumbs(("Gold rate by jeweller", f"{SITE_URL}/gold-rate-by-jeweller"), (_nm, None))
                     + f"<h1>{_html.escape(_nm)} Gold Rate Today</h1>"
-                    + f'<p class="updated-on">{display_date}, {display_time}</p>'
+                    + (f'<p class="updated-on">Latest published rate: {_asof_disp}. '
+                       f'{_html.escape(_nm)} has not published a rate yet today.</p>' if _asof else
+                       f'<p class="updated-on">{display_date}, {display_time}</p>')
                     + "<table class='jt'><tr><th>Purity</th><th>Per gram</th><th>With 3% GST</th><th>10 grams</th></tr>"
                     + "".join(f"<tr><td>{k}</td><td><strong>{inr(_lad[k])}</strong></td>"
                               f"<td>{inr(_lad[k] * 1.03)}</td><td>{inr(_lad[k] * 10)}</td></tr>"
                               for k in ("24K", "22K", "18K"))
                     + "</table>"
-                    + f"<p>{_html.escape(_nm)} is <strong>number {_i} of {len(_ranked)}</strong> jewellers "
-                      f"we track today, cheapest first, at <strong>{abs(_prem):.2f}% "
-                      f"{'below' if _prem < 0 else 'above'}</strong> the market median "
-                      f"({inr(median24)} per gram for 24K). It is {_where}. Its rate is {_how}"
+                    + ((f"<p>On {_asof_disp}, its latest rate, {_html.escape(_nm)} was "
+                        f"<strong>{abs(_prem):.2f}% {'below' if _prem < 0 else 'above'}</strong> "
+                        f"that day's market median. ") if _asof else
+                       (f"<p>{_html.escape(_nm)} is <strong>number {_i} of {len(_ranked)}</strong> jewellers "
+                        f"we track today, cheapest first, at <strong>{abs(_prem):.2f}% "
+                        f"{'below' if _prem < 0 else 'above'}</strong> the market median "
+                        f"({inr(median24)} per gram for 24K). "))
+                      + f"It is {_where}. Its rate is {_how}"
                       + (f' (<a href="https://{_site}" rel="nofollow noopener" target="_blank">{_html.escape(_site)}</a>)' if _site else "")
                       + ". Rates are before GST and making charges; confirm at the store before buying.</p>"
                     + (f"<h2>{_html.escape(_nm)}'s rate, last 30 days</h2>{_stats}"
@@ -3753,13 +3788,15 @@ b.addEventListener('click',function(){
                     _ps,
                     f"{_nm} Gold Rate Today ({now_ist.strftime('%-d %b')}): 24K, 22K | MyGoldRates",
                     (f"{_nm} gold rate today: 24K {inr(_lad['24K'])}/g, 22K {inr(_lad['22K'])}/g "
-                     f"(pre-GST), number {_i} of {len(_ranked)} jewellers. 30-day history"
+                     + (f"(pre-GST), latest rate {_asof_disp}. 30-day history" if _asof else
+                        f"(pre-GST), number {_i} of {len(_ranked)} jewellers. 30-day history")
                      + (" and making charges." if _mc_html else ".")),
                     _body, jsonld_block=_ld,
                     robots=("index, follow, max-image-preview:large" if _ready else "noindex, follow"))
                 if _ready:
                     extra_urls.append((_ps, "daily", "0.7"))
-                _hub_rows.append((_i, _nm, _ps, _lad, _prem, _states, _ready))
+                if not _asof:            # the hub ranks today's rates only
+                    _hub_rows.append((_i, _nm, _ps, _lad, _prem, _states, _ready))
             _hub = (
                 crumbs(("Gold rate by jeweller", None))
                 + "<h1>Gold Rate Today by Jeweller</h1>"
@@ -5331,6 +5368,109 @@ GATE_CSS = """
 #gate-enrich-skip:hover{background:color-mix(in srgb,var(--ink) 6%,transparent);color:var(--ink)}
 """
 
+# ---- Daily-alerts popup for every page other than the homepage design ----
+# The homepage and city pages (pulse_app.html) carry their own popup; this
+# is the same offer, the same validation (email and Indian mobile both
+# required) and the same upsert_subscriber call, for every other page -
+# jeweller pages, near-me, history, calculators, guides, the market brief.
+# Shares its storage keys with the homepage, so the show-rule is one rule
+# across the site: first visit to any page, 5 s in or at the first scroll;
+# if closed, again after 7 days, at most 3 times; never after subscribing.
+# On phones it is a bottom sheet that leaves the top of the page visible.
+ALERTS_POP_JS = r"""(function(){
+  var SKIP=/^\/(inquiry|unsubscribe|list-your-jewellery|jd-today|jewellers-digest|analytics|404)(\.html)?\/?$/;
+  if(SKIP.test(location.pathname))return;
+  function g(k){try{return localStorage.getItem(k)}catch(_){return null}}
+  function s(k,v){try{localStorage.setItem(k,v)}catch(_){}}
+  function sg(k){try{return sessionStorage.getItem(k)}catch(_){return null}}
+  function ss(k,v){try{sessionStorage.setItem(k,v)}catch(_){}}
+  function eligible(){
+    if(g('gr_sub')==='1'||sg('gr_dismissed'))return false;
+    var n=parseInt(g('gr_pop_n')||'0',10)||0,last=parseInt(g('gr_pop_last')||'0',10)||0;
+    return n<3&&!(last&&Date.now()-last<7*864e5);
+  }
+  if(!eligible())return;
+  var css='#grPop{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.55)}'+
+    '#grPop .b{position:relative;width:100%;max-width:400px;max-height:calc(100vh - 32px);overflow:auto;background:#1b1712;color:#f3eadb;border:1px solid rgba(212,166,60,.35);border-radius:18px;padding:22px 20px 16px;font:14px/1.5 "DM Sans",system-ui,sans-serif;box-shadow:0 24px 64px rgba(0,0,0,.5)}'+
+    '#grPop .t{font:700 18px/1.3 "Playfair Display",Georgia,serif;margin:4px 30px 6px 0}'+
+    '#grPop .d{font-size:13px;opacity:.75;margin-bottom:12px}'+
+    '#grPop input{display:block;width:100%;box-sizing:border-box;margin:0 0 8px;padding:11px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:inherit;font-size:15px}'+
+    '#grPop .go{width:100%;padding:12px;border:0;border-radius:10px;background:#d4a63c;color:#1a1405;font-weight:700;font-size:15px;cursor:pointer}'+
+    '#grPop .go[disabled]{opacity:.6}'+
+    '#grPop .x{position:absolute;top:10px;right:10px;width:32px;height:32px;border:0;border-radius:8px;background:rgba(255,255,255,.08);color:inherit;font-size:20px;cursor:pointer}'+
+    '#grPop .l{display:block;width:100%;margin-top:6px;background:none;border:0;color:inherit;opacity:.6;font-size:12px;cursor:pointer;padding:6px}'+
+    '#grPop .st{min-height:16px;font-size:12px;margin-top:6px}'+
+    '#grPop .n{font-size:11px;opacity:.55;text-align:center;margin-top:6px}'+
+    '@media(max-width:760px){#grPop{align-items:flex-end;padding:0;background:rgba(0,0,0,.35)}'+
+    '#grPop .b{max-width:none;max-height:72vh;border-radius:18px 18px 0 0;border-bottom:0;animation:grUp .3s ease}}'+
+    '@keyframes grUp{from{transform:translateY(100%)}to{transform:none}}';
+  var el,armed=true,timer;
+  function build(){
+    var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+    el=document.createElement('div');el.id='grPop';el.setAttribute('role','dialog');
+    el.setAttribute('aria-modal','true');el.setAttribute('aria-labelledby','grPopT');
+    el.innerHTML='<div class="b"><button class="x" type="button" aria-label="Close">&times;</button>'+
+      '<div class="t" id="grPopT">Get today’s gold rate every morning</div>'+
+      '<div class="d">One free email: the cheapest jeweller near you, the market rate and what moved gold. Unsubscribe anytime.</div>'+
+      '<input id="grPopN" type="text" placeholder="Your name" autocomplete="name">'+
+      '<input id="grPopE" type="email" placeholder="Your email *" inputmode="email" autocomplete="email">'+
+      '<input id="grPopP" type="tel" placeholder="Mobile number *" inputmode="tel" autocomplete="tel" maxlength="18" value="+91 ">'+
+      '<button class="go" type="button">Subscribe free</button>'+
+      '<div class="st" aria-live="polite"></div>'+
+      '<div class="n">Free. No spam. One-click unsubscribe.</div>'+
+      '<button class="l" type="button">Maybe later</button></div>';
+    document.body.appendChild(el);
+    el.querySelector('.x').onclick=close;el.querySelector('.l').onclick=close;
+    el.addEventListener('click',function(e){if(e.target===el)close()});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&el.parentNode)close()});
+    el.querySelector('.go').onclick=submit;
+  }
+  function open(){
+    if(!armed)return;armed=false;
+    clearTimeout(timer);window.removeEventListener('scroll',onScroll);
+    if(!eligible())return;
+    if(document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi"]'))return;
+    build();
+    s('gr_pop_last',String(Date.now()));
+    s('gr_pop_n',String((parseInt(g('gr_pop_n')||'0',10)||0)+1));
+    setTimeout(function(){try{document.getElementById('grPopE').focus({preventScroll:true})}catch(_){}},150);
+  }
+  function close(){if(el&&el.parentNode)el.parentNode.removeChild(el);ss('gr_dismissed','1');}
+  function msg(t,ok){var m=el.querySelector('.st');m.style.color=ok?'#7fd1a3':'#f0909e';m.textContent=t;}
+  function save(p){
+    if(window.GR_SAVE)return window.GR_SAVE(p);
+    var SB=(window.GR_SB_URL||'').replace(/\/$/,''),K=window.GR_SB_KEY||'';
+    return fetch(SB+'/rest/v1/rpc/upsert_subscriber',{method:'POST',
+      headers:{'Content-Type':'application/json',apikey:K,Authorization:'Bearer '+K},
+      body:JSON.stringify({payload:p})}).then(function(r){if(!r.ok)throw new Error('save');return true});
+  }
+  function submit(){
+    var b=this,e=document.getElementById('grPopE').value.trim();
+    var d=document.getElementById('grPopP').value.replace(/\D/g,'');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return msg('Enter a valid email');
+    if(d==='91'||d==='0'||d==='091')d='';
+    else{if(d.length>10&&d.slice(0,2)==='91')d=d.slice(2);if(d.length===11&&d.charAt(0)==='0')d=d.slice(1);}
+    if(!d)return msg('Mobile number is required');
+    if(!/^[6-9]\d{9}$/.test(d))return msg('Enter a valid 10-digit mobile number');
+    b.disabled=true;b.textContent='Subscribing…';
+    save({email:e,phone:'+91'+d,name:document.getElementById('grPopN').value.trim(),
+          country:'India',signup_method:'popup'}).then(function(){
+      s('gr_sub','1');b.textContent='Subscribed ✓';
+      msg('✓ Subscribed — your first email arrives tomorrow morning.',true);
+      setTimeout(function(){if(el&&el.parentNode)el.parentNode.removeChild(el)},2200);
+    }).catch(function(){b.disabled=false;b.textContent='Subscribe free';
+      msg('Couldn’t save that — please try again in a moment.')});
+  }
+  function onScroll(){
+    var h=document.documentElement.scrollHeight-innerHeight;
+    if(h>0&&(scrollY||0)/h>0.12)open();
+  }
+  timer=setTimeout(open,5000);
+  window.addEventListener('scroll',onScroll,{passive:true});
+})();
+"""
+
+
 # ---- Feature-gate modal HTML (injected before </body>) ----
 GATE_HTML = """
 <div id="gate-ov" hidden role="dialog" aria-modal="true" aria-labelledby="gate-title">
@@ -6125,6 +6265,7 @@ $body
 $nd_footer
 <script>window.GR_SB_URL="$supabase_url";window.GR_SB_KEY="$anon_key";</script>
 <script src="signup.js?v=$sig_ver" defer></script>
+<script src="$site_url/alerts-pop.js?v=$sig_ver" defer></script>
 </body>
 </html>
 """)
@@ -6225,6 +6366,7 @@ $body
 $nd_footer
 <script>window.GR_SB_URL="$supabase_url";window.GR_SB_KEY="$anon_key";</script>
 <script src="$site_url/signup.js?v=$sig_ver" defer></script>
+<script src="$site_url/alerts-pop.js?v=$sig_ver" defer></script>
 $extra_js
 </body>
 </html>
