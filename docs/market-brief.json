@@ -55,7 +55,7 @@
   "2026-10-22": {
    "date": "2026-10-22",
    "paragraphs": [
-    "International gold is at $4,119 an ounce (-0.51% since 21 Oct), the rupee at ₹94.59 to the dollar (stronger by 0.42%), and the Indian jeweller board median at ₹14,609/g for 24K (-0.01%). In rupee terms the move came mostly from the world gold price (-0.51% gold, -0.42% USD/INR).",
+    "International gold is at $4,123 an ounce (-0.43% since 21 Oct), the rupee at ₹94.59 to the dollar (stronger by 0.42%), and the Indian jeweller board median at ₹14,609/g for 24K (-0.01%). In rupee terms the move came mostly from the world gold price (-0.43% gold, -0.42% USD/INR).",
     "What the world's gold news is about today: US interest rates (9 headlines), Records and profit-taking (5 headlines), Geopolitics and safe-haven buying (4 headlines), Inflation (2 headlines).",
     "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMikAJBVV95cUxQaFROLWhaUnIzckJyY25Gd3otTWZHWGVEOW45UFlGbXFpSS1vWEVBMTFrM3NEakktTy1IeFJabjVQcDktWDNVS0I0NHRvaXJYeElLTm5qclVvU0VnX3BoeGdYcGVNcHotbE96Rmp4QTVFcVNuY3RTYUI5ZUdKNkxVaDZoOW1RQlR6Wl9JOUxwUnZ5YVZWYldCblhQWk92MDZxQjBxTDZZSUkwb2RSYS1aRTFRUGdkSWdPd2UtT2xPbGlpT0twN3dsWU5KRGt4c2p2TGVtVi10OVZZdDdyOWpfT1paSjd5M1gyb0lIVDdaUUlGX2xFYnZuVDY0enVqS0VsR3hkeTBTVXpCRDRYYVoxbQ?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold price today, Wednesday, October 21, 2026: Gold prices down 5.2% YOY one week ahead of the Fed&#x27;s rate decision</a> (Yahoo Finance); <a href=\"https://news.google.com/rss/articles/CBMipgFBVV95cUxNbzZEMXZtdzJIT1ZRVWlnV2hPaW1BemhnYjkxc3pHODJEb3ZNVGxmaVhLeHBJQkNmVmVEUkdCLXhqRWFFcV96cjZFQkRnb25NSDFFelBuWTdPYXhFMkZ5RVBoMjZQOFVqb3pOTFp2UHM3bDJuR2xYcWt2eXhjblItTmxjUGNsZGY2VUpxWWNJOWJEeHUtWDV5eHphbjhqaFcyRDV3VUtB?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold ETFs to Watch Amid Fed Rate Hike &amp; Oil Risks</a> (TradingView).",
     "<strong>Records and profit-taking.</strong> Big moves feed on themselves for a while, and sharp rallies attract profit-taking. In the news: <a href=\"https://news.google.com/rss/articles/CBMikAFBVV95cUxPV1dCOG1HWXJZTGJnOV9NNEFiWGxBZ202NEI4dWpDb0NSVlpwYzVKR1JWQngyNno1WlFtdXdub2hwbTBTLVBua2R4UUxJTlU3WlAweWhOOV9mMTdEX00teUN6WFpyNVhvYTBtc0stWWRIaXFPNFhNck54OVRUSTRqRmJIUVZhX09vSEJvcHgwekU?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Struggles to Rally as Russia&#x27;s Central Bank Bullion Drops to 2019 Level</a> (BullionVault); <a href=\"https://news.google.com/rss/articles/CBMikgFBVV95cUxNM1JiS2V0RVp5MXhXTTc1c3J3NjVNYjZEMFhJWFVfclJXODJyZVZTM0ZvTTFmY1V5Q1VoTnFBeXdCRXpwd1F3NThSZjR6U2huUXhrYTJHTGxrTGV5bFdDZG43TTJCN2Fwa2NJS2wtSnNFY2JlNXRxMVRlVzNhRFZiU1lhd0lnUFluT0tTQllTLVZYdw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold price outlook: will $4,194 trigger the next rally?</a> (Kitco).",
@@ -64,10 +64,10 @@
    ],
    "snap": {
     "board24": 14609.0,
-    "gold_usd": 4119.200195,
+    "gold_usd": 4122.600098,
     "usdinr": 94.593871
    },
-   "summary": "gold -0.5%, news led by us interest rates",
+   "summary": "gold -0.4%, news led by us interest rates",
    "themes": {
     "central_banks": 2,
     "dollar": 1,
