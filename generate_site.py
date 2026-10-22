@@ -2602,7 +2602,7 @@ def main():
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px" class="grid2">
     <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px">
       <h2 style="margin-top:0;font-size:20px">Send Us a Message</h2>
-      <p style="font-size:13.5px;color:var(--ink-3);margin-bottom:16px">Fill out this form to send a message directly to <strong>{CONTACT_EMAIL}</strong>.</p>
+      <p style="font-size:13.5px;color:var(--ink-3);margin-bottom:16px">Fill out this form to send a message directly to <!--email_off--><strong>{CONTACT_EMAIL}</strong><!--/email_off-->.</p>
 
       <form id="contact-form" action="https://formsubmit.co/{CONTACT_EMAIL}" method="POST" style="display:flex;flex-direction:column;gap:14px">
         <input type="hidden" name="_subject" value="New Inquiry from MyGoldRates Contact Page">
@@ -2650,7 +2650,7 @@ def main():
       <p style="margin-bottom:12px">You can also write to us directly using your email client:</p>
       <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:24px">
         <strong style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em;font-family:'IBM Plex Mono',monospace">Official Email Address</strong><br>
-        <a href="mailto:{CONTACT_EMAIL}" style="font-size:19px;font-weight:600;color:var(--gold);display:inline-block;margin-top:6px">{CONTACT_EMAIL}</a>
+        <!--email_off--><a href="mailto:{CONTACT_EMAIL}" style="font-size:19px;font-weight:600;color:var(--gold);display:inline-block;margin-top:6px">{CONTACT_EMAIL}</a><!--/email_off-->
         <p style="font-size:12.5px;color:var(--ink-3);margin:8px 0 0">We aim to respond to all inquiries within 24-48 business hours.</p>
       </div>
 
@@ -2658,7 +2658,7 @@ def main():
       <p>To receive the daily gold rate comparison directly in your inbox every morning, <a href="{SITE_URL}/inquiry">subscribe to daily email alerts here</a>.</p>
 
       <h2>Privacy &amp; Data Rights</h2>
-      <p>To request access to or removal of your personal information, email us at <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> or read our <a href="{SITE_URL}/privacy">Privacy Policy</a>.</p>
+      <p>To request access to or removal of your personal information, email us at <!--email_off--><a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a><!--/email_off--> or read our <a href="{SITE_URL}/privacy">Privacy Policy</a>.</p>
     </div>
   </div>
 
@@ -2730,7 +2730,7 @@ def main():
   <p>In no event shall GoldRates, its owners, or operators be liable for any direct, indirect, incidental, or consequential damages resulting from your reliance on information or tools provided on this website.</p>
   
   <h2>6. Contact &amp; Questions</h2>
-  <p>For questions regarding these Terms of Service or editorial inquiries, please email us at <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>""")
+  <p>For questions regarding these Terms of Service or editorial inquiries, please email us at <!--email_off--><a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a><!--/email_off-->.</p>""")
 
     write_page(
         "privacy",
@@ -2771,7 +2771,7 @@ def main():
   <ul>
     <li>Unsubscribe from emails any time via the link in every email.</li>
     <li>Request a copy or deletion of your data by emailing
-        <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</li>
+        <!--email_off--><a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a><!--/email_off-->.</li>
     <li>Control ad personalisation via the links above.</li>
   </ul>
   <h2>Data retention &amp; security</h2>
@@ -2786,7 +2786,7 @@ def main():
   latest version.</p>
   <h2>Contact</h2>
   <p>Questions about this policy?
-  <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>""")
+  <!--email_off--><a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a><!--/email_off-->.</p>""")
 
 
     # ================= content pages: calculators / news / learn =========
@@ -3551,10 +3551,10 @@ b.addEventListener('click',function(){
   var la=p.coords.latitude,lo=p.coords.longitude;
   var s=C.map(function(c){return{c:c,d:km(la,lo,c.a,c.o)};}).sort(function(x,y){return x.d-y.d;});
   var n=s[0];
-  var h='<p style="margin:0 0 8px"><strong>Nearest city we cover: <a href="'+n.c.u+'">'+esc(n.c.n)+'</a></strong> (about '+Math.round(n.d)+' km).</p>';
+  var h='<p style="margin:0 0 8px"><strong>Nearest city we cover: <a href=\x22'+n.c.u+'\x22>'+esc(n.c.n)+'</a></strong> (about '+Math.round(n.d)+' km).</p>';
   if(n.c.h.length)h+='<p style="margin:0 0 8px">Jewellers based in '+esc(n.c.n)+': '+n.c.h.map(esc).join(', ')+'.</p>';
-  h+='<p style="margin:0 0 8px"><a href="'+n.c.u+'">See today&rsquo;s gold rate in '+esc(n.c.n)+' &rarr;</a></p>';
-  h+='<p style="margin:0;font-size:13px">Also near you: '+s.slice(1,4).map(function(x){return '<a href="'+x.c.u+'">'+esc(x.c.n)+'</a> ('+Math.round(x.d)+' km)';}).join(', ')+'</p>';
+  h+='<p style="margin:0 0 8px"><a href=\x22'+n.c.u+'\x22>See today&rsquo;s gold rate in '+esc(n.c.n)+' &rarr;</a></p>';
+  h+='<p style="margin:0;font-size:13px">Also near you: '+s.slice(1,4).map(function(x){return '<a href=\x22'+x.c.u+'\x22>'+esc(x.c.n)+'</a> ('+Math.round(x.d)+' km)';}).join(', ')+'</p>';
   show(h);
  },function(){show('Location was not shared. Pick your city from the list below.');},{timeout:10000,maximumAge:600000});
 });})();</script>""")
@@ -4381,7 +4381,12 @@ document.getElementById('drGo').addEventListener('click',function(){
         f.write(f"User-agent: *\nAllow: /\nDisallow: /analytics\nDisallow: /analytics.html\n"
                 # API paths that appear in page scripts; Google listed
                 # /rest/v1/rpc/ as a page in search results
-                f"Disallow: /rest/\nDisallow: /jd/\n\n"
+                f"Disallow: /rest/\nDisallow: /jd/\n"
+                # Cloudflare's own paths: its email obfuscation turned every
+                # email address into a /cdn-cgi/l/email-protection link,
+                # which answers 404 to Googlebot (Search Console: "Not
+                # found (404)"). The addresses are now wrapped in email_off.
+                f"Disallow: /cdn-cgi/\n\n"
                 # sitemap.xml is a sitemap-index that references the four
                 # per-section sub-sitemaps (main, cities, daily, news).
                 # Listing every one here as well is redundant but harmless

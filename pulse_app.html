@@ -2385,7 +2385,7 @@ function handleCredentialResponse(resp){
         var when=it.published?new Date(it.published):null;
         var whenTxt=when&&!isNaN(when)?whenAgo(when):'';
         var src=(it.source||'Moneycontrol').replace(/[<>&]/g,'');
-        return '<a class="news-item" href="'+it.url+'" target="_blank" rel="noopener noreferrer">'+
+        return '<a class="news-item" href=\x22'+it.url+'\x22 target="_blank" rel="noopener noreferrer">'+
           '<div class="news-t">'+t+'</div>'+
           '<div class="news-m"><span class="news-src">'+src+'</span>'+(whenTxt?'<span>·</span><span>'+whenTxt+'</span>':'')+'</div>'+
           '</a>';
