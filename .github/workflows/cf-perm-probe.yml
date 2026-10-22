@@ -1,0 +1,44 @@
+name: cf-perm-probe
+
+# Read-only in effect: tests which Cloudflare permissions each stored token
+# has by writing the CURRENT value back (a no-op). Nothing changes.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - env:
+          CF_WORKERS_TOKEN: ${{ secrets.CF_WORKERS_TOKEN }}
+          CLOUDFLARE_ZONE_TOKEN: ${{ secrets.CLOUDFLARE_ZONE_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          API = "https://api.cloudflare.com/client/v4"
+          def call(m, p, tok, body=None):
+              req = urllib.request.Request(API + p, method=m, data=json.dumps(body).encode() if body is not None else None,
+                                           headers={"Authorization": "Bearer " + tok, "Content-Type": "application/json"})
+              try: return json.loads(urllib.request.urlopen(req, timeout=20).read())
+              except urllib.error.HTTPError as e:
+                  try: return json.loads(e.read())
+                  except Exception: return {"success": False}
+          out = []
+          for k in ("CF_WORKERS_TOKEN", "CLOUDFLARE_ZONE_TOKEN"):
+              tok = os.environ.get(k)
+              if not tok: continue
+              z = call("GET", "/zones?name=mygoldrates.com", tok)
+              zid = z["result"][0]["id"] if z.get("success") and z.get("result") else None
+              if not zid: out.append(f"{k}: no zone"); continue
+              cur = call("GET", f"/zones/{zid}/settings/browser_check", tok)
+              v = (cur.get("result") or {}).get("value")
+              if v is None: out.append(f"{k}: cannot read browser_check"); continue
+              w = call("PATCH", f"/zones/{zid}/settings/browser_check", tok, {"value": v})
+              out.append(f"{k}: browser_check={v}; zone settings edit: {'YES' if w.get('success') else 'no'}")
+          print("::notice title=cf-perm::" + " | ".join(out))
+          PY
