@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-22",
-  "last_updated": "2026-10-22T14:09:13.573032+05:30",
+  "last_updated": "2026-10-22T16:11:35.137096+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 144756.0,
-      "change_pct": -0.91
+      "price_per_10g_inr": 144811.0,
+      "change_pct": -0.87
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 143167.0,
-      "change_pct": -0.98
+      "price_per_10g_inr": 143260.0,
+      "change_pct": -0.92
     }
   ],
   "jewellers": [
@@ -166,6 +166,12 @@
       "rate_18k_per_gram_inr": 10854.0
     },
     {
+      "jeweller": "Tanishq",
+      "rate_24k_per_gram_inr": 14481.82,
+      "rate_22k_per_gram_inr": 13275.0,
+      "rate_18k_per_gram_inr": 10861.36
+    },
+    {
       "jeweller": "Kisna",
       "rate_24k_per_gram_inr": 14486.63,
       "rate_22k_per_gram_inr": 13279.41,
@@ -212,12 +218,6 @@
       "rate_24k_per_gram_inr": 14625.47,
       "rate_22k_per_gram_inr": 13406.68,
       "rate_18k_per_gram_inr": 10969.1
-    },
-    {
-      "jeweller": "Tanishq",
-      "rate_24k_per_gram_inr": 14650.91,
-      "rate_22k_per_gram_inr": 13430.0,
-      "rate_18k_per_gram_inr": 10988.18
     },
     {
       "jeweller": "Waman Hari Pethe",
