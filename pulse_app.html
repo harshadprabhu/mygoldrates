@@ -1626,17 +1626,30 @@ function handleCredentialResponse(resp){
   // single GET. If a cached expiry starts 404-ing (contract rolled), we
   // clear it and re-probe on the next tick.
   var MCX_URL = 'https://priceapi.moneycontrol.com/pricefeed/mcx/commodityfuture/';
+  // Nearest contracts first, never one that has already expired:
+  // Moneycontrol keeps answering for an expired contract with its last
+  // traded price, so the October 2026 gold contract kept being shown
+  // (frozen at its 5 Oct close) instead of December's live one.
+  var MCX_MONTHS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  function istToday(){ var t=new Date(Date.now()+5.5*3600e3);
+    return Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),t.getUTCDate()); }
+  function expiryTime(e){ var m=/^(\d{2})([A-Z]{3})(\d{4})$/.exec(e||'');
+    return m ? Date.UTC(+m[3], MCX_MONTHS.indexOf(m[2]), +m[1]) : NaN; }
   function mcxCandidateExpiries(){
-    var months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-    var out=[]; var now=new Date();
-    for(var m=0;m<5;m++){
-      var d=new Date(now.getFullYear(), now.getMonth()+m, 1);
-      var ym = months[d.getMonth()] + d.getFullYear();
-      ['05','04','06'].forEach(function(day){ out.push(day+ym); });
+    var out=[], today=istToday(), t=new Date(Date.now()+5.5*3600e3);
+    for(var m=0;m<6;m++){
+      [5,4,6,3].forEach(function(day){
+        var ts=Date.UTC(t.getUTCFullYear(), t.getUTCMonth()+m, day);
+        if(ts<today) return;
+        var d=new Date(ts);
+        out.push((day<10?'0':'')+day+MCX_MONTHS[d.getUTCMonth()]+d.getUTCFullYear());
+      });
     }
     return out;
   }
   function fetchMcxOne(sym, cachedExpiry){
+    // a remembered contract that has since expired is dropped, not retried
+    if(cachedExpiry && !(expiryTime(cachedExpiry)>=istToday())) cachedExpiry=null;
     // Try cached first; on 404/non-200/data-missing walk candidates.
     var order = cachedExpiry ? [cachedExpiry].concat(mcxCandidateExpiries().filter(function(e){return e!==cachedExpiry})) : mcxCandidateExpiries();
     var i = 0;

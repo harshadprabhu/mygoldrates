@@ -248,14 +248,25 @@ async function prevCloses() {
   return { gold, silver, fx };
 }
 
+// Candidate contract expiries, nearest first, skipping any that have
+// already expired. Moneycontrol keeps serving an expired contract's last
+// traded price, so without the date check the October 2026 gold contract
+// (last trade 5 Oct, 22:24) was taken as "live" and MCX gold froze for
+// weeks while silver, which had no October contract, kept moving.
 function mcxCandidateExpiries() {
   const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-  const now = new Date();
+  // today in IST (contracts expire on Indian dates)
+  const ist = new Date(Date.now() + 5.5 * 3600e3);
+  const today = Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate());
   const out = [];
-  for (let m = 0; m < 5; m++) {
-    const d = new Date(now.getFullYear(), now.getMonth() + m, 1);
-    const ym = months[d.getMonth()] + d.getFullYear();
-    for (const day of ['05', '04', '06']) out.push(day + ym);
+  for (let m = 0; m < 6; m++) {
+    const y = ist.getUTCFullYear(), mo = ist.getUTCMonth() + m;
+    for (const day of [5, 4, 6, 3]) {
+      const t = Date.UTC(y, mo, day);
+      if (t < today) continue;
+      const d = new Date(t);
+      out.push(String(day).padStart(2, '0') + months[d.getUTCMonth()] + d.getUTCFullYear());
+    }
   }
   return out;
 }
