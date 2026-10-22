@@ -3630,7 +3630,24 @@ b.addEventListener('click',function(){
                 _mcb = {}
             _ranked = sorted(live, key=lambda r: r["canonical_24k_pre_gst"])
             _hub_rows = []
-            for _i, _r in enumerate(_ranked, 1):
+            # A jeweller with no published rate yet today (its site was
+            # unreadable this morning) still gets its page rebuilt, from
+            # its latest published rate if that is under 3 days old, dated
+            # and labelled as such - otherwise the page kept an old build
+            # whose "today" was no longer true.
+            _live_sl = {(r.get("brands") or {}).get("slug") for r in live}
+            _cut = (now_ist.date() - timedelta(days=3)).isoformat()
+            _late = []
+            for _bb in (sb.table("brands").select("slug, name, domain")
+                        .eq("active", True).execute().data or []):
+                _hh = _jhist.get(_bb["slug"]) or {}
+                if _bb["slug"] in _live_sl or not _hh:
+                    continue
+                _dd = max(_hh)
+                if _dd >= _cut:
+                    _late.append({"brands": _bb, "canonical_24k_pre_gst": _hh[_dd],
+                                  "method": "", "_asof": _dd})
+            for _i, _r in list(enumerate(_ranked, 1)) + [(None, x) for x in _late]:
                 _b = _r.get("brands") or {}
                 _sl, _nm = _b.get("slug") or "", _b.get("name") or ""
                 if not _sl or not _nm:
@@ -3639,7 +3656,11 @@ b.addEventListener('click',function(){
                 jeweller_pages[_sl] = _ps
                 _c24 = float(_r["canonical_24k_pre_gst"])
                 _lad = ladder(_c24)
-                _prem = (_c24 / median24 - 1) * 100
+                _asof = _r.get("_asof")
+                _asof_disp = (datetime.strptime(_asof, "%Y-%m-%d").strftime("%d %B %Y")
+                              if _asof else "")
+                _mref = _jmed.get(_asof, median24) if _asof else median24
+                _prem = (_c24 / _mref - 1) * 100
                 _states = REGION_MAP.get(_sl, [])
                 _where = (f"a regional chain with stores in {', '.join(_states)}"
                           if _states else "listed here as a national chain")
@@ -3694,32 +3715,44 @@ b.addEventListener('click',function(){
                                    + ". Making charges are added to the gold value, then 3% GST.")
                 _faq = [
                     (f"What is {_nm}'s gold rate today?",
-                     f"On {display_date}, {_nm}'s rate is {inr(_lad['24K'])} per gram for 24K, "
-                     f"{inr(_lad['22K'])} for 22K and {inr(_lad['18K'])} for 18K, before 3% GST "
+                     (f"{_nm} has not published a rate yet today. Its latest, on {_asof_disp}, "
+                      f"was {inr(_lad['24K'])} per gram for 24K, " if _asof else
+                      f"On {display_date}, {_nm}'s rate is {inr(_lad['24K'])} per gram for 24K, ")
+                     + f"{inr(_lad['22K'])} for 22K and {inr(_lad['18K'])} for 18K, before 3% GST "
                      f"and making charges."),
                     (f"Is {_nm} cheaper than other jewellers today?",
-                     f"{_nm} is number {_i} of {len(_ranked)} jewellers we track today, cheapest "
-                     f"first: {abs(_prem):.2f}% {'below' if _prem < 0 else 'above'} the market "
-                     f"median of {inr(median24)} per gram for 24K."),
+                     (f"{_nm} has not published a rate yet today. On {_asof_disp}, its latest, "
+                      f"it was {abs(_prem):.2f}% {'below' if _prem < 0 else 'above'} that day's "
+                      f"market median." if _asof else
+                      f"{_nm} is number {_i} of {len(_ranked)} jewellers we track today, cheapest "
+                      f"first: {abs(_prem):.2f}% {'below' if _prem < 0 else 'above'} the market "
+                      f"median of {inr(median24)} per gram for 24K.")),
                     (f"Does {_nm}'s rate include GST?",
                      f"The rates on this page are before GST. With 3% GST, 10 grams of 22K at "
-                     f"{_nm} today cost {inr(round(_lad['22K'] * 10 * 1.03))} plus making charges."),
+                     f"{_nm} {'cost on ' + _asof_disp if _asof else 'today cost'} "
+                     f"{inr(round(_lad['22K'] * 10 * 1.03))} plus making charges."),
                 ] + ([_mc_faq] if _mc_faq else [])
                 _faq_html = "".join(f"<h3>{_html.escape(q)}</h3><p>{_html.escape(a)}</p>" for q, a in _faq)
                 _site = (_b.get("domain") or "").replace("https://", "").replace("http://", "").split("/")[0]
                 _body = (
                     crumbs(("Gold rate by jeweller", f"{SITE_URL}/gold-rate-by-jeweller"), (_nm, None))
                     + f"<h1>{_html.escape(_nm)} Gold Rate Today</h1>"
-                    + f'<p class="updated-on">{display_date}, {display_time}</p>'
+                    + (f'<p class="updated-on">Latest published rate: {_asof_disp}. '
+                       f'{_html.escape(_nm)} has not published a rate yet today.</p>' if _asof else
+                       f'<p class="updated-on">{display_date}, {display_time}</p>')
                     + "<table class='jt'><tr><th>Purity</th><th>Per gram</th><th>With 3% GST</th><th>10 grams</th></tr>"
                     + "".join(f"<tr><td>{k}</td><td><strong>{inr(_lad[k])}</strong></td>"
                               f"<td>{inr(_lad[k] * 1.03)}</td><td>{inr(_lad[k] * 10)}</td></tr>"
                               for k in ("24K", "22K", "18K"))
                     + "</table>"
-                    + f"<p>{_html.escape(_nm)} is <strong>number {_i} of {len(_ranked)}</strong> jewellers "
-                      f"we track today, cheapest first, at <strong>{abs(_prem):.2f}% "
-                      f"{'below' if _prem < 0 else 'above'}</strong> the market median "
-                      f"({inr(median24)} per gram for 24K). It is {_where}. Its rate is {_how}"
+                    + ((f"<p>On {_asof_disp}, its latest rate, {_html.escape(_nm)} was "
+                        f"<strong>{abs(_prem):.2f}% {'below' if _prem < 0 else 'above'}</strong> "
+                        f"that day's market median. ") if _asof else
+                       (f"<p>{_html.escape(_nm)} is <strong>number {_i} of {len(_ranked)}</strong> jewellers "
+                        f"we track today, cheapest first, at <strong>{abs(_prem):.2f}% "
+                        f"{'below' if _prem < 0 else 'above'}</strong> the market median "
+                        f"({inr(median24)} per gram for 24K). "))
+                      + f"It is {_where}. Its rate is {_how}"
                       + (f' (<a href="https://{_site}" rel="nofollow noopener" target="_blank">{_html.escape(_site)}</a>)' if _site else "")
                       + ". Rates are before GST and making charges; confirm at the store before buying.</p>"
                     + (f"<h2>{_html.escape(_nm)}'s rate, last 30 days</h2>{_stats}"
@@ -3755,13 +3788,15 @@ b.addEventListener('click',function(){
                     _ps,
                     f"{_nm} Gold Rate Today ({now_ist.strftime('%-d %b')}): 24K, 22K | MyGoldRates",
                     (f"{_nm} gold rate today: 24K {inr(_lad['24K'])}/g, 22K {inr(_lad['22K'])}/g "
-                     f"(pre-GST), number {_i} of {len(_ranked)} jewellers. 30-day history"
+                     + (f"(pre-GST), latest rate {_asof_disp}. 30-day history" if _asof else
+                        f"(pre-GST), number {_i} of {len(_ranked)} jewellers. 30-day history")
                      + (" and making charges." if _mc_html else ".")),
                     _body, jsonld_block=_ld,
                     robots=("index, follow, max-image-preview:large" if _ready else "noindex, follow"))
                 if _ready:
                     extra_urls.append((_ps, "daily", "0.7"))
-                _hub_rows.append((_i, _nm, _ps, _lad, _prem, _states, _ready))
+                if not _asof:            # the hub ranks today's rates only
+                    _hub_rows.append((_i, _nm, _ps, _lad, _prem, _states, _ready))
             _hub = (
                 crumbs(("Gold rate by jeweller", None))
                 + "<h1>Gold Rate Today by Jeweller</h1>"
