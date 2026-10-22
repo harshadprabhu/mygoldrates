@@ -3,7 +3,7 @@
 Search Console's "Not found (404)" report is not exposed by its API, so
 this rebuilds it: every page that appeared in Google search in the last
 16 months (Search Analytics, by page), plus every sitemap URL, each
-fetched now without following redirects. Prints the ones that answer 404
+fetched now, following redirects to the final page. Prints the ones that answer 404
 (or anything other than 200 / 301 / 308), grouped by pattern, so they can
 be redirected to the right page.
 """
@@ -45,16 +45,18 @@ def main():
     s.headers["User-Agent"] = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
     for u in sorted(urls):
         try:
-            code = s.get(u, allow_redirects=False, timeout=20).status_code
+            # follow redirects: Google does, so a 301 that lands on a
+            # missing page is a 404 to it
+            code = s.get(u, allow_redirects=True, timeout=20).status_code
         except Exception as e:
             code = type(e).__name__
-        if code not in (200, 301, 308):
+        if code != 200:
             path = re.sub(r"^https?://[^/]+", "", u) or "/"
             pat = re.sub(r"\d{1,2}-[a-z]{3}-\d{4}", "<date>", path)
             pat = re.sub(r"/gold-rate-[a-z-]+-<date>", "/gold-rate-<place>-<date>", pat)
             bad[(code, pat)].append(u)
     print(f"{len(urls)} addresses checked ({n_search} from Google search, rest from sitemap)")
-    print(f"{sum(len(v) for v in bad.values())} do not answer 200/301/308")
+    print(f"{sum(len(v) for v in bad.values())} do not end in 200")
     for (code, pat), us in sorted(bad.items(), key=lambda kv: -len(kv[1])):
         print(f"\n[{code}] {pat}  x{len(us)}")
         for u in us[:8]:
