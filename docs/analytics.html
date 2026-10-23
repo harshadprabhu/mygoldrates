@@ -121,6 +121,11 @@ td.path .tx{color:var(--accent)}
   padding:6px 9px;font-size:12.5px;min-width:0}
 .msg{color:var(--ink2);padding:18px 4px;text-align:center;font-size:13px}
 .note{color:var(--ink3);font-size:11.5px;margin-top:8px}
+.fwarn{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:rgba(227,191,99,.10);
+  border:1px solid rgba(227,191,99,.55);color:var(--ink);border-radius:10px;padding:9px 12px;
+  font-size:13px;margin:0 0 12px}
+.fwarn b{color:var(--gold)}
+.fwarn .btn{margin-left:auto;border-color:rgba(227,191,99,.55);color:var(--gold)}
 .warn{background:rgba(224,138,106,.1);border:1px solid rgba(224,138,106,.35);color:var(--warm);
   border-radius:10px;padding:10px 12px;font-size:12.5px;margin-bottom:12px}
 @media(max-width:520px){.hide-sm{display:none}}
@@ -149,6 +154,7 @@ td.path .tx{color:var(--accent)}
   </div>
   <div class="chips" id="chips"></div>
   <div class="rangeLbl" id="rangeLbl"></div>
+  <div id="filtBanner"></div>
   <div id="notice"></div>
 
   <div id="main">
@@ -167,9 +173,9 @@ td.path .tx{color:var(--accent)}
     </div>
 
     <div class="grid3 row">
-      <div class="card"><div class="chd"><h2>Traffic sources</h2><span class="hint">click to filter</span></div><div id="t_sources"></div></div>
-      <div class="card"><div class="chd"><h2>Sections</h2><span class="hint">click to filter</span></div><div id="t_groups"></div></div>
-      <div class="card"><div class="chd"><h2>Devices</h2><span class="hint">click to filter</span></div><div id="t_devices"></div>
+      <div class="card"><div class="chd"><h2>Traffic sources</h2><span class="hint">tap a row to filter</span></div><div id="t_sources"></div></div>
+      <div class="card"><div class="chd"><h2>Sections</h2><span class="hint">tap a row to filter</span></div><div id="t_groups"></div></div>
+      <div class="card"><div class="chd"><h2>Devices</h2><span class="hint">tap a row to filter</span></div><div id="t_devices"></div>
         <div class="note">Recorded from 23 Oct 2026; earlier visits show as &ldquo;not recorded&rdquo;.</div></div>
     </div>
 
@@ -191,7 +197,7 @@ td.path .tx{color:var(--accent)}
     <div class="grid2 row">
       <div class="card"><div class="chd"><h2>New sign-ups by method</h2></div><div id="t_signups"></div>
         <div class="note">Whole site: page, source and device filters do not apply to sign-ups.</div></div>
-      <div class="card"><div class="chd"><h2>Hosts</h2><span class="hint">click to filter</span></div><div id="t_hosts"></div></div>
+      <div class="card"><div class="chd"><h2>Hosts</h2><span class="hint">tap a row to filter</span></div><div id="t_hosts"></div></div>
     </div>
 
     <div class="card"><div class="chd"><h2>Jewellers wanting to be listed</h2></div>
@@ -316,13 +322,13 @@ td.path .tx{color:var(--accent)}
     '30d':'Last 30 days','90d':'Last 90 days',all:'All time'};
   var LS='gr_an_v2', ALL_FROM='2024-01-01';
   var ST={preset:'today',from:'',to:'',f:{},mode:''};
-  // Only the view settings are remembered in this browser - never the token.
+  // The page always opens on today for the whole site. Filters used to be
+  // remembered between visits, and a filter set by one tap on a table row
+  // came back next time as figures that looked wrong (23 Oct 2026). Only
+  // the first day with data is kept, for the "All" preset.
   try{var saved=JSON.parse(localStorage.getItem(LS)||'null');
-    if(saved&&saved.f&&typeof saved.f==='object'){ST.preset=saved.preset||'today';
-      ST.from=saved.from||'';ST.to=saved.to||'';ST.f=saved.f;
-      if(saved.allFrom)ALL_FROM=saved.allFrom;}}catch(e){}
-  function save(){try{localStorage.setItem(LS,JSON.stringify({preset:ST.preset,
-    from:ST.from,to:ST.to,f:ST.f,allFrom:ALL_FROM}));}catch(e){}}
+    if(saved&&saved.allFrom)ALL_FROM=saved.allFrom;}catch(e){}
+  function save(){try{localStorage.setItem(LS,JSON.stringify({allFrom:ALL_FROM}));}catch(e){}}
 
   function presetRange(p){
     var t=today();
@@ -337,9 +343,7 @@ td.path .tx{color:var(--accent)}
   }
   // A saved preset means "the last 7 days from now", not the dates it
   // covered the day it was saved.
-  if(ST.preset!=='custom'||!ST.from||!ST.to){
-    if(!PRESET_NAMES[ST.preset])ST.preset='today';
-    var r0=presetRange(ST.preset);ST.from=r0[0];ST.to=r0[1];}
+  var r0=presetRange('today');ST.from=r0[0];ST.to=r0[1];
 
   // ------------------------------------------------------------ filter UI
   function setOptions(sel,dim,list){
@@ -364,6 +368,11 @@ td.path .tx{color:var(--accent)}
       esc(d.name)+' filter">&times;</button></span>');});
     if(chips.length>1)chips.push('<button class="btn" data-clear="*" style="padding:3px 10px">Clear all</button>');
     $('chips').innerHTML=chips.join('');
+    // Say plainly that the numbers below are a slice, not the whole site.
+    var on=DIMS.filter(function(d){return ST.f[d.k];});
+    $('filtBanner').innerHTML=on.length?'<div class="fwarn"><span><b>Filtered view.</b> The numbers below '+
+      'count only '+on.map(function(d){return esc(d.name.toLowerCase())+' = '+esc(dimLabel(d.k,ST.f[d.k]));}).join(', ')+
+      '.</span><button class="btn" data-clear="*">Show whole site</button></div>':'';
   }
   function setFilter(k,v){
     if(v)ST.f[k]=v;else delete ST.f[k];
@@ -383,7 +392,10 @@ td.path .tx{color:var(--accent)}
     if(el.closest&&el.closest('a'))return;            // the open-page arrow
     var tr=el.closest&&el.closest('tr.dr');
     if(tr){var fk=tr.getAttribute('data-f'),fv=tr.getAttribute('data-v');
-      setFilter(fk,ST.f[fk]===fv?'':fv);}
+      setFilter(fk,ST.f[fk]===fv?'':fv);
+      // The row may be far down the page; go back up to where the banner
+      // says the view is now filtered and the numbers have changed.
+      try{window.scrollTo({top:0,behavior:'smooth'});}catch(x){window.scrollTo(0,0);}}
   });
 
   // ---------------------------------------------------------------- data
