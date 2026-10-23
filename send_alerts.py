@@ -99,14 +99,14 @@ padding:26px 12px;font-family:Arial,Helvetica,sans-serif;color:#2c2a26">
       </table>
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0 6px">
         <tr><td style="border-radius:999px;background:linear-gradient(100deg,#8C6A18,#D9B24A 48%,#C79A2E)">
-          <a href="{SITE_URL}/" style="display:inline-block;padding:12px 26px;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;color:#1a1508;text-decoration:none">Compare all {n_brands} jewellers &rarr;</a>
+          <a href="{SITE_URL}/?from=alert" style="display:inline-block;padding:12px 26px;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;color:#1a1508;text-decoration:none">Compare all {n_brands} jewellers &rarr;</a>
         </td></tr>
       </table>
       <p style="margin:12px 0 4px;font-size:12px;color:#9a9284">Prices are indicative and pre-GST; confirm the billed rate with the jeweller. Not investment advice.</p>
     </td></tr>
     <tr><td style="padding:16px 30px 22px;background:#faf8f2;border-top:1px solid #efe9db;font-family:Arial,sans-serif;font-size:11px;color:#8f887c;line-height:1.6">
       You're receiving this because you subscribed at mygoldrates.com.<br>
-      <a href="{unsub}" style="color:#8f887c">Unsubscribe</a> &nbsp;&middot;&nbsp; <a href="{SITE_URL}/" style="color:#8f887c">mygoldrates.com</a>
+      <a href="{unsub}" style="color:#8f887c">Unsubscribe</a> &nbsp;&middot;&nbsp; <a href="{SITE_URL}/?from=alert" style="color:#8f887c">mygoldrates.com</a>
     </td></tr>
   </table>
 </body></html>"""
