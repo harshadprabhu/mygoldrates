@@ -2123,7 +2123,9 @@ def main():
     gsi = ('<script src="https://accounts.google.com/gsi/client" async defer>'
            '</script>') if gclient else ""
 
-    sig_ver = hashlib.md5(SIGNUP_JS.encode()).hexdigest()[:8]
+    # Covers alerts-pop.js too, which shares this tag: a change to the
+    # popup must reach browsers that cached the old file for a day.
+    sig_ver = hashlib.md5((SIGNUP_JS + ALERTS_POP_JS).encode()).hexdigest()[:8]
     gate_html = GATE_HTML if gclient else ""
     gate_js   = GATE_JS   if gclient else ""
     # Freshness signals for Google / social crawlers. updated_http is an
@@ -5434,7 +5436,7 @@ ALERTS_POP_JS = r"""(function(){
     '@media(max-width:760px){#grPop{align-items:flex-end;padding:0;background:rgba(0,0,0,.4);backdrop-filter:none;-webkit-backdrop-filter:none}'+
     '#grPop .b{max-width:none;max-height:78vh;border-radius:20px 20px 0 0;border-bottom:0;animation:grUp .32s ease}}'+
     '@keyframes grUp{from{transform:translateY(100%)}to{transform:none}}@keyframes grIn{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}';
-  var el,armed=true,timer;
+  var el,armed=true,timer,waits=0;
   function build(){
     var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
     el=document.createElement('div');el.id='grPop';el.setAttribute('role','dialog');
@@ -5477,7 +5479,9 @@ ALERTS_POP_JS = r"""(function(){
     if(!armed)return;armed=false;
     clearTimeout(timer);window.removeEventListener('scroll',onScroll);
     if(!eligible())return;
-    if(document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi"]'))return;
+    // Wait for Google's sign-in prompt to close instead of giving up.
+    if(document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi/iframe"]')){
+      if(waits++<40){armed=true;setTimeout(open,1500);}return;}
     build();
     s('gr_pop_last',String(Date.now()));
     s('gr_pop_n',String((parseInt(g('gr_pop_n')||'0',10)||0)+1));
