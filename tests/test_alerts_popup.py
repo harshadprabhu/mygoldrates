@@ -35,3 +35,21 @@ def test_only_the_small_x_closes_it():
 def test_desktop_homepage_can_see_the_popup():
     """Its markup sits inside the phone layout, hidden at 900px and up."""
     assert "document.body.appendChild(subPop)" in APP
+
+
+def test_the_x_sits_on_the_left():
+    assert ".sp-x{position:absolute;top:6px;left:6px;" in APP
+    assert "#grPop .x{position:absolute;top:6px;left:6px;" in POP
+
+
+def test_closing_first_shows_what_they_would_miss():
+    """The first x (or Escape) shows the "before you go" step once, with
+    today's real 22K gap filled in by the build; the next closes."""
+    for code in (APP, POP):
+        assert "__GAP22__" in code and "spSureYes" in code and "spSureNo" in code
+        assert "No thanks, close" in code
+    assert "if(spSureShown||spPhoneOnly||!k){closeSubPop(false);return;}" in APP
+    assert "if(sureShown||phoneOnly){close();return;}" in POP
+    src = open("generate_site.py", encoding="utf-8").read()
+    assert 'ALERTS_POP_JS.replace("__GAP22__", str(gap22))' in src
+    assert '("__GAP22__", str(gap22))' in src
