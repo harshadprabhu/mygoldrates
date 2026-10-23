@@ -453,9 +453,9 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 @keyframes spFade{from{opacity:0}to{opacity:1}}
 .sp-box{position:relative;width:100%;max-width:400px;max-height:calc(100vh - 32px);overflow-y:auto;background:#17130d;border:1px solid rgba(240,208,128,.28);border-radius:20px;box-shadow:0 28px 70px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.3);animation:spRise .3s cubic-bezier(.2,.8,.3,1)}
 @keyframes spRise{from{transform:translateY(16px) scale(.98);opacity:0}to{transform:none;opacity:1}}
-.sp-x{position:absolute;top:6px;right:6px;z-index:2;width:28px;height:28px;border:none;background:none;color:rgba(26,20,5,.55);font-size:16px;line-height:1;cursor:pointer;font-family:inherit;padding:0}
+.sp-x{position:absolute;top:6px;left:6px;z-index:2;width:28px;height:28px;border:none;background:none;color:rgba(26,20,5,.55);font-size:16px;line-height:1;cursor:pointer;font-family:inherit;padding:0}
 .sp-x:hover{color:#1a1405}
-.sp-hero{position:relative;padding:20px 20px 16px;background:radial-gradient(120% 140% at 0% 0%,#ffe9a8 0%,#e7bf5a 38%,#b98a24 100%);color:#1a1405;overflow:hidden}
+.sp-hero{position:relative;padding:30px 20px 16px;background:radial-gradient(120% 140% at 0% 0%,#ffe9a8 0%,#e7bf5a 38%,#b98a24 100%);color:#1a1405;overflow:hidden}
 .sp-hero::after{content:'';position:absolute;right:-40px;top:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.45),transparent 70%);pointer-events:none}
 .sp-pill{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.12em;background:rgba(26,20,5,.88);color:#f0d080;border-radius:999px;padding:4px 10px}
 .sp-t{font-family:'Playfair Display',Georgia,serif;font-size:21px;font-weight:800;line-height:1.22;color:#1a1405;margin:10px 0 0;letter-spacing:-.2px;max-width:300px}
@@ -478,7 +478,18 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 #subPop .al-locate{color:#f0d080;border-color:rgba(240,208,128,.35)}
 .sp-note{font-size:10.5px;color:var(--text3);text-align:center;margin-top:10px;line-height:1.5}
 .sp-have{display:block;margin:4px auto 0;background:none;border:none;color:var(--text3);font-size:10.5px;cursor:pointer;padding:4px 6px;font-family:inherit;text-decoration:underline;text-underline-offset:2px;opacity:.75}
-@media(max-width:420px){.sp-t{font-size:19px}.sp-hero{padding:18px 16px 14px}.sp-body{padding:14px 16px 14px}}
+.sp-sure{padding:30px 20px 18px;text-align:center}
+.sp-sure[hidden],#spMain[hidden]{display:none}
+.sp-sure .sp-k{font-size:11px;font-weight:800;letter-spacing:.12em;color:#f0d080}
+.sp-sure .sp-big{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:800;line-height:1.25;color:var(--text);margin:8px 0 6px}
+.sp-sure .sp-big b{color:#f0d080}
+.sp-sure .sp-sub{font-size:13px;color:var(--text2,#cfc6b4);line-height:1.5;margin:0 0 14px}
+.sp-miss{list-style:none;margin:0 0 16px;padding:12px 14px;text-align:left;background:rgba(224,110,110,.07);border:1px solid rgba(224,110,110,.22);border-radius:12px}
+.sp-miss li{position:relative;padding:3px 0 3px 24px;font-size:13px;color:var(--text);line-height:1.4}
+.sp-miss li::before{content:'✕';position:absolute;left:2px;top:3px;color:#e88b8b;font-weight:800;font-size:12px}
+.sp-sure .al-btn{width:100%}
+.sp-no{display:block;margin:10px auto 0;background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:6px 8px;font-family:inherit}
+@media(max-width:420px){.sp-t{font-size:19px}.sp-hero{padding:28px 16px 14px}.sp-body{padding:14px 16px 14px}}
 /* Phones: slide up from the bottom and keep the top of the page (the rate
    the visitor came for) visible - a full-screen cover on arrival from
    search is what Google's intrusive-interstitial rule penalises. */
@@ -965,6 +976,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 <div id="subPop" role="dialog" aria-modal="true" aria-labelledby="spTitle">
   <div class="sp-box">
     <button class="sp-x" id="spClose" type="button" aria-label="Close">&times;</button>
+    <div id="spMain">
     <div class="sp-hero">
       <span class="sp-pill">FREE DAILY GOLD ALERT</span>
       <div class="sp-t" id="spTitle">Know the cheapest gold rate before you buy</div>
@@ -996,6 +1008,20 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
       <div id="alStatusP" style="font-size:12px;color:var(--mint);margin-top:8px;min-height:14px;text-align:center"></div>
       <p class="sp-note">&#128274; Free &middot; No spam &middot; One-click unsubscribe in every email</p>
       <button class="sp-have" id="spHave" type="button">Already subscribed?</button>
+    </div>
+    </div>
+    <!-- Shown once, the first time the x is pressed. -->
+    <div class="sp-sure" id="spSure" hidden>
+      <div class="sp-k">BEFORE YOU GO</div>
+      <div class="sp-big" id="spSureBig">Jewellers don&rsquo;t all charge the same for gold</div>
+      <p class="sp-sub" id="spSureSub">The gap between the cheapest and the dearest jeweller changes every day. The alert tells you who is cheapest each morning.</p>
+      <ul class="sp-miss">
+        <li>Which jeweller is cheapest in your city each morning</li>
+        <li>A heads-up when gold moves sharply</li>
+        <li>Today&rsquo;s market rate, without searching for it</li>
+      </ul>
+      <button class="al-btn" id="spSureYes" type="button">Okay, send me the free alerts</button>
+      <button class="sp-no" id="spSureNo" type="button">No thanks, close</button>
     </div>
   </div>
 </div>
@@ -3234,11 +3260,32 @@ function handleCredentialResponse(resp){
     if(!subscribed)ssSet(SP_DISMISS,'1');
   }
   window.GR_CLOSE_SUBPOP=closeSubPop;
+  // The first press of x (or Escape) shows what the visitor would miss,
+  // with today's real price gap; the second, or "No thanks", closes.
+  var spSureShown=false,spPhoneOnly=false;
+  var SP_GAP22=Number('__GAP22__')||0;
+  function inr(n){return '\u20b9'+Math.round(n).toLocaleString('en-IN');}
+  function showSure(on){
+    var m=document.getElementById('spMain'),k=document.getElementById('spSure');
+    if(!m||!k)return;m.hidden=on;k.hidden=!on;
+    if(on){var box=subPop.querySelector('.sp-box');if(box)box.scrollTop=0;}
+  }
+  function tryClose(){
+    var k=document.getElementById('spSure');
+    if(spSureShown||spPhoneOnly||!k){closeSubPop(false);return;}
+    spSureShown=true;
+    if(SP_GAP22>=50){
+      document.getElementById('spSureBig').innerHTML='Today, 22K gold cost up to <b>'+inr(SP_GAP22)+'/g</b> more at some jewellers';
+      document.getElementById('spSureSub').innerHTML='On a 10 g chain that&rsquo;s <b>'+inr(SP_GAP22*10)+'</b>, before making charges and GST. The alert tells you who is cheapest every morning.';
+    }
+    showSure(true);
+  }
   function openSubPop(){
     if(!subPop)return;
     lsSet(SP_SEEN,'1');
     lsSet(SP_LAST,String(Date.now()));
     lsSet(SP_N,String((parseInt(lsGet(SP_N)||'0',10)||0)+1));
+    showSure(false);spSureShown=false;spPhoneOnly=false;
     subPop.classList.add('open');
     document.body.style.overflow='hidden';
     var em=document.getElementById('alEmailP');
@@ -3263,6 +3310,7 @@ function handleCredentialResponse(resp){
     var t=document.getElementById('spTitle'),d=subPop.querySelector('.sp-d');
     if(t)t.textContent='One last thing \u2014 your mobile number';
     if(d)d.textContent='We have '+(email||'your email')+'. Add your mobile so we can reach you if a rate moves sharply.';
+    showSure(false);spPhoneOnly=true;
     var nP=document.getElementById('alNameP'),eP=document.getElementById('alEmailP');
     if(nP&&name)nP.value=name;
     if(eP&&email)eP.value=email;
@@ -3275,13 +3323,17 @@ function handleCredentialResponse(resp){
 
   if(subPop){
     var spX=document.getElementById('spClose'),spH=document.getElementById('spHave');
-    if(spX)spX.addEventListener('click',function(){closeSubPop(false)});
+    if(spX)spX.addEventListener('click',tryClose);
     // Subscribed on another phone or browser: remember it here too, so the
     // popup never asks again on this device. No tap-outside close.
     if(spH)spH.addEventListener('click',function(){lsSet(SP_SUB,'1');closeSubPop(true)});
     document.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&subPop.classList.contains('open'))closeSubPop(false);
+      if(e.key==='Escape'&&subPop.classList.contains('open'))tryClose();
     });
+    var sY=document.getElementById('spSureYes'),sN=document.getElementById('spSureNo');
+    if(sY)sY.addEventListener('click',function(){showSure(false);
+      var em=document.getElementById('alEmailP');if(em)try{em.focus()}catch(_){}});
+    if(sN)sN.addEventListener('click',function(){closeSubPop(false)});
   }
 
   // Show policy, shared with every other page through /alerts-pop.js and

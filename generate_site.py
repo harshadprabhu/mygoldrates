@@ -1775,6 +1775,13 @@ def main():
         return {p: c * f for p, f in PURITY_FRACTION.items()}
 
     med = ladder(median24)
+    # Today's 22K gap between the cheapest and the dearest national
+    # jeweller, per gram - the real figure the alerts popup quotes when
+    # someone goes to close it ("before you go"). 0 hides the figure.
+    _c24 = [r["canonical_24k_pre_gst"] for r in base]
+    gap22 = (int(round((max(_c24) - min(_c24)) * PURITY_FRACTION["22K"]))
+             if len(_c24) > 1 else 0)
+    alerts_pop_js = ALERTS_POP_JS.replace("__GAP22__", str(gap22))
 
     # ---------------------------------------------- live gold news feed
     news_items = fetch_news()
@@ -2125,7 +2132,7 @@ def main():
 
     # Covers alerts-pop.js too, which shares this tag: a change to the
     # popup must reach browsers that cached the old file for a day.
-    sig_ver = hashlib.md5((SIGNUP_JS + ALERTS_POP_JS).encode()).hexdigest()[:8]
+    sig_ver = hashlib.md5((SIGNUP_JS + alerts_pop_js).encode()).hexdigest()[:8]
     gate_html = GATE_HTML if gclient else ""
     gate_js   = GATE_JS   if gclient else ""
     # Freshness signals for Google / social crawlers. updated_http is an
@@ -2428,7 +2435,7 @@ def main():
         # urgency. The pageview does not - it is inline in the head.
         f.write(SIGNUP_JS + "\n" + CLICK_JS)
     with open("docs/alerts-pop.js", "w", encoding="utf-8") as f:
-        f.write(ALERTS_POP_JS)
+        f.write(alerts_pop_js)
 
     def write_city_pages(home_html):
         """Every city and state page, in the new design.
@@ -4092,6 +4099,7 @@ document.getElementById('drGo').addEventListener('click',function(){
             # figure stays honest across CDN caching rather than freezing at
             # whatever the build time happened to be.
             ("__RATES_EPOCH__", str(int(now_ist.timestamp()))),
+            ("__GAP22__", str(gap22)),
             ("__RATES_WHEN__",
              f"{display_date}, {display_time}"),
             # Real IBJA 24K anchor + the raw spot INR/g at this build, so the
@@ -5413,9 +5421,9 @@ ALERTS_POP_JS = r"""(function(){
   // top of the page on screen.
   var css='#grPop{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(6,4,2,.66);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}'+
     '#grPop .b{position:relative;width:100%;max-width:400px;max-height:calc(100vh - 32px);overflow:auto;background:#17130d;color:#f3eadb;border:1px solid rgba(240,208,128,.28);border-radius:20px;font:14px/1.5 "DM Sans",system-ui,sans-serif;box-shadow:0 28px 70px rgba(0,0,0,.6);animation:grIn .3s ease}'+
-    '#grPop .x{position:absolute;top:6px;right:6px;z-index:2;width:28px;height:28px;border:0;background:none;color:rgba(26,20,5,.55);font-size:16px;line-height:1;cursor:pointer;padding:0}'+
+    '#grPop .x{position:absolute;top:6px;left:6px;z-index:2;width:28px;height:28px;border:0;background:none;color:rgba(26,20,5,.55);font-size:16px;line-height:1;cursor:pointer;padding:0}'+
     '#grPop .x:hover{color:#1a1405}'+
-    '#grPop .h{position:relative;padding:20px 20px 16px;background:radial-gradient(120% 140% at 0% 0%,#ffe9a8 0%,#e7bf5a 38%,#b98a24 100%);color:#1a1405;overflow:hidden;border-radius:20px 20px 0 0}'+
+    '#grPop .h{position:relative;padding:30px 20px 16px;background:radial-gradient(120% 140% at 0% 0%,#ffe9a8 0%,#e7bf5a 38%,#b98a24 100%);color:#1a1405;overflow:hidden;border-radius:20px 20px 0 0}'+
     '#grPop .pl{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.12em;background:rgba(26,20,5,.88);color:#f0d080;border-radius:999px;padding:4px 10px}'+
     '#grPop .t{font:800 21px/1.22 "Playfair Display",Georgia,serif;margin:10px 0 0;max-width:300px}'+
     '#grPop .m{margin-top:14px;background:#fffaf0;border-radius:12px;padding:10px 12px;box-shadow:0 8px 22px rgba(80,55,0,.28);transform:rotate(-1.2deg);font-size:11.5px;color:#4b4030}'+
@@ -5433,16 +5441,32 @@ ALERTS_POP_JS = r"""(function(){
     '#grPop .st{min-height:16px;font-size:12px;margin-top:6px;text-align:center}'+
     '#grPop .n{font-size:10.5px;opacity:.55;text-align:center;margin-top:6px}'+
     '#grPop .l{display:block;margin:4px auto 0;background:none;border:0;color:inherit;opacity:.45;font-size:10.5px;cursor:pointer;padding:4px 6px;text-decoration:underline;text-underline-offset:2px}'+
+    '#grPop .sr{padding:30px 20px 18px;text-align:center}#grPop [hidden]{display:none}'+
+    '#grPop .sr .k{font-size:11px;font-weight:800;letter-spacing:.12em;color:#f0d080}'+
+    '#grPop .sr .bg{font:800 22px/1.25 "Playfair Display",Georgia,serif;margin:8px 0 6px}#grPop .sr .bg b{color:#f0d080}'+
+    '#grPop .sr .sb{font-size:13px;opacity:.8;margin:0 0 14px}'+
+    '#grPop .ms{list-style:none;margin:0 0 16px;padding:12px 14px;text-align:left;background:rgba(224,110,110,.07);border:1px solid rgba(224,110,110,.22);border-radius:12px}'+
+    '#grPop .ms li{padding-left:24px}#grPop .ms li:before{content:"✕";background:none;color:#e88b8b;width:auto;height:auto;left:2px;font-size:12px}'+
+    '#grPop .no{display:block;margin:10px auto 0;background:none;border:0;color:inherit;opacity:.6;font-size:12px;cursor:pointer;padding:6px 8px}'+
     '@media(max-width:760px){#grPop{align-items:flex-end;padding:0;background:rgba(0,0,0,.4);backdrop-filter:none;-webkit-backdrop-filter:none}'+
     '#grPop .b{max-width:none;max-height:78vh;border-radius:20px 20px 0 0;border-bottom:0;animation:grUp .32s ease}}'+
     '@keyframes grUp{from{transform:translateY(100%)}to{transform:none}}@keyframes grIn{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}';
-  var el,armed=true,timer,waits=0;
+  var el,armed=true,timer,waits=0,sureShown=false,phoneOnly=false;
+  // Today's 22K gap between cheapest and dearest jeweller, filled in by
+  // the build; quoted on the "before you go" step.
+  var GAP=Number('__GAP22__')||0;
+  function inr(n){return '\u20b9'+Math.round(n).toLocaleString('en-IN');}
+  function sure(on){el.querySelector('.mn').hidden=on;el.querySelector('.sr').hidden=!on;
+    if(on)el.querySelector('.b').scrollTop=0;}
+  // First press of x (or Escape) shows what they would miss; the second,
+  // or "No thanks", closes.
+  function tryClose(){if(sureShown||phoneOnly){close();return;}sureShown=true;sure(true);}
   function build(){
     var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
     el=document.createElement('div');el.id='grPop';el.setAttribute('role','dialog');
     el.setAttribute('aria-modal','true');el.setAttribute('aria-labelledby','grPopT');
     el.innerHTML='<div class="b"><button class="x" type="button" aria-label="Close">&times;</button>'+
-      '<div class="h"><span class="pl">FREE DAILY GOLD ALERT</span>'+
+      '<div class="mn"><div class="h"><span class="pl">FREE DAILY GOLD ALERT</span>'+
       '<div class="t" id="grPopT">Know the cheapest gold rate before you buy</div>'+
       '<div class="m" aria-hidden="true"><div class="mh"><i></i>MyGoldRates &middot; every morning</div>'+
       '<div class="ms">Today’s cheapest 22K near you</div>'+
@@ -5458,17 +5482,27 @@ ALERTS_POP_JS = r"""(function(){
       '<button class="go" type="button">Send me tomorrow’s rates — free</button>'+
       '<div class="st" aria-live="polite"></div>'+
       '<div class="n">&#128274; Free &middot; No spam &middot; One-click unsubscribe in every email</div>'+
-      '<button class="l" type="button">Already subscribed?</button></div></div>';
+      '<button class="l" type="button">Already subscribed?</button></div></div>'+
+      '<div class="sr" hidden><div class="k">BEFORE YOU GO</div>'+
+      '<div class="bg">'+(GAP>=50?'Today, 22K gold cost up to <b>'+inr(GAP)+'/g</b> more at some jewellers':'Jewellers don’t all charge the same for gold')+'</div>'+
+      '<p class="sb">'+(GAP>=50?'On a 10 g chain that’s <b>'+inr(GAP*10)+'</b>, before making charges and GST. The alert tells you who is cheapest every morning.':'The gap between the cheapest and the dearest jeweller changes every day. The alert tells you who is cheapest each morning.')+'</p>'+
+      '<ul class="ms"><li>Which jeweller is cheapest in your city each morning</li><li>A heads-up when gold moves sharply</li><li>Today’s market rate, without searching for it</li></ul>'+
+      '<button class="go" id="spSureYes" type="button">Okay, send me the free alerts</button>'+
+      '<button class="no" id="spSureNo" type="button">No thanks, close</button></div></div>';
     document.body.appendChild(el);
-    el.querySelector('.x').onclick=close;
+    el.querySelector('.x').onclick=tryClose;
+    el.querySelector('#spSureYes').onclick=function(){sure(false);
+      try{document.getElementById('grPopE').focus()}catch(_){}};
+    el.querySelector('#spSureNo').onclick=close;
     // Subscribed on another phone or browser: remember it on this one.
     el.querySelector('.l').onclick=function(){s('gr_sub','1');close();};
-    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&el.parentNode)close()});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&el.parentNode)tryClose()});
     el.querySelector('.go').onclick=submit;
     // Signed up with Google but no mobile yet: they are subscribed, so ask
     // only for the number.
     var u=null;try{u=JSON.parse(g('gr_user')||'null')}catch(_){}
     if(g('gr_sub_nophone')==='1'&&u&&u.email){
+      phoneOnly=true;
       el.querySelector('.t').textContent='One last thing: your mobile number';
       el.querySelector('.d').textContent='We have '+u.email+'. Add your mobile so we can reach you if a rate moves sharply.';
       document.getElementById('grPopE').value=u.email;
@@ -7344,6 +7378,8 @@ CLICK_LABELS = {
     "spClose": "Alerts popup: closed",
     "spLater": "Alerts popup: maybe later",
     "spHave": "Alerts popup: already subscribed",
+    "spSureYes": "Alerts popup: stayed after 'before you go'",
+    "spSureNo": "Alerts popup: closed after 'before you go'",
     "m-close": "Add-your-city popup: closed",
     "m-btn": "Add-your-city popup: subscribe",
     "m-loc": "Add-your-city popup: use my location",
