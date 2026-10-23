@@ -101,6 +101,28 @@
     "momentum": 4,
     "rates": 2
    }
+  },
+  "2026-10-24": {
+   "date": "2026-10-24",
+   "paragraphs": [
+    "International gold is at $3,996 an ounce (-0.10% since 23 Oct), the rupee at ₹94.90 to the dollar, and the Indian jeweller board median at ₹14,258/g for 24K (+0.00%). In rupee terms the move came mostly from the world gold price (-0.10% gold, +0.00% USD/INR).",
+    "What the world's gold news is about today: Records and profit-taking (3 headlines), US interest rates (2 headlines), Inflation (1 headline).",
+    "<strong>Records and profit-taking.</strong> Big moves feed on themselves for a while, and sharp rallies attract profit-taking. In the news: <a href=\"https://news.google.com/rss/articles/CBMidkFVX3lxTE92V0ZFWU1uaFJnREN3aTJrcUhBRERwR1JGYW1BZ3ZDd2l2MlJjc2IxcllWM3FpVjVGRmVHdEZQc3l4MDNwTDVYYVBWV0NLZ2JLTnpTQzY2N25aU1B2WE9sX1E4aWxEY1lqOVBkX3JqYXFLcHZFOWc?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Slips Below $4,000 Before Buyers Step In, as Rate Fears and a Bond Rally Squeeze Bullion</a> (BigGo Finance); <a href=\"https://news.google.com/rss/articles/CBMiuAFBVV95cUxQblIzNmNZZVd1TDN4aFVaTVNpMG42Y19nTFhtdm5DNXFxYVhraTFIYTIzTHZ0RmlkQzlGcUxJODVDWl9XRmtXcWFERnc1VUtDaUtFT3dwQ1ZtNk9WOXZkQ0dFOVRwNzg3aHloellxc2lDSW5MOEVKMEoydXpFS3hlNE1qQmkzdTV3WmVEOFdUY00tLTBaSzM1eEpEZjgzS1FiS0ZRbVB5MVhXblBuSDNnX1ZpWTdMQzkw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: XAU/USD Tests $4,000 as Oil Surge Revives Fed Hike Fears</a> (FXLeaders).",
+    "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMiiAFBVV95cUxPdUdpU2Y3bVRMdDg1TkptRFRwNHhvX1RnYlM3MnB2cklSRGxSNFhWeWs0dk5GbmxFQmNHZy1EMmxWd0RhQVdyWkVER0JUUzduQnFuMTkxRE1pQ1dSLXplRW1OWnlqMXpuRy1SbmcyQmtZN2RnejZrSnJZTGJMS2g5ZjlkbEFyNng0?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: Can XAU/USD Recover Above $4,000 as Fed Decision Looms?</a> (Mitrade); <a href=\"https://news.google.com/rss/articles/CBMiuAFBVV95cUxQblIzNmNZZVd1TDN4aFVaTVNpMG42Y19nTFhtdm5DNXFxYVhraTFIYTIzTHZ0RmlkQzlGcUxJODVDWl9XRmtXcWFERnc1VUtDaUtFT3dwQ1ZtNk9WOXZkQ0dFOVRwNzg3aHloellxc2lDSW5MOEVKMEoydXpFS3hlNE1qQmkzdTV3WmVEOFdUY00tLTBaSzM1eEpEZjgzS1FiS0ZRbVB5MVhXblBuSDNnX1ZpWTdMQzkw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: XAU/USD Tests $4,000 as Oil Surge Revives Fed Hike Fears</a> (FXLeaders).",
+    "<strong>Inflation.</strong> Gold is held as an inflation hedge, though hot inflation can also mean higher rates, which cuts the other way. In the news: <a href=\"https://news.google.com/rss/articles/CBMiuwFBVV95cUxPZUUtZHJuN3lDVDVOWHVqbFRoZEFHckp0UDI3MUpHN2ZJMVpXMTdROTJQX29yMHgteWFYZDdXVUVOMXp6c3FLVzFLc2V2NTctMzBGTnlJSmJyQWxhWGs2azVqQ0JjUGx2M3BUNVFjNFY0cTgtMlc0NXpxYy1NZGdVRlNsaVU5Ump4cWFlRU9Fd2R3NVFvaGpDem9kT2xLSFc0YklVb2FQcE1ObGp6ek9NMUNVN1BfYndmb3BN?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold price trades near $4,000/oz after final Consumer Sentiment holds steady at 48, inflation expectations rise</a> (Kitco).",
+    "For buyers: the gap between the cheapest and dearest jeweller on our board is ₹497/g today, and making charges usually differ by more than a day's price move. Compare the <a href=\"https://mygoldrates.com/\">live rates</a> and the <a href=\"https://mygoldrates.com/making-charges-comparison\">making charges</a> before you buy."
+   ],
+   "snap": {
+    "board24": 14258.0,
+    "gold_usd": 3996.199951,
+    "usdinr": 94.901331
+   },
+   "summary": "gold -0.1%, news led by records and profit-taking",
+   "themes": {
+    "inflation": 1,
+    "momentum": 3,
+    "rates": 2
+   }
   }
  }
 }
