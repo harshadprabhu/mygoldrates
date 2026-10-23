@@ -139,7 +139,7 @@ begin
       and (created_at at time zone 'Asia/Kolkata')::date between v_from - v_len and v_to
   )
   select json_build_object(
-    'version', 'v2-2026-10-24',
+    'version', 'v2-2026-10-24b',
     'filters', p_filters,
     'totals', json_build_object(
       'views', (select count(*) from cur),
@@ -202,6 +202,37 @@ begin
             group by 1) t),
     'price_alerts', (select count(*) from price_alerts a
       where (a.created_at at time zone 'Asia/Kolkata')::date between v_from and v_to),
+    'bot', json_build_object(
+      'asked', (select count(*) from bot_questions b where b.day between v_from and v_to
+                and coalesce(b.page, '') not like '/\_\_%'),
+      'answered', (select count(*) from bot_questions b where b.day between v_from and v_to
+                   and b.answered and coalesce(b.page, '') not like '/\_\_%'),
+      'helpful_yes', (select count(*) from bot_questions b where b.day between v_from and v_to and b.helpful),
+      'helpful_no', (select count(*) from bot_questions b where b.day between v_from and v_to and b.helpful = false),
+      'intents', (select coalesce(json_agg(row_to_json(t)), '[]') from (
+                  select coalesce(intent, '?') as name, count(*) as n from bot_questions b
+                  where b.day between v_from and v_to and coalesce(b.page, '') not like '/\_\_%'
+                  group by 1 order by 2 desc) t),
+      -- what Sona could not answer, or answered and got a thumbs-down
+      'unanswered', (select coalesce(json_agg(row_to_json(t)), '[]') from (
+                  select min(q) as q, count(*) as n, bool_or(helpful = false) as disliked,
+                         max(created_at)::date as last
+                  from bot_questions b
+                  where b.day between v_from and v_to and coalesce(b.page, '') not like '/\_\_%'
+                    and (not b.answered or b.helpful = false)
+                  group by q_norm order by 2 desc, 4 desc limit 40) t),
+      'approved', (select coalesce(json_agg(row_to_json(t)), '[]') from (
+                  select id, q, a, u, created_at::date as d from bot_answers
+                  where active order by id desc limit 100) t)),
+    'referrals', json_build_object(
+      'joined', (select count(*) from referrals r
+                 where (r.created_at at time zone 'Asia/Kolkata')::date between v_from and v_to),
+      'notified', (select count(*) from referrals r where r.notified_at is not null
+                 and (r.created_at at time zone 'Asia/Kolkata')::date between v_from and v_to),
+      'top', (select coalesce(json_agg(row_to_json(t)), '[]') from (
+                 select referrer_email as who, count(*) as n from referrals r
+                 where (r.created_at at time zone 'Asia/Kolkata')::date between v_from and v_to
+                 group by 1 order by 2 desc limit 10) t)),
     'signup_methods', (select coalesce(json_agg(row_to_json(t)), '[]')
       from (select method as name, count(*) as signups from subs
             where day between v_from and v_to group by 1 order by 2 desc) t),

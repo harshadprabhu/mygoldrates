@@ -428,6 +428,15 @@ def analytics_snippet(supabase_url, anon_key):
         '(Date.now().toString(36)+Math.random().toString(36).slice(2));'
         'localStorage.setItem("gr_sid",SID);}}catch(e){SID="";}'
         'window.GR_SID=SID;'
+        # A friend's invite link (?ref=CODE): remember the code; once this
+        # visitor subscribes, GR_REF_DONE(email) credits the friend.
+        'try{var rf=location.search.match(/[?&]ref=([A-Za-z0-9]{4,12})/);'
+        'if(rf)localStorage.setItem("gr_ref",rf[1].toUpperCase());}catch(e){}'
+        'window.GR_REF_DONE=function(em){try{var c=localStorage.getItem("gr_ref");'
+        'if(!c||!em)return;fetch(SB+"/rest/v1/rpc/record_referral",{method:"POST",'
+        'headers:{"Content-Type":"application/json","apikey":KEY,"Authorization":"Bearer "+KEY},'
+        'body:JSON.stringify({p_code:c,p_email:em})}).then(function(r){if(r.ok)'
+        'localStorage.removeItem("gr_ref");});}catch(e){}};'
         'function send(table,row,retried){try{'
         'fetch(SB+"/rest/v1/"+table,{method:"POST",keepalive:true,'
         'headers:{"Content-Type":"application/json","apikey":KEY,'
@@ -2138,7 +2147,9 @@ def main():
 
     # Covers alerts-pop.js too, which shares this tag: a change to the
     # popup must reach browsers that cached the old file for a day.
-    sig_ver = hashlib.md5((SIGNUP_JS + alerts_pop_js).encode()).hexdigest()[:8]
+    with open("assistant.js", encoding="utf-8") as _f:
+        assist_ver = hashlib.md5(_f.read().encode()).hexdigest()[:8]
+    sig_ver = hashlib.md5((SIGNUP_JS + alerts_pop_js + assist_ver).encode()).hexdigest()[:8]
     gate_html = GATE_HTML if gclient else ""
     gate_js   = GATE_JS   if gclient else ""
     # Freshness signals for Google / social crawlers. updated_http is an
@@ -2442,6 +2453,11 @@ def main():
         f.write(SIGNUP_JS + "\n" + CLICK_JS)
     with open("docs/alerts-pop.js", "w", encoding="utf-8") as f:
         f.write(alerts_pop_js)
+    # Sona, the assistant: one static file, loaded deferred on every page.
+    with open("assistant.js", encoding="utf-8") as f:
+        _assist_src = f.read()
+    with open("docs/assistant.js", "w", encoding="utf-8") as f:
+        f.write(_assist_src)
 
     def write_city_pages(home_html):
         """Every city and state page, in the new design.
@@ -3910,6 +3926,39 @@ b.addEventListener('click',function(){
 
     _write_jeweller_pages()
 
+    # ---- Sona, the jewellery assistant: its knowledge file ----
+    # docs/assistant.json, everything the assistant (assistant.js) answers
+    # from, rebuilt from today's data on every run. No server, no paid AI.
+    try:
+        import assistant_kb
+        import offers_page as _OP
+        try:
+            with open("docs/offers.json", encoding="utf-8") as _f:
+                _kb_off = json.load(_f)
+        except Exception:
+            _kb_off = {}
+        try:
+            with open("docs/making-charges.json", encoding="utf-8") as _f:
+                _kb_mc = json.load(_f)
+        except Exception:
+            _kb_mc = {}
+        _kb_r22 = {(r["brands"] or {}).get("slug"): r["canonical_24k_pre_gst"] * PURITY_FRACTION["22K"]
+                   for r in live}
+        _kb = assistant_kb.build(
+            live=live, med=med, trend=trend, locations=LOCATIONS,
+            place_state=PLACE_STATE, region_map=REGION_MAP, brand_home=BRAND_HOME,
+            loc_slug=loc_slug, jeweller_pages=jeweller_pages, making=_kb_mc,
+            offers=_kb_off, ring_rows=_OP.ring_prices(_kb_off, _kb_mc, _kb_r22),
+            offer_meaning=_OP.meaning, offer_headline=_OP.headline,
+            guides=[(h1, f"/learn/{slug}", desc)
+                    for slug, title, desc, h1, body in _articles(rate_str, med, inr)],
+            display_date=display_date, updated_iso=now_ist.isoformat(timespec="minutes"),
+            site_url=SITE_URL)
+        print(f"assistant: knowledge file {assistant_kb.write(_kb) // 1024} KB, "
+              f"{len(_kb['brands'])} jewellers, {len(_kb['learned'])} learned answers")
+    except Exception as e:
+        print("assistant: knowledge file skipped -", type(e).__name__, str(e)[:160])
+
     # ---- /list-your-jewellery: jewellers send their own rate ----
     # Most local jewellers publish no rate online, so the board cannot read
     # one. This page lets them send it: a new jeweller applies (held for
@@ -4284,7 +4333,8 @@ document.getElementById('drGo').addEventListener('click',function(){
             # CLICK_JS only. NOT SIGNUP_JS: this app runs its own Google
             # Identity Services flow and the signup bundle's gate/modal/OTP
             # code collides with it.
-            + '<script>' + CLICK_JS + '</script>\n')
+            + '<script>' + CLICK_JS + '</script>\n'
+            + f'<script src="/assistant.js?v={assist_ver}" defer></script>\n')
         # NOTE: no hits/bump_hits injection here. pulse_app.html's own
         # loadHits() now calls bump_hits / hits_count against Supabase
         # directly (it used to read the third-party countapi counter, which
@@ -5221,6 +5271,10 @@ SIGNUP_JS = r"""(function(){
                  'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
         body:JSON.stringify(base)}).then(function(r2){
           if(!r2.ok)throw new Error('save');return true;});
+    }).then(function(ok){
+      /* joined with a friend's invite link: credit the friend */
+      try{if(window.GR_REF_DONE)window.GR_REF_DONE(payload.email);}catch(e){}
+      return ok;
     });
   }
   window.GR_SAVE=saveSubscriber;
@@ -5631,7 +5685,7 @@ ALERTS_POP_JS = r"""(function(){
     clearTimeout(timer);window.removeEventListener('scroll',onScroll);
     if(!eligible())return;
     // Wait for Google's sign-in prompt to close instead of giving up.
-    if(document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi/iframe"]')){
+    if(document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi/iframe"],html.sona-open')){
       if(waits++<40){armed=true;setTimeout(open,1500);}return;}
     build();
     s('gr_pop_last',String(Date.now()));
@@ -5648,8 +5702,9 @@ ALERTS_POP_JS = r"""(function(){
       body:JSON.stringify(body)});
   }
   function save(p){
-    if(window.GR_SAVE)return window.GR_SAVE(p);
-    return rpc('upsert_subscriber',{payload:p}).then(function(r){if(!r.ok)throw new Error('save');return true});
+    var done=function(x){try{if(window.GR_REF_DONE)window.GR_REF_DONE(p.email);}catch(_){}return x;};
+    if(window.GR_SAVE)return window.GR_SAVE(p).then(done);
+    return rpc('upsert_subscriber',{payload:p}).then(function(r){if(!r.ok)throw new Error('save');return true}).then(done);
   }
   // The optional price-drop alert; resolves to the target set, or 0.
   function price(email){
@@ -6497,6 +6552,7 @@ $nd_footer
 <script>window.GR_SB_URL="$supabase_url";window.GR_SB_KEY="$anon_key";</script>
 <script src="signup.js?v=$sig_ver" defer></script>
 <script src="$site_url/alerts-pop.js?v=$sig_ver" defer></script>
+<script src="$site_url/assistant.js?v=$sig_ver" defer></script>
 </body>
 </html>
 """)
@@ -6598,6 +6654,7 @@ $nd_footer
 <script>window.GR_SB_URL="$supabase_url";window.GR_SB_KEY="$anon_key";</script>
 <script src="$site_url/signup.js?v=$sig_ver" defer></script>
 <script src="$site_url/alerts-pop.js?v=$sig_ver" defer></script>
+<script src="$site_url/assistant.js?v=$sig_ver" defer></script>
 $extra_js
 </body>
 </html>
@@ -7749,6 +7806,22 @@ td.path .tx{color:var(--accent)}
       <div class="note" id="funnelNote"></div>
     </div>
 
+    <div class="card">
+      <div class="chd"><h2>Sona, the jewellery assistant</h2><span class="hint">questions asked in this range</span></div>
+      <div class="kpis small" id="botKpis"></div>
+      <h3>What Sona couldn&rsquo;t answer (or got a thumbs-down)</h3>
+      <div id="botUn"></div>
+      <h3>Your approved answers</h3>
+      <div id="botAp"></div>
+      <div class="note">An approved answer is saved to the site&rsquo;s git repository and Sona uses it from the next morning. Questions themselves stay private.</div>
+    </div>
+
+    <div class="card">
+      <div class="chd"><h2>Referrals</h2><span class="hint">friends who joined with a subscriber&rsquo;s link</span></div>
+      <div class="kpis small" id="refKpis"></div>
+      <div id="refTop"></div>
+    </div>
+
     <div class="grid3 row">
       <div class="card"><div class="chd"><h2>Traffic sources</h2><span class="hint">tap a row to filter</span></div><div id="t_sources"></div></div>
       <div class="card"><div class="chd"><h2>Sections</h2><span class="hint">tap a row to filter</span></div><div id="t_groups"></div></div>
@@ -8237,6 +8310,44 @@ td.path .tx{color:var(--accent)}
   }
   $('clicksMore').onclick=function(){CLICKS_N=CLICKS_N<CLICKS_ALL.length?1e9:12;renderClicks();};
 
+  // Sona: what people asked, what it could not answer, and the answers
+  // the owner approves (bot_approve, gated by the same secret token).
+  function renderBot(d){
+    var b=d.bot;
+    if(b===undefined){$('botKpis').innerHTML='<div class="msg">Needs the updated sql/analytics_v2.sql.</div>';return;}
+    $('botKpis').innerHTML=tiles([['Questions asked',b.asked],['Answered',b.answered,
+      b.asked?Math.round(b.answered/b.asked*100)+'% of questions':''],['Helpful \ud83d\udc4d',b.helpful_yes],['Not helpful \ud83d\udc4e',b.helpful_no]]);
+    var un=b.unanswered||[];
+    $('botUn').innerHTML=un.length?'<table><tr><th>Question</th><th class="num">Times</th><th></th></tr>'+un.map(function(r,i){
+      return '<tr><td>'+esc(r.q)+(r.disliked?' <span class="note" style="display:inline">(thumbs-down)</span>':'')+
+        '<div class="ba" id="ba'+i+'" hidden style="margin-top:8px"><textarea rows="3" style="width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px" placeholder="The answer Sona should give"></textarea>'+
+        '<input placeholder="Optional link, e.g. /gold-offers-today" style="width:100%;margin-top:6px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px">'+
+        '<button class="btn" data-save="'+i+'" style="margin-top:6px">Save answer</button> <span class="note" style="display:inline" id="bs'+i+'"></span></div></td>'+
+        '<td class="num">'+nfmt(r.n)+'</td><td class="num"><button class="btn" data-ans="'+i+'">Answer</button></td></tr>';}).join('')+'</table>':
+      '<div class="msg">Nothing unanswered in this range.</div>';
+    var ap=b.approved||[];
+    $('botAp').innerHTML=ap.length?'<table><tr><th>Question</th><th>Answer</th><th></th></tr>'+ap.map(function(r){
+      return '<tr><td>'+esc(r.q)+'</td><td>'+esc(r.a)+(r.u?' <span class="note" style="display:inline">'+esc(r.u)+'</span>':'')+'</td>'+
+        '<td class="num"><button class="btn" data-unap="'+r.id+'">Remove</button></td></tr>';}).join('')+'</table>':
+      '<div class="msg">None yet.</div>';
+    $('botUn').onclick=function(e){
+      var a=e.target.getAttribute('data-ans'),sv=e.target.getAttribute('data-save');
+      if(a!=null){var f=$('ba'+a);f.hidden=!f.hidden;return;}
+      if(sv!=null){var box=$('ba'+sv),ta=box.querySelector('textarea'),u=box.querySelector('input'),st=$('bs'+sv);
+        st.textContent='Saving\u2026';
+        post('bot_approve',{p_secret:TOKEN,p_q:un[+sv].q,p_a:ta.value,p_u:u.value}).then(function(r){
+          st.textContent=r.j==='ok'?'Saved \u2014 Sona uses it from tomorrow morning.':'Not saved: '+(r.j||r.status);
+          if(r.j==='ok')setTimeout(load,1200);});}
+    };
+    $('botAp').onclick=function(e){
+      var id=e.target.getAttribute('data-unap');if(id==null)return;
+      post('bot_unapprove',{p_secret:TOKEN,p_id:+id}).then(function(){load();});
+    };
+    var rf=d.referrals;
+    if(rf){$('refKpis').innerHTML=tiles([['Friends joined',rf.joined],['Referrers emailed',rf.notified]]);
+      plainTable($('refTop'),rf.top||[],[{h:'Referrer',k:'who'},{h:'Friends',k:'n',num:true}]);}
+  }
+
   var SIGNUP_NAMES={google:'Google sign-in',form:'Email form',manual:'Signed up on the page',
     popup:'Popup',otp:'Email code'};
 
@@ -8299,6 +8410,7 @@ td.path .tx{color:var(--accent)}
       return {label:r.name,sub:r.source||'',value:r.views,f:r.source?'source':'',v:r.source};}),
       {h:'Website',h1:'Views',empty:'No other website sent visitors in this range.'});
     renderFunnel(d);
+    renderBot(d);
     barTable($('t_signups'),(d.signup_methods||[]).map(function(r){
       return {label:SIGNUP_NAMES[r.name]||r.name,value:r.signups};}),
       {h:'Method',h1:'Sign-ups',empty:V1?'Needs sql/analytics_v2.sql.':'No new sign-ups in this range.'});

@@ -744,6 +744,21 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
     <div id="brandList"></div>
   </div>
 
+  <!-- Sona feature card (styles come with assistant.js) -->
+<div class="sn-ad">
+  <div class="sn-adav">S</div>
+  <span class="sn-adk">&#10024; NEW &middot; FREE</span>
+  <h3>Meet Sona, your jewellery assistant</h3>
+  <p>Ask anything before you buy gold &mdash; she answers instantly from today&rsquo;s real rates at every jeweller we track, making charges and offers. Free, instant, and every number comes from today&rsquo;s data.</p>
+  <div class="sn-adq">
+    <button type="button" data-ask="Cheapest 22K today">Cheapest 22K today?</button>
+    <button type="button" data-ask="Tanishq vs Kalyan">Tanishq vs Kalyan</button>
+    <button type="button" data-ask="Price of 10 g 22K chain">10 g chain price</button>
+    <button type="button" data-ask="Best offer today">Best offer today</button>
+  </div>
+  <button type="button" class="sn-adgo" data-ask="">Ask Sona &rarr;</button>
+</div>
+
   <!-- Alerts at bottom of main -->
   <div class="dv"><div class="ln"></div><div class="gm r"></div><div class="gm g"></div><div class="gm b"></div><div class="ln"></div></div>
   <div class="alcard al-inline" style="margin:0 12px">
@@ -1134,6 +1149,19 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
           <tbody id="brandTableS"></tbody>
         </table>
       </div>
+<div class="sn-ad" style="margin:14px 0 0">
+  <div class="sn-adav">S</div>
+  <span class="sn-adk">&#10024; NEW &middot; FREE</span>
+  <h3>Meet Sona, your jewellery assistant</h3>
+  <p>Ask anything before you buy gold &mdash; she answers instantly from today&rsquo;s real rates at every jeweller we track, making charges and offers. Free, instant, and every number comes from today&rsquo;s data.</p>
+  <div class="sn-adq">
+    <button type="button" data-ask="Cheapest 22K today">Cheapest 22K today?</button>
+    <button type="button" data-ask="Tanishq vs Kalyan">Tanishq vs Kalyan</button>
+    <button type="button" data-ask="Price of 10 g 22K chain">10 g chain price</button>
+    <button type="button" data-ask="Best offer today">Best offer today</button>
+  </div>
+  <button type="button" class="sn-adgo" data-ask="">Ask Sona &rarr;</button>
+</div>
       <div class="site-inline-sub">
         <div><b>Get this table in your inbox every morning</b><span>Free &middot; one short email a day &middot; unsubscribe anytime</span></div>
         <div class="al-row1">
@@ -3181,6 +3209,7 @@ function handleCredentialResponse(resp){
       // Any saved email is a subscriber (mobile is optional since 24 Oct
       // 2026), so the popup never asks this browser again.
       try{localStorage.setItem('gr_sub','1');}catch(_){}
+      try{if(window.GR_REF_DONE)window.GR_REF_DONE(payload.email);}catch(_){}
       return true;
     });
   }
@@ -3476,7 +3505,7 @@ function handleCredentialResponse(resp){
   // Don't stack behind Google's own sign-in prompt - but wait for it to go
   // rather than give up: skipping outright meant anyone who saw that prompt
   // at the 5-second mark was never asked on that visit.
-  function gsiOnScreen(){return !!document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi/iframe"]');}
+  function gsiOnScreen(){return !!document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi/iframe"],html.sona-open');}
   var spWait=0;
   function maybeOpenSubPop(){
     if(!subPopEligible())return;

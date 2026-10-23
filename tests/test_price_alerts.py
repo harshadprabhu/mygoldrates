@@ -48,3 +48,8 @@ def test_no_email_for_someone_who_unsubscribed(monkeypatch):
     alerts = [{"id": 1, "email": "gone@x.in", "karat": "22K", "target": 20000, "active": True}]
     n, sent, _ = _run(monkeypatch, alerts, [])
     assert n == 0 and sent == []
+
+
+def test_rupees_are_grouped_the_indian_way():
+    assert [sa.inr(x) for x in (999, 14175, 155785, 1234567)] == \
+        ["₹999", "₹14,175", "₹1,55,785", "₹12,34,567"]

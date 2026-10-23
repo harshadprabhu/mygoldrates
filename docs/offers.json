@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-24T01:13+05:30",
+ "updated": "2026-10-24T01:20+05:30",
  "note": "Offers as published on each jeweller's own website on the date shown. Read automatically; confirm terms with the jeweller before buying.",
  "brands": [
   {
@@ -62,9 +62,27 @@
    "slug": "bhima",
    "name": "Bhima Jewels",
    "domain": "bhimagold.com",
-   "status": "not readable (the site blocks automated visits)",
-   "pages": [],
-   "offers": []
+   "status": "ok",
+   "pages": [
+    "https://bhimagold.com/"
+   ],
+   "offers": [
+    {
+     "kind": "scheme",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 3,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Join our EMA Jewellery Purchase Plan and avail exciting benefits",
+     "url": "https://bhimagold.com/",
+     "first_seen": "2026-10-24"
+    }
+   ]
   },
   {
    "slug": "bluestone",
@@ -82,27 +100,12 @@
      "pct_max": 100.0,
      "upto": true,
      "selected": true,
-     "mentions": 7,
+     "mentions": 4,
      "min_purchase": null,
      "dates": [],
      "applies_to": [],
      "conditions": [],
      "text": "Up To 100% Off On Making Charges",
-     "url": "https://www.bluestone.com/",
-     "first_seen": "2026-10-24"
-    },
-    {
-     "kind": "making_zero",
-     "pct_min": 100.0,
-     "pct_max": 100.0,
-     "upto": false,
-     "selected": false,
-     "mentions": 1,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [],
-     "conditions": [],
-     "text": "Offers, 0% Making Charge",
      "url": "https://www.bluestone.com/",
      "first_seen": "2026-10-24"
     }
@@ -147,16 +150,13 @@
    "domain": "www.candere.com",
    "status": "ok",
    "pages": [
-    "https://www.candere.com/",
-    "https://www.candere.com/offers-terms-and-conditions.html",
-    "https://www.candere.com/gifts.html",
-    "https://www.candere.com/jewellery/birthday-gifts.html"
+    "https://www.candere.com/"
    ],
    "offers": [
     {
-     "kind": "making_off",
-     "pct_min": 15.0,
-     "pct_max": 15.0,
+     "kind": "making_zero",
+     "pct_min": 100.0,
+     "pct_max": 100.0,
      "upto": false,
      "selected": false,
      "mentions": 1,
@@ -164,38 +164,8 @@
      "dates": [],
      "applies_to": [],
      "conditions": [],
-     "text": "15% OFF on Making",
-     "url": "https://www.candere.com/jewellery/birthday-gifts.html",
-     "first_seen": "2026-10-24"
-    },
-    {
-     "kind": "making_zero",
-     "pct_min": 100.0,
-     "pct_max": 100.0,
-     "upto": false,
-     "selected": false,
-     "mentions": 4,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [],
-     "conditions": [],
      "text": "Zero Making",
      "url": "https://www.candere.com/",
-     "first_seen": "2026-10-24"
-    },
-    {
-     "kind": "diamond_off",
-     "pct_min": 30.0,
-     "pct_max": 30.0,
-     "upto": false,
-     "selected": false,
-     "mentions": 3,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [],
-     "conditions": [],
-     "text": "Flat 30% off on Diamond value",
-     "url": "https://www.candere.com/offers-terms-and-conditions.html",
      "first_seen": "2026-10-24"
     }
    ]
@@ -207,9 +177,41 @@
    "status": "ok",
    "pages": [
     "https://www.caratlane.com/",
-    "https://www.caratlane.com/treasure-chest-gold-scheme"
+    "https://www.caratlane.com/treasure-chest-gold-scheme",
+    "https://www.caratlane.com/jewellery/festive+edit.html",
+    "https://www.caratlane.com/blog/stylish-earrings-classy-jhumkas-hoops-for-diwali/"
    ],
    "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 100.0,
+     "pct_max": 100.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Beautiful necklace, got 100% discount on making charges making it worth it",
+     "url": "https://www.caratlane.com/",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "exchange",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Enjoy 0% deduction on your exchange value",
+     "url": "https://www.caratlane.com/",
+     "first_seen": "2026-10-24"
+    },
     {
      "kind": "scheme",
      "pct_min": null,
@@ -402,11 +404,27 @@
    "slug": "joyalukkas",
    "name": "Joyalukkas",
    "domain": "joyalukkas.in",
-   "status": "no offers published as text today",
+   "status": "ok",
    "pages": [
     "https://joyalukkas.in/"
    ],
-   "offers": []
+   "offers": [
+    {
+     "kind": "rate_protect",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Advance Booking",
+     "url": "https://joyalukkas.in/",
+     "first_seen": "2026-10-24"
+    }
+   ]
   },
   {
    "slug": "kalyan",
@@ -534,11 +552,47 @@
    "slug": "nac",
    "name": "NAC Jewellers",
    "domain": "www.nacjewellers.com",
-   "status": "no offers published as text today",
+   "status": "ok",
    "pages": [
     "https://www.nacjewellers.com/"
    ],
-   "offers": []
+   "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 50.0,
+     "pct_max": 50.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "diamond jewellery only",
+      "silver"
+     ],
+     "conditions": [],
+     "text": "Vijayawada Diwali Offer : Enjoy a flat 50% off on Value Addition (VA)!* , Diamond Jewellery Offer - Enjoy zero making charges and get 30g of silver free on the purchase of 1 carat of diamonds!",
+     "url": "https://www.nacjewellers.com/",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "making_zero",
+     "pct_min": 100.0,
+     "pct_max": 100.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "silver"
+     ],
+     "conditions": [],
+     "text": "zero making charges and get 30g of silver free on the purchase of 1 carat of diamonds!",
+     "url": "https://www.nacjewellers.com/",
+     "first_seen": "2026-10-24"
+    }
+   ]
   },
   {
    "slug": "orra",
@@ -786,53 +840,18 @@
    "slug": "thangamayil",
    "name": "Thangamayil Jewellery",
    "domain": "www.thangamayil.com",
-   "status": "ok",
-   "pages": [
-    "https://www.thangamayil.com/",
-    "https://www.thangamayil.com/diwali-offers",
-    "https://www.thangamayil.com/saving-schemes",
-    "https://www.thangamayil.com/scheme/index/index",
-    "https://www.thangamayil.com/scheme/index/index/"
-   ],
-   "offers": [
-    {
-     "kind": "making_off",
-     "pct_min": 20.0,
-     "pct_max": 20.0,
-     "upto": false,
-     "selected": false,
-     "mentions": 1,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [],
-     "conditions": [],
-     "text": "Flat 20% OFF on Value Addition (VA)",
-     "url": "https://www.thangamayil.com/diwali-offers",
-     "first_seen": "2026-10-24"
-    },
-    {
-     "kind": "scheme",
-     "pct_min": null,
-     "pct_max": null,
-     "upto": false,
-     "selected": false,
-     "mentions": 5,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [],
-     "conditions": [],
-     "text": "Thangamayil offers five well balanced gold saving schemes for customers to choose from, catering to each of their personal preferences",
-     "url": "https://www.thangamayil.com/saving-schemes",
-     "first_seen": "2026-10-24"
-    }
-   ]
+   "status": "not readable (the site blocks automated visits)",
+   "pages": [],
+   "offers": []
   },
   {
    "slug": "vaibhav",
    "name": "Vaibhav Jewellers",
    "domain": "vaibhavjewellers.com",
-   "status": "not readable (the site blocks automated visits)",
-   "pages": [],
+   "status": "no offers published as text today",
+   "pages": [
+    "https://vaibhavjewellers.com/"
+   ],
    "offers": []
   },
   {

@@ -1,0 +1,4 @@
+{
+ "note": "Answers the owner approved from real visitor questions to Sona, the site assistant. Exported daily from the private database by bot_learn.py; only approved questions and answers are kept here, never the raw questions.",
+ "answers": []
+}

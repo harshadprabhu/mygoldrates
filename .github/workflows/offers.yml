@@ -1,7 +1,8 @@
 name: offers
 # Today's jeweller offers, read from each jeweller's own website with fixed
 # rules (offers.py) - no paid service. Writes docs/offers.json; the next site
-# build turns it into /gold-offers-today.
+# build turns it into /gold-offers-today. Also exports the answers the owner
+# approved for Sona, the site assistant (bot_learn.py).
 on:
   workflow_dispatch:
   schedule:
@@ -26,21 +27,26 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-      - name: Commit offers.json
+      # Sona's learned answers: the owner-approved ones, into git.
+      - run: python bot_learn.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      - name: Commit offers.json and Sona's approved answers
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/offers.json
+          git add docs/offers.json data/assistant_answers.json
           if git diff --cached --quiet; then
             echo "unchanged"
           else
-            git commit -m "offers: refresh offers.json"
+            git commit -m "offers: refresh offers.json and approved answers"
             git fetch origin main
             git rebase -X ours origin/main || {
               git rebase --abort
               git reset --soft origin/main
-              git add docs/offers.json
-              git commit -m "offers: refresh offers.json"
+              git add docs/offers.json data/assistant_answers.json
+              git commit -m "offers: refresh offers.json and approved answers"
             }
             git push
           fi

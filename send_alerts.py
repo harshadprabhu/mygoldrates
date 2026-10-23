@@ -29,18 +29,18 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 def inr(v):
     """Indian-style grouping: 1,23,456."""
-    s = f"{v:,.0f}"
-    parts = s.split(",")
-    if len(parts) <= 2:
-        return "₹" + s
-    digits = parts[0] + "".join(parts[1:-1])
-    groups = []
-    while len(digits) > 2:
-        groups.insert(0, digits[-2:])
-        digits = digits[:-2]
-    if digits:
-        groups.insert(0, digits)
-    return "₹" + ",".join(groups) + "," + parts[-1]
+    n = int(round(v))
+    d = str(abs(n))
+    if len(d) > 3:
+        head, tail = d[:-3], d[-3:]
+        groups = []
+        while len(head) > 2:
+            groups.insert(0, head[-2:])
+            head = head[:-2]
+        if head:
+            groups.insert(0, head)
+        d = ",".join(groups) + "," + tail
+    return ("-" if n < 0 else "") + "₹" + d
 
 
 def ladder(c):
@@ -71,7 +71,125 @@ def offers_line(live):
         return ""
 
 
-def email_html(first, date, med, low, low_brand, unsub, n_brands=14, offers=""):
+# ------------------------------------------------------------- referrals
+REF_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"     # no 0/O, 1/I/L
+
+
+def new_code(taken):
+    import secrets
+    while True:
+        c = "".join(secrets.choice(REF_ALPHABET) for _ in range(7))
+        if c not in taken:
+            taken.add(c)
+            return c
+
+
+def ensure_ref_codes(sb, subs):
+    """A personal invite code for every subscriber who has none yet. New rows
+    only; an existing code never changes. Returns {email_lower: code}."""
+    try:
+        rows = sb.table("referral_codes").select("email, code").execute().data
+    except Exception as e:
+        print(f"referrals: cannot read codes (run sql/assistant_referrals.sql?): {e}")
+        return {}
+    codes = {r["email"].lower(): r["code"] for r in rows}
+    taken = set(codes.values())
+    new = []
+    for s in subs:
+        em = (s.get("email") or "").strip().lower()
+        if em and em not in codes:
+            codes[em] = new_code(taken)
+            new.append({"email": em, "code": codes[em]})
+    for i in range(0, len(new), 200):
+        sb.table("referral_codes").insert(new[i:i + 200]).execute()
+    if new:
+        print(f"referrals: {len(new)} new invite codes")
+    return codes
+
+
+def ref_link(code):
+    return f"{SITE_URL}/?ref={code}" if code else ""
+
+
+def friend_label(name, email):
+    """How a referrer is told who joined: first name, or a masked email."""
+    first = (name or "").strip().split(" ")[0]
+    if first:
+        return first
+    user, _, dom = (email or "").partition("@")
+    return (user[:1] + "\u2022\u2022\u2022@" + dom) if dom else "A friend"
+
+
+def referral_html(first, friend, total, link, unsub):
+    return f"""\
+<!DOCTYPE html><html><body style="margin:0;background:#e9e6df;padding:26px 12px;font-family:Arial,Helvetica,sans-serif;color:#2c2a26">
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e7e1d3">
+    <tr><td style="height:4px;background:linear-gradient(90deg,#8C6A18,#E3BF63 45%,#F4E3A6 55%,#C79A2E);font-size:0;line-height:0">&nbsp;</td></tr>
+    <tr><td style="background:#0b0805;padding:22px 30px 18px">
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;letter-spacing:1.5px;line-height:1"><span style="color:#efe8d6">My</span><span style="color:#e6c268">Gold</span><span style="color:#efe8d6">Rates</span></div>
+    </td></tr>
+    <tr><td style="padding:28px 30px 10px">
+      <p style="margin:0 0 10px;font-size:15px;color:#3b3833">Hi {first},</p>
+      <p style="margin:0 0 16px;font-size:20px;line-height:1.4;color:#1f1c17;font-family:Georgia,serif">&#127881; <b>{friend}</b> just joined MyGoldRates with your invite link.</p>
+      <p style="margin:0 0 18px;font-size:14px;line-height:1.6;color:#6b6459">Thank you for passing it on. {friend} now gets the cheapest jeweller and today&rsquo;s gold rate every morning, just like you. Friends who have joined through you so far: <b>{total}</b>.</p>
+      <p style="margin:0 0 6px;font-size:13px;color:#6b6459">Your invite link, to share again:</p>
+      <p style="margin:0 0 20px;font-size:15px"><a href="{link}" style="color:#8C6A18;font-weight:bold">{link}</a></p>
+    </td></tr>
+    <tr><td style="padding:16px 30px 22px;background:#faf8f2;border-top:1px solid #efe9db;font-size:11px;color:#8f887c;line-height:1.6">
+      You're receiving this because you subscribed at mygoldrates.com.<br><a href="{unsub}" style="color:#8f887c">Unsubscribe</a>
+    </td></tr>
+  </table>
+</body></html>"""
+
+
+def send_referral_notices(sb, key, from_name, from_email):
+    """Email each referrer once per friend who joined with their link."""
+    try:
+        refs = sb.table("referrals").select("*").is_("notified_at", "null").execute().data
+    except Exception as e:
+        print(f"referrals: cannot read (run sql/assistant_referrals.sql?): {e}")
+        return 0
+    if not refs:
+        return 0
+    subs = {(s.get("email") or "").lower(): s for s in sb.table("inquiries")
+            .select("name, email, unsub_token").execute().data}
+    codes = {r["email"].lower(): r["code"] for r in
+             sb.table("referral_codes").select("email, code").execute().data}
+    allrefs = sb.table("referrals").select("referrer_email").execute().data
+    sent = 0
+    for r in refs:
+        who = subs.get(r["referrer_email"].lower())
+        friend = subs.get(r["referred_email"].lower())
+        if not who or not friend or not who.get("unsub_token"):
+            continue
+        first = (who.get("name") or "there").strip().split(" ")[0] or "there"
+        label = friend_label(friend.get("name"), friend.get("email"))
+        total = sum(1 for x in allrefs if x["referrer_email"].lower() == r["referrer_email"].lower())
+        unsub = f"{SITE_URL}/unsubscribe.html?t={who['unsub_token']}"
+        try:
+            resp = requests.post(
+                "https://api.brevo.com/v3/smtp/email",
+                headers={"api-key": key, "accept": "application/json",
+                         "content-type": "application/json"},
+                json={"sender": {"name": from_name, "email": from_email},
+                      "to": [{"email": who["email"]}],
+                      "subject": f"{label} joined MyGoldRates with your invite \U0001F389",
+                      "htmlContent": referral_html(first, label, total,
+                                                   ref_link(codes.get(r["referrer_email"].lower())), unsub),
+                      "headers": {"List-Unsubscribe": f"<{unsub}>",
+                                  "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"}},
+                timeout=30)
+            if resp.status_code < 300:
+                sb.table("referrals").update(
+                    {"notified_at": datetime.now(timezone.utc).isoformat()}).eq("id", r["id"]).execute()
+                sent += 1
+        except requests.RequestException as e:
+            print(f"  referral notice error {r['id']}: {type(e).__name__}")
+    print(f"referrals: {sent} referrer emails sent")
+    return sent
+
+
+def email_html(first, date, med, low, low_brand, unsub, n_brands=14, offers="", invite=""):
     """Branded HTML digest (refreshed design). Inline styles - email clients
     ignore <style>. Text wordmark (no heavy logo image) + one gold button:
     looks premium and is lighter for Primary-inbox placement."""
@@ -130,6 +248,10 @@ padding:26px 12px;font-family:Arial,Helvetica,sans-serif;color:#2c2a26">
         + offers + '. <a href="' + SITE_URL + '/gold-offers-today?from=alert" '
         'style="color:#8C6A18;font-weight:bold">See every jeweller&rsquo;s offer &rarr;</a></p>')
         if offers else ''}
+      {('<p style="margin:16px 0 4px;font-size:13px;line-height:1.55;color:#3b3833;background:#fbf7ec;border:1px solid #efe2c2;border-radius:10px;padding:12px 14px">'
+        '&#127873; <b>Know someone buying gold?</b> Share your invite link &mdash; we&rsquo;ll email you when they join: '
+        '<a href="' + invite + '" style="color:#8C6A18;font-weight:bold">' + invite + '</a></p>')
+        if invite else ''}
       <p style="margin:12px 0 4px;font-size:12px;color:#9a9284">Prices are indicative and pre-GST; confirm the billed rate with the jeweller. Not investment advice.</p>
     </td></tr>
     <tr><td style="padding:16px 30px 22px;background:#faf8f2;border-top:1px solid #efe9db;font-family:Arial,sans-serif;font-size:11px;color:#8f887c;line-height:1.6">
@@ -305,6 +427,7 @@ def main():
     # Price-drop alerts first: they are time-sensitive and independent of
     # whether anyone is due today's digest.
     send_price_alerts(sb, key, from_name, from_email, base, date)
+    send_referral_notices(sb, key, from_name, from_email)
 
     try:
         subs = sb.table("inquiries") \
@@ -319,12 +442,14 @@ def main():
         return
 
     offers = offers_line(live)
+    codes = ensure_ref_codes(sb, subs)
     sent = 0
     for s in pending:
         first = (s.get("name") or "there").strip().split(" ")[0] or "there"
         unsub = f"{SITE_URL}/unsubscribe.html?t={s['unsub_token']}"
         html = email_html(first, date, med, low, lowest["brands"]["name"],
-                          unsub, n_brands, offers)
+                          unsub, n_brands, offers,
+                          ref_link(codes.get(s["email"].lower())))
         to = {"email": s["email"]}
         if s.get("name"):
             to["name"] = s["name"].strip()
