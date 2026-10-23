@@ -432,9 +432,9 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 @keyframes spFade{from{opacity:0}to{opacity:1}}
 .sp-box{position:relative;width:100%;max-width:400px;max-height:calc(100vh - 32px);overflow-y:auto;background:#17130d;border:1px solid rgba(240,208,128,.28);border-radius:20px;box-shadow:0 28px 70px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.3);animation:spRise .3s cubic-bezier(.2,.8,.3,1)}
 @keyframes spRise{from{transform:translateY(16px) scale(.98);opacity:0}to{transform:none;opacity:1}}
-.sp-x{position:absolute;top:6px;right:6px;z-index:2;width:28px;height:28px;border:none;background:none;color:rgba(26,20,5,.55);font-size:16px;line-height:1;cursor:pointer;font-family:inherit;padding:0}
+.sp-x{position:absolute;top:6px;left:6px;z-index:2;width:28px;height:28px;border:none;background:none;color:rgba(26,20,5,.55);font-size:16px;line-height:1;cursor:pointer;font-family:inherit;padding:0}
 .sp-x:hover{color:#1a1405}
-.sp-hero{position:relative;padding:20px 20px 16px;background:radial-gradient(120% 140% at 0% 0%,#ffe9a8 0%,#e7bf5a 38%,#b98a24 100%);color:#1a1405;overflow:hidden}
+.sp-hero{position:relative;padding:30px 20px 16px;background:radial-gradient(120% 140% at 0% 0%,#ffe9a8 0%,#e7bf5a 38%,#b98a24 100%);color:#1a1405;overflow:hidden}
 .sp-hero::after{content:'';position:absolute;right:-40px;top:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.45),transparent 70%);pointer-events:none}
 .sp-pill{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.12em;background:rgba(26,20,5,.88);color:#f0d080;border-radius:999px;padding:4px 10px}
 .sp-t{font-family:'Playfair Display',Georgia,serif;font-size:21px;font-weight:800;line-height:1.22;color:#1a1405;margin:10px 0 0;letter-spacing:-.2px;max-width:300px}
@@ -457,7 +457,18 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 #subPop .al-locate{color:#f0d080;border-color:rgba(240,208,128,.35)}
 .sp-note{font-size:10.5px;color:var(--text3);text-align:center;margin-top:10px;line-height:1.5}
 .sp-have{display:block;margin:4px auto 0;background:none;border:none;color:var(--text3);font-size:10.5px;cursor:pointer;padding:4px 6px;font-family:inherit;text-decoration:underline;text-underline-offset:2px;opacity:.75}
-@media(max-width:420px){.sp-t{font-size:19px}.sp-hero{padding:18px 16px 14px}.sp-body{padding:14px 16px 14px}}
+.sp-sure{padding:30px 20px 18px;text-align:center}
+.sp-sure[hidden],#spMain[hidden]{display:none}
+.sp-sure .sp-k{font-size:11px;font-weight:800;letter-spacing:.12em;color:#f0d080}
+.sp-sure .sp-big{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:800;line-height:1.25;color:var(--text);margin:8px 0 6px}
+.sp-sure .sp-big b{color:#f0d080}
+.sp-sure .sp-sub{font-size:13px;color:var(--text2,#cfc6b4);line-height:1.5;margin:0 0 14px}
+.sp-miss{list-style:none;margin:0 0 16px;padding:12px 14px;text-align:left;background:rgba(224,110,110,.07);border:1px solid rgba(224,110,110,.22);border-radius:12px}
+.sp-miss li{position:relative;padding:3px 0 3px 24px;font-size:13px;color:var(--text);line-height:1.4}
+.sp-miss li::before{content:'✕';position:absolute;left:2px;top:3px;color:#e88b8b;font-weight:800;font-size:12px}
+.sp-sure .al-btn{width:100%}
+.sp-no{display:block;margin:10px auto 0;background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:6px 8px;font-family:inherit}
+@media(max-width:420px){.sp-t{font-size:19px}.sp-hero{padding:28px 16px 14px}.sp-body{padding:14px 16px 14px}}
 /* Phones: slide up from the bottom and keep the top of the page (the rate
    the visitor came for) visible - a full-screen cover on arrival from
    search is what Google's intrusive-interstitial rule penalises. */
@@ -664,7 +675,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",tick);else tick();
   setInterval(tick,30000);
 })();</script>
-<script type="application/ld+json">[{"@context": "https://schema.org", "@type": "WebSite", "name": "GoldRates - Daily Gold Rate Comparison India", "url": "https://mygoldrates.com"}, {"@context": "https://schema.org", "@type": "Organization", "name": "MyGoldRates.com", "alternateName": "GoldRates", "url": "https://mygoldrates.com", "logo": "https://mygoldrates.com/icon-512.png", "image": "https://mygoldrates.com/og.png", "description": "India's gold rate comparison platform - compare today's 24K, 22K and 18K gold rates across leading jewellers, with the IBJA bullion reference, updated daily.", "areaServed": {"@type": "Country", "name": "India"}, "knowsAbout": ["Gold rate", "Gold rate today", "24 carat gold rate", "22K gold rate", "IBJA gold rate", "Gold price India"]}, {"@context": "https://schema.org", "@type": "WebPage", "url": "https://mygoldrates.com/gold-rate-today-in-rajkot", "name": "Gold Rate Today in Rajkot (23 Oct): 24K, 22K, 18K | MyGoldRates", "inLanguage": "en-IN", "dateModified": "2026-10-23T23:35:53+05:30", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/"}}, {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}, {"@type": "ListItem", "position": 2, "name": "Gold Rate Today in Rajkot", "item": "https://mygoldrates.com/gold-rate-today-in-rajkot"}]}, {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the gold rate today in Rajkot?", "acceptedAnswer": {"@type": "Answer", "text": "On 23 October 2026 the median gold rate across the 33 jewellers we track is ₹14,258 per gram for 24K (999), ₹13,070 for 22K (916) and ₹10,694 for 18K (750), before 3% GST and making charges."}}, {"@type": "Question", "name": "Which jeweller has the lowest gold rate for Rajkot today?", "acceptedAnswer": {"@type": "Answer", "text": "Among the national chains and the regional chains serving Gujarat that published a rate today, PN Gadgil is lowest for 22K at ₹12,994 per gram, and ORRA highest at ₹13,248, a gap of ₹254 per gram."}}, {"@type": "Question", "name": "How much do 10 grams of 22K gold cost in Rajkot with GST?", "acceptedAnswer": {"@type": "Answer", "text": "At today's 22K median of ₹13,070 per gram, 10 grams cost ₹130,698 before tax and ₹134,619 with 3% GST. Jewellery also carries a making charge, usually quoted as a percentage of the gold value or per gram, which is added before GST."}}, {"@type": "Question", "name": "Is the gold rate the same at every jeweller in Rajkot?", "acceptedAnswer": {"@type": "Answer", "text": "No. Each jeweller sets its own daily rate, and making charges differ even more than rates, so compare both before buying."}}, {"@type": "Question", "name": "Where do people buy gold in Rajkot?", "acceptedAnswer": {"@type": "Answer", "text": "The main gold markets are Soni Bazaar in the old city, and the jewellery manufacturing clusters around it."}}, {"@type": "Question", "name": "When is gold demand highest in Rajkot?", "acceptedAnswer": {"@type": "Answer", "text": "Dhanteras and Diwali, Akshaya Tritiya, and the wedding season."}}, {"@type": "Question", "name": "Does the gold rate in Rajkot change every day?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Jewellers revise their rates each morning, and some again during the day, following the international gold price and the rupee. We refresh this page several times a day."}}]}]</script>
+<script type="application/ld+json">[{"@context": "https://schema.org", "@type": "WebSite", "name": "GoldRates - Daily Gold Rate Comparison India", "url": "https://mygoldrates.com"}, {"@context": "https://schema.org", "@type": "Organization", "name": "MyGoldRates.com", "alternateName": "GoldRates", "url": "https://mygoldrates.com", "logo": "https://mygoldrates.com/icon-512.png", "image": "https://mygoldrates.com/og.png", "description": "India's gold rate comparison platform - compare today's 24K, 22K and 18K gold rates across leading jewellers, with the IBJA bullion reference, updated daily.", "areaServed": {"@type": "Country", "name": "India"}, "knowsAbout": ["Gold rate", "Gold rate today", "24 carat gold rate", "22K gold rate", "IBJA gold rate", "Gold price India"]}, {"@context": "https://schema.org", "@type": "WebPage", "url": "https://mygoldrates.com/gold-rate-today-in-rajkot", "name": "Gold Rate Today in Rajkot (23 Oct): 24K, 22K, 18K | MyGoldRates", "inLanguage": "en-IN", "dateModified": "2026-10-23T23:47:10+05:30", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/"}}, {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}, {"@type": "ListItem", "position": 2, "name": "Gold Rate Today in Rajkot", "item": "https://mygoldrates.com/gold-rate-today-in-rajkot"}]}, {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the gold rate today in Rajkot?", "acceptedAnswer": {"@type": "Answer", "text": "On 23 October 2026 the median gold rate across the 33 jewellers we track is ₹14,258 per gram for 24K (999), ₹13,070 for 22K (916) and ₹10,694 for 18K (750), before 3% GST and making charges."}}, {"@type": "Question", "name": "Which jeweller has the lowest gold rate for Rajkot today?", "acceptedAnswer": {"@type": "Answer", "text": "Among the national chains and the regional chains serving Gujarat that published a rate today, PN Gadgil is lowest for 22K at ₹12,994 per gram, and ORRA highest at ₹13,248, a gap of ₹254 per gram."}}, {"@type": "Question", "name": "How much do 10 grams of 22K gold cost in Rajkot with GST?", "acceptedAnswer": {"@type": "Answer", "text": "At today's 22K median of ₹13,070 per gram, 10 grams cost ₹130,698 before tax and ₹134,619 with 3% GST. Jewellery also carries a making charge, usually quoted as a percentage of the gold value or per gram, which is added before GST."}}, {"@type": "Question", "name": "Is the gold rate the same at every jeweller in Rajkot?", "acceptedAnswer": {"@type": "Answer", "text": "No. Each jeweller sets its own daily rate, and making charges differ even more than rates, so compare both before buying."}}, {"@type": "Question", "name": "Where do people buy gold in Rajkot?", "acceptedAnswer": {"@type": "Answer", "text": "The main gold markets are Soni Bazaar in the old city, and the jewellery manufacturing clusters around it."}}, {"@type": "Question", "name": "When is gold demand highest in Rajkot?", "acceptedAnswer": {"@type": "Answer", "text": "Dhanteras and Diwali, Akshaya Tritiya, and the wedding season."}}, {"@type": "Question", "name": "Does the gold rate in Rajkot change every day?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Jewellers revise their rates each morning, and some again during the day, following the international gold price and the rupee. We refresh this page several times a day."}}]}]</script>
 </head>
 <body>
 
@@ -684,8 +695,8 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 <!-- When the JEWELLER board rates were last collected. Distinct from the live
      chip above, which tracks the spot/MCX feed refreshing every 3s. Values
      are substituted at build time by generate_site.py. -->
-<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1792778753">
-  Jeweller rates updated <b>23 October 2026, 11:35 PM IST</b><span id="ratesStampAgo"></span>
+<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1792779430">
+  Jeweller rates updated <b>23 October 2026, 11:47 PM IST</b><span id="ratesStampAgo"></span>
 </div>
 
 <!-- Google One Tap (uses Google Identity Services) -->
@@ -995,6 +1006,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 <div id="subPop" role="dialog" aria-modal="true" aria-labelledby="spTitle">
   <div class="sp-box">
     <button class="sp-x" id="spClose" type="button" aria-label="Close">&times;</button>
+    <div id="spMain">
     <div class="sp-hero">
       <span class="sp-pill">FREE DAILY GOLD ALERT</span>
       <div class="sp-t" id="spTitle">Know the cheapest gold rate before you buy</div>
@@ -1026,6 +1038,20 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
       <div id="alStatusP" style="font-size:12px;color:var(--mint);margin-top:8px;min-height:14px;text-align:center"></div>
       <p class="sp-note">&#128274; Free &middot; No spam &middot; One-click unsubscribe in every email</p>
       <button class="sp-have" id="spHave" type="button">Already subscribed?</button>
+    </div>
+    </div>
+    <!-- Shown once, the first time the x is pressed. -->
+    <div class="sp-sure" id="spSure" hidden>
+      <div class="sp-k">BEFORE YOU GO</div>
+      <div class="sp-big" id="spSureBig">Jewellers don&rsquo;t all charge the same for gold</div>
+      <p class="sp-sub" id="spSureSub">The gap between the cheapest and the dearest jeweller changes every day. The alert tells you who is cheapest each morning.</p>
+      <ul class="sp-miss">
+        <li>Which jeweller is cheapest in your city each morning</li>
+        <li>A heads-up when gold moves sharply</li>
+        <li>Today&rsquo;s market rate, without searching for it</li>
+      </ul>
+      <button class="al-btn" id="spSureYes" type="button">Okay, send me the free alerts</button>
+      <button class="sp-no" id="spSureNo" type="button">No thanks, close</button>
     </div>
   </div>
 </div>
@@ -1460,7 +1486,7 @@ function handleCredentialResponse(resp){
   // movement from a TRUE anchor instead of a guessed premium. Zero when
   // the IBJA fetch failed - applyLive falls back to the old estimate then.
   var IBJA_ANCHOR_24=Number("14163.0000")||0;
-  var IBJA_ANCHOR_SPOT=Number("12202.4589")||0;
+  var IBJA_ANCHOR_SPOT=Number("12204.5946")||0;
   // Every `delta*` here is the change against the PREVIOUS CLOSE, not
   // against the last poll. The previous close for each metric arrives from
   // the worker as `*_prev` and is held in the `prev*` fields below.
@@ -2413,7 +2439,7 @@ function handleCredentialResponse(resp){
   // business feed was the wrong shape anyway. Headlines now come from the
   // worker's /news (gold-specific Google News query across Indian
   // publishers), so the page no longer fetches or filters RSS itself.
-  var NEWS_BUILD = [{"title":"Gold Rate Today Live, Latest 22 And 24 Carat Gold Price In India","url":"https://news.google.com/rss/articles/CBMiTkFVX3lxTE5ieHFlWW9CNF9vaC03ME9mY29vZnpqTzdmcFpOZ3BfcEQxY3RXamt4VUI3cDBFTTQ3VzIxczNSUlBYTGdhMi1nT01HOUNXUQ?oc=5","source":"NDTV Profit","published":"2026-10-23T13:06:51"},{"title":"Silver Rate Today in Gaya 23rd October 2026 : 1 KG, Todays Silver Price in Gaya","url":"https://news.google.com/rss/articles/CBMickFVX3lxTE8tc2dwOTBVTG83c1dlaHJxcHh4czF6d2FNRFdvckhTREZrRUxkeWFxdy16cXB6dzlDN1NJZ3dVMFBRNkh3ZzRWN3I2aDZ0eUJjWmZwa3Vsd0pzcGdQX3N5YWZUbnhna3dJUXdzTWtYdklIQQ?oc=5","source":"Business Today","published":"2026-10-23T16:53:37"},{"title":"Silver rate today: Silver price falls over 3% to Rs 1.93 lakh per kg on MCX","url":"https://news.google.com/rss/articles/CBMi6AFBVV95cUxNYWc2bjVVQmlIa1d4bkFQMHlYemQ3SHBoSDBHNVBrczZ5QXRuRGIxQ3ZlVE5MR29fQzlVSEFpQjAxem5lTlZXQ0t1SkJVb0VTdmFfaHJhZENSWUt6RVZuaTdmVHlZdTM3elZhMjhmUEVGcnRBb3N0dlBvYnJHSHBlMzhEbThRb1BWcUVXQzdzNlRudjRMRlF1UGNSZXNvUTFhLUdxNTIzSG9uV3VaWXA5RGMwNHlJWEkwNmYwUHdqNTlzaEdDcVNIZWFRNzlPNFBlOXE5YkFXNENlQXY3WDJiakNRTWhObnJJ0gHuAUFVX3lxTE9EZWpfZDlLVU5FR3FtT2s4enpZdndndzZYbUlKZHE3OWsxcENzUjh2SGVUai01OTRGM1BzclhSZzhDbmRlSGdiU1VTWVh6ODFGRzVfWi14QUxOUW9ZSHJZdmI4UkJ2UWRvOUZNb2VJb1QtMFpYLTMyb2d2SGVHYmhBZ1UycEFnN09uSVhrb1VjcXo4VVVCZEloaU5oOHVzMlF0dzVuSW1GRlhFRzVPMU5YWjZEb2hhdjBhU2ZodmEzMzZyQ0VxN2I2YUlGX2kyTHdWOWtidUNJclQ4dW43dmlocWM0Um9ybU9YLUZUOGc?oc=5","source":"India Today","published":"2026-10-23T05:02:41"},{"title":"Gold Rate Today, October 23, 2026: 24K Gold Falls by \u20b9190 per Gram; Check City-Wise Rates","url":"https://news.google.com/rss/articles/CBMiwgFBVV95cUxQY3E1N1dYZmd1LVJObzN4T1YyWkpKQ192TzhrOEE1ZnppVFhtalpiczhjS3VxSEl3SGFwaDM1OUlRendYWXFZcWF5dG50aVk5amFJUzV3RlBNczNyMW9ibHJsSjNCZWM2V2ZBdGFCTmV5QmpRYmZkMVgwXzUydUU3R1A1bGJLTXlETGM5d3FXdm84NUhOMC1BRklxaTFONFlLeEQ2aDhDMVFUcGpvYkV5MnRyYlJTeEM0cWhEUzhfQW95QQ?oc=5","source":"India Infoline","published":"2026-10-23T06:54:50"},{"title":"Gold Rate Today October 23: Check latest Gold prices in Delhi, Mumbai, Kolkata, Chennai, Bengaluru, Hyderabad, Pune & Other Cities","url":"https://news.google.com/rss/articles/CBMilAJBVV95cUxNNDhPdXlDRExRY1BHcXZhZGk3TVU2UExiYkRMdTlxTXFBNXhtUFQ4VXBBdHVOUDV1M3pwYkd3R1Z6ME51XzZGSVlicHhjaTZmSlI1YVM2UWdGcnFNTHFPbENLekNqVXpDUW93MlZQdzNYeFZqMkVKaGZrVm14enBOWU9sUDJ4SVgyeEx2bmdEUHJtV2NxMmVlSUtDZ2h2dGlWemRYdWZkTWFjUlZCMjlPZDg5TkprQS1CSEhYc0JtUl96cFBkeFhRRkdfSWNwWWtkSV9TelJLblBKT1FaVUpwdVBvVzdpSnBjUVpqeXdKT3Q0T0NFWGYyS0k0Mm9DUjlwMXVEVE5LbWxLa01keURsQWRoYUrSAZsCQVVfeXFMT3JRUUFMbDNRSlFlSERtTDdWZVlyVEZERGZKV2NhMTFLLXhJMEZOMVpoeUl1YmJBaWhOWWtXWExoOUtBcFZpX0xDQWxwSFRUWlVoaFRqVng4dE01Z3dCT2hWbm5WcHM5VlZ2bnprNVZfRXZ4bmd3bDhCOTZaSDlmdmhaSlZKZjhkR1NSS0RoMXVzVlJXSWR5ME14S2VveG5LWk1zQkpKMmpuMElJNG1NZXZidmdQcEJmdmt6WmM5MU5ta19KNTN4S2pPQm5sTEVTV3Q2ZV8wekFnY2x5X2JpeHY3cTNPenMtd0JZT0NGNzRlbE9PdEtNZVo4Q1JDOUpoRFRMS2VrSXJlanVJYTZmQWdDc2I4a1ZNQXpYdw?oc=5","source":"BusinessLine","published":"2026-10-23T08:01:04"},{"title":"Silver rate today at 11-month low; slips below \u20b92 lakh in India \u2014 where will it go? Should you buy for good returns?","url":"https://news.google.com/rss/articles/CBMiiAJBVV95cUxOZW9vU1FLMXk0Q2phc3VBdjR4bk1RS2hfUkphWHZKZ3pHMGdBcS0yTWlWWFpSUHBzUk52S2ZhdjNwVWQyMEFvb1NRV2xsUS1ZczdBSmFueVdOTVo0MDBCV3pDZ1pkREZ4TnRWbXd0My1WTmdiUTRHMHAzekN2RGdybEtvYjhWdndIcnRxdk1xdnVmcnpzcHZVazUtWUJKV0VLUjRDQ3NDXzBnY1JxbVdyemFHR3hMbzBwelZJUTBzSUo4b3RqbjNLc3JmbTMwTzhNVjFUalN6aEY0ZmtRZF9SNS1WLWlBLWlrckhXdl9IdXpiTzZMX2s1UndHYjlGU2pmZHlUYlFjZ1XSAY4CQVVfeXFMT3FQeUhwcDE1WndRanljc25pZzZNTVI3aFRDR0g5VkFjcHRYTFFISWVQUGZqcWZBVDY4b1ZtNVlsZ1JnZFN0Y2d2OE5DSUltcVB6WFhXeTNRdENBYlM0Y0x4X2lvUjhDbWRhaWZnTXlqWDN4eWdnRzZfblJJSzc3bF8zNjFqWXNlSkVfWFQ3ejhWcWU5eXdNeXJ0VVBOQTNxcUV4cEN6ZWtWT21SRTdUeDEzYmJUc05wUDFtWF9MUm1aYk4yS2d2Y3JQaHJ6anYwaHZoN3BPUjFKZzRLMkgzRTBwX1c5U3JoQ3VoX01JcHUwTlB0bFo1YVpDUklQc1VDaFRoOXdGdllDUEhzTXJB?oc=5","source":"Livemint","published":"2026-10-23T08:11:32"},{"title":"Gold price today: Gold rates crash 26% from peak, lowest in 2 months; silver price also falls","url":"https://news.google.com/rss/articles/CBMiwwFBVV95cUxOakNGU1lsM1JvVzVjb0NXOU1vOGhzaUFEZ2NNZ3dKbHhEU29PaWR4cVhvc05KRXpZTzVTQnVQTkRCVng5N1dLVFhQeGYyRU5XMFlYWnpPeTgxb3Y4ZWp1UEJNRmNCOWdONmV0MWpJeWhGOXRCdndjWkk2Y2paTGFhZy1kT2oyZXJKekd5S3VVTmZ0amlZQ010UjY0YU53MnZTUkZCcjlSU2FCYXdiM25CZS1SR2lsX1R6TUtoRzhmMUlnN28?oc=5","source":"PTC News","published":"2026-10-23T11:55:54"},{"title":"Gold Rate Today October 23: Check latest Gold prices in Coimbatore, Nagpur, Visakhapatnam, Surat, Jaipur, Lucknow, Chandigarh & Other Cities","url":"https://news.google.com/rss/articles/CBMiogJBVV95cUxOMVRkbGtjSHY2aEl3emJ1RkN3eHJZWHBNQ2JrdWRCWkZrTG5UQmNhWmVJRU0yYXBLUnUxQTNVWm04MGVNOVZHS01fZ005c0lSQ2ZSR29KYjhPZm9kenVBQ3d2ZkYtTll5aUN2MjhybWwzVmx0aVY3WF9BbG9LZlpSUGJZcEwyUjQtVkFLa0otN3padzcyNmlqNFZoN3I5cjVYR1c0WVhKZERNREhtSXJrdEIyZDBIOG40TzhqdmJEY3c1dldQTU05SS1QbnZacnlHQ2wwbGQyZHhEdmx3Z3BnNHJ3dUQyVFNINWlIVFBCOUZNN1VRd1pBR3JmdURjVFVXRkx4WjVSUmxta1doaUdFbEZMU1AzbzBYNUg3YkpiNHEwUdIBqAJBVV95cUxQLTY1OFl4US1DcGk1eEJzd2l1am93aWNIY0dZNnBrM1NVX3BMVURFc0kyS1lOdWU2Rm1WSk9WckhNSzE1SXNXT3FDQ0VXTm5EeVhVWnZvUnIzLUQ4N2ZabGlzc1NNVkhBaEZkOXNFX1BWY2ZsNTQ1d2tNTzFEM1Q3M2ZndHYzQnpFNE5UdkJGOFR4SDBzZGVaRnhOZzZEOFN1eGhJelMycVRIS2kzRlRUU0NJcjBwbmJteVZjWVJaZDJlbzNOdkF1dXpKM2FQUzJDRzRDd001ckMxd3Zma0RDNk5SWklqMmNHc3piek1fcmlWZnlXTFdXSmZlMGRaWTlsbm1wa0hTSFR1aWt0LXB1bnpLSW5wREQ3Wkh5WmRQOGM2UFA4NEtISQ?oc=5","source":"BusinessLine","published":"2026-10-23T08:01:04"}];
+  var NEWS_BUILD = [{"title":"Gold Rate Today Live, Latest 22 And 24 Carat Gold Price In India","url":"https://news.google.com/rss/articles/CBMiTkFVX3lxTE5ieHFlWW9CNF9vaC03ME9mY29vZnpqTzdmcFpOZ3BfcEQxY3RXamt4VUI3cDBFTTQ3VzIxczNSUlBYTGdhMi1nT01HOUNXUQ?oc=5","source":"NDTV Profit","published":"2026-10-23T13:06:51"},{"title":"Silver Rate Today in Bundi 23rd October 2026 : 1 KG, Todays Silver Price in Bundi","url":"https://news.google.com/rss/articles/CBMic0FVX3lxTFBTTTExVDJmNEhvTHAtTjNpb2F2Rk9kUGFfWWpoX21XUmpRSzdPNmx5UGlpWl9jU2t2NEszVkM5blRzOTBKalBBZURkN0VNaV9obHYtVjJsT29GaFRrT3pfNmQ2YzdvRmpQNmp2bXdFZ3FucXc?oc=5","source":"Business Today","published":"2026-10-23T15:17:58"},{"title":"Silver rate today: Silver price falls over 3% to Rs 1.93 lakh per kg on MCX","url":"https://news.google.com/rss/articles/CBMi6AFBVV95cUxNYWc2bjVVQmlIa1d4bkFQMHlYemQ3SHBoSDBHNVBrczZ5QXRuRGIxQ3ZlVE5MR29fQzlVSEFpQjAxem5lTlZXQ0t1SkJVb0VTdmFfaHJhZENSWUt6RVZuaTdmVHlZdTM3elZhMjhmUEVGcnRBb3N0dlBvYnJHSHBlMzhEbThRb1BWcUVXQzdzNlRudjRMRlF1UGNSZXNvUTFhLUdxNTIzSG9uV3VaWXA5RGMwNHlJWEkwNmYwUHdqNTlzaEdDcVNIZWFRNzlPNFBlOXE5YkFXNENlQXY3WDJiakNRTWhObnJJ0gHuAUFVX3lxTE9EZWpfZDlLVU5FR3FtT2s4enpZdndndzZYbUlKZHE3OWsxcENzUjh2SGVUai01OTRGM1BzclhSZzhDbmRlSGdiU1VTWVh6ODFGRzVfWi14QUxOUW9ZSHJZdmI4UkJ2UWRvOUZNb2VJb1QtMFpYLTMyb2d2SGVHYmhBZ1UycEFnN09uSVhrb1VjcXo4VVVCZEloaU5oOHVzMlF0dzVuSW1GRlhFRzVPMU5YWjZEb2hhdjBhU2ZodmEzMzZyQ0VxN2I2YUlGX2kyTHdWOWtidUNJclQ4dW43dmlocWM0Um9ybU9YLUZUOGc?oc=5","source":"India Today","published":"2026-10-23T05:02:41"},{"title":"Gold Rate Today, October 23, 2026: 24K Gold Falls by \u20b9190 per Gram; Check City-Wise Rates","url":"https://news.google.com/rss/articles/CBMiwgFBVV95cUxQY3E1N1dYZmd1LVJObzN4T1YyWkpKQ192TzhrOEE1ZnppVFhtalpiczhjS3VxSEl3SGFwaDM1OUlRendYWXFZcWF5dG50aVk5amFJUzV3RlBNczNyMW9ibHJsSjNCZWM2V2ZBdGFCTmV5QmpRYmZkMVgwXzUydUU3R1A1bGJLTXlETGM5d3FXdm84NUhOMC1BRklxaTFONFlLeEQ2aDhDMVFUcGpvYkV5MnRyYlJTeEM0cWhEUzhfQW95QQ?oc=5","source":"India Infoline","published":"2026-10-23T06:54:50"},{"title":"Gold Rate Today October 23: Check latest Gold prices in Delhi, Mumbai, Kolkata, Chennai, Bengaluru, Hyderabad, Pune & Other Cities","url":"https://news.google.com/rss/articles/CBMilAJBVV95cUxNNDhPdXlDRExRY1BHcXZhZGk3TVU2UExiYkRMdTlxTXFBNXhtUFQ4VXBBdHVOUDV1M3pwYkd3R1Z6ME51XzZGSVlicHhjaTZmSlI1YVM2UWdGcnFNTHFPbENLekNqVXpDUW93MlZQdzNYeFZqMkVKaGZrVm14enBOWU9sUDJ4SVgyeEx2bmdEUHJtV2NxMmVlSUtDZ2h2dGlWemRYdWZkTWFjUlZCMjlPZDg5TkprQS1CSEhYc0JtUl96cFBkeFhRRkdfSWNwWWtkSV9TelJLblBKT1FaVUpwdVBvVzdpSnBjUVpqeXdKT3Q0T0NFWGYyS0k0Mm9DUjlwMXVEVE5LbWxLa01keURsQWRoYUrSAZsCQVVfeXFMT3JRUUFMbDNRSlFlSERtTDdWZVlyVEZERGZKV2NhMTFLLXhJMEZOMVpoeUl1YmJBaWhOWWtXWExoOUtBcFZpX0xDQWxwSFRUWlVoaFRqVng4dE01Z3dCT2hWbm5WcHM5VlZ2bnprNVZfRXZ4bmd3bDhCOTZaSDlmdmhaSlZKZjhkR1NSS0RoMXVzVlJXSWR5ME14S2VveG5LWk1zQkpKMmpuMElJNG1NZXZidmdQcEJmdmt6WmM5MU5ta19KNTN4S2pPQm5sTEVTV3Q2ZV8wekFnY2x5X2JpeHY3cTNPenMtd0JZT0NGNzRlbE9PdEtNZVo4Q1JDOUpoRFRMS2VrSXJlanVJYTZmQWdDc2I4a1ZNQXpYdw?oc=5","source":"BusinessLine","published":"2026-10-23T08:01:04"},{"title":"Silver rate today at 11-month low; slips below \u20b92 lakh in India \u2014 where will it go? Should you buy for good returns?","url":"https://news.google.com/rss/articles/CBMiiAJBVV95cUxOZW9vU1FLMXk0Q2phc3VBdjR4bk1RS2hfUkphWHZKZ3pHMGdBcS0yTWlWWFpSUHBzUk52S2ZhdjNwVWQyMEFvb1NRV2xsUS1ZczdBSmFueVdOTVo0MDBCV3pDZ1pkREZ4TnRWbXd0My1WTmdiUTRHMHAzekN2RGdybEtvYjhWdndIcnRxdk1xdnVmcnpzcHZVazUtWUJKV0VLUjRDQ3NDXzBnY1JxbVdyemFHR3hMbzBwelZJUTBzSUo4b3RqbjNLc3JmbTMwTzhNVjFUalN6aEY0ZmtRZF9SNS1WLWlBLWlrckhXdl9IdXpiTzZMX2s1UndHYjlGU2pmZHlUYlFjZ1XSAY4CQVVfeXFMT3FQeUhwcDE1WndRanljc25pZzZNTVI3aFRDR0g5VkFjcHRYTFFISWVQUGZqcWZBVDY4b1ZtNVlsZ1JnZFN0Y2d2OE5DSUltcVB6WFhXeTNRdENBYlM0Y0x4X2lvUjhDbWRhaWZnTXlqWDN4eWdnRzZfblJJSzc3bF8zNjFqWXNlSkVfWFQ3ejhWcWU5eXdNeXJ0VVBOQTNxcUV4cEN6ZWtWT21SRTdUeDEzYmJUc05wUDFtWF9MUm1aYk4yS2d2Y3JQaHJ6anYwaHZoN3BPUjFKZzRLMkgzRTBwX1c5U3JoQ3VoX01JcHUwTlB0bFo1YVpDUklQc1VDaFRoOXdGdllDUEhzTXJB?oc=5","source":"Livemint","published":"2026-10-23T08:11:32"},{"title":"Gold price today: Gold rates crash 26% from peak, lowest in 2 months; silver price also falls","url":"https://news.google.com/rss/articles/CBMiwwFBVV95cUxOakNGU1lsM1JvVzVjb0NXOU1vOGhzaUFEZ2NNZ3dKbHhEU29PaWR4cVhvc05KRXpZTzVTQnVQTkRCVng5N1dLVFhQeGYyRU5XMFlYWnpPeTgxb3Y4ZWp1UEJNRmNCOWdONmV0MWpJeWhGOXRCdndjWkk2Y2paTGFhZy1kT2oyZXJKekd5S3VVTmZ0amlZQ010UjY0YU53MnZTUkZCcjlSU2FCYXdiM25CZS1SR2lsX1R6TUtoRzhmMUlnN28?oc=5","source":"PTC News","published":"2026-10-23T11:55:54"},{"title":"Gold Rate Today October 23: Check latest Gold prices in Coimbatore, Nagpur, Visakhapatnam, Surat, Jaipur, Lucknow, Chandigarh & Other Cities","url":"https://news.google.com/rss/articles/CBMiogJBVV95cUxOMVRkbGtjSHY2aEl3emJ1RkN3eHJZWHBNQ2JrdWRCWkZrTG5UQmNhWmVJRU0yYXBLUnUxQTNVWm04MGVNOVZHS01fZ005c0lSQ2ZSR29KYjhPZm9kenVBQ3d2ZkYtTll5aUN2MjhybWwzVmx0aVY3WF9BbG9LZlpSUGJZcEwyUjQtVkFLa0otN3padzcyNmlqNFZoN3I5cjVYR1c0WVhKZERNREhtSXJrdEIyZDBIOG40TzhqdmJEY3c1dldQTU05SS1QbnZacnlHQ2wwbGQyZHhEdmx3Z3BnNHJ3dUQyVFNINWlIVFBCOUZNN1VRd1pBR3JmdURjVFVXRkx4WjVSUmxta1doaUdFbEZMU1AzbzBYNUg3YkpiNHEwUdIBqAJBVV95cUxQLTY1OFl4US1DcGk1eEJzd2l1am93aWNIY0dZNnBrM1NVX3BMVURFc0kyS1lOdWU2Rm1WSk9WckhNSzE1SXNXT3FDQ0VXTm5EeVhVWnZvUnIzLUQ4N2ZabGlzc1NNVkhBaEZkOXNFX1BWY2ZsNTQ1d2tNTzFEM1Q3M2ZndHYzQnpFNE5UdkJGOFR4SDBzZGVaRnhOZzZEOFN1eGhJelMycVRIS2kzRlRUU0NJcjBwbmJteVZjWVJaZDJlbzNOdkF1dXpKM2FQUzJDRzRDd001ckMxd3Zma0RDNk5SWklqMmNHc3piek1fcmlWZnlXTFdXSmZlMGRaWTlsbm1wa0hTSFR1aWt0LXB1bnpLSW5wREQ3Wkh5WmRQOGM2UFA4NEtISQ?oc=5","source":"BusinessLine","published":"2026-10-23T08:01:04"}];
   var NEWS_CACHE_KEY='mgr_news_cache_v1';
   var NEWS_TTL_MS=30*60*1000;
   var NEWS_MAX=8;
@@ -3238,11 +3264,32 @@ function handleCredentialResponse(resp){
     if(!subscribed)ssSet(SP_DISMISS,'1');
   }
   window.GR_CLOSE_SUBPOP=closeSubPop;
+  // The first press of x (or Escape) shows what the visitor would miss,
+  // with today's real price gap; the second, or "No thanks", closes.
+  var spSureShown=false,spPhoneOnly=false;
+  var SP_GAP22=Number('254')||0;
+  function inr(n){return '\u20b9'+Math.round(n).toLocaleString('en-IN');}
+  function showSure(on){
+    var m=document.getElementById('spMain'),k=document.getElementById('spSure');
+    if(!m||!k)return;m.hidden=on;k.hidden=!on;
+    if(on){var box=subPop.querySelector('.sp-box');if(box)box.scrollTop=0;}
+  }
+  function tryClose(){
+    var k=document.getElementById('spSure');
+    if(spSureShown||spPhoneOnly||!k){closeSubPop(false);return;}
+    spSureShown=true;
+    if(SP_GAP22>=50){
+      document.getElementById('spSureBig').innerHTML='Today, 22K gold cost up to <b>'+inr(SP_GAP22)+'/g</b> more at some jewellers';
+      document.getElementById('spSureSub').innerHTML='On a 10 g chain that&rsquo;s <b>'+inr(SP_GAP22*10)+'</b>, before making charges and GST. The alert tells you who is cheapest every morning.';
+    }
+    showSure(true);
+  }
   function openSubPop(){
     if(!subPop)return;
     lsSet(SP_SEEN,'1');
     lsSet(SP_LAST,String(Date.now()));
     lsSet(SP_N,String((parseInt(lsGet(SP_N)||'0',10)||0)+1));
+    showSure(false);spSureShown=false;spPhoneOnly=false;
     subPop.classList.add('open');
     document.body.style.overflow='hidden';
     var em=document.getElementById('alEmailP');
@@ -3267,6 +3314,7 @@ function handleCredentialResponse(resp){
     var t=document.getElementById('spTitle'),d=subPop.querySelector('.sp-d');
     if(t)t.textContent='One last thing \u2014 your mobile number';
     if(d)d.textContent='We have '+(email||'your email')+'. Add your mobile so we can reach you if a rate moves sharply.';
+    showSure(false);spPhoneOnly=true;
     var nP=document.getElementById('alNameP'),eP=document.getElementById('alEmailP');
     if(nP&&name)nP.value=name;
     if(eP&&email)eP.value=email;
@@ -3279,13 +3327,17 @@ function handleCredentialResponse(resp){
 
   if(subPop){
     var spX=document.getElementById('spClose'),spH=document.getElementById('spHave');
-    if(spX)spX.addEventListener('click',function(){closeSubPop(false)});
+    if(spX)spX.addEventListener('click',tryClose);
     // Subscribed on another phone or browser: remember it here too, so the
     // popup never asks again on this device. No tap-outside close.
     if(spH)spH.addEventListener('click',function(){lsSet(SP_SUB,'1');closeSubPop(true)});
     document.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&subPop.classList.contains('open'))closeSubPop(false);
+      if(e.key==='Escape'&&subPop.classList.contains('open'))tryClose();
     });
+    var sY=document.getElementById('spSureYes'),sN=document.getElementById('spSureNo');
+    if(sY)sY.addEventListener('click',function(){showSure(false);
+      var em=document.getElementById('alEmailP');if(em)try{em.focus()}catch(_){}});
+    if(sN)sN.addEventListener('click',function(){closeSubPop(false)});
   }
 
   // Show policy, shared with every other page through /alerts-pop.js and
