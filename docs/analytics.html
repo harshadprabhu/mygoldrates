@@ -6,109 +6,210 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <title>Private Analytics - MyGoldRates</title>
 <style>
-:root{--bg:#0f1115;--card:#181b22;--line:#272b34;--ink:#eef1f6;--ink2:#a7afbe;
-  --gold:#e3bf63;--emerald:#54c08a;--warm:#e08a6a;--accent:#6aa0e0}
+/* Chart colours were checked with the dataviz palette validator against the
+   card surface (#181b22): views #b08a2a and visitors #5b8fd6 pass the
+   lightness, chroma, colour-blind separation and contrast checks. */
+:root{--bg:#0f1115;--card:#181b22;--card2:#1e222b;--line:#272b34;--grid:#232731;
+  --ink:#eef1f6;--ink2:#a7afbe;--ink3:#7d8697;--gold:#e3bf63;--emerald:#54c08a;
+  --warm:#e08a6a;--accent:#6aa0e0;--s1:#b08a2a;--s2:#5b8fd6}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
   font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-.wrap{max-width:1060px;margin:0 auto;padding:22px 18px 60px}
-h1{font-size:21px;margin:0 0 2px;letter-spacing:.02em}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
+.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin-bottom:12px}
+h1{font-size:20px;margin:0;letter-spacing:.02em}
 h1 b{color:var(--gold)}
-.sub{color:var(--ink2);font-size:12.5px;margin:0 0 18px}
-.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;
-  background:var(--card);border:1px solid var(--line);border-radius:12px;
-  padding:14px 16px;margin-bottom:16px}
-.filters label{display:block;font-size:11px;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--ink2);margin-bottom:4px}
-.filters input,.filters select{background:var(--bg);border:1px solid var(--line);
-  color:var(--ink);border-radius:8px;padding:8px 10px;font-size:13px;min-width:150px}
-.btn{background:var(--gold);color:#231a02;border:0;border-radius:8px;
-  padding:9px 16px;font-weight:600;font-size:13px;cursor:pointer}
-.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:12px;margin-bottom:18px}
-.range-lbl{font-size:13px;color:var(--muted,#9aa3ad);margin:0 0 8px;font-weight:600}
-/* Today's three numbers side by side, even on a phone. */
-#kpis{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-@media(max-width:480px){#kpis .kpi{padding:12px 10px}#kpis .n{font-size:24px}
-  #kpis .l{font-size:10px;letter-spacing:.03em}}
-.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
-.kpi .n{font-size:28px;font-weight:700;letter-spacing:.01em}
-.kpi .l{color:var(--ink2);font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
-  padding:16px 18px;margin-bottom:16px}
-.card h2{font-size:14px;margin:0 0 12px;color:var(--ink);letter-spacing:.03em}
-.chart{display:flex;align-items:flex-end;gap:4px;height:170px;padding-top:6px;overflow-x:auto}
-.bar{flex:1;min-width:14px;display:flex;flex-direction:column;justify-content:flex-end;
-  align-items:center;gap:4px;height:100%}
-.bar .fill{width:70%;background:linear-gradient(180deg,var(--gold),#b8952f);
-  border-radius:4px 4px 0 0;min-height:2px;transition:height .2s}
-.bar .v{font-size:10px;color:var(--ink2)}
-.bar .d{font-size:9.5px;color:var(--ink2);white-space:nowrap;transform:rotate(0deg)}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
-th{color:var(--ink2);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
-td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-td.path{color:var(--accent);word-break:break-all}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:720px){.grid2{grid-template-columns:1fr}}
-.msg{color:var(--ink2);padding:22px 4px;text-align:center;font-size:13px}
-.err{color:var(--warm)}
+.sub{color:var(--ink2);font-size:12px;margin:0}
 .status{font-size:12px;color:var(--ink2);margin-left:auto}
-.foot{color:var(--ink2);font-size:11.5px;margin-top:24px;line-height:1.6}
+.err{color:var(--warm)}
+
+/* Filter bar: one row above everything it controls (wraps on a phone). */
+.fbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--card);
+  border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+@media(min-width:900px){.fbar{position:sticky;top:0;z-index:5;
+  box-shadow:0 6px 18px rgba(0,0,0,.35)}}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;flex-wrap:wrap}
+.seg button{background:transparent;color:var(--ink2);border:0;border-right:1px solid var(--line);
+  padding:7px 11px;font-size:12.5px;cursor:pointer;font-weight:600}
+.seg button:last-child{border-right:0}
+.seg button:hover{color:var(--ink);background:var(--card2)}
+.seg button.on{background:var(--gold);color:#231a02}
+.range{display:inline-flex;align-items:center;gap:6px;color:var(--ink3);font-size:12px}
+.fbar input,.fbar select{background:var(--bg);border:1px solid var(--line);color:var(--ink);
+  border-radius:8px;padding:7px 8px;font-size:12.5px;min-width:0}
+.fbar select{flex:1 1 130px;max-width:220px}
+.fbar select.set{border-color:var(--gold);color:var(--gold)}
+.btn{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;
+  padding:7px 12px;font-size:12.5px;cursor:pointer}
+.btn:hover{background:var(--card2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:6px;margin:0 0 10px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 6px 3px 11px;font-size:12px;color:var(--ink)}
+.chip b{color:var(--ink2);font-weight:500}
+.chip button{background:transparent;border:0;color:var(--ink2);cursor:pointer;font-size:14px;
+  line-height:1;padding:2px 5px;border-radius:999px}
+.chip button:hover{color:var(--ink);background:var(--line)}
+.rangeLbl{font-size:13px;color:var(--ink2);margin:0 0 10px}
+.rangeLbl strong{color:var(--ink);font-weight:600}
+
+#main{transition:opacity .15s}
+#main.busy{opacity:.5;pointer-events:none}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:14px}
+@media(max-width:1000px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:520px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;min-width:0}
+.kpi .l{color:var(--ink2);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.kpi .n{font-size:26px;font-weight:700;letter-spacing:.01em;margin:2px 0 1px;
+  font-variant-numeric:tabular-nums}
+.kpi .d{font-size:12px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.kpi .d .up{color:var(--emerald);font-weight:600}
+.kpi .d .dn{color:var(--warm);font-weight:600}
+.kpi .d .eq{color:var(--ink2);font-weight:600}
+.kpi .note{font-size:10.5px;color:var(--ink3);margin-top:2px}
+.kpis.small{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:14px 16px;margin-bottom:14px;min-width:0}
+.card h2{font-size:14px;margin:0;color:var(--ink);letter-spacing:.02em}
+.card h3{font-size:13px;margin:14px 0 8px;color:var(--ink)}
+.chd{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:10px}
+.chd .hint{color:var(--ink3);font-size:11.5px}
+.chd .seg{margin-left:auto}
+.chd .seg button{padding:4px 10px;font-size:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:1000px){.grid3{grid-template-columns:1fr 1fr}}
+@media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr}}
+.grid2>.card,.grid3>.card{margin-bottom:0}
+.row{margin-bottom:14px}
+
+/* Charts */
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px}
+.plot{position:relative;width:100%;min-height:230px}
+.plot svg{display:block;width:100%;overflow:visible}
+.plot text{fill:var(--ink3);font-size:11px;font-family:inherit}
+.plot .dl{fill:var(--ink2);font-size:11.5px;font-weight:600}
+.tip{position:absolute;pointer-events:none;background:#0b0d11;border:1px solid var(--line);
+  border-radius:8px;padding:7px 10px;font-size:12px;color:var(--ink);white-space:nowrap;
+  box-shadow:0 6px 18px rgba(0,0,0,.45);display:none;z-index:3}
+.tip .t{color:var(--ink2);margin-bottom:3px}
+.tip .r{display:flex;align-items:center;gap:7px;font-variant-numeric:tabular-nums}
+.tip .r i{display:inline-block;width:10px;height:3px;border-radius:2px}
+.tip .r b{margin-left:auto;padding-left:14px}
+
+/* Breakdown tables with an in-cell bar */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--ink3);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.num.mute{color:var(--ink3)}
+.cell{position:relative;padding:2px 6px;border-radius:4px;min-width:0}
+.cell .bk{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:rgba(176,138,42,.22)}
+.cell .tx{position:relative;overflow-wrap:anywhere}
+.cell .sm{position:relative;color:var(--ink3);font-size:11px;margin-left:6px}
+.cell a{position:relative;color:var(--ink3);text-decoration:none;margin-left:6px;font-size:12px}
+.cell a:hover{color:var(--accent)}
+tr.dr{cursor:pointer}
+tr.dr:hover td{background:var(--card2)}
+tr.dr.on td{background:rgba(227,191,99,.10)}
+tr.dr.on .tx{color:var(--gold)}
+td.path .tx{color:var(--accent)}
+.more{display:flex;gap:8px;align-items:center;margin-top:8px}
+.search{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:8px;
+  padding:6px 9px;font-size:12.5px;min-width:0}
+.msg{color:var(--ink2);padding:18px 4px;text-align:center;font-size:13px}
+.note{color:var(--ink3);font-size:11.5px;margin-top:8px}
+.warn{background:rgba(224,138,106,.1);border:1px solid rgba(224,138,106,.35);color:var(--warm);
+  border-radius:10px;padding:10px 12px;font-size:12.5px;margin-bottom:12px}
+@media(max-width:520px){.hide-sm{display:none}}
+.foot{color:var(--ink3);font-size:11.5px;margin-top:20px;line-height:1.6}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>My<b>Gold</b>Rates - Private Analytics</h1>
-  <p class="sub">Day-wise visitor activity. Built 23 October 2026. Private: readable only via your secret link (the URL ending in #your-token).</p>
-
-  <div class="filters">
-    <div><label>From</label><input type="date" id="from"></div>
-    <div><label>To</label><input type="date" id="to"></div>
-    <div><label>Page</label><select id="page"><option value="">All pages</option></select></div>
-    <button class="btn" id="apply">Apply</button>
-    <button class="btn ghost" id="today">Today</button>
-    <button class="btn ghost" id="quick7">Last 7d</button>
-    <button class="btn ghost" id="quick30">Last 30d</button>
-    <button class="btn ghost" id="quick90">Last 90d</button>
-    <button class="btn ghost" id="alltime">All time</button>
+  <div class="top">
+    <h1>My<b>Gold</b>Rates &middot; Private Analytics</h1>
+    <p class="sub">Built 23 October 2026 &middot; private: opens only with your secret link (the URL ending in #your-token).</p>
     <span class="status" id="status"></span>
   </div>
 
-  <div class="range-lbl" id="rangeLbl"></div>
-  <div class="kpis" id="kpis"></div>
-
-  <div class="card">
-    <h2>Daily page views</h2>
-    <div class="chart" id="chart"></div>
+  <div class="fbar" id="fbar">
+    <div class="seg" id="presets" role="group" aria-label="Date range">
+      <button data-p="today">Today</button><button data-p="yesterday">Yesterday</button><button data-p="7d">7D</button><button data-p="30d">30D</button><button data-p="90d">90D</button><button data-p="all">All</button>
+    </div>
+    <span class="range"><input type="date" id="from" aria-label="From"><span>to</span><input type="date" id="to" aria-label="To"></span>
+    <select id="f_page_group" aria-label="Section"></select>
+    <select id="f_page" aria-label="Page"></select>
+    <select id="f_source" aria-label="Traffic source"></select>
+    <select id="f_device" aria-label="Device"></select>
+    <select id="f_host" aria-label="Host"></select>
+    <button class="btn" id="reset" title="Back to today, no filters">Reset</button>
   </div>
+  <div class="chips" id="chips"></div>
+  <div class="rangeLbl" id="rangeLbl"></div>
+  <div id="notice"></div>
 
-  <div class="grid2">
-    <div class="card"><h2>Top pages</h2><div id="pages"></div></div>
-    <div class="card"><h2>Most-clicked elements</h2><div id="clicks"></div></div>
+  <div id="main">
+    <div class="kpis" id="kpis"></div>
+
+    <div class="card">
+      <div class="chd">
+        <h2 id="trendTitle">Visits over time</h2>
+        <div class="legend" id="trendLegend"></div>
+        <div class="seg" id="trendMode" role="group" aria-label="Chart">
+          <button data-m="day">By day</button><button data-m="hour">By hour (IST)</button>
+        </div>
+      </div>
+      <div class="plot" id="trend"></div>
+      <div class="note" id="trendNote"></div>
+    </div>
+
+    <div class="grid3 row">
+      <div class="card"><div class="chd"><h2>Traffic sources</h2><span class="hint">click to filter</span></div><div id="t_sources"></div></div>
+      <div class="card"><div class="chd"><h2>Sections</h2><span class="hint">click to filter</span></div><div id="t_groups"></div></div>
+      <div class="card"><div class="chd"><h2>Devices</h2><span class="hint">click to filter</span></div><div id="t_devices"></div>
+        <div class="note">Recorded from 23 Oct 2026; earlier visits show as &ldquo;not recorded&rdquo;.</div></div>
+    </div>
+
+    <div class="grid2 row">
+      <div class="card"><div class="chd"><h2>Top pages</h2><span class="hint">click to filter &middot; &#8599; opens the page</span></div>
+        <div class="more" style="margin:0 0 8px"><input class="search" id="pageSearch" placeholder="Search pages&hellip;" aria-label="Search pages"></div>
+        <div id="t_pages"></div>
+        <div class="more"><button class="btn" id="pagesMore" style="display:none"></button></div></div>
+      <div class="card"><div class="chd"><h2>Landing pages</h2><span class="hint">first page of each visit</span></div><div id="t_landing"></div></div>
+    </div>
+
+    <div class="grid2 row">
+      <div class="card"><div class="chd"><h2>Most-clicked</h2></div><div id="t_clicks"></div>
+        <div class="more"><button class="btn" id="clicksMore" style="display:none"></button></div>
+        <div class="note" id="clicksNote"></div></div>
+      <div class="card"><div class="chd"><h2>Referring websites</h2><span class="hint">click to filter by its source</span></div><div id="t_refs"></div></div>
+    </div>
+
+    <div class="grid2 row">
+      <div class="card"><div class="chd"><h2>New sign-ups by method</h2></div><div id="t_signups"></div>
+        <div class="note">Whole site: page, source and device filters do not apply to sign-ups.</div></div>
+      <div class="card"><div class="chd"><h2>Hosts</h2><span class="hint">click to filter</span></div><div id="t_hosts"></div></div>
+    </div>
+
+    <div class="card"><div class="chd"><h2>Jewellers wanting to be listed</h2></div>
+      <div class="kpis small" id="jwKpis"></div>
+      <style>#jwApps th{white-space:nowrap}#jwApps td{overflow-wrap:anywhere}</style>
+      <div id="jwApps" style="overflow-x:auto"></div>
+      <h3>Rates posted by listed jewellers</h3>
+      <div id="jwDaily" style="overflow-x:auto"></div>
+    </div>
+
+    <div class="card"><div class="chd"><h2>Email subscribers &amp; unsubscribes</h2></div>
+      <div class="kpis small" id="subKpis"></div>
+      <div class="grid2"><div><h3>Why people unsubscribed</h3><div id="unsubWhy"></div></div>
+      <div><h3>Latest unsubscribes</h3><div id="unsubRecent"></div></div></div>
+    </div>
+
+    <div class="card"><div class="chd"><h2>All time</h2><span class="hint">not affected by the filters</span></div><div class="kpis small" id="lifeBox"></div></div>
   </div>
-
-  <div class="grid2">
-    <div class="card"><h2>Where visitors came from</h2><div id="refs"></div></div>
-    <div class="card"><h2>Traffic by host (www vs apex)</h2><div id="hosts"></div></div>
-  </div>
-
-  <div class="card"><h2>Jewellers wanting to be listed</h2>
-    <div class="kpis" id="jwKpis"></div>
-    <style>#jwApps th{white-space:nowrap}#jwApps td{overflow-wrap:anywhere}</style>
-    <div id="jwApps" style="overflow-x:auto"></div>
-    <h2 style="font-size:14px;margin-top:14px">Rates posted by listed jewellers</h2>
-    <div id="jwDaily" style="overflow-x:auto"></div>
-  </div>
-
-  <div class="card"><h2>Email subscribers &amp; unsubscribes</h2>
-    <div class="kpis" id="subKpis"></div>
-    <div class="grid2"><div><h2 style="font-size:14px">Why people unsubscribed</h2><div id="unsubWhy"></div></div>
-    <div><h2 style="font-size:14px">Latest unsubscribes</h2><div id="unsubRecent"></div></div></div>
-  </div>
-
-  <div class="card"><h2>All time</h2><div class="kpis" id="lifeBox"></div></div>
 
   <p class="foot" id="foot"></p>
 </div>
@@ -121,6 +222,8 @@ td.path{color:var(--accent);word-break:break-all}
   // hosted page carries no secret; only someone with the full link can read data.
   var SB="https://opwrfflzzowhobesysmr.supabase.co", KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE",
       TOKEN=(location.hash ? decodeURIComponent(location.hash.slice(1)) : "");
+  var SITE='https://mygoldrates.com';
+  var C1='#b08a2a', C2='#5b8fd6';     // views, visitors (validated, see CSS)
   var $=function(id){return document.getElementById(id);};
   function nfmt(n){try{return Number(n).toLocaleString('en-IN');}catch(e){return n;}}
   // toISOString() renders in UTC, not IST - for the ~5.5h window between
@@ -131,22 +234,16 @@ td.path{color:var(--accent);word-break:break-all}
   function iso(d){
     return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(d);
   }
-  // A Date pinned to IST-midnight-as-UTC, so getUTCDate()/setUTCDate() day
-  // arithmetic is immune to the visitor's own browser timezone - getDate()/
-  // setDate() read local time, which would silently disagree with iso()'s
-  // IST-based formatting again for any visitor not set to IST.
-  function todayIST(){
-    var p=iso(new Date()).split('-');
-    return new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));
-  }
+  // Day arithmetic on YYYY-MM-DD strings through UTC midnights, so the
+  // visitor's own browser timezone can never shift a date.
+  function addDays(s,n){var p=s.split('-');
+    return new Date(Date.UTC(+p[0],+p[1]-1,+p[2]+n)).toISOString().slice(0,10);}
+  function today(){return iso(new Date());}
+  function daysBetween(a,b){return Math.round((Date.parse(b+'T00:00:00Z')-Date.parse(a+'T00:00:00Z'))/864e5);}
+  function fmtDay(s,yr){return new Date(s+'T00:00:00Z').toLocaleDateString('en-IN',
+    yr?{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}:{day:'numeric',month:'short',timeZone:'UTC'});}
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-
-  // Default range: today. The owner reads this daily, so the top row is
-  // today's views, visitors and clicks; the all-time totals sit in their
-  // own card at the bottom, so the two are never mistaken for each other.
-  var today=todayIST();
-  $('from').value=iso(today); $('to').value=iso(today);
 
   // Readable names for click keys. The map is generated from CLICK_LABELS
   // in generate_site.py (one source, tested); rules below cover the
@@ -165,7 +262,7 @@ td.path{color:var(--accent);word-break:break-all}
     if((m=s.match(/^(\d+K) \((\d+)\)$/)))return 'Making charges: purity '+m[1]+' ('+m[2]+')';
     if(/^(Gold Spot|MCX Gold|Silver Spot|MCX Silver|USD\/INR)$/i.test(s))
       return 'Market ticker: '+s;
-    if((m=s.match(/^(\d+(?:\.\d+)?)g\s*\u00b7\s*(.+)$/)))
+    if((m=s.match(/^(\d+(?:\.\d+)?)g\s*·\s*(.+)$/)))
       return 'Making charges: '+m[1]+'g '+m[2];
     if(/^(Rings?|Earrings|Chains?|Bangles?|Necklaces?|Pendants?|Bracelets?|Coins?|Mangalsutras?|Nose ?pins?|Anklets?|Kadas?|Studs?|Jhumkas?)$/i.test(s))
       return 'Making charges: item '+s;
@@ -173,12 +270,12 @@ td.path{color:var(--accent);word-break:break-all}
       return 'Jeweller picked: '+s;
     if(CITIES.indexOf(s)>-1)return 'City picked: '+s;
     if(/^MyGoldRates/i.test(s))return 'Logo: back to home';
-    if(/^\u20b9/.test(s))return 'Budget picked: '+s;
+    if(/^₹/.test(s))return 'Budget picked: '+s;
     if(/^(\d+(?:\.\d+)?\s*g\b.*|\d+\s*Tola)$/i.test(s))return 'Weight picked: '+s;
     // A card's title and blurb arrive run together (\"Gold SIP CalculatorProject
     // the future...\"); keep the title.
     if(s.length>30&&(m=s.match(/^(.{6,40}?[a-z])([A-Z][a-z].{8,})$/)))return 'Card: '+m[1];
-    if(s.length>45)return 'Article link: '+s.slice(0,60)+'\u2026';
+    if(s.length>45)return 'Article link: '+s.slice(0,60)+'…';
     s=s.replace(/^[^\x00-\x7F]+\s*/,'').trim();   // drop a leading emoji/pin
     // Anything still shaped like an HTML id gets flagged rather than passed
     // off as an action name, so a missing label is visible, not mysterious.
@@ -201,17 +298,122 @@ td.path{color:var(--accent);word-break:break-all}
   function isSynthetic(p){var x=String(p||'');
     return /^\/?__/.test(x)||x==='probe'||x==='diag';}
 
+  // ---------------------------------------------------------------- state
+  // The filter values match the names sql/analytics_v2.sql groups by.
+  var DIMS=[
+    {k:'page_group',name:'Section',all:'All sections',fixed:['Home','City & state pages',
+      'Jeweller pages','Near me','Calculators','Guides & reports','News & market brief',
+      'Rate history','Sign-up & members','Other pages']},
+    {k:'page',name:'Page',all:'All pages'},
+    {k:'source',name:'Source',all:'All sources',fixed:['Direct','Google','Bing',
+      'Other search','AI assistants','Social','Other websites','Site preview copies',
+      'Within the site']},
+    {k:'device',name:'Device',all:'All devices',fixed:['mobile','tablet','desktop','(not recorded)']},
+    {k:'host',name:'Host',all:'All hosts'}];
+  var DEV_NAMES={mobile:'Mobile',tablet:'Tablet',desktop:'Desktop'};
+  function dimLabel(k,v){return k==='device'?(DEV_NAMES[v]||v):v;}
+  var PRESET_NAMES={today:'Today',yesterday:'Yesterday','7d':'Last 7 days',
+    '30d':'Last 30 days','90d':'Last 90 days',all:'All time'};
+  var LS='gr_an_v2', ALL_FROM='2024-01-01';
+  var ST={preset:'today',from:'',to:'',f:{},mode:''};
+  // Only the view settings are remembered in this browser - never the token.
+  try{var saved=JSON.parse(localStorage.getItem(LS)||'null');
+    if(saved&&saved.f&&typeof saved.f==='object'){ST.preset=saved.preset||'today';
+      ST.from=saved.from||'';ST.to=saved.to||'';ST.f=saved.f;
+      if(saved.allFrom)ALL_FROM=saved.allFrom;}}catch(e){}
+  function save(){try{localStorage.setItem(LS,JSON.stringify({preset:ST.preset,
+    from:ST.from,to:ST.to,f:ST.f,allFrom:ALL_FROM}));}catch(e){}}
+
+  function presetRange(p){
+    var t=today();
+    switch(p){
+      case 'yesterday':return [addDays(t,-1),addDays(t,-1)];
+      case '7d':return [addDays(t,-6),t];
+      case '30d':return [addDays(t,-29),t];
+      case '90d':return [addDays(t,-89),t];
+      case 'all':return [ALL_FROM,t];
+      default:return [t,t];
+    }
+  }
+  // A saved preset means "the last 7 days from now", not the dates it
+  // covered the day it was saved.
+  if(ST.preset!=='custom'||!ST.from||!ST.to){
+    if(!PRESET_NAMES[ST.preset])ST.preset='today';
+    var r0=presetRange(ST.preset);ST.from=r0[0];ST.to=r0[1];}
+
+  // ------------------------------------------------------------ filter UI
+  function setOptions(sel,dim,list){
+    var cur=ST.f[dim.k]||'',seen={},opts=['<option value="">'+esc(dim.all)+'</option>'];
+    (list||[]).forEach(function(v){if(v==null||seen[v])return;seen[v]=1;
+      opts.push('<option value="'+esc(v)+'">'+esc(dimLabel(dim.k,v))+'</option>');});
+    if(cur&&!seen[cur])opts.push('<option value="'+esc(cur)+'">'+esc(dimLabel(dim.k,cur))+'</option>');
+    sel.innerHTML=opts.join('');sel.value=cur;
+    sel.className=cur?'set':'';
+  }
+  DIMS.forEach(function(d){setOptions($('f_'+d.k),d,d.fixed||[]);
+    $('f_'+d.k).onchange=function(){setFilter(d.k,this.value);};});
+
+  function syncControls(){
+    var bs=$('presets').querySelectorAll('button');
+    for(var i=0;i<bs.length;i++)bs[i].className=bs[i].getAttribute('data-p')===ST.preset?'on':'';
+    $('from').value=ST.from;$('to').value=ST.to;$('from').max=$('to').max=today();
+    DIMS.forEach(function(d){var s=$('f_'+d.k);s.value=ST.f[d.k]||'';s.className=ST.f[d.k]?'set':'';});
+    var chips=[];
+    DIMS.forEach(function(d){if(ST.f[d.k])chips.push('<span class="chip"><b>'+esc(d.name)+
+      ':</b> '+esc(dimLabel(d.k,ST.f[d.k]))+'<button data-clear="'+d.k+'" aria-label="Remove '+
+      esc(d.name)+' filter">&times;</button></span>');});
+    if(chips.length>1)chips.push('<button class="btn" data-clear="*" style="padding:3px 10px">Clear all</button>');
+    $('chips').innerHTML=chips.join('');
+  }
+  function setFilter(k,v){
+    if(v)ST.f[k]=v;else delete ST.f[k];
+    load();
+  }
+  $('presets').onclick=function(e){var p=e.target.getAttribute&&e.target.getAttribute('data-p');
+    if(!p)return;ST.preset=p;ST.mode='';var r=presetRange(p);ST.from=r[0];ST.to=r[1];load();};
+  function onDate(){var f=$('from').value,t=$('to').value;if(!f||!t)return;
+    if(f>t){var x=f;f=t;t=x;}ST.preset='custom';ST.mode='';ST.from=f;ST.to=t;load();}
+  $('from').onchange=onDate;$('to').onchange=onDate;
+  $('reset').onclick=function(){ST.preset='today';var r=presetRange('today');
+    ST.from=r[0];ST.to=r[1];ST.f={};ST.mode='';load();};
+  document.addEventListener('click',function(e){
+    var el=e.target;
+    var c=el.closest&&el.closest('[data-clear]');
+    if(c){var k=c.getAttribute('data-clear');if(k==='*')ST.f={};else delete ST.f[k];load();return;}
+    if(el.closest&&el.closest('a'))return;            // the open-page arrow
+    var tr=el.closest&&el.closest('tr.dr');
+    if(tr){var fk=tr.getAttribute('data-f'),fv=tr.getAttribute('data-v');
+      setFilter(fk,ST.f[fk]===fv?'':fv);}
+  });
+
+  // ---------------------------------------------------------------- data
   function setStatus(t,isErr){var s=$('status');s.textContent=t;
     s.className='status'+(isErr?' err':'');}
-
-  function rpc(){
-    var body={p_secret:TOKEN,p_from:$('from').value,p_to:$('to').value,
-      p_page:$('page').value||null};
-    setStatus('Loading...');
-    return fetch(SB+'/rest/v1/rpc/analytics_report',{method:'POST',
-      headers:{'Content-Type':'application/json','apikey':KEY,
-        'Authorization':'Bearer '+KEY},
-      body:JSON.stringify(body)}).then(function(r){return r.json();});
+  function post(fn,body){
+    return fetch(SB+'/rest/v1/rpc/'+fn,{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
+      body:JSON.stringify(body)}).then(function(r){
+        return r.json().then(function(j){return {ok:r.ok,status:r.status,j:j};},
+          function(){return {ok:r.ok,status:r.status,j:null};});});
+  }
+  // Older database: analytics_report_v2 missing. Fall back to the first
+  // report (date range and page only) and reshape it, so the page still works.
+  var V1=false;
+  function fetchReport(){
+    var filters={};DIMS.forEach(function(d){if(ST.f[d.k])filters[d.k]=ST.f[d.k];});
+    if(!V1){
+      return post('analytics_report_v2',{p_secret:TOKEN,p_from:ST.from,p_to:ST.to,p_filters:filters})
+        .then(function(r){
+          if(r.ok)return r.j;
+          if(r.status===404||(r.j&&r.j.code==='PGRST202')){V1=true;return fetchReport();}
+          return r.j||{error:'http '+r.status};
+        });
+    }
+    return post('analytics_report',{p_secret:TOKEN,p_from:ST.from,p_to:ST.to,p_page:ST.f.page||null})
+      .then(function(r){var d=r.j;if(!d||d.error)return d;
+        d.referrers=(d.top_referrers||[]).map(function(x){return {name:x.referrer,views:x.views};});
+        d.hosts=(d.top_hosts||[]).map(function(x){return {name:x.host,views:x.views};});
+        return d;});
   }
 
   // LIFETIME visits come from a DIFFERENT table than everything else on
@@ -219,179 +421,353 @@ td.path{color:var(--accent);word-break:break-all}
   // per session via the bump_hits RPC from every page); `page_views` is
   // the newer per-pageview log that powers the charts and tables below.
   // They are not interchangeable and page_views is NOT a superset - it
-  // only started collecting later. Showing only page_views totals made
-  // the dashboard read ~164 when the real lifetime figure was ~6,400.
-  // hits_count is a public RPC (anon may call it), so no secret needed
-  // and no date range applies - it is always all-time.
+  // only started collecting later. hits_count is a public RPC, always
+  // all-time; it is only shown if the report has no lifetime figure.
   var LIFETIME=null;
   function loadLifetime(){
-    return fetch(SB+'/rest/v1/rpc/hits_count',{method:'POST',
-      headers:{'Content-Type':'application/json','apikey':KEY,
-        'Authorization':'Bearer '+KEY},body:'{}'})
-      .then(function(r){return r.ok?r.json():Promise.reject(r.status);})
-      .then(function(n){if(!isNaN(Number(n)))LIFETIME=Number(n);})
-      .catch(function(){/* leave null - tile renders as an em dash */});
+    return post('hits_count',{}).then(function(r){
+      if(r.ok&&!isNaN(Number(r.j)))LIFETIME=Number(r.j);}).catch(function(){});
   }
 
+  // ---------------------------------------------------------------- KPIs
+  function delta(cur,prev,lowerIsBetter){
+    if(prev==null||isNaN(prev))return '';
+    if(!prev&&!cur)return '<span class="eq">no change</span>';
+    if(!prev)return '<span class="up">new</span>';
+    var p=(cur-prev)/prev*100,a=Math.abs(p);
+    if(a<0.5)return '<span class="eq">&#9679; 0%</span>';
+    var good=(p>0)!==!!lowerIsBetter;
+    return '<span class="'+(good?'up':'dn')+'">'+(p>0?'&#9650; ':'&#9660; ')+
+      (a>=10?Math.round(a):a.toFixed(1))+'%</span>';
+  }
+  function kpi(label,val,dHtml,prevTxt,note){
+    return '<div class="kpi"><div class="l">'+label+'</div><div class="n">'+val+'</div>'+
+      '<div class="d">'+(dHtml?dHtml+' <span>'+prevTxt+'</span>':'&nbsp;')+'</div>'+
+      (note?'<div class="note">'+note+'</div>':'')+'</div>';
+  }
+  function renderKPIs(d){
+    var t=d.totals||{},p=d.prev||null,ppv=t.visitors?t.views/t.visitors:0;
+    var pp=p&&p.visitors?p.views/p.visitors:null;
+    var vs=function(x){return 'vs '+nfmt(x);};
+    var spv=t.single_page_visits!=null&&t.visitors?Math.round(t.single_page_visits/t.visitors*100):null;
+    $('kpis').innerHTML=[
+      kpi('Page views',nfmt(t.views||0),p&&delta(t.views,p.views),p&&vs(p.views)),
+      kpi('Visitors',nfmt(t.visitors||0),p&&delta(t.visitors,p.visitors),p&&vs(p.visitors)),
+      kpi('Pages per visit',ppv?ppv.toFixed(2):'&mdash;',p&&pp!=null&&delta(ppv,pp),pp!=null?'vs '+pp.toFixed(2):''),
+      kpi('Clicks',nfmt(t.clicks||0),p&&delta(t.clicks,p.clicks),p&&vs(p.clicks)),
+      kpi('One-page visits',spv==null?'&mdash;':spv+'%','','',
+        spv==null?'':'left after one page'),
+      kpi('New sign-ups',t.signups==null?'&mdash;':nfmt(t.signups),p&&delta(t.signups,p.signups),
+        p&&vs(p.signups),'whole site')
+    ].join('');
+  }
+  function renderRange(d){
+    var name=ST.preset==='custom'?'Custom':PRESET_NAMES[ST.preset];
+    var span=ST.from===ST.to?fmtDay(ST.from,true):fmtDay(ST.from,true)+' &ndash; '+fmtDay(ST.to,true);
+    var cmp='';
+    if(d.prev&&d.prev.from){cmp=' &middot; compared with '+(d.prev.from===d.prev.to?
+      fmtDay(d.prev.from,true):fmtDay(d.prev.from)+' &ndash; '+fmtDay(d.prev.to,true));}
+    $('rangeLbl').innerHTML='<strong>'+esc(name)+'</strong> &middot; '+span+cmp;
+  }
+
+  // -------------------------------------------------------------- charts
+  function niceMax(v){
+    if(v<=4)return 4;
+    var raw=v/4,mag=Math.pow(10,Math.floor(Math.log10(raw))),c=[1,2,5,10],step=mag;
+    for(var i=0;i<c.length;i++){if(c[i]*mag>=raw){step=c[i]*mag;break;}}
+    return Math.max(1,step)*4;
+  }
+  function tipShow(tip,html,px,py,box){
+    tip.innerHTML=html;tip.style.display='block';
+    var w=tip.offsetWidth,h=tip.offsetHeight,x=px+14,y=py-h-10;
+    if(x+w>box.clientWidth)x=px-w-14;if(x<0)x=0;if(y<0)y=py+14;
+    tip.style.left=x+'px';tip.style.top=y+'px';
+  }
+  function svgEl(W,H,inner){return '<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+
+    '" role="img">'+inner+'</svg>';}
+  function yAxis(W,L,R,T,ph,yMax){
+    var g='';
+    for(var i=0;i<=4;i++){var v=yMax*i/4,y=T+ph*(1-i/4);
+      g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="'+(i?'#232731':'#3a3f4b')+'" stroke-width="1"/>'+
+        '<text x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end">'+nfmt(v)+'</text>';}
+    return g;
+  }
+  // Daily views and visitors: one axis (both are counts of the same visits).
+  function lineChart(el,rows,series){
+    var W=Math.max(el.clientWidth,280),H=230,L=40,R=70,T=12,B=26,pw=W-L-R,ph=H-T-B;
+    var max=0;rows.forEach(function(r){series.forEach(function(s){max=Math.max(max,+r[s.k]||0);});});
+    var yMax=niceMax(max),n=rows.length;
+    var X=function(i){return L+(n===1?pw/2:i*pw/(n-1));},Y=function(v){return T+ph*(1-v/yMax);};
+    var g=yAxis(W,L,R,T,ph,yMax);
+    var ticks=Math.min(n,W<520?4:7),used={};
+    for(var j=0;j<ticks;j++){var i=n===1?0:Math.round(j*(n-1)/Math.max(1,ticks-1));if(used[i])continue;used[i]=1;
+      g+='<text x="'+X(i)+'" y="'+(H-6)+'" text-anchor="'+(i===0&&n>1?'start':i===n-1&&n>1?'end':'middle')+'">'+
+        esc(fmtDay(rows[i].day))+'</text>';}
+    var ends=[];
+    series.forEach(function(s){
+      var dpath=rows.map(function(r,i){return (i?'L':'M')+X(i).toFixed(1)+','+Y(+r[s.k]||0).toFixed(1);}).join('');
+      g+='<path d="'+dpath+'" fill="none" stroke="'+s.color+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+      if(n===1)g+='<circle cx="'+X(0)+'" cy="'+Y(+rows[0][s.k]||0)+'" r="4" fill="'+s.color+'" stroke="#181b22" stroke-width="2"/>';
+      ends.push({s:s,y:Y(+rows[n-1][s.k]||0),v:+rows[n-1][s.k]||0});
+    });
+    // Direct labels at the right end, nudged apart so they never overlap.
+    ends.sort(function(a,b){return a.y-b.y;});
+    for(var k=1;k<ends.length;k++)if(ends[k].y-ends[k-1].y<14)ends[k].y=ends[k-1].y+14;
+    ends.forEach(function(e){g+='<text class="dl" x="'+(X(n-1)+8)+'" y="'+(e.y+4)+'">'+
+      esc(e.s.short)+' '+nfmt(e.v)+'</text>';});
+    g+='<line id="xh" x1="0" x2="0" y1="'+T+'" y2="'+(T+ph)+'" stroke="#7d8697" stroke-width="1" stroke-dasharray="3 3" style="display:none"/>';
+    series.forEach(function(s,i){g+='<circle id="xd'+i+'" r="4" fill="'+s.color+'" stroke="#181b22" stroke-width="2" style="display:none"/>';});
+    g+='<rect id="hit" x="'+L+'" y="'+T+'" width="'+pw+'" height="'+ph+'" fill="transparent"/>';
+    el.innerHTML=svgEl(W,H,g)+'<div class="tip"></div>';
+    var svg=el.querySelector('svg'),tip=el.querySelector('.tip'),xh=svg.querySelector('#xh');
+    function move(ev){
+      var b=svg.getBoundingClientRect(),mx=(ev.clientX-b.left)*W/b.width;
+      var i=n===1?0:Math.max(0,Math.min(n-1,Math.round((mx-L)/pw*(n-1)))),r=rows[i],x=X(i);
+      xh.setAttribute('x1',x);xh.setAttribute('x2',x);xh.style.display='';
+      series.forEach(function(s,j){var c=svg.querySelector('#xd'+j);c.setAttribute('cx',x);
+        c.setAttribute('cy',Y(+r[s.k]||0));c.style.display='';});
+      var html='<div class="t">'+esc(fmtDay(r.day,true))+'</div>'+series.map(function(s){
+        return '<div class="r"><i style="background:'+s.color+'"></i>'+esc(s.name)+'<b>'+nfmt(r[s.k]||0)+'</b></div>';}).join('')+
+        (r.signups!=null?'<div class="r"><i></i>Sign-ups<b>'+nfmt(r.signups)+'</b></div>':'');
+      tipShow(tip,html,x*b.width/W,Y(+r[series[0].k]||0)*b.height/H,el);
+    }
+    function out(){xh.style.display='none';tip.style.display='none';
+      series.forEach(function(s,j){svg.querySelector('#xd'+j).style.display='none';});}
+    var hit=svg.querySelector('#hit');
+    hit.addEventListener('pointermove',move);hit.addEventListener('pointerdown',move);
+    hit.addEventListener('pointerleave',out);
+  }
+  function hourName(h){var a=h%12||12;return a+(h<12?' am':' pm');}
+  // Views by IST hour: one series, so no legend - the title names it.
+  function barChart(el,rows){
+    var W=Math.max(el.clientWidth,280),H=230,L=40,R=10,T=12,B=26,pw=W-L-R,ph=H-T-B;
+    var max=0;rows.forEach(function(r){max=Math.max(max,+r.views||0);});
+    var yMax=niceMax(max),n=rows.length,slot=pw/n,bw=Math.max(2,slot-2);
+    var g=yAxis(W,L,R,T,ph,yMax);
+    rows.forEach(function(r,i){
+      var v=+r.views||0,h=ph*v/yMax,x0=L+i*slot+1,x1=x0+bw,yb=T+ph,y=yb-h,rr=Math.min(4,bw/2,h);
+      if(h>0)g+='<path d="M'+x0+','+yb+'V'+(y+rr)+'Q'+x0+','+y+' '+(x0+rr)+','+y+'H'+(x1-rr)+
+        'Q'+x1+','+y+' '+x1+','+(y+rr)+'V'+yb+'Z" fill="'+C1+'"/>';
+      if(r.hour%(W<520?6:3)===0)g+='<text x="'+(x0+bw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+hourName(r.hour)+'</text>';
+      g+='<rect class="hb" data-i="'+i+'" x="'+(L+i*slot)+'" y="'+T+'" width="'+slot+'" height="'+ph+'" fill="transparent"/>';
+    });
+    el.innerHTML=svgEl(W,H,g)+'<div class="tip"></div>';
+    var svg=el.querySelector('svg'),tip=el.querySelector('.tip');
+    svg.addEventListener('pointermove',function(ev){
+      var t=ev.target;if(!t.classList||!t.classList.contains('hb')){tip.style.display='none';return;}
+      var i=+t.getAttribute('data-i'),r=rows[i],b=svg.getBoundingClientRect();
+      tipShow(tip,'<div class="t">'+hourName(r.hour)+' &ndash; '+hourName((r.hour+1)%24)+' IST</div>'+
+        '<div class="r"><i style="background:'+C1+'"></i>Page views<b>'+nfmt(r.views||0)+'</b></div>',
+        (L+(i+.5)*slot)*b.width/W,(T+ph*(1-(+r.views||0)/yMax))*b.height/H,el);
+    });
+    svg.addEventListener('pointerleave',function(){tip.style.display='none';});
+  }
+  var LAST=null;
+  function renderTrend(){
+    var d=LAST;if(!d)return;
+    var el=$('trend'),daily=(d.daily||[]).slice(),hourly=d.hourly||[];
+    // "All time" starts well before the first recorded view; start the
+    // chart at the first day with any traffic.
+    while(daily.length>1&&!(+daily[0].views)&&!(+daily[0].signups))daily.shift();
+    var mode=ST.mode||(daily.length<=1&&hourly.length?'hour':'day');
+    if(!hourly.length)mode='day';
+    var bs=$('trendMode').querySelectorAll('button');
+    for(var i=0;i<bs.length;i++){bs[i].className=bs[i].getAttribute('data-m')===mode?'on':'';
+      bs[i].style.display=(!hourly.length&&bs[i].getAttribute('data-m')==='hour')?'none':'';}
+    if(mode==='hour'){
+      $('trendTitle').textContent='Page views by hour of day';
+      $('trendLegend').innerHTML='';
+      $('trendNote').textContent=ST.from===ST.to?'India time (IST).':'India time (IST), all days in the range added together.';
+      barChart(el,hourly);
+    }else{
+      var S=[{k:'views',name:'Page views',short:'Views',color:C1},{k:'visitors',name:'Visitors',short:'Visitors',color:C2}];
+      $('trendTitle').textContent='Visits by day';
+      $('trendLegend').innerHTML=S.map(function(s){return '<span><i style="background:'+s.color+'"></i>'+s.name+'</span>';}).join('');
+      $('trendNote').textContent=daily.length?'Hover or tap the chart for each day’s numbers.':'';
+      if(!daily.length){el.innerHTML='<div class="msg">No views in this range yet.</div>';return;}
+      lineChart(el,daily,S);
+    }
+  }
+  $('trendMode').onclick=function(e){var m=e.target.getAttribute&&e.target.getAttribute('data-m');
+    if(!m)return;ST.mode=m;renderTrend();};
+  var rt=null;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(renderTrend,150);});
+
+  // -------------------------------------------------------------- tables
+  // rows: [{label, value, value2?, sub?, href?, f?, v?}]
+  function barTable(el,rows,o){
+    if(!rows||!rows.length){el.innerHTML='<div class="msg">'+(o.empty||'Nothing in this range.')+'</div>';return;}
+    var total=0,max=0;rows.forEach(function(r){total+=+r.value||0;max=Math.max(max,+r.value||0);});
+    var head='<tr><th>'+esc(o.h)+'</th><th class="num">'+esc(o.h1)+'</th>'+
+      (o.h2?'<th class="num hide-sm">'+esc(o.h2)+'</th>':'')+'<th class="num">Share</th></tr>';
+    var body=rows.map(function(r){
+      var pct=max?(+r.value||0)/max*100:0,share=total?(+r.value||0)/total*100:0;
+      var on=r.f&&ST.f[r.f]===r.v;
+      return '<tr'+(r.f?' class="dr'+(on?' on':'')+'" data-f="'+esc(r.f)+'" data-v="'+esc(r.v)+'" title="'+(on?'Remove this filter':'Filter to this')+'"':'')+'>'+
+        '<td class="'+(o.path?'path':'')+'"><div class="cell"><span class="bk" style="width:'+pct.toFixed(1)+'%"></span>'+
+        '<span class="tx">'+esc(r.label)+'</span>'+(r.sub?'<span class="sm">'+esc(r.sub)+'</span>':'')+
+        (r.href?'<a href="'+esc(r.href)+'" target="_blank" rel="noopener" title="Open page">&#8599;</a>':'')+'</div></td>'+
+        '<td class="num">'+nfmt(r.value||0)+'</td>'+
+        (o.h2?'<td class="num mute hide-sm">'+(r.value2==null?'&ndash;':nfmt(r.value2))+'</td>':'')+
+        '<td class="num mute">'+(share<1&&share>0?'&lt;1':Math.round(share))+'%</td></tr>';
+    }).join('');
+    el.innerHTML='<table>'+head+body+'</table>';
+  }
+  function plainTable(el,rows,cols){
+    if(!rows||!rows.length){el.innerHTML='<div class="msg">Nothing yet.</div>';return;}
+    var head='<tr>'+cols.map(function(c){return '<th'+(c.num?' class="num"':'')+'>'+c.h+'</th>';}).join('')+'</tr>';
+    var body=rows.map(function(r){return '<tr>'+cols.map(function(c){var v=r[c.k];
+      return c.num?'<td class="num">'+(v==null?'&ndash;':nfmt(v))+'</td>':'<td>'+esc(v)+'</td>';}).join('')+'</tr>';}).join('');
+    el.innerHTML='<table>'+head+body+'</table>';
+  }
   function tiles(items){
     return items.map(function(it){
-      var val=(it[1]==null)?'&mdash;':nfmt(it[1]||0);
-      var note=it[2]?'<div class="l" style="font-size:10px;opacity:.65;'+
-        'text-transform:none;letter-spacing:0">'+it[2]+'</div>':'';
-      return '<div class="kpi"><div class="n">'+val+
-        '</div><div class="l">'+it[0]+'</div>'+note+'</div>';}).join('');
+      return kpi(it[0],it[1]==null?'&mdash;':nfmt(it[1]||0),'','',it[2]||'');}).join('');
   }
-  function rangeName(f,t){
-    var td=iso(todayIST()),y=todayIST();y.setUTCDate(y.getUTCDate()-1);
-    var fmt=function(x){return new Date(x+'T00:00:00Z').toLocaleDateString('en-IN',
-      {day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});};
-    if(f===t)return (f===td?'Today, ':f===iso(y)?'Yesterday, ':'')+fmt(f);
-    return fmt(f)+' – '+fmt(t);
+  function pageHref(p){return SITE+(p==='/'?'/':p);}
+
+  var PAGES_ALL=[],PAGES_N=15,CLICKS_ALL=[],CLICKS_N=12;
+  function renderPages(){
+    var q=($('pageSearch').value||'').toLowerCase().trim();
+    var rows=PAGES_ALL.filter(function(r){return !q||r.label.toLowerCase().indexOf(q)>-1;});
+    var shown=q?rows:rows.slice(0,PAGES_N);
+    barTable($('t_pages'),shown,{h:'Page',h1:'Views',h2:'Visitors',path:true,
+      empty:q?'No page matches.':'Nothing in this range.'});
+    var b=$('pagesMore');
+    if(!q&&rows.length>15){b.style.display='';
+      b.textContent=PAGES_N<rows.length?'Show all '+rows.length+' pages':'Show fewer';}
+    else b.style.display='none';
   }
-  function renderKPIs(t,life){
-    // Top row: the selected range only (today by default).
-    $('rangeLbl').textContent=rangeName($('from').value,$('to').value);
-    $('kpis').innerHTML=tiles([
-      ['Page views',t.views],
-      ['Unique visitors',t.visitors],
-      ['Clicks',t.clicks]]);
-    // Bottom card: all-time totals from page_views (every page). Falls back
-    // to the older hits counter only if the database function predates
-    // the lifetime figure; that counter covers fewer pages.
+  $('pageSearch').oninput=renderPages;
+  $('pagesMore').onclick=function(){PAGES_N=PAGES_N<PAGES_ALL.length?1e9:15;renderPages();};
+  function renderClicks(){
+    barTable($('t_clicks'),CLICKS_ALL.slice(0,CLICKS_N),{h:'Action',h1:'Clicks',empty:'No clicks in this range.'});
+    var b=$('clicksMore');
+    if(CLICKS_ALL.length>12){b.style.display='';
+      b.textContent=CLICKS_N<CLICKS_ALL.length?'Show all '+CLICKS_ALL.length:'Show fewer';}
+    else b.style.display='none';
+  }
+  $('clicksMore').onclick=function(){CLICKS_N=CLICKS_N<CLICKS_ALL.length?1e9:12;renderClicks();};
+
+  var SIGNUP_NAMES={google:'Google sign-in',form:'Email form',manual:'Added by hand',otp:'Email code'};
+
+  function render(d){
+    LAST=d;
+    renderRange(d);
+    renderKPIs(d);
+    renderTrend();
+    var dim=function(list,f,lab){return (list||[]).map(function(r){
+      return {label:lab?lab(r.name):r.name,value:r.views,value2:r.visitors,f:f,v:r.name};});};
+    barTable($('t_sources'),dim(d.sources,'source'),{h:'Source',h1:'Views',h2:'Visitors'});
+    barTable($('t_groups'),dim(d.page_groups,'page_group'),{h:'Section',h1:'Views',h2:'Visitors'});
+    barTable($('t_devices'),dim(d.devices,'device',function(n){return DEV_NAMES[n]||n;}),{h:'Device',h1:'Views',h2:'Visitors'});
+    PAGES_ALL=(d.top_pages||[]).filter(function(r){return !isSynthetic(r.page);}).map(function(r){
+      return {label:r.page,value:r.views,value2:r.visitors,sub:'',href:pageHref(r.page),f:'page',v:r.page};});
+    renderPages();
+    barTable($('t_landing'),(d.landing_pages||[]).filter(function(r){return !isSynthetic(r.page);}).slice(0,15).map(function(r){
+      return {label:r.page,value:r.visits,href:pageHref(r.page),f:'page',v:r.page};}),
+      {h:'Page',h1:'Visits',path:true,empty:V1?'Needs sql/analytics_v2.sql.':'Nothing in this range.'});
+    d.top_clicks=(d.top_clicks||[]).filter(function(r){return !isSynthetic(r.target);});
+    d.top_clicks.forEach(function(r){r.target=friendly(r.target);});
+    d.top_clicks=mergeByLabel(d.top_clicks,'target','clicks');
+    CLICKS_ALL=d.top_clicks.map(function(r){return {label:r.target,value:r.clicks};});
+    renderClicks();
+    $('clicksNote').textContent=(ST.f.source||ST.f.device||ST.f.host)?
+      'Clicks made during the visits that match the source, device or host filter.':'';
+    barTable($('t_refs'),(d.referrers||[]).map(function(r){
+      return {label:r.name,sub:r.source||'',value:r.views,f:r.source?'source':'',v:r.source};}),
+      {h:'Website',h1:'Views',empty:'No other website sent visitors in this range.'});
+    barTable($('t_signups'),(d.signup_methods||[]).map(function(r){
+      return {label:SIGNUP_NAMES[r.name]||r.name,value:r.signups};}),
+      {h:'Method',h1:'Sign-ups',empty:V1?'Needs sql/analytics_v2.sql.':'No new sign-ups in this range.'});
+    barTable($('t_hosts'),(d.hosts||[]).map(function(r){
+      return {label:r.name,value:r.views,f:'host',v:r.name};}),{h:'Host',h1:'Views'});
+
+    // Filter menus: pages and hosts seen in this range.
+    DIMS.forEach(function(dm){
+      var list=dm.k==='page'?(d.pages_list||[]).filter(function(p){return !isSynthetic(p);}):
+               dm.k==='host'?(d.hosts_list||[]):dm.fixed;
+      setOptions($('f_'+dm.k),dm,list);
+    });
+
+    // Unsubscribes. Missing from a report function older than 2026-10-20.
+    if(d.unsubs===undefined){
+      $('subKpis').innerHTML='<div class="msg err">Run the updated '+
+        'sql/analytics_report.sql in Supabase to see subscribers and '+
+        'unsubscribe reasons here.</div>';
+    } else {
+      $('subKpis').innerHTML=tiles([
+        ['Subscribed now',d.unsubs.subscribers_now],
+        ['Unsubscribed in this range',d.unsubs.total]]);
+      plainTable($('unsubWhy'),d.unsubs.by_reason,[{h:'Reason',k:'reason'},
+        {h:'People',k:'count',num:true}]);
+      plainTable($('unsubRecent'),d.unsubs.recent,[{h:'When (IST)',k:'at'},
+        {h:'Reason',k:'reason'}]);
+    }
+    // Jeweller applications from /list-your-jewellery (report 2026-10-20b).
+    // Approve one by asking Claude, who shows the SQL first.
+    if(d.jewellers===undefined){
+      $('jwKpis').innerHTML='<div class="msg err">Run the updated '+
+        'sql/analytics_report.sql to see jeweller applications here.</div>';
+    } else {
+      var ja=d.jewellers.applications||[];
+      $('jwKpis').innerHTML=tiles([
+        ['Waiting for review',ja.filter(function(a){return a.status==='pending'}).length],
+        ['Applications (30 days)',ja.length]]);
+      plainTable($('jwApps'),ja.map(function(a){return {
+          at:a.at, who:a.jeweller+' ('+a.city+', '+a.state+')',
+          contact:[a.contact_name,a.phone,a.email,a.instagram,a.website].filter(Boolean).join(' / '),
+          rate:['24K '+(a.rate_24k||'-'),'22K '+(a.rate_22k||'-'),'18K '+(a.rate_18k||'-')].join(', ')+(a.includes_gst?' incl. GST':''),
+          status:a.status+' #'+a.id}}),
+        [{h:'When (IST)',k:'at'},{h:'Jeweller',k:'who'},{h:'Contact',k:'contact'},
+         {h:'Rate / g',k:'rate'},{h:'Status',k:'status'}]);
+      plainTable($('jwDaily'),d.jewellers.daily,[{h:'Jeweller',k:'slug'},{h:'Day',k:'day'},
+        {h:'24K',k:'rate_24k',num:true},{h:'22K',k:'rate_22k',num:true},{h:'18K',k:'rate_18k',num:true}]);
+    }
+    // All time: page_views totals (every page). Falls back to the older
+    // hits counter only if the database function predates the lifetime
+    // figure; that counter covers fewer pages.
+    var life=d.lifetime||null;
+    if(life&&life.since&&/^\d{4}-\d{2}-\d{2}/.test(life.since)){
+      var since=String(life.since).slice(0,10);
+      if(since!==ALL_FROM){ALL_FROM=since;save();}
+    }
     $('lifeBox').innerHTML=life
       ? tiles([['Page views',life.views,'every page since '+esc(life.since)],
                ['Unique visitors',life.visitors,'since '+esc(life.since)]])
       : tiles([['Total visits',LIFETIME,'from hits table']]);
+
+    $('notice').innerHTML=V1?'<div class="warn">The database still has the older report, so only the '+
+      'date and page filters work. Run sql/analytics_v2.sql in Supabase for sections, sources, devices, '+
+      'hosts, comparisons and the hourly chart.</div>':'';
+    $('foot').textContent='Range '+(d.from||ST.from)+' to '+(d.to||ST.to)+
+      '. No personal data is collected: only page path, referrer, device type, host, a random '+
+      'session id and click labels.';
   }
 
-  function renderChart(daily){
-    var c=$('chart');
-    if(!daily||!daily.length){c.innerHTML='<div class="msg">No views in this range yet.</div>';return;}
-    var max=0; daily.forEach(function(d){if(d.views>max)max=d.views;});
-    max=max||1;
-    c.innerHTML=daily.map(function(d){
-      var h=Math.round((d.views/max)*130)+8;
-      var dd=(d.day||'').slice(8,10);
-      return '<div class="bar" title="'+esc(d.day)+': '+nfmt(d.views)+' views, '+
-        nfmt(d.visitors)+' visitors"><span class="v">'+nfmt(d.views)+
-        '</span><div class="fill" style="height:'+h+'px"></div>'+
-        '<span class="d">'+dd+'</span></div>';}).join('');
-  }
-
-  function renderTable(el,rows,cols){
-    if(!rows||!rows.length){el.innerHTML='<div class="msg">No data yet.</div>';return;}
-    var head='<tr>'+cols.map(function(c){
-      return '<th'+(c.num?' class="num"':'')+'>'+c.h+'</th>';}).join('')+'</tr>';
-    var body=rows.map(function(r){
-      return '<tr>'+cols.map(function(c){
-        var v=r[c.k]; if(c.num)return '<td class="num">'+nfmt(v||0)+'</td>';
-        return '<td class="'+(c.path?'path':'')+'">'+esc(v)+'</td>';
-      }).join('')+'</tr>';}).join('');
-    el.innerHTML='<table>'+head+body+'</table>';
-  }
-
-  function fillPages(list){
-    var sel=$('page'); if(!list||!list.length)return;
-    var cur=sel.value;
-    var opts='<option value="">All pages</option>'+list.map(function(p){
-      return '<option value="'+esc(p)+'">'+esc(p)+'</option>';}).join('');
-    sel.innerHTML=opts; sel.value=cur;
-  }
-
+  var SEQ=0;
   function load(){
-    rpc().then(function(d){
+    save();syncControls();
+    var my=++SEQ;
+    $('main').className='busy';setStatus('Loading…');
+    fetchReport().then(function(d){
+      if(my!==SEQ)return;                      // a newer request is on its way
+      $('main').className='';
       if(!d||d.error){
-        setStatus(d&&d.error==='unauthorized'?'Access token not configured':'Error',true);
-        $('kpis').innerHTML='<div class="msg err">'+
-          (d&&d.error==='unauthorized'
-            ? 'Open this page using your private link (the URL ending in #your-token). Without it, no data is shown.'
-            : 'Could not load analytics.')+'</div>';
+        var unauth=d&&d.error==='unauthorized';
+        setStatus(unauth?'Private link needed':'Error',true);
+        $('kpis').innerHTML='<div class="msg err" style="grid-column:1/-1">'+
+          (unauth?'Open this page using your private link (the URL ending in #your-token). Without it, no data is shown.'
+                 :'Could not load analytics'+(d&&d.message?': '+esc(d.message):'.'))+'</div>';
         return;
       }
-      var t=d.totals||{views:0,visitors:0,clicks:0};
-      renderKPIs(t,d.lifetime||null);
-      renderChart(d.daily);
-      renderTable($('pages'),d.top_pages,[{h:'Page',k:'page',path:true},
-        {h:'Views',k:'views',num:true},{h:'Visitors',k:'visitors',num:true}]);
-      d.top_clicks=(d.top_clicks||[]).filter(function(r){return !isSynthetic(r.target);});
-      d.top_clicks.forEach(function(r){r.target=friendly(r.target);});
-      d.top_clicks=mergeByLabel(d.top_clicks,'target','clicks');
-      d.top_pages=(d.top_pages||[]).filter(function(r){return !isSynthetic(r.page);});
-      renderTable($('clicks'),d.top_clicks,[{h:'Action',k:'target'},
-        {h:'Clicks',k:'clicks',num:true}]);
-      renderTable($('refs'),d.top_referrers,[{h:'Source',k:'referrer',path:true},
-        {h:'Visits',k:'views',num:true}]);
-      // An older report function in the database returns no host data at
-      // all. Say so, rather than showing "No data yet" for a table that
-      // can never fill.
-      if(d.top_hosts===undefined){
-        $('hosts').innerHTML='<div class="msg err">The report function in the '+
-          'database is out of date, so host data is not returned. Run '+
-          'sql/analytics_report.sql in the Supabase SQL Editor.</div>';
-      } else {
-        renderTable($('hosts'),d.top_hosts,[{h:'Host',k:'host'},
-          {h:'Views',k:'views',num:true}]);
-      }
-      // Unsubscribes. Missing from a report function older than 2026-10-20.
-      if(d.unsubs===undefined){
-        $('subKpis').innerHTML='<div class="msg err">Run the updated '+
-          'sql/analytics_report.sql in Supabase to see subscribers and '+
-          'unsubscribe reasons here.</div>';
-      } else {
-        $('subKpis').innerHTML=tiles([
-          ['Subscribed now',d.unsubs.subscribers_now],
-          ['Unsubscribed in this range',d.unsubs.total]]);
-        renderTable($('unsubWhy'),d.unsubs.by_reason,[{h:'Reason',k:'reason'},
-          {h:'People',k:'count',num:true}]);
-        renderTable($('unsubRecent'),d.unsubs.recent,[{h:'When (IST)',k:'at'},
-          {h:'Reason',k:'reason'}]);
-      }
-      // Jeweller applications from /list-your-jewellery (report 2026-10-20b).
-      // Approve one by asking Claude, who shows the SQL first.
-      if(d.jewellers===undefined){
-        $('jwKpis').innerHTML='<div class="msg err">Run the updated '+
-          'sql/analytics_report.sql to see jeweller applications here.</div>';
-      } else {
-        var ja=d.jewellers.applications||[];
-        $('jwKpis').innerHTML=tiles([
-          ['Waiting for review',ja.filter(function(a){return a.status==='pending'}).length],
-          ['Applications (30 days)',ja.length]]);
-        renderTable($('jwApps'),ja.map(function(a){return {
-            at:a.at, who:a.jeweller+' ('+a.city+', '+a.state+')',
-            contact:[a.contact_name,a.phone,a.email,a.instagram,a.website].filter(Boolean).join(' / '),
-            rate:['24K '+(a.rate_24k||'-'),'22K '+(a.rate_22k||'-'),'18K '+(a.rate_18k||'-')].join(', ')+(a.includes_gst?' incl. GST':''),
-            status:a.status+' #'+a.id}}),
-          [{h:'When (IST)',k:'at'},{h:'Jeweller',k:'who'},{h:'Contact',k:'contact'},
-           {h:'Rate / g',k:'rate'},{h:'Status',k:'status'}]);
-        renderTable($('jwDaily'),d.jewellers.daily,[{h:'Jeweller',k:'slug'},{h:'Day',k:'day'},
-          {h:'24K',k:'rate_24k',num:true},{h:'22K',k:'rate_22k',num:true},{h:'18K',k:'rate_18k',num:true}]);
-      }
-      fillPages(d.pages_list);
-      $('foot').textContent='Range '+d.from+' to '+d.to+
-        (d.page_filter?(' - filtered to '+d.page_filter):'')+
-        '. No personal data is collected: only page path, referrer, a random '+
-        'session id and click labels.';
-      setStatus('Updated '+new Date().toLocaleTimeString());
-    }).catch(function(){setStatus('Network error',true);});
+      render(d);
+      setStatus('Updated '+new Date().toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}));
+    }).catch(function(){if(my===SEQ){$('main').className='';setStatus('Network error',true);}});
   }
 
-  $('apply').onclick=load;
-  $('today').onclick=function(){var a=todayIST();
-    $('from').value=iso(a);$('to').value=iso(a);load();};
-  $('quick7').onclick=function(){var a=todayIST(),b=todayIST();b.setUTCDate(b.getUTCDate()-6);
-    $('from').value=iso(b);$('to').value=iso(a);load();};
-  $('quick30').onclick=function(){var a=todayIST(),b=todayIST();b.setUTCDate(b.getUTCDate()-29);
-    $('from').value=iso(b);$('to').value=iso(a);load();};
-  $('quick90').onclick=function(){var a=todayIST(),b=todayIST();b.setUTCDate(b.getUTCDate()-89);
-    $('from').value=iso(b);$('to').value=iso(a);load();};
-  // All time: earliest possible - the site launched mid-2026, but pick a
-  // date safely earlier so no history is chopped off if analytics landed
-  // sooner than expected.
-  $('alltime').onclick=function(){var a=todayIST();
-    $('from').value='2024-01-01';$('to').value=iso(a);load();};
-  $('page').onchange=load;
-  // Fetch the lifetime hits total first so the KPI row renders complete on
-  // first paint; load() runs regardless of whether that call succeeds.
+  syncControls();
+  // Fetch the lifetime hits total first so the all-time card renders
+  // complete; load() runs whether or not that call succeeds.
   loadLifetime().then(load,load);
 })();
 </script>
