@@ -1,0 +1,43 @@
+name: promo-email
+# One-off announcement email (promo_email.py). Run by hand only:
+#   mode=test  -> one copy to the address in test_to (not recorded)
+#   mode=send  -> every subscriber who has not had this campaign yet; each
+#                 send is recorded, so a re-run never emails anyone twice.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "test or send"
+        required: true
+        default: test
+        type: choice
+        options: [test, send]
+      test_to:
+        description: "Address for a test copy (mode=test)"
+        required: false
+        default: ""
+
+jobs:
+  promo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests supabase
+      - name: Send
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          ALERTS_FROM: ${{ secrets.ALERTS_FROM }}
+          MODE: ${{ inputs.mode }}
+          TEST_TO: ${{ inputs.test_to }}
+        run: |
+          if [ "$MODE" = "send" ]; then
+            python promo_email.py --send
+          else
+            test -n "$TEST_TO" || { echo "test_to is empty"; exit 1; }
+            python promo_email.py --to "$TEST_TO"
+          fi
