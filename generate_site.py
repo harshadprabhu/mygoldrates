@@ -346,6 +346,7 @@ def site_links_html():
         f'<a href="{SITE_URL}/dhanteras-gold-report-2026">Dhanteras 2026 report</a>'
         f'<a href="{SITE_URL}/calculators">Gold calculators</a>'
         f'<a href="{SITE_URL}/making-charges-comparison">Making charges</a>'
+        f'<a href="{SITE_URL}/gold-offers-today">Gold offers today</a>'
         f'<a href="{SITE_URL}/gold-market-today">Gold market today</a>'
         f'<a href="{SITE_URL}/gold-rate-near-me">Gold rate near me</a>'
         f'<a href="{SITE_URL}/gold-rate-by-jeweller">Gold rate by jeweller</a>'
@@ -378,6 +379,7 @@ def nd_header_html():
         f'<a href="{SITE_URL}/">Today&rsquo;s rates</a>'
         f'<a href="{SITE_URL}/calculators">Calculators</a>'
         f'<a href="{SITE_URL}/making-charges-comparison">Making charges</a>'
+        f'<a href="{SITE_URL}/gold-offers-today">Offers</a>'
         f'<a href="{SITE_URL}/news">News</a>'
         f'<a href="{SITE_URL}/jewellers-digest">For jewellers</a>'
         '</nav>'
@@ -3594,6 +3596,58 @@ b.addEventListener('click',function(){
         extra_urls.append(("gold-rate-near-me", "daily", "0.8"))
     except Exception as e:
         print("near-me: skipped -", type(e).__name__, str(e)[:120])
+
+    # ---- /gold-offers-today: every jeweller's published offers ----
+    # docs/offers.json is written daily by offers.py (offers.yml); the page
+    # works out what each offer is worth with today's rates and the making
+    # charges in docs/making-charges.json. No offers file: no page.
+    try:
+        import offers_page
+        with open("docs/offers.json", encoding="utf-8") as _f:
+            _offers = json.load(_f)
+        try:
+            with open("docs/making-charges.json", encoding="utf-8") as _f:
+                _mc = json.load(_f)
+        except Exception:
+            _mc = {}
+        _r22 = {(r["brands"] or {}).get("slug"): r["canonical_24k_pre_gst"] * PURITY_FRACTION["22K"]
+                for r in live}
+        _obody, _ofaq, _osum = offers_page.build_body(
+            _offers, _mc, _r22, med["24K"], display_date, SITE_URL,
+            crumbs(("Gold offers today", None)))
+        _ostyle = ('<style>.lb-wrap{overflow-x:auto;max-width:100%}'
+                   '.local-tbl{width:100%;border-collapse:collapse;font-size:14.5px}'
+                   '.local-tbl th,.local-tbl td{padding:9px 8px;border-bottom:1px solid '
+                   'rgba(127,127,127,.2);text-align:left;vertical-align:top}'
+                   '.local-tbl small{opacity:.7}.offer-brand{margin:18px 0 6px}'
+                   '.offer{border:1px solid rgba(201,162,74,.28);border-radius:12px;'
+                   'padding:12px 14px;margin:10px 0}.offer p{margin:0 0 6px}'
+                   '.offer-q{font-style:italic;opacity:.9}.offer-f{font-size:13.5px;opacity:.85}'
+                   '.offer p:last-child{margin-bottom:0}</style>')
+        _old = ('<script type="application/ld+json">' + json.dumps([
+            {"@context": "https://schema.org", "@type": "WebPage",
+             "url": f"{SITE_URL}/gold-offers-today",
+             "name": "Gold Jewellery Offers Today", "inLanguage": "en-IN",
+             "dateModified": now_ist.isoformat()},
+            {"@context": "https://schema.org", "@type": "FAQPage",
+             "mainEntity": [{"@type": "Question", "name": q,
+                             "acceptedAnswer": {"@type": "Answer", "text": a}}
+                            for q, a in _ofaq]}], ensure_ascii=False) + "</script>")
+        render_content(
+            "gold-offers-today",
+            f"Gold Jewellery Offers Today ({now_ist.strftime('%-d %b')}): Making Charge "
+            "Discounts Compared | MyGoldRates",
+            ("Today's gold jewellery offers from India's jewellers, read from their own "
+             "websites: making-charge discounts, old-gold exchange, free coins - and what a "
+             "10 g 22K ring really costs after them."),
+            _ostyle + _obody, jsonld_block=_old)
+        extra_urls.append(("gold-offers-today", "daily", "0.8"))
+        print(f"offers page: {sum(1 for b in _offers.get('brands', []) if b.get('offers'))} "
+              f"jewellers with offers; {_osum or 'no ring ranking'}")
+    except FileNotFoundError:
+        print("offers page: skipped - docs/offers.json not written yet")
+    except Exception as e:
+        print("offers page: skipped -", type(e).__name__, str(e)[:120])
 
     # ---- a page per jeweller, and /gold-rate-by-jeweller ----
     # "Tanishq gold rate today", "Kalyan jewellers gold rate today" are how
