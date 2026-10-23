@@ -264,7 +264,7 @@ def sheet_making_charges(wb, mc):
 
 
 def sheet_market_note(wb, ai, generated):
-    """The AI-written daily note - or an honest blank where it would have been.
+    """The rules-written daily note - or an honest blank where it would have been.
 
     When the note fails validation the sheet says so instead of quietly
     disappearing. A subscriber who paid for commentary should be told it was
@@ -274,12 +274,8 @@ def sheet_market_note(wb, ai, generated):
     ws.column_dimensions["A"].width = 110
     ws["A1"] = "Daily market note"
     ws["A1"].font = Font(bold=True, size=14, color=INK)
-    ws["A2"] = ((f"Written {generated} by fixed rules from the figures in "
-                 f"this workbook; every number below is read from them.")
-                if (ai or {}).get("source") == "rules" else
-                (f"Written {generated} by Claude from the figures in this "
-                 f"workbook. Every rupee figure below is checked against those "
-                 f"figures before publication."))
+    ws["A2"] = (f"Written {generated} by fixed rules from the figures in "
+                f"this workbook; every number below is read from them.")
     ws["A2"].font = Font(italic=True, color="6B6357")
     ws["A2"].alignment = Alignment(wrap_text=True, vertical="top")
     ws.row_dimensions[2].height = 30
@@ -748,12 +744,10 @@ def build(rates, brands, mc, generated):
         sheet_events(wb, ol)
     else:
         print("  outlook  not available - workbook ships without it")
+    # The note is written by fixed rules (jd_narrative) from figures already
+    # in the issue. No paid AI service is used anywhere (owner's decision,
+    # 24 Oct 2026).
     ai = None
-    if os.environ.get("ANTHROPIC_API_KEY"):
-        import jd_ai_report as AI
-        ai = AI.generate({"trend": trend, "stats": stats, "market": market})
-    else:
-        print("  ai note  skipped (ANTHROPIC_API_KEY not set) - rules note instead")
     if mc:
         sheet_making_charges(wb, mc)
     sheet_methodology(wb, notes, excluded, trend, generated)
@@ -762,9 +756,8 @@ def build(rates, brands, mc, generated):
         dates, matrix, market, stats, trend, notes, A.weekday_pattern(market),
         ol, ai, mc, {b["slug"]: b["name"] for b in brands if b.get("slug")},
         excluded, generated, DISCLAIMER)
-    # The morning note: the AI's when it passed its figure check, otherwise
-    # the rules-based one (jd_narrative), which needs no key and reads only
-    # figures already in the issue. Either way the page and workbook carry it.
+    # The morning note, written by rules from figures already in the issue;
+    # the page and the workbook both carry it.
     if not (ai and ai.get("ok")):
         import jd_narrative
         note = jd_narrative.compose(issue)

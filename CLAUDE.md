@@ -181,12 +181,11 @@ it shipped once under the name `b2b` and was renamed wholesale.
   `jewellers-digest-<window-end>.xlsx`. Dated, not overwritten, so a
   subscriber who paid last week can still be given what they paid for.
 
-### `jd_ai_report.py`
-- The AI market note (`claude-opus-5-5`, adaptive thinking). The model is
-  never shown raw data — only facts already computed by `jd_analysis` — and
-  every rupee figure in its output is checked back against those facts before
-  the note ships. An untraceable figure means the note is withheld, not
-  published. Optional: no `ANTHROPIC_API_KEY`, no note, report still builds.
+### No paid AI services
+- The Jewellers Digest market note is written by fixed rules
+  (`jd_narrative.py`) from figures already computed. The earlier
+  Anthropic-API note (`jd_ai_report.py`) was removed on 24 Oct 2026 at the
+  owner's request: everything runs on Python logic and cron jobs, free.
 
 ### Cloudflare Worker (`cf-worker-jd/`)
 - Separate Worker from `cf-worker-market/` on purpose: that one is public,
