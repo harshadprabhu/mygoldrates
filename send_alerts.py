@@ -142,6 +142,110 @@ def latest_published_rates(sb, lookback_days=10):
     return [r for r in live if r["rate_date"] == as_of], as_of
 
 
+def price_alert_html(first, karat, rate, brand, target, date, unsub):
+    """The one-off email for a price-drop alert."""
+    return f"""\
+<!DOCTYPE html><html><body style="margin:0;background:#e9e6df;
+padding:26px 12px;font-family:Arial,Helvetica,sans-serif;color:#2c2a26">
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0"
+  style="width:600px;max-width:600px;margin:0 auto;background:#ffffff;
+  border-radius:16px;overflow:hidden;border:1px solid #e7e1d3">
+    <tr><td style="height:4px;background:linear-gradient(90deg,#8C6A18,#E3BF63 45%,#F4E3A6 55%,#C79A2E);font-size:0;line-height:0">&nbsp;</td></tr>
+    <tr><td style="background:#0b0805;padding:22px 30px 18px">
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;letter-spacing:1.5px;line-height:1">
+        <span style="color:#efe8d6">My</span><span style="color:#e6c268">Gold</span><span style="color:#efe8d6">Rates</span></div>
+      <div style="margin-top:9px;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#d3ad4e">Price alert &nbsp;&middot;&nbsp; {date}</div>
+    </td></tr>
+    <tr><td style="padding:26px 30px 10px">
+      <p style="margin:0 0 6px;font-size:15px;color:#3b3833">Hi {first},</p>
+      <p style="margin:0 0 18px;font-size:15px;line-height:1.6;color:#3b3833">
+        {karat} gold has dropped to the price you were waiting for.</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+      style="background:#f3f7f2;border:1px solid #cfe0d6;border-radius:12px">
+        <tr><td style="padding:18px 22px">
+          <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#2f7a58;font-weight:bold">Lowest {karat} today &middot; {brand}</div>
+          <div style="font-family:Georgia,serif;font-size:36px;color:#1f1c17;font-weight:bold;margin-top:6px">{inr(rate)}<span style="font-size:15px;color:#5a6b5f;font-weight:normal;font-family:Arial,sans-serif"> / gram</span></div>
+          <div style="font-size:13px;color:#5a6b5f;margin-top:4px">Your alert: {inr(target)} / gram or lower</div>
+        </td></tr>
+      </table>
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px 0 6px">
+        <tr><td style="border-radius:999px;background:linear-gradient(100deg,#8C6A18,#D9B24A 48%,#C79A2E)">
+          <a href="{SITE_URL}/?from=alert" style="display:inline-block;padding:12px 26px;font-size:14px;font-weight:bold;color:#1a1508;text-decoration:none">Compare today&rsquo;s rates &rarr;</a>
+        </td></tr>
+      </table>
+      <p style="margin:12px 0 4px;font-size:12px;color:#9a9284">Pre-GST rate as published by the jeweller; confirm the billed price with them. This alert is now used up - set a new one on the site any time. Not investment advice.</p>
+    </td></tr>
+    <tr><td style="padding:16px 30px 22px;background:#faf8f2;border-top:1px solid #efe9db;font-size:11px;color:#8f887c;line-height:1.6">
+      You're receiving this because you set a price alert at mygoldrates.com.<br>
+      <a href="{unsub}" style="color:#8f887c">Unsubscribe</a>
+    </td></tr>
+  </table>
+</body></html>"""
+
+
+def send_price_alerts(sb, key, from_name, from_email, base, date):
+    """Email everyone whose price-drop alert has been reached, once each.
+
+    The rate compared is the one the site shows: today's lowest national
+    jeweller rate for that purity (24K canonical x purity fraction). Only
+    for people still subscribed; the alert is switched off once sent.
+    Returns the number sent. Never raises: the daily digest must not be
+    held up by this.
+    """
+    try:
+        alerts = sb.table("price_alerts").select("*") \
+                   .eq("active", True).execute().data
+    except Exception as e:
+        print(f"price alerts: cannot read alerts (run sql/price_alerts.sql?): {e}")
+        return 0
+    if not alerts:
+        print("price alerts: none active")
+        return 0
+    lowest = min(base, key=lambda r: r["canonical_24k_pre_gst"])
+    low = ladder(lowest["canonical_24k_pre_gst"])
+    brand = lowest["brands"]["name"]
+    subs = {(s.get("email") or "").lower(): s for s in sb.table("inquiries")
+            .select("name, email, unsub_token").execute().data}
+    sent = 0
+    for a in alerts:
+        rate = low.get(a["karat"])
+        if rate is None or rate > float(a["target"]):
+            continue
+        s = subs.get(a["email"].lower())
+        if not s or not s.get("unsub_token"):
+            continue                      # unsubscribed since: say nothing
+        first = (s.get("name") or "there").strip().split(" ")[0] or "there"
+        unsub = f"{SITE_URL}/unsubscribe.html?t={s['unsub_token']}"
+        try:
+            r = requests.post(
+                "https://api.brevo.com/v3/smtp/email",
+                headers={"api-key": key, "accept": "application/json",
+                         "content-type": "application/json"},
+                json={"sender": {"name": from_name, "email": from_email},
+                      "to": [{"email": s["email"]}],
+                      "subject": f"Price alert: {a['karat']} gold is now "
+                                 f"{inr(rate)}/g",
+                      "htmlContent": price_alert_html(
+                          first, a["karat"], rate, brand, float(a["target"]),
+                          date, unsub),
+                      "headers": {"List-Unsubscribe": f"<{unsub}>",
+                                  "List-Unsubscribe-Post":
+                                      "List-Unsubscribe=One-Click"}},
+                timeout=30)
+            if r.status_code < 300:
+                sb.table("price_alerts").update({
+                    "active": False, "fired_rate": round(rate, 2),
+                    "fired_at": datetime.now(timezone.utc).isoformat()}) \
+                  .eq("id", a["id"]).execute()
+                sent += 1
+            else:
+                print(f"  price alert failed {a['id']}: {r.status_code} {r.text[:140]}")
+        except requests.RequestException as e:
+            print(f"  price alert error {a['id']}: {type(e).__name__}")
+    print(f"price alerts: sent {sent} of {len(alerts)} active")
+    return sent
+
+
 def main():
     key = os.environ.get("BREVO_API_KEY", "").strip()
     if not key:
@@ -169,6 +273,10 @@ def main():
     med, low = ladder(median24), ladder(lowest["canonical_24k_pre_gst"])
     n_brands = len(base)
     date = datetime.now(IST).strftime("%d %B %Y")
+
+    # Price-drop alerts first: they are time-sensitive and independent of
+    # whether anyone is due today's digest.
+    send_price_alerts(sb, key, from_name, from_email, base, date)
 
     try:
         subs = sb.table("inquiries") \

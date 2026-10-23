@@ -11,6 +11,8 @@
 --             devices, landing pages (first page of each visit), top pages,
 --             top clicks
 --   signups   new subscribers in the range, by sign-up method
+--   funnel    sign-up popup and form events (shown, closed, subscribed,
+--             price alert, mobile added) - added 2026-10-24
 -- Clicks have no referrer or device, so a source/device filter keeps the
 -- clicks made in the visits that match it.
 
@@ -137,7 +139,7 @@ begin
       and (created_at at time zone 'Asia/Kolkata')::date between v_from - v_len and v_to
   )
   select json_build_object(
-    'version', 'v2-2026-10-23',
+    'version', 'v2-2026-10-24',
     'filters', p_filters,
     'totals', json_build_object(
       'views', (select count(*) from cur),
@@ -190,8 +192,16 @@ begin
             group by 1 order by 2 desc limit 30) t),
     'top_clicks', (select coalesce(json_agg(row_to_json(t)), '[]')
       from (select target, count(*) as clicks from cef
-            where day between v_from and v_to
+            where day between v_from and v_to and target not like 'funnel:%'
             group by 1 order by 2 desc limit 80) t),
+    'funnel', (select coalesce(json_object_agg(target, n), '{}')
+      from (select target, count(*) as n from cef
+            where day between v_from and v_to
+              and (target like 'funnel:%' or target in
+                   ('spClose', 'spSureYes', 'spSureNo', 'spHave'))
+            group by 1) t),
+    'price_alerts', (select count(*) from price_alerts a
+      where (a.created_at at time zone 'Asia/Kolkata')::date between v_from and v_to),
     'signup_methods', (select coalesce(json_agg(row_to_json(t)), '[]')
       from (select method as name, count(*) as signups from subs
             where day between v_from and v_to group by 1 order by 2 desc) t),

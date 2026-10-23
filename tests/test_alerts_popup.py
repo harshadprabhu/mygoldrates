@@ -5,6 +5,19 @@ APP = open("pulse_app.html", encoding="utf-8").read()
 POP = gs.ALERTS_POP_JS
 
 
+def test_signing_up_takes_one_step_and_mobile_is_optional():
+    """Google or an email; the mobile comes after, optionally."""
+    assert "Mobile number is required" not in APP + POP
+    for code in (APP, POP):
+        assert "renderButton" in code and "set_price_alert" in code
+        assert 'id="spPhone"' in code and "(optional)" in code
+    assert 'id="alPhoneP"' not in APP and 'id="grPopP"' not in POP
+
+
+def test_the_two_popups_never_both_show():
+    assert "if(document.getElementById('subPop'))return;" in POP
+
+
 def test_subscribers_are_never_asked():
     """Asking someone who already subscribed only pulls them off the page."""
     assert "if(lsGet(SP_SUB)==='1')return false;" in APP
@@ -48,8 +61,8 @@ def test_closing_first_shows_what_they_would_miss():
     for code in (APP, POP):
         assert "__GAP22__" in code and "spSureYes" in code and "spSureNo" in code
         assert "No thanks, close" in code
-    assert "if(spSureShown||spPhoneOnly||!k){closeSubPop(false);return;}" in APP
-    assert "if(sureShown||phoneOnly){close();return;}" in POP
+    assert "if(spSureShown||!document.getElementById('spSure')){closeSubPop(false);return;}" in APP
+    assert "if(sureShown){close();return;}" in POP
     src = open("generate_site.py", encoding="utf-8").read()
     assert 'ALERTS_POP_JS.replace("__GAP22__", str(gap22))' in src
     assert '("__GAP22__", str(gap22))' in src
