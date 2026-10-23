@@ -105,3 +105,20 @@ def test_the_jd_page_is_tracked_too():
     import jd_page
     assert hasattr(jd_page, "_analytics")
     assert "{analytics}" in open("jd_page.py").read()
+
+
+def test_the_beacon_sends_the_device_type_and_can_drop_it():
+    """Device type (mobile/tablet/desktop) feeds the dashboard's device
+    filter. If the insert is refused it is retried without host and device,
+    so an unmigrated database still records the visit."""
+    s = snippet()
+    assert "device:DEV" in s
+    assert 'k!=="host"&&k!=="device"' in s
+
+
+def test_the_dashboard_uses_the_filtered_report_with_a_fallback():
+    page = gs.ANALYTICS_HTML
+    assert "analytics_report_v2" in page and "p_filters" in page
+    assert "post('analytics_report'," in page        # older database
+    for dim in ("page_group", "page", "source", "device", "host"):
+        assert "'f_'+d.k" in page and "k:'" + dim + "'" in page
