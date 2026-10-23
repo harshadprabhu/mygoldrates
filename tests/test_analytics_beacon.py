@@ -122,3 +122,12 @@ def test_the_dashboard_uses_the_filtered_report_with_a_fallback():
     assert "post('analytics_report'," in page        # older database
     for dim in ("page_group", "page", "source", "device", "host"):
         assert "'f_'+d.k" in page and "k:'" + dim + "'" in page
+
+
+def test_the_dashboard_does_not_reopen_filtered():
+    """A filter remembered from an earlier visit made the figures look wrong
+    (23 Oct 2026). The page opens on today for the whole site, and any
+    filter is announced above the numbers."""
+    page = gs.ANALYTICS_HTML
+    assert "ST.f=saved" not in page
+    assert "Filtered view." in page and "Show whole site" in page
