@@ -1,0 +1,46 @@
+name: offers
+# Today's jeweller offers, read from each jeweller's own website with fixed
+# rules (offers.py) - no paid service. Writes docs/offers.json; the next site
+# build turns it into /gold-offers-today.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "41 0 * * *"   # 06:11 IST, before the morning rate runs
+
+permissions:
+  contents: write
+
+jobs:
+  offers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          pip install requests supabase playwright
+          playwright install --with-deps chromium
+      - run: python offers.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      - name: Commit offers.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/offers.json
+          if git diff --cached --quiet; then
+            echo "unchanged"
+          else
+            git commit -m "offers: refresh offers.json"
+            git fetch origin main
+            git rebase -X ours origin/main || {
+              git rebase --abort
+              git reset --soft origin/main
+              git add docs/offers.json
+              git commit -m "offers: refresh offers.json"
+            }
+            git push
+          fi

@@ -1,0 +1,915 @@
+{
+ "updated": "2026-10-24T01:13+05:30",
+ "note": "Offers as published on each jeweller's own website on the date shown. Read automatically; confirm terms with the jeweller before buying.",
+ "brands": [
+  {
+   "slug": "abharan",
+   "name": "Abharan Jewellers",
+   "domain": "abharan.com",
+   "status": "no offers published as text today",
+   "pages": [
+    "https://abharan.com/"
+   ],
+   "offers": []
+  },
+  {
+   "slug": "avr",
+   "name": "AVR Swarna Mahal",
+   "domain": "www.avrswarnamahal.com",
+   "status": "ok",
+   "pages": [
+    "https://www.avrswarnamahal.com/",
+    "https://www.avrswarnamahal.com/silver-saving-scheme",
+    "https://www.avrswarnamahal.com/diamond-festival-offers-2026",
+    "https://www.avrswarnamahal.com/diwali-gold-scheme-offers-2026"
+   ],
+   "offers": [
+    {
+     "kind": "rate_protect",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 2,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "silver"
+     ],
+     "conditions": [],
+     "text": "100% SILVER RATE PROTECTION",
+     "url": "https://www.avrswarnamahal.com/silver-saving-scheme",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "scheme",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 6,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "JOIN NEW JEWELLERY PURCHASE PLAN",
+     "url": "https://www.avrswarnamahal.com/silver-saving-scheme",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "bhima",
+   "name": "Bhima Jewels",
+   "domain": "bhimagold.com",
+   "status": "not readable (the site blocks automated visits)",
+   "pages": [],
+   "offers": []
+  },
+  {
+   "slug": "bluestone",
+   "name": "BlueStone",
+   "domain": "www.bluestone.com",
+   "status": "ok",
+   "pages": [
+    "https://www.bluestone.com/",
+    "https://www.bluestone.com/offer-landing.html"
+   ],
+   "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 10.0,
+     "pct_max": 100.0,
+     "upto": true,
+     "selected": true,
+     "mentions": 7,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Up To 100% Off On Making Charges",
+     "url": "https://www.bluestone.com/",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "making_zero",
+     "pct_min": 100.0,
+     "pct_max": 100.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Offers, 0% Making Charge",
+     "url": "https://www.bluestone.com/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "ckc",
+   "name": "C Krishniah Chetty",
+   "domain": "ckcjewellers.com",
+   "status": "ok",
+   "pages": [
+    "https://ckcjewellers.com/",
+    "https://www.ckcjewellers.com/en_IN/thegrandgenuinediwalit-c.html"
+   ],
+   "offers": [
+    {
+     "kind": "rate_protect",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 16,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "silver"
+     ],
+     "conditions": [
+      "Signature Rate Protection Plan™ terms in force at the time",
+      "as per the prevailing Signature Rate Protection Plan™ terms",
+      "• *Rate Protection Plan (RPP): If a customer wishes to utilize the Saving Plan along with a promotion for a jewellery purchase, the promotion will be applicable only on the addit"
+     ],
+     "text": "Rate Protection Plan (RPP)*, or Paper Gold*, or Paper Silver*, or Sparkle & Shine, or The Grand Genuine Diwali Discount cum Saving Sale, or Loyalty Points, or Bank Card Cashba",
+     "url": "https://www.ckcjewellers.com/en_IN/thegrandgenuinediwalit-c.html",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "candere",
+   "name": "Candere",
+   "domain": "www.candere.com",
+   "status": "ok",
+   "pages": [
+    "https://www.candere.com/",
+    "https://www.candere.com/offers-terms-and-conditions.html",
+    "https://www.candere.com/gifts.html",
+    "https://www.candere.com/jewellery/birthday-gifts.html"
+   ],
+   "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 15.0,
+     "pct_max": 15.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "15% OFF on Making",
+     "url": "https://www.candere.com/jewellery/birthday-gifts.html",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "making_zero",
+     "pct_min": 100.0,
+     "pct_max": 100.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 4,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Zero Making",
+     "url": "https://www.candere.com/",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "diamond_off",
+     "pct_min": 30.0,
+     "pct_max": 30.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 3,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Flat 30% off on Diamond value",
+     "url": "https://www.candere.com/offers-terms-and-conditions.html",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "caratlane",
+   "name": "CaratLane",
+   "domain": "www.caratlane.com",
+   "status": "ok",
+   "pages": [
+    "https://www.caratlane.com/",
+    "https://www.caratlane.com/treasure-chest-gold-scheme"
+   ],
+   "offers": [
+    {
+     "kind": "scheme",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "CaratLane Gold Savings Scheme - Plan of Purchase",
+     "url": "https://www.caratlane.com/treasure-chest-gold-scheme",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "chandukaka",
+   "name": "Chandukaka Saraf",
+   "domain": "chandukakasaraf.in",
+   "status": "ok",
+   "pages": [
+    "https://chandukakasaraf.in/",
+    "https://chandukakasaraf.in/diwali-rishton-ka-tyohar/"
+   ],
+   "offers": [
+    {
+     "kind": "scheme",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Explore our jewellery purchase plans!",
+     "url": "https://chandukakasaraf.in/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "grt",
+   "name": "GRT Jewellers",
+   "domain": "www.grtjewels.com",
+   "status": "ok",
+   "pages": [
+    "https://www.grtjewels.com/",
+    "https://www.grtjewels.com/about-grt/offerings/",
+    "https://www.grtjewels.com/dhanteras-diwali2026",
+    "https://www.grtjewels.com/about-grt/corp-sales/",
+    "https://www.grtjewels.com/all-jewellery.html?collections=418"
+   ],
+   "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 20.0,
+     "pct_max": 20.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "online purchases only",
+      "gold jewellery"
+     ],
+     "conditions": [],
+     "text": "Flat 20% off on VA, for Online Gold Jewellery",
+     "url": "https://www.grtjewels.com/",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "diamond_off",
+     "pct_min": 15.0,
+     "pct_max": 15.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "15% OFF on Diamond Value",
+     "url": "https://www.grtjewels.com/",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "scheme",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 2,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Save big! With our Jewellery Purchase Plan",
+     "url": "https://www.grtjewels.com/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "indriya",
+   "name": "Indriya",
+   "domain": "indriya.com",
+   "status": "ok",
+   "pages": [
+    "https://indriya.com/",
+    "https://indriya.com/jewellery/22k-gold-jewellery",
+    "https://www.indriya.com/jewellery/akshaya-tritiya-jewellery"
+   ],
+   "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 30.0,
+     "pct_max": 30.0,
+     "upto": true,
+     "selected": false,
+     "mentions": 3,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "gold jewellery"
+     ],
+     "conditions": [],
+     "text": "💰 Up to 30% off on gold jewellery making charges*",
+     "url": "https://indriya.com/",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "diamond_off",
+     "pct_min": 50.0,
+     "pct_max": 50.0,
+     "upto": true,
+     "selected": false,
+     "mentions": 3,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "💎 Up to 50% off on diamond value*",
+     "url": "https://indriya.com/",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "exchange",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 4,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "♻️ 0% DEDUCTION ON OLD GOLD (on any karat)*",
+     "url": "https://indriya.com/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "jewelone",
+   "name": "Jewel One",
+   "domain": "www.jewelone.in",
+   "status": "no offers published as text today",
+   "pages": [
+    "https://www.jewelone.in/"
+   ],
+   "offers": []
+  },
+  {
+   "slug": "josalukkas",
+   "name": "Jos Alukkas",
+   "domain": "www.josalukkasonline.com",
+   "status": "no offers published as text today",
+   "pages": [
+    "https://www.josalukkasonline.com/",
+    "https://www.josalukkasonline.com/gold-jewellery?Collections=ValentinesDayCollection"
+   ],
+   "offers": []
+  },
+  {
+   "slug": "joyalukkas",
+   "name": "Joyalukkas",
+   "domain": "joyalukkas.in",
+   "status": "no offers published as text today",
+   "pages": [
+    "https://joyalukkas.in/"
+   ],
+   "offers": []
+  },
+  {
+   "slug": "kalyan",
+   "name": "Kalyan Jewellers",
+   "domain": "store.kalyanjewellers.net",
+   "status": "no offers published as text today",
+   "pages": [
+    "https://store.kalyanjewellers.net/"
+   ],
+   "offers": []
+  },
+  {
+   "slug": "khazana",
+   "name": "Khazana Jewellery",
+   "domain": "www.khazanajewellery.com",
+   "status": "ok",
+   "pages": [
+    "https://www.khazanajewellery.com/",
+    "https://www.khazanajewellery.com/home-section/festive-favourites"
+   ],
+   "offers": [
+    {
+     "kind": "scheme",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Gold Saving Plans",
+     "url": "https://www.khazanajewellery.com/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "khimji",
+   "name": "Khimji Jewellers",
+   "domain": "www.khimjijewellers.com",
+   "status": "no offers published as text today",
+   "pages": [
+    "https://www.khimjijewellers.com/"
+   ],
+   "offers": []
+  },
+  {
+   "slug": "kisna",
+   "name": "Kisna",
+   "domain": "www.kisna.com",
+   "status": "ok",
+   "pages": [
+    "https://www.kisna.com/"
+   ],
+   "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 5.0,
+     "pct_max": 15.0,
+     "upto": false,
+     "selected": true,
+     "mentions": 27,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Opheliane Diamond Earring 15% off on making charges",
+     "url": "https://www.kisna.com/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "mahesh",
+   "name": "Mahesh Jewellers",
+   "domain": "maheshjewellers.com",
+   "status": "no offers published as text today",
+   "pages": [
+    "https://maheshjewellers.com/"
+   ],
+   "offers": []
+  },
+  {
+   "slug": "malabar",
+   "name": "Malabar Gold",
+   "domain": "www.malabargoldanddiamonds.com",
+   "status": "ok",
+   "pages": [
+    "https://www.malabargoldanddiamonds.com/",
+    "https://www.malabargoldanddiamonds.com/us/all-offers"
+   ],
+   "offers": [
+    {
+     "kind": "exchange",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 4,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "diamond jewellery only"
+     ],
+     "conditions": [],
+     "text": "Assured 100% exchange value for diamond jewellery",
+     "url": "https://www.malabargoldanddiamonds.com/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "mehta",
+   "name": "Mehta Jewellers",
+   "domain": "www.mehtajewellers.com",
+   "status": "no offers published as text today",
+   "pages": [
+    "https://www.mehtajewellers.com/"
+   ],
+   "offers": []
+  },
+  {
+   "slug": "nac",
+   "name": "NAC Jewellers",
+   "domain": "www.nacjewellers.com",
+   "status": "no offers published as text today",
+   "pages": [
+    "https://www.nacjewellers.com/"
+   ],
+   "offers": []
+  },
+  {
+   "slug": "orra",
+   "name": "ORRA",
+   "domain": "www.orra.co.in",
+   "status": "ok",
+   "pages": [
+    "https://www.orra.co.in/"
+   ],
+   "offers": [
+    {
+     "kind": "free_coin",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Get a FREE Gold Coin This Diwali",
+     "url": "https://www.orra.co.in/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "pcchandra",
+   "name": "P.C. Chandra Jewellers",
+   "domain": "www.pcchandraindia.com",
+   "status": "ok",
+   "pages": [
+    "https://www.pcchandraindia.com/",
+    "https://pcchandraindia.com/collections/promotions",
+    "https://www.pcchandraindia.com/collections/promotions",
+    "https://pcchandraindia.com/"
+   ],
+   "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 20.0,
+     "pct_max": 20.0,
+     "upto": true,
+     "selected": false,
+     "mentions": 4,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "gold jewellery"
+     ],
+     "conditions": [],
+     "text": "Upto 20% off on Gold jewellery making charges",
+     "url": "https://www.pcchandraindia.com/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "png",
+   "name": "PN Gadgil",
+   "domain": "www.pngjewellers.com",
+   "status": "ok",
+   "pages": [
+    "https://www.pngjewellers.com/",
+    "https://www.pngjewellers.com/pages/offer-t-c",
+    "https://www.pngjewellers.com/collections/gold-diwali-offer-2026",
+    "https://www.pngjewellers.com/collections/diamond-diwali-offer-2026",
+    "https://www.pngjewellers.com/products/infinity-petals-9kt-gold-mangalsutra"
+   ],
+   "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 15.0,
+     "pct_max": 100.0,
+     "upto": true,
+     "selected": true,
+     "mentions": 13,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "diamond jewellery only"
+     ],
+     "conditions": [],
+     "text": "up to 100% off on Diamond Jewellery Making Charges",
+     "url": "https://www.pngjewellers.com/pages/offer-t-c",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "pngsons",
+   "name": "PN Gadgil & Sons",
+   "domain": "pngadgilandsons.com",
+   "status": "no offers published as text today",
+   "pages": [
+    "https://pngadgilandsons.com/",
+    "https://pngadgilandsons.com/fixed-deposit-scheme/",
+    "https://pngadgilandsons.com/what-png-offer-to-customers/",
+    "https://pngadgilandsons.com/png-and-sons-exclusive-diamond-jewellery-offer-for-valentine-day-3/",
+    "https://pngadgilandsons.com/products/diamond-jewellery/diamond-collection/festival-diamond/"
+   ],
+   "offers": []
+  },
+  {
+   "slug": "prince",
+   "name": "Prince Jewellery",
+   "domain": "princejewellery.com",
+   "status": "ok",
+   "pages": [
+    "https://princejewellery.com/"
+   ],
+   "offers": [
+    {
+     "kind": "scheme",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "gold purchase plans!",
+     "url": "https://princejewellery.com/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "ranka",
+   "name": "Ranka Jewellers",
+   "domain": "rankajewellers.in",
+   "status": "ok",
+   "pages": [
+    "https://rankajewellers.in/",
+    "https://rankajewellers.in/pages/discount-offers-terms-conditions"
+   ],
+   "offers": [
+    {
+     "kind": "exchange",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "100% exchange",
+     "url": "https://rankajewellers.in/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "reliance",
+   "name": "Reliance Jewels",
+   "domain": "www.reliancejewels.com",
+   "status": "ok",
+   "pages": [
+    "https://www.reliancejewels.com/",
+    "https://www.reliancejewels.com/diwali26/",
+    "https://www.reliancejewels.com/all-jewellery/filter_Occasion:%28%22Festive%22%29/"
+   ],
+   "offers": [
+    {
+     "kind": "free_coin",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 4,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [
+      "To avail the Free Coin (FOC) offer EGV, Gift Cards, R1 points",
+      "To avail the Free Coin (FOC) offer GSS, GSV, and OG will not be"
+     ],
+     "text": "Redemption Period: The Free Coin Offer and Double Gold",
+     "url": "https://www.reliancejewels.com/diwali26/",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "rate_protect",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 9,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [
+      "Gold Rate Protection are valid only if final billing is completed within the",
+      "will not be accepted during advance booking or during final billing"
+     ],
+     "text": "Any advance booking made before or after the applicable booking period",
+     "url": "https://www.reliancejewels.com/diwali26/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "senco",
+   "name": "Senco Gold",
+   "domain": "sencogoldanddiamonds.com",
+   "status": "ok",
+   "pages": [
+    "https://sencogoldanddiamonds.com/",
+    "https://sencogoldanddiamonds.com/deal-of-the-day"
+   ],
+   "offers": [
+    {
+     "kind": "exchange",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 2,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "only jewellery bought from them"
+     ],
+     "conditions": [],
+     "text": "Enjoy 0% deduction on old gold exchange & buyback facility for Senco jewellery, so you can keep changing your style & status quo!",
+     "url": "https://sencogoldanddiamonds.com/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "tanishq",
+   "name": "Tanishq",
+   "domain": "www.tanishq.co.in",
+   "status": "not readable (the site blocks automated visits)",
+   "pages": [],
+   "offers": []
+  },
+  {
+   "slug": "thangamayil",
+   "name": "Thangamayil Jewellery",
+   "domain": "www.thangamayil.com",
+   "status": "ok",
+   "pages": [
+    "https://www.thangamayil.com/",
+    "https://www.thangamayil.com/diwali-offers",
+    "https://www.thangamayil.com/saving-schemes",
+    "https://www.thangamayil.com/scheme/index/index",
+    "https://www.thangamayil.com/scheme/index/index/"
+   ],
+   "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 20.0,
+     "pct_max": 20.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Flat 20% OFF on Value Addition (VA)",
+     "url": "https://www.thangamayil.com/diwali-offers",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "scheme",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 5,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Thangamayil offers five well balanced gold saving schemes for customers to choose from, catering to each of their personal preferences",
+     "url": "https://www.thangamayil.com/saving-schemes",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "vaibhav",
+   "name": "Vaibhav Jewellers",
+   "domain": "vaibhavjewellers.com",
+   "status": "not readable (the site blocks automated visits)",
+   "pages": [],
+   "offers": []
+  },
+  {
+   "slug": "vummidi",
+   "name": "Vummidi Bangaru",
+   "domain": "vummidi.com",
+   "status": "ok",
+   "pages": [
+    "https://vummidi.com/",
+    "https://www.vummidi.com/saving-scheme",
+    "https://www.vummidi.com/jewellery.html"
+   ],
+   "offers": [
+    {
+     "kind": "diamond_off",
+     "pct_min": 3.5,
+     "pct_max": 15.0,
+     "upto": false,
+     "selected": true,
+     "mentions": 12,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "stones and gems",
+      "gold jewellery"
+     ],
+     "conditions": [],
+     "text": "on gold jewellery. 15% off on diamonds and precious stones",
+     "url": "https://www.vummidi.com/saving-scheme",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "scheme",
+     "pct_min": 10.0,
+     "pct_max": 50.0,
+     "upto": true,
+     "selected": true,
+     "mentions": 7,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "gold jewellery"
+     ],
+     "conditions": [],
+     "text": "12 month plan 50% discount on Value Addition upto 18% for gold jewellery",
+     "url": "https://www.vummidi.com/saving-scheme",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "slug": "whp",
+   "name": "Waman Hari Pethe",
+   "domain": "whpjewellers.com",
+   "status": "ok",
+   "pages": [
+    "https://whpjewellers.com/",
+    "https://whpjewellers.com/collections/gold-20-akshaya-tritiya",
+    "https://whpjewellers.com/collections/silver-articles-and-gifting-collection"
+   ],
+   "offers": [
+    {
+     "kind": "free_coin",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 3,
+     "min_purchase": 7000,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Free Gold Coin on Jewellery Purchases Above ₹7,000*",
+     "url": "https://whpjewellers.com/",
+     "first_seen": "2026-10-24"
+    }
+   ]
+  }
+ ]
+}

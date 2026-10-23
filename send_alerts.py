@@ -47,7 +47,31 @@ def ladder(c):
     return {p: c * f for p, f in PURITY_FRACTION.items()}
 
 
-def email_html(first, date, med, low, low_brand, unsub, n_brands=14):
+def offers_line(live):
+    """One line for the digest from today's offers page, or "" - e.g.
+    "Lowest for a 10 g 22K ring today: PN Gadgil, Rs 1,55,785 with GST"."""
+    try:
+        import json as _json
+        import offers_page
+        offers = _json.load(open("docs/offers.json", encoding="utf-8"))
+        try:
+            mc = _json.load(open("docs/making-charges.json", encoding="utf-8"))
+        except Exception:
+            mc = {}
+        # 22/24, exactly as the offers page computes it, so the two agree.
+        r22 = {(r["brands"] or {}).get("slug"): r["canonical_24k_pre_gst"] * 22 / 24
+               for r in live}
+        rows = offers_page.ring_prices(offers, mc, r22)
+        if not rows:
+            return ""
+        top = rows[0]
+        return (f"Lowest for a 10 g 22K ring today, after offers: {top['name']}, "
+                f"{inr(top['after'])} with GST")
+    except Exception:
+        return ""
+
+
+def email_html(first, date, med, low, low_brand, unsub, n_brands=14, offers=""):
     """Branded HTML digest (refreshed design). Inline styles - email clients
     ignore <style>. Text wordmark (no heavy logo image) + one gold button:
     looks premium and is lighter for Primary-inbox placement."""
@@ -102,6 +126,10 @@ padding:26px 12px;font-family:Arial,Helvetica,sans-serif;color:#2c2a26">
           <a href="{SITE_URL}/?from=alert" style="display:inline-block;padding:12px 26px;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;color:#1a1508;text-decoration:none">Compare all {n_brands} jewellers &rarr;</a>
         </td></tr>
       </table>
+      {('<p style="margin:16px 0 4px;font-size:14px;line-height:1.5;color:#3b3833">'
+        + offers + '. <a href="' + SITE_URL + '/gold-offers-today?from=alert" '
+        'style="color:#8C6A18;font-weight:bold">See every jeweller&rsquo;s offer &rarr;</a></p>')
+        if offers else ''}
       <p style="margin:12px 0 4px;font-size:12px;color:#9a9284">Prices are indicative and pre-GST; confirm the billed rate with the jeweller. Not investment advice.</p>
     </td></tr>
     <tr><td style="padding:16px 30px 22px;background:#faf8f2;border-top:1px solid #efe9db;font-family:Arial,sans-serif;font-size:11px;color:#8f887c;line-height:1.6">
@@ -290,12 +318,13 @@ def main():
         print("alerts: nobody to email today")
         return
 
+    offers = offers_line(live)
     sent = 0
     for s in pending:
         first = (s.get("name") or "there").strip().split(" ")[0] or "there"
         unsub = f"{SITE_URL}/unsubscribe.html?t={s['unsub_token']}"
         html = email_html(first, date, med, low, lowest["brands"]["name"],
-                          unsub, n_brands)
+                          unsub, n_brands, offers)
         to = {"email": s["email"]}
         if s.get("name"):
             to["name"] = s["name"].strip()
