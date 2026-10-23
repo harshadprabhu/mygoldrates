@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-23",
-  "last_updated": "2026-10-23T17:36:50.001578+05:30",
+  "last_updated": "2026-10-23T22:35:52.092564+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -22,14 +22,14 @@
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 142898.0,
-      "change_pct": -0.29
+      "price_per_10g_inr": 142119.0,
+      "change_pct": -0.83
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 141333.0,
-      "change_pct": -0.33
+      "price_per_10g_inr": 140453.0,
+      "change_pct": -0.95
     }
   ],
   "jewellers": [
@@ -178,6 +178,12 @@
       "rate_18k_per_gram_inr": 10718.18
     },
     {
+      "jeweller": "Kisna",
+      "rate_24k_per_gram_inr": 14295.14,
+      "rate_22k_per_gram_inr": 13103.88,
+      "rate_18k_per_gram_inr": 10721.35
+    },
+    {
       "jeweller": "Kalyan Jewellers",
       "rate_24k_per_gram_inr": 14342.5,
       "rate_22k_per_gram_inr": 13147.29,
@@ -188,18 +194,6 @@
       "rate_24k_per_gram_inr": 14385.59,
       "rate_22k_per_gram_inr": 13186.79,
       "rate_18k_per_gram_inr": 10789.19
-    },
-    {
-      "jeweller": "CaratLane",
-      "rate_24k_per_gram_inr": 14397.0,
-      "rate_22k_per_gram_inr": 13197.25,
-      "rate_18k_per_gram_inr": 10797.75
-    },
-    {
-      "jeweller": "ORRA",
-      "rate_24k_per_gram_inr": 14404.44,
-      "rate_22k_per_gram_inr": 13204.07,
-      "rate_18k_per_gram_inr": 10803.33
     },
     {
       "jeweller": "BlueStone",
@@ -214,10 +208,10 @@
       "rate_18k_per_gram_inr": 10828.5
     },
     {
-      "jeweller": "Kisna",
-      "rate_24k_per_gram_inr": 14486.63,
-      "rate_22k_per_gram_inr": 13279.41,
-      "rate_18k_per_gram_inr": 10864.97
+      "jeweller": "ORRA",
+      "rate_24k_per_gram_inr": 14452.39,
+      "rate_22k_per_gram_inr": 13248.02,
+      "rate_18k_per_gram_inr": 10839.29
     },
     {
       "jeweller": "Waman Hari Pethe",
@@ -238,7 +232,7 @@
       "rate_18k_per_gram_inr": 10968.75
     }
   ],
-  "jeweller_count": 34,
+  "jeweller_count": 33,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
