@@ -420,26 +420,50 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 
 /* ─── Alert card ─── */
 /* ─── Daily-alerts subscribe popup ─── */
-#subPop{position:fixed;inset:0;z-index:4000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+/* Redesigned 23 Oct 2026 to convert better: a gold header with a preview
+   of the morning email, three concrete benefits and one strong button.
+   It closes only from the small x in the corner (or Escape) - not from a
+   tap outside, and there is no "Maybe later" button. The x stays visible:
+   a dialog with no findable way out reads as a trap and sends people back
+   to Google, and on phones it stays a bottom sheet so the rate the visitor
+   came for is still on screen. */
+#subPop{position:fixed;inset:0;z-index:4000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(6,4,2,.66);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
 #subPop.open{display:flex;animation:spFade .22s ease}
 @keyframes spFade{from{opacity:0}to{opacity:1}}
-.sp-box{position:relative;width:100%;max-width:392px;max-height:calc(100vh - 32px);overflow-y:auto;background:var(--bg2,#1b1712);border:1px solid var(--glass-border);border-radius:18px;padding:22px 20px 18px;box-shadow:0 24px 64px rgba(0,0,0,.55);animation:spRise .26s cubic-bezier(.2,.8,.3,1)}
-@keyframes spRise{from{transform:translateY(14px) scale(.98);opacity:0}to{transform:none;opacity:1}}
-.sp-x{position:absolute;top:10px;right:10px;width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.06);color:var(--text3);font-size:19px;line-height:1;cursor:pointer;font-family:inherit}
-.sp-x:hover{background:rgba(255,255,255,.12);color:var(--text)}
-.sp-em{font-size:30px;line-height:1;margin-bottom:8px}
-.sp-t{font-size:17px;font-weight:800;color:var(--text);letter-spacing:-.2px}
-.sp-d{font-size:12px;color:var(--text3);line-height:1.55;margin:6px 0 14px}
-.sp-note{font-size:10px;color:var(--text3);text-align:center;margin-top:10px;line-height:1.5}
-.sp-later{display:block;width:100%;margin-top:8px;background:none;border:none;color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;padding:6px;font-family:inherit}
-.sp-later:hover{color:var(--text)}
-@media(max-width:420px){.sp-box{padding:20px 16px 16px}.sp-t{font-size:16px}}
+.sp-box{position:relative;width:100%;max-width:400px;max-height:calc(100vh - 32px);overflow-y:auto;background:#17130d;border:1px solid rgba(240,208,128,.28);border-radius:20px;box-shadow:0 28px 70px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.3);animation:spRise .3s cubic-bezier(.2,.8,.3,1)}
+@keyframes spRise{from{transform:translateY(16px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+.sp-x{position:absolute;top:6px;right:6px;z-index:2;width:28px;height:28px;border:none;background:none;color:rgba(26,20,5,.55);font-size:16px;line-height:1;cursor:pointer;font-family:inherit;padding:0}
+.sp-x:hover{color:#1a1405}
+.sp-hero{position:relative;padding:20px 20px 16px;background:radial-gradient(120% 140% at 0% 0%,#ffe9a8 0%,#e7bf5a 38%,#b98a24 100%);color:#1a1405;overflow:hidden}
+.sp-hero::after{content:'';position:absolute;right:-40px;top:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.45),transparent 70%);pointer-events:none}
+.sp-pill{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.12em;background:rgba(26,20,5,.88);color:#f0d080;border-radius:999px;padding:4px 10px}
+.sp-t{font-family:'Playfair Display',Georgia,serif;font-size:21px;font-weight:800;line-height:1.22;color:#1a1405;margin:10px 0 0;letter-spacing:-.2px;max-width:300px}
+.sp-mail{position:relative;margin-top:14px;background:#fffaf0;border-radius:12px;padding:10px 12px;box-shadow:0 8px 22px rgba(80,55,0,.28);transform:rotate(-1.2deg)}
+.sp-mh{display:flex;align-items:center;gap:6px;font-size:10.5px;color:#7a6a48;font-weight:600}
+.sp-dot{width:8px;height:8px;border-radius:50%;background:#2fa36b;flex:none}
+.sp-ms{font-size:13px;font-weight:800;color:#1a1405;margin-top:3px}
+.sp-mr{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:11.5px;color:#4b4030}
+.sp-mr b{font-size:12.5px;color:#1a1405}
+.sp-mr .sp-tag{font-size:9.5px;font-weight:800;color:#1f7a4d;background:#dff3e8;border-radius:5px;padding:2px 6px}
+.sp-body{padding:16px 20px 16px}
+.sp-list{list-style:none;margin:0 0 12px;padding:0}
+.sp-list li{position:relative;padding:3px 0 3px 26px;font-size:13px;color:var(--text);line-height:1.4}
+.sp-list li::before{content:'✓';position:absolute;left:0;top:3px;width:18px;height:18px;border-radius:50%;background:rgba(212,166,60,.18);color:#f0d080;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.sp-d{font-size:12px;color:var(--text3);line-height:1.5;margin:0 0 10px}
+#subPop .al-form{max-width:none;width:100%;margin:0}
+#subPop .al-inp{background:rgba(255,255,255,.06);border-color:rgba(240,208,128,.22);padding:11px 12px;font-size:14px}
+#subPop .al-inp:focus{border-color:#e7bf5a}
+#subPop .al-btn{background:linear-gradient(135deg,#f6d77d,#d4a63c 55%,#b98a24);color:#1a1405;font-size:15px;font-weight:800;padding:13px 16px;border-radius:12px;box-shadow:0 8px 22px rgba(212,166,60,.35);letter-spacing:.01em}
+#subPop .al-locate{color:#f0d080;border-color:rgba(240,208,128,.35)}
+.sp-note{font-size:10.5px;color:var(--text3);text-align:center;margin-top:10px;line-height:1.5}
+.sp-have{display:block;margin:4px auto 0;background:none;border:none;color:var(--text3);font-size:10.5px;cursor:pointer;padding:4px 6px;font-family:inherit;text-decoration:underline;text-underline-offset:2px;opacity:.75}
+@media(max-width:420px){.sp-t{font-size:19px}.sp-hero{padding:18px 16px 14px}.sp-body{padding:14px 16px 14px}}
 /* Phones: slide up from the bottom and keep the top of the page (the rate
    the visitor came for) visible - a full-screen cover on arrival from
    search is what Google's intrusive-interstitial rule penalises. */
 @media(max-width:760px){
-  #subPop{align-items:flex-end;padding:0;background:rgba(0,0,0,.35);backdrop-filter:none;-webkit-backdrop-filter:none}
-  .sp-box{max-width:none;max-height:72vh;border-radius:18px 18px 0 0;border-bottom:none;animation:spUp .3s cubic-bezier(.2,.8,.3,1)}
+  #subPop{align-items:flex-end;padding:0;background:rgba(0,0,0,.4);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .sp-box{max-width:none;max-height:78vh;border-radius:20px 20px 0 0;border-bottom:none;animation:spUp .32s cubic-bezier(.2,.8,.3,1)}
   @keyframes spUp{from{transform:translateY(100%)}to{transform:none}}
 }
 .alcard{margin:0 12px;background:linear-gradient(135deg,rgba(232,138,174,0.1),rgba(212,166,60,0.08));backdrop-filter:blur(20px);border-radius:16px;border:1px solid rgba(232,138,174,0.15);padding:20px 16px;text-align:center;position:relative;overflow:hidden}
@@ -640,7 +664,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",tick);else tick();
   setInterval(tick,30000);
 })();</script>
-<script type="application/ld+json">[{"@context": "https://schema.org", "@type": "WebSite", "name": "GoldRates - Daily Gold Rate Comparison India", "url": "https://mygoldrates.com"}, {"@context": "https://schema.org", "@type": "Organization", "name": "MyGoldRates.com", "alternateName": "GoldRates", "url": "https://mygoldrates.com", "logo": "https://mygoldrates.com/icon-512.png", "image": "https://mygoldrates.com/og.png", "description": "India's gold rate comparison platform - compare today's 24K, 22K and 18K gold rates across leading jewellers, with the IBJA bullion reference, updated daily.", "areaServed": {"@type": "Country", "name": "India"}, "knowsAbout": ["Gold rate", "Gold rate today", "24 carat gold rate", "22K gold rate", "IBJA gold rate", "Gold price India"]}, {"@context": "https://schema.org", "@type": "WebPage", "url": "https://mygoldrates.com/gold-rate-today-in-gurugram", "name": "Gold Rate Today in Gurugram (23 Oct): 24K, 22K, 18K | MyGoldRates", "inLanguage": "en-IN", "dateModified": "2026-10-23T22:35:52+05:30", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/"}}, {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}, {"@type": "ListItem", "position": 2, "name": "Gold Rate Today in Gurugram", "item": "https://mygoldrates.com/gold-rate-today-in-gurugram"}]}, {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the gold rate today in Gurugram?", "acceptedAnswer": {"@type": "Answer", "text": "On 23 October 2026 the median gold rate across the 33 jewellers we track is ₹14,258 per gram for 24K (999), ₹13,070 for 22K (916) and ₹10,694 for 18K (750), before 3% GST and making charges."}}, {"@type": "Question", "name": "Which jeweller has the lowest gold rate for Gurugram today?", "acceptedAnswer": {"@type": "Answer", "text": "Among the national chains and the regional chains serving Haryana that published a rate today, PN Gadgil is lowest for 22K at ₹12,994 per gram, and ORRA highest at ₹13,248, a gap of ₹254 per gram."}}, {"@type": "Question", "name": "How much do 10 grams of 22K gold cost in Gurugram with GST?", "acceptedAnswer": {"@type": "Answer", "text": "At today's 22K median of ₹13,070 per gram, 10 grams cost ₹130,698 before tax and ₹134,619 with 3% GST. Jewellery also carries a making charge, usually quoted as a percentage of the gold value or per gram, which is added before GST."}}, {"@type": "Question", "name": "Is the gold rate the same at every jeweller in Gurugram?", "acceptedAnswer": {"@type": "Answer", "text": "No. Each jeweller sets its own daily rate, and making charges differ even more than rates, so compare both before buying."}}, {"@type": "Question", "name": "Does the gold rate in Gurugram change every day?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Jewellers revise their rates each morning, and some again during the day, following the international gold price and the rupee. We refresh this page several times a day."}}]}]</script>
+<script type="application/ld+json">[{"@context": "https://schema.org", "@type": "WebSite", "name": "GoldRates - Daily Gold Rate Comparison India", "url": "https://mygoldrates.com"}, {"@context": "https://schema.org", "@type": "Organization", "name": "MyGoldRates.com", "alternateName": "GoldRates", "url": "https://mygoldrates.com", "logo": "https://mygoldrates.com/icon-512.png", "image": "https://mygoldrates.com/og.png", "description": "India's gold rate comparison platform - compare today's 24K, 22K and 18K gold rates across leading jewellers, with the IBJA bullion reference, updated daily.", "areaServed": {"@type": "Country", "name": "India"}, "knowsAbout": ["Gold rate", "Gold rate today", "24 carat gold rate", "22K gold rate", "IBJA gold rate", "Gold price India"]}, {"@context": "https://schema.org", "@type": "WebPage", "url": "https://mygoldrates.com/gold-rate-today-in-gurugram", "name": "Gold Rate Today in Gurugram (23 Oct): 24K, 22K, 18K | MyGoldRates", "inLanguage": "en-IN", "dateModified": "2026-10-23T23:21:51+05:30", "isPartOf": {"@type": "WebSite", "url": "https://mygoldrates.com/"}}, {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://mygoldrates.com/"}, {"@type": "ListItem", "position": 2, "name": "Gold Rate Today in Gurugram", "item": "https://mygoldrates.com/gold-rate-today-in-gurugram"}]}, {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the gold rate today in Gurugram?", "acceptedAnswer": {"@type": "Answer", "text": "On 23 October 2026 the median gold rate across the 33 jewellers we track is ₹14,258 per gram for 24K (999), ₹13,070 for 22K (916) and ₹10,694 for 18K (750), before 3% GST and making charges."}}, {"@type": "Question", "name": "Which jeweller has the lowest gold rate for Gurugram today?", "acceptedAnswer": {"@type": "Answer", "text": "Among the national chains and the regional chains serving Haryana that published a rate today, PN Gadgil is lowest for 22K at ₹12,994 per gram, and ORRA highest at ₹13,248, a gap of ₹254 per gram."}}, {"@type": "Question", "name": "How much do 10 grams of 22K gold cost in Gurugram with GST?", "acceptedAnswer": {"@type": "Answer", "text": "At today's 22K median of ₹13,070 per gram, 10 grams cost ₹130,698 before tax and ₹134,619 with 3% GST. Jewellery also carries a making charge, usually quoted as a percentage of the gold value or per gram, which is added before GST."}}, {"@type": "Question", "name": "Is the gold rate the same at every jeweller in Gurugram?", "acceptedAnswer": {"@type": "Answer", "text": "No. Each jeweller sets its own daily rate, and making charges differ even more than rates, so compare both before buying."}}, {"@type": "Question", "name": "Does the gold rate in Gurugram change every day?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Jewellers revise their rates each morning, and some again during the day, following the international gold price and the rupee. We refresh this page several times a day."}}]}]</script>
 </head>
 <body>
 
@@ -660,8 +684,8 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 <!-- When the JEWELLER board rates were last collected. Distinct from the live
      chip above, which tracks the spot/MCX feed refreshing every 3s. Values
      are substituted at build time by generate_site.py. -->
-<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1792775152">
-  Jeweller rates updated <b>23 October 2026, 10:35 PM IST</b><span id="ratesStampAgo"></span>
+<div class="rates-stamp" id="ratesStamp" data-rates-epoch="1792777911">
+  Jeweller rates updated <b>23 October 2026, 11:21 PM IST</b><span id="ratesStampAgo"></span>
 </div>
 
 <!-- Google One Tap (uses Google Identity Services) -->
@@ -971,23 +995,38 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 <div id="subPop" role="dialog" aria-modal="true" aria-labelledby="spTitle">
   <div class="sp-box">
     <button class="sp-x" id="spClose" type="button" aria-label="Close">&times;</button>
-    <div class="sp-em">&#128140;</div>
-    <div class="sp-t" id="spTitle">Never miss the cheapest rate</div>
-    <div class="sp-d">One free email each morning &mdash; who&rsquo;s cheapest today, the bullion premium and the market median across every jeweller we track.</div>
-    <div class="al-form">
-      <input class="al-inp" id="alNameP" type="text" placeholder="Your name" autocomplete="name">
-      <input class="al-inp" id="alEmailP" type="email" placeholder="Your email *" inputmode="email" autocomplete="email">
-      <input class="al-inp" id="alPhoneP" type="tel" placeholder="Mobile number *" inputmode="tel" autocomplete="tel" maxlength="18" value="+91 ">
-      <button class="al-locate" id="alLocateP" type="button"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Use my current location</span></button>
-      <div class="al-row2">
-        <input class="al-inp" id="alCityP" type="text" placeholder="City" autocomplete="address-level2">
-        <input class="al-inp al-pin" id="alPinP" type="text" placeholder="PIN code" inputmode="numeric" maxlength="6" autocomplete="postal-code">
+    <div class="sp-hero">
+      <span class="sp-pill">FREE DAILY GOLD ALERT</span>
+      <div class="sp-t" id="spTitle">Know the cheapest gold rate before you buy</div>
+      <div class="sp-mail" aria-hidden="true">
+        <div class="sp-mh"><span class="sp-dot"></span>MyGoldRates &middot; every morning</div>
+        <div class="sp-ms">Today&rsquo;s cheapest 22K near you</div>
+        <div class="sp-mr"><span>Lowest jeweller rate in your city</span><span class="sp-tag">CHEAPEST</span></div>
+        <div class="sp-mr"><span>Market rate &amp; what moved gold</span></div>
       </div>
-      <button class="al-btn al-btn-full" id="alBtnP">Subscribe</button>
     </div>
-    <div id="alStatusP" style="font-size:11px;color:var(--mint);margin-top:8px;min-height:14px"></div>
-    <p class="sp-note">Free. No spam. Unsubscribe from any email in one click.</p>
-    <button class="sp-later" id="spLater" type="button">Maybe later</button>
+    <div class="sp-body">
+      <ul class="sp-list">
+        <li>The cheapest jeweller in your city, before you leave home</li>
+        <li>Today&rsquo;s market rate and what moved gold overnight</li>
+        <li>A heads-up when gold moves sharply</li>
+      </ul>
+      <div class="sp-d">One short email a day. Takes 10 seconds to join.</div>
+      <div class="al-form">
+        <input class="al-inp" id="alNameP" type="text" placeholder="Your name" autocomplete="name">
+        <input class="al-inp" id="alEmailP" type="email" placeholder="Your email *" inputmode="email" autocomplete="email">
+        <input class="al-inp" id="alPhoneP" type="tel" placeholder="Mobile number *" inputmode="tel" autocomplete="tel" maxlength="18" value="+91 ">
+        <button class="al-locate" id="alLocateP" type="button"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Use my current location</span></button>
+        <div class="al-row2">
+          <input class="al-inp" id="alCityP" type="text" placeholder="City" autocomplete="address-level2">
+          <input class="al-inp al-pin" id="alPinP" type="text" placeholder="PIN code" inputmode="numeric" maxlength="6" autocomplete="postal-code">
+        </div>
+        <button class="al-btn al-btn-full" id="alBtnP">Send me tomorrow&rsquo;s rates &mdash; free</button>
+      </div>
+      <div id="alStatusP" style="font-size:12px;color:var(--mint);margin-top:8px;min-height:14px;text-align:center"></div>
+      <p class="sp-note">&#128274; Free &middot; No spam &middot; One-click unsubscribe in every email</p>
+      <button class="sp-have" id="spHave" type="button">Already subscribed?</button>
+    </div>
   </div>
 </div>
 
@@ -1421,7 +1460,7 @@ function handleCredentialResponse(resp){
   // movement from a TRUE anchor instead of a guessed premium. Zero when
   // the IBJA fetch failed - applyLive falls back to the old estimate then.
   var IBJA_ANCHOR_24=Number("14163.0000")||0;
-  var IBJA_ANCHOR_SPOT=Number("12206.7302")||0;
+  var IBJA_ANCHOR_SPOT=Number("12200.6279")||0;
   // Every `delta*` here is the change against the PREVIOUS CLOSE, not
   // against the last poll. The previous close for each metric arrives from
   // the worker as `*_prev` and is held in the `prev*` fields below.
@@ -2374,7 +2413,7 @@ function handleCredentialResponse(resp){
   // business feed was the wrong shape anyway. Headlines now come from the
   // worker's /news (gold-specific Google News query across Indian
   // publishers), so the page no longer fetches or filters RSS itself.
-  var NEWS_BUILD = [{"title":"Gold Rate Today Live, Latest 22 And 24 Carat Gold Price In India","url":"https://news.google.com/rss/articles/CBMiTkFVX3lxTE5ieHFlWW9CNF9vaC03ME9mY29vZnpqTzdmcFpOZ3BfcEQxY3RXamt4VUI3cDBFTTQ3VzIxczNSUlBYTGdhMi1nT01HOUNXUQ?oc=5","source":"NDTV Profit","published":"2026-10-23T13:06:51"},{"title":"Silver Rate Today in Bundi 23rd October 2026 : 1 KG, Todays Silver Price in Bundi","url":"https://news.google.com/rss/articles/CBMic0FVX3lxTFBTTTExVDJmNEhvTHAtTjNpb2F2Rk9kUGFfWWpoX21XUmpRSzdPNmx5UGlpWl9jU2t2NEszVkM5blRzOTBKalBBZURkN0VNaV9obHYtVjJsT29GaFRrT3pfNmQ2YzdvRmpQNmp2bXdFZ3FucXc?oc=5","source":"Business Today","published":"2026-10-23T15:17:58"},{"title":"Silver rate today: Silver price falls over 3% to Rs 1.93 lakh per kg on MCX","url":"https://news.google.com/rss/articles/CBMi6AFBVV95cUxNYWc2bjVVQmlIa1d4bkFQMHlYemQ3SHBoSDBHNVBrczZ5QXRuRGIxQ3ZlVE5MR29fQzlVSEFpQjAxem5lTlZXQ0t1SkJVb0VTdmFfaHJhZENSWUt6RVZuaTdmVHlZdTM3elZhMjhmUEVGcnRBb3N0dlBvYnJHSHBlMzhEbThRb1BWcUVXQzdzNlRudjRMRlF1UGNSZXNvUTFhLUdxNTIzSG9uV3VaWXA5RGMwNHlJWEkwNmYwUHdqNTlzaEdDcVNIZWFRNzlPNFBlOXE5YkFXNENlQXY3WDJiakNRTWhObnJJ0gHuAUFVX3lxTE9EZWpfZDlLVU5FR3FtT2s4enpZdndndzZYbUlKZHE3OWsxcENzUjh2SGVUai01OTRGM1BzclhSZzhDbmRlSGdiU1VTWVh6ODFGRzVfWi14QUxOUW9ZSHJZdmI4UkJ2UWRvOUZNb2VJb1QtMFpYLTMyb2d2SGVHYmhBZ1UycEFnN09uSVhrb1VjcXo4VVVCZEloaU5oOHVzMlF0dzVuSW1GRlhFRzVPMU5YWjZEb2hhdjBhU2ZodmEzMzZyQ0VxN2I2YUlGX2kyTHdWOWtidUNJclQ4dW43dmlocWM0Um9ybU9YLUZUOGc?oc=5","source":"India Today","published":"2026-10-23T05:02:41"},{"title":"Silver rate today at 11-month low; slips below \u20b92 lakh in India \u2014 where will it go? Should you buy for good returns?","url":"https://news.google.com/rss/articles/CBMiiAJBVV95cUxOZW9vU1FLMXk0Q2phc3VBdjR4bk1RS2hfUkphWHZKZ3pHMGdBcS0yTWlWWFpSUHBzUk52S2ZhdjNwVWQyMEFvb1NRV2xsUS1ZczdBSmFueVdOTVo0MDBCV3pDZ1pkREZ4TnRWbXd0My1WTmdiUTRHMHAzekN2RGdybEtvYjhWdndIcnRxdk1xdnVmcnpzcHZVazUtWUJKV0VLUjRDQ3NDXzBnY1JxbVdyemFHR3hMbzBwelZJUTBzSUo4b3RqbjNLc3JmbTMwTzhNVjFUalN6aEY0ZmtRZF9SNS1WLWlBLWlrckhXdl9IdXpiTzZMX2s1UndHYjlGU2pmZHlUYlFjZ1XSAY4CQVVfeXFMT3FQeUhwcDE1WndRanljc25pZzZNTVI3aFRDR0g5VkFjcHRYTFFISWVQUGZqcWZBVDY4b1ZtNVlsZ1JnZFN0Y2d2OE5DSUltcVB6WFhXeTNRdENBYlM0Y0x4X2lvUjhDbWRhaWZnTXlqWDN4eWdnRzZfblJJSzc3bF8zNjFqWXNlSkVfWFQ3ejhWcWU5eXdNeXJ0VVBOQTNxcUV4cEN6ZWtWT21SRTdUeDEzYmJUc05wUDFtWF9MUm1aYk4yS2d2Y3JQaHJ6anYwaHZoN3BPUjFKZzRLMkgzRTBwX1c5U3JoQ3VoX01JcHUwTlB0bFo1YVpDUklQc1VDaFRoOXdGdllDUEhzTXJB?oc=5","source":"Livemint","published":"2026-10-23T08:11:32"},{"title":"Gold Rate Today, October 23, 2026: 24K Gold Falls by \u20b9190 per Gram; Check City-Wise Rates","url":"https://news.google.com/rss/articles/CBMiwgFBVV95cUxQY3E1N1dYZmd1LVJObzN4T1YyWkpKQ192TzhrOEE1ZnppVFhtalpiczhjS3VxSEl3SGFwaDM1OUlRendYWXFZcWF5dG50aVk5amFJUzV3RlBNczNyMW9ibHJsSjNCZWM2V2ZBdGFCTmV5QmpRYmZkMVgwXzUydUU3R1A1bGJLTXlETGM5d3FXdm84NUhOMC1BRklxaTFONFlLeEQ2aDhDMVFUcGpvYkV5MnRyYlJTeEM0cWhEUzhfQW95QQ?oc=5","source":"India Infoline","published":"2026-10-23T06:54:50"},{"title":"Gold Rate Today October 23: Check latest Gold prices in Delhi, Mumbai, Kolkata, Chennai, Bengaluru, Hyderabad, Pune & Other Cities","url":"https://news.google.com/rss/articles/CBMilAJBVV95cUxNNDhPdXlDRExRY1BHcXZhZGk3TVU2UExiYkRMdTlxTXFBNXhtUFQ4VXBBdHVOUDV1M3pwYkd3R1Z6ME51XzZGSVlicHhjaTZmSlI1YVM2UWdGcnFNTHFPbENLekNqVXpDUW93MlZQdzNYeFZqMkVKaGZrVm14enBOWU9sUDJ4SVgyeEx2bmdEUHJtV2NxMmVlSUtDZ2h2dGlWemRYdWZkTWFjUlZCMjlPZDg5TkprQS1CSEhYc0JtUl96cFBkeFhRRkdfSWNwWWtkSV9TelJLblBKT1FaVUpwdVBvVzdpSnBjUVpqeXdKT3Q0T0NFWGYyS0k0Mm9DUjlwMXVEVE5LbWxLa01keURsQWRoYUrSAZsCQVVfeXFMT3JRUUFMbDNRSlFlSERtTDdWZVlyVEZERGZKV2NhMTFLLXhJMEZOMVpoeUl1YmJBaWhOWWtXWExoOUtBcFZpX0xDQWxwSFRUWlVoaFRqVng4dE01Z3dCT2hWbm5WcHM5VlZ2bnprNVZfRXZ4bmd3bDhCOTZaSDlmdmhaSlZKZjhkR1NSS0RoMXVzVlJXSWR5ME14S2VveG5LWk1zQkpKMmpuMElJNG1NZXZidmdQcEJmdmt6WmM5MU5ta19KNTN4S2pPQm5sTEVTV3Q2ZV8wekFnY2x5X2JpeHY3cTNPenMtd0JZT0NGNzRlbE9PdEtNZVo4Q1JDOUpoRFRMS2VrSXJlanVJYTZmQWdDc2I4a1ZNQXpYdw?oc=5","source":"BusinessLine","published":"2026-10-23T08:01:04"},{"title":"Gold price today: Gold rates crash 26% from peak, lowest in 2 months; silver price also falls","url":"https://news.google.com/rss/articles/CBMiwwFBVV95cUxOakNGU1lsM1JvVzVjb0NXOU1vOGhzaUFEZ2NNZ3dKbHhEU29PaWR4cVhvc05KRXpZTzVTQnVQTkRCVng5N1dLVFhQeGYyRU5XMFlYWnpPeTgxb3Y4ZWp1UEJNRmNCOWdONmV0MWpJeWhGOXRCdndjWkk2Y2paTGFhZy1kT2oyZXJKekd5S3VVTmZ0amlZQ010UjY0YU53MnZTUkZCcjlSU2FCYXdiM25CZS1SR2lsX1R6TUtoRzhmMUlnN28?oc=5","source":"PTC News","published":"2026-10-23T11:55:54"},{"title":"Gold Rate Today October 23: Check latest Gold prices in Coimbatore, Nagpur, Visakhapatnam, Surat, Jaipur, Lucknow, Chandigarh & Other Cities","url":"https://news.google.com/rss/articles/CBMiogJBVV95cUxOMVRkbGtjSHY2aEl3emJ1RkN3eHJZWHBNQ2JrdWRCWkZrTG5UQmNhWmVJRU0yYXBLUnUxQTNVWm04MGVNOVZHS01fZ005c0lSQ2ZSR29KYjhPZm9kenVBQ3d2ZkYtTll5aUN2MjhybWwzVmx0aVY3WF9BbG9LZlpSUGJZcEwyUjQtVkFLa0otN3padzcyNmlqNFZoN3I5cjVYR1c0WVhKZERNREhtSXJrdEIyZDBIOG40TzhqdmJEY3c1dldQTU05SS1QbnZacnlHQ2wwbGQyZHhEdmx3Z3BnNHJ3dUQyVFNINWlIVFBCOUZNN1VRd1pBR3JmdURjVFVXRkx4WjVSUmxta1doaUdFbEZMU1AzbzBYNUg3YkpiNHEwUdIBqAJBVV95cUxQLTY1OFl4US1DcGk1eEJzd2l1am93aWNIY0dZNnBrM1NVX3BMVURFc0kyS1lOdWU2Rm1WSk9WckhNSzE1SXNXT3FDQ0VXTm5EeVhVWnZvUnIzLUQ4N2ZabGlzc1NNVkhBaEZkOXNFX1BWY2ZsNTQ1d2tNTzFEM1Q3M2ZndHYzQnpFNE5UdkJGOFR4SDBzZGVaRnhOZzZEOFN1eGhJelMycVRIS2kzRlRUU0NJcjBwbmJteVZjWVJaZDJlbzNOdkF1dXpKM2FQUzJDRzRDd001ckMxd3Zma0RDNk5SWklqMmNHc3piek1fcmlWZnlXTFdXSmZlMGRaWTlsbm1wa0hTSFR1aWt0LXB1bnpLSW5wREQ3Wkh5WmRQOGM2UFA4NEtISQ?oc=5","source":"BusinessLine","published":"2026-10-23T08:01:04"}];
+  var NEWS_BUILD = [{"title":"Gold Rate Today Live, Latest 22 And 24 Carat Gold Price In India","url":"https://news.google.com/rss/articles/CBMiTkFVX3lxTE5ieHFlWW9CNF9vaC03ME9mY29vZnpqTzdmcFpOZ3BfcEQxY3RXamt4VUI3cDBFTTQ3VzIxczNSUlBYTGdhMi1nT01HOUNXUQ?oc=5","source":"NDTV Profit","published":"2026-10-23T13:06:51"},{"title":"Silver Rate Today in Bundi 23rd October 2026 : 1 KG, Todays Silver Price in Bundi","url":"https://news.google.com/rss/articles/CBMic0FVX3lxTFBTTTExVDJmNEhvTHAtTjNpb2F2Rk9kUGFfWWpoX21XUmpRSzdPNmx5UGlpWl9jU2t2NEszVkM5blRzOTBKalBBZURkN0VNaV9obHYtVjJsT29GaFRrT3pfNmQ2YzdvRmpQNmp2bXdFZ3FucXc?oc=5","source":"Business Today","published":"2026-10-23T15:17:58"},{"title":"Silver rate today: Silver price falls over 3% to Rs 1.93 lakh per kg on MCX","url":"https://news.google.com/rss/articles/CBMi6AFBVV95cUxNYWc2bjVVQmlIa1d4bkFQMHlYemQ3SHBoSDBHNVBrczZ5QXRuRGIxQ3ZlVE5MR29fQzlVSEFpQjAxem5lTlZXQ0t1SkJVb0VTdmFfaHJhZENSWUt6RVZuaTdmVHlZdTM3elZhMjhmUEVGcnRBb3N0dlBvYnJHSHBlMzhEbThRb1BWcUVXQzdzNlRudjRMRlF1UGNSZXNvUTFhLUdxNTIzSG9uV3VaWXA5RGMwNHlJWEkwNmYwUHdqNTlzaEdDcVNIZWFRNzlPNFBlOXE5YkFXNENlQXY3WDJiakNRTWhObnJJ0gHuAUFVX3lxTE9EZWpfZDlLVU5FR3FtT2s4enpZdndndzZYbUlKZHE3OWsxcENzUjh2SGVUai01OTRGM1BzclhSZzhDbmRlSGdiU1VTWVh6ODFGRzVfWi14QUxOUW9ZSHJZdmI4UkJ2UWRvOUZNb2VJb1QtMFpYLTMyb2d2SGVHYmhBZ1UycEFnN09uSVhrb1VjcXo4VVVCZEloaU5oOHVzMlF0dzVuSW1GRlhFRzVPMU5YWjZEb2hhdjBhU2ZodmEzMzZyQ0VxN2I2YUlGX2kyTHdWOWtidUNJclQ4dW43dmlocWM0Um9ybU9YLUZUOGc?oc=5","source":"India Today","published":"2026-10-23T05:02:41"},{"title":"Gold Rate Today, October 23, 2026: 24K Gold Falls by \u20b9190 per Gram; Check City-Wise Rates","url":"https://news.google.com/rss/articles/CBMiwgFBVV95cUxQY3E1N1dYZmd1LVJObzN4T1YyWkpKQ192TzhrOEE1ZnppVFhtalpiczhjS3VxSEl3SGFwaDM1OUlRendYWXFZcWF5dG50aVk5amFJUzV3RlBNczNyMW9ibHJsSjNCZWM2V2ZBdGFCTmV5QmpRYmZkMVgwXzUydUU3R1A1bGJLTXlETGM5d3FXdm84NUhOMC1BRklxaTFONFlLeEQ2aDhDMVFUcGpvYkV5MnRyYlJTeEM0cWhEUzhfQW95QQ?oc=5","source":"India Infoline","published":"2026-10-23T06:54:50"},{"title":"Gold Rate Today October 23: Check latest Gold prices in Delhi, Mumbai, Kolkata, Chennai, Bengaluru, Hyderabad, Pune & Other Cities","url":"https://news.google.com/rss/articles/CBMilAJBVV95cUxNNDhPdXlDRExRY1BHcXZhZGk3TVU2UExiYkRMdTlxTXFBNXhtUFQ4VXBBdHVOUDV1M3pwYkd3R1Z6ME51XzZGSVlicHhjaTZmSlI1YVM2UWdGcnFNTHFPbENLekNqVXpDUW93MlZQdzNYeFZqMkVKaGZrVm14enBOWU9sUDJ4SVgyeEx2bmdEUHJtV2NxMmVlSUtDZ2h2dGlWemRYdWZkTWFjUlZCMjlPZDg5TkprQS1CSEhYc0JtUl96cFBkeFhRRkdfSWNwWWtkSV9TelJLblBKT1FaVUpwdVBvVzdpSnBjUVpqeXdKT3Q0T0NFWGYyS0k0Mm9DUjlwMXVEVE5LbWxLa01keURsQWRoYUrSAZsCQVVfeXFMT3JRUUFMbDNRSlFlSERtTDdWZVlyVEZERGZKV2NhMTFLLXhJMEZOMVpoeUl1YmJBaWhOWWtXWExoOUtBcFZpX0xDQWxwSFRUWlVoaFRqVng4dE01Z3dCT2hWbm5WcHM5VlZ2bnprNVZfRXZ4bmd3bDhCOTZaSDlmdmhaSlZKZjhkR1NSS0RoMXVzVlJXSWR5ME14S2VveG5LWk1zQkpKMmpuMElJNG1NZXZidmdQcEJmdmt6WmM5MU5ta19KNTN4S2pPQm5sTEVTV3Q2ZV8wekFnY2x5X2JpeHY3cTNPenMtd0JZT0NGNzRlbE9PdEtNZVo4Q1JDOUpoRFRMS2VrSXJlanVJYTZmQWdDc2I4a1ZNQXpYdw?oc=5","source":"BusinessLine","published":"2026-10-23T08:01:04"},{"title":"Silver rate today at 11-month low; slips below \u20b92 lakh in India \u2014 where will it go? Should you buy for good returns?","url":"https://news.google.com/rss/articles/CBMiiAJBVV95cUxOZW9vU1FLMXk0Q2phc3VBdjR4bk1RS2hfUkphWHZKZ3pHMGdBcS0yTWlWWFpSUHBzUk52S2ZhdjNwVWQyMEFvb1NRV2xsUS1ZczdBSmFueVdOTVo0MDBCV3pDZ1pkREZ4TnRWbXd0My1WTmdiUTRHMHAzekN2RGdybEtvYjhWdndIcnRxdk1xdnVmcnpzcHZVazUtWUJKV0VLUjRDQ3NDXzBnY1JxbVdyemFHR3hMbzBwelZJUTBzSUo4b3RqbjNLc3JmbTMwTzhNVjFUalN6aEY0ZmtRZF9SNS1WLWlBLWlrckhXdl9IdXpiTzZMX2s1UndHYjlGU2pmZHlUYlFjZ1XSAY4CQVVfeXFMT3FQeUhwcDE1WndRanljc25pZzZNTVI3aFRDR0g5VkFjcHRYTFFISWVQUGZqcWZBVDY4b1ZtNVlsZ1JnZFN0Y2d2OE5DSUltcVB6WFhXeTNRdENBYlM0Y0x4X2lvUjhDbWRhaWZnTXlqWDN4eWdnRzZfblJJSzc3bF8zNjFqWXNlSkVfWFQ3ejhWcWU5eXdNeXJ0VVBOQTNxcUV4cEN6ZWtWT21SRTdUeDEzYmJUc05wUDFtWF9MUm1aYk4yS2d2Y3JQaHJ6anYwaHZoN3BPUjFKZzRLMkgzRTBwX1c5U3JoQ3VoX01JcHUwTlB0bFo1YVpDUklQc1VDaFRoOXdGdllDUEhzTXJB?oc=5","source":"Livemint","published":"2026-10-23T08:11:32"},{"title":"Gold price today: Gold rates crash 26% from peak, lowest in 2 months; silver price also falls","url":"https://news.google.com/rss/articles/CBMiwwFBVV95cUxOakNGU1lsM1JvVzVjb0NXOU1vOGhzaUFEZ2NNZ3dKbHhEU29PaWR4cVhvc05KRXpZTzVTQnVQTkRCVng5N1dLVFhQeGYyRU5XMFlYWnpPeTgxb3Y4ZWp1UEJNRmNCOWdONmV0MWpJeWhGOXRCdndjWkk2Y2paTGFhZy1kT2oyZXJKekd5S3VVTmZ0amlZQ010UjY0YU53MnZTUkZCcjlSU2FCYXdiM25CZS1SR2lsX1R6TUtoRzhmMUlnN28?oc=5","source":"PTC News","published":"2026-10-23T11:55:54"},{"title":"Gold Rate Today October 23: Check latest Gold prices in Coimbatore, Nagpur, Visakhapatnam, Surat, Jaipur, Lucknow, Chandigarh & Other Cities","url":"https://news.google.com/rss/articles/CBMiogJBVV95cUxOMVRkbGtjSHY2aEl3emJ1RkN3eHJZWHBNQ2JrdWRCWkZrTG5UQmNhWmVJRU0yYXBLUnUxQTNVWm04MGVNOVZHS01fZ005c0lSQ2ZSR29KYjhPZm9kenVBQ3d2ZkYtTll5aUN2MjhybWwzVmx0aVY3WF9BbG9LZlpSUGJZcEwyUjQtVkFLa0otN3padzcyNmlqNFZoN3I5cjVYR1c0WVhKZERNREhtSXJrdEIyZDBIOG40TzhqdmJEY3c1dldQTU05SS1QbnZacnlHQ2wwbGQyZHhEdmx3Z3BnNHJ3dUQyVFNINWlIVFBCOUZNN1VRd1pBR3JmdURjVFVXRkx4WjVSUmxta1doaUdFbEZMU1AzbzBYNUg3YkpiNHEwUdIBqAJBVV95cUxQLTY1OFl4US1DcGk1eEJzd2l1am93aWNIY0dZNnBrM1NVX3BMVURFc0kyS1lOdWU2Rm1WSk9WckhNSzE1SXNXT3FDQ0VXTm5EeVhVWnZvUnIzLUQ4N2ZabGlzc1NNVkhBaEZkOXNFX1BWY2ZsNTQ1d2tNTzFEM1Q3M2ZndHYzQnpFNE5UdkJGOFR4SDBzZGVaRnhOZzZEOFN1eGhJelMycVRIS2kzRlRUU0NJcjBwbmJteVZjWVJaZDJlbzNOdkF1dXpKM2FQUzJDRzRDd001ckMxd3Zma0RDNk5SWklqMmNHc3piek1fcmlWZnlXTFdXSmZlMGRaWTlsbm1wa0hTSFR1aWt0LXB1bnpLSW5wREQ3Wkh5WmRQOGM2UFA4NEtISQ?oc=5","source":"BusinessLine","published":"2026-10-23T08:01:04"}];
   var NEWS_CACHE_KEY='mgr_news_cache_v1';
   var NEWS_TTL_MS=30*60*1000;
   var NEWS_MAX=8;
@@ -3142,7 +3181,8 @@ function handleCredentialResponse(resp){
         btn.textContent='Subscribed \u2713';
         if(st){st.style.color='var(--mint)';
                st.textContent='\u2713 Subscribed \u2014 your first email arrives tomorrow morning.'}
-        if(window.GR_CLOSE_SUBPOP)window.GR_CLOSE_SUBPOP(true);
+        // Leave the popup's own confirmation on screen for a moment.
+        if(window.GR_CLOSE_SUBPOP)setTimeout(function(){window.GR_CLOSE_SUBPOP(true)},suf==='P'?2200:0);
       }).catch(function(err){
         console.warn('subscribe failed',err);
         btn.disabled=false;btn.textContent=idle;
@@ -3178,8 +3218,17 @@ function handleCredentialResponse(resp){
   function lsSet(k,v){try{localStorage.setItem(k,v)}catch(_){}}
   function ssGet(k){try{return sessionStorage.getItem(k)}catch(_){return null}}
   function ssSet(k,v){try{sessionStorage.setItem(k,v)}catch(_){}}
+  // Links in the daily email carry ?from=alert: whoever arrives through one
+  // is a subscriber, so never show them the popup (on this device, ever).
+  try{var spQ=new URLSearchParams(location.search);
+    if(spQ.get('from')==='alert'){lsSet(SP_SUB,'1');spQ.delete('from');
+      history.replaceState(null,'',location.pathname+(spQ.toString()?'?'+spQ:'')+location.hash);}}catch(_){}
 
   var subPop=document.getElementById('subPop');
+  // The popup's markup sits inside the phone layout, which is hidden on
+  // screens 900px and wider - so on desktop it "opened" invisibly and no
+  // desktop visitor to the homepage was ever asked. Lift it to <body>.
+  if(subPop&&subPop.parentNode!==document.body)document.body.appendChild(subPop);
   function closeSubPop(subscribed){
     if(!subPop)return;
     subPop.classList.remove('open');
@@ -3229,10 +3278,11 @@ function handleCredentialResponse(resp){
   window.GR_ASK_PHONE=askForPhone;
 
   if(subPop){
-    var spX=document.getElementById('spClose'),spL=document.getElementById('spLater');
+    var spX=document.getElementById('spClose'),spH=document.getElementById('spHave');
     if(spX)spX.addEventListener('click',function(){closeSubPop(false)});
-    if(spL)spL.addEventListener('click',function(){closeSubPop(false)});
-    subPop.addEventListener('click',function(e){if(e.target===subPop)closeSubPop(false)});
+    // Subscribed on another phone or browser: remember it here too, so the
+    // popup never asks again on this device. No tap-outside close.
+    if(spH)spH.addEventListener('click',function(){lsSet(SP_SUB,'1');closeSubPop(true)});
     document.addEventListener('keydown',function(e){
       if(e.key==='Escape'&&subPop.classList.contains('open'))closeSubPop(false);
     });
@@ -3255,7 +3305,14 @@ function handleCredentialResponse(resp){
     if(document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi"]'))return false;
     return true;
   }
-  function maybeOpenSubPop(){ if(subPopEligible())openSubPop(); }
+  function maybeOpenSubPop(){
+    if(!subPopEligible())return;
+    openSubPop();
+    // Signed up with Google but gave no mobile: they ARE subscribed, so ask
+    // only for the missing number rather than pitching the whole thing again.
+    var u=null;try{u=JSON.parse(lsGet('gr_user')||'null')}catch(_){}
+    if(lsGet('gr_sub_nophone')==='1'&&u&&u.email)askForPhone(u.name||'',u.email);
+  }
 
   // Trigger: whichever engagement signal lands first, then never again.
   // The original fired as soon as One Tap concluded, which on a cold load

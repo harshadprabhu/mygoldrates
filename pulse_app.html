@@ -3297,12 +3297,16 @@ function handleCredentialResponse(resp){
     var n=parseInt(lsGet(SP_N)||'0',10)||0, last=parseInt(lsGet(SP_LAST)||'0',10)||0;
     if(n>=SP_MAX)return false;
     if(last&&Date.now()-last<SP_GAP)return false;
-    // Don't stack behind Google's own prompt.
-    if(document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi"]'))return false;
     return true;
   }
+  // Don't stack behind Google's own sign-in prompt - but wait for it to go
+  // rather than give up: skipping outright meant anyone who saw that prompt
+  // at the 5-second mark was never asked on that visit.
+  function gsiOnScreen(){return !!document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi/iframe"]');}
+  var spWait=0;
   function maybeOpenSubPop(){
     if(!subPopEligible())return;
+    if(gsiOnScreen()){if(spWait++<40)setTimeout(maybeOpenSubPop,1500);return;}
     openSubPop();
     // Signed up with Google but gave no mobile: they ARE subscribed, so ask
     // only for the missing number rather than pitching the whole thing again.
