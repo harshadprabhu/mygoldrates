@@ -22,6 +22,10 @@
                  'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
         body:JSON.stringify(base)}).then(function(r2){
           if(!r2.ok)throw new Error('save');return true;});
+    }).then(function(ok){
+      /* joined with a friend's invite link: credit the friend */
+      try{if(window.GR_REF_DONE)window.GR_REF_DONE(payload.email);}catch(e){}
+      return ok;
     });
   }
   window.GR_SAVE=saveSubscriber;

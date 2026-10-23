@@ -174,7 +174,7 @@
     clearTimeout(timer);window.removeEventListener('scroll',onScroll);
     if(!eligible())return;
     // Wait for Google's sign-in prompt to close instead of giving up.
-    if(document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi/iframe"]')){
+    if(document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi/iframe"],html.sona-open')){
       if(waits++<40){armed=true;setTimeout(open,1500);}return;}
     build();
     s('gr_pop_last',String(Date.now()));
@@ -191,8 +191,9 @@
       body:JSON.stringify(body)});
   }
   function save(p){
-    if(window.GR_SAVE)return window.GR_SAVE(p);
-    return rpc('upsert_subscriber',{payload:p}).then(function(r){if(!r.ok)throw new Error('save');return true});
+    var done=function(x){try{if(window.GR_REF_DONE)window.GR_REF_DONE(p.email);}catch(_){}return x;};
+    if(window.GR_SAVE)return window.GR_SAVE(p).then(done);
+    return rpc('upsert_subscriber',{payload:p}).then(function(r){if(!r.ok)throw new Error('save');return true}).then(done);
   }
   // The optional price-drop alert; resolves to the target set, or 0.
   function price(email){

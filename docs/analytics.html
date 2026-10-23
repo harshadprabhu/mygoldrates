@@ -178,6 +178,22 @@ td.path .tx{color:var(--accent)}
       <div class="note" id="funnelNote"></div>
     </div>
 
+    <div class="card">
+      <div class="chd"><h2>Sona, the jewellery assistant</h2><span class="hint">questions asked in this range</span></div>
+      <div class="kpis small" id="botKpis"></div>
+      <h3>What Sona couldn&rsquo;t answer (or got a thumbs-down)</h3>
+      <div id="botUn"></div>
+      <h3>Your approved answers</h3>
+      <div id="botAp"></div>
+      <div class="note">An approved answer is saved to the site&rsquo;s git repository and Sona uses it from the next morning. Questions themselves stay private.</div>
+    </div>
+
+    <div class="card">
+      <div class="chd"><h2>Referrals</h2><span class="hint">friends who joined with a subscriber&rsquo;s link</span></div>
+      <div class="kpis small" id="refKpis"></div>
+      <div id="refTop"></div>
+    </div>
+
     <div class="grid3 row">
       <div class="card"><div class="chd"><h2>Traffic sources</h2><span class="hint">tap a row to filter</span></div><div id="t_sources"></div></div>
       <div class="card"><div class="chd"><h2>Sections</h2><span class="hint">tap a row to filter</span></div><div id="t_groups"></div></div>
@@ -666,6 +682,44 @@ td.path .tx{color:var(--accent)}
   }
   $('clicksMore').onclick=function(){CLICKS_N=CLICKS_N<CLICKS_ALL.length?1e9:12;renderClicks();};
 
+  // Sona: what people asked, what it could not answer, and the answers
+  // the owner approves (bot_approve, gated by the same secret token).
+  function renderBot(d){
+    var b=d.bot;
+    if(b===undefined){$('botKpis').innerHTML='<div class="msg">Needs the updated sql/analytics_v2.sql.</div>';return;}
+    $('botKpis').innerHTML=tiles([['Questions asked',b.asked],['Answered',b.answered,
+      b.asked?Math.round(b.answered/b.asked*100)+'% of questions':''],['Helpful \ud83d\udc4d',b.helpful_yes],['Not helpful \ud83d\udc4e',b.helpful_no]]);
+    var un=b.unanswered||[];
+    $('botUn').innerHTML=un.length?'<table><tr><th>Question</th><th class="num">Times</th><th></th></tr>'+un.map(function(r,i){
+      return '<tr><td>'+esc(r.q)+(r.disliked?' <span class="note" style="display:inline">(thumbs-down)</span>':'')+
+        '<div class="ba" id="ba'+i+'" hidden style="margin-top:8px"><textarea rows="3" style="width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px" placeholder="The answer Sona should give"></textarea>'+
+        '<input placeholder="Optional link, e.g. /gold-offers-today" style="width:100%;margin-top:6px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px">'+
+        '<button class="btn" data-save="'+i+'" style="margin-top:6px">Save answer</button> <span class="note" style="display:inline" id="bs'+i+'"></span></div></td>'+
+        '<td class="num">'+nfmt(r.n)+'</td><td class="num"><button class="btn" data-ans="'+i+'">Answer</button></td></tr>';}).join('')+'</table>':
+      '<div class="msg">Nothing unanswered in this range.</div>';
+    var ap=b.approved||[];
+    $('botAp').innerHTML=ap.length?'<table><tr><th>Question</th><th>Answer</th><th></th></tr>'+ap.map(function(r){
+      return '<tr><td>'+esc(r.q)+'</td><td>'+esc(r.a)+(r.u?' <span class="note" style="display:inline">'+esc(r.u)+'</span>':'')+'</td>'+
+        '<td class="num"><button class="btn" data-unap="'+r.id+'">Remove</button></td></tr>';}).join('')+'</table>':
+      '<div class="msg">None yet.</div>';
+    $('botUn').onclick=function(e){
+      var a=e.target.getAttribute('data-ans'),sv=e.target.getAttribute('data-save');
+      if(a!=null){var f=$('ba'+a);f.hidden=!f.hidden;return;}
+      if(sv!=null){var box=$('ba'+sv),ta=box.querySelector('textarea'),u=box.querySelector('input'),st=$('bs'+sv);
+        st.textContent='Saving\u2026';
+        post('bot_approve',{p_secret:TOKEN,p_q:un[+sv].q,p_a:ta.value,p_u:u.value}).then(function(r){
+          st.textContent=r.j==='ok'?'Saved \u2014 Sona uses it from tomorrow morning.':'Not saved: '+(r.j||r.status);
+          if(r.j==='ok')setTimeout(load,1200);});}
+    };
+    $('botAp').onclick=function(e){
+      var id=e.target.getAttribute('data-unap');if(id==null)return;
+      post('bot_unapprove',{p_secret:TOKEN,p_id:+id}).then(function(){load();});
+    };
+    var rf=d.referrals;
+    if(rf){$('refKpis').innerHTML=tiles([['Friends joined',rf.joined],['Referrers emailed',rf.notified]]);
+      plainTable($('refTop'),rf.top||[],[{h:'Referrer',k:'who'},{h:'Friends',k:'n',num:true}]);}
+  }
+
   var SIGNUP_NAMES={google:'Google sign-in',form:'Email form',manual:'Signed up on the page',
     popup:'Popup',otp:'Email code'};
 
@@ -728,6 +782,7 @@ td.path .tx{color:var(--accent)}
       return {label:r.name,sub:r.source||'',value:r.views,f:r.source?'source':'',v:r.source};}),
       {h:'Website',h1:'Views',empty:'No other website sent visitors in this range.'});
     renderFunnel(d);
+    renderBot(d);
     barTable($('t_signups'),(d.signup_methods||[]).map(function(r){
       return {label:SIGNUP_NAMES[r.name]||r.name,value:r.signups};}),
       {h:'Method',h1:'Sign-ups',empty:V1?'Needs sql/analytics_v2.sql.':'No new sign-ups in this range.'});
