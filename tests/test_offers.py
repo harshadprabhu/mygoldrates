@@ -96,3 +96,31 @@ def test_an_implausible_flat_discount_never_enters_the_ranking():
     r = P.ring_prices(data, mc, {"a": 12000.0})[0]
     assert r["flat_pct"] == 0 and r["after"] == r["before"]
     assert r["best_case"]                      # shown only as a best case
+
+
+def test_a_site_showing_us_its_international_version_is_skipped():
+    html = "".join(f'<img src="/media/bsimages/collection-{i}-web-intl.jpg">' for i in range(4))
+    assert O.international(html)
+    assert O.international("<p>Get a FREE pendant on purchases of $300, $500 and $1000 and $2000</p>")
+    assert not O.international("<p>₹13,050 per gram, ₹1,30,500 for 10 g</p>")
+    # everyday addresses are not country markers
+    assert not O.international('<script src="/js/intl-tel-input.min.js"></script>' * 4)
+    assert not O.international('<a href="/contact-us/">x</a><a href="/about-us.html">y</a>'
+                               '<a href="/pages/us-policy">z</a><a href="/why-us/">w</a>')
+
+
+def test_banner_text_from_ocr_reads_like_page_text():
+    """CaratLane's banner (24 Oct 2026), as Tesseract reads it: the '%' after
+    'FLAT 20' is stylised and comes back missing."""
+    txt = "FLAT\n20 Off\nOn All Diamond Jewellery\n5% INSTANT DISCOUNT ON CREDIT CARDS\nValid till 31st Oct 2026. T&C Apply"
+    got = {o["kind"]: o for o in O.extract_offers(txt, "https://x.in/", image="https://x.in/b.jpg")}
+    assert got["diamond_off"]["pct"] == 20.0 and got["diamond_off"]["image"]
+    assert got["cashback"]["pct"] == 5.0
+
+
+def test_a_big_figure_from_a_banner_is_left_out_and_buy_more_is_named():
+    """Jewel One's banner, 24 Oct 2026."""
+    txt = ("BUY 1 DIAMOND\nJEWELLERY\nGOLD JEWELLERY\nGET YOUR 2ND AT 15% OFF\n100% OFF\nON DIAMOND")
+    got = O.extract_offers(txt, "u", image="i")
+    assert not any((o["pct"] or 0) >= 50 for o in got)
+    assert any(o["kind"] == "combo" for o in got)

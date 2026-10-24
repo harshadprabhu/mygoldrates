@@ -31,6 +31,7 @@ KIND_LABEL = {
     "rate_protect": "Rate protection / advance booking",
     "scheme": "Monthly savings plan",
     "cashback": "Bank / card offer",
+    "combo": "Buy-more offer",
 }
 
 
@@ -108,7 +109,7 @@ def flat_making_offer(o):
     go into the ranking: not "up to", not selected designs, not diamond-only,
     and not implausibly large."""
     return (o["kind"] == "making_off" and o.get("pct_max") and not o.get("upto")
-            and o["pct_max"] <= MAX_FLAT_PCT
+            and o["pct_max"] <= MAX_FLAT_PCT and not o.get("image")
             and not o.get("selected") and _gold_jewellery_applies(o)
             and (o.get("pct_min") == o.get("pct_max")))
 
@@ -197,6 +198,10 @@ def meaning(o, name, mc_pct, rate24):
                      "in for the plan period and usually redeemable only as jewellery from them.")
     elif k == "cashback":
         parts.append("Needs that bank&rsquo;s card and is usually capped; read the maximum.")
+    elif k == "combo":
+        parts.append("A discount on the second piece when you buy two; the first is at full "
+                     "price, and the discount usually applies to the lower-priced piece. Worth "
+                     "it only if you wanted both.")
     return " ".join(parts)
 
 
@@ -274,7 +279,11 @@ def build_body(offers_data, mc, rate22_by_slug, rate24, display_date, site_url, 
     for b in with_offers:
         out.append(f'<section class="offer-brand"><h3>{esc(b["name"])}</h3>')
         for o in b["offers"]:
-            tags = o.get("applies_to") or []
+            tags = list(o.get("applies_to") or [])
+            if o.get("dates"):
+                tags.append("valid: " + ", ".join(o["dates"]))
+            if o.get("image"):
+                tags.append("read from their banner")
             seen = (f" &middot; first seen {esc(o['first_seen'])}" if o.get("first_seen") else "")
             out.append(
                 '<div class="offer">'
@@ -285,6 +294,8 @@ def build_body(offers_data, mc, rate22_by_slug, rate24, display_date, site_url, 
                 f'{esc(b["name"])}&rsquo;s page</a>{seen}</p>'
                 f'<p class="offer-m"><strong>What it means:</strong> '
                 f'{meaning(o, b["name"], mc_by.get(b["slug"]), rate24)}</p>'
+                + (f'<p class="offer-f"><strong>The whole banner says:</strong> &ldquo;{esc(o["banner"])}&rdquo;</p>'
+                   if o.get("banner") else "")
                 + ("<p class=\"offer-f\"><strong>Fine print we found:</strong> "
                    + " &middot; ".join(f"&ldquo;{esc(c)}&rdquo;" for c in o.get("conditions", []))
                    + "</p>" if o.get("conditions") else "")
