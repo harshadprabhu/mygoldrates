@@ -166,3 +166,11 @@ def test_the_daily_rate_email_stays_free_of_marketing():
         assert word not in html.lower() and word not in text.lower(), word
     assert "₹14,050" in text and "Unsubscribe: https://u" in text
     assert sa.masked("harshad@example.com") == "ha…"
+
+
+def test_the_launch_email_has_no_invite_link():
+    import promo_email as P
+    qa = [("Which jeweller has the cheapest 22K today?", "PN Gadgil, at ₹12,958/g.")]
+    body, text = P.letter("Asha", qa, "https://u")
+    for out in (body, text, P.html("Asha", qa, "https://u", "25 October 2026")):
+        assert "invite" not in out.lower() and "?ref=" not in out

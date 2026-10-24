@@ -8,8 +8,8 @@
                                                not had this campaign yet
 
 Every send is recorded in email_campaigns, so running --send again never
-emails anyone twice. Each email carries the reader's own invite link and a
-one-click unsubscribe. The example answers use today's real rates.
+emails anyone twice. Each email carries a one-click unsubscribe; no invite
+link (referral wording is what Gmail files under Promotions). The example answers use today's real rates.
 
 It is written as a short personal letter (plain layout, one small picture,
 links in the text, a plain-text part, from a person), which Gmail is far
@@ -53,7 +53,7 @@ def examples(live):
     return out
 
 
-def letter(first, qa, invite, unsub):
+def letter(first, qa, unsub):
     """The personal-letter email: (html, text)."""
     import html as H
     site = SA.SITE_URL
@@ -85,7 +85,6 @@ def letter(first, qa, invite, unsub):
   <td style="border-radius:999px;background:#d9b24a;background:linear-gradient(100deg,#b98a24,#e6c268 50%,#c79a2e)">
     <a href="{ask}" style="display:inline-block;padding:11px 22px;font-size:15px;font-weight:bold;color:#1a1405;text-decoration:none">Ask Sona a question &rarr;</a></td></tr></table>
 <p {p}>We have also started putting every jeweller&rsquo;s offers in one place, with what each is really worth after making charges and GST: <a href="{offers}" {link}>gold offers today</a>. And if you tell us your target price, we will email you the day 22K drops to it.</p>
-<div style="margin:0 0 16px;padding:12px 14px;border:1px dashed #e0c98a;border-radius:10px;background:#fffdf7">If a friend is buying gold soon, this is your personal invite link:<br><a href="{invite}" {link}>{invite}</a><br><span style="color:#6b6458;font-size:13.5px">When they join, we will let you know.</span></div>
 <p style="margin:0 0 18px;font-size:13.5px;color:#6b6458;font-style:italic">One small request: if this email landed in your Promotions tab, please move it to Primary, so the daily rate alerts reach you too.</p>
 <p style="margin:0 0 2px">Thank you for being one of our first subscribers,</p>
 <p style="margin:0 0 20px"><b>Harshad</b><br><span style="color:#8C6A18">MyGoldRates</span></p>
@@ -106,8 +105,6 @@ def letter(first, qa, invite, unsub):
         "We have also started putting every jeweller's offers in one place, with what each is really "
         f"worth after making charges and GST: {offers}\nAnd if you tell us your target price, we will "
         "email you the day 22K drops to it.",
-        f"If a friend is buying gold soon, this is your personal invite link: {invite}\n"
-        "When they join, we will let you know.",
         "One small request: if this email landed in your Promotions tab, please move it to Primary, "
         "so the daily rate alerts reach you too.",
         "Thank you for being one of our first subscribers,\nHarshad\nMyGoldRates",
@@ -115,7 +112,7 @@ def letter(first, qa, invite, unsub):
     return body, text
 
 
-def html(first, qa, invite, unsub, date):
+def html(first, qa, unsub, date):
     site = SA.SITE_URL
     rows = "".join(
         f'<tr><td style="padding:0 0 12px">'
@@ -155,15 +152,6 @@ def html(first, qa, invite, unsub, date):
       </table>
       <p style="margin:16px 0 0;font-size:14px;line-height:1.6;color:#514b41">Also new: <a href="{site}/gold-offers-today?from=alert" style="color:#8C6A18;font-weight:bold">Gold offers today</a> &mdash; every jeweller&rsquo;s offer in one place, with what it&rsquo;s really worth after making charges and GST. And you can now ask us to email you the day 22K drops to your price.</p>
     </td></tr>
-    <tr><td style="padding:18px 30px 24px">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fbf7ec;border:1px solid #efe2c2;border-radius:12px">
-        <tr><td style="padding:16px 18px">
-          <div style="font-size:16px;font-weight:bold;color:#1f1c17">&#127873; Know someone buying gold soon?</div>
-          <div style="margin-top:6px;font-size:13.5px;line-height:1.6;color:#514b41">Send them your personal invite link. When they join, we&rsquo;ll email you to say who joined through you.</div>
-          <div style="margin-top:10px;font-size:15px"><a href="{invite}" style="color:#8C6A18;font-weight:bold">{invite}</a></div>
-        </td></tr>
-      </table>
-    </td></tr>
     <tr><td style="padding:16px 30px 22px;background:#faf8f2;border-top:1px solid #efe9db;font-size:11px;color:#8f887c;line-height:1.6">
       You're receiving this one-off announcement because you subscribed at mygoldrates.com. {date}.<br>
       <a href="{unsub}" style="color:#8f887c">Unsubscribe</a>
@@ -181,11 +169,11 @@ def main():
     ap.add_argument("--designed", action="store_true", help="the newsletter-style version")
     args = ap.parse_args()
 
-    def compose(first, invite, unsub):
+    def compose(first, unsub):
         """(html, text or None, subject, sender name or None)"""
         if args.designed:
-            return html(first, qa, invite, unsub, date), None, SUBJECT_DESIGNED, None
-        b, tx = letter(first, qa, invite, unsub)
+            return html(first, qa, unsub, date), None, SUBJECT_DESIGNED, None
+        b, tx = letter(first, qa, unsub)
         return b, tx, SUBJECT, LETTER_FROM
 
     from supabase import create_client
@@ -196,8 +184,7 @@ def main():
     qa = examples(live)
     date = datetime.now(SA.IST).strftime("%d %B %Y")
     if args.preview:                 # reads rates only; writes nothing anywhere
-        body, text, _, _ = compose("Asha", SA.ref_link("SAMPLE1"),
-                                   f"{SA.SITE_URL}/unsubscribe.html?t=00000000-0000-0000-0000-000000000000")
+        body, text, _, _ = compose("Asha", f"{SA.SITE_URL}/unsubscribe.html?t=00000000-0000-0000-0000-000000000000")
         open(args.preview, "w", encoding="utf-8").write(body)
         if text:
             open(args.preview + ".txt", "w", encoding="utf-8").write(text)
@@ -205,13 +192,11 @@ def main():
         return
     subs = sb.table("inquiries").select("name, email, unsub_token").execute().data
     subs = [s for s in subs if s.get("email") and s.get("unsub_token")]
-    codes = {}
 
     def build(s):
         first = (s.get("name") or "there").strip().split(" ")[0] or "there"
         unsub = f"{SA.SITE_URL}/unsubscribe.html?t={s['unsub_token']}"
-        code = codes.get(s["email"].lower())
-        return compose(first, SA.ref_link(code) if code else f"{SA.SITE_URL}/", unsub), unsub
+        return compose(first, unsub), unsub
 
     key = os.environ.get("BREVO_API_KEY", "").strip()
     if not key:
@@ -240,13 +225,9 @@ def main():
         return r.status_code < 300
 
     if args.to:
-        # A test touches no one else: an invite code for this address only,
-        # if it is a subscriber, and nothing recorded.
-        sample = next((s for s in subs if s["email"].lower() == args.to.lower()), None)
-        if sample:
-            codes.update(SA.ensure_ref_codes(sb, [sample]))
-        else:
-            sample = {"name": "", "email": args.to, "unsub_token": "00000000-0000-0000-0000-000000000000"}
+        # A test touches no one else and records nothing.
+        sample = next((s for s in subs if s["email"].lower() == args.to.lower()), None) or \
+            {"name": "", "email": args.to, "unsub_token": "00000000-0000-0000-0000-000000000000"}
         body, unsub = build(sample)
         ok = send(args.to, body, unsub)
         print("promo: test copy", "sent" if ok else "FAILED")
@@ -254,7 +235,6 @@ def main():
             sys.exit(1)                 # a red run, not a quiet green one
         return
 
-    codes.update(SA.ensure_ref_codes(sb, subs))
     done = {r["email"].lower() for r in sb.table("email_campaigns").select("email")
             .eq("campaign", CAMPAIGN).execute().data}
     todo = [s for s in subs if s["email"].lower() not in done]
