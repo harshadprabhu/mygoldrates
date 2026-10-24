@@ -10,14 +10,38 @@
  * numbers) so the owner can see what people ask and approve answers for the
  * ones Sona could not handle; approved answers come back through the
  * knowledge file (data/assistant_answers.json in git).
+ *
+ * Voice and languages, also free: the browser's own speech recognition
+ * (tap the mic) and its own voices (read aloud), in English and nine Indian
+ * languages. A question in an Indian script is turned into the words this
+ * engine knows by sona_lang.js; replies come from sona_i18n.js. The build
+ * puts all three in one file, /assistant.js.
  */
 (function () {
   if (window.__sona) return; window.__sona = 1;
-  if (/^\/(analytics|unsubscribe|404)(\.html)?\/?$/.test(location.pathname)) return;
+  var TEST = !!window.__SONA_TEST;
+  if (!TEST && /^\/(analytics|unsubscribe|404)(\.html)?\/?$/.test(location.pathname)) return;
 
   var SB = (window.GR_SB_URL || '').replace(/\/$/, ''), KEY = window.GR_SB_KEY || '';
   var KB = null, kbWait = null, opened = false, lastCity = null;
   try { lastCity = localStorage.getItem('sona_city'); } catch (_) {}
+  var LG = window.SONA_LANG, STR = window.SONA_STR || {};
+  var LANG = 'en', RL = 'en';             // chosen language; the language of this reply
+  try { LANG = localStorage.getItem('sona_lang') || ''; } catch (_) {}
+  if (!STR[LANG]) {
+    LANG = 'en';
+    (navigator.languages || [navigator.language || '']).some(function (l) {
+      var c = String(l).slice(0, 2).toLowerCase();
+      if (STR[c] && c !== 'en') { LANG = c; return true; }
+      return false;
+    });
+  }
+  RL = LANG;
+  // Text in the reply language, falling back to English: t('city_h', {c: 'Pune'}).
+  function fill(s, v) { return String(s).replace(/\{(\w+)\}/g, function (_, n) { return v && v[n] != null ? v[n] : ''; }); }
+  function t(k, v) { return fill((STR[RL] && STR[RL][k]) || (STR.en && STR.en[k]) || k, v); }
+  function en(k, v) { return fill((STR.en && STR.en[k]) || k, v); }
+  function langName(c) { var l = (LG ? LG.LANGS : []).filter(function (x) { return x.c === c; })[0]; return l ? l.n : c; }
 
   // ------------------------------------------------------------ helpers
   function $(s, r) { return (r || document).querySelector(s); }
@@ -26,7 +50,12 @@
   function pct(n) { return (Math.round(n * 10) / 10).toLocaleString('en-IN') + '%'; }
   var K = { '24K': 1, '22K': 22 / 24, '18K': 18 / 24, '14K': 14 / 24 };
   function rate(b, k) { return b.r24 * K[k]; }
-  function track(t) { try { if (window.GR_TRACK) window.GR_TRACK('click_events', { page: location.pathname, target: 'sona:' + t, session_id: window.GR_SID || '' }); } catch (_) {} }
+  // For speaking: "12,879 rupees", "22 carat".
+  function sInr(n) { return Math.round(n).toLocaleString('en-IN') + ' ' + t('rupees'); }
+  function sK(k) { return String(k).replace('K', '') + ' ' + t('carat'); }
+  function catName(c) { return (STR[RL] && STR[RL]['c_' + c]) || (STR.en && STR.en['c_' + c]) || String(c).toLowerCase(); }
+  function wLabel(w) { return t('u_' + w.u, { n: w.n }); }
+  function track(what) { try { if (window.GR_TRACK) window.GR_TRACK('click_events', { page: location.pathname, target: 'sona:' + what, session_id: window.GR_SID || '' }); } catch (_) {} }
   function rpc(fn, body) {
     if (!SB || !KEY) return Promise.resolve(null);
     return fetch(SB + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(body) })
@@ -45,7 +74,12 @@
   // ------------------------------------------------------- understanding
   var CITY_ALIAS = { bangalore: 'bengaluru', bombay: 'mumbai', calcutta: 'kolkata', madras: 'chennai', gurgaon: 'gurugram', vizag: 'visakhapatnam', mysore: 'mysuru', trivandrum: 'thiruvananthapuram', calicut: 'kozhikode', cochin: 'kochi', ernakulam: 'kochi', baroda: 'vadodara', pondicherry: 'puducherry', benaras: 'varanasi', banaras: 'varanasi', poona: 'pune', mangalore: 'mangaluru', hubli: 'hubballi', 'new delhi': 'delhi', ncr: 'delhi' };
   var BRAND_EXTRA = { tbz: 'tbz', 'pn gadgil and sons': 'pngsons', 'png sons': 'pngsons', 'pn gadgil & sons': 'pngsons', 'pn gadgil': 'png', png: 'png', gadgil: 'png', whp: 'whp', 'waman hari': 'whp', ckc: 'ckc', krishniah: 'ckc', 'pc chandra': 'pcchandra', grt: 'grt', avr: 'avr', nac: 'nac', 'jos alukkas': 'josalukkas', joyalukkas: 'joyalukkas', 'joy alukkas': 'joyalukkas' };
-  var aliases = [], cityIdx = [];
+  // Spoken names that are not how the site spells them.
+  var SPOKEN = { dilli: 'delhi', bambai: 'mumbai', bambay: 'mumbai', kalkatta: 'kolkata', madras: 'chennai', banglore: 'bengaluru',
+    amdavad: 'ahmedabad', vadodra: 'vadodara', koyambuthur: 'coimbatore', kovai: 'coimbatore', trichy: 'tiruchirappalli',
+    tiruchi: 'tiruchirappalli', thiruvananthapuram: 'thiruvananthapuram', kashi: 'varanasi', prayagraj: 'allahabad',
+    gurgaon: 'gurugram', bhagyanagar: 'hyderabad', belgaum: 'belagavi', vishakhapatnam: 'visakhapatnam', kozhikkode: 'kozhikode' };
+  var aliases = [], cityIdx = [], VOCAB = [];
   function prep(d) {
     aliases = [];
     d.brands.forEach(function (b) {
@@ -56,6 +90,14 @@
     Object.keys(BRAND_EXTRA).forEach(function (a) { if (d.brands.some(function (b) { return b.s === BRAND_EXTRA[a]; })) aliases.push([a, BRAND_EXTRA[a]]); });
     aliases.sort(function (x, y) { return y[0].length - x[0].length; });     // longest first: "pn gadgil & sons" before "pn gadgil"
     cityIdx = d.cities.map(function (c) { return [c.n.toLowerCase(), c]; }).sort(function (x, y) { return y[0].length - x[0].length; });
+    // Names to match by sound in a question asked in an Indian script.
+    if (LG) {
+      var words = [];
+      aliases.forEach(function (a) { words = words.concat(a[0].split(/[\s&]+/)); });
+      d.cities.forEach(function (c) { words = words.concat(c.n.toLowerCase().split(/\s+/)); });
+      VOCAB = LG.vocabOf(words.concat(Object.keys(CITY_ALIAS)));
+      Object.keys(SPOKEN).forEach(function (s) { VOCAB.push([LG.key(s), SPOKEN[s]]); });
+    }
   }
   function norm(q) {
     return (' ' + q.toLowerCase() + ' ')
@@ -79,11 +121,11 @@
   }
   function karatIn(t) { var m = t.match(/\b(24|22|18|14)k\b/); return m ? m[1] + 'K' : null; }
   function weightIn(t) {
-    var m = t.match(/(\d+(?:\.\d+)?)\s*(?:g|gm|gms|gram|grams|gr)\b/); if (m) return { g: +m[1], label: m[1] + ' g' };
-    m = t.match(/(\d+(?:\.\d+)?)\s*(?:tola|tolas|tole)\b/); if (m) return { g: +m[1] * 11.664, label: m[1] + ' tola' };
-    m = t.match(/\b(?:a|one|1)\s*tola\b/); if (m) return { g: 11.664, label: '1 tola' };
-    m = t.match(/(\d+(?:\.\d+)?)\s*(?:sovereign|sovereigns|pavan|pavun|pawan)\b/); if (m) return { g: +m[1] * 8, label: m[1] + ' sovereign' };
-    m = t.match(/(\d+(?:\.\d+)?)\s*(?:kg|kilo)\b/); if (m) return { g: +m[1] * 1000, label: m[1] + ' kg' };
+    var m = t.match(/(\d+(?:\.\d+)?)\s*(?:g|gm|gms|gram|grams|gr)\b/); if (m) return { g: +m[1], n: m[1], u: 'g' };
+    m = t.match(/(\d+(?:\.\d+)?)\s*(?:tola|tolas|tole)\b/); if (m) return { g: +m[1] * 11.664, n: m[1], u: 'tola' };
+    m = t.match(/\b(?:a|one|1)\s*tola\b/); if (m) return { g: 11.664, n: '1', u: 'tola' };
+    m = t.match(/(\d+(?:\.\d+)?)\s*(?:sovereign|sovereigns|pavan|pavun|pawan)\b/); if (m) return { g: +m[1] * 8, n: m[1], u: 'sov' };
+    m = t.match(/(\d+(?:\.\d+)?)\s*(?:kg|kilo)\b/); if (m) return { g: +m[1] * 1000, n: m[1], u: 'kg' };
     return null;
   }
   var CATS = { ring: 'Ring', rings: 'Ring', chain: 'Chain', chains: 'Chain', bangle: 'Bangle', bangles: 'Bangle', kada: 'Bangle', necklace: 'Necklace', haar: 'Necklace', earring: 'Earrings', earrings: 'Earrings', jhumka: 'Earrings', mangalsutra: 'Mangalsutra', pendant: 'Pendant', bracelet: 'Bracelet', coin: 'Coin', coins: 'Coin' };
@@ -103,12 +145,17 @@
   };
 
   // ------------------------------------------------------------ answers
-  // Each returns {html, chips?, intent}. html is built from KB values only.
+  // Each returns {html, say?, chips?, intent}. html is built from KB values
+  // only; say is the same answer in a sentence or two, for reading aloud.
   function natBrands() { return KB.brands.filter(function (b) { return b.nat; }); }
   function ranked(list, k) { return list.slice().sort(function (a, b) { return a.r24 - b.r24; }); }
   function rankOf(b, list) { var r = ranked(list); for (var i = 0; i < r.length; i++) if (r[i].s === b.s) return i + 1; return null; }
-  function link(u, t) { return '<a href="' + esc(u) + '">' + t + '</a>'; }
-  function src() { return '<div class="sn-src">Today’s rates from ' + KB.brands.length + ' jewellers, before GST · ' + esc(KB.date) + '</div>'; }
+  function link(u, tx) { return '<a href="' + esc(u) + '">' + tx + '</a>'; }
+  function src() { return '<div class="sn-src">' + t('src', { n: KB.brands.length, d: esc(KB.date) }) + '</div>'; }
+  // A suggestion chip: shown in the reply language, asked in English.
+  function chip(k, v) { return { l: t('ch_' + k, v), q: en('ch_' + k, v) }; }
+  function chips(keys) { return keys.map(function (k) { return chip(k); }); }
+  function suggest() { return chips(SUGGEST); }
   function cityBrands(c) {
     var loc = (c && c.loc) || [];
     return KB.brands.filter(function (b) { return b.nat || loc.indexOf(b.s) > -1; });
@@ -118,167 +165,204 @@
       return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + (b.u ? link(b.u, esc(b.n)) : esc(b.n)) + (b.nat ? '' : ' <em>local</em>') + '</span><span class="sn-v">' + inr(rate(b, k)) + '<small>/g</small></span></div>';
     }).join('') + '</div>';
   }
+  function tiles(m, k) {
+    return '<div class="sn-tiles">' + ['24K', '22K', '18K'].map(function (x) {
+      return '<div' + (x === k ? ' class="on"' : '') + '><b>' + inr(m[x]) + '</b><span>' + x + ' /g</span></div>';
+    }).join('') + '</div>';
+  }
 
   function aMedian(k) {
-    var m = KB.med, list = ranked(natBrands());
-    var low = list[0];
-    return { intent: 'rate', html: '<p>Gold rate in India today, the middle of ' + KB.brands.length + ' jewellers:</p>' +
-      '<div class="sn-tiles"><div><b>' + inr(m['24K']) + '</b><span>24K /g</span></div><div class="on"><b>' + inr(m['22K']) + '</b><span>22K /g</span></div><div><b>' + inr(m['18K']) + '</b><span>18K /g</span></div></div>' +
-      '<p>Lowest 22K among national jewellers: <b>' + esc(low.n) + '</b> at <b>' + inr(rate(low, '22K')) + '/g</b>.</p>' + src(),
-      chips: ['Cheapest 22K today', 'Gold rate in my city', 'Price of 10 g 22K'] };
+    k = k || '22K';
+    var m = KB.med, low = ranked(natBrands())[0];
+    return { intent: 'rate', html: '<p>' + t('med_h', { n: KB.brands.length }) + '</p>' + tiles(m, k) +
+      '<p>' + t('med_low', { b: esc(low.n), p: inr(rate(low, '22K')) }) + '</p>' + src(),
+      say: t('say_med', { k: sK(k), p: sInr(m[k]), n: KB.brands.length, b: low.n, q: sInr(rate(low, k)) }),
+      chips: chips(['cheap22', 'mycity', 'p10']) };
   }
   function aBrand(b, k) {
     k = k || '22K';
     var list = b.nat ? natBrands() : KB.brands, r = rankOf(b, list), n = list.length;
     var diff = rate(b, k) - KB.med[k];
-    var h = '<p><b>' + esc(b.n) + '</b> today:</p><div class="sn-tiles"><div' + (k === '24K' ? ' class="on"' : '') + '><b>' + inr(rate(b, '24K')) + '</b><span>24K /g</span></div><div' + (k === '22K' ? ' class="on"' : '') + '><b>' + inr(rate(b, '22K')) + '</b><span>22K /g</span></div><div' + (k === '18K' ? ' class="on"' : '') + '><b>' + inr(rate(b, '18K')) + '</b><span>18K /g</span></div></div>' +
-      '<p>That’s <b>#' + r + ' of ' + n + '</b> ' + (b.nat ? 'national jewellers' : 'jewellers') + ' today — ' + (Math.abs(diff) < 1 ? 'right at' : inr(Math.abs(diff)) + '/g ' + (diff < 0 ? 'below' : 'above')) + ' the market middle for ' + k + '.</p>';
-    if (b.mk) h += '<p>Usual making charges: ' + Object.keys(b.mk).map(function (c) { return esc(c.toLowerCase()) + ' ' + pct(b.mk[c]); }).join(', ') + '.</p>';
-    if (b.off && b.off.length) h += '<p>Offer on their site: <b>' + esc(b.off[0].h) + '</b>.</p>';
-    if (!b.nat && b.st) h += '<p class="sn-dim">Sells in ' + esc(b.st.join(', ')) + '.</p>';
-    if (b.u) h += '<p>' + link(b.u, esc(b.n) + '’s 30-day rates →') + '</p>';
-    return { intent: 'rate_brand', html: h + src(), chips: [b.n.split(' ')[0] + ' making charges', b.n.split(' ')[0] + ' offers', 'Cheapest 22K today'] };
+    var rel = Math.abs(diff) < 1 ? t('rel_at', { k: k }) : t(diff < 0 ? 'rel_below' : 'rel_above', { k: k, p: inr(Math.abs(diff)) });
+    var h = '<p>' + t('brand_h', { b: esc(b.n) }) + '</p>' + tiles({ '24K': rate(b, '24K'), '22K': rate(b, '22K'), '18K': rate(b, '18K') }, k) +
+      '<p>' + t('brand_rank', { r: r, n: n, rel: rel }) + '</p>';
+    if (b.mk) h += '<p>' + t('brand_mk', { list: Object.keys(b.mk).map(function (c) { return esc(catName(c)) + ' ' + pct(b.mk[c]); }).join(', ') }) + '</p>';
+    if (b.off && b.off.length) h += '<p>' + t('brand_off', { o: esc(b.off[0].h) }) + '</p>';
+    if (!b.nat && b.st) h += '<p class="sn-dim">' + t('brand_st', { s: esc(b.st.join(', ')) }) + '</p>';
+    if (b.u) h += '<p>' + link(b.u, t('brand_link', { b: esc(b.n) })) + '</p>';
+    var nm = b.n.split(' ')[0];
+    return { intent: 'rate_brand', html: h + src(), say: t('say_brand', { b: b.n, k: sK(k), p: sInr(rate(b, k)), r: r, n: n }),
+      chips: [chip('bmk', { b: nm }), chip('boff', { b: nm }), chip('cheap22')] };
   }
   function aCity(c, k) {
     k = k || '22K';
     lastCity = c.n; try { localStorage.setItem('sona_city', c.n); } catch (_) {}
     var list = ranked(cityBrands(c)).slice(0, 6), locals = (c.loc || []).length;
-    return { intent: 'rate_city', html: '<p>Cheapest ' + k + ' for <b>' + esc(c.n) + '</b> today' + (locals ? ' (national jewellers plus ' + locals + ' that sell in ' + esc(c.st) + ')' : ' (national jewellers)') + ':</p>' + table(list, k) +
-      '<p>' + link(c.u, 'Full board for ' + esc(c.n) + ' →') + '</p>' + src(),
-      chips: ['Price of 10 g 22K', 'Best offer today', '22K vs 24K?'] };
+    var note = locals ? t('city_loc', { l: locals, s: esc(c.st) }) : t('city_nat');
+    return { intent: 'rate_city', html: '<p>' + t('city_h', { k: k, c: esc(c.n), note: note }) + '</p>' + table(list, k) +
+      '<p>' + link(c.u, t('city_link', { c: esc(c.n) })) + '</p>' + src(),
+      say: t('say_city', { c: c.n, k: sK(k), b: list[0].n, p: sInr(rate(list[0], k)) }),
+      chips: chips(['p10', 'bestoff', 'k22v24']) };
   }
   function aCheapest(k, c) {
     if (c) return aCity(c, k);
     k = k || '22K';
     var list = ranked(natBrands()).slice(0, 6), hi = ranked(natBrands()).slice(-1)[0];
     var gap = (rate(hi, k) - rate(list[0], k)) * 10;
-    return { intent: 'cheapest', html: '<p>Cheapest ' + k + ' among national jewellers today:</p>' + table(list, k) +
-      '<p>The gap from cheapest to dearest is <b>' + inr(gap) + '</b> on 10 g — worth checking before you buy.</p>' + src(),
-      chips: ['Gold rate in my city', 'Price after offers', 'Making charges compared'] };
+    return { intent: 'cheapest', html: '<p>' + t('cheap_h', { k: k }) + '</p>' + table(list, k) +
+      '<p>' + t('cheap_gap', { p: inr(gap) }) + '</p>' + src(),
+      say: t('say_cheap', { k: sK(k), b: list[0].n, p: sInr(rate(list[0], k)), q: sInr(gap) }),
+      chips: chips(['mycity', 'afteroff', 'mkcmp']) };
   }
   function aCompare(bs, k) {
     k = k || '22K';
-    var h = '<p>Side by side today (' + k + '):</p><div class="sn-cmp">' + bs.slice(0, 3).map(function (b) {
+    var h = '<p>' + t('cmp_h', { k: k }) + '</p><div class="sn-cmp">' + bs.slice(0, 3).map(function (b) {
       return '<div><div class="sn-cn">' + esc(b.n) + '</div><b>' + inr(rate(b, k)) + '<small>/g</small></b>' +
-        '<span>' + inr(rate(b, k) * 10) + ' for 10 g</span>' +
-        (b.mk ? '<span>Making ~' + pct(b.mk.Ring || b.mk[Object.keys(b.mk)[0]]) + '</span>' : '<span class="sn-dim">Making: not measured</span>') +
+        '<span>' + t('cmp_10', { p: inr(rate(b, k) * 10) }) + '</span>' +
+        (b.mk ? '<span>' + t('cmp_mk', { p: pct(b.mk.Ring || b.mk[Object.keys(b.mk)[0]]) }) + '</span>' : '<span class="sn-dim">' + t('cmp_nomk') + '</span>') +
         (b.off && b.off.length ? '<span class="sn-off">' + esc(b.off[0].h) + '</span>' : '') + '</div>';
     }).join('') + '</div>';
     var s = bs.slice(0, 3).sort(function (a, b) { return a.r24 - b.r24; });
-    h += '<p><b>' + esc(s[0].n) + '</b> has the lower ' + k + ' rate by <b>' + inr((rate(s[s.length - 1], k) - rate(s[0], k)) * 10) + '</b> on 10 g. The final bill also depends on the making charge for the design you pick.</p>';
-    return { intent: 'compare', html: h + src(), chips: ['Price after offers', 'Making charges compared', 'Best offer today'] };
+    var gap = (rate(s[s.length - 1], k) - rate(s[0], k)) * 10;
+    h += '<p>' + t('cmp_win', { b: esc(s[0].n), k: k, p: inr(gap) }) + '</p>';
+    return { intent: 'compare', html: h + src(), say: t('say_cmp', { b: s[0].n, p: sInr(gap), k: sK(k) }),
+      chips: chips(['afteroff', 'mkcmp', 'bestoff']) };
   }
-  function aMaking(bs, cat) {
+  function aMaking(bs, ct) {
     var withMk = KB.brands.filter(function (b) { return b.mk; });
     if (bs.length) {
       var b = bs[0];
-      if (!b.mk) return { intent: 'making', html: '<p>We haven’t measured <b>' + esc(b.n) + '</b>’s making charges yet. We have them for ' + withMk.map(function (x) { return esc(x.n); }).join(', ') + '.</p><p>' + link('/making-charges-comparison', 'Making charges compared →') + '</p>' };
-      return { intent: 'making', html: '<p><b>' + esc(b.n) + '</b>’s usual making charges (median of real products, % of gold value):</p><div class="sn-list">' +
-        Object.keys(b.mk).map(function (c) { return '<div class="sn-row"><span class="sn-nm">' + esc(c) + '</span><span class="sn-v">' + pct(b.mk[c]) + '</span></div>'; }).join('') + '</div>' +
-        '<p class="sn-dim">Varies by design; it’s the most negotiable part of the bill.</p><p>' + link('/making-charges-comparison', 'Compare all jewellers →') + '</p>',
-        chips: [b.n.split(' ')[0] + ' offers', 'Price after offers', 'Cheapest 22K today'] };
+      if (!b.mk) return { intent: 'making', html: '<p>' + t('mk_none', { b: esc(b.n), list: withMk.map(function (x) { return esc(x.n); }).join(', ') }) + '</p><p>' + link('/making-charges-comparison', t('mk_link')) + '</p>',
+        say: t('say_mk_none', { b: b.n }) };
+      var c1 = ct && b.mk[ct] != null ? ct : (b.mk.Ring != null ? 'Ring' : Object.keys(b.mk)[0]);
+      return { intent: 'making', html: '<p>' + t('mk_brand_h', { b: esc(b.n) }) + '</p><div class="sn-list">' +
+        Object.keys(b.mk).map(function (c) { return '<div class="sn-row"><span class="sn-nm">' + esc(catName(c)) + '</span><span class="sn-v">' + pct(b.mk[c]) + '</span></div>'; }).join('') + '</div>' +
+        '<p class="sn-dim">' + t('mk_note') + '</p><p>' + link('/making-charges-comparison', t('mk_all')) + '</p>',
+        say: t('say_mk_brand', { b: b.n, c: catName(c1), p: pct(b.mk[c1]) }),
+        chips: [chip('boff', { b: b.n.split(' ')[0] }), chip('afteroff'), chip('cheap22')] };
     }
-    var c = cat && cat !== 'Coin' ? cat : 'Ring';
+    var c = ct && ct !== 'Coin' ? ct : 'Ring';
     var rows = withMk.filter(function (b) { return b.mk[c] != null; }).sort(function (a, b) { return a.mk[c] - b.mk[c]; });
     if (!rows.length) { c = 'Ring'; rows = withMk.filter(function (b) { return b.mk.Ring != null; }).sort(function (a, b) { return a.mk.Ring - b.mk.Ring; }); }
-    return { intent: 'making', html: '<p>Lowest making charges on a <b>' + esc(c.toLowerCase()) + '</b> (median of real products):</p><div class="sn-list">' +
+    return { intent: 'making', html: '<p>' + t('mk_h', { c: esc(catName(c)) }) + '</p><div class="sn-list">' +
       rows.slice(0, 6).map(function (b, i) { return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + esc(b.n) + '</span><span class="sn-v">' + pct(b.mk[c]) + '</span></div>'; }).join('') + '</div>' +
-      '<p>' + link('/making-charges-comparison', 'Every jeweller and category →') + '</p>',
-      chips: ['Price after offers', 'Best offer today', 'What are making charges?'] };
+      '<p>' + link('/making-charges-comparison', t('mk_every')) + '</p>',
+      say: rows.length ? t('say_mk', { c: catName(c), b: rows[0].n, p: pct(rows[0].mk[c]) }) : '',
+      chips: chips(['afteroff', 'bestoff', 'whatmk']) };
   }
   function aOffers(bs) {
     if (bs.length) {
       var b = bs[0];
-      if (!b.off || !b.off.length) return { intent: 'offers', html: '<p>No offer is published as text on <b>' + esc(b.n) + '</b>’s website today. ' + link('/gold-offers-today', 'See who has offers →') + '</p>' };
-      return { intent: 'offers', html: '<p>Offers on <b>' + esc(b.n) + '</b>’s website today:</p>' + b.off.map(function (o) {
-        return '<div class="sn-card"><b>' + esc(o.h) + '</b><q>' + esc(o.t) + '</q><p>' + o.m + '</p><a href="' + esc(o.u) + '" target="_blank" rel="nofollow noopener">Their page ↗</a></div>';
-      }).join('') + '<p>' + link('/gold-offers-today', 'All jewellers’ offers compared →') + '</p>', chips: ['Price after offers', 'Cheapest 22K today'] };
+      if (!b.off || !b.off.length) return { intent: 'offers', html: '<p>' + t('off_none', { b: esc(b.n) }) + ' ' + link('/gold-offers-today', t('off_see')) + '</p>',
+        say: t('say_off_none', { b: b.n }) };
+      return { intent: 'offers', html: '<p>' + t('off_brand_h', { b: esc(b.n) }) + '</p>' + b.off.map(function (o) {
+        return '<div class="sn-card"><b>' + esc(o.h) + '</b><q>' + esc(o.t) + '</q><p>' + o.m + '</p><a href="' + esc(o.u) + '" target="_blank" rel="nofollow noopener">' + t('off_page') + '</a></div>';
+      }).join('') + '<p>' + link('/gold-offers-today', t('off_all')) + '</p>',
+        say: t('say_off_brand', { b: b.n, n: b.off.length }), chips: chips(['afteroff', 'cheap22']) };
     }
     var rows = (KB.ring || []).slice(0, 5);
-    var h = '<p>The real test of an offer is the final price. A 10 g 22K ring today, after offers, with GST:</p>' +
-      (rows.length ? '<div class="sn-list">' + rows.map(function (r, i) { return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + esc(r.n) + (r.p ? ' <em>' + r.p + '% off making</em>' : '') + '</span><span class="sn-v">' + inr(r.a) + '</span></div>'; }).join('') + '</div>' : '');
+    var h = '<p>' + t('off_h') + '</p>' +
+      (rows.length ? '<div class="sn-list">' + rows.map(function (r, i) { return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + esc(r.n) + (r.p ? ' <em>' + t('off_tag', { p: r.p }) + '</em>' : '') + '</span><span class="sn-v">' + inr(r.a) + '</span></div>'; }).join('') + '</div>' : '');
     var withOff = KB.brands.filter(function (b) { return b.off && b.off.length; });
-    h += '<p>' + withOff.length + ' jewellers have offers on their sites today, e.g. ' + withOff.slice(0, 4).map(function (b) { return esc(b.n) + ': ' + esc(b.off[0].h); }).join('; ') + '.</p>' +
-      '<p>' + link('/gold-offers-today', 'Every offer, and what it really means →') + '</p>';
-    return { intent: 'offers', html: h, chips: ['Is 20% off making a good deal?', 'Making charges compared', 'Cheapest 22K today'] };
+    h += '<p>' + t('off_count', { n: withOff.length, list: withOff.slice(0, 4).map(function (b) { return esc(b.n) + ': ' + esc(b.off[0].h); }).join('; ') }) + '</p>' +
+      '<p>' + link('/gold-offers-today', t('off_every')) + '</p>';
+    return { intent: 'offers', html: h, say: rows.length ? t('say_off', { b: rows[0].n, p: sInr(rows[0].a) }) : '',
+      chips: chips(['goodmk', 'mkcmp', 'cheap22']) };
   }
-  function aPrice(w, k, bs, cat) {
-    k = k || (cat === 'Coin' ? '24K' : '22K');
-    var b = bs[0] || ranked(natBrands())[0], who = bs[0] ? esc(b.n) : 'the cheapest national jeweller (' + esc(b.n) + ')';
+  function aPrice(w, k, bs, ct) {
+    k = k || (ct === 'Coin' ? '24K' : '22K');
+    var b = bs[0] || ranked(natBrands())[0], who = bs[0] ? esc(b.n) : t('price_who', { b: esc(b.n) });
     var gold = rate(b, k) * w.g;
-    var mkp = b.mk ? (cat && b.mk[cat] != null ? b.mk[cat] : (b.mk.Ring != null ? b.mk.Ring : null)) : null;
-    if (cat === 'Coin' || (k === '24K' && !cat)) mkp = null;   // 24K: coins and bars
-    var mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03;
-    var h = '<p>' + esc(w.label) + ' of ' + k + ' at ' + who + ' today:</p><div class="sn-bill">' +
-      '<div><span>Gold (' + (Math.round(w.g * 1000) / 1000) + ' g × ' + inr(rate(b, k)) + ')</span><b>' + inr(gold) + '</b></div>' +
-      (mkp != null ? '<div><span>Making (~' + pct(mkp) + (cat && b.mk[cat] != null ? ', ' + esc(cat.toLowerCase()) : ', typical') + ')</span><b>' + inr(mk) + '</b></div>' : '') +
-      '<div><span>GST 3%</span><b>' + inr(gst) + '</b></div><div class="sn-tot"><span>Total</span><b>' + inr(gold + mk + gst) + '</b></div></div>' +
-      (mkp == null && cat !== 'Coin' && k !== '24K' ? '<p class="sn-dim">Making charges not included — add the jeweller’s charge for your design (often 8–25%).</p>' : '') + src();
-    return { intent: 'price', html: h, chips: ['Same at another jeweller', 'Price after offers', 'Cheapest 22K today'] };
+    var mkp = b.mk ? (ct && b.mk[ct] != null ? b.mk[ct] : (b.mk.Ring != null ? b.mk.Ring : null)) : null;
+    if (ct === 'Coin' || (k === '24K' && !ct)) mkp = null;   // 24K: coins and bars
+    var mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03, tot = gold + mk + gst;
+    var h = '<p>' + t('price_h', { w: esc(wLabel(w)), k: k, who: who }) + '</p><div class="sn-bill">' +
+      '<div><span>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(rate(b, k)) }) + '</span><b>' + inr(gold) + '</b></div>' +
+      (mkp != null ? '<div><span>' + t('price_mk', { p: pct(mkp), c: ct && b.mk[ct] != null ? esc(catName(ct)) : t('price_typ') }) + '</span><b>' + inr(mk) + '</b></div>' : '') +
+      '<div><span>GST 3%</span><b>' + inr(gst) + '</b></div><div class="sn-tot"><span>' + t('price_total') + '</span><b>' + inr(tot) + '</b></div></div>' +
+      (mkp == null && ct !== 'Coin' && k !== '24K' ? '<p class="sn-dim">' + t('price_nomk') + '</p>' : '') + src();
+    return { intent: 'price', html: h, say: t('say_price', { w: wLabel(w), k: sK(k), b: b.n, p: sInr(tot) }),
+      chips: chips(['another', 'afteroff', 'cheap22']) };
   }
   function aTrend(k) {
     k = k || '22K';
     var h = KB.hist || [], f = K[k];
-    if (h.length < 2) return { intent: 'trend', html: '<p>Not enough history yet. ' + link('/gold-rate-history', 'Gold rate history →') + '</p>' };
+    if (h.length < 2) return { intent: 'trend', html: '<p>' + t('trend_none') + ' ' + link('/gold-rate-history', t('hist_link')) + '</p>', say: t('trend_none') };
     var last = h[h.length - 1][1] * f;
     function back(n) { var i = Math.max(0, h.length - 1 - n); return h[i][1] * f; }
     function chg(v) { var d = last - v, p = d / v * 100; return '<b class="' + (d >= 0 ? 'up' : 'dn') + '">' + (d >= 0 ? '▲ ' : '▼ ') + inr(Math.abs(d)) + ' (' + pct(Math.abs(p)) + ')</b>'; }
     var pts = h.slice(-30).map(function (x) { return x[1]; }), mn = Math.min.apply(null, pts), mx = Math.max.apply(null, pts);
     var sv = '<svg class="sn-spark" viewBox="0 0 240 48" preserveAspectRatio="none"><polyline fill="none" stroke="#e7bf5a" stroke-width="2" stroke-linejoin="round" points="' +
       pts.map(function (v, i) { return (i * 240 / Math.max(1, pts.length - 1)).toFixed(1) + ',' + (44 - (mx === mn ? 20 : (v - mn) / (mx - mn) * 40)).toFixed(1); }).join(' ') + '"/></svg>';
-    return { intent: 'trend', html: '<p>' + k + ' market middle: <b>' + inr(last) + '/g</b> today.</p>' + sv +
-      '<div class="sn-list"><div class="sn-row"><span class="sn-nm">vs previous day</span><span class="sn-v">' + chg(back(1)) + '</span></div>' +
-      '<div class="sn-row"><span class="sn-nm">vs 7 days ago</span><span class="sn-v">' + chg(back(7)) + '</span></div>' +
-      '<div class="sn-row"><span class="sn-nm">vs 30 days ago</span><span class="sn-v">' + chg(back(30)) + '</span></div></div>' +
-      '<p class="sn-dim">Past moves, not a forecast — nobody can reliably predict tomorrow’s price. ' + link('/gold-rate-history', 'Full history →') + '</p>',
-      chips: ['Set a price alert', 'Cheapest 22K today', 'Is now a good time to buy?'] };
+    var d1 = last - back(1);
+    return { intent: 'trend', html: '<p>' + t('trend_h', { k: k, p: inr(last) }) + '</p>' + sv +
+      '<div class="sn-list"><div class="sn-row"><span class="sn-nm">' + t('vs1') + '</span><span class="sn-v">' + chg(back(1)) + '</span></div>' +
+      '<div class="sn-row"><span class="sn-nm">' + t('vs7') + '</span><span class="sn-v">' + chg(back(7)) + '</span></div>' +
+      '<div class="sn-row"><span class="sn-nm">' + t('vs30') + '</span><span class="sn-v">' + chg(back(30)) + '</span></div></div>' +
+      '<p class="sn-dim">' + t('trend_note') + ' ' + link('/gold-rate-history', t('full_hist')) + '</p>',
+      say: t(Math.abs(d1) < 1 ? 'say_trend_same' : d1 > 0 ? 'say_trend_up' : 'say_trend_dn', { k: sK(k), p: sInr(last), q: sInr(Math.abs(d1)) }),
+      chips: chips(['alert', 'cheap22', 'goodtime']) };
   }
   function aAlerts() {
-    return { intent: 'alerts', html: '<p>Get the cheapest jeweller and today’s rate every morning, free — and an email the day 22K drops to your price.</p><button class="sn-cta" data-sn="subscribe">Get free daily alerts</button>' };
+    return { intent: 'alerts', html: '<p>' + t('alerts') + '</p><button class="sn-cta" data-sn="subscribe">' + t('alerts_cta') + '</button>', say: t('alerts') };
   }
-  function words(t) { return t.split(/\s+/).filter(function (w) { return w.length > 2 && !/^(the|and|for|what|how|are|you|your|with|does|this|that|from|have|can|why|which|about|gold|is|of)$/.test(w); }); }
-  function scoreDoc(t, q, keys) {
-    var ws = words(t), qs = norm(q), s = 0;
-    ws.forEach(function (w) { if (qs.indexOf(' ' + w) > -1) s += 1; if ((keys || []).indexOf(w) > -1) s += 1.5; });
-    return s / Math.max(3, Math.sqrt(words(qs).length + 1) * 2);
+  function words(s) { return s.split(/\s+/).filter(function (w) { return w.length > 2 && !/^(the|and|for|what|how|are|you|your|with|does|this|that|from|have|can|why|which|about|gold|is|of)$/.test(w); }); }
+  function scoreDoc(s, q, keys) {
+    var ws = words(s), qs = norm(q), n = 0;
+    ws.forEach(function (w) { if (qs.indexOf(' ' + w) > -1) n += 1; if ((keys || []).indexOf(w) > -1) n += 1.5; });
+    return n / Math.max(3, Math.sqrt(words(qs).length + 1) * 2);
   }
-  function aSearch(t) {
+  // FAQ and approved answers are written in English: `en` carries the text
+  // so it can be translated on the visitor's device, where the browser can.
+  function aSearch(s) {
     var best = null, bs = 0;
-    (KB.learned || []).forEach(function (d) { var s = scoreDoc(t, d.q, []) * 1.2; if (s > bs) { bs = s; best = d; } });
-    KB.faq.forEach(function (d) { var s = scoreDoc(t, d.q, d.k); if (s > bs) { bs = s; best = d; } });
-    if (best && bs >= 0.6) return { intent: 'faq', score: bs, html: '<p>' + esc(best.a) + '</p>' + (best.u ? '<p>' + link(best.u, 'Read more →') + '</p>' : ''), chips: ['Cheapest 22K today', 'Best offer today'] };
+    (KB.learned || []).forEach(function (d) { var v = scoreDoc(s, d.q, []) * 1.2; if (v > bs) { bs = v; best = d; } });
+    KB.faq.forEach(function (d) { var v = scoreDoc(s, d.q, d.k); if (v > bs) { bs = v; best = d; } });
+    if (best && bs >= 0.6) return { intent: 'faq', score: bs, en: best.a, html: '<p>' + esc(best.a) + '</p>' + (best.u ? '<p>' + link(best.u, t('more')) + '</p>' : ''),
+      say: best.a, chips: chips(['cheap22', 'bestoff']) };
     var g = null, gs = 0;
-    KB.guides.forEach(function (d) { var s = scoreDoc(t, d.t + ' ' + d.d, []); if (s > gs) { gs = s; g = d; } });
-    if (g && gs >= 0.6) return { intent: 'guide', score: gs, html: '<p>This guide covers it: <b>' + esc(g.t) + '</b> — ' + esc(g.d) + '</p><p>' + link(g.u, 'Read the guide →') + '</p>' };
+    KB.guides.forEach(function (d) { var v = scoreDoc(s, d.t + ' ' + d.d, []); if (v > gs) { gs = v; g = d; } });
+    if (g && gs >= 0.6) return { intent: 'guide', score: gs, en: g.t + '. ' + g.d,
+      html: '<p>' + t('guide_h', { t: esc(g.t), d: esc(g.d) }) + '</p><p>' + link(g.u, t('guide_link')) + '</p>', say: g.t + '. ' + g.d };
     return null;
   }
 
   function answer(q) {
-    var t = norm(q), k = karatIn(t), bs = brandsIn(t), c = cityIn(t), w = weightIn(t), cat = catIn(t);
-    if (/\b(my city|near me|nearby|mere sheher|mere shahar|my area)\b/.test(t) && !c) {
+    var tx = norm(q), k = karatIn(tx), bs = brandsIn(tx), c = cityIn(tx), w = weightIn(tx), ct = catIn(tx);
+    if (/\b(my city|near me|nearby|mere sheher|mere shahar|my area)\b/.test(tx) && !c) {
       if (lastCity) c = KB.cities.filter(function (x) { return x.n === lastCity; })[0];
-      if (!c) return { intent: 'ask_city', html: '<p>Which city are you in?</p>', chips: ['Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Hyderabad', 'Kolkata', 'Pune', 'Lucknow'] };
+      if (!c) return { intent: 'ask_city', html: '<p>' + t('ask_city') + '</p>', say: t('ask_city'),
+        chips: ['Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Hyderabad', 'Kolkata', 'Pune', 'Lucknow'].map(function (n) { return { l: n, q: n }; }) };
     }
-    if (has(t, W.silver) && !has(t, ['gold', 'sona'])) return { intent: 'silver', html: '<p>I cover gold for now — jewellers’ 22K, 24K and 18K rates. Silver is on its way.</p>', chips: ['Gold rate today', 'Cheapest 22K today'] };
-    if (has(t, ['alert', 'alerts', 'notify', 'subscribe', 'email me', 'whatsapp', 'set a price'])) return aAlerts();
+    if (has(tx, W.silver) && !has(tx, ['gold', 'sona'])) return { intent: 'silver', html: '<p>' + t('silver') + '</p>', say: t('silver'), chips: chips(['rate', 'cheap22']) };
+    if (has(tx, ['alert', 'alerts', 'notify', 'subscribe', 'email me', 'whatsapp', 'set a price'])) return aAlerts();
     if (bs.length >= 2) return aCompare(bs, k);
-    var strong = aSearch(t);                 // a question the FAQ answers word for word
+    if (has(tx, W.making) && has(tx, W.cheap) && !w) return aMaking(bs, ct);    // "lowest making charge": the ranking
+    var strong = aSearch(tx);                // a question the FAQ answers word for word
     if (strong && strong.score >= 1.0 && !w && !bs.length && !c) return strong;
-    if (has(t, W.offer) || /\bafter offers?\b/.test(t)) return aOffers(bs);
-    if (has(t, W.making) && !w) return aMaking(bs, cat);
-    if (w) return aPrice(w, k, bs, cat);
-    if (has(t, W.trend) && !bs.length) return aTrend(k);
-    var search = aSearch(t);
+    if (has(tx, W.offer) || /\bafter offers?\b/.test(tx)) return aOffers(bs);
+    if (has(tx, W.making) && !w) return aMaking(bs, ct);
+    if (w) return aPrice(w, k, bs, ct);
+    if (has(tx, W.trend) && !bs.length) return aTrend(k);
+    var search = aSearch(tx);
     if (search && search.score > 0.9) return search;
-    if (has(t, W.cheap)) return aCheapest(k, c);
+    if (has(tx, W.cheap)) return aCheapest(k, c);
     if (bs.length) return aBrand(bs[0], k);
     if (c) return aCity(c, k);
     if (search) return search;
-    if (has(t, W.rate) || k || /\b(gold|sona)\b/.test(t)) return aMedian(k);
-    if (has(t, W.hello)) return { intent: 'hello', html: '<p>Namaste! 🙏 I’m Sona. Ask me anything about buying gold — today’s rates at ' + KB.brands.length + ' jewellers, your city, making charges, offers or a price for any weight.</p>', chips: SUGGEST };
-    if (has(t, W.thanks)) return { intent: 'thanks', html: '<p>Happy to help! Anything else?</p>', chips: ['Cheapest 22K today', 'Best offer today'] };
-    if (W.who.some(function (x) { return t.indexOf(x) > -1; })) return { intent: 'about', html: '<p>I’m Sona, MyGoldRates’ assistant. I answer from today’s real data — ' + KB.brands.length + ' jewellers’ published rates, making charges measured from real products, and the offers on their websites — so I never guess a number.</p>', chips: SUGGEST };
+    if (has(tx, W.rate) || k || /\b(gold|sona)\b/.test(tx)) return aMedian(k);
+    if (has(tx, W.hello)) return { intent: 'hello', html: '<p>' + t('hello', { n: KB.brands.length }) + '</p>', say: t('hello', { n: KB.brands.length }), chips: suggest() };
+    if (has(tx, W.thanks)) return { intent: 'thanks', html: '<p>' + t('thanks') + '</p>', say: t('thanks'), chips: chips(['cheap22', 'bestoff']) };
+    if (W.who.some(function (x) { return tx.indexOf(x) > -1; })) return { intent: 'about', html: '<p>' + t('about', { n: KB.brands.length }) + '</p>', say: t('about', { n: KB.brands.length }), chips: suggest() };
     return null;
+  }
+  // A question in any language: Indian scripts are first turned into the
+  // words above (sona_lang.js); the reply comes in the asker's language.
+  function understand(q) {
+    RL = (LG && LG.detect(q, LANG)) || LANG;
+    if (!STR[RL]) RL = 'en';
+    if (LG && LG.isIndic(q)) return LG.understand(q, VOCAB, RL).text;
+    return q;
   }
 
   // ------------------------------------------------------------- avatar
@@ -317,7 +401,7 @@
   window.GR_SONA_AVATAR = avatar;
 
   // --------------------------------------------------------------- UI
-  var SUGGEST = ['Cheapest 22K today', 'Gold rate in my city', 'Tanishq vs Kalyan', 'Best offer today', 'Price of 10 g 22K chain', '22K vs 24K?'];
+  var SUGGEST = ['cheap22', 'mycity', 'tvk', 'bestoff', 'p10chain', 'k22v24'];      // chip keys (sona_i18n.js ch_*)
   var CSS = '' +
     '.sn-fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:8500;display:flex;align-items:center;gap:9px;height:52px;padding:0 18px 0 7px;border:0;border-radius:999px;cursor:pointer;color:#1a1405;font:700 14.5px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:linear-gradient(135deg,#ffe9a8,#e7bf5a 45%,#b98a24);box-shadow:0 10px 30px rgba(185,138,36,.45),0 0 0 1px rgba(255,255,255,.25) inset;transition:transform .2s}' +
     '.sn-fab:hover{transform:translateY(-2px)}.sn-fab .sn-orb{width:42px;height:42px;flex:none;margin:-2px 0;filter:drop-shadow(0 2px 4px rgba(90,60,0,.35))}' +
@@ -384,26 +468,64 @@
     '.sn-foot{text-align:center;font-size:10px;color:#6f6754;padding:0 0 8px}' +
     '.sn-ban{position:relative;z-index:50;display:flex;align-items:center;justify-content:center;gap:10px;padding:9px 40px 9px 14px;font:600 13px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1a1405;background:linear-gradient(90deg,#b98a24,#f6d77d 50%,#b98a24);background-size:200% 100%;animation:snShine 6s linear infinite;cursor:pointer;text-align:center}' +
     '@keyframes snShine{to{background-position:-200% 0}}.sn-ban .nw{flex:none;background:#1a1405;color:#f0d080;border-radius:999px;padding:2px 8px;font-size:10.5px;letter-spacing:.08em}.sn-ban u{text-underline-offset:2px}' +
+    '.sn-hd .sn-ttl{flex:1;min-width:0}.sn-hd .sn-ttl span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sn-hd .sn-x{margin-left:0;flex:none}' +
+    '.sn-lp{height:32px;flex:none;border-radius:999px;border:1px solid rgba(240,208,128,.35);background:rgba(231,191,90,.1);color:#f0d080;font:700 12.5px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:0 11px;cursor:pointer;white-space:nowrap}' +
+    '.sn-hb{width:34px;height:34px;flex:none;border-radius:50%;border:0;background:rgba(255,255,255,.07);color:#cfc4ad;cursor:pointer;display:flex;align-items:center;justify-content:center}.sn-hb svg{width:17px;height:17px}.sn-hb.on{background:rgba(231,191,90,.22);color:#f6d77d}' +
+    '.sn-lm{display:none;position:absolute;left:12px;right:12px;top:72px;z-index:3;grid-template-columns:repeat(2,1fr);gap:6px;padding:10px;border-radius:16px;background:#1b160e;border:1px solid rgba(240,208,128,.25);box-shadow:0 18px 40px rgba(0,0,0,.55)}.sn-lm.on{display:grid}' +
+    '.sn-lm button{border:1px solid rgba(240,208,128,.16);background:rgba(255,255,255,.04);color:#f3eadb;border-radius:10px;padding:10px 12px;text-align:left;font-size:14.5px;cursor:pointer}.sn-lm button.on{border-color:#e7bf5a;background:rgba(231,191,90,.15);color:#f6d77d}' +
+    '.sn-lchips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}.sn-lchips button{border:1px solid rgba(240,208,128,.25);background:none;color:#f0d080;border-radius:999px;padding:4px 10px;font-size:12.5px;cursor:pointer}.sn-lchips button:hover{background:rgba(231,191,90,.12)}' +
+    '.sn-mic{width:46px;height:46px;flex:none;border-radius:50%;border:1px solid rgba(240,208,128,.4);background:rgba(231,191,90,.1);color:#f0d080;cursor:pointer;display:flex;align-items:center;justify-content:center}.sn-mic svg{width:21px;height:21px}' +
+    '.sn-mic.on{background:#e5484d;border-color:#e5484d;color:#fff;animation:snMic 1.2s infinite}@keyframes snMic{0%{box-shadow:0 0 0 0 rgba(229,72,77,.6)}70%{box-shadow:0 0 0 12px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}' +
+    '.sn-fb .sn-say{margin-left:auto}.sn-fab .sn-fmic{width:26px;height:26px;margin:0 -6px 0 -2px;border-radius:50%;background:rgba(26,20,5,.12);display:flex;align-items:center;justify-content:center}.sn-fab .sn-fmic svg{width:15px;height:15px}' +
+    '@media(max-width:520px){.sn-fab .sn-fmic{display:none}}' +
     '.sn-ban .bx{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;border:0;border-radius:50%;background:rgba(26,20,5,.12);color:#1a1405;cursor:pointer;font-size:14px}';
 
-  var panel, body, chips, input;
+  var panel, body, chipBox, input, mic, spk, lmenu, voiceQ = false;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition, rec = null, listening = false;
+  var TTS = window.speechSynthesis, ttsOn = false;      // read every reply aloud; a spoken question is always answered aloud
+  try { ttsOn = localStorage.getItem('sona_tts') === '1'; } catch (_) {}
+  var ICON = {
+    mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+    on: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
+    off: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>'
+  };
+  function short(c) { var l = (LG ? LG.LANGS : []).filter(function (x) { return x.c === c; })[0]; return l ? l.s : 'EN'; }
   function ui() {
     if (panel) return;
     panel = document.createElement('div'); panel.className = 'sn-panel'; panel.id = 'sonaPanel';
     panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Sona, the jewellery assistant');
-    panel.innerHTML = '<div class="sn-hd"><div class="sn-av" id="sonaHeadAv">' + avatar() + '</div><div><b>Sona</b><span>Jewellery assistant · answers from today’s real rates</span></div><button class="sn-x" id="sonaClose" aria-label="Close">×</button></div>' +
+    panel.innerHTML = '<div class="sn-hd"><div class="sn-av" id="sonaHeadAv">' + avatar() + '</div><div class="sn-ttl"><b>Sona</b><span id="sonaSub"></span></div>' +
+      (LG ? '<button class="sn-lp" id="sonaLang" type="button" aria-haspopup="true"></button>' : '') +
+      (TTS ? '<button class="sn-hb" id="sonaSpk" type="button"></button>' : '') +
+      '<button class="sn-x" id="sonaClose" aria-label="Close">×</button></div>' +
+      (LG ? '<div class="sn-lm" id="sonaLm" role="menu">' + LG.LANGS.map(function (l) { return '<button type="button" role="menuitem" data-lang="' + l.c + '">' + l.n + '</button>'; }).join('') + '</div>' : '') +
       '<div class="sn-body" aria-live="polite"></div><div class="sn-chips"></div>' +
-      '<form class="sn-in"><input id="sonaInput" type="text" autocomplete="off" maxlength="200" placeholder="Ask about rates, jewellers, offers…" aria-label="Your question"><button class="sn-send" id="sonaSend" aria-label="Send">➤</button></form>' +
-      '<div class="sn-foot">Free · answers from published data, not advice</div>';
+      '<form class="sn-in"><input id="sonaInput" type="text" autocomplete="off" maxlength="200" aria-label="Your question">' +
+      (SR ? '<button class="sn-mic" id="sonaMic" type="button">' + ICON.mic + '</button>' : '') +
+      '<button class="sn-send" id="sonaSend" aria-label="Send">➤</button></form>' +
+      '<div class="sn-foot" id="sonaFoot"></div>';
     document.body.appendChild(panel);
-    body = $('.sn-body', panel); chips = $('.sn-chips', panel); input = $('#sonaInput', panel);
+    body = $('.sn-body', panel); chipBox = $('.sn-chips', panel); input = $('#sonaInput', panel);
+    mic = $('#sonaMic', panel); spk = $('#sonaSpk', panel); lmenu = $('#sonaLm', panel);
     $('#sonaClose', panel).onclick = close;
     $('form', panel).onsubmit = function (e) { e.preventDefault(); ask(input.value); };
+    if (mic) mic.onclick = listen;
+    if (spk) spk.onclick = function () {
+      ttsOn = !ttsOn; try { localStorage.setItem('sona_tts', ttsOn ? '1' : '0'); } catch (_) {}
+      if (!ttsOn) hush();
+      labels(); track(ttsOn ? 'tts_on' : 'tts_off');
+    };
+    if (LG) $('#sonaLang', panel).onclick = function (e) { e.stopPropagation(); lmenu.classList.toggle('on'); };
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && opened) close(); });
     panel.addEventListener('click', function (e) {
-      var c = e.target.closest('.sn-chip'); if (c) { ask(c.textContent); return; }
+      var lb = e.target.closest('[data-lang]');
+      if (lb) { setLang(lb.getAttribute('data-lang')); return; }
+      if (lmenu && !e.target.closest('#sonaLang')) lmenu.classList.remove('on');
+      var c = e.target.closest('.sn-chip'); if (c) { ask(c.getAttribute('data-q') || c.textContent, c.textContent); return; }
       var s = e.target.closest('[data-sn="subscribe"]');
       if (s) { close(); if (window.GR_OPEN_SUBPOP) window.GR_OPEN_SUBPOP(); else location.href = '/inquiry'; track('subscribe'); return; }
+      var sy = e.target.closest('.sn-say');
+      if (sy) { var m = sy.closest('.sn-m'); speak(m._say, m._sl, m); track('replay'); return; }
       var f = e.target.closest('.sn-fb button');
       if (f && !f.parentNode.getAttribute('data-done')) {
         f.classList.add('on'); f.parentNode.setAttribute('data-done', '1');
@@ -411,51 +533,187 @@
         if (id) rpc('bot_feedback', { p_id: +id, p_sid: window.GR_SID || '', p_helpful: f.getAttribute('data-v') === '1' });
       }
     });
+    labels();
   }
-  function setChips(list) { chips.innerHTML = (list || []).map(function (c) { return '<button class="sn-chip" type="button">' + esc(c) + '</button>'; }).join(''); }
+  // Every fixed label in the chosen language.
+  function labels() {
+    RL = LANG;
+    $('#sonaSub', panel).textContent = t('ui_sub');
+    $('#sonaFoot', panel).textContent = t('ui_foot');
+    if (!listening) input.placeholder = t('ui_ph');
+    if (mic) { mic.setAttribute('aria-label', t('ui_mic')); mic.title = t('ui_mic'); }
+    if (spk) { spk.innerHTML = ttsOn ? ICON.on : ICON.off; spk.classList.toggle('on', ttsOn); spk.setAttribute('aria-pressed', ttsOn ? 'true' : 'false'); spk.setAttribute('aria-label', t('ui_speak')); spk.title = ttsOn ? t('ui_mute') : t('ui_speak'); }
+    if (LG) {
+      var lp = $('#sonaLang', panel); lp.textContent = short(LANG) + ' ▾'; lp.setAttribute('aria-label', t('ui_lang') + ': ' + langName(LANG));
+      [].forEach.call(lmenu.querySelectorAll('button'), function (b) { b.classList.toggle('on', b.getAttribute('data-lang') === LANG); });
+    }
+  }
+  function setLang(c) {
+    if (!STR[c]) return;
+    LANG = c; try { localStorage.setItem('sona_lang', c); } catch (_) {}
+    if (lmenu) lmenu.classList.remove('on');
+    hush(); labels(); track('lang_' + c);
+    // Only the welcome so far: say it again in the new language.
+    var ms = body.querySelectorAll('.sn-m');
+    if (ms.length === 1 && ms[0].getAttribute('data-greet')) { ms[0].remove(); greet(); }
+    else setChips(suggest());
+  }
+  function greet() {
+    RL = LANG;
+    var m = bubble('<p>' + t('greet1') + '</p><p>' + t('greet2') + '</p>' + (LG ? '<p class="sn-dim">' + t('lang_hint') + '</p><div class="sn-lchips">' +
+      LG.LANGS.map(function (l) { return '<button type="button" data-lang="' + l.c + '">' + l.n + '</button>'; }).join('') + '</div>' : ''));
+    m.setAttribute('data-greet', '1');
+    setChips(suggest());
+  }
+  function setChips(list) {
+    chipBox.innerHTML = (list || []).map(function (c) {
+      c = typeof c === 'string' ? { l: c, q: c } : c;
+      return '<button class="sn-chip" type="button" data-q="' + esc(c.q) + '">' + esc(c.l) + '</button>';
+    }).join('');
+  }
   function bubble(html, me, talking) {
     var m = document.createElement('div'); m.className = 'sn-m' + (me ? ' me' : ' bot') + (talking ? ' sona-talk' : '');
     m.innerHTML = (me ? '' : '<div class="sn-mav">' + avatar() + '</div>') + '<div class="sn-b">' + html + '</div>';
     body.appendChild(m);
     body.scrollTop = body.scrollHeight; return m;
   }
-  // While Sona writes a reply she talks: in her message and in the header.
-  function talking(on) { var h = $('#sonaHeadAv', panel); if (h) h.classList.toggle('sona-talk', on); }
-  function ask(q) {
+  function note(text) { bubble('<p class="sn-dim">' + esc(text) + '</p>'); }
+  // While Sona writes or reads out a reply she talks: in her message and in the header.
+  function talking(on) { var h = panel && $('#sonaHeadAv', panel); if (h) h.classList.toggle('sona-talk', on); }
+
+  // ------------------------------------------------- voice (the browser's own)
+  function bcp(c) { var l = (LG ? LG.LANGS : []).filter(function (x) { return x.c === c; })[0]; return l ? l.bcp : 'en-IN'; }
+  function voiceFor(c) {
+    var vs = (TTS && TTS.getVoices()) || [], want = bcp(c).toLowerCase();
+    var lg = function (v) { return String(v.lang || '').replace('_', '-').toLowerCase(); };
+    return vs.filter(function (v) { return lg(v) === want; })[0] ||
+      vs.filter(function (v) { return lg(v) === c || lg(v).indexOf(c + '-') === 0; })[0] || null;
+  }
+  var toldNoVoice = {};
+  function speak(text, lang, m) {
+    if (!TTS || !text) return;
+    lang = lang || 'en';
+    var go = function () {
+      var v = voiceFor(lang);
+      if (!v && lang !== 'en') {
+        if (!toldNoVoice[lang]) { toldNoVoice[lang] = 1; RL = lang; note(t('no_voice', { l: langName(lang) })); }
+        return;
+      }
+      try { TTS.cancel(); } catch (_) {}
+      var u = new SpeechSynthesisUtterance(String(text).replace(/₹/g, ''));
+      if (v) u.voice = v;
+      u.lang = v ? v.lang : bcp(lang); u.rate = 1; u.pitch = 1.05;
+      u.onstart = function () { talking(true); if (m) m.classList.add('sona-talk'); };
+      u.onend = u.onerror = function () { talking(false); if (m) m.classList.remove('sona-talk'); };
+      TTS.speak(u);
+    };
+    if ((TTS.getVoices() || []).length) go();
+    else {                                     // voices load late on some browsers
+      var done = false, once = function () { if (!done) { done = true; go(); } };
+      try { TTS.addEventListener('voiceschanged', once); } catch (_) {}
+      setTimeout(once, 1200);
+    }
+  }
+  function hush() { if (TTS) try { TTS.cancel(); } catch (_) {} talking(false); }
+  function setListening(on) {
+    listening = on;
+    if (mic) mic.classList.toggle('on', on);
+    RL = LANG; input.placeholder = on ? t('ui_listen') : t('ui_ph');
+  }
+  function listen() {
+    if (!SR) return;
+    if (listening) { try { rec.stop(); } catch (_) {} return; }
+    hush();
+    rec = new SR(); rec.lang = bcp(LANG); rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
+    var heard = '';
+    rec.onresult = function (e) {
+      var now = '';
+      for (var i = 0; i < e.results.length; i++) now += e.results[i][0].transcript;
+      heard = now; input.value = now;
+    };
+    rec.onerror = function (e) {
+      RL = LANG;
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') note(t('mic_denied'));
+      else if (e.error === 'no-speech') note(t('mic_none'));
+    };
+    rec.onend = function () {
+      setListening(false);
+      if (heard.trim()) { voiceQ = true; ask(heard); }
+    };
+    try { rec.start(); setListening(true); track('voice'); } catch (_) { setListening(false); }
+  }
+  // FAQ answers are written in English; where the browser can translate on
+  // the device (free, nothing sent anywhere), Sona answers in the reply
+  // language, otherwise in English with a note.
+  function translateTo(text, lang) {
+    try {
+      if (!('Translator' in window)) return Promise.resolve(null);
+      var o = { sourceLanguage: 'en', targetLanguage: lang };
+      var go = window.Translator.availability(o).then(function (a) {
+        return a === 'unavailable' ? null : window.Translator.create(o).then(function (tr) { return tr.translate(text); });
+      }).catch(function () { return null; });
+      return Promise.race([go, new Promise(function (r) { setTimeout(function () { r(null); }, 4000); })]);
+    } catch (_) { return Promise.resolve(null); }
+  }
+
+  function ask(q, label) {
     q = String(q || '').trim(); if (!q) return;
-    input.value = ''; bubble(esc(q), true); setChips([]);
+    var spoken = voiceQ; voiceQ = false;
+    hush();
+    input.value = ''; bubble(esc(label || q), true); setChips([]);
     var typing = bubble('<span class="sn-typing"><span></span><span></span><span></span></span>', false, true);
     talking(true);
     loadKB().then(function () {
       var a = null;
-      try { a = answer(q); } catch (e) { a = null; }
-      var ok = !!a;
-      if (!a) a = { intent: 'unknown', html: '<p>I’m still learning that one — I’ve noted your question so we can add a proper answer soon. Meanwhile, I’m good at these:</p>', chips: SUGGEST };
-      setTimeout(function () {
-        typing.remove(); talking(false);
-        var m = bubble(a.html + '<div class="sn-fb"><button type="button" data-v="1" aria-label="Helpful">👍</button><button type="button" data-v="0" aria-label="Not helpful">👎</button></div>');
-        setChips(a.chips || SUGGEST);
-        rpc('log_bot_question', { p_q: redact(q), p_intent: a.intent, p_answered: ok, p_page: location.pathname, p_sid: window.GR_SID || '' })
-          .then(function (id) { if (id) $('.sn-fb', m).setAttribute('data-id', id); });
-        track(ok ? 'answered' : 'unanswered');
-      }, 350 + Math.min(600, a.html.length / 6));
-    }).catch(function () { typing.remove(); talking(false); bubble('<p>I couldn’t load today’s data. Please check your connection and try again.</p>'); });
+      try { a = answer(understand(q)); } catch (e) { a = null; }
+      var ok = !!a, rl = RL;
+      if (!a) a = { intent: 'unknown', html: '<p>' + t('unknown') + '</p>', say: t('unknown'), chips: suggest() };
+      var tr = a.en && rl !== 'en' ? translateTo(a.en, rl) : Promise.resolve(null);
+      tr.then(function (txt) {
+        RL = rl;
+        if (a.en && rl !== 'en') {
+          if (txt) { a.html = '<p>' + esc(txt) + '</p>' + a.html.replace(/^<p>[\s\S]*?<\/p>/, '') + '<div class="sn-src">' + t('translated') + '</div>'; a.say = txt; }
+          else { a.html = '<p class="sn-dim">' + t('en_only') + '</p>' + a.html; a.sayLang = 'en'; }
+        }
+        setTimeout(function () {
+          typing.remove(); talking(false);
+          var m = bubble(a.html + '<div class="sn-fb"><button type="button" data-v="1" aria-label="Helpful">👍</button><button type="button" data-v="0" aria-label="Not helpful">👎</button>' +
+            (TTS && a.say ? '<button type="button" class="sn-say" aria-label="' + esc(t('ui_speak')) + '">🔊</button>' : '') + '</div>');
+          m._say = a.say; m._sl = a.sayLang || rl;
+          setChips(a.chips || suggest());
+          var tag = (rl !== 'en' ? rl : '') + (spoken ? (rl !== 'en' ? ' ' : '') + 'voice' : '');
+          rpc('log_bot_question', { p_q: (tag ? '[' + tag + '] ' : '') + redact(q), p_intent: a.intent, p_answered: ok, p_page: location.pathname, p_sid: window.GR_SID || '' })
+            .then(function (id) { if (id) $('.sn-fb', m).setAttribute('data-id', id); });
+          track(ok ? 'answered' : 'unanswered');
+          if (spoken || ttsOn) speak(a.say, m._sl, m);
+        }, 350 + Math.min(600, a.html.length / 6));
+      });
+    }).catch(function () { typing.remove(); talking(false); RL = LANG; bubble('<p>' + t('nodata') + '</p>'); });
   }
   function open(q) {
     ui();
     if (!opened) {
       opened = true; document.documentElement.classList.add('sona-open');
-      if (!body.childNodes.length) {
-        bubble('<p>Namaste! 🙏 I’m <b>Sona</b>, your jewellery assistant.</p><p>Ask me anything about buying gold — today’s rate at any jeweller, the cheapest in your city, making charges, offers, or the price of any weight. I answer from today’s real data.</p>');
-        setChips(SUGGEST);
-      }
+      if (!body.childNodes.length) greet();
       track('open'); loadKB();
       if (window.innerWidth > 560) setTimeout(function () { try { input.focus(); } catch (_) {} }, 200);
     }
     if (q) ask(q);
   }
-  function close() { opened = false; document.documentElement.classList.remove('sona-open'); }
+  function close() {
+    opened = false; document.documentElement.classList.remove('sona-open');
+    hush(); if (listening && rec) try { rec.stop(); } catch (_) {}
+  }
   window.GR_ASK = open;
+
+  if (TEST) {                                   // tests drive the engine without a page
+    window.__SONA_TEST = {
+      setKB: function (d) { KB = d; prep(d); },
+      setLang: function (c) { LANG = c; RL = c; },
+      ask: function (q) { var tx = understand(q), a = answer(tx); return { text: tx, lang: RL, a: a }; }
+    };
+    return;
+  }
 
   // ---------------------------------------------------- launcher & banner
   function mount() {
@@ -463,15 +721,15 @@
     var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
     var fab = document.createElement('button');
     fab.className = 'sn-fab'; fab.id = 'sonaFab'; fab.type = 'button'; fab.setAttribute('aria-label', 'Ask Sona, the jewellery assistant');
-    fab.innerHTML = '<span class="sn-orb">' + avatar() + '</span><span class="sn-lbl">Ask Sona</span><span class="sn-ping"></span>';
+    fab.innerHTML = '<span class="sn-orb">' + avatar() + '</span><span class="sn-lbl">Ask Sona</span>' + (SR ? '<span class="sn-fmic">' + ICON.mic + '</span>' : '') + '<span class="sn-ping"></span>';
     fab.onclick = function () { open(); };
     document.body.appendChild(fab);
-    var seen = null; try { seen = localStorage.getItem('sona_ban'); } catch (_) {}
+    var seen = null; try { seen = localStorage.getItem('sona_ban2'); } catch (_) {}
     if (!seen) {
       var b = document.createElement('div'); b.className = 'sn-ban'; b.id = 'sonaBanner';
-      b.innerHTML = '<span class="sn-banav">' + avatar() + '</span><span class="nw">NEW</span><span>Meet <b>Sona</b>, our new gold-rate assistant — ask about any jeweller, city, making charge or offer. <u>Try it</u></span><button class="bx" type="button" aria-label="Dismiss">×</button>';
+      b.innerHTML = '<span class="sn-banav">' + avatar() + '</span><span class="nw">NEW</span><span>Now <b>talk to Sona</b> about gold rates — in English, हिन्दी, मराठी, ગુજરાતી, தமிழ், తెలుగు, ಕನ್ನಡ, മലയാളം, বাংলা or ਪੰਜਾਬੀ. <u>Try it</u></span><button class="bx" type="button" aria-label="Dismiss">×</button>';
       b.onclick = function (e) {
-        if (e.target.closest('.bx')) { b.remove(); try { localStorage.setItem('sona_ban', '1'); } catch (_) {} return; }
+        if (e.target.closest('.bx')) { b.remove(); try { localStorage.setItem('sona_ban2', '1'); } catch (_) {} return; }
         open(); track('banner');
       };
       document.body.insertBefore(b, document.body.firstChild);

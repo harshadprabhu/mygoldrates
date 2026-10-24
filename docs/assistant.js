@@ -1,3 +1,1227 @@
+/* Sona's replies in ten languages. {x} marks a value filled in at answer
+ * time (a jeweller, a city, a price); "say_" lines are what she speaks
+ * aloud, so they carry words, not tables. Missing keys fall back to
+ * English. Figures stay in Western digits, as Indian sites print them.
+ */
+(function (root) {
+  'use strict';
+  var S = {};
+
+  S.en = {
+    ui_sub: 'Jewellery assistant · answers from today’s real rates',
+    ui_ph: 'Ask about rates, jewellers, offers…',
+    ui_listen: 'Listening… speak now',
+    ui_mic: 'Speak your question',
+    ui_foot: 'Free · type or talk · answers from published data, not advice',
+    ui_lang: 'Language', ui_speak: 'Read aloud', ui_mute: 'Stop reading aloud',
+    greet1: 'Namaste! 🙏 I’m <b>Sona</b>, your jewellery assistant.',
+    greet2: 'Ask me anything about buying gold — today’s rate at any jeweller, the cheapest in your city, making charges, offers, or the price of any weight. Type, or tap the 🎤 and talk.',
+    lang_hint: 'I speak your language too — pick it at the top:',
+    src: 'Today’s rates from {n} jewellers, before GST · {d}',
+    med_h: 'Gold rate in India today, the middle of {n} jewellers:',
+    med_low: 'Lowest 22K among national jewellers: <b>{b}</b> at <b>{p}/g</b>.',
+    brand_h: '<b>{b}</b> today:',
+    brand_rank: 'That’s <b>#{r} of {n}</b> jewellers today — {rel}.',
+    rel_at: 'right at the market middle for {k}', rel_below: '{p}/g below the market middle for {k}', rel_above: '{p}/g above the market middle for {k}',
+    brand_mk: 'Usual making charges: {list}.',
+    brand_off: 'Offer on their site: <b>{o}</b>.',
+    brand_st: 'Sells in {s}.',
+    brand_link: '{b}’s 30-day rates →',
+    city_h: 'Cheapest {k} for <b>{c}</b> today ({note}):',
+    city_loc: 'national jewellers plus {l} that sell in {s}', city_nat: 'national jewellers',
+    city_link: 'Full board for {c} →',
+    cheap_h: 'Cheapest {k} among national jewellers today:',
+    cheap_gap: 'The gap from cheapest to dearest is <b>{p}</b> on 10 g — worth checking before you buy.',
+    cmp_h: 'Side by side today ({k}):', cmp_10: '{p} for 10 g', cmp_mk: 'Making ~{p}', cmp_nomk: 'Making: not measured',
+    cmp_win: '<b>{b}</b> has the lower {k} rate by <b>{p}</b> on 10 g. The final bill also depends on the making charge for the design you pick.',
+    mk_none: 'We haven’t measured <b>{b}</b>’s making charges yet. We have them for {list}.',
+    mk_link: 'Making charges compared →',
+    mk_brand_h: '<b>{b}</b>’s usual making charges (median of real products, % of gold value):',
+    mk_note: 'Varies by design; it’s the most negotiable part of the bill.',
+    mk_all: 'Compare all jewellers →',
+    mk_h: 'Lowest making charges on a <b>{c}</b> (median of real products):',
+    mk_every: 'Every jeweller and category →',
+    off_none: 'No offer is published as text on <b>{b}</b>’s website today.',
+    off_see: 'See who has offers →',
+    off_brand_h: 'Offers on <b>{b}</b>’s website today:',
+    off_page: 'Their page ↗', off_all: 'All jewellers’ offers compared →',
+    off_h: 'The real test of an offer is the final price. A 10 g 22K ring today, after offers, with GST:',
+    off_tag: '{p}% off making',
+    off_count: '{n} jewellers have offers on their sites today, e.g. {list}.',
+    off_every: 'Every offer, and what it really means →',
+    price_h: '{w} of {k} at {who} today:', price_who: 'the cheapest national jeweller ({b})',
+    price_gold: 'Gold ({g} g × {p})', price_mk: 'Making (~{p}, {c})', price_typ: 'typical', price_total: 'Total',
+    price_nomk: 'Making charges not included — add the jeweller’s charge for your design (often 8–25%).',
+    trend_none: 'Not enough history yet.', hist_link: 'Gold rate history →',
+    trend_h: '{k} market middle: <b>{p}/g</b> today.',
+    vs1: 'vs previous day', vs7: 'vs 7 days ago', vs30: 'vs 30 days ago',
+    trend_note: 'Past moves, not a forecast — nobody can reliably predict tomorrow’s price.',
+    full_hist: 'Full history →',
+    alerts: 'Get the cheapest jeweller and today’s rate every morning, free — and an email the day 22K drops to your price.',
+    alerts_cta: 'Get free daily alerts',
+    more: 'Read more →', guide_h: 'This guide covers it: <b>{t}</b> — {d}', guide_link: 'Read the guide →',
+    en_only: 'This answer is in English for now:', translated: 'Translated on your device',
+    ask_city: 'Which city are you in?',
+    silver: 'I cover gold for now — jewellers’ 22K, 24K and 18K rates. Silver is on its way.',
+    hello: 'Namaste! 🙏 I’m Sona. Ask me anything about buying gold — today’s rates at {n} jewellers, your city, making charges, offers or a price for any weight.',
+    thanks: 'Happy to help! Anything else?',
+    about: 'I’m Sona, MyGoldRates’ assistant. I answer from today’s real data — {n} jewellers’ published rates, making charges measured from real products, and the offers on their websites — so I never guess a number.',
+    unknown: 'I’m still learning that one — I’ve noted your question so we can add a proper answer soon. Meanwhile, I’m good at these:',
+    nodata: 'I couldn’t load today’s data. Please check your connection and try again.',
+    no_voice: 'This device has no {l} voice for reading aloud, so I’ll answer in text.',
+    mic_denied: 'The microphone is blocked. Allow it for this site in your browser settings, then tap the 🎤 again.',
+    mic_none: 'I didn’t catch that — tap the 🎤 and try again.',
+    rupees: 'rupees', carat: 'carat',
+    say_med: 'Today {k} gold is about {p} per gram, the middle of {n} jewellers. The lowest is {b}, at {q}.',
+    say_brand: '{b}: {k} gold is {p} per gram today, number {r} of {n} jewellers.',
+    say_city: 'In {c}, the cheapest {k} today is at {b}: {p} per gram.',
+    say_cheap: 'The cheapest {k} today is at {b}: {p} per gram. On 10 grams, the dearest jeweller charges {q} more.',
+    say_cmp: '{b} is cheaper, by {p} on 10 grams of {k}.',
+    say_mk_brand: '{b}’s usual making charge on a {c} is about {p}.',
+    say_mk: 'The lowest making charge on a {c} is at {b}, about {p}.',
+    say_mk_none: 'We have not measured {b}’s making charges yet.',
+    say_off: 'Counting the offers, a 10 gram 22 carat ring costs the least at {b} today: {p} with GST.',
+    say_off_brand: '{b} has {n} offers on its website today.',
+    say_off_none: 'No offer is published on {b}’s website today.',
+    say_price: '{w} of {k} gold at {b} comes to about {p}, with GST.',
+    say_trend_up: '{k} gold is {p} per gram today, up {q} from the previous day.',
+    say_trend_dn: '{k} gold is {p} per gram today, down {q} from the previous day.',
+    say_trend_same: '{k} gold is {p} per gram today, the same as the previous day.',
+    u_g: '{n} g', u_tola: '{n} tola', u_sov: '{n} sovereign', u_kg: '{n} kg',
+    c_Ring: 'ring', c_Chain: 'chain', c_Bangle: 'bangle', c_Necklace: 'necklace', c_Earrings: 'earrings',
+    c_Mangalsutra: 'mangalsutra', c_Pendant: 'pendant', c_Bracelet: 'bracelet', c_Coin: 'coin',
+    ch_cheap22: 'Cheapest 22K today', ch_mycity: 'Gold rate in my city', ch_tvk: 'Tanishq vs Kalyan',
+    ch_bestoff: 'Best offer today', ch_p10chain: 'Price of 10 g 22K chain', ch_k22v24: '22K vs 24K?',
+    ch_p10: 'Price of 10 g 22K', ch_afteroff: 'Price after offers', ch_mkcmp: 'Making charges compared',
+    ch_goodmk: 'Is 20% off making a good deal?', ch_whatmk: 'What are making charges?', ch_alert: 'Set a price alert',
+    ch_goodtime: 'Is now a good time to buy?', ch_rate: 'Gold rate today', ch_another: 'Same at another jeweller',
+    ch_bmk: '{b} making charges', ch_boff: '{b} offers'
+  };
+
+  S.hi = {
+    ui_sub: 'ज्वेलरी असिस्टेंट · आज के असली भाव से जवाब',
+    ui_ph: 'भाव, ज्वैलर, ऑफ़र के बारे में पूछें…',
+    ui_listen: 'सुन रही हूँ… बोलिए',
+    ui_mic: 'बोलकर पूछें',
+    ui_foot: 'मुफ़्त · लिखें या बोलें · प्रकाशित आँकड़ों से जवाब, सलाह नहीं',
+    ui_lang: 'भाषा', ui_speak: 'सुनें', ui_mute: 'बोलना बंद करें',
+    greet1: 'नमस्ते! 🙏 मैं <b>सोना</b> हूँ, आपकी ज्वेलरी असिस्टेंट।',
+    greet2: 'सोना ख़रीदने से जुड़ा कुछ भी पूछिए — किसी भी ज्वैलर का आज का भाव, आपके शहर में सबसे सस्ता, मेकिंग चार्ज, ऑफ़र या किसी भी वज़न की क़ीमत। लिखिए, या 🎤 दबाकर बोलिए।',
+    lang_hint: 'आप अपनी भाषा ऊपर से चुन सकते हैं:',
+    src: 'आज के भाव {n} ज्वैलर्स से, GST से पहले · {d}',
+    med_h: 'भारत में आज सोने का भाव, {n} ज्वैलर्स का बीच का भाव:',
+    med_low: 'राष्ट्रीय ज्वैलर्स में सबसे कम 22K: <b>{b}</b>, <b>{p}/ग्राम</b>।',
+    brand_h: '<b>{b}</b> आज:',
+    brand_rank: 'आज {n} ज्वैलर्स में यह <b>#{r}</b> पर है — {rel}।',
+    rel_at: '{k} के बाज़ार के बीच के भाव के बराबर', rel_below: '{k} के बीच के भाव से {p}/ग्राम कम', rel_above: '{k} के बीच के भाव से {p}/ग्राम ज़्यादा',
+    brand_mk: 'आम मेकिंग चार्ज: {list}।',
+    brand_off: 'उनकी साइट पर ऑफ़र: <b>{o}</b>।',
+    brand_st: 'इन राज्यों में: {s}।',
+    brand_link: '{b} के 30 दिन के भाव →',
+    city_h: '<b>{c}</b> में आज सबसे सस्ता {k} ({note}):',
+    city_loc: 'राष्ट्रीय ज्वैलर्स और {s} के {l} स्थानीय ज्वैलर', city_nat: 'राष्ट्रीय ज्वैलर्स',
+    city_link: '{c} की पूरी सूची →',
+    cheap_h: 'राष्ट्रीय ज्वैलर्स में आज सबसे सस्ता {k}:',
+    cheap_gap: 'सबसे सस्ते और सबसे महँगे में 10 ग्राम पर <b>{p}</b> का फ़र्क़ है — ख़रीदने से पहले ज़रूर देखें।',
+    cmp_h: 'आज आमने-सामने ({k}):', cmp_10: '10 ग्राम: {p}', cmp_mk: 'मेकिंग ~{p}', cmp_nomk: 'मेकिंग: मापा नहीं गया',
+    cmp_win: '<b>{b}</b> का {k} भाव 10 ग्राम पर <b>{p}</b> कम है। आख़िरी बिल आपके चुने डिज़ाइन के मेकिंग चार्ज पर भी निर्भर करता है।',
+    mk_none: '<b>{b}</b> का मेकिंग चार्ज हमने अभी नहीं मापा है। इनका मापा है: {list}।',
+    mk_link: 'मेकिंग चार्ज की तुलना →',
+    mk_brand_h: '<b>{b}</b> का आम मेकिंग चार्ज (असली प्रोडक्ट्स का बीच का आँकड़ा, सोने की क़ीमत का %):',
+    mk_note: 'डिज़ाइन के हिसाब से बदलता है; बिल में इसी पर सबसे ज़्यादा मोलभाव हो सकता है।',
+    mk_all: 'सभी ज्वैलर्स की तुलना →',
+    mk_h: '<b>{c}</b> पर सबसे कम मेकिंग चार्ज (असली प्रोडक्ट्स का बीच का आँकड़ा):',
+    mk_every: 'हर ज्वैलर और हर कैटेगरी →',
+    off_none: 'आज <b>{b}</b> की वेबसाइट पर कोई ऑफ़र लिखा हुआ नहीं है।',
+    off_see: 'देखें किसके पास ऑफ़र है →',
+    off_brand_h: 'आज <b>{b}</b> की वेबसाइट पर ऑफ़र:',
+    off_page: 'उनका पेज ↗', off_all: 'सभी ज्वैलर्स के ऑफ़र की तुलना →',
+    off_h: 'ऑफ़र की असली परख आख़िरी क़ीमत है। आज 10 ग्राम 22K की अंगूठी, ऑफ़र के बाद, GST के साथ:',
+    off_tag: 'मेकिंग पर {p}% छूट',
+    off_count: 'आज {n} ज्वैलर्स की साइट पर ऑफ़र हैं, जैसे {list}।',
+    off_every: 'हर ऑफ़र, और उसका असली मतलब →',
+    price_h: 'आज {who} पर {w} {k}:', price_who: 'सबसे सस्ता राष्ट्रीय ज्वैलर ({b})',
+    price_gold: 'सोना ({g} ग्राम × {p})', price_mk: 'मेकिंग (~{p}, {c})', price_typ: 'आम तौर पर', price_total: 'कुल',
+    price_nomk: 'मेकिंग चार्ज शामिल नहीं — अपने डिज़ाइन का चार्ज जोड़ें (अक्सर 8–25%)।',
+    trend_none: 'अभी पर्याप्त इतिहास नहीं है।', hist_link: 'सोने के भाव का इतिहास →',
+    trend_h: '{k} का बाज़ार का बीच का भाव: आज <b>{p}/ग्राम</b>।',
+    vs1: 'पिछले दिन से', vs7: '7 दिन पहले से', vs30: '30 दिन पहले से',
+    trend_note: 'यह बीता हुआ बदलाव है, भविष्यवाणी नहीं — कल का भाव कोई पक्का नहीं बता सकता।',
+    full_hist: 'पूरा इतिहास →',
+    alerts: 'हर सुबह सबसे सस्ता ज्वैलर और आज का भाव, मुफ़्त — और जिस दिन 22K आपके भाव तक गिरे, उस दिन ईमेल।',
+    alerts_cta: 'मुफ़्त रोज़ाना अलर्ट पाएँ',
+    more: 'और पढ़ें →', guide_h: 'यह गाइड इसी बारे में है: <b>{t}</b> — {d}', guide_link: 'गाइड पढ़ें →',
+    en_only: 'यह जवाब अभी अंग्रेज़ी में है:', translated: 'आपके डिवाइस पर अनुवाद किया गया',
+    ask_city: 'आप किस शहर में हैं?',
+    silver: 'अभी मैं सिर्फ़ सोने की जानकारी देती हूँ — ज्वैलर्स के 22K, 24K और 18K भाव। चाँदी जल्द आ रही है।',
+    hello: 'नमस्ते! 🙏 मैं सोना हूँ। सोना ख़रीदने से जुड़ा कुछ भी पूछिए — {n} ज्वैलर्स के आज के भाव, आपका शहर, मेकिंग चार्ज, ऑफ़र या किसी भी वज़न की क़ीमत।',
+    thanks: 'ख़ुशी हुई! और कुछ?',
+    about: 'मैं सोना हूँ, MyGoldRates की असिस्टेंट। मैं आज के असली आँकड़ों से जवाब देती हूँ — {n} ज्वैलर्स के प्रकाशित भाव, असली प्रोडक्ट्स से मापे गए मेकिंग चार्ज, और उनकी वेबसाइट के ऑफ़र — इसलिए मैं कोई आँकड़ा अंदाज़े से नहीं बताती।',
+    unknown: 'यह मैं अभी सीख रही हूँ — आपका सवाल नोट कर लिया है ताकि जल्द सही जवाब जोड़ सकें। तब तक, इनमें मैं अच्छी हूँ:',
+    nodata: 'आज के आँकड़े लोड नहीं हो पाए। कृपया इंटरनेट देखकर फिर कोशिश करें।',
+    no_voice: 'इस डिवाइस में {l} आवाज़ नहीं है, इसलिए मैं लिखकर जवाब दूँगी।',
+    mic_denied: 'माइक बंद है। ब्राउज़र की सेटिंग में इस साइट के लिए माइक चालू करें, फिर 🎤 दबाएँ।',
+    mic_none: 'मैं सुन नहीं पाई — 🎤 दबाकर फिर बोलिए।',
+    rupees: 'रुपये', carat: 'कैरेट',
+    say_med: 'आज {k} सोना लगभग {p} प्रति ग्राम है, {n} ज्वैलर्स का बीच का भाव। सबसे कम {b} पर है, {q}।',
+    say_brand: '{b} पर आज {k} सोना {p} प्रति ग्राम है, {n} ज्वैलर्स में नंबर {r}।',
+    say_city: '{c} में आज सबसे सस्ता {k} {b} पर है, {p} प्रति ग्राम।',
+    say_cheap: 'आज सबसे सस्ता {k} {b} पर है, {p} प्रति ग्राम। 10 ग्राम पर सबसे महँगा ज्वैलर {q} ज़्यादा लेता है।',
+    say_cmp: '{b} सस्ता है, 10 ग्राम {k} पर {p} कम।',
+    say_mk_brand: '{b} पर {c} का आम मेकिंग चार्ज लगभग {p} है।',
+    say_mk: '{c} पर सबसे कम मेकिंग चार्ज {b} पर है, लगभग {p}।',
+    say_mk_none: '{b} का मेकिंग चार्ज हमने अभी नहीं मापा है।',
+    say_off: 'ऑफ़र जोड़कर, आज 10 ग्राम 22 कैरेट की अंगूठी सबसे कम {b} पर है: GST के साथ {p}।',
+    say_off_brand: 'आज {b} की वेबसाइट पर {n} ऑफ़र हैं।',
+    say_off_none: 'आज {b} की वेबसाइट पर कोई ऑफ़र नहीं है।',
+    say_price: '{b} पर {w} {k} सोना GST के साथ लगभग {p} का पड़ेगा।',
+    say_trend_up: 'आज {k} सोना {p} प्रति ग्राम है, पिछले दिन से {q} ज़्यादा।',
+    say_trend_dn: 'आज {k} सोना {p} प्रति ग्राम है, पिछले दिन से {q} कम।',
+    say_trend_same: 'आज {k} सोना {p} प्रति ग्राम है, पिछले दिन जितना ही।',
+    u_g: '{n} ग्राम', u_tola: '{n} तोला', u_sov: '{n} सॉवरेन', u_kg: '{n} किलो',
+    c_Ring: 'अंगूठी', c_Chain: 'चेन', c_Bangle: 'चूड़ी', c_Necklace: 'हार', c_Earrings: 'झुमके',
+    c_Mangalsutra: 'मंगलसूत्र', c_Pendant: 'पेंडेंट', c_Bracelet: 'ब्रेसलेट', c_Coin: 'सिक्का',
+    ch_cheap22: 'आज सबसे सस्ता 22K', ch_mycity: 'मेरे शहर में भाव', ch_tvk: 'तनिष्क या कल्याण',
+    ch_bestoff: 'आज का सबसे अच्छा ऑफ़र', ch_p10chain: '10 ग्राम 22K चेन की क़ीमत', ch_k22v24: '22K और 24K में फ़र्क़?',
+    ch_p10: '10 ग्राम 22K की क़ीमत', ch_afteroff: 'ऑफ़र के बाद क़ीमत', ch_mkcmp: 'मेकिंग चार्ज की तुलना',
+    ch_goodmk: 'क्या मेकिंग पर 20% छूट अच्छी है?', ch_whatmk: 'मेकिंग चार्ज क्या है?', ch_alert: 'भाव अलर्ट लगाएँ',
+    ch_goodtime: 'क्या अभी ख़रीदना ठीक है?', ch_rate: 'आज सोने का भाव', ch_another: 'दूसरे ज्वैलर पर यही',
+    ch_bmk: '{b} मेकिंग चार्ज', ch_boff: '{b} ऑफ़र'
+  };
+
+  S.mr = {
+    ui_sub: 'दागिने सहाय्यक · आजच्या खऱ्या दरांवरून उत्तरे',
+    ui_ph: 'दर, ज्वेलर्स, ऑफर्सबद्दल विचारा…',
+    ui_listen: 'ऐकतेय… बोला',
+    ui_mic: 'बोलून विचारा',
+    ui_foot: 'मोफत · लिहा किंवा बोला · प्रसिद्ध माहितीवरून उत्तरे, सल्ला नाही',
+    ui_lang: 'भाषा', ui_speak: 'ऐका', ui_mute: 'बोलणे थांबवा',
+    greet1: 'नमस्कार! 🙏 मी <b>सोना</b>, तुमची दागिने सहाय्यक.',
+    greet2: 'सोने खरेदीबद्दल काहीही विचारा — कोणत्याही ज्वेलरचा आजचा दर, तुमच्या शहरात सर्वात स्वस्त, मजुरी (मेकिंग चार्ज), ऑफर्स किंवा कोणत्याही वजनाची किंमत. लिहा, किंवा 🎤 दाबून बोला.',
+    lang_hint: 'तुमची भाषा वर निवडा:',
+    src: 'आजचे दर {n} ज्वेलर्सकडून, GST आधी · {d}',
+    med_h: 'भारतात आजचा सोन्याचा दर, {n} ज्वेलर्सचा मधला दर:',
+    med_low: 'राष्ट्रीय ज्वेलर्समध्ये सर्वात कमी 22K: <b>{b}</b>, <b>{p}/ग्रॅम</b>.',
+    brand_h: '<b>{b}</b> आज:',
+    brand_rank: 'आज {n} ज्वेलर्समध्ये हे <b>#{r}</b> वर आहे — {rel}.',
+    rel_at: '{k} च्या बाजारातील मधल्या दराइतकेच', rel_below: '{k} च्या मधल्या दरापेक्षा {p}/ग्रॅम कमी', rel_above: '{k} च्या मधल्या दरापेक्षा {p}/ग्रॅम जास्त',
+    brand_mk: 'नेहमीची मजुरी: {list}.',
+    brand_off: 'त्यांच्या साइटवरील ऑफर: <b>{o}</b>.',
+    brand_st: 'या राज्यांत: {s}.',
+    brand_link: '{b} चे 30 दिवसांचे दर →',
+    city_h: '<b>{c}</b> मध्ये आज सर्वात स्वस्त {k} ({note}):',
+    city_loc: 'राष्ट्रीय ज्वेलर्स आणि {s} मधील {l} स्थानिक ज्वेलर्स', city_nat: 'राष्ट्रीय ज्वेलर्स',
+    city_link: '{c} ची संपूर्ण यादी →',
+    cheap_h: 'राष्ट्रीय ज्वेलर्समध्ये आज सर्वात स्वस्त {k}:',
+    cheap_gap: 'सर्वात स्वस्त आणि सर्वात महाग यांत 10 ग्रॅमवर <b>{p}</b> फरक आहे — खरेदीपूर्वी नक्की पाहा.',
+    cmp_h: 'आज समोरासमोर ({k}):', cmp_10: '10 ग्रॅम: {p}', cmp_mk: 'मजुरी ~{p}', cmp_nomk: 'मजुरी: मोजलेली नाही',
+    cmp_win: '<b>{b}</b> चा {k} दर 10 ग्रॅमवर <b>{p}</b> ने कमी आहे. अंतिम बिल तुम्ही निवडलेल्या डिझाइनच्या मजुरीवरही अवलंबून असते.',
+    mk_none: '<b>{b}</b> ची मजुरी आम्ही अजून मोजलेली नाही. यांची मोजली आहे: {list}.',
+    mk_link: 'मजुरीची तुलना →',
+    mk_brand_h: '<b>{b}</b> ची नेहमीची मजुरी (खऱ्या उत्पादनांचा मधला आकडा, सोन्याच्या किमतीच्या %):',
+    mk_note: 'डिझाइननुसार बदलते; बिलात सर्वाधिक घासाघीस याच भागावर होऊ शकते.',
+    mk_all: 'सर्व ज्वेलर्सची तुलना →',
+    mk_h: '<b>{c}</b> वर सर्वात कमी मजुरी (खऱ्या उत्पादनांचा मधला आकडा):',
+    mk_every: 'प्रत्येक ज्वेलर आणि प्रकार →',
+    off_none: 'आज <b>{b}</b> च्या वेबसाइटवर कोणतीही ऑफर लिहिलेली नाही.',
+    off_see: 'कोणाकडे ऑफर आहे ते पाहा →',
+    off_brand_h: 'आज <b>{b}</b> च्या वेबसाइटवरील ऑफर्स:',
+    off_page: 'त्यांचे पान ↗', off_all: 'सर्व ज्वेलर्सच्या ऑफर्सची तुलना →',
+    off_h: 'ऑफरची खरी कसोटी म्हणजे अंतिम किंमत. आज 10 ग्रॅम 22K अंगठी, ऑफरनंतर, GST सह:',
+    off_tag: 'मजुरीवर {p}% सूट',
+    off_count: 'आज {n} ज्वेलर्सच्या साइटवर ऑफर्स आहेत, उदा. {list}.',
+    off_every: 'प्रत्येक ऑफर, आणि तिचा खरा अर्थ →',
+    price_h: 'आज {who} येथे {w} {k}:', price_who: 'सर्वात स्वस्त राष्ट्रीय ज्वेलर ({b})',
+    price_gold: 'सोने ({g} ग्रॅम × {p})', price_mk: 'मजुरी (~{p}, {c})', price_typ: 'साधारण', price_total: 'एकूण',
+    price_nomk: 'मजुरी समाविष्ट नाही — तुमच्या डिझाइनची मजुरी जोडा (अनेकदा 8–25%).',
+    trend_none: 'अजून पुरेसा इतिहास नाही.', hist_link: 'सोन्याच्या दरांचा इतिहास →',
+    trend_h: '{k} चा बाजारातील मधला दर: आज <b>{p}/ग्रॅम</b>.',
+    vs1: 'कालच्या तुलनेत', vs7: '7 दिवसांपूर्वीच्या तुलनेत', vs30: '30 दिवसांपूर्वीच्या तुलनेत',
+    trend_note: 'हे झालेले बदल आहेत, अंदाज नाही — उद्याचा दर कोणीही खात्रीने सांगू शकत नाही.',
+    full_hist: 'संपूर्ण इतिहास →',
+    alerts: 'दररोज सकाळी सर्वात स्वस्त ज्वेलर आणि आजचा दर, मोफत — आणि 22K तुमच्या दरापर्यंत उतरेल त्या दिवशी ईमेल.',
+    alerts_cta: 'मोफत दैनिक अलर्ट मिळवा',
+    more: 'अधिक वाचा →', guide_h: 'हे मार्गदर्शक याबद्दलच आहे: <b>{t}</b> — {d}', guide_link: 'मार्गदर्शक वाचा →',
+    en_only: 'हे उत्तर सध्या इंग्रजीत आहे:', translated: 'तुमच्या डिव्हाइसवर भाषांतर केले',
+    ask_city: 'तुम्ही कोणत्या शहरात आहात?',
+    silver: 'सध्या मी फक्त सोन्याची माहिती देते — ज्वेलर्सचे 22K, 24K आणि 18K दर. चांदी लवकरच येत आहे.',
+    hello: 'नमस्कार! 🙏 मी सोना. सोने खरेदीबद्दल काहीही विचारा — {n} ज्वेलर्सचे आजचे दर, तुमचे शहर, मजुरी, ऑफर्स किंवा कोणत्याही वजनाची किंमत.',
+    thanks: 'आनंद झाला! आणखी काही?',
+    about: 'मी सोना, MyGoldRates ची सहाय्यक. मी आजच्या खऱ्या माहितीवरून उत्तर देते — {n} ज्वेलर्सचे प्रसिद्ध दर, खऱ्या उत्पादनांवरून मोजलेली मजुरी, आणि त्यांच्या वेबसाइटवरील ऑफर्स — त्यामुळे मी कोणताही आकडा अंदाजाने सांगत नाही.',
+    unknown: 'हे मी अजून शिकतेय — तुमचा प्रश्न नोंदवला आहे, लवकरच योग्य उत्तर जोडू. तोपर्यंत, यात मी चांगली आहे:',
+    nodata: 'आजची माहिती लोड झाली नाही. कृपया इंटरनेट तपासून पुन्हा प्रयत्न करा.',
+    no_voice: 'या डिव्हाइसमध्ये {l} आवाज नाही, त्यामुळे मी लिहून उत्तर देईन.',
+    mic_denied: 'माइक बंद आहे. ब्राउझरच्या सेटिंगमध्ये या साइटसाठी माइक सुरू करा, मग पुन्हा 🎤 दाबा.',
+    mic_none: 'मला ऐकू आले नाही — 🎤 दाबून पुन्हा बोला.',
+    rupees: 'रुपये', carat: 'कॅरेट',
+    say_med: 'आज {k} सोने साधारण {p} प्रति ग्रॅम आहे, {n} ज्वेलर्सचा मधला दर. सर्वात कमी {b} येथे, {q}.',
+    say_brand: '{b} येथे आज {k} सोने {p} प्रति ग्रॅम आहे, {n} ज्वेलर्समध्ये क्रमांक {r}.',
+    say_city: '{c} मध्ये आज सर्वात स्वस्त {k} {b} येथे आहे, {p} प्रति ग्रॅम.',
+    say_cheap: 'आज सर्वात स्वस्त {k} {b} येथे आहे, {p} प्रति ग्रॅम. 10 ग्रॅमवर सर्वात महाग ज्वेलर {q} जास्त घेतो.',
+    say_cmp: '{b} स्वस्त आहे, 10 ग्रॅम {k} वर {p} ने कमी.',
+    say_mk_brand: '{b} येथे {c} ची नेहमीची मजुरी साधारण {p} आहे.',
+    say_mk: '{c} वर सर्वात कमी मजुरी {b} येथे आहे, साधारण {p}.',
+    say_mk_none: '{b} ची मजुरी आम्ही अजून मोजलेली नाही.',
+    say_off: 'ऑफर धरून, आज 10 ग्रॅम 22 कॅरेट अंगठी सर्वात कमी {b} येथे आहे: GST सह {p}.',
+    say_off_brand: 'आज {b} च्या वेबसाइटवर {n} ऑफर्स आहेत.',
+    say_off_none: 'आज {b} च्या वेबसाइटवर कोणतीही ऑफर नाही.',
+    say_price: '{b} येथे {w} {k} सोने GST सह साधारण {p} ला पडेल.',
+    say_trend_up: 'आज {k} सोने {p} प्रति ग्रॅम आहे, कालपेक्षा {q} जास्त.',
+    say_trend_dn: 'आज {k} सोने {p} प्रति ग्रॅम आहे, कालपेक्षा {q} कमी.',
+    say_trend_same: 'आज {k} सोने {p} प्रति ग्रॅम आहे, कालइतकेच.',
+    u_g: '{n} ग्रॅम', u_tola: '{n} तोळे', u_sov: '{n} सॉव्हरिन', u_kg: '{n} किलो',
+    c_Ring: 'अंगठी', c_Chain: 'चेन', c_Bangle: 'बांगडी', c_Necklace: 'हार', c_Earrings: 'कानातले',
+    c_Mangalsutra: 'मंगळसूत्र', c_Pendant: 'पेंडंट', c_Bracelet: 'ब्रेसलेट', c_Coin: 'नाणे',
+    ch_cheap22: 'आज सर्वात स्वस्त 22K', ch_mycity: 'माझ्या शहरातील दर', ch_tvk: 'तनिष्क की कल्याण',
+    ch_bestoff: 'आजची सर्वोत्तम ऑफर', ch_p10chain: '10 ग्रॅम 22K चेनची किंमत', ch_k22v24: '22K आणि 24K मध्ये फरक?',
+    ch_p10: '10 ग्रॅम 22K ची किंमत', ch_afteroff: 'ऑफरनंतरची किंमत', ch_mkcmp: 'मजुरीची तुलना',
+    ch_goodmk: 'मजुरीवर 20% सूट चांगली आहे का?', ch_whatmk: 'मजुरी म्हणजे काय?', ch_alert: 'दर अलर्ट लावा',
+    ch_goodtime: 'आता खरेदी करावी का?', ch_rate: 'आजचा सोन्याचा दर', ch_another: 'दुसऱ्या ज्वेलरकडे हेच',
+    ch_bmk: '{b} मजुरी', ch_boff: '{b} ऑफर्स'
+  };
+
+  S.gu = {
+    ui_sub: 'જ્વેલરી સહાયક · આજના સાચા ભાવ પરથી જવાબ',
+    ui_ph: 'ભાવ, જ્વેલર્સ, ઑફર વિશે પૂછો…',
+    ui_listen: 'સાંભળું છું… બોલો',
+    ui_mic: 'બોલીને પૂછો',
+    ui_foot: 'મફત · લખો કે બોલો · પ્રકાશિત માહિતી પરથી જવાબ, સલાહ નહીં',
+    ui_lang: 'ભાષા', ui_speak: 'સાંભળો', ui_mute: 'બોલવાનું બંધ કરો',
+    greet1: 'નમસ્તે! 🙏 હું <b>સોના</b> છું, તમારી જ્વેલરી સહાયક.',
+    greet2: 'સોનું ખરીદવા વિશે કંઈ પણ પૂછો — કોઈ પણ જ્વેલરનો આજનો ભાવ, તમારા શહેરમાં સૌથી સસ્તું, ઘડામણ (મેકિંગ ચાર્જ), ઑફર કે કોઈ પણ વજનની કિંમત. લખો, અથવા 🎤 દબાવીને બોલો.',
+    lang_hint: 'તમારી ભાષા ઉપરથી પસંદ કરો:',
+    src: 'આજના ભાવ {n} જ્વેલર્સના, GST પહેલાં · {d}',
+    med_h: 'ભારતમાં આજનો સોનાનો ભાવ, {n} જ્વેલર્સનો વચ્ચેનો ભાવ:',
+    med_low: 'રાષ્ટ્રીય જ્વેલર્સમાં સૌથી ઓછો 22K: <b>{b}</b>, <b>{p}/ગ્રામ</b>.',
+    brand_h: '<b>{b}</b> આજે:',
+    brand_rank: 'આજે {n} જ્વેલર્સમાં આ <b>#{r}</b> પર છે — {rel}.',
+    rel_at: '{k} ના બજારના વચ્ચેના ભાવ જેટલો જ', rel_below: '{k} ના વચ્ચેના ભાવ કરતાં {p}/ગ્રામ ઓછો', rel_above: '{k} ના વચ્ચેના ભાવ કરતાં {p}/ગ્રામ વધુ',
+    brand_mk: 'સામાન્ય ઘડામણ: {list}.',
+    brand_off: 'તેમની સાઇટ પર ઑફર: <b>{o}</b>.',
+    brand_st: 'આ રાજ્યોમાં: {s}.',
+    brand_link: '{b} ના 30 દિવસના ભાવ →',
+    city_h: '<b>{c}</b> માં આજે સૌથી સસ્તું {k} ({note}):',
+    city_loc: 'રાષ્ટ્રીય જ્વેલર્સ અને {s} ના {l} સ્થાનિક જ્વેલર્સ', city_nat: 'રાષ્ટ્રીય જ્વેલર્સ',
+    city_link: '{c} ની પૂરી યાદી →',
+    cheap_h: 'રાષ્ટ્રીય જ્વેલર્સમાં આજે સૌથી સસ્તું {k}:',
+    cheap_gap: 'સૌથી સસ્તા અને સૌથી મોંઘા વચ્ચે 10 ગ્રામ પર <b>{p}</b> નો ફરક છે — ખરીદતા પહેલાં જરૂર જુઓ.',
+    cmp_h: 'આજે સામસામે ({k}):', cmp_10: '10 ગ્રામ: {p}', cmp_mk: 'ઘડામણ ~{p}', cmp_nomk: 'ઘડામણ: માપ્યું નથી',
+    cmp_win: '<b>{b}</b> નો {k} ભાવ 10 ગ્રામ પર <b>{p}</b> ઓછો છે. અંતિમ બિલ તમે પસંદ કરેલી ડિઝાઇનના ઘડામણ પર પણ આધાર રાખે છે.',
+    mk_none: '<b>{b}</b> નું ઘડામણ અમે હજી માપ્યું નથી. આમનું માપ્યું છે: {list}.',
+    mk_link: 'ઘડામણની સરખામણી →',
+    mk_brand_h: '<b>{b}</b> નું સામાન્ય ઘડામણ (સાચાં ઉત્પાદનોનો વચ્ચેનો આંકડો, સોનાની કિંમતના %):',
+    mk_note: 'ડિઝાઇન મુજબ બદલાય છે; બિલમાં સૌથી વધુ ભાવતાલ આના પર થઈ શકે.',
+    mk_all: 'બધા જ્વેલર્સની સરખામણી →',
+    mk_h: '<b>{c}</b> પર સૌથી ઓછું ઘડામણ (સાચાં ઉત્પાદનોનો વચ્ચેનો આંકડો):',
+    mk_every: 'દરેક જ્વેલર અને પ્રકાર →',
+    off_none: 'આજે <b>{b}</b> ની વેબસાઇટ પર કોઈ ઑફર લખેલી નથી.',
+    off_see: 'કોની પાસે ઑફર છે તે જુઓ →',
+    off_brand_h: 'આજે <b>{b}</b> ની વેબસાઇટ પરની ઑફર:',
+    off_page: 'તેમનું પેજ ↗', off_all: 'બધા જ્વેલર્સની ઑફરની સરખામણી →',
+    off_h: 'ઑફરની સાચી કસોટી અંતિમ કિંમત છે. આજે 10 ગ્રામ 22K વીંટી, ઑફર પછી, GST સાથે:',
+    off_tag: 'ઘડામણ પર {p}% છૂટ',
+    off_count: 'આજે {n} જ્વેલર્સની સાઇટ પર ઑફર છે, જેમ કે {list}.',
+    off_every: 'દરેક ઑફર, અને તેનો સાચો અર્થ →',
+    price_h: 'આજે {who} પર {w} {k}:', price_who: 'સૌથી સસ્તો રાષ્ટ્રીય જ્વેલર ({b})',
+    price_gold: 'સોનું ({g} ગ્રામ × {p})', price_mk: 'ઘડામણ (~{p}, {c})', price_typ: 'સામાન્ય', price_total: 'કુલ',
+    price_nomk: 'ઘડામણ સામેલ નથી — તમારી ડિઝાઇનનું ઘડામણ ઉમેરો (ઘણી વાર 8–25%).',
+    trend_none: 'હજી પૂરતો ઇતિહાસ નથી.', hist_link: 'સોનાના ભાવનો ઇતિહાસ →',
+    trend_h: '{k} નો બજારનો વચ્ચેનો ભાવ: આજે <b>{p}/ગ્રામ</b>.',
+    vs1: 'ગઈકાલની સરખામણીએ', vs7: '7 દિવસ પહેલાંની સરખામણીએ', vs30: '30 દિવસ પહેલાંની સરખામણીએ',
+    trend_note: 'આ થઈ ગયેલા ફેરફાર છે, આગાહી નહીં — આવતીકાલનો ભાવ કોઈ ખાતરીથી કહી શકે નહીં.',
+    full_hist: 'પૂરો ઇતિહાસ →',
+    alerts: 'દરરોજ સવારે સૌથી સસ્તો જ્વેલર અને આજનો ભાવ, મફત — અને જે દિવસે 22K તમારા ભાવ સુધી ઘટે તે દિવસે ઇમેઇલ.',
+    alerts_cta: 'મફત દૈનિક અલર્ટ મેળવો',
+    more: 'વધુ વાંચો →', guide_h: 'આ માર્ગદર્શિકા આ વિશે જ છે: <b>{t}</b> — {d}', guide_link: 'માર્ગદર્શિકા વાંચો →',
+    en_only: 'આ જવાબ હાલ અંગ્રેજીમાં છે:', translated: 'તમારા ડિવાઇસ પર અનુવાદ કર્યો',
+    ask_city: 'તમે કયા શહેરમાં છો?',
+    silver: 'હાલ હું ફક્ત સોનાની માહિતી આપું છું — જ્વેલર્સના 22K, 24K અને 18K ભાવ. ચાંદી જલદી આવે છે.',
+    hello: 'નમસ્તે! 🙏 હું સોના છું. સોનું ખરીદવા વિશે કંઈ પણ પૂછો — {n} જ્વેલર્સના આજના ભાવ, તમારું શહેર, ઘડામણ, ઑફર કે કોઈ પણ વજનની કિંમત.',
+    thanks: 'આનંદ થયો! બીજું કંઈ?',
+    about: 'હું સોના છું, MyGoldRates ની સહાયક. હું આજની સાચી માહિતી પરથી જવાબ આપું છું — {n} જ્વેલર્સના પ્રકાશિત ભાવ, સાચાં ઉત્પાદનો પરથી માપેલું ઘડામણ, અને તેમની વેબસાઇટની ઑફર — એટલે હું કોઈ આંકડો અંદાજથી કહેતી નથી.',
+    unknown: 'આ હું હજી શીખું છું — તમારો પ્રશ્ન નોંધી લીધો છે, જલદી સાચો જવાબ ઉમેરીશું. ત્યાં સુધી, આમાં હું સારી છું:',
+    nodata: 'આજની માહિતી લોડ ન થઈ. કૃપા કરીને ઇન્ટરનેટ તપાસીને ફરી પ્રયત્ન કરો.',
+    no_voice: 'આ ડિવાઇસમાં {l} અવાજ નથી, એટલે હું લખીને જવાબ આપીશ.',
+    mic_denied: 'માઇક બંધ છે. બ્રાઉઝરના સેટિંગમાં આ સાઇટ માટે માઇક ચાલુ કરો, પછી ફરી 🎤 દબાવો.',
+    mic_none: 'હું સાંભળી ન શકી — 🎤 દબાવીને ફરી બોલો.',
+    rupees: 'રૂપિયા', carat: 'કેરેટ',
+    say_med: 'આજે {k} સોનું લગભગ {p} પ્રતિ ગ્રામ છે, {n} જ્વેલર્સનો વચ્ચેનો ભાવ. સૌથી ઓછો {b} પર, {q}.',
+    say_brand: '{b} પર આજે {k} સોનું {p} પ્રતિ ગ્રામ છે, {n} જ્વેલર્સમાં નંબર {r}.',
+    say_city: '{c} માં આજે સૌથી સસ્તું {k} {b} પર છે, {p} પ્રતિ ગ્રામ.',
+    say_cheap: 'આજે સૌથી સસ્તું {k} {b} પર છે, {p} પ્રતિ ગ્રામ. 10 ગ્રામ પર સૌથી મોંઘો જ્વેલર {q} વધુ લે છે.',
+    say_cmp: '{b} સસ્તું છે, 10 ગ્રામ {k} પર {p} ઓછું.',
+    say_mk_brand: '{b} પર {c} નું સામાન્ય ઘડામણ લગભગ {p} છે.',
+    say_mk: '{c} પર સૌથી ઓછું ઘડામણ {b} પર છે, લગભગ {p}.',
+    say_mk_none: '{b} નું ઘડામણ અમે હજી માપ્યું નથી.',
+    say_off: 'ઑફર ગણીને, આજે 10 ગ્રામ 22 કેરેટ વીંટી સૌથી ઓછી {b} પર છે: GST સાથે {p}.',
+    say_off_brand: 'આજે {b} ની વેબસાઇટ પર {n} ઑફર છે.',
+    say_off_none: 'આજે {b} ની વેબસાઇટ પર કોઈ ઑફર નથી.',
+    say_price: '{b} પર {w} {k} સોનું GST સાથે લગભગ {p} થશે.',
+    say_trend_up: 'આજે {k} સોનું {p} પ્રતિ ગ્રામ છે, ગઈકાલ કરતાં {q} વધુ.',
+    say_trend_dn: 'આજે {k} સોનું {p} પ્રતિ ગ્રામ છે, ગઈકાલ કરતાં {q} ઓછું.',
+    say_trend_same: 'આજે {k} સોનું {p} પ્રતિ ગ્રામ છે, ગઈકાલ જેટલું જ.',
+    u_g: '{n} ગ્રામ', u_tola: '{n} તોલા', u_sov: '{n} સોવરિન', u_kg: '{n} કિલો',
+    c_Ring: 'વીંટી', c_Chain: 'ચેન', c_Bangle: 'બંગડી', c_Necklace: 'હાર', c_Earrings: 'બુટ્ટી',
+    c_Mangalsutra: 'મંગળસૂત્ર', c_Pendant: 'પેન્ડન્ટ', c_Bracelet: 'બ્રેસલેટ', c_Coin: 'સિક્કો',
+    ch_cheap22: 'આજે સૌથી સસ્તું 22K', ch_mycity: 'મારા શહેરમાં ભાવ', ch_tvk: 'તનિષ્ક કે કલ્યાણ',
+    ch_bestoff: 'આજની શ્રેષ્ઠ ઑફર', ch_p10chain: '10 ગ્રામ 22K ચેનની કિંમત', ch_k22v24: '22K અને 24K માં ફરક?',
+    ch_p10: '10 ગ્રામ 22K ની કિંમત', ch_afteroff: 'ઑફર પછીની કિંમત', ch_mkcmp: 'ઘડામણની સરખામણી',
+    ch_goodmk: 'ઘડામણ પર 20% છૂટ સારી છે?', ch_whatmk: 'ઘડામણ એટલે શું?', ch_alert: 'ભાવ અલર્ટ મૂકો',
+    ch_goodtime: 'અત્યારે ખરીદવું યોગ્ય છે?', ch_rate: 'આજનો સોનાનો ભાવ', ch_another: 'બીજા જ્વેલર પર આ જ',
+    ch_bmk: '{b} ઘડામણ', ch_boff: '{b} ઑફર'
+  };
+
+  S.pa = {
+    ui_sub: 'ਗਹਿਣਿਆਂ ਦੀ ਸਹਾਇਕ · ਅੱਜ ਦੇ ਅਸਲ ਭਾਅ ਤੋਂ ਜਵਾਬ',
+    ui_ph: 'ਭਾਅ, ਜਿਊਲਰ, ਆਫ਼ਰ ਬਾਰੇ ਪੁੱਛੋ…',
+    ui_listen: 'ਸੁਣ ਰਹੀ ਹਾਂ… ਬੋਲੋ',
+    ui_mic: 'ਬੋਲ ਕੇ ਪੁੱਛੋ',
+    ui_foot: 'ਮੁਫ਼ਤ · ਲਿਖੋ ਜਾਂ ਬੋਲੋ · ਛਪੇ ਅੰਕੜਿਆਂ ਤੋਂ ਜਵਾਬ, ਸਲਾਹ ਨਹੀਂ',
+    ui_lang: 'ਭਾਸ਼ਾ', ui_speak: 'ਸੁਣੋ', ui_mute: 'ਬੋਲਣਾ ਬੰਦ ਕਰੋ',
+    greet1: 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ! 🙏 ਮੈਂ <b>ਸੋਨਾ</b> ਹਾਂ, ਤੁਹਾਡੀ ਗਹਿਣਿਆਂ ਦੀ ਸਹਾਇਕ।',
+    greet2: 'ਸੋਨਾ ਖ਼ਰੀਦਣ ਬਾਰੇ ਕੁਝ ਵੀ ਪੁੱਛੋ — ਕਿਸੇ ਵੀ ਜਿਊਲਰ ਦਾ ਅੱਜ ਦਾ ਭਾਅ, ਤੁਹਾਡੇ ਸ਼ਹਿਰ ਵਿੱਚ ਸਭ ਤੋਂ ਸਸਤਾ, ਘੜਾਈ (ਮੇਕਿੰਗ ਚਾਰਜ), ਆਫ਼ਰ ਜਾਂ ਕਿਸੇ ਵੀ ਭਾਰ ਦੀ ਕੀਮਤ। ਲਿਖੋ, ਜਾਂ 🎤 ਦਬਾ ਕੇ ਬੋਲੋ।',
+    lang_hint: 'ਆਪਣੀ ਭਾਸ਼ਾ ਉੱਪਰੋਂ ਚੁਣੋ:',
+    src: 'ਅੱਜ ਦੇ ਭਾਅ {n} ਜਿਊਲਰਾਂ ਤੋਂ, GST ਤੋਂ ਪਹਿਲਾਂ · {d}',
+    med_h: 'ਭਾਰਤ ਵਿੱਚ ਅੱਜ ਸੋਨੇ ਦਾ ਭਾਅ, {n} ਜਿਊਲਰਾਂ ਦਾ ਵਿਚਕਾਰਲਾ ਭਾਅ:',
+    med_low: 'ਕੌਮੀ ਜਿਊਲਰਾਂ ਵਿੱਚ ਸਭ ਤੋਂ ਘੱਟ 22K: <b>{b}</b>, <b>{p}/ਗ੍ਰਾਮ</b>।',
+    brand_h: '<b>{b}</b> ਅੱਜ:',
+    brand_rank: 'ਅੱਜ {n} ਜਿਊਲਰਾਂ ਵਿੱਚ ਇਹ <b>#{r}</b> ਉੱਤੇ ਹੈ — {rel}।',
+    rel_at: '{k} ਦੇ ਬਾਜ਼ਾਰ ਦੇ ਵਿਚਕਾਰਲੇ ਭਾਅ ਦੇ ਬਰਾਬਰ', rel_below: '{k} ਦੇ ਵਿਚਕਾਰਲੇ ਭਾਅ ਤੋਂ {p}/ਗ੍ਰਾਮ ਘੱਟ', rel_above: '{k} ਦੇ ਵਿਚਕਾਰਲੇ ਭਾਅ ਤੋਂ {p}/ਗ੍ਰਾਮ ਵੱਧ',
+    brand_mk: 'ਆਮ ਘੜਾਈ: {list}।',
+    brand_off: 'ਉਹਨਾਂ ਦੀ ਸਾਈਟ ’ਤੇ ਆਫ਼ਰ: <b>{o}</b>।',
+    brand_st: 'ਇਹਨਾਂ ਰਾਜਾਂ ਵਿੱਚ: {s}।',
+    brand_link: '{b} ਦੇ 30 ਦਿਨਾਂ ਦੇ ਭਾਅ →',
+    city_h: '<b>{c}</b> ਵਿੱਚ ਅੱਜ ਸਭ ਤੋਂ ਸਸਤਾ {k} ({note}):',
+    city_loc: 'ਕੌਮੀ ਜਿਊਲਰ ਅਤੇ {s} ਦੇ {l} ਸਥਾਨਕ ਜਿਊਲਰ', city_nat: 'ਕੌਮੀ ਜਿਊਲਰ',
+    city_link: '{c} ਦੀ ਪੂਰੀ ਸੂਚੀ →',
+    cheap_h: 'ਕੌਮੀ ਜਿਊਲਰਾਂ ਵਿੱਚ ਅੱਜ ਸਭ ਤੋਂ ਸਸਤਾ {k}:',
+    cheap_gap: 'ਸਭ ਤੋਂ ਸਸਤੇ ਅਤੇ ਸਭ ਤੋਂ ਮਹਿੰਗੇ ਵਿੱਚ 10 ਗ੍ਰਾਮ ’ਤੇ <b>{p}</b> ਦਾ ਫ਼ਰਕ ਹੈ — ਖ਼ਰੀਦਣ ਤੋਂ ਪਹਿਲਾਂ ਜ਼ਰੂਰ ਵੇਖੋ।',
+    cmp_h: 'ਅੱਜ ਆਹਮੋ-ਸਾਹਮਣੇ ({k}):', cmp_10: '10 ਗ੍ਰਾਮ: {p}', cmp_mk: 'ਘੜਾਈ ~{p}', cmp_nomk: 'ਘੜਾਈ: ਮਾਪੀ ਨਹੀਂ',
+    cmp_win: '<b>{b}</b> ਦਾ {k} ਭਾਅ 10 ਗ੍ਰਾਮ ’ਤੇ <b>{p}</b> ਘੱਟ ਹੈ। ਆਖ਼ਰੀ ਬਿੱਲ ਤੁਹਾਡੇ ਚੁਣੇ ਡਿਜ਼ਾਈਨ ਦੀ ਘੜਾਈ ’ਤੇ ਵੀ ਨਿਰਭਰ ਕਰਦਾ ਹੈ।',
+    mk_none: '<b>{b}</b> ਦੀ ਘੜਾਈ ਅਸੀਂ ਅਜੇ ਨਹੀਂ ਮਾਪੀ। ਇਹਨਾਂ ਦੀ ਮਾਪੀ ਹੈ: {list}।',
+    mk_link: 'ਘੜਾਈ ਦੀ ਤੁਲਨਾ →',
+    mk_brand_h: '<b>{b}</b> ਦੀ ਆਮ ਘੜਾਈ (ਅਸਲ ਉਤਪਾਦਾਂ ਦਾ ਵਿਚਕਾਰਲਾ ਅੰਕੜਾ, ਸੋਨੇ ਦੀ ਕੀਮਤ ਦਾ %):',
+    mk_note: 'ਡਿਜ਼ਾਈਨ ਮੁਤਾਬਕ ਬਦਲਦੀ ਹੈ; ਬਿੱਲ ਵਿੱਚ ਸਭ ਤੋਂ ਵੱਧ ਮੋਲ-ਭਾਅ ਇਸੇ ’ਤੇ ਹੋ ਸਕਦਾ ਹੈ।',
+    mk_all: 'ਸਾਰੇ ਜਿਊਲਰਾਂ ਦੀ ਤੁਲਨਾ →',
+    mk_h: '<b>{c}</b> ’ਤੇ ਸਭ ਤੋਂ ਘੱਟ ਘੜਾਈ (ਅਸਲ ਉਤਪਾਦਾਂ ਦਾ ਵਿਚਕਾਰਲਾ ਅੰਕੜਾ):',
+    mk_every: 'ਹਰ ਜਿਊਲਰ ਅਤੇ ਹਰ ਕਿਸਮ →',
+    off_none: 'ਅੱਜ <b>{b}</b> ਦੀ ਵੈੱਬਸਾਈਟ ’ਤੇ ਕੋਈ ਆਫ਼ਰ ਲਿਖੀ ਨਹੀਂ ਹੈ।',
+    off_see: 'ਵੇਖੋ ਕਿਸ ਕੋਲ ਆਫ਼ਰ ਹੈ →',
+    off_brand_h: 'ਅੱਜ <b>{b}</b> ਦੀ ਵੈੱਬਸਾਈਟ ’ਤੇ ਆਫ਼ਰ:',
+    off_page: 'ਉਹਨਾਂ ਦਾ ਪੰਨਾ ↗', off_all: 'ਸਾਰੇ ਜਿਊਲਰਾਂ ਦੀਆਂ ਆਫ਼ਰਾਂ ਦੀ ਤੁਲਨਾ →',
+    off_h: 'ਆਫ਼ਰ ਦੀ ਅਸਲ ਪਰਖ ਆਖ਼ਰੀ ਕੀਮਤ ਹੈ। ਅੱਜ 10 ਗ੍ਰਾਮ 22K ਮੁੰਦਰੀ, ਆਫ਼ਰ ਤੋਂ ਬਾਅਦ, GST ਸਮੇਤ:',
+    off_tag: 'ਘੜਾਈ ’ਤੇ {p}% ਛੋਟ',
+    off_count: 'ਅੱਜ {n} ਜਿਊਲਰਾਂ ਦੀ ਸਾਈਟ ’ਤੇ ਆਫ਼ਰਾਂ ਹਨ, ਜਿਵੇਂ {list}।',
+    off_every: 'ਹਰ ਆਫ਼ਰ, ਅਤੇ ਉਸਦਾ ਅਸਲ ਮਤਲਬ →',
+    price_h: 'ਅੱਜ {who} ’ਤੇ {w} {k}:', price_who: 'ਸਭ ਤੋਂ ਸਸਤਾ ਕੌਮੀ ਜਿਊਲਰ ({b})',
+    price_gold: 'ਸੋਨਾ ({g} ਗ੍ਰਾਮ × {p})', price_mk: 'ਘੜਾਈ (~{p}, {c})', price_typ: 'ਆਮ ਤੌਰ ’ਤੇ', price_total: 'ਕੁੱਲ',
+    price_nomk: 'ਘੜਾਈ ਸ਼ਾਮਲ ਨਹੀਂ — ਆਪਣੇ ਡਿਜ਼ਾਈਨ ਦੀ ਘੜਾਈ ਜੋੜੋ (ਅਕਸਰ 8–25%)।',
+    trend_none: 'ਅਜੇ ਕਾਫ਼ੀ ਇਤਿਹਾਸ ਨਹੀਂ ਹੈ।', hist_link: 'ਸੋਨੇ ਦੇ ਭਾਅ ਦਾ ਇਤਿਹਾਸ →',
+    trend_h: '{k} ਦਾ ਬਾਜ਼ਾਰ ਦਾ ਵਿਚਕਾਰਲਾ ਭਾਅ: ਅੱਜ <b>{p}/ਗ੍ਰਾਮ</b>।',
+    vs1: 'ਪਿਛਲੇ ਦਿਨ ਨਾਲੋਂ', vs7: '7 ਦਿਨ ਪਹਿਲਾਂ ਨਾਲੋਂ', vs30: '30 ਦਿਨ ਪਹਿਲਾਂ ਨਾਲੋਂ',
+    trend_note: 'ਇਹ ਬੀਤੇ ਬਦਲਾਅ ਹਨ, ਭਵਿੱਖਬਾਣੀ ਨਹੀਂ — ਕੱਲ੍ਹ ਦਾ ਭਾਅ ਕੋਈ ਪੱਕਾ ਨਹੀਂ ਦੱਸ ਸਕਦਾ।',
+    full_hist: 'ਪੂਰਾ ਇਤਿਹਾਸ →',
+    alerts: 'ਹਰ ਸਵੇਰ ਸਭ ਤੋਂ ਸਸਤਾ ਜਿਊਲਰ ਅਤੇ ਅੱਜ ਦਾ ਭਾਅ, ਮੁਫ਼ਤ — ਅਤੇ ਜਿਸ ਦਿਨ 22K ਤੁਹਾਡੇ ਭਾਅ ਤੱਕ ਡਿੱਗੇ, ਉਸ ਦਿਨ ਈਮੇਲ।',
+    alerts_cta: 'ਮੁਫ਼ਤ ਰੋਜ਼ਾਨਾ ਅਲਰਟ ਲਓ',
+    more: 'ਹੋਰ ਪੜ੍ਹੋ →', guide_h: 'ਇਹ ਗਾਈਡ ਇਸੇ ਬਾਰੇ ਹੈ: <b>{t}</b> — {d}', guide_link: 'ਗਾਈਡ ਪੜ੍ਹੋ →',
+    en_only: 'ਇਹ ਜਵਾਬ ਅਜੇ ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ ਹੈ:', translated: 'ਤੁਹਾਡੇ ਡਿਵਾਈਸ ’ਤੇ ਅਨੁਵਾਦ ਕੀਤਾ',
+    ask_city: 'ਤੁਸੀਂ ਕਿਹੜੇ ਸ਼ਹਿਰ ਵਿੱਚ ਹੋ?',
+    silver: 'ਅਜੇ ਮੈਂ ਸਿਰਫ਼ ਸੋਨੇ ਦੀ ਜਾਣਕਾਰੀ ਦਿੰਦੀ ਹਾਂ — ਜਿਊਲਰਾਂ ਦੇ 22K, 24K ਅਤੇ 18K ਭਾਅ। ਚਾਂਦੀ ਜਲਦੀ ਆ ਰਹੀ ਹੈ।',
+    hello: 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ! 🙏 ਮੈਂ ਸੋਨਾ ਹਾਂ। ਸੋਨਾ ਖ਼ਰੀਦਣ ਬਾਰੇ ਕੁਝ ਵੀ ਪੁੱਛੋ — {n} ਜਿਊਲਰਾਂ ਦੇ ਅੱਜ ਦੇ ਭਾਅ, ਤੁਹਾਡਾ ਸ਼ਹਿਰ, ਘੜਾਈ, ਆਫ਼ਰ ਜਾਂ ਕਿਸੇ ਵੀ ਭਾਰ ਦੀ ਕੀਮਤ।',
+    thanks: 'ਖ਼ੁਸ਼ੀ ਹੋਈ! ਹੋਰ ਕੁਝ?',
+    about: 'ਮੈਂ ਸੋਨਾ ਹਾਂ, MyGoldRates ਦੀ ਸਹਾਇਕ। ਮੈਂ ਅੱਜ ਦੇ ਅਸਲ ਅੰਕੜਿਆਂ ਤੋਂ ਜਵਾਬ ਦਿੰਦੀ ਹਾਂ — {n} ਜਿਊਲਰਾਂ ਦੇ ਛਪੇ ਭਾਅ, ਅਸਲ ਉਤਪਾਦਾਂ ਤੋਂ ਮਾਪੀ ਘੜਾਈ, ਅਤੇ ਉਹਨਾਂ ਦੀਆਂ ਵੈੱਬਸਾਈਟਾਂ ਦੀਆਂ ਆਫ਼ਰਾਂ — ਇਸ ਲਈ ਮੈਂ ਕੋਈ ਅੰਕੜਾ ਅੰਦਾਜ਼ੇ ਨਾਲ ਨਹੀਂ ਦੱਸਦੀ।',
+    unknown: 'ਇਹ ਮੈਂ ਅਜੇ ਸਿੱਖ ਰਹੀ ਹਾਂ — ਤੁਹਾਡਾ ਸਵਾਲ ਨੋਟ ਕਰ ਲਿਆ ਹੈ, ਜਲਦੀ ਸਹੀ ਜਵਾਬ ਜੋੜਾਂਗੇ। ਤਦ ਤੱਕ, ਇਹਨਾਂ ਵਿੱਚ ਮੈਂ ਚੰਗੀ ਹਾਂ:',
+    nodata: 'ਅੱਜ ਦੇ ਅੰਕੜੇ ਲੋਡ ਨਹੀਂ ਹੋਏ। ਕਿਰਪਾ ਕਰਕੇ ਇੰਟਰਨੈੱਟ ਵੇਖ ਕੇ ਫਿਰ ਕੋਸ਼ਿਸ਼ ਕਰੋ।',
+    no_voice: 'ਇਸ ਡਿਵਾਈਸ ਵਿੱਚ {l} ਆਵਾਜ਼ ਨਹੀਂ ਹੈ, ਇਸ ਲਈ ਮੈਂ ਲਿਖ ਕੇ ਜਵਾਬ ਦਿਆਂਗੀ।',
+    mic_denied: 'ਮਾਈਕ ਬੰਦ ਹੈ। ਬ੍ਰਾਊਜ਼ਰ ਦੀ ਸੈਟਿੰਗ ਵਿੱਚ ਇਸ ਸਾਈਟ ਲਈ ਮਾਈਕ ਚਾਲੂ ਕਰੋ, ਫਿਰ 🎤 ਦਬਾਓ।',
+    mic_none: 'ਮੈਂ ਸੁਣ ਨਹੀਂ ਸਕੀ — 🎤 ਦਬਾ ਕੇ ਫਿਰ ਬੋਲੋ।',
+    rupees: 'ਰੁਪਏ', carat: 'ਕੈਰਟ',
+    say_med: 'ਅੱਜ {k} ਸੋਨਾ ਲਗਭਗ {p} ਪ੍ਰਤੀ ਗ੍ਰਾਮ ਹੈ, {n} ਜਿਊਲਰਾਂ ਦਾ ਵਿਚਕਾਰਲਾ ਭਾਅ। ਸਭ ਤੋਂ ਘੱਟ {b} ’ਤੇ, {q}।',
+    say_brand: '{b} ’ਤੇ ਅੱਜ {k} ਸੋਨਾ {p} ਪ੍ਰਤੀ ਗ੍ਰਾਮ ਹੈ, {n} ਜਿਊਲਰਾਂ ਵਿੱਚ ਨੰਬਰ {r}।',
+    say_city: '{c} ਵਿੱਚ ਅੱਜ ਸਭ ਤੋਂ ਸਸਤਾ {k} {b} ’ਤੇ ਹੈ, {p} ਪ੍ਰਤੀ ਗ੍ਰਾਮ।',
+    say_cheap: 'ਅੱਜ ਸਭ ਤੋਂ ਸਸਤਾ {k} {b} ’ਤੇ ਹੈ, {p} ਪ੍ਰਤੀ ਗ੍ਰਾਮ। 10 ਗ੍ਰਾਮ ’ਤੇ ਸਭ ਤੋਂ ਮਹਿੰਗਾ ਜਿਊਲਰ {q} ਵੱਧ ਲੈਂਦਾ ਹੈ।',
+    say_cmp: '{b} ਸਸਤਾ ਹੈ, 10 ਗ੍ਰਾਮ {k} ’ਤੇ {p} ਘੱਟ।',
+    say_mk_brand: '{b} ’ਤੇ {c} ਦੀ ਆਮ ਘੜਾਈ ਲਗਭਗ {p} ਹੈ।',
+    say_mk: '{c} ’ਤੇ ਸਭ ਤੋਂ ਘੱਟ ਘੜਾਈ {b} ’ਤੇ ਹੈ, ਲਗਭਗ {p}।',
+    say_mk_none: '{b} ਦੀ ਘੜਾਈ ਅਸੀਂ ਅਜੇ ਨਹੀਂ ਮਾਪੀ।',
+    say_off: 'ਆਫ਼ਰ ਜੋੜ ਕੇ, ਅੱਜ 10 ਗ੍ਰਾਮ 22 ਕੈਰਟ ਮੁੰਦਰੀ ਸਭ ਤੋਂ ਘੱਟ {b} ’ਤੇ ਹੈ: GST ਸਮੇਤ {p}।',
+    say_off_brand: 'ਅੱਜ {b} ਦੀ ਵੈੱਬਸਾਈਟ ’ਤੇ {n} ਆਫ਼ਰਾਂ ਹਨ।',
+    say_off_none: 'ਅੱਜ {b} ਦੀ ਵੈੱਬਸਾਈਟ ’ਤੇ ਕੋਈ ਆਫ਼ਰ ਨਹੀਂ ਹੈ।',
+    say_price: '{b} ’ਤੇ {w} {k} ਸੋਨਾ GST ਸਮੇਤ ਲਗਭਗ {p} ਦਾ ਪਵੇਗਾ।',
+    say_trend_up: 'ਅੱਜ {k} ਸੋਨਾ {p} ਪ੍ਰਤੀ ਗ੍ਰਾਮ ਹੈ, ਪਿਛਲੇ ਦਿਨ ਨਾਲੋਂ {q} ਵੱਧ।',
+    say_trend_dn: 'ਅੱਜ {k} ਸੋਨਾ {p} ਪ੍ਰਤੀ ਗ੍ਰਾਮ ਹੈ, ਪਿਛਲੇ ਦਿਨ ਨਾਲੋਂ {q} ਘੱਟ।',
+    say_trend_same: 'ਅੱਜ {k} ਸੋਨਾ {p} ਪ੍ਰਤੀ ਗ੍ਰਾਮ ਹੈ, ਪਿਛਲੇ ਦਿਨ ਜਿੰਨਾ ਹੀ।',
+    u_g: '{n} ਗ੍ਰਾਮ', u_tola: '{n} ਤੋਲਾ', u_sov: '{n} ਸਾਵਰਿਨ', u_kg: '{n} ਕਿੱਲੋ',
+    c_Ring: 'ਮੁੰਦਰੀ', c_Chain: 'ਚੇਨ', c_Bangle: 'ਚੂੜੀ', c_Necklace: 'ਹਾਰ', c_Earrings: 'ਝੁਮਕੇ',
+    c_Mangalsutra: 'ਮੰਗਲਸੂਤਰ', c_Pendant: 'ਪੈਂਡੈਂਟ', c_Bracelet: 'ਬ੍ਰੇਸਲੈੱਟ', c_Coin: 'ਸਿੱਕਾ',
+    ch_cheap22: 'ਅੱਜ ਸਭ ਤੋਂ ਸਸਤਾ 22K', ch_mycity: 'ਮੇਰੇ ਸ਼ਹਿਰ ਵਿੱਚ ਭਾਅ', ch_tvk: 'ਤਨਿਸ਼ਕ ਜਾਂ ਕਲਿਆਣ',
+    ch_bestoff: 'ਅੱਜ ਦੀ ਸਭ ਤੋਂ ਵਧੀਆ ਆਫ਼ਰ', ch_p10chain: '10 ਗ੍ਰਾਮ 22K ਚੇਨ ਦੀ ਕੀਮਤ', ch_k22v24: '22K ਅਤੇ 24K ਵਿੱਚ ਫ਼ਰਕ?',
+    ch_p10: '10 ਗ੍ਰਾਮ 22K ਦੀ ਕੀਮਤ', ch_afteroff: 'ਆਫ਼ਰ ਤੋਂ ਬਾਅਦ ਕੀਮਤ', ch_mkcmp: 'ਘੜਾਈ ਦੀ ਤੁਲਨਾ',
+    ch_goodmk: 'ਕੀ ਘੜਾਈ ’ਤੇ 20% ਛੋਟ ਚੰਗੀ ਹੈ?', ch_whatmk: 'ਘੜਾਈ ਕੀ ਹੈ?', ch_alert: 'ਭਾਅ ਅਲਰਟ ਲਾਓ',
+    ch_goodtime: 'ਕੀ ਹੁਣ ਖ਼ਰੀਦਣਾ ਠੀਕ ਹੈ?', ch_rate: 'ਅੱਜ ਸੋਨੇ ਦਾ ਭਾਅ', ch_another: 'ਦੂਜੇ ਜਿਊਲਰ ’ਤੇ ਇਹੀ',
+    ch_bmk: '{b} ਘੜਾਈ', ch_boff: '{b} ਆਫ਼ਰਾਂ'
+  };
+
+  S.bn = {
+    ui_sub: 'গয়নার সহকারী · আজকের আসল দাম থেকে উত্তর',
+    ui_ph: 'দাম, জুয়েলার, অফার নিয়ে জিজ্ঞেস করুন…',
+    ui_listen: 'শুনছি… বলুন',
+    ui_mic: 'বলে জিজ্ঞেস করুন',
+    ui_foot: 'বিনামূল্যে · লিখুন বা বলুন · প্রকাশিত তথ্য থেকে উত্তর, পরামর্শ নয়',
+    ui_lang: 'ভাষা', ui_speak: 'শুনুন', ui_mute: 'বলা থামান',
+    greet1: 'নমস্কার! 🙏 আমি <b>সোনা</b>, আপনার গয়নার সহকারী।',
+    greet2: 'সোনা কেনা নিয়ে যা খুশি জিজ্ঞেস করুন — যেকোনো জুয়েলারের আজকের দাম, আপনার শহরে সবচেয়ে সস্তা, মজুরি (মেকিং চার্জ), অফার বা যেকোনো ওজনের দাম। লিখুন, বা 🎤 টিপে বলুন।',
+    lang_hint: 'আপনার ভাষা ওপর থেকে বেছে নিন:',
+    src: 'আজকের দাম {n}টি জুয়েলারের, GST ছাড়া · {d}',
+    med_h: 'ভারতে আজ সোনার দাম, {n}টি জুয়েলারের মাঝামাঝি দাম:',
+    med_low: 'জাতীয় জুয়েলারদের মধ্যে সবচেয়ে কম 22K: <b>{b}</b>, <b>{p}/গ্রাম</b>।',
+    brand_h: '<b>{b}</b> আজ:',
+    brand_rank: 'আজ {n}টি জুয়েলারের মধ্যে এটি <b>#{r}</b> — {rel}।',
+    rel_at: '{k}-এর বাজারের মাঝামাঝি দামের সমান', rel_below: '{k}-এর মাঝামাঝি দামের চেয়ে {p}/গ্রাম কম', rel_above: '{k}-এর মাঝামাঝি দামের চেয়ে {p}/গ্রাম বেশি',
+    brand_mk: 'সাধারণ মজুরি: {list}।',
+    brand_off: 'ওদের সাইটে অফার: <b>{o}</b>।',
+    brand_st: 'এই রাজ্যগুলিতে: {s}।',
+    brand_link: '{b}-এর 30 দিনের দাম →',
+    city_h: '<b>{c}</b>-এ আজ সবচেয়ে সস্তা {k} ({note}):',
+    city_loc: 'জাতীয় জুয়েলার এবং {s}-এর {l}টি স্থানীয় জুয়েলার', city_nat: 'জাতীয় জুয়েলার',
+    city_link: '{c}-এর পুরো তালিকা →',
+    cheap_h: 'জাতীয় জুয়েলারদের মধ্যে আজ সবচেয়ে সস্তা {k}:',
+    cheap_gap: 'সবচেয়ে সস্তা আর সবচেয়ে দামির মধ্যে 10 গ্রামে <b>{p}</b> তফাত — কেনার আগে অবশ্যই দেখুন।',
+    cmp_h: 'আজ পাশাপাশি ({k}):', cmp_10: '10 গ্রাম: {p}', cmp_mk: 'মজুরি ~{p}', cmp_nomk: 'মজুরি: মাপা হয়নি',
+    cmp_win: '<b>{b}</b>-এর {k} দাম 10 গ্রামে <b>{p}</b> কম। চূড়ান্ত বিল আপনার বেছে নেওয়া ডিজাইনের মজুরির ওপরও নির্ভর করে।',
+    mk_none: '<b>{b}</b>-এর মজুরি আমরা এখনও মাপিনি। এদের মাপা আছে: {list}।',
+    mk_link: 'মজুরির তুলনা →',
+    mk_brand_h: '<b>{b}</b>-এর সাধারণ মজুরি (আসল পণ্যের মাঝামাঝি হিসাব, সোনার দামের %):',
+    mk_note: 'ডিজাইন অনুযায়ী বদলায়; বিলের এই অংশেই সবচেয়ে বেশি দরদাম করা যায়।',
+    mk_all: 'সব জুয়েলারের তুলনা →',
+    mk_h: '<b>{c}</b>-এ সবচেয়ে কম মজুরি (আসল পণ্যের মাঝামাঝি হিসাব):',
+    mk_every: 'প্রতিটি জুয়েলার ও প্রতিটি ধরন →',
+    off_none: 'আজ <b>{b}</b>-এর ওয়েবসাইটে কোনো অফার লেখা নেই।',
+    off_see: 'কার অফার আছে দেখুন →',
+    off_brand_h: 'আজ <b>{b}</b>-এর ওয়েবসাইটে অফার:',
+    off_page: 'ওদের পেজ ↗', off_all: 'সব জুয়েলারের অফারের তুলনা →',
+    off_h: 'অফারের আসল পরীক্ষা হল চূড়ান্ত দাম। আজ 10 গ্রাম 22K আংটি, অফারের পরে, GST সহ:',
+    off_tag: 'মজুরিতে {p}% ছাড়',
+    off_count: 'আজ {n}টি জুয়েলারের সাইটে অফার আছে, যেমন {list}।',
+    off_every: 'প্রতিটি অফার, আর তার আসল মানে →',
+    price_h: 'আজ {who}-এ {w} {k}:', price_who: 'সবচেয়ে সস্তা জাতীয় জুয়েলার ({b})',
+    price_gold: 'সোনা ({g} গ্রাম × {p})', price_mk: 'মজুরি (~{p}, {c})', price_typ: 'সাধারণত', price_total: 'মোট',
+    price_nomk: 'মজুরি ধরা হয়নি — আপনার ডিজাইনের মজুরি যোগ করুন (প্রায়ই 8–25%)।',
+    trend_none: 'এখনও যথেষ্ট ইতিহাস নেই।', hist_link: 'সোনার দামের ইতিহাস →',
+    trend_h: '{k}-এর বাজারের মাঝামাঝি দাম: আজ <b>{p}/গ্রাম</b>।',
+    vs1: 'আগের দিনের তুলনায়', vs7: '7 দিন আগের তুলনায়', vs30: '30 দিন আগের তুলনায়',
+    trend_note: 'এগুলো অতীতের ওঠানামা, পূর্বাভাস নয় — কালকের দাম কেউ নিশ্চিত করে বলতে পারে না।',
+    full_hist: 'পুরো ইতিহাস →',
+    alerts: 'প্রতিদিন সকালে সবচেয়ে সস্তা জুয়েলার আর আজকের দাম, বিনামূল্যে — আর যেদিন 22K আপনার দামে নামবে, সেদিন ইমেল।',
+    alerts_cta: 'বিনামূল্যে রোজের অ্যালার্ট নিন',
+    more: 'আরও পড়ুন →', guide_h: 'এই গাইডে এটাই আছে: <b>{t}</b> — {d}', guide_link: 'গাইড পড়ুন →',
+    en_only: 'এই উত্তরটি আপাতত ইংরেজিতে:', translated: 'আপনার ডিভাইসে অনুবাদ করা',
+    ask_city: 'আপনি কোন শহরে আছেন?',
+    silver: 'আপাতত আমি শুধু সোনার তথ্য দিই — জুয়েলারদের 22K, 24K আর 18K দাম। রুপো শিগগিরই আসছে।',
+    hello: 'নমস্কার! 🙏 আমি সোনা। সোনা কেনা নিয়ে যা খুশি জিজ্ঞেস করুন — {n}টি জুয়েলারের আজকের দাম, আপনার শহর, মজুরি, অফার বা যেকোনো ওজনের দাম।',
+    thanks: 'খুশি হলাম! আর কিছু?',
+    about: 'আমি সোনা, MyGoldRates-এর সহকারী। আমি আজকের আসল তথ্য থেকে উত্তর দিই — {n}টি জুয়েলারের প্রকাশিত দাম, আসল পণ্য থেকে মাপা মজুরি, আর ওদের ওয়েবসাইটের অফার — তাই কোনো সংখ্যা আন্দাজে বলি না।',
+    unknown: 'এটা আমি এখনও শিখছি — আপনার প্রশ্ন লিখে রেখেছি, শিগগিরই ঠিক উত্তর যোগ করব। ততক্ষণ, এগুলোতে আমি ভালো:',
+    nodata: 'আজকের তথ্য লোড হয়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন।',
+    no_voice: 'এই ডিভাইসে {l} কণ্ঠ নেই, তাই আমি লিখে উত্তর দেব।',
+    mic_denied: 'মাইক বন্ধ আছে। ব্রাউজারের সেটিংসে এই সাইটের জন্য মাইক চালু করুন, তারপর আবার 🎤 টিপুন।',
+    mic_none: 'আমি শুনতে পাইনি — 🎤 টিপে আবার বলুন।',
+    rupees: 'টাকা', carat: 'ক্যারেট',
+    say_med: 'আজ {k} সোনা প্রায় {p} প্রতি গ্রাম, {n}টি জুয়েলারের মাঝামাঝি দাম। সবচেয়ে কম {b}-এ, {q}।',
+    say_brand: '{b}-এ আজ {k} সোনা {p} প্রতি গ্রাম, {n}টি জুয়েলারের মধ্যে {r} নম্বর।',
+    say_city: '{c}-এ আজ সবচেয়ে সস্তা {k} {b}-এ, {p} প্রতি গ্রাম।',
+    say_cheap: 'আজ সবচেয়ে সস্তা {k} {b}-এ, {p} প্রতি গ্রাম। 10 গ্রামে সবচেয়ে দামি জুয়েলার {q} বেশি নেয়।',
+    say_cmp: '{b} সস্তা, 10 গ্রাম {k}-এ {p} কম।',
+    say_mk_brand: '{b}-এ {c}-এর সাধারণ মজুরি প্রায় {p}।',
+    say_mk: '{c}-এ সবচেয়ে কম মজুরি {b}-এ, প্রায় {p}।',
+    say_mk_none: '{b}-এর মজুরি আমরা এখনও মাপিনি।',
+    say_off: 'অফার ধরে, আজ 10 গ্রাম 22 ক্যারেট আংটি সবচেয়ে কমে {b}-এ: GST সহ {p}।',
+    say_off_brand: 'আজ {b}-এর ওয়েবসাইটে {n}টি অফার আছে।',
+    say_off_none: 'আজ {b}-এর ওয়েবসাইটে কোনো অফার নেই।',
+    say_price: '{b}-এ {w} {k} সোনা GST সহ প্রায় {p} পড়বে।',
+    say_trend_up: 'আজ {k} সোনা {p} প্রতি গ্রাম, আগের দিনের চেয়ে {q} বেশি।',
+    say_trend_dn: 'আজ {k} সোনা {p} প্রতি গ্রাম, আগের দিনের চেয়ে {q} কম।',
+    say_trend_same: 'আজ {k} সোনা {p} প্রতি গ্রাম, আগের দিনের মতোই।',
+    u_g: '{n} গ্রাম', u_tola: '{n} ভরি', u_sov: '{n} সভরেন', u_kg: '{n} কেজি',
+    c_Ring: 'আংটি', c_Chain: 'চেন', c_Bangle: 'চুড়ি', c_Necklace: 'হার', c_Earrings: 'কানের দুল',
+    c_Mangalsutra: 'মঙ্গলসূত্র', c_Pendant: 'লকেট', c_Bracelet: 'ব্রেসলেট', c_Coin: 'কয়েন',
+    ch_cheap22: 'আজ সবচেয়ে সস্তা 22K', ch_mycity: 'আমার শহরে দাম', ch_tvk: 'তানিষ্ক না কল্যাণ',
+    ch_bestoff: 'আজকের সেরা অফার', ch_p10chain: '10 গ্রাম 22K চেনের দাম', ch_k22v24: '22K আর 24K-এর তফাত?',
+    ch_p10: '10 গ্রাম 22K-এর দাম', ch_afteroff: 'অফারের পরে দাম', ch_mkcmp: 'মজুরির তুলনা',
+    ch_goodmk: 'মজুরিতে 20% ছাড় কি ভালো?', ch_whatmk: 'মজুরি কী?', ch_alert: 'দামের অ্যালার্ট দিন',
+    ch_goodtime: 'এখন কেনা কি ঠিক?', ch_rate: 'আজ সোনার দাম', ch_another: 'অন্য জুয়েলারে একই',
+    ch_bmk: '{b} মজুরি', ch_boff: '{b} অফার'
+  };
+
+  S.kn = {
+    ui_sub: 'ಆಭರಣ ಸಹಾಯಕಿ · ಇಂದಿನ ನಿಜವಾದ ದರಗಳಿಂದ ಉತ್ತರ',
+    ui_ph: 'ದರ, ಜ್ಯುವೆಲ್ಲರ್ಸ್, ಆಫರ್‌ಗಳ ಬಗ್ಗೆ ಕೇಳಿ…',
+    ui_listen: 'ಕೇಳುತ್ತಿದ್ದೇನೆ… ಮಾತನಾಡಿ',
+    ui_mic: 'ಮಾತನಾಡಿ ಕೇಳಿ',
+    ui_foot: 'ಉಚಿತ · ಟೈಪ್ ಮಾಡಿ ಅಥವಾ ಮಾತನಾಡಿ · ಪ್ರಕಟಿತ ಮಾಹಿತಿಯಿಂದ ಉತ್ತರ, ಸಲಹೆ ಅಲ್ಲ',
+    ui_lang: 'ಭಾಷೆ', ui_speak: 'ಕೇಳಿ', ui_mute: 'ಮಾತು ನಿಲ್ಲಿಸಿ',
+    greet1: 'ನಮಸ್ಕಾರ! 🙏 ನಾನು <b>ಸೋನಾ</b>, ನಿಮ್ಮ ಆಭರಣ ಸಹಾಯಕಿ.',
+    greet2: 'ಚಿನ್ನ ಖರೀದಿಯ ಬಗ್ಗೆ ಏನಾದರೂ ಕೇಳಿ — ಯಾವುದೇ ಜ್ಯುವೆಲ್ಲರ್‌ನ ಇಂದಿನ ದರ, ನಿಮ್ಮ ನಗರದಲ್ಲಿ ಅತಿ ಕಡಿಮೆ ದರ, ಮೇಕಿಂಗ್ ಚಾರ್ಜ್, ಆಫರ್‌ಗಳು ಅಥವಾ ಯಾವುದೇ ತೂಕದ ಬೆಲೆ. ಟೈಪ್ ಮಾಡಿ, ಅಥವಾ 🎤 ಒತ್ತಿ ಮಾತನಾಡಿ.',
+    lang_hint: 'ನಿಮ್ಮ ಭಾಷೆಯನ್ನು ಮೇಲೆ ಆರಿಸಿ:',
+    src: 'ಇಂದಿನ ದರಗಳು {n} ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನಿಂದ, GST ಮೊದಲು · {d}',
+    med_h: 'ಭಾರತದಲ್ಲಿ ಇಂದಿನ ಚಿನ್ನದ ದರ, {n} ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನ ಮಧ್ಯದ ದರ:',
+    med_low: 'ರಾಷ್ಟ್ರೀಯ ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನಲ್ಲಿ ಅತಿ ಕಡಿಮೆ 22K: <b>{b}</b>, <b>{p}/ಗ್ರಾಂ</b>.',
+    brand_h: '<b>{b}</b> ಇಂದು:',
+    brand_rank: 'ಇಂದು {n} ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನಲ್ಲಿ ಇದು <b>#{r}</b> ಸ್ಥಾನದಲ್ಲಿದೆ — {rel}.',
+    rel_at: '{k} ಮಾರುಕಟ್ಟೆಯ ಮಧ್ಯದ ದರಕ್ಕೆ ಸಮ', rel_below: '{k} ಮಧ್ಯದ ದರಕ್ಕಿಂತ {p}/ಗ್ರಾಂ ಕಡಿಮೆ', rel_above: '{k} ಮಧ್ಯದ ದರಕ್ಕಿಂತ {p}/ಗ್ರಾಂ ಹೆಚ್ಚು',
+    brand_mk: 'ಸಾಮಾನ್ಯ ಮೇಕಿಂಗ್ ಚಾರ್ಜ್: {list}.',
+    brand_off: 'ಅವರ ಸೈಟ್‌ನಲ್ಲಿ ಆಫರ್: <b>{o}</b>.',
+    brand_st: 'ಈ ರಾಜ್ಯಗಳಲ್ಲಿ: {s}.',
+    brand_link: '{b} ನ 30 ದಿನಗಳ ದರಗಳು →',
+    city_h: '<b>{c}</b> ನಲ್ಲಿ ಇಂದು ಅತಿ ಕಡಿಮೆ {k} ({note}):',
+    city_loc: 'ರಾಷ್ಟ್ರೀಯ ಜ್ಯುವೆಲ್ಲರ್ಸ್ ಮತ್ತು {s} ನ {l} ಸ್ಥಳೀಯ ಜ್ಯುವೆಲ್ಲರ್ಸ್', city_nat: 'ರಾಷ್ಟ್ರೀಯ ಜ್ಯುವೆಲ್ಲರ್ಸ್',
+    city_link: '{c} ನ ಪೂರ್ಣ ಪಟ್ಟಿ →',
+    cheap_h: 'ರಾಷ್ಟ್ರೀಯ ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನಲ್ಲಿ ಇಂದು ಅತಿ ಕಡಿಮೆ {k}:',
+    cheap_gap: 'ಅತಿ ಕಡಿಮೆ ಮತ್ತು ಅತಿ ಹೆಚ್ಚು ದರದ ನಡುವೆ 10 ಗ್ರಾಂಗೆ <b>{p}</b> ವ್ಯತ್ಯಾಸ ಇದೆ — ಖರೀದಿಸುವ ಮೊದಲು ನೋಡಿ.',
+    cmp_h: 'ಇಂದು ಅಕ್ಕಪಕ್ಕ ({k}):', cmp_10: '10 ಗ್ರಾಂ: {p}', cmp_mk: 'ಮೇಕಿಂಗ್ ~{p}', cmp_nomk: 'ಮೇಕಿಂಗ್: ಅಳೆದಿಲ್ಲ',
+    cmp_win: '<b>{b}</b> ನ {k} ದರ 10 ಗ್ರಾಂಗೆ <b>{p}</b> ಕಡಿಮೆ. ಅಂತಿಮ ಬಿಲ್ ನೀವು ಆರಿಸುವ ವಿನ್ಯಾಸದ ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ ಮೇಲೂ ಅವಲಂಬಿತ.',
+    mk_none: '<b>{b}</b> ನ ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ ಅನ್ನು ನಾವು ಇನ್ನೂ ಅಳೆದಿಲ್ಲ. ಇವರದ್ದು ಅಳೆದಿದ್ದೇವೆ: {list}.',
+    mk_link: 'ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ ಹೋಲಿಕೆ →',
+    mk_brand_h: '<b>{b}</b> ನ ಸಾಮಾನ್ಯ ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ (ನಿಜವಾದ ಉತ್ಪನ್ನಗಳ ಮಧ್ಯದ ಅಂಕಿ, ಚಿನ್ನದ ಬೆಲೆಯ %):',
+    mk_note: 'ವಿನ್ಯಾಸದ ಪ್ರಕಾರ ಬದಲಾಗುತ್ತದೆ; ಬಿಲ್‌ನಲ್ಲಿ ಹೆಚ್ಚು ಚೌಕಾಸಿ ಮಾಡಬಹುದಾದ ಭಾಗ ಇದೇ.',
+    mk_all: 'ಎಲ್ಲಾ ಜ್ಯುವೆಲ್ಲರ್ಸ್ ಹೋಲಿಕೆ →',
+    mk_h: '<b>{c}</b> ಮೇಲೆ ಅತಿ ಕಡಿಮೆ ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ (ನಿಜವಾದ ಉತ್ಪನ್ನಗಳ ಮಧ್ಯದ ಅಂಕಿ):',
+    mk_every: 'ಪ್ರತಿ ಜ್ಯುವೆಲ್ಲರ್ ಮತ್ತು ವಿಭಾಗ →',
+    off_none: 'ಇಂದು <b>{b}</b> ನ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ ಯಾವುದೇ ಆಫರ್ ಬರೆದಿಲ್ಲ.',
+    off_see: 'ಯಾರ ಬಳಿ ಆಫರ್ ಇದೆ ನೋಡಿ →',
+    off_brand_h: 'ಇಂದು <b>{b}</b> ನ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿರುವ ಆಫರ್‌ಗಳು:',
+    off_page: 'ಅವರ ಪುಟ ↗', off_all: 'ಎಲ್ಲಾ ಜ್ಯುವೆಲ್ಲರ್ಸ್ ಆಫರ್ ಹೋಲಿಕೆ →',
+    off_h: 'ಆಫರ್‌ನ ನಿಜವಾದ ಪರೀಕ್ಷೆ ಅಂತಿಮ ಬೆಲೆ. ಇಂದು 10 ಗ್ರಾಂ 22K ಉಂಗುರ, ಆಫರ್ ನಂತರ, GST ಸೇರಿ:',
+    off_tag: 'ಮೇಕಿಂಗ್ ಮೇಲೆ {p}% ರಿಯಾಯಿತಿ',
+    off_count: 'ಇಂದು {n} ಜ್ಯುವೆಲ್ಲರ್ಸ್ ಸೈಟ್‌ಗಳಲ್ಲಿ ಆಫರ್‌ಗಳಿವೆ, ಉದಾ. {list}.',
+    off_every: 'ಪ್ರತಿ ಆಫರ್, ಮತ್ತು ಅದರ ನಿಜವಾದ ಅರ್ಥ →',
+    price_h: 'ಇಂದು {who} ನಲ್ಲಿ {w} {k}:', price_who: 'ಅತಿ ಕಡಿಮೆ ದರದ ರಾಷ್ಟ್ರೀಯ ಜ್ಯುವೆಲ್ಲರ್ ({b})',
+    price_gold: 'ಚಿನ್ನ ({g} ಗ್ರಾಂ × {p})', price_mk: 'ಮೇಕಿಂಗ್ (~{p}, {c})', price_typ: 'ಸಾಮಾನ್ಯ', price_total: 'ಒಟ್ಟು',
+    price_nomk: 'ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ ಸೇರಿಲ್ಲ — ನಿಮ್ಮ ವಿನ್ಯಾಸದ ಚಾರ್ಜ್ ಸೇರಿಸಿ (ಸಾಮಾನ್ಯವಾಗಿ 8–25%).',
+    trend_none: 'ಇನ್ನೂ ಸಾಕಷ್ಟು ಇತಿಹಾಸ ಇಲ್ಲ.', hist_link: 'ಚಿನ್ನದ ದರದ ಇತಿಹಾಸ →',
+    trend_h: '{k} ಮಾರುಕಟ್ಟೆಯ ಮಧ್ಯದ ದರ: ಇಂದು <b>{p}/ಗ್ರಾಂ</b>.',
+    vs1: 'ಹಿಂದಿನ ದಿನಕ್ಕೆ ಹೋಲಿಸಿದರೆ', vs7: '7 ದಿನಗಳ ಹಿಂದಿಗೆ ಹೋಲಿಸಿದರೆ', vs30: '30 ದಿನಗಳ ಹಿಂದಿಗೆ ಹೋಲಿಸಿದರೆ',
+    trend_note: 'ಇವು ಹಿಂದಿನ ಬದಲಾವಣೆಗಳು, ಮುನ್ಸೂಚನೆ ಅಲ್ಲ — ನಾಳೆಯ ದರವನ್ನು ಯಾರೂ ಖಚಿತವಾಗಿ ಹೇಳಲಾರರು.',
+    full_hist: 'ಪೂರ್ಣ ಇತಿಹಾಸ →',
+    alerts: 'ಪ್ರತಿದಿನ ಬೆಳಿಗ್ಗೆ ಅತಿ ಕಡಿಮೆ ದರದ ಜ್ಯುವೆಲ್ಲರ್ ಮತ್ತು ಇಂದಿನ ದರ, ಉಚಿತ — ಮತ್ತು 22K ನಿಮ್ಮ ದರಕ್ಕೆ ಇಳಿದ ದಿನ ಇಮೇಲ್.',
+    alerts_cta: 'ಉಚಿತ ದೈನಂದಿನ ಅಲರ್ಟ್ ಪಡೆಯಿರಿ',
+    more: 'ಇನ್ನಷ್ಟು ಓದಿ →', guide_h: 'ಈ ಮಾರ್ಗದರ್ಶಿ ಇದರ ಬಗ್ಗೆಯೇ: <b>{t}</b> — {d}', guide_link: 'ಮಾರ್ಗದರ್ಶಿ ಓದಿ →',
+    en_only: 'ಈ ಉತ್ತರ ಸದ್ಯಕ್ಕೆ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿದೆ:', translated: 'ನಿಮ್ಮ ಸಾಧನದಲ್ಲೇ ಅನುವಾದಿಸಲಾಗಿದೆ',
+    ask_city: 'ನೀವು ಯಾವ ನಗರದಲ್ಲಿದ್ದೀರಿ?',
+    silver: 'ಸದ್ಯಕ್ಕೆ ನಾನು ಚಿನ್ನದ ಮಾಹಿತಿ ಮಾತ್ರ ನೀಡುತ್ತೇನೆ — ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನ 22K, 24K ಮತ್ತು 18K ದರಗಳು. ಬೆಳ್ಳಿ ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿದೆ.',
+    hello: 'ನಮಸ್ಕಾರ! 🙏 ನಾನು ಸೋನಾ. ಚಿನ್ನ ಖರೀದಿಯ ಬಗ್ಗೆ ಏನಾದರೂ ಕೇಳಿ — {n} ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನ ಇಂದಿನ ದರಗಳು, ನಿಮ್ಮ ನಗರ, ಮೇಕಿಂಗ್ ಚಾರ್ಜ್, ಆಫರ್‌ಗಳು ಅಥವಾ ಯಾವುದೇ ತೂಕದ ಬೆಲೆ.',
+    thanks: 'ಸಂತೋಷ! ಇನ್ನೇನಾದರೂ?',
+    about: 'ನಾನು ಸೋನಾ, MyGoldRates ನ ಸಹಾಯಕಿ. ನಾನು ಇಂದಿನ ನಿಜವಾದ ಮಾಹಿತಿಯಿಂದ ಉತ್ತರಿಸುತ್ತೇನೆ — {n} ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನ ಪ್ರಕಟಿತ ದರಗಳು, ನಿಜವಾದ ಉತ್ಪನ್ನಗಳಿಂದ ಅಳೆದ ಮೇಕಿಂಗ್ ಚಾರ್ಜ್, ಮತ್ತು ಅವರ ವೆಬ್‌ಸೈಟ್‌ಗಳ ಆಫರ್‌ಗಳು — ಹಾಗಾಗಿ ನಾನು ಯಾವ ಅಂಕಿಯನ್ನೂ ಊಹಿಸುವುದಿಲ್ಲ.',
+    unknown: 'ಇದನ್ನು ನಾನು ಇನ್ನೂ ಕಲಿಯುತ್ತಿದ್ದೇನೆ — ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಗುರುತಿಸಿಕೊಂಡಿದ್ದೇನೆ, ಶೀಘ್ರದಲ್ಲೇ ಸರಿಯಾದ ಉತ್ತರ ಸೇರಿಸುತ್ತೇವೆ. ಅಲ್ಲಿಯವರೆಗೆ, ಇವುಗಳಲ್ಲಿ ನಾನು ಚೆನ್ನಾಗಿ ಉತ್ತರಿಸಬಲ್ಲೆ:',
+    nodata: 'ಇಂದಿನ ಮಾಹಿತಿ ಲೋಡ್ ಆಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಇಂಟರ್ನೆಟ್ ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+    no_voice: 'ಈ ಸಾಧನದಲ್ಲಿ {l} ಧ್ವನಿ ಇಲ್ಲ, ಹಾಗಾಗಿ ನಾನು ಬರೆದು ಉತ್ತರಿಸುತ್ತೇನೆ.',
+    mic_denied: 'ಮೈಕ್ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ. ಬ್ರೌಸರ್ ಸೆಟ್ಟಿಂಗ್‌ನಲ್ಲಿ ಈ ಸೈಟ್‌ಗೆ ಮೈಕ್ ಅನುಮತಿಸಿ, ನಂತರ ಮತ್ತೆ 🎤 ಒತ್ತಿ.',
+    mic_none: 'ನನಗೆ ಕೇಳಿಸಲಿಲ್ಲ — 🎤 ಒತ್ತಿ ಮತ್ತೆ ಮಾತನಾಡಿ.',
+    rupees: 'ರೂಪಾಯಿ', carat: 'ಕ್ಯಾರೆಟ್',
+    say_med: 'ಇಂದು {k} ಚಿನ್ನ ಗ್ರಾಂಗೆ ಸುಮಾರು {p}, {n} ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನ ಮಧ್ಯದ ದರ. ಅತಿ ಕಡಿಮೆ {b} ನಲ್ಲಿ, {q}.',
+    say_brand: '{b} ನಲ್ಲಿ ಇಂದು {k} ಚಿನ್ನ ಗ್ರಾಂಗೆ {p}, {n} ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನಲ್ಲಿ ಸ್ಥಾನ {r}.',
+    say_city: '{c} ನಲ್ಲಿ ಇಂದು ಅತಿ ಕಡಿಮೆ {k} {b} ನಲ್ಲಿ, ಗ್ರಾಂಗೆ {p}.',
+    say_cheap: 'ಇಂದು ಅತಿ ಕಡಿಮೆ {k} {b} ನಲ್ಲಿ, ಗ್ರಾಂಗೆ {p}. 10 ಗ್ರಾಂಗೆ ಅತಿ ದುಬಾರಿ ಜ್ಯುವೆಲ್ಲರ್ {q} ಹೆಚ್ಚು ತೆಗೆದುಕೊಳ್ಳುತ್ತಾರೆ.',
+    say_cmp: '{b} ಕಡಿಮೆ ದರ, 10 ಗ್ರಾಂ {k} ಗೆ {p} ಕಡಿಮೆ.',
+    say_mk_brand: '{b} ನಲ್ಲಿ {c} ಗೆ ಸಾಮಾನ್ಯ ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ ಸುಮಾರು {p}.',
+    say_mk: '{c} ಗೆ ಅತಿ ಕಡಿಮೆ ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ {b} ನಲ್ಲಿ, ಸುಮಾರು {p}.',
+    say_mk_none: '{b} ನ ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ ಅನ್ನು ನಾವು ಇನ್ನೂ ಅಳೆದಿಲ್ಲ.',
+    say_off: 'ಆಫರ್ ಸೇರಿಸಿ, ಇಂದು 10 ಗ್ರಾಂ 22 ಕ್ಯಾರೆಟ್ ಉಂಗುರ ಅತಿ ಕಡಿಮೆ {b} ನಲ್ಲಿ: GST ಸೇರಿ {p}.',
+    say_off_brand: 'ಇಂದು {b} ನ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ {n} ಆಫರ್‌ಗಳಿವೆ.',
+    say_off_none: 'ಇಂದು {b} ನ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ ಯಾವುದೇ ಆಫರ್ ಇಲ್ಲ.',
+    say_price: '{b} ನಲ್ಲಿ {w} {k} ಚಿನ್ನ GST ಸೇರಿ ಸುಮಾರು {p} ಆಗುತ್ತದೆ.',
+    say_trend_up: 'ಇಂದು {k} ಚಿನ್ನ ಗ್ರಾಂಗೆ {p}, ಹಿಂದಿನ ದಿನಕ್ಕಿಂತ {q} ಹೆಚ್ಚು.',
+    say_trend_dn: 'ಇಂದು {k} ಚಿನ್ನ ಗ್ರಾಂಗೆ {p}, ಹಿಂದಿನ ದಿನಕ್ಕಿಂತ {q} ಕಡಿಮೆ.',
+    say_trend_same: 'ಇಂದು {k} ಚಿನ್ನ ಗ್ರಾಂಗೆ {p}, ಹಿಂದಿನ ದಿನದಷ್ಟೇ.',
+    u_g: '{n} ಗ್ರಾಂ', u_tola: '{n} ತೊಲ', u_sov: '{n} ಪವನ್', u_kg: '{n} ಕೆಜಿ',
+    c_Ring: 'ಉಂಗುರ', c_Chain: 'ಸರ', c_Bangle: 'ಬಳೆ', c_Necklace: 'ನೆಕ್ಲೇಸ್', c_Earrings: 'ಕಿವಿಯೋಲೆ',
+    c_Mangalsutra: 'ಮಾಂಗಲ್ಯ ಸರ', c_Pendant: 'ಪೆಂಡೆಂಟ್', c_Bracelet: 'ಬ್ರೇಸ್ಲೆಟ್', c_Coin: 'ನಾಣ್ಯ',
+    ch_cheap22: 'ಇಂದು ಅತಿ ಕಡಿಮೆ 22K', ch_mycity: 'ನನ್ನ ನಗರದಲ್ಲಿ ದರ', ch_tvk: 'ತನಿಷ್ಕ್ ಅಥವಾ ಕಲ್ಯಾಣ್',
+    ch_bestoff: 'ಇಂದಿನ ಉತ್ತಮ ಆಫರ್', ch_p10chain: '10 ಗ್ರಾಂ 22K ಸರದ ಬೆಲೆ', ch_k22v24: '22K ಮತ್ತು 24K ವ್ಯತ್ಯಾಸ?',
+    ch_p10: '10 ಗ್ರಾಂ 22K ಬೆಲೆ', ch_afteroff: 'ಆಫರ್ ನಂತರದ ಬೆಲೆ', ch_mkcmp: 'ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ ಹೋಲಿಕೆ',
+    ch_goodmk: 'ಮೇಕಿಂಗ್ ಮೇಲೆ 20% ರಿಯಾಯಿತಿ ಒಳ್ಳೆಯದೇ?', ch_whatmk: 'ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ ಎಂದರೇನು?', ch_alert: 'ದರ ಅಲರ್ಟ್ ಹೊಂದಿಸಿ',
+    ch_goodtime: 'ಈಗ ಖರೀದಿಸುವುದು ಸರಿಯೇ?', ch_rate: 'ಇಂದಿನ ಚಿನ್ನದ ದರ', ch_another: 'ಬೇರೆ ಜ್ಯುವೆಲ್ಲರ್‌ನಲ್ಲಿ ಇದೇ',
+    ch_bmk: '{b} ಮೇಕಿಂಗ್ ಚಾರ್ಜ್', ch_boff: '{b} ಆಫರ್‌ಗಳು'
+  };
+
+  S.ta = {
+    ui_sub: 'நகை உதவியாளர் · இன்றைய உண்மை விலைகளிலிருந்து பதில்',
+    ui_ph: 'விலை, நகைக்கடை, ஆஃபர் பற்றி கேளுங்கள்…',
+    ui_listen: 'கேட்கிறேன்… பேசுங்கள்',
+    ui_mic: 'பேசிக் கேளுங்கள்',
+    ui_foot: 'இலவசம் · தட்டச்சு செய்யுங்கள் அல்லது பேசுங்கள் · வெளியிடப்பட்ட தரவிலிருந்து பதில், ஆலோசனை அல்ல',
+    ui_lang: 'மொழி', ui_speak: 'கேளுங்கள்', ui_mute: 'பேசுவதை நிறுத்து',
+    greet1: 'வணக்கம்! 🙏 நான் <b>சோனா</b>, உங்கள் நகை உதவியாளர்.',
+    greet2: 'தங்கம் வாங்குவது பற்றி எதையும் கேளுங்கள் — எந்த நகைக்கடையின் இன்றைய விலை, உங்கள் நகரில் மலிவான விலை, செய்கூலி, ஆஃபர்கள் அல்லது எந்த எடையின் விலையும். தட்டச்சு செய்யுங்கள், அல்லது 🎤 அழுத்திப் பேசுங்கள்.',
+    lang_hint: 'உங்கள் மொழியை மேலே தேர்ந்தெடுங்கள்:',
+    src: 'இன்றைய விலைகள் {n} நகைக்கடைகளிடமிருந்து, GST இல்லாமல் · {d}',
+    med_h: 'இந்தியாவில் இன்றைய தங்க விலை, {n} நகைக்கடைகளின் நடு விலை:',
+    med_low: 'தேசிய நகைக்கடைகளில் குறைந்த 22K: <b>{b}</b>, <b>{p}/கிராம்</b>.',
+    brand_h: '<b>{b}</b> இன்று:',
+    brand_rank: 'இன்று {n} நகைக்கடைகளில் இது <b>#{r}</b> இடத்தில் — {rel}.',
+    rel_at: '{k} சந்தை நடு விலைக்குச் சமம்', rel_below: '{k} நடு விலையை விட {p}/கிராம் குறைவு', rel_above: '{k} நடு விலையை விட {p}/கிராம் அதிகம்',
+    brand_mk: 'வழக்கமான செய்கூலி: {list}.',
+    brand_off: 'அவர்கள் தளத்தில் ஆஃபர்: <b>{o}</b>.',
+    brand_st: 'இந்த மாநிலங்களில்: {s}.',
+    brand_link: '{b} 30 நாள் விலைகள் →',
+    city_h: '<b>{c}</b> இல் இன்று மலிவான {k} ({note}):',
+    city_loc: 'தேசிய நகைக்கடைகள் மற்றும் {s} இல் உள்ள {l} உள்ளூர் கடைகள்', city_nat: 'தேசிய நகைக்கடைகள்',
+    city_link: '{c} முழுப் பட்டியல் →',
+    cheap_h: 'தேசிய நகைக்கடைகளில் இன்று மலிவான {k}:',
+    cheap_gap: 'மலிவானதற்கும் விலை அதிகமானதற்கும் 10 கிராமுக்கு <b>{p}</b> வித்தியாசம் — வாங்கும் முன் பாருங்கள்.',
+    cmp_h: 'இன்று அருகருகே ({k}):', cmp_10: '10 கிராம்: {p}', cmp_mk: 'செய்கூலி ~{p}', cmp_nomk: 'செய்கூலி: அளவிடப்படவில்லை',
+    cmp_win: '<b>{b}</b> இன் {k} விலை 10 கிராமுக்கு <b>{p}</b> குறைவு. இறுதி பில் நீங்கள் தேர்ந்தெடுக்கும் டிசைனின் செய்கூலியையும் பொறுத்தது.',
+    mk_none: '<b>{b}</b> இன் செய்கூலியை நாங்கள் இன்னும் அளவிடவில்லை. இவற்றுக்கு அளவிட்டுள்ளோம்: {list}.',
+    mk_link: 'செய்கூலி ஒப்பீடு →',
+    mk_brand_h: '<b>{b}</b> இன் வழக்கமான செய்கூலி (உண்மைப் பொருட்களின் நடு அளவு, தங்க மதிப்பின் %):',
+    mk_note: 'டிசைனைப் பொறுத்து மாறும்; பில்லில் அதிகம் பேரம் பேசக்கூடிய பகுதி இதுதான்.',
+    mk_all: 'எல்லா நகைக்கடைகளையும் ஒப்பிடுக →',
+    mk_h: '<b>{c}</b> க்கு குறைந்த செய்கூலி (உண்மைப் பொருட்களின் நடு அளவு):',
+    mk_every: 'ஒவ்வொரு நகைக்கடையும் வகையும் →',
+    off_none: 'இன்று <b>{b}</b> இணையதளத்தில் எந்த ஆஃபரும் எழுதப்படவில்லை.',
+    off_see: 'யாரிடம் ஆஃபர் உள்ளது பாருங்கள் →',
+    off_brand_h: 'இன்று <b>{b}</b> இணையதளத்தில் உள்ள ஆஃபர்கள்:',
+    off_page: 'அவர்கள் பக்கம் ↗', off_all: 'எல்லா நகைக்கடைகளின் ஆஃபர் ஒப்பீடு →',
+    off_h: 'ஆஃபரின் உண்மையான சோதனை இறுதி விலைதான். இன்று 10 கிராம் 22K மோதிரம், ஆஃபருக்குப் பிறகு, GST உடன்:',
+    off_tag: 'செய்கூலியில் {p}% தள்ளுபடி',
+    off_count: 'இன்று {n} நகைக்கடைகளின் தளங்களில் ஆஃபர்கள் உள்ளன, உதா. {list}.',
+    off_every: 'ஒவ்வொரு ஆஃபரும், அதன் உண்மையான அர்த்தமும் →',
+    price_h: 'இன்று {who} இல் {w} {k}:', price_who: 'மலிவான தேசிய நகைக்கடை ({b})',
+    price_gold: 'தங்கம் ({g} கிராம் × {p})', price_mk: 'செய்கூலி (~{p}, {c})', price_typ: 'வழக்கமான', price_total: 'மொத்தம்',
+    price_nomk: 'செய்கூலி சேர்க்கப்படவில்லை — உங்கள் டிசைனுக்கான கூலியைச் சேர்க்கவும் (பெரும்பாலும் 8–25%).',
+    trend_none: 'இன்னும் போதுமான வரலாறு இல்லை.', hist_link: 'தங்க விலை வரலாறு →',
+    trend_h: '{k} சந்தை நடு விலை: இன்று <b>{p}/கிராம்</b>.',
+    vs1: 'முந்தைய நாளை விட', vs7: '7 நாட்களுக்கு முன்பை விட', vs30: '30 நாட்களுக்கு முன்பை விட',
+    trend_note: 'இவை கடந்த மாற்றங்கள், கணிப்பு அல்ல — நாளைய விலையை யாராலும் உறுதியாகச் சொல்ல முடியாது.',
+    full_hist: 'முழு வரலாறு →',
+    alerts: 'தினமும் காலையில் மலிவான நகைக்கடையும் இன்றைய விலையும், இலவசமாக — 22K உங்கள் விலைக்கு இறங்கும் நாளில் ஒரு மின்னஞ்சல்.',
+    alerts_cta: 'இலவச தினசரி அலர்ட் பெறுங்கள்',
+    more: 'மேலும் படிக்க →', guide_h: 'இந்த வழிகாட்டி இதைப் பற்றியது: <b>{t}</b> — {d}', guide_link: 'வழிகாட்டியைப் படிக்க →',
+    en_only: 'இந்தப் பதில் இப்போதைக்கு ஆங்கிலத்தில்:', translated: 'உங்கள் சாதனத்திலேயே மொழிபெயர்க்கப்பட்டது',
+    ask_city: 'நீங்கள் எந்த நகரில் இருக்கிறீர்கள்?',
+    silver: 'இப்போதைக்கு நான் தங்கம் பற்றி மட்டும் சொல்கிறேன் — நகைக்கடைகளின் 22K, 24K, 18K விலைகள். வெள்ளி விரைவில் வருகிறது.',
+    hello: 'வணக்கம்! 🙏 நான் சோனா. தங்கம் வாங்குவது பற்றி எதையும் கேளுங்கள் — {n} நகைக்கடைகளின் இன்றைய விலைகள், உங்கள் நகரம், செய்கூலி, ஆஃபர்கள் அல்லது எந்த எடையின் விலையும்.',
+    thanks: 'மகிழ்ச்சி! வேறு ஏதாவது?',
+    about: 'நான் சோனா, MyGoldRates இன் உதவியாளர். இன்றைய உண்மைத் தரவிலிருந்து பதில் சொல்கிறேன் — {n} நகைக்கடைகளின் வெளியிட்ட விலைகள், உண்மைப் பொருட்களிலிருந்து அளந்த செய்கூலி, அவர்கள் இணையதள ஆஃபர்கள் — அதனால் எந்த எண்ணையும் ஊகிப்பதில்லை.',
+    unknown: 'இதை நான் இன்னும் கற்றுக்கொண்டிருக்கிறேன் — உங்கள் கேள்வியைக் குறித்துக்கொண்டேன், விரைவில் சரியான பதிலைச் சேர்ப்போம். அதுவரை, இவற்றில் நான் நன்றாகப் பதில் சொல்வேன்:',
+    nodata: 'இன்றைய தரவு ஏற்றப்படவில்லை. இணைய இணைப்பைச் சரிபார்த்து மீண்டும் முயலுங்கள்.',
+    no_voice: 'இந்தச் சாதனத்தில் {l} குரல் இல்லை, அதனால் எழுத்தில் பதில் தருகிறேன்.',
+    mic_denied: 'மைக் தடுக்கப்பட்டுள்ளது. உலாவி அமைப்புகளில் இந்தத் தளத்துக்கு மைக்கை அனுமதித்து, மீண்டும் 🎤 அழுத்துங்கள்.',
+    mic_none: 'எனக்குக் கேட்கவில்லை — 🎤 அழுத்தி மீண்டும் பேசுங்கள்.',
+    rupees: 'ரூபாய்', carat: 'கேரட்',
+    say_med: 'இன்று {k} தங்கம் கிராமுக்கு சுமார் {p}, {n} நகைக்கடைகளின் நடு விலை. குறைந்தது {b} இல், {q}.',
+    say_brand: '{b} இல் இன்று {k} தங்கம் கிராமுக்கு {p}, {n} கடைகளில் இடம் {r}.',
+    say_city: '{c} இல் இன்று மலிவான {k} {b} இல், கிராமுக்கு {p}.',
+    say_cheap: 'இன்று மலிவான {k} {b} இல், கிராமுக்கு {p}. 10 கிராமுக்கு விலை அதிகமான கடை {q} கூடுதலாக வாங்குகிறது.',
+    say_cmp: '{b} மலிவு, 10 கிராம் {k} க்கு {p} குறைவு.',
+    say_mk_brand: '{b} இல் {c} க்கு வழக்கமான செய்கூலி சுமார் {p}.',
+    say_mk: '{c} க்கு குறைந்த செய்கூலி {b} இல், சுமார் {p}.',
+    say_mk_none: '{b} இன் செய்கூலியை நாங்கள் இன்னும் அளவிடவில்லை.',
+    say_off: 'ஆஃபர்களைச் சேர்த்து, இன்று 10 கிராம் 22 கேரட் மோதிரம் குறைந்த விலையில் {b} இல்: GST உடன் {p}.',
+    say_off_brand: 'இன்று {b} இணையதளத்தில் {n} ஆஃபர்கள் உள்ளன.',
+    say_off_none: 'இன்று {b} இணையதளத்தில் எந்த ஆஃபரும் இல்லை.',
+    say_price: '{b} இல் {w} {k} தங்கம் GST உடன் சுமார் {p} ஆகும்.',
+    say_trend_up: 'இன்று {k} தங்கம் கிராமுக்கு {p}, முந்தைய நாளை விட {q} அதிகம்.',
+    say_trend_dn: 'இன்று {k} தங்கம் கிராமுக்கு {p}, முந்தைய நாளை விட {q} குறைவு.',
+    say_trend_same: 'இன்று {k} தங்கம் கிராமுக்கு {p}, முந்தைய நாளைப் போலவே.',
+    u_g: '{n} கிராம்', u_tola: '{n} தோலா', u_sov: '{n} பவுன்', u_kg: '{n} கிலோ',
+    c_Ring: 'மோதிரம்', c_Chain: 'செயின்', c_Bangle: 'வளையல்', c_Necklace: 'நெக்லஸ்', c_Earrings: 'கம்மல்',
+    c_Mangalsutra: 'தாலி', c_Pendant: 'பெண்டன்ட்', c_Bracelet: 'பிரேஸ்லெட்', c_Coin: 'நாணயம்',
+    ch_cheap22: 'இன்று மலிவான 22K', ch_mycity: 'என் நகரில் விலை', ch_tvk: 'தனிஷ்க் அல்லது கல்யாண்',
+    ch_bestoff: 'இன்றைய சிறந்த ஆஃபர்', ch_p10chain: '10 கிராம் 22K செயின் விலை', ch_k22v24: '22K, 24K வித்தியாசம்?',
+    ch_p10: '10 கிராம் 22K விலை', ch_afteroff: 'ஆஃபருக்குப் பின் விலை', ch_mkcmp: 'செய்கூலி ஒப்பீடு',
+    ch_goodmk: 'செய்கூலியில் 20% தள்ளுபடி நல்லதா?', ch_whatmk: 'செய்கூலி என்றால் என்ன?', ch_alert: 'விலை அலர்ட் அமைக்க',
+    ch_goodtime: 'இப்போது வாங்கலாமா?', ch_rate: 'இன்றைய தங்க விலை', ch_another: 'வேறு கடையில் இதே',
+    ch_bmk: '{b} செய்கூலி', ch_boff: '{b} ஆஃபர்கள்'
+  };
+
+  S.te = {
+    ui_sub: 'నగల సహాయకురాలు · ఈరోజు నిజమైన ధరల నుంచి సమాధానాలు',
+    ui_ph: 'ధరలు, జ్యువెలర్లు, ఆఫర్ల గురించి అడగండి…',
+    ui_listen: 'వింటున్నాను… మాట్లాడండి',
+    ui_mic: 'మాట్లాడి అడగండి',
+    ui_foot: 'ఉచితం · టైప్ చేయండి లేదా మాట్లాడండి · ప్రచురించిన డేటా నుంచి సమాధానాలు, సలహా కాదు',
+    ui_lang: 'భాష', ui_speak: 'వినండి', ui_mute: 'చదవడం ఆపండి',
+    greet1: 'నమస్కారం! 🙏 నేను <b>సోనా</b>, మీ నగల సహాయకురాలు.',
+    greet2: 'బంగారం కొనడం గురించి ఏదైనా అడగండి — ఏ జ్యువెలర్ దగ్గరైనా ఈరోజు ధర, మీ నగరంలో చౌకైనది, మేకింగ్ చార్జీలు, ఆఫర్లు లేదా ఏ బరువుకైనా ధర. టైప్ చేయండి, లేదా 🎤 నొక్కి మాట్లాడండి.',
+    lang_hint: 'మీ భాషను పైన ఎంచుకోండి:',
+    src: 'ఈరోజు ధరలు {n} జ్యువెలర్ల నుంచి, GST లేకుండా · {d}',
+    med_h: 'భారతదేశంలో ఈరోజు బంగారం ధర, {n} జ్యువెలర్ల మధ్యస్థ ధర:',
+    med_low: 'జాతీయ జ్యువెలర్లలో తక్కువ 22K: <b>{b}</b>, <b>{p}/గ్రాము</b>.',
+    brand_h: '<b>{b}</b> ఈరోజు:',
+    brand_rank: 'ఈరోజు {n} జ్యువెలర్లలో ఇది <b>#{r}</b> స్థానంలో ఉంది — {rel}.',
+    rel_at: '{k} మార్కెట్ మధ్యస్థ ధరకు సమానం', rel_below: '{k} మధ్యస్థ ధర కంటే {p}/గ్రాము తక్కువ', rel_above: '{k} మధ్యస్థ ధర కంటే {p}/గ్రాము ఎక్కువ',
+    brand_mk: 'సాధారణ మేకింగ్ చార్జీలు: {list}.',
+    brand_off: 'వారి సైట్‌లో ఆఫర్: <b>{o}</b>.',
+    brand_st: 'ఈ రాష్ట్రాల్లో: {s}.',
+    brand_link: '{b} 30 రోజుల ధరలు →',
+    city_h: '<b>{c}</b> లో ఈరోజు చౌకైన {k} ({note}):',
+    city_loc: 'జాతీయ జ్యువెలర్లు మరియు {s} లోని {l} స్థానిక జ్యువెలర్లు', city_nat: 'జాతీయ జ్యువెలర్లు',
+    city_link: '{c} పూర్తి జాబితా →',
+    cheap_h: 'జాతీయ జ్యువెలర్లలో ఈరోజు చౌకైన {k}:',
+    cheap_gap: 'చౌకైనదానికి, ఖరీదైనదానికి మధ్య 10 గ్రాములకు <b>{p}</b> తేడా ఉంది — కొనే ముందు చూడండి.',
+    cmp_h: 'ఈరోజు పక్కపక్కనే ({k}):', cmp_10: '10 గ్రాములు: {p}', cmp_mk: 'మేకింగ్ ~{p}', cmp_nomk: 'మేకింగ్: కొలవలేదు',
+    cmp_win: '<b>{b}</b> {k} ధర 10 గ్రాములకు <b>{p}</b> తక్కువ. తుది బిల్లు మీరు ఎంచుకునే డిజైన్ మేకింగ్ చార్జీపై కూడా ఆధారపడి ఉంటుంది.',
+    mk_none: '<b>{b}</b> మేకింగ్ చార్జీలను మేము ఇంకా కొలవలేదు. వీటికి కొలిచాము: {list}.',
+    mk_link: 'మేకింగ్ చార్జీల పోలిక →',
+    mk_brand_h: '<b>{b}</b> సాధారణ మేకింగ్ చార్జీలు (నిజమైన ఉత్పత్తుల మధ్యస్థం, బంగారం విలువలో %):',
+    mk_note: 'డిజైన్‌ను బట్టి మారుతుంది; బిల్లులో ఎక్కువగా బేరం ఆడగలిగే భాగం ఇదే.',
+    mk_all: 'అన్ని జ్యువెలర్లను పోల్చండి →',
+    mk_h: '<b>{c}</b> పై తక్కువ మేకింగ్ చార్జీలు (నిజమైన ఉత్పత్తుల మధ్యస్థం):',
+    mk_every: 'ప్రతి జ్యువెలర్, ప్రతి రకం →',
+    off_none: 'ఈరోజు <b>{b}</b> వెబ్‌సైట్‌లో ఏ ఆఫర్ రాసి లేదు.',
+    off_see: 'ఎవరి దగ్గర ఆఫర్ ఉందో చూడండి →',
+    off_brand_h: 'ఈరోజు <b>{b}</b> వెబ్‌సైట్‌లోని ఆఫర్లు:',
+    off_page: 'వారి పేజీ ↗', off_all: 'అన్ని జ్యువెలర్ల ఆఫర్ల పోలిక →',
+    off_h: 'ఆఫర్‌కు అసలు పరీక్ష తుది ధరే. ఈరోజు 10 గ్రాముల 22K ఉంగరం, ఆఫర్ తర్వాత, GST తో:',
+    off_tag: 'మేకింగ్‌పై {p}% తగ్గింపు',
+    off_count: 'ఈరోజు {n} జ్యువెలర్ల సైట్లలో ఆఫర్లు ఉన్నాయి, ఉదా. {list}.',
+    off_every: 'ప్రతి ఆఫర్, దాని అసలు అర్థం →',
+    price_h: 'ఈరోజు {who} వద్ద {w} {k}:', price_who: 'చౌకైన జాతీయ జ్యువెలర్ ({b})',
+    price_gold: 'బంగారం ({g} గ్రా × {p})', price_mk: 'మేకింగ్ (~{p}, {c})', price_typ: 'సాధారణంగా', price_total: 'మొత్తం',
+    price_nomk: 'మేకింగ్ చార్జీలు చేర్చలేదు — మీ డిజైన్ చార్జీ కలపండి (తరచుగా 8–25%).',
+    trend_none: 'ఇంకా తగినంత చరిత్ర లేదు.', hist_link: 'బంగారం ధరల చరిత్ర →',
+    trend_h: '{k} మార్కెట్ మధ్యస్థ ధర: ఈరోజు <b>{p}/గ్రాము</b>.',
+    vs1: 'ముందు రోజుతో పోలిస్తే', vs7: '7 రోజుల క్రితంతో పోలిస్తే', vs30: '30 రోజుల క్రితంతో పోలిస్తే',
+    trend_note: 'ఇవి గత మార్పులు, అంచనా కాదు — రేపటి ధరను ఎవరూ ఖచ్చితంగా చెప్పలేరు.',
+    full_hist: 'పూర్తి చరిత్ర →',
+    alerts: 'ప్రతి ఉదయం చౌకైన జ్యువెలర్, ఈరోజు ధర, ఉచితంగా — 22K మీ ధరకు దిగిన రోజు ఒక ఈమెయిల్.',
+    alerts_cta: 'ఉచిత రోజువారీ అలర్ట్‌లు పొందండి',
+    more: 'ఇంకా చదవండి →', guide_h: 'ఈ గైడ్ దీని గురించే: <b>{t}</b> — {d}', guide_link: 'గైడ్ చదవండి →',
+    en_only: 'ఈ సమాధానం ప్రస్తుతానికి ఇంగ్లీష్‌లో ఉంది:', translated: 'మీ పరికరంలోనే అనువదించబడింది',
+    ask_city: 'మీరు ఏ నగరంలో ఉన్నారు?',
+    silver: 'ప్రస్తుతానికి నేను బంగారం గురించి మాత్రమే చెబుతాను — జ్యువెలర్ల 22K, 24K, 18K ధరలు. వెండి త్వరలో వస్తుంది.',
+    hello: 'నమస్కారం! 🙏 నేను సోనా. బంగారం కొనడం గురించి ఏదైనా అడగండి — {n} జ్యువెలర్ల ఈరోజు ధరలు, మీ నగరం, మేకింగ్ చార్జీలు, ఆఫర్లు లేదా ఏ బరువుకైనా ధర.',
+    thanks: 'సంతోషం! ఇంకేమైనా?',
+    about: 'నేను సోనా, MyGoldRates సహాయకురాలిని. ఈరోజు నిజమైన డేటా నుంచి సమాధానం ఇస్తాను — {n} జ్యువెలర్ల ప్రచురించిన ధరలు, నిజమైన ఉత్పత్తుల నుంచి కొలిచిన మేకింగ్ చార్జీలు, వారి వెబ్‌సైట్ ఆఫర్లు — అందుకే ఏ సంఖ్యనూ ఊహించను.',
+    unknown: 'ఇది నేను ఇంకా నేర్చుకుంటున్నాను — మీ ప్రశ్నను నమోదు చేశాను, త్వరలో సరైన సమాధానం చేరుస్తాము. అప్పటి వరకు, వీటిలో నేను బాగా చెప్పగలను:',
+    nodata: 'ఈరోజు డేటా లోడ్ కాలేదు. దయచేసి ఇంటర్నెట్ చూసి మళ్లీ ప్రయత్నించండి.',
+    no_voice: 'ఈ పరికరంలో {l} గొంతు లేదు, కాబట్టి నేను రాసి సమాధానం ఇస్తాను.',
+    mic_denied: 'మైక్ బ్లాక్ అయింది. బ్రౌజర్ సెట్టింగ్‌లలో ఈ సైట్‌కు మైక్ అనుమతించి, మళ్లీ 🎤 నొక్కండి.',
+    mic_none: 'నాకు వినిపించలేదు — 🎤 నొక్కి మళ్లీ మాట్లాడండి.',
+    rupees: 'రూపాయలు', carat: 'క్యారెట్',
+    say_med: 'ఈరోజు {k} బంగారం గ్రాముకు సుమారు {p}, {n} జ్యువెలర్ల మధ్యస్థ ధర. తక్కువది {b} వద్ద, {q}.',
+    say_brand: '{b} వద్ద ఈరోజు {k} బంగారం గ్రాముకు {p}, {n} జ్యువెలర్లలో స్థానం {r}.',
+    say_city: '{c} లో ఈరోజు చౌకైన {k} {b} వద్ద, గ్రాముకు {p}.',
+    say_cheap: 'ఈరోజు చౌకైన {k} {b} వద్ద, గ్రాముకు {p}. 10 గ్రాములకు ఖరీదైన జ్యువెలర్ {q} ఎక్కువ తీసుకుంటారు.',
+    say_cmp: '{b} చౌక, 10 గ్రాముల {k} పై {p} తక్కువ.',
+    say_mk_brand: '{b} వద్ద {c} పై సాధారణ మేకింగ్ చార్జీ సుమారు {p}.',
+    say_mk: '{c} పై తక్కువ మేకింగ్ చార్జీ {b} వద్ద, సుమారు {p}.',
+    say_mk_none: '{b} మేకింగ్ చార్జీలను మేము ఇంకా కొలవలేదు.',
+    say_off: 'ఆఫర్లు కలిపి, ఈరోజు 10 గ్రాముల 22 క్యారెట్ ఉంగరం తక్కువ ధర {b} వద్ద: GST తో {p}.',
+    say_off_brand: 'ఈరోజు {b} వెబ్‌సైట్‌లో {n} ఆఫర్లు ఉన్నాయి.',
+    say_off_none: 'ఈరోజు {b} వెబ్‌సైట్‌లో ఏ ఆఫర్ లేదు.',
+    say_price: '{b} వద్ద {w} {k} బంగారం GST తో సుమారు {p} అవుతుంది.',
+    say_trend_up: 'ఈరోజు {k} బంగారం గ్రాముకు {p}, ముందు రోజు కంటే {q} ఎక్కువ.',
+    say_trend_dn: 'ఈరోజు {k} బంగారం గ్రాముకు {p}, ముందు రోజు కంటే {q} తక్కువ.',
+    say_trend_same: 'ఈరోజు {k} బంగారం గ్రాముకు {p}, ముందు రోజు లాగానే.',
+    u_g: '{n} గ్రాములు', u_tola: '{n} తులం', u_sov: '{n} సావరిన్', u_kg: '{n} కిలో',
+    c_Ring: 'ఉంగరం', c_Chain: 'చైన్', c_Bangle: 'గాజులు', c_Necklace: 'నెక్లెస్', c_Earrings: 'చెవిపోగులు',
+    c_Mangalsutra: 'మంగళసూత్రం', c_Pendant: 'పెండెంట్', c_Bracelet: 'బ్రేస్లెట్', c_Coin: 'నాణెం',
+    ch_cheap22: 'ఈరోజు చౌకైన 22K', ch_mycity: 'నా నగరంలో ధర', ch_tvk: 'తనిష్క్ లేదా కళ్యాణ్',
+    ch_bestoff: 'ఈరోజు ఉత్తమ ఆఫర్', ch_p10chain: '10 గ్రాముల 22K చైన్ ధర', ch_k22v24: '22K, 24K తేడా?',
+    ch_p10: '10 గ్రాముల 22K ధర', ch_afteroff: 'ఆఫర్ తర్వాత ధర', ch_mkcmp: 'మేకింగ్ చార్జీల పోలిక',
+    ch_goodmk: 'మేకింగ్‌పై 20% తగ్గింపు మంచిదేనా?', ch_whatmk: 'మేకింగ్ చార్జీలు అంటే ఏమిటి?', ch_alert: 'ధర అలర్ట్ పెట్టండి',
+    ch_goodtime: 'ఇప్పుడు కొనడం మంచిదేనా?', ch_rate: 'ఈరోజు బంగారం ధర', ch_another: 'వేరే జ్యువెలర్ వద్ద ఇదే',
+    ch_bmk: '{b} మేకింగ్ చార్జీలు', ch_boff: '{b} ఆఫర్లు'
+  };
+
+  S.ml = {
+    ui_sub: 'ആഭരണ സഹായി · ഇന്നത്തെ യഥാർത്ഥ വിലകളിൽ നിന്ന് ഉത്തരം',
+    ui_ph: 'വില, ജ്വല്ലറികൾ, ഓഫറുകൾ എന്നിവയെക്കുറിച്ച് ചോദിക്കൂ…',
+    ui_listen: 'കേൾക്കുന്നു… സംസാരിക്കൂ',
+    ui_mic: 'സംസാരിച്ച് ചോദിക്കൂ',
+    ui_foot: 'സൗജന്യം · ടൈപ്പ് ചെയ്യൂ അല്ലെങ്കിൽ സംസാരിക്കൂ · പ്രസിദ്ധീകരിച്ച വിവരങ്ങളിൽ നിന്ന് ഉത്തരം, ഉപദേശമല്ല',
+    ui_lang: 'ഭാഷ', ui_speak: 'കേൾക്കൂ', ui_mute: 'വായന നിർത്തൂ',
+    greet1: 'നമസ്കാരം! 🙏 ഞാൻ <b>സോണ</b>, നിങ്ങളുടെ ആഭരണ സഹായി.',
+    greet2: 'സ്വർണം വാങ്ങുന്നതിനെക്കുറിച്ച് എന്തും ചോദിക്കൂ — ഏത് ജ്വല്ലറിയുടെയും ഇന്നത്തെ വില, നിങ്ങളുടെ നഗരത്തിലെ കുറഞ്ഞ വില, പണിക്കൂലി, ഓഫറുകൾ, അല്ലെങ്കിൽ ഏത് തൂക്കത്തിന്റെയും വില. ടൈപ്പ് ചെയ്യൂ, അല്ലെങ്കിൽ 🎤 അമർത്തി സംസാരിക്കൂ.',
+    lang_hint: 'നിങ്ങളുടെ ഭാഷ മുകളിൽ തിരഞ്ഞെടുക്കൂ:',
+    src: 'ഇന്നത്തെ വിലകൾ {n} ജ്വല്ലറികളിൽ നിന്ന്, GST കൂടാതെ · {d}',
+    med_h: 'ഇന്ത്യയിൽ ഇന്നത്തെ സ്വർണവില, {n} ജ്വല്ലറികളുടെ മധ്യവില:',
+    med_low: 'ദേശീയ ജ്വല്ലറികളിൽ കുറഞ്ഞ 22K: <b>{b}</b>, <b>{p}/ഗ്രാം</b>.',
+    brand_h: '<b>{b}</b> ഇന്ന്:',
+    brand_rank: 'ഇന്ന് {n} ജ്വല്ലറികളിൽ ഇത് <b>#{r}</b> സ്ഥാനത്താണ് — {rel}.',
+    rel_at: '{k} വിപണിയിലെ മധ്യവിലയ്ക്ക് തുല്യം', rel_below: '{k} മധ്യവിലയേക്കാൾ {p}/ഗ്രാം കുറവ്', rel_above: '{k} മധ്യവിലയേക്കാൾ {p}/ഗ്രാം കൂടുതൽ',
+    brand_mk: 'സാധാരണ പണിക്കൂലി: {list}.',
+    brand_off: 'അവരുടെ സൈറ്റിലെ ഓഫർ: <b>{o}</b>.',
+    brand_st: 'ഈ സംസ്ഥാനങ്ങളിൽ: {s}.',
+    brand_link: '{b} 30 ദിവസത്തെ വിലകൾ →',
+    city_h: '<b>{c}</b> ൽ ഇന്ന് കുറഞ്ഞ {k} ({note}):',
+    city_loc: 'ദേശീയ ജ്വല്ലറികളും {s} ലെ {l} പ്രാദേശിക ജ്വല്ലറികളും', city_nat: 'ദേശീയ ജ്വല്ലറികൾ',
+    city_link: '{c} മുഴുവൻ പട്ടിക →',
+    cheap_h: 'ദേശീയ ജ്വല്ലറികളിൽ ഇന്ന് കുറഞ്ഞ {k}:',
+    cheap_gap: 'കുറഞ്ഞതും കൂടിയതും തമ്മിൽ 10 ഗ്രാമിന് <b>{p}</b> വ്യത്യാസമുണ്ട് — വാങ്ങുന്നതിന് മുമ്പ് നോക്കൂ.',
+    cmp_h: 'ഇന്ന് അടുത്തടുത്ത് ({k}):', cmp_10: '10 ഗ്രാം: {p}', cmp_mk: 'പണിക്കൂലി ~{p}', cmp_nomk: 'പണിക്കൂലി: അളന്നിട്ടില്ല',
+    cmp_win: '<b>{b}</b> ന്റെ {k} വില 10 ഗ്രാമിന് <b>{p}</b> കുറവാണ്. അന്തിമ ബിൽ നിങ്ങൾ തിരഞ്ഞെടുക്കുന്ന ഡിസൈനിന്റെ പണിക്കൂലിയെയും ആശ്രയിച്ചിരിക്കും.',
+    mk_none: '<b>{b}</b> ന്റെ പണിക്കൂലി ഞങ്ങൾ ഇതുവരെ അളന്നിട്ടില്ല. ഇവയുടേത് അളന്നിട്ടുണ്ട്: {list}.',
+    mk_link: 'പണിക്കൂലി താരതമ്യം →',
+    mk_brand_h: '<b>{b}</b> ന്റെ സാധാരണ പണിക്കൂലി (യഥാർത്ഥ ഉൽപ്പന്നങ്ങളുടെ മധ്യമൂല്യം, സ്വർണവിലയുടെ %):',
+    mk_note: 'ഡിസൈൻ അനുസരിച്ച് മാറും; ബില്ലിൽ ഏറ്റവും കൂടുതൽ വിലപേശാവുന്ന ഭാഗം ഇതാണ്.',
+    mk_all: 'എല്ലാ ജ്വല്ലറികളും താരതമ്യം ചെയ്യൂ →',
+    mk_h: '<b>{c}</b> ന് കുറഞ്ഞ പണിക്കൂലി (യഥാർത്ഥ ഉൽപ്പന്നങ്ങളുടെ മധ്യമൂല്യം):',
+    mk_every: 'എല്ലാ ജ്വല്ലറികളും വിഭാഗങ്ങളും →',
+    off_none: 'ഇന്ന് <b>{b}</b> ന്റെ വെബ്സൈറ്റിൽ ഓഫറൊന്നും എഴുതിയിട്ടില്ല.',
+    off_see: 'ആർക്കൊക്കെ ഓഫറുണ്ടെന്ന് നോക്കൂ →',
+    off_brand_h: 'ഇന്ന് <b>{b}</b> ന്റെ വെബ്സൈറ്റിലെ ഓഫറുകൾ:',
+    off_page: 'അവരുടെ പേജ് ↗', off_all: 'എല്ലാ ജ്വല്ലറികളുടെയും ഓഫറുകൾ താരതമ്യം →',
+    off_h: 'ഓഫറിന്റെ യഥാർത്ഥ പരീക്ഷണം അന്തിമ വിലയാണ്. ഇന്ന് 10 ഗ്രാം 22K മോതിരം, ഓഫറിന് ശേഷം, GST ഉൾപ്പെടെ:',
+    off_tag: 'പണിക്കൂലിയിൽ {p}% കിഴിവ്',
+    off_count: 'ഇന്ന് {n} ജ്വല്ലറികളുടെ സൈറ്റുകളിൽ ഓഫറുകളുണ്ട്, ഉദാ. {list}.',
+    off_every: 'എല്ലാ ഓഫറുകളും, അവയുടെ യഥാർത്ഥ അർത്ഥവും →',
+    price_h: 'ഇന്ന് {who} ൽ {w} {k}:', price_who: 'ഏറ്റവും കുറഞ്ഞ ദേശീയ ജ്വല്ലറി ({b})',
+    price_gold: 'സ്വർണം ({g} ഗ്രാം × {p})', price_mk: 'പണിക്കൂലി (~{p}, {c})', price_typ: 'സാധാരണ', price_total: 'ആകെ',
+    price_nomk: 'പണിക്കൂലി ഉൾപ്പെടുത്തിയിട്ടില്ല — നിങ്ങളുടെ ഡിസൈനിന്റെ കൂലി ചേർക്കൂ (പലപ്പോഴും 8–25%).',
+    trend_none: 'ആവശ്യത്തിന് ചരിത്രം ഇനിയും ഇല്ല.', hist_link: 'സ്വർണവില ചരിത്രം →',
+    trend_h: '{k} വിപണി മധ്യവില: ഇന്ന് <b>{p}/ഗ്രാം</b>.',
+    vs1: 'തലേ ദിവസത്തേക്കാൾ', vs7: '7 ദിവസം മുമ്പത്തേക്കാൾ', vs30: '30 ദിവസം മുമ്പത്തേക്കാൾ',
+    trend_note: 'ഇവ കഴിഞ്ഞ മാറ്റങ്ങളാണ്, പ്രവചനമല്ല — നാളത്തെ വില ആർക്കും ഉറപ്പിച്ച് പറയാനാവില്ല.',
+    full_hist: 'മുഴുവൻ ചരിത്രം →',
+    alerts: 'എല്ലാ ദിവസവും രാവിലെ ഏറ്റവും കുറഞ്ഞ ജ്വല്ലറിയും ഇന്നത്തെ വിലയും, സൗജന്യമായി — 22K നിങ്ങളുടെ വിലയിലേക്ക് താഴുന്ന ദിവസം ഒരു ഇമെയിലും.',
+    alerts_cta: 'സൗജന്യ ദൈനംദിന അലർട്ട് നേടൂ',
+    more: 'കൂടുതൽ വായിക്കൂ →', guide_h: 'ഈ ഗൈഡ് ഇതിനെക്കുറിച്ചാണ്: <b>{t}</b> — {d}', guide_link: 'ഗൈഡ് വായിക്കൂ →',
+    en_only: 'ഈ ഉത്തരം ഇപ്പോൾ ഇംഗ്ലീഷിലാണ്:', translated: 'നിങ്ങളുടെ ഉപകരണത്തിൽ തന്നെ വിവർത്തനം ചെയ്തത്',
+    ask_city: 'നിങ്ങൾ ഏത് നഗരത്തിലാണ്?',
+    silver: 'ഇപ്പോൾ ഞാൻ സ്വർണത്തെക്കുറിച്ച് മാത്രമേ പറയൂ — ജ്വല്ലറികളുടെ 22K, 24K, 18K വിലകൾ. വെള്ളി ഉടൻ വരുന്നു.',
+    hello: 'നമസ്കാരം! 🙏 ഞാൻ സോണ. സ്വർണം വാങ്ങുന്നതിനെക്കുറിച്ച് എന്തും ചോദിക്കൂ — {n} ജ്വല്ലറികളുടെ ഇന്നത്തെ വിലകൾ, നിങ്ങളുടെ നഗരം, പണിക്കൂലി, ഓഫറുകൾ, അല്ലെങ്കിൽ ഏത് തൂക്കത്തിന്റെയും വില.',
+    thanks: 'സന്തോഷം! മറ്റെന്തെങ്കിലും?',
+    about: 'ഞാൻ സോണ, MyGoldRates ന്റെ സഹായി. ഇന്നത്തെ യഥാർത്ഥ വിവരങ്ങളിൽ നിന്നാണ് ഞാൻ ഉത്തരം നൽകുന്നത് — {n} ജ്വല്ലറികളുടെ പ്രസിദ്ധീകരിച്ച വിലകൾ, യഥാർത്ഥ ഉൽപ്പന്നങ്ങളിൽ നിന്ന് അളന്ന പണിക്കൂലി, അവരുടെ വെബ്സൈറ്റിലെ ഓഫറുകൾ — അതിനാൽ ഒരു സംഖ്യയും ഊഹിക്കില്ല.',
+    unknown: 'ഇത് ഞാൻ ഇപ്പോഴും പഠിക്കുകയാണ് — നിങ്ങളുടെ ചോദ്യം കുറിച്ചെടുത്തു, ഉടൻ ശരിയായ ഉത്തരം ചേർക്കും. അതുവരെ, ഇവയിൽ എനിക്ക് നന്നായി സഹായിക്കാനാകും:',
+    nodata: 'ഇന്നത്തെ വിവരങ്ങൾ ലോഡ് ആയില്ല. ഇന്റർനെറ്റ് പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കൂ.',
+    no_voice: 'ഈ ഉപകരണത്തിൽ {l} ശബ്ദമില്ല, അതിനാൽ ഞാൻ എഴുതി ഉത്തരം നൽകാം.',
+    mic_denied: 'മൈക്ക് തടഞ്ഞിരിക്കുന്നു. ബ്രൗസർ ക്രമീകരണങ്ങളിൽ ഈ സൈറ്റിന് മൈക്ക് അനുവദിച്ച്, വീണ്ടും 🎤 അമർത്തൂ.',
+    mic_none: 'എനിക്ക് കേൾക്കാനായില്ല — 🎤 അമർത്തി വീണ്ടും സംസാരിക്കൂ.',
+    rupees: 'രൂപ', carat: 'കാരറ്റ്',
+    say_med: 'ഇന്ന് {k} സ്വർണം ഗ്രാമിന് ഏകദേശം {p}, {n} ജ്വല്ലറികളുടെ മധ്യവില. ഏറ്റവും കുറവ് {b} ൽ, {q}.',
+    say_brand: '{b} ൽ ഇന്ന് {k} സ്വർണം ഗ്രാമിന് {p}, {n} ജ്വല്ലറികളിൽ സ്ഥാനം {r}.',
+    say_city: '{c} ൽ ഇന്ന് കുറഞ്ഞ {k} {b} ൽ, ഗ്രാമിന് {p}.',
+    say_cheap: 'ഇന്ന് കുറഞ്ഞ {k} {b} ൽ, ഗ്രാമിന് {p}. 10 ഗ്രാമിന് ഏറ്റവും വിലകൂടിയ ജ്വല്ലറി {q} കൂടുതൽ വാങ്ങുന്നു.',
+    say_cmp: '{b} ആണ് കുറവ്, 10 ഗ്രാം {k} ന് {p} കുറവ്.',
+    say_mk_brand: '{b} ൽ {c} ന് സാധാരണ പണിക്കൂലി ഏകദേശം {p}.',
+    say_mk: '{c} ന് കുറഞ്ഞ പണിക്കൂലി {b} ൽ, ഏകദേശം {p}.',
+    say_mk_none: '{b} ന്റെ പണിക്കൂലി ഞങ്ങൾ ഇതുവരെ അളന്നിട്ടില്ല.',
+    say_off: 'ഓഫറുകൾ ചേർത്ത്, ഇന്ന് 10 ഗ്രാം 22 കാരറ്റ് മോതിരം ഏറ്റവും കുറവ് {b} ൽ: GST ഉൾപ്പെടെ {p}.',
+    say_off_brand: 'ഇന്ന് {b} ന്റെ വെബ്സൈറ്റിൽ {n} ഓഫറുകളുണ്ട്.',
+    say_off_none: 'ഇന്ന് {b} ന്റെ വെബ്സൈറ്റിൽ ഓഫറൊന്നുമില്ല.',
+    say_price: '{b} ൽ {w} {k} സ്വർണത്തിന് GST ഉൾപ്പെടെ ഏകദേശം {p} ആകും.',
+    say_trend_up: 'ഇന്ന് {k} സ്വർണം ഗ്രാമിന് {p}, തലേ ദിവസത്തേക്കാൾ {q} കൂടുതൽ.',
+    say_trend_dn: 'ഇന്ന് {k} സ്വർണം ഗ്രാമിന് {p}, തലേ ദിവസത്തേക്കാൾ {q} കുറവ്.',
+    say_trend_same: 'ഇന്ന് {k} സ്വർണം ഗ്രാമിന് {p}, തലേ ദിവസത്തെ പോലെ തന്നെ.',
+    u_g: '{n} ഗ്രാം', u_tola: '{n} തോല', u_sov: '{n} പവൻ', u_kg: '{n} കിലോ',
+    c_Ring: 'മോതിരം', c_Chain: 'മാല', c_Bangle: 'വള', c_Necklace: 'നെക്ലേസ്', c_Earrings: 'കമ്മൽ',
+    c_Mangalsutra: 'താലി', c_Pendant: 'ലോക്കറ്റ്', c_Bracelet: 'ബ്രേസ്ലെറ്റ്', c_Coin: 'നാണയം',
+    ch_cheap22: 'ഇന്ന് കുറഞ്ഞ 22K', ch_mycity: 'എന്റെ നഗരത്തിലെ വില', ch_tvk: 'തനിഷ്ക് അല്ലെങ്കിൽ കല്യാൺ',
+    ch_bestoff: 'ഇന്നത്തെ മികച്ച ഓഫർ', ch_p10chain: '10 ഗ്രാം 22K മാലയുടെ വില', ch_k22v24: '22K, 24K വ്യത്യാസം?',
+    ch_p10: '10 ഗ്രാം 22K വില', ch_afteroff: 'ഓഫറിന് ശേഷമുള്ള വില', ch_mkcmp: 'പണിക്കൂലി താരതമ്യം',
+    ch_goodmk: 'പണിക്കൂലിയിൽ 20% കിഴിവ് നല്ലതാണോ?', ch_whatmk: 'പണിക്കൂലി എന്നാൽ എന്ത്?', ch_alert: 'വില അലർട്ട് വെക്കൂ',
+    ch_goodtime: 'ഇപ്പോൾ വാങ്ങുന്നത് നല്ലതാണോ?', ch_rate: 'ഇന്നത്തെ സ്വർണവില', ch_another: 'മറ്റൊരു ജ്വല്ലറിയിൽ ഇതേ',
+    ch_bmk: '{b} പണിക്കൂലി', ch_boff: '{b} ഓഫറുകൾ'
+  };
+
+  root.SONA_STR = S;
+  if (typeof module !== 'undefined' && module.exports) module.exports = S;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* Sona's languages: understanding a question asked in an Indian language.
+ *
+ * Free and in the browser, like the rest of Sona. A question typed or spoken
+ * in Hindi, Marathi, Gujarati, Punjabi, Bengali, Kannada, Tamil, Telugu or
+ * Malayalam is turned into the plain words Sona's answer engine already
+ * knows ("सबसे सस्ता सोना" -> "cheapest gold"):
+ *
+ *   - everyday words (gold, rate, cheapest, making charge, offer, ring...)
+ *     come from a small word list per meaning, written in each script;
+ *   - names (jewellers, cities) are matched by sound: every Indian script is
+ *     spelled out in Latin letters and compared, loosely, with the names we
+ *     know - so "तनिष्क", "தனிஷ்க்" and "ತನಿಷ್ಕ್" all find Tanishq.
+ *
+ * The replies themselves are in sona_i18n.js.
+ */
+(function (root) {
+  'use strict';
+
+  var LANGS = [
+    { c: 'en', n: 'English', s: 'EN', bcp: 'en-IN' },
+    { c: 'hi', n: 'हिन्दी', s: 'हि', bcp: 'hi-IN' },
+    { c: 'mr', n: 'मराठी', s: 'म', bcp: 'mr-IN' },
+    { c: 'gu', n: 'ગુજરાતી', s: 'ગુ', bcp: 'gu-IN' },
+    { c: 'pa', n: 'ਪੰਜਾਬੀ', s: 'ਪੰ', bcp: 'pa-IN' },
+    { c: 'bn', n: 'বাংলা', s: 'বা', bcp: 'bn-IN' },
+    { c: 'kn', n: 'ಕನ್ನಡ', s: 'ಕ', bcp: 'kn-IN' },
+    { c: 'ta', n: 'தமிழ்', s: 'த', bcp: 'ta-IN' },
+    { c: 'te', n: 'తెలుగు', s: 'తె', bcp: 'te-IN' },
+    { c: 'ml', n: 'മലയാളം', s: 'മ', bcp: 'ml-IN' }
+  ];
+
+  // ------------------------------------------------- any script -> Latin
+  // The Indian scripts share one layout (each block is 128 code points with
+  // the same letter at the same offset), so one table spells all of them.
+  var BLOCKS = [[0x0900, 'deva'], [0x0980, 'beng'], [0x0A00, 'guru'], [0x0A80, 'gujr'],
+    [0x0B80, 'taml'], [0x0C00, 'telu'], [0x0C80, 'knda'], [0x0D00, 'mlym']];
+  var SCRIPT_LANG = { deva: 'hi', beng: 'bn', guru: 'pa', gujr: 'gu', taml: 'ta', telu: 'te', knda: 'kn', mlym: 'ml' };
+  // North Indian scripts drop the silent "a" ("सबसे" is sabse, not sabase).
+  var DROPS_A = { deva: 1, beng: 1, guru: 1, gujr: 1 };
+  var V = { 5: 'a', 6: 'aa', 7: 'i', 8: 'ii', 9: 'u', 10: 'uu', 11: 'ri', 12: 'li', 13: 'e', 14: 'e', 15: 'e', 16: 'ai',
+    17: 'o', 18: 'o', 19: 'o', 20: 'au', 114: 'e' };
+  var C = { 21: 'k', 22: 'kh', 23: 'g', 24: 'gh', 25: 'ng', 26: 'ch', 27: 'chh', 28: 'j', 29: 'jh', 30: 'ny',
+    31: 't', 32: 'th', 33: 'd', 34: 'dh', 35: 'n', 36: 't', 37: 'th', 38: 'd', 39: 'dh', 40: 'n', 41: 'n',
+    42: 'p', 43: 'ph', 44: 'b', 45: 'bh', 46: 'm', 47: 'y', 48: 'r', 49: 'r', 50: 'l', 51: 'l', 52: 'l',
+    53: 'v', 54: 'sh', 55: 'sh', 56: 's', 57: 'h', 88: 'q', 89: 'kh', 90: 'gh', 91: 'z', 92: 'r', 93: 'rh',
+    94: 'f', 95: 'y' };
+  var M = { 62: 'aa', 63: 'i', 64: 'ii', 65: 'u', 66: 'uu', 67: 'ri', 68: 'ri', 69: 'e', 70: 'e', 71: 'e', 72: 'ai',
+    73: 'o', 74: 'o', 75: 'o', 76: 'au', 87: 'u' };
+  var NUKTA = { k: 'q', j: 'z', ph: 'f', d: 'r', dh: 'rh' };
+
+  function scriptOf(cp) {
+    for (var i = 0; i < BLOCKS.length; i++) if (cp >= BLOCKS[i][0] && cp < BLOCKS[i][0] + 128) return BLOCKS[i];
+    return null;
+  }
+  function isIndic(s) { return /[ऀ-ൿ]/.test(s); }
+
+  function romWord(w) {
+    var syl = [], sc = null, pend = '';
+    for (var i = 0; i < w.length; i++) {
+      var cp = w.charCodeAt(i), b = scriptOf(cp), last = syl[syl.length - 1];
+      if (!b) { if (/[a-z0-9]/i.test(w[i])) syl.push({ c: w[i].toLowerCase(), v: '', lat: 1 }); continue; }
+      sc = sc || b[1];
+      var o = cp - b[0];
+      if (o >= 102 && o <= 111) { syl.push({ c: String(o - 102), v: '', lat: 1 }); continue; }
+      if (C[o] !== undefined) {
+        if (last && last.hal) { last.c += C[o]; last.hal = false; last.v = null; last.conj = true; }
+        else syl.push({ c: pend + C[o], v: null });
+        pend = ''; continue;
+      }
+      if (M[o] !== undefined) { if (last && !last.lat) { last.v = M[o]; last.hal = false; } continue; }
+      if (V[o] !== undefined) { syl.push({ c: '', v: V[o] }); continue; }
+      if (o === 77) { if (last && last.v === null) { last.v = ''; last.hal = true; } continue; }        // virama
+      if (o === 60) { if (last && NUKTA[last.c]) last.c = NUKTA[last.c]; continue; }                     // nukta
+      if (o === 1 || o === 2 || o === 112) { if (last) last.coda = (last.coda || '') + 'n'; continue; } // nasal
+      if (o === 3) { if (last) last.coda = (last.coda || '') + 'h'; continue; }
+      if (o >= 122 && o <= 127) {                                                                       // Malayalam chillu
+        var ch = 'nnrllk'[o - 122];
+        if (last) last.coda = (last.coda || '') + ch; else syl.push({ c: ch, v: '' });
+        continue;
+      }
+      if (o === 78) {
+        if (b[1] === 'mlym') pend = 'r';
+        else if (last) last.coda = (last.coda || '') + 't';                                              // Bengali khanda ta
+      }
+    }
+    if (DROPS_A[sc]) {
+      var n = syl.length;
+      var voiced = function (s) { return s.v === null ? !s.del : s.v !== ''; };
+      if (n > 1 && syl[n - 1].v === null && !syl[n - 1].conj && !syl[n - 1].coda) syl[n - 1].del = true;
+      for (var j = n - 2; j >= 1; j--) {
+        var s = syl[j];
+        if (s.v === null && !s.conj && !s.coda && s.c && voiced(syl[j - 1]) && syl[j + 1].c && !syl[j + 1].lat && voiced(syl[j + 1])) s.del = true;
+      }
+    }
+    return syl.map(function (s) { return s.c + (s.v === null ? (s.del ? '' : 'a') : s.v) + (s.coda || ''); }).join('');
+  }
+
+  // A loose spelling key, so "Tanishq" and "tanishka", or "Malabar" and
+  // Tamil's "malapaar", compare equal: no vowel length, no aspiration,
+  // voiced = unvoiced, doubled letters single.
+  function key(s) {
+    s = String(s).toLowerCase().replace(/[^a-z0-9]/g, '')
+      .replace(/x/g, 'ks').replace(/q/g, 'k').replace(/z/g, 'j').replace(/w/g, 'v').replace(/f/g, 'ph')
+      .replace(/c(?!h)/g, 'k');
+    s = s.replace(/([kgcjtdpbr])h/g, '$1').replace(/([kgcjtdpbr])h/g, '$1').replace(/sh/g, 's')
+      .replace(/ee|ii/g, 'i').replace(/oo|uu/g, 'u').replace(/aa/g, 'a').replace(/y/g, 'i')
+      .replace(/g/g, 'k').replace(/d/g, 't').replace(/b/g, 'p').replace(/n(?=[pm])/g, 'm')
+      .replace(/(.)\1+/g, '$1');
+    if (s.length > 3) s = s.replace(/a$/, '');
+    return s;
+  }
+
+  function lev(a, b) {
+    var d = [], i, j;
+    for (i = 0; i <= a.length; i++) d[i] = [i];
+    for (j = 1; j <= b.length; j++) d[0][j] = j;
+    for (i = 1; i <= a.length; i++)
+      for (j = 1; j <= b.length; j++)
+        d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    return d[a.length][b.length];
+  }
+  function common(a, b) { var i = 0; while (i < a.length && i < b.length && a[i] === b[i]) i++; return i; }
+
+  // ------------------------------------------------------- word list
+  // Meaning (the word the answer engine knows) -> the same idea in each
+  // script, with the usual inflected forms. Prefix-matched, so "सोन्याचा"
+  // finds "सोन्या".
+  var LEX = {
+    gold: 'सोना सोने सोनं सोन्या सोन्याचा सोन्याचे सोन्याची गोल्ड સોનું સોના સોનાનો સોનાના સોનાની ગોલ્ડ ਸੋਨਾ ਸੋਨੇ ਗੋਲਡ সোনা সোনার গোল্ড ಚಿನ್ನ ಚಿನ್ನದ ಬಂಗಾರ ಬಂಗಾರದ ಗೋಲ್ಡ್ தங்கம் தங்க தங்கத்தின் கோல்ட் బంగారం బంగారు గోల్డ్ സ്വർണം സ്വർണ്ണം സ്വർണ സ്വർണ്ണ ഗോൾഡ്',
+    rate: 'भाव दाम कीमत क़ीमत क़ीमत रेट रेट्स मूल्य दर किंमत ભાવ કિંમત દર રેટ ਭਾਅ ਰੇਟ ਕੀਮਤ ਮੁੱਲ দাম দর রেট ಬೆಲೆ ದರ ರೇಟ್ விலை விலைய ரேட் ధర ధరలు రేటు రేట్ വില വിലയ നിരക്ക് റേറ്റ്',
+    price: 'प्राइस कितना कितने कितनी किती કેટલા કેટલો કેટલું ਕਿੰਨਾ ਕਿੰਨੇ ਕਿੰਨੀ কত ಎಷ್ಟು எவ்வளவு ఎంత എത്ര',
+    today: 'आज आजचा आजचे आजची आजचं આજે આજનો આજનું આજના ਅੱਜ ਅਜ আজ আজকের ಇಂದು ಇಂದಿನ ಇವತ್ತು ಇವತ್ತಿನ இன்று இன்றைய ఈరోజు నేడు నేటి ഇന്ന് ഇന്നത്തെ',
+    cheapest: 'सस्ता सस्ते सस्ती सबसे-सस्ता कम स्वस्त स्वस्तात સસ્તું સસ્તો સસ્તા સસ્તી ਸਸਤਾ ਸਸਤੇ ਸਸਤੀ ਘੱਟ সস্তা সস্তায় কম ಕಡಿಮೆ ಅಗ್ಗ ಅಗ್ಗದ குறைவு குறைந்த குறைவான மலிவு மலிவான తక్కువ చౌక చౌకైన കുറഞ്ഞ കുറവ് വിലക്കുറവ്',
+    making: 'मेकिंग घड़ाई गढ़ाई घडाई बनवाई मजदूरी मजुरी मजूरी घडणावळ चार्ज चार्जेस ઘડામણ ઘડાઈ મેકિંગ મજૂરી ચાર્જ ਘੜਾਈ ਮੇਕਿੰਗ ਬਣਵਾਈ ਚਾਰਜ মজুরি মেকিং বানি চার্জ ಮೇಕಿಂಗ್ ಮಜೂರಿ ಚಾರ್ಜ್ செய்கூலி கூலி மேக்கிங் சார்ஜ் మేకింగ్ మజూరీ మజూరి తయారీ చార్జీ చార్జీలు ఛార్జీలు పణిక్కూలి പണിക്കൂലി പണിക്കുറവ് മേക്കിംഗ് മേക്കിങ് ചാർജ്',
+    wastage: 'सेदारम वेस्टेज சேதாரம் తరుగు ತರುಗು',
+    offer: 'ऑफर ऑफ़र ऑफर्स ऑफ़र्स ओफर छूट डिस्काउंट सवलत सूट ઑફર ઓફર ઑફર્સ ડિસ્કાઉન્ટ છૂટ ਆਫ਼ਰ ਆਫਰ ਛੋਟ ਡਿਸਕਾਊਂਟ অফার ছাড় ডিসকাউন্ট ಆಫರ್ ರಿಯಾಯಿತಿ ಡಿಸ್ಕೌಂಟ್ ஆஃபர் ஆபர் தள்ளுபடி சலுகை ఆఫర్ ఆఫర్లు డిస్కౌంట్ తగ్గింపు రాయితీ ഓഫർ ഓഫറ ഡിസ്കൗണ്ട് കിഴിവ്',
+    diwali: 'दिवाली दीवाली दिवाळी धनतेरस धनत्रयोदशी अक्षय દિવાળી ધનતેરસ ਦੀਵਾਲੀ দীপাবলি দিওয়ালি ধনতেরাস ದೀಪಾವಳಿ ಅಕ್ಷಯ தீபாவளி அட்சய దీపావళి అక్షయ ദീപാവലി അക്ഷയ',
+    yesterday: 'कल काल ગઈકાલ ગઈકાલે ਕੱਲ੍ਹ ਕੱਲ গতকাল ಮೊನ್ನೆ ನಿನ್ನೆ நேற்று నిన్న ഇന്നലെ',
+    trend: 'ट्रेंड इतिहास ટ્રેન્ડ ઇતિહાસ ਟ੍ਰੈਂਡ ইতিহাস ಟ್ರೆಂಡ್ ಇತಿಹಾಸ டிரெண்ட் வரலாறு ట్రెండ్ చరిత్ర ട്രെൻഡ് ചരിത്രം',
+    gram: 'ग्राम ग्रॅम ग्राम्स ગ્રામ ਗ੍ਰਾਮ গ্রাম ಗ್ರಾಂ ಗ್ರಾಮ್ ಗ್ರಾಮು கிராம் గ్రాములు గ్రాము గ్రాం ഗ്രാം ഗ്രാമിന്',
+    tola: 'तोला तोले तोळा तोळे તોલા તોલો ਤੋਲਾ ਤੋਲੇ ভরি তোলা ತೊಲ ತೊಲೆ தோலா తులం తులాలు തോല',
+    sovereign: 'पवन सॉवरेन பவுன் சவரன் ಪವನ್ పవను సవరన్ പവൻ പവന്',
+    kg: 'किलो કિલો ਕਿੱਲੋ কেজি ಕೆಜಿ கிலோ కిలో കിലോ',
+    carat: 'कैरेट कॅरेट केरेट कैरट કેરેટ ਕੈਰਟ ਕੈਰੇਟ ক্যারেট ಕ್ಯಾರೆಟ್ கேரட் காரட் క్యారెట్ కేరట్ കാരറ്റ് ക്യാരറ്റ്',
+    chain: 'चेन चैन साखळी ચેન ਚੇਨ চেন ಚೈನ್ செயின் சங்கிலி చైన్ గొలుసు ചെയിൻ',
+    necklace: 'हार नेकलेस હાર નેકલેસ ਹਾਰ ਨੈਕਲੇਸ হার নেকলেস ನೆಕ್ಲೇಸ್ ಹಾರ நெக்லஸ் ஆரம் నెక్లెస్ హారం നെക്ലേസ് മാല',
+    ring: 'अंगूठी अँगूठी अंगूठियां रिंग अंगठी વીંટી રિંગ ਮੁੰਦਰੀ ਅੰਗੂਠੀ আংটি ಉಂಗುರ ರಿಂಗ್ மோதிரம் ரிங் ఉంగరం ఉంగరాలు రింగ్ മോതിരം',
+    bangle: 'चूड़ी चूड़ियां कंगन कड़ा बांगडी बांगड्या चुडी બંગડી ਚੂੜੀ ਕੰਗਣ চুড়ি বালা ಬಳೆ வளையல் గాజులు గాజు വള വളകൾ',
+    earrings: 'झुमका झुमके बाली बालियां कानातले कुड्या ઝુમખા બુટ્ટી ਝੁਮਕੇ ਵਾਲੀਆਂ ঝুমকা দুল ಕಿವಿಯೋಲೆ ಓಲೆ ಜುಮ್ಕಿ கம்மல் ஜிமிக்கி தோடு చెవిపోగులు జుంకాలు కమ్మలు കമ്മൽ ജിമിക്കി',
+    mangalsutra: 'मंगलसूत्र मंगळसूत्र મંગળસૂત્ર ਮੰਗਲਸੂਤਰ মঙ্গলসূত্র ಮಂಗಳಸೂತ್ರ ತಾಳಿ ಮಾಂಗಲ್ಯ தாலி மாங்கல்யம் తాళి మంగళసూత్రం താലി',
+    pendant: 'पेंडेंट लॉकेट પેન્ડન્ટ ਪੈਂਡੈਂਟ লকেট ಪೆಂಡೆಂಟ್ டாலர் பெண்டன்ட் లాకెట్ పెండెంట్ ലോക്കറ്റ്',
+    bracelet: 'ब्रेसलेट બ્રેસલેટ ਬ੍ਰੇਸਲੈੱਟ ব্রেসলেট ಬ್ರೇಸ್ಲೆಟ್ பிரேஸ்லெட் బ్రేస్లెట్ ബ്രേസ്ലെറ്റ്',
+    coin: 'सिक्का सिक्के कॉइन नाणे નાણું સિક્કો સિક્કા ਸਿੱਕਾ ਸਿੱਕੇ কয়েন মুদ্রা ನಾಣ್ಯ காசு நாணயம் నాణెం కాయిన్ നാണയം കോയിൻ',
+    hello: 'नमस्ते नमस्कार हेलो हैलो નમસ્તે નમસ્કાર ਅਕਾਲ ਹੈਲੋ নমস্কার হ্যালো ನಮಸ್ಕಾರ ಹಲೋ வணக்கம் ஹலோ నమస్కారం హలో നമസ്കാരം ഹലോ',
+    thanks: 'धन्यवाद शुक्रिया थैंक्स आभार ધન્યવાદ આભાર ਧੰਨਵਾਦ ਸ਼ੁਕਰੀਆ ধন্যবাদ ಧನ್ಯವಾದ ಧನ್ಯವಾದಗಳು நன்றி ధన్యవాదాలు ధన్యవాదం നന്ദി',
+    silver: 'चांदी चाँदी ચાંદી ਚਾਂਦੀ রুপো রূপা রুপা ಬೆಳ್ಳಿ வெள்ளி వెండి വെള്ളി',
+    compare: 'तुलना बनाम फरक फ़र्क़ फर्क अंतर तफावत ફરક સરખામણી ਫ਼ਰਕ ਤੁਲਨਾ তুলনা তফাত পার্থক্য ಹೋಲಿಕೆ ವ್ಯತ್ಯಾಸ ஒப்பீடு வித்தியாசம் పోలిక తేడా താരതമ്യം വ്യത്യാസം',
+    or: 'या किंवा અથવા ਜਾਂ নাকি ಅಥವಾ அல்லது లేదా അല്ലെങ്കിൽ',
+    my: 'मेरे मेरा मेरी माझ्या माझे माझा મારા મારું ਮੇਰੇ ਮੇਰਾ আমার ನನ್ನ என் எனது నా എന്റെ',
+    city: 'शहर शहरात શહેર શહેરમાં ਸ਼ਹਿਰ শহর শহরে ನಗರ ನಗರದ ಊರು ಊರಿನ நகரம் நகரில் ஊர் ఊరు నగరం నగరంలో നഗരം നഗരത്തിലെ',
+    nearby: 'पास नज़दीक नजदीक जवळ પાસે નજીક ਨੇੜੇ কাছে ಹತ್ತಿರ அருகில் దగ్గర അടുത്ത്',
+    best: 'बढ़िया बेस्ट श्रेष्ठ सर्वोत्तम શ્રેષ્ઠ ਵਧੀਆ সেরা ಉತ್ತಮ சிறந்த ఉత్తమ മികച്ച',
+    alert: 'अलर्ट ઍલર્ટ અલર્ટ ਅਲਰਟ অ্যালার্ট ಅಲರ್ಟ್ அலர்ட் అలర్ట్ അലർട്ട്',
+    buy: 'खरीद ख़रीद खरीदना खरेदी ખરીદ ખરીદી ਖ਼ਰੀਦ ਖਰੀਦ কেনা কিনব ಖರೀದಿ வாங்க వాంగ కొనడం కొనాలా വാങ്ങ',
+    time: 'समय वेळ સમય ਸਮਾਂ সময় ಸಮಯ நேரம் సమయం സമയം',
+    where: 'कहाँ कहां कहा कुठे ક્યાં ਕਿੱਥੇ কোথায় ಎಲ್ಲಿ எங்கே ఎక్కడ എവിടെ',
+    vs: 'बनाम विरुद्ध',
+    // Little words that carry no meaning here; listed so they are never
+    // mistaken for a jeweller's name ("कहाँ" is not Khazana).
+    _: 'का की के को में मे है हैं हे था थी क्या से पर और भी तो ही कौन कौनसा सा वाला वाले आप मुझे बताओ बताइए बताएं चाहिए मिलेगा मिलता होगा रहा रही ' +
+       'आहे चा ची चे च्या ला ना काय मला सांगा आणि होता ' +
+       'છે નો ની નું ના માં શું મને કહો અને હતો ' +
+       'ਦਾ ਦੀ ਦੇ ਵਿੱਚ ਹੈ ਕੀ ਮੈਨੂੰ ਦੱਸੋ ਅਤੇ ' +
+       'কি কী এর আছে আমাকে বলুন এবং ' +
+       'ಏನು ಇದೆ ಹೇಳಿ ಮತ್ತು ನನಗೆ ' +
+       'என்ன உள்ளது சொல்லுங்கள் மற்றும் எனக்கு ' +
+       'ఏమిటి ఉంది చెప్పండి మరియు నాకు ' +
+       'എന്ത് ഉണ്ട് പറയൂ ഒപ്പം എനിക്ക്'
+  };
+  // Numbers, per language: the same word means different numbers in
+  // different languages (Tamil எட்டு is 8, Telugu ఏడు is 7), so only the
+  // asker's own are used.
+  var NUMS = {
+    hi: 'एक:1 दो:2 तीन:3 चार:4 पांच:5 पाँच:5 छह:6 छः:6 सात:7 आठ:8 नौ:9 दस:10 ग्यारह:11 बारह:12 पंद्रह:15 अठारह:18 बीस:20 बाईस:22 चौबीस:24 पच्चीस:25 पचास:50 सौ:100 आधा:0.5',
+    mr: 'एक:1 दोन:2 तीन:3 चार:4 पाच:5 सहा:6 सात:7 आठ:8 नऊ:9 दहा:10 अकरा:11 बारा:12 पंधरा:15 अठरा:18 वीस:20 बावीस:22 चोवीस:24 पंचवीस:25 पन्नास:50 शंभर:100 अर्धा:0.5',
+    gu: 'એક:1 બે:2 ત્રણ:3 ચાર:4 પાંચ:5 છ:6 સાત:7 આઠ:8 નવ:9 દસ:10 અગિયાર:11 બાર:12 પંદર:15 અઢાર:18 વીસ:20 બાવીસ:22 ચોવીસ:24 પચીસ:25 પચાસ:50 સો:100 અડધો:0.5',
+    pa: 'ਇੱਕ:1 ਇਕ:1 ਦੋ:2 ਤਿੰਨ:3 ਚਾਰ:4 ਪੰਜ:5 ਛੇ:6 ਸੱਤ:7 ਅੱਠ:8 ਨੌਂ:9 ਦਸ:10 ਬਾਰਾਂ:12 ਅਠਾਰਾਂ:18 ਵੀਹ:20 ਬਾਈ:22 ਚੌਵੀ:24 ਪੰਜਾਹ:50 ਸੌ:100',
+    bn: 'এক:1 দুই:2 তিন:3 চার:4 পাঁচ:5 ছয়:6 সাত:7 আট:8 দশ:10 বারো:12 আঠারো:18 কুড়ি:20 বাইশ:22 চব্বিশ:24 পঁচিশ:25 পঞ্চাশ:50 একশো:100',
+    kn: 'ಒಂದು:1 ಒಂದ:1 ಎರಡು:2 ಮೂರು:3 ನಾಲ್ಕು:4 ಐದು:5 ಆರು:6 ಏಳು:7 ಎಂಟು:8 ಒಂಬತ್ತು:9 ಹತ್ತು:10 ಹನ್ನೆರಡು:12 ಹದಿನೆಂಟು:18 ಇಪ್ಪತ್ತು:20 ಇಪ್ಪತ್ತೆರಡು:22 ಇಪ್ಪತ್ನಾಲ್ಕು:24 ಐವತ್ತು:50 ನೂರು:100',
+    ta: 'ஒன்று:1 ஒரு:1 இரண்டு:2 மூன்று:3 நான்கு:4 ஐந்து:5 ஆறு:6 ஏழு:7 எட்டு:8 ஒன்பது:9 பத்து:10 பன்னிரண்டு:12 பதினெட்டு:18 இருபது:20 இருபத்திரண்டு:22 இருபத்திநான்கு:24 இருபத்துநான்கு:24 ஐம்பது:50 நூறு:100',
+    te: 'ఒకటి:1 ఒక:1 రెండు:2 మూడు:3 నాలుగు:4 ఐదు:5 ఆరు:6 ఏడు:7 ఎనిమిది:8 తొమ్మిది:9 పది:10 పన్నెండు:12 పద్దెనిమిది:18 ఇరవై:20 ఇరవైరెండు:22 ఇరవైనాలుగు:24 యాభై:50 వంద:100',
+    ml: 'ഒന്ന്:1 ഒരു:1 രണ്ട്:2 മൂന്ന്:3 നാല്:4 അഞ്ച്:5 ആറ്:6 ഏഴ്:7 എട്ട്:8 ഒമ്പത്:9 പത്ത്:10 പന്ത്രണ്ട്:12 പതിനെട്ട്:18 ഇരുപത്:20 ഇരുപത്തിരണ്ട്:22 ഇരുപത്തിനാല്:24 അമ്പത്:50 നൂറ്:100'
+  };
+
+  // Words are looked up within their own script: in Latin letters Bengali
+  // কত ("how much") and Punjabi ਘੱਟ ("less") would read the same.
+  var EXACT = null, PREFIX = null, NUMK = {};
+  function scriptName(w) { var m = String(w).match(/[ऀ-ൿ]/); return m ? scriptOf(m[0].charCodeAt(0))[1] : ''; }
+  function compile() {
+    if (EXACT) return;
+    EXACT = {}; PREFIX = {};
+    Object.keys(LEX).forEach(function (tok) {
+      LEX[tok].split(/\s+/).forEach(function (w) {
+        var k = key(romWord(w.replace(/-/g, ''))), sc = scriptName(w);
+        if (!k) return;
+        if (!EXACT[sc + ':' + k]) EXACT[sc + ':' + k] = tok;
+        (PREFIX[sc] = PREFIX[sc] || []).push([k, tok]);
+      });
+    });
+    Object.keys(PREFIX).forEach(function (sc) { PREFIX[sc].sort(function (a, b) { return b[0].length - a[0].length; }); });
+    Object.keys(NUMS).forEach(function (l) {
+      NUMK[l] = {};
+      NUMS[l].split(/\s+/).forEach(function (p) { var kv = p.split(':'); NUMK[l][key(romWord(kv[0]))] = kv[1]; });
+    });
+  }
+  function lexPrefix(k, sc) {
+    var list = PREFIX[sc] || [];
+    for (var i = 0; i < list.length; i++) {
+      var e = list[i][0];
+      if (k.indexOf(e) === 0 && (e.length >= 4 || (e.length === 3 && k.length - e.length <= 2))) return list[i][1];
+    }
+    return null;
+  }
+
+  // Case endings, in key spelling: "मुंबईत", "சென்னையில்", "హైదరాబాద్‌లో".
+  var SUF = ['mathe', 'mate', 'mem', 'mam', 'man', 'ma', 'me', 'la', 'li', 'ali', 'il', 'ile', 'lil', 'lo', 'loni', 'ni', 'ne',
+    'na', 'nu', 're', 'ra', 'ke', 'ka', 'ki', 'ce', 'ca', 'ci', 'te', 'at', 't', 'e', 'ar', 'er', 'tu', 'vic', 'il', 'iil'];
+  function candidates(k) {
+    var out = [k];
+    SUF.forEach(function (s) { if (k.length - s.length >= 3 && k.slice(-s.length) === s) out.push(k.slice(0, -s.length)); });
+    if (/iat(il)?$/.test(k)) out.push(k.replace(/iat(il)?$/, 'e'));      // Marathi पुण्यात -> Pune
+    return out;
+  }
+  // The closest name (jeweller or city) to a spoken word: [word, score] or null.
+  function nameMatch(k, vocab) {
+    var best = null, bs = 9, cs = candidates(k);
+    vocab.forEach(function (v) {
+      var L = v[0].length;
+      cs.forEach(function (c, ci) {
+        var d;
+        if (c === v[0]) d = ci ? 0.2 : 0;
+        else if (L >= 4) {
+          var thr = L >= 8 ? 2 : L >= 5 ? 1 : 0;
+          if (thr && Math.abs(c.length - L) <= thr) { var e = lev(c, v[0]); if (e <= thr) d = e + (ci ? 0.2 : 0); }
+          if (d === undefined && L >= 5 && c.length >= L && common(c, v[0]) >= L - 1) d = 1.5;
+        }
+        if (d !== undefined && d < bs) { bs = d; best = v[1]; }
+      });
+    });
+    return best ? [best, bs] : null;
+  }
+  function vocabOf(words) {
+    var seen = {}, out = [];
+    words.forEach(function (w) {
+      w = String(w || '').toLowerCase();
+      if (w.length < 3 || /^(jewell?ers?|jewell?ery|jewels|gold|diamonds?|and|sons|the|of)$/.test(w)) return;
+      var k = key(w);
+      if (k.length >= 3 && !seen[k]) { seen[k] = 1; out.push([k, w]); }
+    });
+    return out;
+  }
+
+  var DIGITS = /[०-९০-৯੦-੯૦-૯௦-௯౦-౯೦-೯൦-൯]/g;
+  var MR = /(आहे|किती|काय|मध्ये|सोन्या|आजचा|आजचे|कुठे|माझ्या|स्वस्त|तोळ|आणि|ाचा|ाचे|ाची|्यात)/;
+  function detect(q, cur) {
+    var m = String(q).match(/[ऀ-ൿ]/);
+    if (!m) return null;
+    var b = scriptOf(m[0].charCodeAt(0));
+    if (b[1] === 'deva') return cur === 'mr' || MR.test(q) ? 'mr' : 'hi';
+    return SCRIPT_LANG[b[1]];
+  }
+
+  // A question in any script -> the words the answer engine knows.
+  // vocab: [key, word] for the jewellers and cities (vocabOf()).
+  function understand(q, vocab, lang) {
+    compile();
+    q = String(q || '').replace(/[​-‍]/g, '')
+      .replace(DIGITS, function (d) { return String((d.charCodeAt(0) - 0x66) % 16); })
+      .replace(/(\d)([ऀ-ൿ])/g, '$1 $2').replace(/([ऀ-ൿ])(\d)/g, '$1 $2');
+    var nums = NUMK[lang] || {}, out = [], indic = false;
+    q.split(/[\s,?!।॥;:()"“”‘’]+/).forEach(function (w) {
+      if (!w) return;
+      if (!isIndic(w)) { out.push(w.toLowerCase()); return; }
+      indic = true;
+      var k = key(romWord(w)), sc = scriptName(w);
+      if (nums[k]) { out.push(nums[k]); return; }
+      if (EXACT[sc + ':' + k]) { out.push(EXACT[sc + ':' + k]); return; }
+      var nm = nameMatch(k, vocab || []);
+      if (nm && nm[1] <= 1) { out.push(nm[0]); return; }
+      var lx = lexPrefix(k, sc);
+      if (lx) { out.push(lx); return; }
+      if (nm) out.push(nm[0]);
+    });
+    return { text: out.filter(function (w) { return w !== '_'; }).join(' '), indic: indic };
+  }
+
+  root.SONA_LANG = { LANGS: LANGS, romWord: romWord, key: key, detect: detect, understand: understand,
+    vocabOf: vocabOf, isIndic: isIndic, LEX: LEX };
+  if (typeof module !== 'undefined' && module.exports) module.exports = root.SONA_LANG;
+})(typeof window !== 'undefined' ? window : globalThis);
+
 /* Sona - the MyGoldRates jewellery assistant.
  *
  * Answers in the visitor's browser from /assistant.json, which the site build
@@ -10,14 +1234,38 @@
  * numbers) so the owner can see what people ask and approve answers for the
  * ones Sona could not handle; approved answers come back through the
  * knowledge file (data/assistant_answers.json in git).
+ *
+ * Voice and languages, also free: the browser's own speech recognition
+ * (tap the mic) and its own voices (read aloud), in English and nine Indian
+ * languages. A question in an Indian script is turned into the words this
+ * engine knows by sona_lang.js; replies come from sona_i18n.js. The build
+ * puts all three in one file, /assistant.js.
  */
 (function () {
   if (window.__sona) return; window.__sona = 1;
-  if (/^\/(analytics|unsubscribe|404)(\.html)?\/?$/.test(location.pathname)) return;
+  var TEST = !!window.__SONA_TEST;
+  if (!TEST && /^\/(analytics|unsubscribe|404)(\.html)?\/?$/.test(location.pathname)) return;
 
   var SB = (window.GR_SB_URL || '').replace(/\/$/, ''), KEY = window.GR_SB_KEY || '';
   var KB = null, kbWait = null, opened = false, lastCity = null;
   try { lastCity = localStorage.getItem('sona_city'); } catch (_) {}
+  var LG = window.SONA_LANG, STR = window.SONA_STR || {};
+  var LANG = 'en', RL = 'en';             // chosen language; the language of this reply
+  try { LANG = localStorage.getItem('sona_lang') || ''; } catch (_) {}
+  if (!STR[LANG]) {
+    LANG = 'en';
+    (navigator.languages || [navigator.language || '']).some(function (l) {
+      var c = String(l).slice(0, 2).toLowerCase();
+      if (STR[c] && c !== 'en') { LANG = c; return true; }
+      return false;
+    });
+  }
+  RL = LANG;
+  // Text in the reply language, falling back to English: t('city_h', {c: 'Pune'}).
+  function fill(s, v) { return String(s).replace(/\{(\w+)\}/g, function (_, n) { return v && v[n] != null ? v[n] : ''; }); }
+  function t(k, v) { return fill((STR[RL] && STR[RL][k]) || (STR.en && STR.en[k]) || k, v); }
+  function en(k, v) { return fill((STR.en && STR.en[k]) || k, v); }
+  function langName(c) { var l = (LG ? LG.LANGS : []).filter(function (x) { return x.c === c; })[0]; return l ? l.n : c; }
 
   // ------------------------------------------------------------ helpers
   function $(s, r) { return (r || document).querySelector(s); }
@@ -26,7 +1274,12 @@
   function pct(n) { return (Math.round(n * 10) / 10).toLocaleString('en-IN') + '%'; }
   var K = { '24K': 1, '22K': 22 / 24, '18K': 18 / 24, '14K': 14 / 24 };
   function rate(b, k) { return b.r24 * K[k]; }
-  function track(t) { try { if (window.GR_TRACK) window.GR_TRACK('click_events', { page: location.pathname, target: 'sona:' + t, session_id: window.GR_SID || '' }); } catch (_) {} }
+  // For speaking: "12,879 rupees", "22 carat".
+  function sInr(n) { return Math.round(n).toLocaleString('en-IN') + ' ' + t('rupees'); }
+  function sK(k) { return String(k).replace('K', '') + ' ' + t('carat'); }
+  function catName(c) { return (STR[RL] && STR[RL]['c_' + c]) || (STR.en && STR.en['c_' + c]) || String(c).toLowerCase(); }
+  function wLabel(w) { return t('u_' + w.u, { n: w.n }); }
+  function track(what) { try { if (window.GR_TRACK) window.GR_TRACK('click_events', { page: location.pathname, target: 'sona:' + what, session_id: window.GR_SID || '' }); } catch (_) {} }
   function rpc(fn, body) {
     if (!SB || !KEY) return Promise.resolve(null);
     return fetch(SB + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(body) })
@@ -45,7 +1298,12 @@
   // ------------------------------------------------------- understanding
   var CITY_ALIAS = { bangalore: 'bengaluru', bombay: 'mumbai', calcutta: 'kolkata', madras: 'chennai', gurgaon: 'gurugram', vizag: 'visakhapatnam', mysore: 'mysuru', trivandrum: 'thiruvananthapuram', calicut: 'kozhikode', cochin: 'kochi', ernakulam: 'kochi', baroda: 'vadodara', pondicherry: 'puducherry', benaras: 'varanasi', banaras: 'varanasi', poona: 'pune', mangalore: 'mangaluru', hubli: 'hubballi', 'new delhi': 'delhi', ncr: 'delhi' };
   var BRAND_EXTRA = { tbz: 'tbz', 'pn gadgil and sons': 'pngsons', 'png sons': 'pngsons', 'pn gadgil & sons': 'pngsons', 'pn gadgil': 'png', png: 'png', gadgil: 'png', whp: 'whp', 'waman hari': 'whp', ckc: 'ckc', krishniah: 'ckc', 'pc chandra': 'pcchandra', grt: 'grt', avr: 'avr', nac: 'nac', 'jos alukkas': 'josalukkas', joyalukkas: 'joyalukkas', 'joy alukkas': 'joyalukkas' };
-  var aliases = [], cityIdx = [];
+  // Spoken names that are not how the site spells them.
+  var SPOKEN = { dilli: 'delhi', bambai: 'mumbai', bambay: 'mumbai', kalkatta: 'kolkata', madras: 'chennai', banglore: 'bengaluru',
+    amdavad: 'ahmedabad', vadodra: 'vadodara', koyambuthur: 'coimbatore', kovai: 'coimbatore', trichy: 'tiruchirappalli',
+    tiruchi: 'tiruchirappalli', thiruvananthapuram: 'thiruvananthapuram', kashi: 'varanasi', prayagraj: 'allahabad',
+    gurgaon: 'gurugram', bhagyanagar: 'hyderabad', belgaum: 'belagavi', vishakhapatnam: 'visakhapatnam', kozhikkode: 'kozhikode' };
+  var aliases = [], cityIdx = [], VOCAB = [];
   function prep(d) {
     aliases = [];
     d.brands.forEach(function (b) {
@@ -56,6 +1314,14 @@
     Object.keys(BRAND_EXTRA).forEach(function (a) { if (d.brands.some(function (b) { return b.s === BRAND_EXTRA[a]; })) aliases.push([a, BRAND_EXTRA[a]]); });
     aliases.sort(function (x, y) { return y[0].length - x[0].length; });     // longest first: "pn gadgil & sons" before "pn gadgil"
     cityIdx = d.cities.map(function (c) { return [c.n.toLowerCase(), c]; }).sort(function (x, y) { return y[0].length - x[0].length; });
+    // Names to match by sound in a question asked in an Indian script.
+    if (LG) {
+      var words = [];
+      aliases.forEach(function (a) { words = words.concat(a[0].split(/[\s&]+/)); });
+      d.cities.forEach(function (c) { words = words.concat(c.n.toLowerCase().split(/\s+/)); });
+      VOCAB = LG.vocabOf(words.concat(Object.keys(CITY_ALIAS)));
+      Object.keys(SPOKEN).forEach(function (s) { VOCAB.push([LG.key(s), SPOKEN[s]]); });
+    }
   }
   function norm(q) {
     return (' ' + q.toLowerCase() + ' ')
@@ -79,11 +1345,11 @@
   }
   function karatIn(t) { var m = t.match(/\b(24|22|18|14)k\b/); return m ? m[1] + 'K' : null; }
   function weightIn(t) {
-    var m = t.match(/(\d+(?:\.\d+)?)\s*(?:g|gm|gms|gram|grams|gr)\b/); if (m) return { g: +m[1], label: m[1] + ' g' };
-    m = t.match(/(\d+(?:\.\d+)?)\s*(?:tola|tolas|tole)\b/); if (m) return { g: +m[1] * 11.664, label: m[1] + ' tola' };
-    m = t.match(/\b(?:a|one|1)\s*tola\b/); if (m) return { g: 11.664, label: '1 tola' };
-    m = t.match(/(\d+(?:\.\d+)?)\s*(?:sovereign|sovereigns|pavan|pavun|pawan)\b/); if (m) return { g: +m[1] * 8, label: m[1] + ' sovereign' };
-    m = t.match(/(\d+(?:\.\d+)?)\s*(?:kg|kilo)\b/); if (m) return { g: +m[1] * 1000, label: m[1] + ' kg' };
+    var m = t.match(/(\d+(?:\.\d+)?)\s*(?:g|gm|gms|gram|grams|gr)\b/); if (m) return { g: +m[1], n: m[1], u: 'g' };
+    m = t.match(/(\d+(?:\.\d+)?)\s*(?:tola|tolas|tole)\b/); if (m) return { g: +m[1] * 11.664, n: m[1], u: 'tola' };
+    m = t.match(/\b(?:a|one|1)\s*tola\b/); if (m) return { g: 11.664, n: '1', u: 'tola' };
+    m = t.match(/(\d+(?:\.\d+)?)\s*(?:sovereign|sovereigns|pavan|pavun|pawan)\b/); if (m) return { g: +m[1] * 8, n: m[1], u: 'sov' };
+    m = t.match(/(\d+(?:\.\d+)?)\s*(?:kg|kilo)\b/); if (m) return { g: +m[1] * 1000, n: m[1], u: 'kg' };
     return null;
   }
   var CATS = { ring: 'Ring', rings: 'Ring', chain: 'Chain', chains: 'Chain', bangle: 'Bangle', bangles: 'Bangle', kada: 'Bangle', necklace: 'Necklace', haar: 'Necklace', earring: 'Earrings', earrings: 'Earrings', jhumka: 'Earrings', mangalsutra: 'Mangalsutra', pendant: 'Pendant', bracelet: 'Bracelet', coin: 'Coin', coins: 'Coin' };
@@ -103,12 +1369,17 @@
   };
 
   // ------------------------------------------------------------ answers
-  // Each returns {html, chips?, intent}. html is built from KB values only.
+  // Each returns {html, say?, chips?, intent}. html is built from KB values
+  // only; say is the same answer in a sentence or two, for reading aloud.
   function natBrands() { return KB.brands.filter(function (b) { return b.nat; }); }
   function ranked(list, k) { return list.slice().sort(function (a, b) { return a.r24 - b.r24; }); }
   function rankOf(b, list) { var r = ranked(list); for (var i = 0; i < r.length; i++) if (r[i].s === b.s) return i + 1; return null; }
-  function link(u, t) { return '<a href="' + esc(u) + '">' + t + '</a>'; }
-  function src() { return '<div class="sn-src">Today’s rates from ' + KB.brands.length + ' jewellers, before GST · ' + esc(KB.date) + '</div>'; }
+  function link(u, tx) { return '<a href="' + esc(u) + '">' + tx + '</a>'; }
+  function src() { return '<div class="sn-src">' + t('src', { n: KB.brands.length, d: esc(KB.date) }) + '</div>'; }
+  // A suggestion chip: shown in the reply language, asked in English.
+  function chip(k, v) { return { l: t('ch_' + k, v), q: en('ch_' + k, v) }; }
+  function chips(keys) { return keys.map(function (k) { return chip(k); }); }
+  function suggest() { return chips(SUGGEST); }
   function cityBrands(c) {
     var loc = (c && c.loc) || [];
     return KB.brands.filter(function (b) { return b.nat || loc.indexOf(b.s) > -1; });
@@ -118,167 +1389,204 @@
       return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + (b.u ? link(b.u, esc(b.n)) : esc(b.n)) + (b.nat ? '' : ' <em>local</em>') + '</span><span class="sn-v">' + inr(rate(b, k)) + '<small>/g</small></span></div>';
     }).join('') + '</div>';
   }
+  function tiles(m, k) {
+    return '<div class="sn-tiles">' + ['24K', '22K', '18K'].map(function (x) {
+      return '<div' + (x === k ? ' class="on"' : '') + '><b>' + inr(m[x]) + '</b><span>' + x + ' /g</span></div>';
+    }).join('') + '</div>';
+  }
 
   function aMedian(k) {
-    var m = KB.med, list = ranked(natBrands());
-    var low = list[0];
-    return { intent: 'rate', html: '<p>Gold rate in India today, the middle of ' + KB.brands.length + ' jewellers:</p>' +
-      '<div class="sn-tiles"><div><b>' + inr(m['24K']) + '</b><span>24K /g</span></div><div class="on"><b>' + inr(m['22K']) + '</b><span>22K /g</span></div><div><b>' + inr(m['18K']) + '</b><span>18K /g</span></div></div>' +
-      '<p>Lowest 22K among national jewellers: <b>' + esc(low.n) + '</b> at <b>' + inr(rate(low, '22K')) + '/g</b>.</p>' + src(),
-      chips: ['Cheapest 22K today', 'Gold rate in my city', 'Price of 10 g 22K'] };
+    k = k || '22K';
+    var m = KB.med, low = ranked(natBrands())[0];
+    return { intent: 'rate', html: '<p>' + t('med_h', { n: KB.brands.length }) + '</p>' + tiles(m, k) +
+      '<p>' + t('med_low', { b: esc(low.n), p: inr(rate(low, '22K')) }) + '</p>' + src(),
+      say: t('say_med', { k: sK(k), p: sInr(m[k]), n: KB.brands.length, b: low.n, q: sInr(rate(low, k)) }),
+      chips: chips(['cheap22', 'mycity', 'p10']) };
   }
   function aBrand(b, k) {
     k = k || '22K';
     var list = b.nat ? natBrands() : KB.brands, r = rankOf(b, list), n = list.length;
     var diff = rate(b, k) - KB.med[k];
-    var h = '<p><b>' + esc(b.n) + '</b> today:</p><div class="sn-tiles"><div' + (k === '24K' ? ' class="on"' : '') + '><b>' + inr(rate(b, '24K')) + '</b><span>24K /g</span></div><div' + (k === '22K' ? ' class="on"' : '') + '><b>' + inr(rate(b, '22K')) + '</b><span>22K /g</span></div><div' + (k === '18K' ? ' class="on"' : '') + '><b>' + inr(rate(b, '18K')) + '</b><span>18K /g</span></div></div>' +
-      '<p>That’s <b>#' + r + ' of ' + n + '</b> ' + (b.nat ? 'national jewellers' : 'jewellers') + ' today — ' + (Math.abs(diff) < 1 ? 'right at' : inr(Math.abs(diff)) + '/g ' + (diff < 0 ? 'below' : 'above')) + ' the market middle for ' + k + '.</p>';
-    if (b.mk) h += '<p>Usual making charges: ' + Object.keys(b.mk).map(function (c) { return esc(c.toLowerCase()) + ' ' + pct(b.mk[c]); }).join(', ') + '.</p>';
-    if (b.off && b.off.length) h += '<p>Offer on their site: <b>' + esc(b.off[0].h) + '</b>.</p>';
-    if (!b.nat && b.st) h += '<p class="sn-dim">Sells in ' + esc(b.st.join(', ')) + '.</p>';
-    if (b.u) h += '<p>' + link(b.u, esc(b.n) + '’s 30-day rates →') + '</p>';
-    return { intent: 'rate_brand', html: h + src(), chips: [b.n.split(' ')[0] + ' making charges', b.n.split(' ')[0] + ' offers', 'Cheapest 22K today'] };
+    var rel = Math.abs(diff) < 1 ? t('rel_at', { k: k }) : t(diff < 0 ? 'rel_below' : 'rel_above', { k: k, p: inr(Math.abs(diff)) });
+    var h = '<p>' + t('brand_h', { b: esc(b.n) }) + '</p>' + tiles({ '24K': rate(b, '24K'), '22K': rate(b, '22K'), '18K': rate(b, '18K') }, k) +
+      '<p>' + t('brand_rank', { r: r, n: n, rel: rel }) + '</p>';
+    if (b.mk) h += '<p>' + t('brand_mk', { list: Object.keys(b.mk).map(function (c) { return esc(catName(c)) + ' ' + pct(b.mk[c]); }).join(', ') }) + '</p>';
+    if (b.off && b.off.length) h += '<p>' + t('brand_off', { o: esc(b.off[0].h) }) + '</p>';
+    if (!b.nat && b.st) h += '<p class="sn-dim">' + t('brand_st', { s: esc(b.st.join(', ')) }) + '</p>';
+    if (b.u) h += '<p>' + link(b.u, t('brand_link', { b: esc(b.n) })) + '</p>';
+    var nm = b.n.split(' ')[0];
+    return { intent: 'rate_brand', html: h + src(), say: t('say_brand', { b: b.n, k: sK(k), p: sInr(rate(b, k)), r: r, n: n }),
+      chips: [chip('bmk', { b: nm }), chip('boff', { b: nm }), chip('cheap22')] };
   }
   function aCity(c, k) {
     k = k || '22K';
     lastCity = c.n; try { localStorage.setItem('sona_city', c.n); } catch (_) {}
     var list = ranked(cityBrands(c)).slice(0, 6), locals = (c.loc || []).length;
-    return { intent: 'rate_city', html: '<p>Cheapest ' + k + ' for <b>' + esc(c.n) + '</b> today' + (locals ? ' (national jewellers plus ' + locals + ' that sell in ' + esc(c.st) + ')' : ' (national jewellers)') + ':</p>' + table(list, k) +
-      '<p>' + link(c.u, 'Full board for ' + esc(c.n) + ' →') + '</p>' + src(),
-      chips: ['Price of 10 g 22K', 'Best offer today', '22K vs 24K?'] };
+    var note = locals ? t('city_loc', { l: locals, s: esc(c.st) }) : t('city_nat');
+    return { intent: 'rate_city', html: '<p>' + t('city_h', { k: k, c: esc(c.n), note: note }) + '</p>' + table(list, k) +
+      '<p>' + link(c.u, t('city_link', { c: esc(c.n) })) + '</p>' + src(),
+      say: t('say_city', { c: c.n, k: sK(k), b: list[0].n, p: sInr(rate(list[0], k)) }),
+      chips: chips(['p10', 'bestoff', 'k22v24']) };
   }
   function aCheapest(k, c) {
     if (c) return aCity(c, k);
     k = k || '22K';
     var list = ranked(natBrands()).slice(0, 6), hi = ranked(natBrands()).slice(-1)[0];
     var gap = (rate(hi, k) - rate(list[0], k)) * 10;
-    return { intent: 'cheapest', html: '<p>Cheapest ' + k + ' among national jewellers today:</p>' + table(list, k) +
-      '<p>The gap from cheapest to dearest is <b>' + inr(gap) + '</b> on 10 g — worth checking before you buy.</p>' + src(),
-      chips: ['Gold rate in my city', 'Price after offers', 'Making charges compared'] };
+    return { intent: 'cheapest', html: '<p>' + t('cheap_h', { k: k }) + '</p>' + table(list, k) +
+      '<p>' + t('cheap_gap', { p: inr(gap) }) + '</p>' + src(),
+      say: t('say_cheap', { k: sK(k), b: list[0].n, p: sInr(rate(list[0], k)), q: sInr(gap) }),
+      chips: chips(['mycity', 'afteroff', 'mkcmp']) };
   }
   function aCompare(bs, k) {
     k = k || '22K';
-    var h = '<p>Side by side today (' + k + '):</p><div class="sn-cmp">' + bs.slice(0, 3).map(function (b) {
+    var h = '<p>' + t('cmp_h', { k: k }) + '</p><div class="sn-cmp">' + bs.slice(0, 3).map(function (b) {
       return '<div><div class="sn-cn">' + esc(b.n) + '</div><b>' + inr(rate(b, k)) + '<small>/g</small></b>' +
-        '<span>' + inr(rate(b, k) * 10) + ' for 10 g</span>' +
-        (b.mk ? '<span>Making ~' + pct(b.mk.Ring || b.mk[Object.keys(b.mk)[0]]) + '</span>' : '<span class="sn-dim">Making: not measured</span>') +
+        '<span>' + t('cmp_10', { p: inr(rate(b, k) * 10) }) + '</span>' +
+        (b.mk ? '<span>' + t('cmp_mk', { p: pct(b.mk.Ring || b.mk[Object.keys(b.mk)[0]]) }) + '</span>' : '<span class="sn-dim">' + t('cmp_nomk') + '</span>') +
         (b.off && b.off.length ? '<span class="sn-off">' + esc(b.off[0].h) + '</span>' : '') + '</div>';
     }).join('') + '</div>';
     var s = bs.slice(0, 3).sort(function (a, b) { return a.r24 - b.r24; });
-    h += '<p><b>' + esc(s[0].n) + '</b> has the lower ' + k + ' rate by <b>' + inr((rate(s[s.length - 1], k) - rate(s[0], k)) * 10) + '</b> on 10 g. The final bill also depends on the making charge for the design you pick.</p>';
-    return { intent: 'compare', html: h + src(), chips: ['Price after offers', 'Making charges compared', 'Best offer today'] };
+    var gap = (rate(s[s.length - 1], k) - rate(s[0], k)) * 10;
+    h += '<p>' + t('cmp_win', { b: esc(s[0].n), k: k, p: inr(gap) }) + '</p>';
+    return { intent: 'compare', html: h + src(), say: t('say_cmp', { b: s[0].n, p: sInr(gap), k: sK(k) }),
+      chips: chips(['afteroff', 'mkcmp', 'bestoff']) };
   }
-  function aMaking(bs, cat) {
+  function aMaking(bs, ct) {
     var withMk = KB.brands.filter(function (b) { return b.mk; });
     if (bs.length) {
       var b = bs[0];
-      if (!b.mk) return { intent: 'making', html: '<p>We haven’t measured <b>' + esc(b.n) + '</b>’s making charges yet. We have them for ' + withMk.map(function (x) { return esc(x.n); }).join(', ') + '.</p><p>' + link('/making-charges-comparison', 'Making charges compared →') + '</p>' };
-      return { intent: 'making', html: '<p><b>' + esc(b.n) + '</b>’s usual making charges (median of real products, % of gold value):</p><div class="sn-list">' +
-        Object.keys(b.mk).map(function (c) { return '<div class="sn-row"><span class="sn-nm">' + esc(c) + '</span><span class="sn-v">' + pct(b.mk[c]) + '</span></div>'; }).join('') + '</div>' +
-        '<p class="sn-dim">Varies by design; it’s the most negotiable part of the bill.</p><p>' + link('/making-charges-comparison', 'Compare all jewellers →') + '</p>',
-        chips: [b.n.split(' ')[0] + ' offers', 'Price after offers', 'Cheapest 22K today'] };
+      if (!b.mk) return { intent: 'making', html: '<p>' + t('mk_none', { b: esc(b.n), list: withMk.map(function (x) { return esc(x.n); }).join(', ') }) + '</p><p>' + link('/making-charges-comparison', t('mk_link')) + '</p>',
+        say: t('say_mk_none', { b: b.n }) };
+      var c1 = ct && b.mk[ct] != null ? ct : (b.mk.Ring != null ? 'Ring' : Object.keys(b.mk)[0]);
+      return { intent: 'making', html: '<p>' + t('mk_brand_h', { b: esc(b.n) }) + '</p><div class="sn-list">' +
+        Object.keys(b.mk).map(function (c) { return '<div class="sn-row"><span class="sn-nm">' + esc(catName(c)) + '</span><span class="sn-v">' + pct(b.mk[c]) + '</span></div>'; }).join('') + '</div>' +
+        '<p class="sn-dim">' + t('mk_note') + '</p><p>' + link('/making-charges-comparison', t('mk_all')) + '</p>',
+        say: t('say_mk_brand', { b: b.n, c: catName(c1), p: pct(b.mk[c1]) }),
+        chips: [chip('boff', { b: b.n.split(' ')[0] }), chip('afteroff'), chip('cheap22')] };
     }
-    var c = cat && cat !== 'Coin' ? cat : 'Ring';
+    var c = ct && ct !== 'Coin' ? ct : 'Ring';
     var rows = withMk.filter(function (b) { return b.mk[c] != null; }).sort(function (a, b) { return a.mk[c] - b.mk[c]; });
     if (!rows.length) { c = 'Ring'; rows = withMk.filter(function (b) { return b.mk.Ring != null; }).sort(function (a, b) { return a.mk.Ring - b.mk.Ring; }); }
-    return { intent: 'making', html: '<p>Lowest making charges on a <b>' + esc(c.toLowerCase()) + '</b> (median of real products):</p><div class="sn-list">' +
+    return { intent: 'making', html: '<p>' + t('mk_h', { c: esc(catName(c)) }) + '</p><div class="sn-list">' +
       rows.slice(0, 6).map(function (b, i) { return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + esc(b.n) + '</span><span class="sn-v">' + pct(b.mk[c]) + '</span></div>'; }).join('') + '</div>' +
-      '<p>' + link('/making-charges-comparison', 'Every jeweller and category →') + '</p>',
-      chips: ['Price after offers', 'Best offer today', 'What are making charges?'] };
+      '<p>' + link('/making-charges-comparison', t('mk_every')) + '</p>',
+      say: rows.length ? t('say_mk', { c: catName(c), b: rows[0].n, p: pct(rows[0].mk[c]) }) : '',
+      chips: chips(['afteroff', 'bestoff', 'whatmk']) };
   }
   function aOffers(bs) {
     if (bs.length) {
       var b = bs[0];
-      if (!b.off || !b.off.length) return { intent: 'offers', html: '<p>No offer is published as text on <b>' + esc(b.n) + '</b>’s website today. ' + link('/gold-offers-today', 'See who has offers →') + '</p>' };
-      return { intent: 'offers', html: '<p>Offers on <b>' + esc(b.n) + '</b>’s website today:</p>' + b.off.map(function (o) {
-        return '<div class="sn-card"><b>' + esc(o.h) + '</b><q>' + esc(o.t) + '</q><p>' + o.m + '</p><a href="' + esc(o.u) + '" target="_blank" rel="nofollow noopener">Their page ↗</a></div>';
-      }).join('') + '<p>' + link('/gold-offers-today', 'All jewellers’ offers compared →') + '</p>', chips: ['Price after offers', 'Cheapest 22K today'] };
+      if (!b.off || !b.off.length) return { intent: 'offers', html: '<p>' + t('off_none', { b: esc(b.n) }) + ' ' + link('/gold-offers-today', t('off_see')) + '</p>',
+        say: t('say_off_none', { b: b.n }) };
+      return { intent: 'offers', html: '<p>' + t('off_brand_h', { b: esc(b.n) }) + '</p>' + b.off.map(function (o) {
+        return '<div class="sn-card"><b>' + esc(o.h) + '</b><q>' + esc(o.t) + '</q><p>' + o.m + '</p><a href="' + esc(o.u) + '" target="_blank" rel="nofollow noopener">' + t('off_page') + '</a></div>';
+      }).join('') + '<p>' + link('/gold-offers-today', t('off_all')) + '</p>',
+        say: t('say_off_brand', { b: b.n, n: b.off.length }), chips: chips(['afteroff', 'cheap22']) };
     }
     var rows = (KB.ring || []).slice(0, 5);
-    var h = '<p>The real test of an offer is the final price. A 10 g 22K ring today, after offers, with GST:</p>' +
-      (rows.length ? '<div class="sn-list">' + rows.map(function (r, i) { return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + esc(r.n) + (r.p ? ' <em>' + r.p + '% off making</em>' : '') + '</span><span class="sn-v">' + inr(r.a) + '</span></div>'; }).join('') + '</div>' : '');
+    var h = '<p>' + t('off_h') + '</p>' +
+      (rows.length ? '<div class="sn-list">' + rows.map(function (r, i) { return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + esc(r.n) + (r.p ? ' <em>' + t('off_tag', { p: r.p }) + '</em>' : '') + '</span><span class="sn-v">' + inr(r.a) + '</span></div>'; }).join('') + '</div>' : '');
     var withOff = KB.brands.filter(function (b) { return b.off && b.off.length; });
-    h += '<p>' + withOff.length + ' jewellers have offers on their sites today, e.g. ' + withOff.slice(0, 4).map(function (b) { return esc(b.n) + ': ' + esc(b.off[0].h); }).join('; ') + '.</p>' +
-      '<p>' + link('/gold-offers-today', 'Every offer, and what it really means →') + '</p>';
-    return { intent: 'offers', html: h, chips: ['Is 20% off making a good deal?', 'Making charges compared', 'Cheapest 22K today'] };
+    h += '<p>' + t('off_count', { n: withOff.length, list: withOff.slice(0, 4).map(function (b) { return esc(b.n) + ': ' + esc(b.off[0].h); }).join('; ') }) + '</p>' +
+      '<p>' + link('/gold-offers-today', t('off_every')) + '</p>';
+    return { intent: 'offers', html: h, say: rows.length ? t('say_off', { b: rows[0].n, p: sInr(rows[0].a) }) : '',
+      chips: chips(['goodmk', 'mkcmp', 'cheap22']) };
   }
-  function aPrice(w, k, bs, cat) {
-    k = k || (cat === 'Coin' ? '24K' : '22K');
-    var b = bs[0] || ranked(natBrands())[0], who = bs[0] ? esc(b.n) : 'the cheapest national jeweller (' + esc(b.n) + ')';
+  function aPrice(w, k, bs, ct) {
+    k = k || (ct === 'Coin' ? '24K' : '22K');
+    var b = bs[0] || ranked(natBrands())[0], who = bs[0] ? esc(b.n) : t('price_who', { b: esc(b.n) });
     var gold = rate(b, k) * w.g;
-    var mkp = b.mk ? (cat && b.mk[cat] != null ? b.mk[cat] : (b.mk.Ring != null ? b.mk.Ring : null)) : null;
-    if (cat === 'Coin' || (k === '24K' && !cat)) mkp = null;   // 24K: coins and bars
-    var mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03;
-    var h = '<p>' + esc(w.label) + ' of ' + k + ' at ' + who + ' today:</p><div class="sn-bill">' +
-      '<div><span>Gold (' + (Math.round(w.g * 1000) / 1000) + ' g × ' + inr(rate(b, k)) + ')</span><b>' + inr(gold) + '</b></div>' +
-      (mkp != null ? '<div><span>Making (~' + pct(mkp) + (cat && b.mk[cat] != null ? ', ' + esc(cat.toLowerCase()) : ', typical') + ')</span><b>' + inr(mk) + '</b></div>' : '') +
-      '<div><span>GST 3%</span><b>' + inr(gst) + '</b></div><div class="sn-tot"><span>Total</span><b>' + inr(gold + mk + gst) + '</b></div></div>' +
-      (mkp == null && cat !== 'Coin' && k !== '24K' ? '<p class="sn-dim">Making charges not included — add the jeweller’s charge for your design (often 8–25%).</p>' : '') + src();
-    return { intent: 'price', html: h, chips: ['Same at another jeweller', 'Price after offers', 'Cheapest 22K today'] };
+    var mkp = b.mk ? (ct && b.mk[ct] != null ? b.mk[ct] : (b.mk.Ring != null ? b.mk.Ring : null)) : null;
+    if (ct === 'Coin' || (k === '24K' && !ct)) mkp = null;   // 24K: coins and bars
+    var mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03, tot = gold + mk + gst;
+    var h = '<p>' + t('price_h', { w: esc(wLabel(w)), k: k, who: who }) + '</p><div class="sn-bill">' +
+      '<div><span>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(rate(b, k)) }) + '</span><b>' + inr(gold) + '</b></div>' +
+      (mkp != null ? '<div><span>' + t('price_mk', { p: pct(mkp), c: ct && b.mk[ct] != null ? esc(catName(ct)) : t('price_typ') }) + '</span><b>' + inr(mk) + '</b></div>' : '') +
+      '<div><span>GST 3%</span><b>' + inr(gst) + '</b></div><div class="sn-tot"><span>' + t('price_total') + '</span><b>' + inr(tot) + '</b></div></div>' +
+      (mkp == null && ct !== 'Coin' && k !== '24K' ? '<p class="sn-dim">' + t('price_nomk') + '</p>' : '') + src();
+    return { intent: 'price', html: h, say: t('say_price', { w: wLabel(w), k: sK(k), b: b.n, p: sInr(tot) }),
+      chips: chips(['another', 'afteroff', 'cheap22']) };
   }
   function aTrend(k) {
     k = k || '22K';
     var h = KB.hist || [], f = K[k];
-    if (h.length < 2) return { intent: 'trend', html: '<p>Not enough history yet. ' + link('/gold-rate-history', 'Gold rate history →') + '</p>' };
+    if (h.length < 2) return { intent: 'trend', html: '<p>' + t('trend_none') + ' ' + link('/gold-rate-history', t('hist_link')) + '</p>', say: t('trend_none') };
     var last = h[h.length - 1][1] * f;
     function back(n) { var i = Math.max(0, h.length - 1 - n); return h[i][1] * f; }
     function chg(v) { var d = last - v, p = d / v * 100; return '<b class="' + (d >= 0 ? 'up' : 'dn') + '">' + (d >= 0 ? '▲ ' : '▼ ') + inr(Math.abs(d)) + ' (' + pct(Math.abs(p)) + ')</b>'; }
     var pts = h.slice(-30).map(function (x) { return x[1]; }), mn = Math.min.apply(null, pts), mx = Math.max.apply(null, pts);
     var sv = '<svg class="sn-spark" viewBox="0 0 240 48" preserveAspectRatio="none"><polyline fill="none" stroke="#e7bf5a" stroke-width="2" stroke-linejoin="round" points="' +
       pts.map(function (v, i) { return (i * 240 / Math.max(1, pts.length - 1)).toFixed(1) + ',' + (44 - (mx === mn ? 20 : (v - mn) / (mx - mn) * 40)).toFixed(1); }).join(' ') + '"/></svg>';
-    return { intent: 'trend', html: '<p>' + k + ' market middle: <b>' + inr(last) + '/g</b> today.</p>' + sv +
-      '<div class="sn-list"><div class="sn-row"><span class="sn-nm">vs previous day</span><span class="sn-v">' + chg(back(1)) + '</span></div>' +
-      '<div class="sn-row"><span class="sn-nm">vs 7 days ago</span><span class="sn-v">' + chg(back(7)) + '</span></div>' +
-      '<div class="sn-row"><span class="sn-nm">vs 30 days ago</span><span class="sn-v">' + chg(back(30)) + '</span></div></div>' +
-      '<p class="sn-dim">Past moves, not a forecast — nobody can reliably predict tomorrow’s price. ' + link('/gold-rate-history', 'Full history →') + '</p>',
-      chips: ['Set a price alert', 'Cheapest 22K today', 'Is now a good time to buy?'] };
+    var d1 = last - back(1);
+    return { intent: 'trend', html: '<p>' + t('trend_h', { k: k, p: inr(last) }) + '</p>' + sv +
+      '<div class="sn-list"><div class="sn-row"><span class="sn-nm">' + t('vs1') + '</span><span class="sn-v">' + chg(back(1)) + '</span></div>' +
+      '<div class="sn-row"><span class="sn-nm">' + t('vs7') + '</span><span class="sn-v">' + chg(back(7)) + '</span></div>' +
+      '<div class="sn-row"><span class="sn-nm">' + t('vs30') + '</span><span class="sn-v">' + chg(back(30)) + '</span></div></div>' +
+      '<p class="sn-dim">' + t('trend_note') + ' ' + link('/gold-rate-history', t('full_hist')) + '</p>',
+      say: t(Math.abs(d1) < 1 ? 'say_trend_same' : d1 > 0 ? 'say_trend_up' : 'say_trend_dn', { k: sK(k), p: sInr(last), q: sInr(Math.abs(d1)) }),
+      chips: chips(['alert', 'cheap22', 'goodtime']) };
   }
   function aAlerts() {
-    return { intent: 'alerts', html: '<p>Get the cheapest jeweller and today’s rate every morning, free — and an email the day 22K drops to your price.</p><button class="sn-cta" data-sn="subscribe">Get free daily alerts</button>' };
+    return { intent: 'alerts', html: '<p>' + t('alerts') + '</p><button class="sn-cta" data-sn="subscribe">' + t('alerts_cta') + '</button>', say: t('alerts') };
   }
-  function words(t) { return t.split(/\s+/).filter(function (w) { return w.length > 2 && !/^(the|and|for|what|how|are|you|your|with|does|this|that|from|have|can|why|which|about|gold|is|of)$/.test(w); }); }
-  function scoreDoc(t, q, keys) {
-    var ws = words(t), qs = norm(q), s = 0;
-    ws.forEach(function (w) { if (qs.indexOf(' ' + w) > -1) s += 1; if ((keys || []).indexOf(w) > -1) s += 1.5; });
-    return s / Math.max(3, Math.sqrt(words(qs).length + 1) * 2);
+  function words(s) { return s.split(/\s+/).filter(function (w) { return w.length > 2 && !/^(the|and|for|what|how|are|you|your|with|does|this|that|from|have|can|why|which|about|gold|is|of)$/.test(w); }); }
+  function scoreDoc(s, q, keys) {
+    var ws = words(s), qs = norm(q), n = 0;
+    ws.forEach(function (w) { if (qs.indexOf(' ' + w) > -1) n += 1; if ((keys || []).indexOf(w) > -1) n += 1.5; });
+    return n / Math.max(3, Math.sqrt(words(qs).length + 1) * 2);
   }
-  function aSearch(t) {
+  // FAQ and approved answers are written in English: `en` carries the text
+  // so it can be translated on the visitor's device, where the browser can.
+  function aSearch(s) {
     var best = null, bs = 0;
-    (KB.learned || []).forEach(function (d) { var s = scoreDoc(t, d.q, []) * 1.2; if (s > bs) { bs = s; best = d; } });
-    KB.faq.forEach(function (d) { var s = scoreDoc(t, d.q, d.k); if (s > bs) { bs = s; best = d; } });
-    if (best && bs >= 0.6) return { intent: 'faq', score: bs, html: '<p>' + esc(best.a) + '</p>' + (best.u ? '<p>' + link(best.u, 'Read more →') + '</p>' : ''), chips: ['Cheapest 22K today', 'Best offer today'] };
+    (KB.learned || []).forEach(function (d) { var v = scoreDoc(s, d.q, []) * 1.2; if (v > bs) { bs = v; best = d; } });
+    KB.faq.forEach(function (d) { var v = scoreDoc(s, d.q, d.k); if (v > bs) { bs = v; best = d; } });
+    if (best && bs >= 0.6) return { intent: 'faq', score: bs, en: best.a, html: '<p>' + esc(best.a) + '</p>' + (best.u ? '<p>' + link(best.u, t('more')) + '</p>' : ''),
+      say: best.a, chips: chips(['cheap22', 'bestoff']) };
     var g = null, gs = 0;
-    KB.guides.forEach(function (d) { var s = scoreDoc(t, d.t + ' ' + d.d, []); if (s > gs) { gs = s; g = d; } });
-    if (g && gs >= 0.6) return { intent: 'guide', score: gs, html: '<p>This guide covers it: <b>' + esc(g.t) + '</b> — ' + esc(g.d) + '</p><p>' + link(g.u, 'Read the guide →') + '</p>' };
+    KB.guides.forEach(function (d) { var v = scoreDoc(s, d.t + ' ' + d.d, []); if (v > gs) { gs = v; g = d; } });
+    if (g && gs >= 0.6) return { intent: 'guide', score: gs, en: g.t + '. ' + g.d,
+      html: '<p>' + t('guide_h', { t: esc(g.t), d: esc(g.d) }) + '</p><p>' + link(g.u, t('guide_link')) + '</p>', say: g.t + '. ' + g.d };
     return null;
   }
 
   function answer(q) {
-    var t = norm(q), k = karatIn(t), bs = brandsIn(t), c = cityIn(t), w = weightIn(t), cat = catIn(t);
-    if (/\b(my city|near me|nearby|mere sheher|mere shahar|my area)\b/.test(t) && !c) {
+    var tx = norm(q), k = karatIn(tx), bs = brandsIn(tx), c = cityIn(tx), w = weightIn(tx), ct = catIn(tx);
+    if (/\b(my city|near me|nearby|mere sheher|mere shahar|my area)\b/.test(tx) && !c) {
       if (lastCity) c = KB.cities.filter(function (x) { return x.n === lastCity; })[0];
-      if (!c) return { intent: 'ask_city', html: '<p>Which city are you in?</p>', chips: ['Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Hyderabad', 'Kolkata', 'Pune', 'Lucknow'] };
+      if (!c) return { intent: 'ask_city', html: '<p>' + t('ask_city') + '</p>', say: t('ask_city'),
+        chips: ['Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Hyderabad', 'Kolkata', 'Pune', 'Lucknow'].map(function (n) { return { l: n, q: n }; }) };
     }
-    if (has(t, W.silver) && !has(t, ['gold', 'sona'])) return { intent: 'silver', html: '<p>I cover gold for now — jewellers’ 22K, 24K and 18K rates. Silver is on its way.</p>', chips: ['Gold rate today', 'Cheapest 22K today'] };
-    if (has(t, ['alert', 'alerts', 'notify', 'subscribe', 'email me', 'whatsapp', 'set a price'])) return aAlerts();
+    if (has(tx, W.silver) && !has(tx, ['gold', 'sona'])) return { intent: 'silver', html: '<p>' + t('silver') + '</p>', say: t('silver'), chips: chips(['rate', 'cheap22']) };
+    if (has(tx, ['alert', 'alerts', 'notify', 'subscribe', 'email me', 'whatsapp', 'set a price'])) return aAlerts();
     if (bs.length >= 2) return aCompare(bs, k);
-    var strong = aSearch(t);                 // a question the FAQ answers word for word
+    if (has(tx, W.making) && has(tx, W.cheap) && !w) return aMaking(bs, ct);    // "lowest making charge": the ranking
+    var strong = aSearch(tx);                // a question the FAQ answers word for word
     if (strong && strong.score >= 1.0 && !w && !bs.length && !c) return strong;
-    if (has(t, W.offer) || /\bafter offers?\b/.test(t)) return aOffers(bs);
-    if (has(t, W.making) && !w) return aMaking(bs, cat);
-    if (w) return aPrice(w, k, bs, cat);
-    if (has(t, W.trend) && !bs.length) return aTrend(k);
-    var search = aSearch(t);
+    if (has(tx, W.offer) || /\bafter offers?\b/.test(tx)) return aOffers(bs);
+    if (has(tx, W.making) && !w) return aMaking(bs, ct);
+    if (w) return aPrice(w, k, bs, ct);
+    if (has(tx, W.trend) && !bs.length) return aTrend(k);
+    var search = aSearch(tx);
     if (search && search.score > 0.9) return search;
-    if (has(t, W.cheap)) return aCheapest(k, c);
+    if (has(tx, W.cheap)) return aCheapest(k, c);
     if (bs.length) return aBrand(bs[0], k);
     if (c) return aCity(c, k);
     if (search) return search;
-    if (has(t, W.rate) || k || /\b(gold|sona)\b/.test(t)) return aMedian(k);
-    if (has(t, W.hello)) return { intent: 'hello', html: '<p>Namaste! 🙏 I’m Sona. Ask me anything about buying gold — today’s rates at ' + KB.brands.length + ' jewellers, your city, making charges, offers or a price for any weight.</p>', chips: SUGGEST };
-    if (has(t, W.thanks)) return { intent: 'thanks', html: '<p>Happy to help! Anything else?</p>', chips: ['Cheapest 22K today', 'Best offer today'] };
-    if (W.who.some(function (x) { return t.indexOf(x) > -1; })) return { intent: 'about', html: '<p>I’m Sona, MyGoldRates’ assistant. I answer from today’s real data — ' + KB.brands.length + ' jewellers’ published rates, making charges measured from real products, and the offers on their websites — so I never guess a number.</p>', chips: SUGGEST };
+    if (has(tx, W.rate) || k || /\b(gold|sona)\b/.test(tx)) return aMedian(k);
+    if (has(tx, W.hello)) return { intent: 'hello', html: '<p>' + t('hello', { n: KB.brands.length }) + '</p>', say: t('hello', { n: KB.brands.length }), chips: suggest() };
+    if (has(tx, W.thanks)) return { intent: 'thanks', html: '<p>' + t('thanks') + '</p>', say: t('thanks'), chips: chips(['cheap22', 'bestoff']) };
+    if (W.who.some(function (x) { return tx.indexOf(x) > -1; })) return { intent: 'about', html: '<p>' + t('about', { n: KB.brands.length }) + '</p>', say: t('about', { n: KB.brands.length }), chips: suggest() };
     return null;
+  }
+  // A question in any language: Indian scripts are first turned into the
+  // words above (sona_lang.js); the reply comes in the asker's language.
+  function understand(q) {
+    RL = (LG && LG.detect(q, LANG)) || LANG;
+    if (!STR[RL]) RL = 'en';
+    if (LG && LG.isIndic(q)) return LG.understand(q, VOCAB, RL).text;
+    return q;
   }
 
   // ------------------------------------------------------------- avatar
@@ -317,7 +1625,7 @@
   window.GR_SONA_AVATAR = avatar;
 
   // --------------------------------------------------------------- UI
-  var SUGGEST = ['Cheapest 22K today', 'Gold rate in my city', 'Tanishq vs Kalyan', 'Best offer today', 'Price of 10 g 22K chain', '22K vs 24K?'];
+  var SUGGEST = ['cheap22', 'mycity', 'tvk', 'bestoff', 'p10chain', 'k22v24'];      // chip keys (sona_i18n.js ch_*)
   var CSS = '' +
     '.sn-fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:8500;display:flex;align-items:center;gap:9px;height:52px;padding:0 18px 0 7px;border:0;border-radius:999px;cursor:pointer;color:#1a1405;font:700 14.5px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:linear-gradient(135deg,#ffe9a8,#e7bf5a 45%,#b98a24);box-shadow:0 10px 30px rgba(185,138,36,.45),0 0 0 1px rgba(255,255,255,.25) inset;transition:transform .2s}' +
     '.sn-fab:hover{transform:translateY(-2px)}.sn-fab .sn-orb{width:42px;height:42px;flex:none;margin:-2px 0;filter:drop-shadow(0 2px 4px rgba(90,60,0,.35))}' +
@@ -384,26 +1692,64 @@
     '.sn-foot{text-align:center;font-size:10px;color:#6f6754;padding:0 0 8px}' +
     '.sn-ban{position:relative;z-index:50;display:flex;align-items:center;justify-content:center;gap:10px;padding:9px 40px 9px 14px;font:600 13px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1a1405;background:linear-gradient(90deg,#b98a24,#f6d77d 50%,#b98a24);background-size:200% 100%;animation:snShine 6s linear infinite;cursor:pointer;text-align:center}' +
     '@keyframes snShine{to{background-position:-200% 0}}.sn-ban .nw{flex:none;background:#1a1405;color:#f0d080;border-radius:999px;padding:2px 8px;font-size:10.5px;letter-spacing:.08em}.sn-ban u{text-underline-offset:2px}' +
+    '.sn-hd .sn-ttl{flex:1;min-width:0}.sn-hd .sn-ttl span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sn-hd .sn-x{margin-left:0;flex:none}' +
+    '.sn-lp{height:32px;flex:none;border-radius:999px;border:1px solid rgba(240,208,128,.35);background:rgba(231,191,90,.1);color:#f0d080;font:700 12.5px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:0 11px;cursor:pointer;white-space:nowrap}' +
+    '.sn-hb{width:34px;height:34px;flex:none;border-radius:50%;border:0;background:rgba(255,255,255,.07);color:#cfc4ad;cursor:pointer;display:flex;align-items:center;justify-content:center}.sn-hb svg{width:17px;height:17px}.sn-hb.on{background:rgba(231,191,90,.22);color:#f6d77d}' +
+    '.sn-lm{display:none;position:absolute;left:12px;right:12px;top:72px;z-index:3;grid-template-columns:repeat(2,1fr);gap:6px;padding:10px;border-radius:16px;background:#1b160e;border:1px solid rgba(240,208,128,.25);box-shadow:0 18px 40px rgba(0,0,0,.55)}.sn-lm.on{display:grid}' +
+    '.sn-lm button{border:1px solid rgba(240,208,128,.16);background:rgba(255,255,255,.04);color:#f3eadb;border-radius:10px;padding:10px 12px;text-align:left;font-size:14.5px;cursor:pointer}.sn-lm button.on{border-color:#e7bf5a;background:rgba(231,191,90,.15);color:#f6d77d}' +
+    '.sn-lchips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}.sn-lchips button{border:1px solid rgba(240,208,128,.25);background:none;color:#f0d080;border-radius:999px;padding:4px 10px;font-size:12.5px;cursor:pointer}.sn-lchips button:hover{background:rgba(231,191,90,.12)}' +
+    '.sn-mic{width:46px;height:46px;flex:none;border-radius:50%;border:1px solid rgba(240,208,128,.4);background:rgba(231,191,90,.1);color:#f0d080;cursor:pointer;display:flex;align-items:center;justify-content:center}.sn-mic svg{width:21px;height:21px}' +
+    '.sn-mic.on{background:#e5484d;border-color:#e5484d;color:#fff;animation:snMic 1.2s infinite}@keyframes snMic{0%{box-shadow:0 0 0 0 rgba(229,72,77,.6)}70%{box-shadow:0 0 0 12px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}' +
+    '.sn-fb .sn-say{margin-left:auto}.sn-fab .sn-fmic{width:26px;height:26px;margin:0 -6px 0 -2px;border-radius:50%;background:rgba(26,20,5,.12);display:flex;align-items:center;justify-content:center}.sn-fab .sn-fmic svg{width:15px;height:15px}' +
+    '@media(max-width:520px){.sn-fab .sn-fmic{display:none}}' +
     '.sn-ban .bx{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;border:0;border-radius:50%;background:rgba(26,20,5,.12);color:#1a1405;cursor:pointer;font-size:14px}';
 
-  var panel, body, chips, input;
+  var panel, body, chipBox, input, mic, spk, lmenu, voiceQ = false;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition, rec = null, listening = false;
+  var TTS = window.speechSynthesis, ttsOn = false;      // read every reply aloud; a spoken question is always answered aloud
+  try { ttsOn = localStorage.getItem('sona_tts') === '1'; } catch (_) {}
+  var ICON = {
+    mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+    on: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
+    off: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>'
+  };
+  function short(c) { var l = (LG ? LG.LANGS : []).filter(function (x) { return x.c === c; })[0]; return l ? l.s : 'EN'; }
   function ui() {
     if (panel) return;
     panel = document.createElement('div'); panel.className = 'sn-panel'; panel.id = 'sonaPanel';
     panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Sona, the jewellery assistant');
-    panel.innerHTML = '<div class="sn-hd"><div class="sn-av" id="sonaHeadAv">' + avatar() + '</div><div><b>Sona</b><span>Jewellery assistant · answers from today’s real rates</span></div><button class="sn-x" id="sonaClose" aria-label="Close">×</button></div>' +
+    panel.innerHTML = '<div class="sn-hd"><div class="sn-av" id="sonaHeadAv">' + avatar() + '</div><div class="sn-ttl"><b>Sona</b><span id="sonaSub"></span></div>' +
+      (LG ? '<button class="sn-lp" id="sonaLang" type="button" aria-haspopup="true"></button>' : '') +
+      (TTS ? '<button class="sn-hb" id="sonaSpk" type="button"></button>' : '') +
+      '<button class="sn-x" id="sonaClose" aria-label="Close">×</button></div>' +
+      (LG ? '<div class="sn-lm" id="sonaLm" role="menu">' + LG.LANGS.map(function (l) { return '<button type="button" role="menuitem" data-lang="' + l.c + '">' + l.n + '</button>'; }).join('') + '</div>' : '') +
       '<div class="sn-body" aria-live="polite"></div><div class="sn-chips"></div>' +
-      '<form class="sn-in"><input id="sonaInput" type="text" autocomplete="off" maxlength="200" placeholder="Ask about rates, jewellers, offers…" aria-label="Your question"><button class="sn-send" id="sonaSend" aria-label="Send">➤</button></form>' +
-      '<div class="sn-foot">Free · answers from published data, not advice</div>';
+      '<form class="sn-in"><input id="sonaInput" type="text" autocomplete="off" maxlength="200" aria-label="Your question">' +
+      (SR ? '<button class="sn-mic" id="sonaMic" type="button">' + ICON.mic + '</button>' : '') +
+      '<button class="sn-send" id="sonaSend" aria-label="Send">➤</button></form>' +
+      '<div class="sn-foot" id="sonaFoot"></div>';
     document.body.appendChild(panel);
-    body = $('.sn-body', panel); chips = $('.sn-chips', panel); input = $('#sonaInput', panel);
+    body = $('.sn-body', panel); chipBox = $('.sn-chips', panel); input = $('#sonaInput', panel);
+    mic = $('#sonaMic', panel); spk = $('#sonaSpk', panel); lmenu = $('#sonaLm', panel);
     $('#sonaClose', panel).onclick = close;
     $('form', panel).onsubmit = function (e) { e.preventDefault(); ask(input.value); };
+    if (mic) mic.onclick = listen;
+    if (spk) spk.onclick = function () {
+      ttsOn = !ttsOn; try { localStorage.setItem('sona_tts', ttsOn ? '1' : '0'); } catch (_) {}
+      if (!ttsOn) hush();
+      labels(); track(ttsOn ? 'tts_on' : 'tts_off');
+    };
+    if (LG) $('#sonaLang', panel).onclick = function (e) { e.stopPropagation(); lmenu.classList.toggle('on'); };
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && opened) close(); });
     panel.addEventListener('click', function (e) {
-      var c = e.target.closest('.sn-chip'); if (c) { ask(c.textContent); return; }
+      var lb = e.target.closest('[data-lang]');
+      if (lb) { setLang(lb.getAttribute('data-lang')); return; }
+      if (lmenu && !e.target.closest('#sonaLang')) lmenu.classList.remove('on');
+      var c = e.target.closest('.sn-chip'); if (c) { ask(c.getAttribute('data-q') || c.textContent, c.textContent); return; }
       var s = e.target.closest('[data-sn="subscribe"]');
       if (s) { close(); if (window.GR_OPEN_SUBPOP) window.GR_OPEN_SUBPOP(); else location.href = '/inquiry'; track('subscribe'); return; }
+      var sy = e.target.closest('.sn-say');
+      if (sy) { var m = sy.closest('.sn-m'); speak(m._say, m._sl, m); track('replay'); return; }
       var f = e.target.closest('.sn-fb button');
       if (f && !f.parentNode.getAttribute('data-done')) {
         f.classList.add('on'); f.parentNode.setAttribute('data-done', '1');
@@ -411,51 +1757,187 @@
         if (id) rpc('bot_feedback', { p_id: +id, p_sid: window.GR_SID || '', p_helpful: f.getAttribute('data-v') === '1' });
       }
     });
+    labels();
   }
-  function setChips(list) { chips.innerHTML = (list || []).map(function (c) { return '<button class="sn-chip" type="button">' + esc(c) + '</button>'; }).join(''); }
+  // Every fixed label in the chosen language.
+  function labels() {
+    RL = LANG;
+    $('#sonaSub', panel).textContent = t('ui_sub');
+    $('#sonaFoot', panel).textContent = t('ui_foot');
+    if (!listening) input.placeholder = t('ui_ph');
+    if (mic) { mic.setAttribute('aria-label', t('ui_mic')); mic.title = t('ui_mic'); }
+    if (spk) { spk.innerHTML = ttsOn ? ICON.on : ICON.off; spk.classList.toggle('on', ttsOn); spk.setAttribute('aria-pressed', ttsOn ? 'true' : 'false'); spk.setAttribute('aria-label', t('ui_speak')); spk.title = ttsOn ? t('ui_mute') : t('ui_speak'); }
+    if (LG) {
+      var lp = $('#sonaLang', panel); lp.textContent = short(LANG) + ' ▾'; lp.setAttribute('aria-label', t('ui_lang') + ': ' + langName(LANG));
+      [].forEach.call(lmenu.querySelectorAll('button'), function (b) { b.classList.toggle('on', b.getAttribute('data-lang') === LANG); });
+    }
+  }
+  function setLang(c) {
+    if (!STR[c]) return;
+    LANG = c; try { localStorage.setItem('sona_lang', c); } catch (_) {}
+    if (lmenu) lmenu.classList.remove('on');
+    hush(); labels(); track('lang_' + c);
+    // Only the welcome so far: say it again in the new language.
+    var ms = body.querySelectorAll('.sn-m');
+    if (ms.length === 1 && ms[0].getAttribute('data-greet')) { ms[0].remove(); greet(); }
+    else setChips(suggest());
+  }
+  function greet() {
+    RL = LANG;
+    var m = bubble('<p>' + t('greet1') + '</p><p>' + t('greet2') + '</p>' + (LG ? '<p class="sn-dim">' + t('lang_hint') + '</p><div class="sn-lchips">' +
+      LG.LANGS.map(function (l) { return '<button type="button" data-lang="' + l.c + '">' + l.n + '</button>'; }).join('') + '</div>' : ''));
+    m.setAttribute('data-greet', '1');
+    setChips(suggest());
+  }
+  function setChips(list) {
+    chipBox.innerHTML = (list || []).map(function (c) {
+      c = typeof c === 'string' ? { l: c, q: c } : c;
+      return '<button class="sn-chip" type="button" data-q="' + esc(c.q) + '">' + esc(c.l) + '</button>';
+    }).join('');
+  }
   function bubble(html, me, talking) {
     var m = document.createElement('div'); m.className = 'sn-m' + (me ? ' me' : ' bot') + (talking ? ' sona-talk' : '');
     m.innerHTML = (me ? '' : '<div class="sn-mav">' + avatar() + '</div>') + '<div class="sn-b">' + html + '</div>';
     body.appendChild(m);
     body.scrollTop = body.scrollHeight; return m;
   }
-  // While Sona writes a reply she talks: in her message and in the header.
-  function talking(on) { var h = $('#sonaHeadAv', panel); if (h) h.classList.toggle('sona-talk', on); }
-  function ask(q) {
+  function note(text) { bubble('<p class="sn-dim">' + esc(text) + '</p>'); }
+  // While Sona writes or reads out a reply she talks: in her message and in the header.
+  function talking(on) { var h = panel && $('#sonaHeadAv', panel); if (h) h.classList.toggle('sona-talk', on); }
+
+  // ------------------------------------------------- voice (the browser's own)
+  function bcp(c) { var l = (LG ? LG.LANGS : []).filter(function (x) { return x.c === c; })[0]; return l ? l.bcp : 'en-IN'; }
+  function voiceFor(c) {
+    var vs = (TTS && TTS.getVoices()) || [], want = bcp(c).toLowerCase();
+    var lg = function (v) { return String(v.lang || '').replace('_', '-').toLowerCase(); };
+    return vs.filter(function (v) { return lg(v) === want; })[0] ||
+      vs.filter(function (v) { return lg(v) === c || lg(v).indexOf(c + '-') === 0; })[0] || null;
+  }
+  var toldNoVoice = {};
+  function speak(text, lang, m) {
+    if (!TTS || !text) return;
+    lang = lang || 'en';
+    var go = function () {
+      var v = voiceFor(lang);
+      if (!v && lang !== 'en') {
+        if (!toldNoVoice[lang]) { toldNoVoice[lang] = 1; RL = lang; note(t('no_voice', { l: langName(lang) })); }
+        return;
+      }
+      try { TTS.cancel(); } catch (_) {}
+      var u = new SpeechSynthesisUtterance(String(text).replace(/₹/g, ''));
+      if (v) u.voice = v;
+      u.lang = v ? v.lang : bcp(lang); u.rate = 1; u.pitch = 1.05;
+      u.onstart = function () { talking(true); if (m) m.classList.add('sona-talk'); };
+      u.onend = u.onerror = function () { talking(false); if (m) m.classList.remove('sona-talk'); };
+      TTS.speak(u);
+    };
+    if ((TTS.getVoices() || []).length) go();
+    else {                                     // voices load late on some browsers
+      var done = false, once = function () { if (!done) { done = true; go(); } };
+      try { TTS.addEventListener('voiceschanged', once); } catch (_) {}
+      setTimeout(once, 1200);
+    }
+  }
+  function hush() { if (TTS) try { TTS.cancel(); } catch (_) {} talking(false); }
+  function setListening(on) {
+    listening = on;
+    if (mic) mic.classList.toggle('on', on);
+    RL = LANG; input.placeholder = on ? t('ui_listen') : t('ui_ph');
+  }
+  function listen() {
+    if (!SR) return;
+    if (listening) { try { rec.stop(); } catch (_) {} return; }
+    hush();
+    rec = new SR(); rec.lang = bcp(LANG); rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
+    var heard = '';
+    rec.onresult = function (e) {
+      var now = '';
+      for (var i = 0; i < e.results.length; i++) now += e.results[i][0].transcript;
+      heard = now; input.value = now;
+    };
+    rec.onerror = function (e) {
+      RL = LANG;
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') note(t('mic_denied'));
+      else if (e.error === 'no-speech') note(t('mic_none'));
+    };
+    rec.onend = function () {
+      setListening(false);
+      if (heard.trim()) { voiceQ = true; ask(heard); }
+    };
+    try { rec.start(); setListening(true); track('voice'); } catch (_) { setListening(false); }
+  }
+  // FAQ answers are written in English; where the browser can translate on
+  // the device (free, nothing sent anywhere), Sona answers in the reply
+  // language, otherwise in English with a note.
+  function translateTo(text, lang) {
+    try {
+      if (!('Translator' in window)) return Promise.resolve(null);
+      var o = { sourceLanguage: 'en', targetLanguage: lang };
+      var go = window.Translator.availability(o).then(function (a) {
+        return a === 'unavailable' ? null : window.Translator.create(o).then(function (tr) { return tr.translate(text); });
+      }).catch(function () { return null; });
+      return Promise.race([go, new Promise(function (r) { setTimeout(function () { r(null); }, 4000); })]);
+    } catch (_) { return Promise.resolve(null); }
+  }
+
+  function ask(q, label) {
     q = String(q || '').trim(); if (!q) return;
-    input.value = ''; bubble(esc(q), true); setChips([]);
+    var spoken = voiceQ; voiceQ = false;
+    hush();
+    input.value = ''; bubble(esc(label || q), true); setChips([]);
     var typing = bubble('<span class="sn-typing"><span></span><span></span><span></span></span>', false, true);
     talking(true);
     loadKB().then(function () {
       var a = null;
-      try { a = answer(q); } catch (e) { a = null; }
-      var ok = !!a;
-      if (!a) a = { intent: 'unknown', html: '<p>I’m still learning that one — I’ve noted your question so we can add a proper answer soon. Meanwhile, I’m good at these:</p>', chips: SUGGEST };
-      setTimeout(function () {
-        typing.remove(); talking(false);
-        var m = bubble(a.html + '<div class="sn-fb"><button type="button" data-v="1" aria-label="Helpful">👍</button><button type="button" data-v="0" aria-label="Not helpful">👎</button></div>');
-        setChips(a.chips || SUGGEST);
-        rpc('log_bot_question', { p_q: redact(q), p_intent: a.intent, p_answered: ok, p_page: location.pathname, p_sid: window.GR_SID || '' })
-          .then(function (id) { if (id) $('.sn-fb', m).setAttribute('data-id', id); });
-        track(ok ? 'answered' : 'unanswered');
-      }, 350 + Math.min(600, a.html.length / 6));
-    }).catch(function () { typing.remove(); talking(false); bubble('<p>I couldn’t load today’s data. Please check your connection and try again.</p>'); });
+      try { a = answer(understand(q)); } catch (e) { a = null; }
+      var ok = !!a, rl = RL;
+      if (!a) a = { intent: 'unknown', html: '<p>' + t('unknown') + '</p>', say: t('unknown'), chips: suggest() };
+      var tr = a.en && rl !== 'en' ? translateTo(a.en, rl) : Promise.resolve(null);
+      tr.then(function (txt) {
+        RL = rl;
+        if (a.en && rl !== 'en') {
+          if (txt) { a.html = '<p>' + esc(txt) + '</p>' + a.html.replace(/^<p>[\s\S]*?<\/p>/, '') + '<div class="sn-src">' + t('translated') + '</div>'; a.say = txt; }
+          else { a.html = '<p class="sn-dim">' + t('en_only') + '</p>' + a.html; a.sayLang = 'en'; }
+        }
+        setTimeout(function () {
+          typing.remove(); talking(false);
+          var m = bubble(a.html + '<div class="sn-fb"><button type="button" data-v="1" aria-label="Helpful">👍</button><button type="button" data-v="0" aria-label="Not helpful">👎</button>' +
+            (TTS && a.say ? '<button type="button" class="sn-say" aria-label="' + esc(t('ui_speak')) + '">🔊</button>' : '') + '</div>');
+          m._say = a.say; m._sl = a.sayLang || rl;
+          setChips(a.chips || suggest());
+          var tag = (rl !== 'en' ? rl : '') + (spoken ? (rl !== 'en' ? ' ' : '') + 'voice' : '');
+          rpc('log_bot_question', { p_q: (tag ? '[' + tag + '] ' : '') + redact(q), p_intent: a.intent, p_answered: ok, p_page: location.pathname, p_sid: window.GR_SID || '' })
+            .then(function (id) { if (id) $('.sn-fb', m).setAttribute('data-id', id); });
+          track(ok ? 'answered' : 'unanswered');
+          if (spoken || ttsOn) speak(a.say, m._sl, m);
+        }, 350 + Math.min(600, a.html.length / 6));
+      });
+    }).catch(function () { typing.remove(); talking(false); RL = LANG; bubble('<p>' + t('nodata') + '</p>'); });
   }
   function open(q) {
     ui();
     if (!opened) {
       opened = true; document.documentElement.classList.add('sona-open');
-      if (!body.childNodes.length) {
-        bubble('<p>Namaste! 🙏 I’m <b>Sona</b>, your jewellery assistant.</p><p>Ask me anything about buying gold — today’s rate at any jeweller, the cheapest in your city, making charges, offers, or the price of any weight. I answer from today’s real data.</p>');
-        setChips(SUGGEST);
-      }
+      if (!body.childNodes.length) greet();
       track('open'); loadKB();
       if (window.innerWidth > 560) setTimeout(function () { try { input.focus(); } catch (_) {} }, 200);
     }
     if (q) ask(q);
   }
-  function close() { opened = false; document.documentElement.classList.remove('sona-open'); }
+  function close() {
+    opened = false; document.documentElement.classList.remove('sona-open');
+    hush(); if (listening && rec) try { rec.stop(); } catch (_) {}
+  }
   window.GR_ASK = open;
+
+  if (TEST) {                                   // tests drive the engine without a page
+    window.__SONA_TEST = {
+      setKB: function (d) { KB = d; prep(d); },
+      setLang: function (c) { LANG = c; RL = c; },
+      ask: function (q) { var tx = understand(q), a = answer(tx); return { text: tx, lang: RL, a: a }; }
+    };
+    return;
+  }
 
   // ---------------------------------------------------- launcher & banner
   function mount() {
@@ -463,15 +1945,15 @@
     var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
     var fab = document.createElement('button');
     fab.className = 'sn-fab'; fab.id = 'sonaFab'; fab.type = 'button'; fab.setAttribute('aria-label', 'Ask Sona, the jewellery assistant');
-    fab.innerHTML = '<span class="sn-orb">' + avatar() + '</span><span class="sn-lbl">Ask Sona</span><span class="sn-ping"></span>';
+    fab.innerHTML = '<span class="sn-orb">' + avatar() + '</span><span class="sn-lbl">Ask Sona</span>' + (SR ? '<span class="sn-fmic">' + ICON.mic + '</span>' : '') + '<span class="sn-ping"></span>';
     fab.onclick = function () { open(); };
     document.body.appendChild(fab);
-    var seen = null; try { seen = localStorage.getItem('sona_ban'); } catch (_) {}
+    var seen = null; try { seen = localStorage.getItem('sona_ban2'); } catch (_) {}
     if (!seen) {
       var b = document.createElement('div'); b.className = 'sn-ban'; b.id = 'sonaBanner';
-      b.innerHTML = '<span class="sn-banav">' + avatar() + '</span><span class="nw">NEW</span><span>Meet <b>Sona</b>, our new gold-rate assistant — ask about any jeweller, city, making charge or offer. <u>Try it</u></span><button class="bx" type="button" aria-label="Dismiss">×</button>';
+      b.innerHTML = '<span class="sn-banav">' + avatar() + '</span><span class="nw">NEW</span><span>Now <b>talk to Sona</b> about gold rates — in English, हिन्दी, मराठी, ગુજરાતી, தமிழ், తెలుగు, ಕನ್ನಡ, മലയാളം, বাংলা or ਪੰਜਾਬੀ. <u>Try it</u></span><button class="bx" type="button" aria-label="Dismiss">×</button>';
       b.onclick = function (e) {
-        if (e.target.closest('.bx')) { b.remove(); try { localStorage.setItem('sona_ban', '1'); } catch (_) {} return; }
+        if (e.target.closest('.bx')) { b.remove(); try { localStorage.setItem('sona_ban2', '1'); } catch (_) {} return; }
         open(); track('banner');
       };
       document.body.insertBefore(b, document.body.firstChild);

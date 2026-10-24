@@ -1,5 +1,6 @@
 """Sona, the site assistant: its knowledge file, learning export, referrals."""
 import json
+import subprocess
 
 import assistant_kb as KB
 import bot_learn
@@ -65,3 +66,65 @@ def test_assistant_never_claims_what_we_cannot_prove_and_loads_everywhere():
 def test_popups_wait_while_the_assistant_is_open():
     app = open("pulse_app.html", encoding="utf-8").read()
     assert "html.sona-open" in app and "html.sona-open" in gs.ALERTS_POP_JS
+
+
+# ------------------------------------------------- languages and voice
+SONA = {
+    "hi": [("आज तनिष्क में 22 कैरेट सोने का भाव क्या है", "rate_brand", "Tanishq"),
+           ("सबसे सस्ता सोना कहाँ मिलेगा", "cheapest", None),
+           ("मुंबई में सोने का भाव", "rate_city", "Mumbai"),
+           ("दस ग्राम 22 कैरेट चेन की कीमत", "price", "10 ग्राम"),
+           ("तनिष्क या कल्याण", "compare", None),
+           ("मेकिंग चार्ज सबसे कम कहाँ है", "making", None),
+           ("आज का सबसे अच्छा ऑफ़र", "offers", None),
+           ("चांदी का भाव", "silver", None)],
+    "mr": [("पुण्यात आज सोन्याचा दर किती आहे", "rate_city", "Pune")],
+    "gu": [("અમદાવાદમાં આજે સોનાનો ભાવ", "rate_city", "Ahmedabad"), ("સૌથી સસ્તું સોનું", "cheapest", None)],
+    "pa": [("ਲੁਧਿਆਣਾ ਵਿੱਚ ਸੋਨੇ ਦਾ ਰੇਟ", "rate_city", "Ludhiana")],
+    "bn": [("কলকাতায় আজ সোনার দাম", "rate_city", "Kolkata")],
+    "kn": [("ಬೆಂಗಳೂರಿನಲ್ಲಿ ಇಂದಿನ ಚಿನ್ನದ ದರ", "rate_city", "Bengaluru"), ("ಹತ್ತು ಗ್ರಾಂ ಚಿನ್ನದ ಬೆಲೆ", "price", None)],
+    "ta": [("சென்னையில் இன்றைய தங்க விலை", "rate_city", "Chennai"), ("தனிஷ்க் தங்க விலை", "rate_brand", "Tanishq"),
+           ("கோயம்புத்தூர் தங்க விலை", "rate_city", "Coimbatore")],
+    "te": [("హైదరాబాద్‌లో ఈరోజు బంగారం ధర", "rate_city", "Hyderabad")],
+    "ml": [("കൊച്ചിയിലെ ഇന്നത്തെ സ്വർണവില", "rate_city", "Kochi"), ("നമസ്കാരം", "hello", None)],
+}
+
+
+def _sona(qs):
+    inp = json.dumps({"kb": "docs/assistant.json", "qs": qs})
+    r = subprocess.run(["node", "tests/sona_harness.js"], input=inp, capture_output=True, text=True, check=True)
+    return json.loads(r.stdout)
+
+
+def test_sona_understands_every_language_and_answers_in_it():
+    qs = [{"lang": "en", "q": q} for lang in SONA for q, _, _ in SONA[lang]]
+    got = _sona(qs)
+    want = [(lang, intent, word) for lang in SONA for _, intent, word in SONA[lang]]
+    for r, (lang, intent, word) in zip(got, want):
+        assert r["intent"] == intent, (r["q"], r["text"], r["intent"])
+        assert r["lang"] == lang, (r["q"], r["lang"])           # the reply follows the question's language
+        assert word is None or word in r["html"] + r["say"], (r["q"], r["say"])
+        assert r["say"], r["q"]                                  # something to read aloud
+
+
+def test_a_chip_in_english_is_answered_in_the_chosen_language():
+    r = _sona([{"lang": "ta", "q": "Cheapest 22K today"}])[0]
+    assert r["intent"] == "cheapest" and r["lang"] == "ta"
+    assert "மலிவான" in r["html"] and "ரூபாய்" in r["say"]
+
+
+def test_every_language_has_every_reply_with_the_same_blanks():
+    out = subprocess.run(["node", "-e", """
+const S=require('./sona_i18n.js'), ph=s=>JSON.stringify((s.match(/\\{\\w+\\}/g)||[]).sort());
+const bad=[];for(const l in S)for(const k in S.en){if(!(k in S[l])||ph(S[l][k])!==ph(S.en[k]))bad.push(l+':'+k);}
+console.log(JSON.stringify({langs:Object.keys(S),bad}));"""], capture_output=True, text=True, check=True).stdout
+    res = json.loads(out)
+    assert sorted(res["langs"]) == sorted(["en", "hi", "mr", "gu", "pa", "bn", "kn", "ta", "te", "ml"])
+    assert res["bad"] == []
+
+
+def test_voice_is_the_browsers_own_and_the_bundle_ships_all_three_files():
+    assert "SpeechRecognition" in JS and "speechSynthesis" in JS
+    assert "api.anthropic" not in JS and "openai" not in JS.lower()
+    b = gs.sona_bundle()
+    assert b.index("root.SONA_STR") < b.index("root.SONA_LANG") < b.index("Sona - the MyGoldRates")

@@ -23,7 +23,7 @@ jobs:
           python-version: "3.12"
       - run: |
           sudo apt-get install -y -q tesseract-ocr
-          pip install requests supabase playwright pytesseract pillow
+          pip install requests supabase playwright pytesseract pillow numpy
           playwright install --with-deps chromium
       - run: python offers.py
         env:
