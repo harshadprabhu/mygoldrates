@@ -274,10 +274,10 @@
         say: t('say_mk_brand', { b: b.n, c: catName(c1), p: pct(b.mk[c1]) }),
         chips: [chip('boff', { b: b.n.split(' ')[0] }), chip('afteroff'), chip('cheap22')] };
     }
-    var c = ct && ct !== 'Coin' ? ct : 'Ring';
+    var c = ct && ct !== 'Coin' ? ct : 'Ring', miss = null;      // miss: asked for, not measured
     var rows = withMk.filter(function (b) { return b.mk[c] != null; }).sort(function (a, b) { return a.mk[c] - b.mk[c]; });
-    if (!rows.length) { c = 'Ring'; rows = withMk.filter(function (b) { return b.mk.Ring != null; }).sort(function (a, b) { return a.mk.Ring - b.mk.Ring; }); }
-    return { intent: 'making', html: '<p>' + t('mk_h', { c: esc(catName(c)) }) + '</p><div class="sn-list">' +
+    if (!rows.length) { miss = c; c = 'Ring'; rows = withMk.filter(function (b) { return b.mk.Ring != null; }).sort(function (a, b) { return a.mk.Ring - b.mk.Ring; }); }
+    return { intent: 'making', html: '<p>' + (miss ? t('mk_nocat', { c: esc(catName(miss)), r: esc(catName(c)) }) : t('mk_h', { c: esc(catName(c)) })) + '</p><div class="sn-list">' +
       rows.slice(0, 6).map(function (b, i) { return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + esc(b.n) + '</span><span class="sn-v">' + pct(b.mk[c]) + '</span></div>'; }).join('') + '</div>' +
       '<p>' + link('/making-charges-comparison', t('mk_every')) + '</p>',
       say: rows.length ? t('say_mk', { c: catName(c), b: rows[0].n, p: pct(rows[0].mk[c]) }) : '',
