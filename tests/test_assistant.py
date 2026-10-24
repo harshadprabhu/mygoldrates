@@ -153,3 +153,16 @@ def test_language_is_automatic_and_the_mic_follows_the_visitor():
                  {"lang": "auto", "q": "आज सोने का भाव"}])
     assert [g["lang"] for g in got] == ["en", "ta", "ta", "en", "hi"]
     assert [g["mic"] for g in got] == ["hi", "ta", "ta", "ta", "hi"]
+
+
+def test_the_daily_rate_email_stays_free_of_marketing():
+    """The digest moved to Gmail's Promotions tab the day an invite box and
+    an offers line were added (23 Oct 2026). It carries the rates only, and
+    a plain-text part."""
+    med = {"24K": 14050.0, "22K": 12879.0, "18K": 10537.0}
+    html = sa.email_html("Asha", "25 October 2026", med, med, "PN Gadgil", "https://u", 34)
+    text = sa.email_text("Asha", "25 October 2026", med, med, "PN Gadgil", "https://u", 34)
+    for word in ("invite", "?ref=", "offer", "&#127873;", "free"):
+        assert word not in html.lower() and word not in text.lower(), word
+    assert "₹14,050" in text and "Unsubscribe: https://u" in text
+    assert sa.masked("harshad@example.com") == "ha…"

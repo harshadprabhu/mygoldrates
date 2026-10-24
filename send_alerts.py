@@ -189,10 +189,15 @@ def send_referral_notices(sb, key, from_name, from_email):
     return sent
 
 
-def email_html(first, date, med, low, low_brand, unsub, n_brands=14, offers="", invite=""):
+def email_html(first, date, med, low, low_brand, unsub, n_brands=14):
     """Branded HTML digest (refreshed design). Inline styles - email clients
     ignore <style>. Text wordmark (no heavy logo image) + one gold button:
-    looks premium and is lighter for Primary-inbox placement."""
+    looks premium and is lighter for Primary-inbox placement.
+
+    Kept to the rates on purpose: an invite box and an offers line were added
+    on 23 Oct 2026 and the digest moved to Gmail's Promotions tab the next
+    day. Referral and deal wording are what Gmail reads as marketing; the
+    daily rate email has to stay in Primary."""
     def prow(label, val):
         return (
             '<tr>'
@@ -244,14 +249,6 @@ padding:26px 12px;font-family:Arial,Helvetica,sans-serif;color:#2c2a26">
           <a href="{SITE_URL}/?from=alert" style="display:inline-block;padding:12px 26px;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;color:#1a1508;text-decoration:none">Compare all {n_brands} jewellers &rarr;</a>
         </td></tr>
       </table>
-      {('<p style="margin:16px 0 4px;font-size:14px;line-height:1.5;color:#3b3833">'
-        + offers + '. <a href="' + SITE_URL + '/gold-offers-today?from=alert" '
-        'style="color:#8C6A18;font-weight:bold">See every jeweller&rsquo;s offer &rarr;</a></p>')
-        if offers else ''}
-      {('<p style="margin:16px 0 4px;font-size:13px;line-height:1.55;color:#3b3833;background:#fbf7ec;border:1px solid #efe2c2;border-radius:10px;padding:12px 14px">'
-        '&#127873; <b>Know someone buying gold?</b> Share your invite link &mdash; we&rsquo;ll email you when they join: '
-        '<a href="' + invite + '" style="color:#8C6A18;font-weight:bold">' + invite + '</a></p>')
-        if invite else ''}
       <p style="margin:12px 0 4px;font-size:12px;color:#9a9284">Prices are indicative and pre-GST; confirm the billed rate with the jeweller. Not investment advice.</p>
     </td></tr>
     <tr><td style="padding:16px 30px 22px;background:#faf8f2;border-top:1px solid #efe9db;font-family:Arial,sans-serif;font-size:11px;color:#8f887c;line-height:1.6">
@@ -270,6 +267,26 @@ def parse_sender(raw):
         email = raw[raw.index("<") + 1:raw.index(">")].strip()
         return name, email
     return "GoldRates", (raw or "alerts@mygoldrates.com")
+
+
+def email_text(first, date, med, low, low_brand, unsub, n_brands=14):
+    """The plain-text part of the digest: mail from people always has one."""
+    return "\n".join([
+        f"Good morning, {first}", "",
+        f"Gold rate today, {date} - median across India's leading jewellers, per gram, before GST:", "",
+        f"24K (999): {inr(med['24K'])}",
+        f"22K (916): {inr(med['22K'])}",
+        f"18K (750): {inr(med['18K'])}", "",
+        f"Lowest 24K today: {inr(low['24K'])}/g at {low_brand}", "",
+        f"Compare all {n_brands} jewellers: {SITE_URL}/?from=alert", "",
+        "Prices are indicative and pre-GST; confirm the billed rate with the jeweller. Not investment advice.",
+        "", "--", "You're receiving this because you subscribed at mygoldrates.com.",
+        f"Unsubscribe: {unsub}"])
+
+
+def masked(email):
+    """An address as it may appear in a log (the repository is public)."""
+    return (email or "")[:2] + "\u2026"
 
 
 def latest_published_rates(sb, lookback_days=10):
@@ -378,6 +395,11 @@ def send_price_alerts(sb, key, from_name, from_email, base, date):
                       "htmlContent": price_alert_html(
                           first, a["karat"], rate, brand, float(a["target"]),
                           date, unsub),
+                      "textContent": (f"Hi {first},\n\n{a['karat']} gold has dropped to the price you were "
+                                      f"waiting for: {inr(rate)}/g at {brand} today (your alert: "
+                                      f"{inr(float(a['target']))}/g or lower).\n\nCompare today's rates: "
+                                      f"{SITE_URL}/?from=alert\n\nPre-GST rate as published by the jeweller; "
+                                      "confirm the billed price with them.\n\n--\nUnsubscribe: " + unsub),
                       "headers": {"List-Unsubscribe": f"<{unsub}>",
                                   "List-Unsubscribe-Post":
                                       "List-Unsubscribe=One-Click"}},
@@ -441,15 +463,13 @@ def main():
         print("alerts: nobody to email today")
         return
 
-    offers = offers_line(live)
-    codes = ensure_ref_codes(sb, subs)
     sent = 0
     for s in pending:
         first = (s.get("name") or "there").strip().split(" ")[0] or "there"
         unsub = f"{SITE_URL}/unsubscribe.html?t={s['unsub_token']}"
         html = email_html(first, date, med, low, lowest["brands"]["name"],
-                          unsub, n_brands, offers,
-                          ref_link(codes.get(s["email"].lower())))
+                          unsub, n_brands)
+        text = email_text(first, date, med, low, lowest["brands"]["name"], unsub, n_brands)
         to = {"email": s["email"]}
         if s.get("name"):
             to["name"] = s["name"].strip()
@@ -461,7 +481,7 @@ def main():
                 json={"sender": {"name": from_name, "email": from_email},
                       "to": [to],
                       "subject": f"Gold Rate Today - {date}",
-                      "htmlContent": html,
+                      "htmlContent": html, "textContent": text,
                       "headers": {"List-Unsubscribe": f"<{unsub}>",
                                   "List-Unsubscribe-Post":
                                       "List-Unsubscribe=One-Click"}},
@@ -471,9 +491,9 @@ def main():
                   .eq("id", s["id"]).execute()
                 sent += 1
             else:
-                print(f"  send failed {s['email']}: {r.status_code} {r.text[:140]}")
+                print(f"  send failed {masked(s['email'])}: {r.status_code} {r.text[:140]}")
         except requests.RequestException as e:
-            print(f"  send error {s['email']}: {type(e).__name__}")
+            print(f"  send error {masked(s['email'])}: {type(e).__name__}")
     print(f"alerts: sent {sent}/{len(pending)}")
     # Recipients that failed keep their old last_emailed (updated only on
     # success), so the next scheduled run of the day retries just them. If the
