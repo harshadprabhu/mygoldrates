@@ -33,11 +33,15 @@ jobs:
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           ALERTS_FROM: ${{ secrets.ALERTS_FROM }}
           MODE: ${{ inputs.mode }}
-          TEST_TO: ${{ inputs.test_to }}
+        # The repository is public, and so are its run logs: the test
+        # address is read from the event (not put in env, which the log
+        # shows) and masked before use.
         run: |
           if [ "$MODE" = "send" ]; then
             python promo_email.py --send
           else
+            TEST_TO=$(jq -r '.inputs.test_to // ""' "$GITHUB_EVENT_PATH")
             test -n "$TEST_TO" || { echo "test_to is empty"; exit 1; }
+            echo "::add-mask::$TEST_TO"
             python promo_email.py --to "$TEST_TO"
           fi
