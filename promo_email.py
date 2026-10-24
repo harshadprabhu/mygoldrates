@@ -122,12 +122,13 @@ def main():
         return
     subs = sb.table("inquiries").select("name, email, unsub_token").execute().data
     subs = [s for s in subs if s.get("email") and s.get("unsub_token")]
-    codes = SA.ensure_ref_codes(sb, subs)
+    codes = {}
 
     def build(s):
         first = (s.get("name") or "there").strip().split(" ")[0] or "there"
         unsub = f"{SA.SITE_URL}/unsubscribe.html?t={s['unsub_token']}"
-        return html(first, qa, SA.ref_link(codes.get(s["email"].lower())), unsub, date), unsub
+        code = codes.get(s["email"].lower())
+        return html(first, qa, SA.ref_link(code) if code else f"{SA.SITE_URL}/", unsub, date), unsub
 
     key = os.environ.get("BREVO_API_KEY", "").strip()
     if not key:
@@ -144,15 +145,26 @@ def main():
                   "headers": {"List-Unsubscribe": f"<{unsub}>",
                               "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"}},
             timeout=30)
+        if r.status_code >= 300:
+            print(f"promo: {to_email[:2]}… not sent: HTTP {r.status_code} {r.text[:200]}")
         return r.status_code < 300
 
     if args.to:
-        sample = next((s for s in subs if s["email"].lower() == args.to.lower()), None) or \
-            {"name": "", "email": args.to, "unsub_token": "00000000-0000-0000-0000-000000000000"}
+        # A test touches no one else: an invite code for this address only,
+        # if it is a subscriber, and nothing recorded.
+        sample = next((s for s in subs if s["email"].lower() == args.to.lower()), None)
+        if sample:
+            codes.update(SA.ensure_ref_codes(sb, [sample]))
+        else:
+            sample = {"name": "", "email": args.to, "unsub_token": "00000000-0000-0000-0000-000000000000"}
         body, unsub = build(sample)
-        print("promo: test copy", "sent" if send(args.to, body, unsub) else "FAILED")
+        ok = send(args.to, body, unsub)
+        print("promo: test copy", "sent" if ok else "FAILED")
+        if not ok:
+            sys.exit(1)                 # a red run, not a quiet green one
         return
 
+    codes.update(SA.ensure_ref_codes(sb, subs))
     done = {r["email"].lower() for r in sb.table("email_campaigns").select("email")
             .eq("campaign", CAMPAIGN).execute().data}
     todo = [s for s in subs if s["email"].lower() not in done]
@@ -163,6 +175,8 @@ def main():
             sb.table("email_campaigns").insert({"campaign": CAMPAIGN, "email": s["email"].lower()}).execute()
             sent += 1
     print(f"promo: sent {sent} of {len(todo)} ({len(done)} had it already)")
+    if sent < len(todo):
+        sys.exit(1)                     # some failed: the run shows red; re-running sends only those
 
 
 if __name__ == "__main__":
