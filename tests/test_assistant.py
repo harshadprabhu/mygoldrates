@@ -148,6 +148,15 @@ def test_my_city_is_the_visitors_own_never_the_last_city_asked_about(tmp_path):
     assert "localStorage.setItem('sona_city'" not in JS
 
 
+def test_making_charges_for_an_unmeasured_jewel_say_so_instead_of_showing_another():
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    measured = {c for b in kb["brands"] for c in (b.get("mk") or {})}
+    r = _sona([{"lang": "en", "q": "lowest making charge on a chain"}, {"q": "lowest making charge on a ring"}])
+    if "Chain" not in measured:
+        assert "haven’t measured making charges on a <b>chain</b>" in r[0]["html"]
+    assert "Lowest making charges on a <b>ring</b>" in r[1]["html"]
+
+
 def test_every_language_has_every_reply_with_the_same_blanks():
     out = subprocess.run(["node", "-e", """
 const S=require('./sona_i18n.js'), ph=s=>JSON.stringify((s.match(/\\{\\w+\\}/g)||[]).sort());

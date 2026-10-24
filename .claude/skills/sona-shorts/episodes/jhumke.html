@@ -1,0 +1,129 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Sona Shorts - Making ka jhatka</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Noto+Sans+Devanagari:wght@600;800&display=block">
+<link rel="stylesheet" href="../kit/stage.css">
+<style>
+.bill { position: absolute; left: 70px; top: 150px; width: 400px; background: #fffdf6; border: 3.5px solid #2b1a10; border-radius: 18px; padding: 16px 22px 12px;
+  box-sizing: border-box; font: 700 28px/1.5 'Baloo 2', sans-serif; color: #2b1a10; box-shadow: 0 10px 0 rgba(0, 0, 0, .25); transform-origin: 50% 0; }
+.bill b { display: block; text-align: center; font-size: 30px; letter-spacing: 3px; border-bottom: 3px dashed #c9b9a8; margin-bottom: 6px; }
+.bill div { display: flex; justify-content: space-between; }
+.bill .mk { color: #d0122f; font-weight: 800; font-size: 31px; }
+</style>
+</head><body>
+<div id="stage">
+  <svg id="bg" viewBox="0 0 540 960"></svg><svg id="cast" viewBox="0 0 540 960"></svg>
+  <div id="phone"><div class="bezel"><iframe id="chat" title="Sona"></iframe></div></div>
+  <svg id="fx" viewBox="0 0 540 960"></svg><div id="ui"></div><div id="flash"></div>
+</div>
+<script>window.__SONA_TEST = 1;</script><script src="/assistant.js"></script>
+<script src="../kit/chars.js"></script><script src="../kit/kit.js"></script>
+<script>
+/* Episode 2 - "Making ka Jhatka" (romance + comedy, Hindi dialogue, Hinglish subtitles).
+ * Piku loves a pair of jhumkas; the bill's making charge knocks Chiku out
+ * cold. Revived, he asks Sona for the lowest making charge on jhumkas (real
+ * answer) - and Piku's thank-you kiss knocks him out again.
+ * D.mk.Earrings (render.py) = today's lowest measured making charge on earrings. */
+var D = window.D || {};
+var MK = (D.mk && D.mk.Earrings) || { p: '15.7%', hi: 'पंद्रह दशमलव सात' };
+var LINES = [
+  { id: 'p1', who: 'piku', hi: 'चिकू, देखो! ये झुमके कितने प्यारे हैं!', sub: 'Chiku, dekho! Ye jhumke kitne pyaare hain! 😍' },
+  { id: 'c1', who: 'chiku', hi: 'मेकिंग चार्ज... इतना?!', sub: 'Making charge… itna?! 😱' },
+  { id: 'p2', who: 'piku', hi: 'उठिए जी! उठिए! चिकू!', sub: 'Uthiye ji! Uthiye! Chiku! 😭' },
+  { id: 'c2', who: 'chiku', hi: 'रुको... सोना से पूछता हूँ!', sub: 'Ruko… Sona se poochta hoon! 📱' },
+  { id: 's1', who: 'sona', hi: 'झुमकों पर सबसे कम मेकिंग चार्ज, ' + MK.hi + ' प्रतिशत से शुरू है!' },
+  { id: 'c3', who: 'chiku', hi: 'देखा? वही झुमके, कम मेकिंग!', sub: 'Dekha? Wahi jhumke, kam making! 💪' },
+  { id: 'p3', who: 'piku', hi: 'मेरा स्मार्ट हीरो!', sub: 'Mera smart hero! 😍' },
+  { id: 'c4', who: 'chiku', hi: 'हाय... मैं गया!', sub: 'Haaye… main gaya! 😵‍💫' },
+  { id: 'p4', who: 'piku', hi: 'अरे! फिर से बेहोश? हा हा!', sub: 'Arey! Phir se behosh? 😂' },
+  { id: 's2', who: 'sona', hi: 'मेकिंग चार्ज? पहले सोना से पूछो!' }
+];
+var SUB = {}; LINES.forEach(function (l) { SUB[l.id] = l.sub; });
+var BEAT = .4992, tl = K.timeline(window.VO, BEAT, .02);           // Happy Beats vol. 1, 120.2 BPM
+var L = {}, S = {};
+L.p1 = tl.say('p1', .45);
+S.bill = tl.wait(.1); L.c1 = tl.say('c1', .75);
+S.fall = tl.wait(.05);                                                  // down he goes
+S.faint = tl.cut(.55); L.p2 = tl.say('p2', .35);
+S.sona = tl.cut(.35); L.c2 = tl.say('c2', .45);
+S.up = tl.wait(.15);
+var CH = { q: 'झुमकों पर सबसे कम मेकिंग चार्ज?', typeAt: S.up + .5, sendAt: S.up + 1.7, answerAt: S.up + 2.4, hold: 1.6, scroll: 120 };
+tl.wait(CH.answerAt + .15 - tl.now()); L.s1 = tl.say('s1');
+S.win = tl.cut(.5); L.c3 = tl.say('c3', .3); L.p3 = tl.say('p3', .25);
+S.kiss = tl.cut(.2); L.c4 = tl.say('c4', .9); S.fall2 = tl.now(); L.p4 = tl.say('p4', .45);
+S.outro = tl.cut(.4); L.s2 = tl.say('s2', .55);
+S.end = tl.cut(.9);
+var talk = function (t, id) { return K.talking(t, L[id]); };
+
+window.EP = {
+  lines: LINES, voice: tl.voice, dur: S.end, chat: CH, poster: S.bill + .7,
+  music: { file: 'music/vol-1.mp3', start: 0, gain: -6 },
+  sfx: [
+    ['interface/drop_002.ogg', S.bill, -10], ['interface/glitch_002.ogg', L.c1.a, -13],
+    ['impact/impactPlank_medium_000.ogg', S.fall + .5, -8], ['ui/rollover4.ogg', S.up, -14], ['ui/click2.ogg', CH.sendAt, -12],
+    ['interface/bong_001.ogg', CH.answerAt, -16], ['casino/chips-collide-1.ogg', S.win + .1, -12],
+    ['impact/impactBell_heavy_000.ogg', S.kiss + .3, -19], ['impact/impactSoft_heavy_003.ogg', S.fall2 + .45, -10],
+    ['impact/impactGeneric_light_002.ogg', S.outro + .05, -12]
+  ],
+  scene: function (t) {
+    var o = { bg: K.shop(t), cast: '', fx: '', ui: '' };
+    if (t < S.faint) {                                      // 1. the jhumkas, and the bill
+      var shock = t > L.c1.a - .3, fall = K.eio((t - S.fall) / .55), out = t > S.fall + .2;
+      o.cast = CHAR.chiku({ x: 150, y: 890 + fall * 10, s: .95, t: t, mood: out ? 'faint' : shock ? 'shock' : 'happy', pose: shock && !out ? 'cheeks' : 'idle', rot: -fall * 82, earFlap: shock && !out, talk: talk(t, 'c1') }) +
+        CHAR.piku({ x: 385, y: 895, s: .95, flip: -1, t: t, mood: shock ? 'shock' : 'love', pose: 'point', prop: 'jhumka', talk: talk(t, 'p1') });
+      o.fx = K.sparkles(t, 330, 690, 50, 5);
+      o.ui = K.caption('Shopping with biwi 💕', K.env(t, .1, S.bill), 150, 40) +
+        K.line(t, L.p1, { x: 395, y: 560, w: 400, tail: 'br', text: SUB.p1 });
+      var bp = K.env(t, S.bill, S.faint, .3, .2);
+      if (bp > 0) o.ui += '<div class="bill" style="transform:scale(' + K.back(bp) + ') rotate(' + (-3 + Math.sin(t * 30) * (shock ? 1.5 : 0)) + 'deg);opacity:' + K.clamp(bp * 2) + '"><b>BILL</b>' +
+        '<div><span>Sona</span><span>✔</span></div><div><span>GST 3%</span><span>✔</span></div><div class="mk"><span>Making charge</span><span>😱😱😱</span></div></div>';
+      o.ui += K.line(t, L.c1, { x: 160, y: 600, w: 330, tail: 'bl', text: SUB.c1 });
+      o.flash = K.env(t, 0, .25, .01, .2) * .5 + K.env(t, S.fall + .3, S.fall + .55, .02, .2) * .4;
+    } else if (t < S.sona) {                                // 2. out cold
+      o.cast = CHAR.chiku({ x: 175, y: 905, s: .95, t: t, mood: 'faint', rot: -82 }) +
+        CHAR.piku({ x: 360, y: 895, s: .95, flip: -1, t: t, mood: 'cry', pose: 'fan', talk: talk(t, 'p2') });
+      var wind = '';
+      for (var k = 0; k < 3; k++) { var wp = ((t * 2.5 + k / 3) % 1); wind += '<path d="M' + (270 - wp * 60) + ' ' + (720 + k * 26) + ' h-40" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity="' + (1 - wp) + '"/>'; }
+      o.fx = wind;
+      o.ui = K.caption('Making charge ka<br>jhatka ⚡', K.env(t, S.faint + .1, S.sona), 150, 46) +
+        K.line(t, L.p2, { x: 360, y: 560, w: 380, tail: 'br', text: SUB.p2 });
+    } else if (t < S.win) {                                 // 3. ask Sona - the real chat
+      if (t < S.up) {
+        var hop = Math.max(0, Math.sin(K.clamp((t - S.sona) / .5) * Math.PI)) * 70;
+        o.cast = CHAR.chiku({ x: 270, y: 900 - hop, s: 1.25, t: t, mood: 'sly', pose: 'phone', prop: 'phone', talk: talk(t, 'c2') });
+        o.ui = K.line(t, L.c2, { x: 300, y: 370, w: 400, tail: 'bl', text: SUB.c2 });
+        o.flash = K.env(t, S.sona, S.sona + .2, .01, .18) * .5;
+      } else {
+        var up = K.eo((t - S.up) / .45), sc = 1.17, py = K.lerp(980, 70, up);
+        o.phone = 'translate(' + ((540 - 330 * sc) / 2) + 'px,' + py + 'px) scale(' + sc + ')';
+        o.bg += '<rect width="540" height="960" fill="#12060a" opacity="' + (.6 * up) + '"/>';
+        var bot = py + 690 * sc;
+        o.ui = '<svg viewBox="0 0 540 960"><circle cx="86" cy="' + (bot - 40) + '" r="30" fill="#e6a966" stroke="#bf7d3d" stroke-width="4"/><circle cx="454" cy="' + (bot - 40) + '" r="30" fill="#e6a966" stroke="#bf7d3d" stroke-width="4"/></svg>' +
+          K.caption(t < L.s1.a ? 'Sona, help! 🙏' : 'Sona bol rahi hai 🔊', K.env(t, S.up + .3, S.win - .1), 16, 30);
+      }
+    } else if (t < S.kiss) {                                // 4. the hero
+      var w = t - S.win, praised = t > L.p3.a - .2;
+      o.cast = CHAR.chiku({ x: 165, y: 890, s: 1.0, t: t, mood: 'happy', pose: 'cheer', earFlap: true, talk: talk(t, 'c3'), sq: Math.abs(Math.sin(w * 7)) * .04 }) +
+        CHAR.piku({ x: 385, y: 895, s: 1.0, flip: -1, t: t, mood: praised ? 'love' : 'happy', pose: praised ? 'cheeks' : 'hold', prop: praised ? 'none' : 'jhumka', blush: true, talk: talk(t, 'p3') });
+      o.fx = K.coins(t, S.win, 12) + K.hearts(t, L.p3.a, 385, 500, 8);
+      o.ui = K.caption('Jhumkon ka making<br><span style="color:#ffd35a;font-size:1.3em">' + MK.p + '</span> se shuru! 💪', K.env(t, S.win + .1, S.kiss), 120, 42) +
+        K.line(t, L.c3, { x: 170, y: 545, w: 400, tail: 'bl', text: SUB.c3 }) +
+        K.line(t, L.p3, { x: 395, y: 545, w: 340, tail: 'br', text: SUB.p3 });
+      o.flash = K.env(t, S.win, S.win + .2, .01, .18) * .55;
+    } else if (t < S.outro) {                               // 5. the kiss - and down he goes again
+      var z = t - S.kiss, lean = K.eo(z / .5), fall2 = K.eio((t - S.fall2) / .5), down = t > S.fall2 + .15;
+      o.cast = CHAR.chiku({ x: 205, y: 890 + fall2 * 12, s: 1.0, t: t, mood: down ? 'faint' : 'love', pose: 'idle', blush: true, rot: -fall2 * 82, talk: talk(t, 'c4') }) +
+        CHAR.piku({ x: K.lerp(385, 315, lean) + (down ? K.eo((t - S.fall2) / .5) * 50 : 0), y: 895, s: 1.0, flip: -1, t: t, mood: down ? 'laugh' : 'kiss', pose: 'cheeks', rot: down ? 0 : lean * -8, blush: true, talk: talk(t, 'p4') });
+      o.fx = K.hearts(t, S.kiss + .3, 255, 520, 18) + K.hearts(t, S.fall2 + .2, 150, 760, 8, 1.2);
+      o.ui = K.line(t, L.c4, { x: 210, y: 520, w: 330, tail: 'bl', text: SUB.c4 }) +
+        K.line(t, L.p4, { x: 400, y: 545, w: 380, tail: 'br', text: SUB.p4 }) +
+        K.caption('Is baar pyaar se<br>behosh 😵‍💫💘', K.env(t, S.fall2 + .2, S.outro), 140, 44);
+      o.flash = K.env(t, S.kiss, S.kiss + .2, .01, .18) * .4;
+    } else {                                                // 6. outro - Sona signs off
+      o.ui = K.outro(K.eo((t - S.outro) / .5), t, 'Making charge? <b>Sona</b> se poochho 💛<br><span style="font-size:.62em;color:#f3e6c8">har jeweller ka asli making</span>');
+    }
+    return o;
+  }
+};
+K.boot();
+</script>
+</body></html>

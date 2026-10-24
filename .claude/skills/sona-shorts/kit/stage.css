@@ -1,0 +1,28 @@
+/* Sona Shorts stage: 540x960 CSS px, captured at 2x (1080x1920). */
+html, body { margin: 0; background: #000; }
+#stage { position: relative; width: 540px; height: 960px; overflow: hidden; background: #000; font-family: 'Baloo 2', 'Noto Sans Devanagari', sans-serif; }
+#bg, #cast, #fx { position: absolute; left: 0; top: 0; width: 540px; height: 960px; }
+#ui { position: absolute; inset: 0; }
+#ui > svg { position: absolute; left: 0; top: 0; width: 540px; height: 960px; }
+#flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+.bub { position: absolute; background: #fff; color: #2b1a10; border: 3.5px solid #2b1a10; border-radius: 26px; padding: 12px 18px 10px;
+  font: 800 31px/1.2 'Baloo 2', sans-serif; text-align: center; box-shadow: 0 7px 0 rgba(43, 26, 16, .18); box-sizing: border-box; }
+.bub i { position: absolute; bottom: -25px; border: 14px solid transparent; border-top: 24px solid #2b1a10; border-bottom: 0; }
+.bub i::after { content: ''; position: absolute; left: -10px; top: -28.5px; border: 10px solid transparent; border-top: 19px solid #fff; border-bottom: 0; }
+.cap { position: absolute; left: 0; right: 0; padding: 0 22px; text-align: center; font: 800 40px/1.15 'Baloo 2', sans-serif; color: #fff;
+  text-shadow: 0 5px 0 #2b1a10, 3px 3px 0 #2b1a10, -3px 3px 0 #2b1a10, 3px -3px 0 #2b1a10, -3px -3px 0 #2b1a10, 0 -3px 0 #2b1a10, 3px 0 0 #2b1a10, -3px 0 0 #2b1a10; }
+.cap.gold { color: #ffd35a; }
+.cap small { display: block; font-size: .55em; color: #fff3d6; }
+#phone { position: absolute; left: 0; top: 0; width: 330px; height: 690px; display: none; transform-origin: 0 0; }
+.bezel { width: 330px; height: 690px; border-radius: 46px; background: #121212; padding: 16px 15px; box-sizing: border-box;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, .45), inset 0 0 0 3px #d6b25e; }
+#chat { width: 300px; height: 658px; border: 0; border-radius: 32px; background: #0f0b06; display: block; }
+.outro { position: absolute; inset: 0; background: radial-gradient(circle at 50% 34%, #4a3510, #120c05 72%); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px; }
+.o-sona { width: 230px; height: 253px; } .o-sona svg { width: 100%; height: 100%; }
+.o-line { font: 800 40px/1.18 'Baloo 2', sans-serif; color: #fff; text-align: center; padding: 0 30px; }
+.o-line b { color: #ffd35a; }
+.o-site { display: flex; align-items: center; gap: 12px; font: 800 34px/1 'Baloo 2', sans-serif; color: #ffd35a; border: 2.5px solid #e3b44f;
+  border-radius: 999px; padding: 10px 24px 8px; background: rgba(255, 255, 255, .05); }
+.o-site img { width: 42px; height: 42px; border-radius: 10px; }
+.o-sub { font: 600 23px/1 'Baloo 2', sans-serif; color: #d9c79c; }
