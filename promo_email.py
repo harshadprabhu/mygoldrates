@@ -27,6 +27,10 @@ CAMPAIGN = "sona-launch-2026-10"
 SUBJECT = "Sona can now answer your gold questions"
 SUBJECT_DESIGNED = "Meet Sona: ask about gold in your own language, type or talk (free)"
 LETTER_FROM = "Harshad from MyGoldRates"
+# The launch goes out from its own address, never the daily alerts' one:
+# whatever Gmail learns about an announcement must not move the daily rate
+# email out of Primary. PROMO_FROM overrides; default hello@<alerts domain>.
+PROMO_LOCAL = "hello"
 
 
 def examples(live):
@@ -212,8 +216,12 @@ def main():
     key = os.environ.get("BREVO_API_KEY", "").strip()
     if not key:
         sys.exit("promo: BREVO_API_KEY not set")
-    from_name, from_email = SA.parse_sender(
+    from_name, alerts_email = SA.parse_sender(
         os.environ.get("ALERTS_FROM", "GoldRates <alerts@mygoldrates.com>"))
+    from_email = (os.environ.get("PROMO_FROM", "").strip()
+                  or f"{PROMO_LOCAL}@{alerts_email.split('@')[-1]}")
+    if from_email.lower() == alerts_email.lower():
+        sys.exit("promo: refusing to send the launch from the daily alerts address")
 
     def send(to_email, mail, unsub):
         body, text, subject, sender = mail
