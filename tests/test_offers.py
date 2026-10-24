@@ -124,3 +124,26 @@ def test_a_big_figure_from_a_banner_is_left_out_and_buy_more_is_named():
     got = O.extract_offers(txt, "u", image="i")
     assert not any((o["pct"] or 0) >= 50 for o in got)
     assert any(o["kind"] == "combo" for o in got)
+
+
+def test_stylised_banner_figures_are_read_right():
+    """PN Gadgil & Sons' banner (24 Oct 2026): "lOO ON MAKING CHARGES OF
+    CERTIFIED NATURAL DIAMOND JEWELLERY ... Offer Valid Till 15 Nov 2026"."""
+    txt = "lOO\nON MAKING CHARGES OF CERTIFIED\nNATURAL DIAMOND JEWELLERY\nOffer Valid Till 15 Nov 2026 *T&C Apply"
+    assert "100% ON MAKING" in O._ocr_prepare(txt)
+
+
+def test_rate_lock_wording_is_rate_protection():
+    """Khimji's banner: lock your gold rate / get it at the booked rate."""
+    assert _one("LOCK YOUR GOLD RATE AT JEWELLERY ADVANCE", "rate_protect")
+    assert _one("PRICE HIKED? GET YOUR GOLD JEWELLERY AT THE BOOKED RATE", "rate_protect")
+
+
+def test_a_redirect_abroad_is_followed_back_to_the_indian_store():
+    class R:
+        def __init__(self, url, text): self.url, self.text, self.status_code = url, text, 200
+    class S:
+        def get(self, u, timeout=0): return R("https://x.com/in/pan-india/en/", "<p>₹13,000</p>")
+    html = '<a href="https://x.com/in/">India</a><a href="https://x.com/uk/">UK</a>'
+    assert O.india_url(S(), "https://x.com/", "https://x.com/us/", html) == "https://x.com/in/pan-india/en/"
+    assert O.india_url(S(), "https://x.com/", "https://x.com/", "<p>₹1</p>") is None
