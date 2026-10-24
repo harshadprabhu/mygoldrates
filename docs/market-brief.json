@@ -105,7 +105,7 @@
   "2026-10-24": {
    "date": "2026-10-24",
    "paragraphs": [
-    "International gold is at $3,997 an ounce (-0.08% since 23 Oct), the rupee at ₹95.04 to the dollar (weaker by 0.14%), and the Indian jeweller board median at ₹14,266/g for 24K (+0.06%). In rupee terms the move came mostly from the rupee (-0.08% gold, +0.14% USD/INR).",
+    "the rupee at ₹95.04 to the dollar (weaker by 0.14%), and the Indian jeweller board median at ₹14,266/g for 24K (+0.06%).",
     "What the world's gold news is about today: US interest rates (2 headlines), Inflation (1 headline), Records and profit-taking (1 headline).",
     "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMisgFBVV95cUxNSkRMRnR4aHc0aXgwWW5qZnU3ZlVrMzFHdE90dDh1YzFfeUp1ZmI4SmRrUEtveVNsbnRyczNveG5GaEtYRjk1NTkwODRoQkJuMzgtbVpHRzVLZ0ZpUkhmTnVqeWIySnRJbng1UDVmYXZkRm1ac0xnQ25KNFFNRE5odm9SSTlzWDAtUVR4RWllZ0N2aTRrNjlPUG03b2xQLWl1b1EteGRhTzd0b3EwYk9YYk53?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold price set for steep weekly loss as rising oil prices bolster Fed rate hike bets</a> (Mining.com); <a href=\"https://news.google.com/rss/articles/CBMiiAFBVV95cUxPdUdpU2Y3bVRMdDg1TkptRFRwNHhvX1RnYlM3MnB2cklSRGxSNFhWeWs0dk5GbmxFQmNHZy1EMmxWd0RhQVdyWkVER0JUUzduQnFuMTkxRE1pQ1dSLXplRW1OWnlqMXpuRy1SbmcyQmtZN2RnejZrSnJZTGJMS2g5ZjlkbEFyNng0?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: Can XAU/USD Recover Above $4,000 as Fed Decision Looms?</a> (Mitrade).",
     "<strong>Inflation.</strong> Gold is held as an inflation hedge, though hot inflation can also mean higher rates, which cuts the other way. In the news: <a href=\"https://news.google.com/rss/articles/CBMiuwFBVV95cUxPZUUtZHJuN3lDVDVOWHVqbFRoZEFHckp0UDI3MUpHN2ZJMVpXMTdROTJQX29yMHgteWFYZDdXVUVOMXp6c3FLVzFLc2V2NTctMzBGTnlJSmJyQWxhWGs2azVqQ0JjUGx2M3BUNVFjNFY0cTgtMlc0NXpxYy1NZGdVRlNsaVU5Ump4cWFlRU9Fd2R3NVFvaGpDem9kT2xLSFc0YklVb2FQcE1ObGp6ek9NMUNVN1BfYndmb3BN?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold price trades near $4,000/oz after final Consumer Sentiment holds steady at 48, inflation expectations rise</a> (Kitco).",
@@ -114,10 +114,10 @@
    ],
    "snap": {
     "board24": 14266.5,
-    "gold_usd": 3996.899902,
+    "gold_usd": null,
     "usdinr": 95.036492
    },
-   "summary": "gold -0.1%, news led by us interest rates",
+   "summary": "news led by us interest rates",
    "themes": {
     "inflation": 1,
     "momentum": 1,
