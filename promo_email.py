@@ -19,7 +19,7 @@ from datetime import datetime
 import send_alerts as SA
 
 CAMPAIGN = "sona-launch-2026-10"
-SUBJECT = "Meet Sona: ask anything before you buy gold (new and free)"
+SUBJECT = "Meet Sona: ask about gold in your own language, type or talk (free)"
 
 
 def examples(live):
@@ -38,7 +38,7 @@ def examples(live):
     gold = r22(low) * 10
     out.append(("What does a 10 g 22K chain cost?",
                 f"About {SA.inr(gold * 1.03)} for the gold with GST at {low['brands']['name']}, "
-                "plus the jeweller's making charge - Sona works it out for any jeweller and weight."))
+                "plus the jeweller's making charge &mdash; Sona works it out for any jeweller and weight."))
     return out
 
 
@@ -59,11 +59,12 @@ def html(first, qa, invite, unsub, date):
       <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;letter-spacing:1.5px;line-height:1"><span style="color:#efe8d6">My</span><span style="color:#e6c268">Gold</span><span style="color:#efe8d6">Rates</span></div>
       <div style="margin-top:18px;display:inline-block;background:#e6c268;color:#1a1405;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:bold;letter-spacing:1.5px">NEW &middot; FREE</div>
       <div style="margin-top:10px;font-family:Georgia,serif;font-size:30px;line-height:1.2;color:#fff3d6">Meet Sona, your jewellery assistant</div>
-      <div style="margin-top:8px;font-size:14px;line-height:1.6;color:#cdbf9f">Ask anything before you buy gold &mdash; she answers instantly from today&rsquo;s real rates at every jeweller we track.</div>
+      <div style="margin-top:8px;font-size:14px;line-height:1.6;color:#cdbf9f">Ask anything before you buy gold &mdash; type it, or just say it out loud. She answers instantly from today&rsquo;s real rates at every jeweller we track.</div>
+      <div style="margin-top:12px;font-size:13px;line-height:1.7;color:#e6c268">English &middot; &#2361;&#2367;&#2344;&#2381;&#2342;&#2368; &middot; &#2350;&#2352;&#2366;&#2336;&#2368; &middot; &#2711;&#2753;&#2716;&#2736;&#2750;&#2724;&#2752; &middot; &#2602;&#2672;&#2588;&#2622;&#2604;&#2624; &middot; &#2476;&#2494;&#2434;&#2482;&#2494; &middot; &#3221;&#3240;&#3277;&#3240;&#3233; &middot; &#2980;&#2990;&#3007;&#2996;&#3021; &middot; &#3108;&#3142;&#3122;&#3137;&#3095;&#3137; &middot; &#3374;&#3378;&#3375;&#3390;&#3379;&#3330;</div>
     </td></tr>
     <tr><td style="padding:26px 30px 6px">
       <p style="margin:0 0 14px;font-size:15px;color:#3b3833">Hi {first},</p>
-      <p style="margin:0 0 18px;font-size:14px;line-height:1.65;color:#514b41">Thank you for being one of our first subscribers. Today we&rsquo;re launching <b>Sona</b> on MyGoldRates: type a question the way you&rsquo;d ask a friend &mdash; in English or Hinglish &mdash; and get the answer with today&rsquo;s numbers. A few she answered this morning:</p>
+      <p style="margin:0 0 18px;font-size:14px;line-height:1.65;color:#514b41">Thank you for being one of our first subscribers. Today we&rsquo;re launching <b>Sona</b> on MyGoldRates: type a question the way you&rsquo;d ask a friend, or tap the &#127908; and simply ask out loud &mdash; in English, Hindi, Marathi, Gujarati, Punjabi, Bengali, Kannada, Tamil, Telugu or Malayalam. She answers in your language with today&rsquo;s numbers, and can read the answer out to you. A few she answered this morning:</p>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{rows}</table>
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:10px 0 8px">
         <tr><td style="border-radius:999px;background:linear-gradient(100deg,#8C6A18,#D9B24A 48%,#C79A2E)">
@@ -104,6 +105,12 @@ def main():
         sys.exit("promo: no published rates - not sending")
     qa = examples(live)
     date = datetime.now(SA.IST).strftime("%d %B %Y")
+    if args.preview:                 # reads rates only; writes nothing anywhere
+        body = html("Asha", qa, SA.ref_link("SAMPLE1"),
+                    f"{SA.SITE_URL}/unsubscribe.html?t=00000000-0000-0000-0000-000000000000", date)
+        open(args.preview, "w", encoding="utf-8").write(body)
+        print(f"promo: preview written to {args.preview}; nothing sent")
+        return
     subs = sb.table("inquiries").select("name, email, unsub_token").execute().data
     subs = [s for s in subs if s.get("email") and s.get("unsub_token")]
     codes = SA.ensure_ref_codes(sb, subs)
@@ -112,13 +119,6 @@ def main():
         first = (s.get("name") or "there").strip().split(" ")[0] or "there"
         unsub = f"{SA.SITE_URL}/unsubscribe.html?t={s['unsub_token']}"
         return html(first, qa, SA.ref_link(codes.get(s["email"].lower())), unsub, date), unsub
-
-    if args.preview:
-        body, _ = build({"name": "Asha", "email": "sample@example.com",
-                         "unsub_token": "00000000-0000-0000-0000-000000000000"})
-        open(args.preview, "w", encoding="utf-8").write(body)
-        print(f"promo: preview written to {args.preview}; nothing sent")
-        return
 
     key = os.environ.get("BREVO_API_KEY", "").strip()
     if not key:

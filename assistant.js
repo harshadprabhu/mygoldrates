@@ -260,13 +260,19 @@
       }).join('') + '<p>' + link('/gold-offers-today', t('off_all')) + '</p>',
         say: t('say_off_brand', { b: b.n, n: b.off.length }), chips: chips(['afteroff', 'cheap22']) };
     }
-    var rows = (KB.ring || []).slice(0, 5);
-    var h = '<p>' + t('off_h') + '</p>' +
-      (rows.length ? '<div class="sn-list">' + rows.map(function (r, i) { return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + esc(r.n) + (r.p ? ' <em>' + t('off_tag', { p: r.p }) + '</em>' : '') + '</span><span class="sn-v">' + inr(r.a) + '</span></div>'; }).join('') + '</div>' : '');
-    var withOff = KB.brands.filter(function (b) { return b.off && b.off.length; });
-    h += '<p>' + t('off_count', { n: withOff.length, list: withOff.slice(0, 4).map(function (b) { return esc(b.n) + ': ' + esc(b.off[0].h); }).join('; ') }) + '</p>' +
+    // Every jeweller with an offer today, A to Z, each with its own offers:
+    // no jeweller is singled out. The ring price after offers is one line,
+    // because only an offer on every design can be priced into it.
+    var withOff = KB.brands.filter(function (b) { return b.off && b.off.length; })
+      .sort(function (a, b) { return a.n.localeCompare(b.n); });
+    var ring = (KB.ring || [])[0];
+    var h = '<p>' + t('off_all_h', { n: withOff.length }) + '</p><div class="sn-list">' + withOff.map(function (b) {
+      return '<div class="sn-row sn-orow"><span class="sn-nm"><b>' + esc(b.n) + '</b>' +
+        b.off.slice(0, 3).map(function (o) { return '<small>' + esc(o.h) + '</small>'; }).join('') + '</span></div>';
+    }).join('') + '</div>' +
+      (ring ? '<p class="sn-dim">' + t('off_ring', { b: esc(ring.n), p: inr(ring.a) }) + '</p>' : '') +
       '<p>' + link('/gold-offers-today', t('off_every')) + '</p>';
-    return { intent: 'offers', html: h, say: rows.length ? t('say_off', { b: rows[0].n, p: sInr(rows[0].a) }) : '',
+    return { intent: 'offers', html: h, say: ring ? t('say_off_all', { n: withOff.length, b: ring.n, p: sInr(ring.a) }) : '',
       chips: chips(['goodmk', 'mkcmp', 'cheap22']) };
   }
   function aPrice(w, k, bs, ct) {
@@ -476,6 +482,7 @@
     '.sn-lchips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}.sn-lchips button{border:1px solid rgba(240,208,128,.25);background:none;color:#f0d080;border-radius:999px;padding:4px 10px;font-size:12.5px;cursor:pointer}.sn-lchips button:hover{background:rgba(231,191,90,.12)}' +
     '.sn-mic{width:46px;height:46px;flex:none;border-radius:50%;border:1px solid rgba(240,208,128,.4);background:rgba(231,191,90,.1);color:#f0d080;cursor:pointer;display:flex;align-items:center;justify-content:center}.sn-mic svg{width:21px;height:21px}' +
     '.sn-mic.on{background:#e5484d;border-color:#e5484d;color:#fff;animation:snMic 1.2s infinite}@keyframes snMic{0%{box-shadow:0 0 0 0 rgba(229,72,77,.6)}70%{box-shadow:0 0 0 12px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}' +
+    '.sn-orow .sn-nm b{display:block;font-size:13.5px}.sn-orow small{display:block;color:#cfc4ad;font-size:12px;line-height:1.45;margin-top:2px}' +
     '.sn-fb .sn-say{margin-left:auto}.sn-fab .sn-fmic{width:26px;height:26px;margin:0 -6px 0 -2px;border-radius:50%;background:rgba(26,20,5,.12);display:flex;align-items:center;justify-content:center}.sn-fab .sn-fmic svg{width:15px;height:15px}' +
     '@media(max-width:520px){.sn-fab .sn-fmic{display:none}}' +
     '.sn-ban .bx{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;border:0;border-radius:50%;background:rgba(26,20,5,.12);color:#1a1405;cursor:pointer;font-size:14px}';
