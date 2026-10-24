@@ -12,7 +12,7 @@ require(path.join(root, 'assistant.js'));
 var S = window.__SONA_TEST, input = JSON.parse(fs.readFileSync(0, 'utf8'));
 S.setKB(JSON.parse(fs.readFileSync(input.kb, 'utf8')));
 console.log(JSON.stringify(input.qs.map(function (x) {
-  S.setLang(x.lang || 'en');
-  var r = S.ask(x.q), a = r.a || {};
-  return { q: x.q, text: r.text, lang: r.lang, intent: a.intent || null, html: a.html || '', say: a.say || '' };
+  if ('lang' in x) S.setLang(x.lang);                // otherwise the conversation carries on
+  var r = S.ask(x.q, !!x.chip), a = r.a || {};
+  return { q: x.q, text: r.text, lang: r.lang, mic: S.micLang(), intent: a.intent || null, html: a.html || '', say: a.say || '' };
 })));
