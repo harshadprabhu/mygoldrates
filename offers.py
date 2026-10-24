@@ -36,6 +36,13 @@ OUT = "docs/offers.json"
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/141.0 Safari/537.36 MyGoldRatesOffers/1.0")
 MAX_PAGES = 5            # homepage + up to 4 offer pages per jeweller
+# Where a jeweller's Indian site starts, for sites that send visitors from
+# abroad (our reader) to another country's store. Found by hand; the reader
+# also looks for an India link itself (india_url).
+INDIA_HOME = {
+    "malabar": "https://www.malabargoldanddiamonds.com/in/pan-india/en/jewellery.html",
+}
+COUNTRY_PATH = re.compile(r"^/(?:us|uk|ae|uae|sg|au|ca|qa|om|kw|bh|sa|my|nz|gcc|intl|international)(?:/|$)", re.I)
 LINK_WORDS = re.compile(
     r"offer|promotion|promo|deal|festive|festival|scheme|celebrat|dhanteras|"
     r"diwali|akshaya|wedding-season|sale", re.I)
@@ -51,6 +58,9 @@ RULES = [
         UPTO + PCT + r"\s*(?:off|discount|savings?)\s*(?:on|in)?\s*(?:the\s*)?"
         r"(?:gold\s*|diamond\s*|jewell?ery\s*)*(?:making|mc\b|labou?r|wastage|va\b|value\s*addition)", re.I)),
     # making charges flat 20% off / making charges upto 30% off
+    # 50% Off on making charges / 25% on making charges (banner wording)
+    ("making_off", re.compile(
+        UPTO + PCT + r"\s*(?:off\s*)?on\s*(?:the\s*)?(?:making|mc\b|wastage|va\b|value\s*addition)", re.I)),
     ("making_off", re.compile(
         r"(?:making|wastage|value\s*addition)\s*charges?\s*[:\-]?\s*" + UPTO + PCT +
         r"\s*(?:off|discount)", re.I)),
@@ -71,7 +81,9 @@ RULES = [
     # gold rate protection / price lock / advance booking
     ("rate_protect", re.compile(
         r"(?:gold\s*)?(?:rate|price)\s*(?:protection|lock|guarantee|assurance)|"
-        r"advance\s*booking|book\s*(?:your\s*)?gold\s*(?:at|now)", re.I)),
+        r"advance\s*booking|book\s*(?:your\s*)?gold\s*(?:at|now)|"
+        r"lock\s*(?:your\s*)?gold\s*rate|(?:at\s*the\s*)?booked\s*rate|"
+        r"price\s*(?:hiked|dropped)\?", re.I)),
     # monthly purchase schemes
     ("scheme", re.compile(
         r"(?:gold|jewell?ery)\s*(?:savings?|purchase|harvest|plus|tree|mine|"
@@ -82,6 +94,9 @@ RULES = [
         PCT + r"\s*(?:instant\s*)?(?:cash\s*back|discount)\s*(?:with|on|using)\s*"
         r"(?:[A-Z][\w&]+\s*){1,3}(?:bank|card|credit|debit)|"
         r"(?:cash\s*back|instant\s*discount)\s*(?:of\s*)?(?:up\s*to\s*)?" + MONEY, re.I)),
+    # buy one, get the second at a discount
+    ("combo", re.compile(
+        r"buy\s*(?:1|one|2|two)\b[^.]{0,80}?(?:get|2nd|second|3rd|third)\b[^.]{0,40}", re.I)),
     # flat 10% off on gold jewellery / on everything (not on making - above)
     ("all_off", re.compile(
         UPTO + PCT + r"\s*(?:off|discount)\s*(?:on|in)\s*(?:all\s*|the\s*|our\s*)?"
@@ -102,7 +117,14 @@ REVIEW = re.compile(
     r"\b(?:they|he|she)\s+gave\b|\bhighly\s+recommend|\bthank(?:s|\s+you)\b|"
     r"\b(?:we|i)\s+(?:really\s+)?(?:are\s+|am\s+|was\s+|were\s+)?(?:happy|loved|bought|visited|purchased)|"
     r"\bour\s+(?:purchase|experience|family)\b|\bexperience\s+was\b|"
-    r"for\s+the\s+customer.?s\s+money|\b(?:their|the)\s+\w+(?:\s+\w+){0,4}\s+is\s+very\b", re.I)
+    r"for\s+the\s+customer.?s\s+money|\b(?:their|the)\s+\w+(?:\s+\w+){0,4}\s+is\s+very\b|"
+    # "Beautiful necklace, got 100% discount on making charges making it worth
+    # it" - a customer review on CaratLane's homepage, read as an offer and
+    # published as CaratLane's on 24 Oct 2026. Past tense and praise mark a
+    # review; missing an offer is better than inventing one.
+    r"\b(?:i|we|she|he)?\s*got\b|\breceived\b|\bbeautiful\b|\blovely\b|\bamazing\b|"
+    r"\bworth\s+it\b|\bloved\b|\bsatisfied\b|\bexcellent\b|\bhappy\s+with\b|\bmy\s+(?:wife|mother|"
+    r"daughter|sister|husband|order|purchase)\b|\breview|\brated\b|\bstars?\b", re.I)
 # Leading clutter: ratings "4.7 (6)", prices "₹ 91,817", repeated menu text.
 LEAD_JUNK = re.compile(r"^(?:\d(?:\.\d)?\s*\(\d+\)\s*|(?:₹|rs\.?)\s*[\d,]+(?:\.\d+)?\s*)+", re.I)
 # Fine print: the conditions that decide what an offer is really worth.
@@ -143,12 +165,47 @@ def _sentence(text: str, start: int, end: int) -> str:
     return s[:220]
 
 
-def extract_offers(text: str, url: str) -> list[dict]:
-    """Every offer statement on one page, de-duplicated by wording."""
+def _ocr_prepare(text: str) -> str:
+    """Banner text from OCR as one run, and the stylised "%" OCR drops put
+    back where a number is followed by "off" ("FLAT 20 Off" -> "20% Off")."""
+    # Banner phrases run across lines ("FLAT / 20% Off / On All Diamond
+    # Jewellery"); the offer rules match across line breaks, which are kept
+    # so a lead-in word stays with its own line.
+    t = "\n".join(ln.strip() for ln in text.splitlines() if ln.strip())
+    t = _fix_figures(t)
+    # A dropped "%" before off / on making / on diamond.
+    return re.sub(r"\b(\d{1,3})\s+(?=(?:off|on\s+making|on\s+diamond|on\s+m/?c)\b)", r"\1% ", t, flags=re.I)
+
+
+def _fix_figures(t: str) -> str:
+    # Common misreads in stylised figures: "lOO" for 100, "O" for 0, "l" for 1.
+    t = re.sub(r"\b[lI1]\s?[oO0][oO0]\b", "100", t)
+    return re.sub(r"\b([1-9])[oO]\b", r"\g<1>0", t)
+
+
+def _ocr_sentence(text: str, start: int, end: int) -> str:
+    """One offer out of a banner that may carry several: a lead-in word or
+    two ("FLAT", "Up to"), the match, and its words up to the next figure."""
+    # A lead-in word counts only from the figure's own banner line: "FLAT"
+    # above "20%" must not be read into the "5%" offer printed next to it.
+    lead = re.search(r"(?:\b(?:flat|up\s*to|upto|get|enjoy|extra|special)\b[ \t]*)+$",
+                     text[max(0, start - 25):start].split("\n")[-1], re.I)
+    a = start - (len(lead.group(0)) if lead else 0)
+    tail = text[end:end + 60]
+    nxt = re.search(r"\d{1,3}\s*%|\bvalid\b|\bt\s*&\s*c\b|\bmin\b|\bmax\b", tail, re.I)
+    b = end + (nxt.start() if nxt else len(tail))
+    return re.sub(r"\s+", " ", text[a:b]).strip(" \u00b7.,")[:160]
+
+
+def extract_offers(text: str, url: str, image: str | None = None) -> list[dict]:
+    """Every offer statement on one page, de-duplicated by wording. With
+    image=..., the text came from a banner picture (banner_ocr.py)."""
     out, seen = [], set()
+    if image:
+        text = _ocr_prepare(text)
     for kind, rx in RULES:
         for m in rx.finditer(text):
-            sent = _sentence(text, m.start(), m.end())
+            sent = (_ocr_sentence if image else _sentence)(text, m.start(), m.end())
             if len(sent) < 8 or FOREIGN_CURRENCY.search(sent) or REVIEW.search(sent):
                 continue                     # template junk, other markets, reviews
             # A benefit of a monthly plan is the plan's, not a shop-wide offer.
@@ -174,18 +231,33 @@ def extract_offers(text: str, url: str) -> list[dict]:
                 pct = 100.0
             if pct is not None and not (0 < pct <= 100):
                 continue
-            mp = MIN_PURCHASE.search(sent)
-            vd = VALID.findall(sent)
+            # A banner loses the context around a big figure ("100% OFF ON
+            # DIAMOND" on Jewel One's was part of a buy-two deal): from a
+            # picture, 50% or more is left out rather than published.
+            # Exception: a making-charge offer that names diamond jewellery
+            # outright ("100% on making charges of certified natural diamond
+            # jewellery", PN Gadgil & Sons) is clear on its own.
+            if image and pct is not None and pct >= 50 and not (
+                    kind == "making_off" and re.search(r"diamond\s*jewell?ery", sent, re.I)):
+                continue
+            # A banner's dates and minimum spend usually cover all of it.
+            mp = MIN_PURCHASE.search(text if image else sent)
+            vd = VALID.findall(text if image else sent)
             out.append({
                 "kind": kind,
                 "pct": pct,
-                "upto": bool(re.search(r"up\s*to|upto", m.group(0) + " " + sent[:60], re.I)),
+                # From a picture, a figure without an explicit "flat" is
+                # shown as "up to": banners often print "UPTO" too small to
+                # read (PN Gadgil & Sons'), and "up to" is the safer claim.
+                "upto": bool(re.search(r"up\s*to|upto", m.group(0) + " " + sent[:60], re.I))
+                        or bool(image and not re.search(r"\bflat\b", sent, re.I)),
                 "selected": bool(re.search(r"select(ed)?\s*(designs|range|collection|products|items)|"
                                            r"on\s*select", sent, re.I)),
                 "min_purchase": _money(mp.group(1), mp.group(2)) if mp else None,
                 "dates": [d.strip() for d in vd][:2],
                 "text": sent,
                 "url": url,
+                **({"image": image, "banner": text[:300]} if image else {}),
             })
     return out
 
@@ -251,8 +323,9 @@ def summarise(offers: list[dict]) -> list[dict]:
             "conditions": fine,
             "text": best["text"],
             "url": best["url"],
+            **({"image": best["image"], "banner": best.get("banner", "")} if best.get("image") else {}),
         })
-    order = ["making_off", "making_zero", "all_off", "diamond_off", "exchange",
+    order = ["making_off", "making_zero", "all_off", "diamond_off", "combo", "exchange",
              "free_coin", "cashback", "rate_protect", "scheme"]
     return sorted(out, key=lambda o: order.index(o["kind"]) if o["kind"] in order else 99)
 
@@ -266,6 +339,44 @@ def _robots(sess, base):
     except Exception:
         rp.parse([])
     return rp
+
+
+FOREIGN_HOST = re.compile(r"\.(?:us|ae|uk|co\.uk|sg|com\.au|ca|qa|om|kw|bh|sa|my|nz)(?:/|$|:)", re.I)
+
+
+def international(html: str) -> bool:
+    """True when a site shows our reader (abroad) its international version:
+    more dollar prices than rupee prices. Its offers are not India's."""
+    text = page_text(html)                    # visible text: scripts are full of "$1"
+    rupees = len(re.findall(r"₹|\bRs\.?\s?\d|\bINR\b", text))
+    dollars = len(re.findall(r"(?<![A-Za-z])\$\s?\d|\bUSD\b|\bAED\b", text))
+    # Server-side geo pages name their assets: Malabar's homepage abroad is
+    # all "-intl" / "US-Gold-Scheme" banners.
+    # Only image addresses count: "intl" in a script name is a phone-number
+    # widget (Prince), "/international-shipping" a link (Candere).
+    intl_assets = len(re.findall(
+        r"[\w./-]*[-_/](?:intl|international|usa|uae|gcc|dubai)(?=[-_/.])[\w./-]*\.(?:jpe?g|png|webp)",
+        html, re.I))
+    return dollars > max(3, rupees) or intl_assets >= 3
+
+
+def india_url(sess, base, final_url, html):
+    """The Indian store, when the site sent our reader to another country's:
+    a same-site link to /in/ or /india/. None if there is no such link."""
+    host = urlparse(final_url or base).netloc
+    if not (COUNTRY_PATH.search(urlparse(final_url or "").path) or international(html)):
+        return None
+    for m in re.finditer(r'href=["\']([^"\']+)["\']', html, re.I):
+        u = urljoin(final_url or base, m.group(1))
+        p = urlparse(u)
+        if p.netloc == host and re.match(r"^/(?:in|india|en-in|in-en)(?:/|$)", p.path, re.I):
+            try:
+                r = sess.get(u, timeout=25)
+                if r.status_code == 200 and not international(r.text):
+                    return r.url
+            except Exception:
+                return None
+    return None
 
 
 def _blocked(status, html):
@@ -282,7 +393,8 @@ def _render(url):
         return None
     try:
         with sync_playwright() as p:
-            b = p.chromium.launch(args=["--no-sandbox"])
+            b = p.chromium.launch(args=["--no-sandbox"],
+                                 executable_path=os.environ.get("OFFERS_CHROMIUM") or None)
             pg = b.new_page(user_agent=UA)
             pg.goto(url, wait_until="domcontentloaded", timeout=45000)
             pg.wait_for_timeout(4000)
@@ -291,6 +403,63 @@ def _render(url):
             return h
     except Exception:
         return None
+
+
+def _render_with_banners(url):
+    """The rendered page and its banner images (for OCR). Free: Chromium in
+    the job. (None, []) if a browser is not available."""
+    try:
+        from playwright.sync_api import sync_playwright
+        import banner_ocr
+    except Exception:
+        return None, []
+    try:
+        with sync_playwright() as p:
+            b = p.chromium.launch(args=["--no-sandbox"],
+                                 executable_path=os.environ.get("OFFERS_CHROMIUM") or None)
+            pg = b.new_page(user_agent=UA, viewport={"width": 1366, "height": 900})
+            if os.environ.get("OFFERS_LOCAL_RELAY"):      # local testing only
+                def _relay(r):
+                    try:
+                        r.fulfill(response=r.fetch(timeout=30000))
+                    except Exception:
+                        try:
+                            r.abort()
+                        except Exception:
+                            pass
+                pg.route("**/*", _relay)
+            pg.goto(url, wait_until="domcontentloaded", timeout=45000)
+            pg.wait_for_timeout(5000)
+            pg.mouse.wheel(0, 1200)                       # lazy-loaded banners
+            pg.wait_for_timeout(1500)
+            h, imgs = pg.content(), banner_ocr.banner_urls(pg)
+            b.close()
+            return h, imgs
+    except Exception:
+        return None, []
+
+
+def read_banners(sess, imgs, page_url):
+    """Offers in banner pictures, read with Tesseract (free)."""
+    try:
+        import banner_ocr
+    except Exception:
+        return []
+    out = []
+    for u in imgs:
+        if FOREIGN_HOST.search(urlparse(u).netloc + "/") or re.search(
+                r"[-_/](?:intl|international|usa|uae|gcc|dubai)[-_/.]", u, re.I):
+            continue                     # e.g. cdn.caratlane.us: the US site's banner
+        try:
+            r = sess.get(u, timeout=25)
+            if r.status_code != 200 or len(r.content) > 6_000_000:
+                continue
+            txt = banner_ocr.read_image(r.content)
+        except Exception:
+            continue
+        if txt:
+            out += extract_offers(txt, page_url, image=u)
+    return out
 
 
 def offer_links(html: str, base: str) -> list[str]:
@@ -317,7 +486,7 @@ def read_brand(sess, brand, render=True):
     if not domain:
         rec["status"] = "no website"
         return rec
-    base = "https://" + domain.rstrip("/") + "/"
+    base = INDIA_HOME.get(brand["slug"]) or "https://" + domain.rstrip("/") + "/"
     rp = _robots(sess, base)
     raw = []
     try:
@@ -329,6 +498,18 @@ def read_brand(sess, brand, render=True):
     if _blocked(status, home):
         rec["status"] = "not readable (the site blocks automated visits)"
         return rec
+    ind = india_url(sess, base, r.url, home)
+    if ind:                                  # sent abroad: read the Indian store
+        base = ind
+        try:
+            r = sess.get(base, timeout=25)
+            home = r.text
+        except Exception:
+            pass
+    elif international(home) or COUNTRY_PATH.search(urlparse(r.url).path):
+        rec["status"] = "shows its international site to our reader, so no Indian offers"
+        return rec
+    rec["read_from"] = base
     pages = [(base, home)]
     for u in offer_links(home, base):
         if not rp.can_fetch(UA, u):
@@ -342,14 +523,37 @@ def read_brand(sess, brand, render=True):
     for u, h in pages:
         rec["pages"].append(u)
         raw += extract_offers(page_text(h), u)
-    if not raw and render:
-        for u, _ in pages[:2]:
-            h = _render(u)
-            if h:
-                raw += extract_offers(page_text(h), u)
+    imgs = []
+    if render:
+        # The homepage in a real browser: its text when the plain page had
+        # none (built by the site's scripts), and its banner pictures, which
+        # is where many jewellers put their offers.
+        h, imgs = _render_with_banners(base)
+        rec["rendered"] = bool(h)
+        if h and international(h):
+            rec["rendered"] = "international"
+            h, imgs = None, []
+        if h and not raw:
+            raw += extract_offers(page_text(h), base)
+        if not raw and len(pages) > 1:
+            h2 = _render(pages[1][0])
+            if h2:
+                raw += extract_offers(page_text(h2), pages[1][0])
+    # Banner pictures: those named in the plain (Indian) page first, then
+    # the rendered page's own. A banner adds what the page text does not
+    # already say.
+    try:
+        import banner_ocr
+        imgs = banner_ocr.banner_urls_from_html(home, base) + [
+            u for u in (imgs if render else []) if u not in home]
+    except Exception:
+        imgs = []
+    text_kinds = {o["kind"] for o in raw}
+    rec["banners"] = len(imgs)
+    raw += [o for o in read_banners(sess, imgs[:10], base) if o["kind"] not in text_kinds]
     rec["offers"] = summarise(raw)
     if not rec["offers"]:
-        rec["status"] = "no offers published as text today"
+        rec["status"] = "no offers published as text or in banners today"
     return rec
 
 

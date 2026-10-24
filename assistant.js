@@ -281,28 +281,79 @@
     return null;
   }
 
+  // ------------------------------------------------------------- avatar
+  // Sona's face, drawn in SVG (no image to download): ivory-and-gold helmet,
+  // black visor, glowing gold eyes, headphone ears, a bun with a gold band
+  // and a forehead jewel. CSS brings her to life: she bobs, blinks and
+  // smiles while idle, and talks (mouth moving, eyes glancing) while a reply
+  // is being written - add the class "sona-talk" to any element holding her.
+  var avN = 0;
+  function avatar(full) {
+    var p = 'sv' + (++avN) + '-';
+    return '<svg class="sona-svg" viewBox="0 0 120 ' + (full ? 132 : 120) + '" aria-hidden="true" focusable="false"><defs>' +
+      '<radialGradient id="' + p + 's" cx="38%" cy="28%" r="78%"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#f1e2c4"/><stop offset="1" stop-color="#c9a46c"/></radialGradient>' +
+      '<linearGradient id="' + p + 'g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0b8"/><stop offset=".45" stop-color="#e3b44f"/><stop offset="1" stop-color="#9c6b14"/></linearGradient>' +
+      '<radialGradient id="' + p + 'v" cx="42%" cy="32%" r="80%"><stop offset="0" stop-color="#33271a"/><stop offset="1" stop-color="#0a0705"/></radialGradient>' +
+      '<radialGradient id="' + p + 'e" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#fff8d6"/><stop offset=".55" stop-color="#ffd25e"/><stop offset="1" stop-color="#e3971a"/></radialGradient>' +
+      '<filter id="' + p + 'f" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>' +
+      '<g class="sv-bob">' +
+      (full ? '<rect x="52" y="96" width="16" height="12" rx="4" fill="url(#' + p + 'g)"/><path d="M30 132 C34 112 48 104 60 104 C72 104 86 112 90 132Z" fill="url(#' + p + 's)"/><path d="M44 107 Q60 116 76 107" stroke="url(#' + p + 'g)" stroke-width="2.4" fill="none"/>' +
+        '<circle cx="60" cy="121" r="6.5" fill="url(#' + p + 'g)"/><text x="60" y="124.6" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="9" fill="#5a3d08">S</text>' : '') +
+      '<ellipse cx="60" cy="15" rx="13" ry="10" fill="url(#' + p + 's)"/><rect x="46" y="19" width="28" height="5.5" rx="2.7" fill="url(#' + p + 'g)"/>' +
+      '<g class="sv-ear"><circle cx="17" cy="61" r="11" fill="url(#' + p + 'g)"/><circle cx="17" cy="61" r="6.6" fill="#2a1d0c"/><circle class="sv-glow" cx="17" cy="61" r="3.8" fill="#ffd25e"/></g>' +
+      '<g class="sv-ear"><circle cx="103" cy="61" r="11" fill="url(#' + p + 'g)"/><circle cx="103" cy="61" r="6.6" fill="#2a1d0c"/><circle class="sv-glow" cx="103" cy="61" r="3.8" fill="#ffd25e"/></g>' +
+      '<circle cx="60" cy="60" r="42" fill="url(#' + p + 's)"/>' +
+      '<ellipse cx="60" cy="64" rx="33.5" ry="27.5" fill="none" stroke="url(#' + p + 'g)" stroke-width="2.6"/>' +
+      '<ellipse cx="60" cy="64" rx="31" ry="25" fill="url(#' + p + 'v)"/>' +
+      '<path d="M37 55 Q43 42 58 40" stroke="rgba(255,255,255,.16)" stroke-width="3.2" fill="none" stroke-linecap="round"/>' +
+      '<path d="M60 25 L65.5 31.5 L60 38 L54.5 31.5Z" fill="url(#' + p + 'g)"/><circle cx="60" cy="31.5" r="1.8" fill="#fff6d0"/>' +
+      '<g class="sv-eyes"><g filter="url(#' + p + 'f)"><ellipse class="sv-eye" cx="48" cy="62" rx="5.4" ry="6.6" fill="url(#' + p + 'e)"/><ellipse class="sv-eye" cx="72" cy="62" rx="5.4" ry="6.6" fill="url(#' + p + 'e)"/></g>' +
+      '<circle class="sv-eye" cx="50" cy="59.6" r="1.6" fill="#fff"/><circle class="sv-eye" cx="74" cy="59.6" r="1.6" fill="#fff"/></g>' +
+      '<ellipse cx="39.5" cy="73" rx="4.6" ry="2.6" fill="#ff8f7d" opacity=".42"/><ellipse cx="80.5" cy="73" rx="4.6" ry="2.6" fill="#ff8f7d" opacity=".42"/>' +
+      '<path class="sv-smile" d="M51 74 Q60 82.5 69 74" stroke="#ffd25e" stroke-width="2.7" fill="none" stroke-linecap="round" filter="url(#' + p + 'f)"/>' +
+      '<ellipse class="sv-talk" cx="60" cy="76.5" rx="5" ry="3.6" fill="#ffd25e" filter="url(#' + p + 'f)"/>' +
+      '</g></svg>';
+  }
+  window.GR_SONA_AVATAR = avatar;
+
   // --------------------------------------------------------------- UI
   var SUGGEST = ['Cheapest 22K today', 'Gold rate in my city', 'Tanishq vs Kalyan', 'Best offer today', 'Price of 10 g 22K chain', '22K vs 24K?'];
   var CSS = '' +
     '.sn-fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:8500;display:flex;align-items:center;gap:9px;height:52px;padding:0 18px 0 7px;border:0;border-radius:999px;cursor:pointer;color:#1a1405;font:700 14.5px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:linear-gradient(135deg,#ffe9a8,#e7bf5a 45%,#b98a24);box-shadow:0 10px 30px rgba(185,138,36,.45),0 0 0 1px rgba(255,255,255,.25) inset;transition:transform .2s}' +
-    '.sn-fab:hover{transform:translateY(-2px)}.sn-fab .sn-orb{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#1a1405;color:#f0d080;font-size:18px}' +
+    '.sn-fab:hover{transform:translateY(-2px)}.sn-fab .sn-orb{width:42px;height:42px;flex:none;margin:-2px 0;filter:drop-shadow(0 2px 4px rgba(90,60,0,.35))}' +
     '.sn-fab .sn-ping{position:absolute;top:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:#2fd18b;box-shadow:0 0 0 0 rgba(47,209,139,.7);animation:snPing 2s infinite}' +
     '@keyframes snPing{0%{box-shadow:0 0 0 0 rgba(47,209,139,.7)}70%{box-shadow:0 0 0 10px rgba(47,209,139,0)}100%{box-shadow:0 0 0 0 rgba(47,209,139,0)}}' +
     'html.sona-bnav .sn-fab{bottom:calc(78px + env(safe-area-inset-bottom))}' +
+    '.sona-svg{display:block;width:100%;height:100%;overflow:visible}' +
+    '.sona-svg .sv-bob{animation:svBob 3.4s ease-in-out infinite}' +
+    '@keyframes svBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}' +
+    '.sona-svg .sv-eyes{transform-box:fill-box;transform-origin:center;animation:svHappy 9s ease-in-out infinite}' +
+    '@keyframes svHappy{0%,58%,74%,100%{transform:scaleY(1)}62%,70%{transform:translateY(-1px) scaleY(.5)}}' +
+    '.sona-svg .sv-eye{transform-box:fill-box;transform-origin:center;animation:svBlink 4.7s infinite}' +
+    '@keyframes svBlink{0%,90%,100%{transform:scaleY(1)}93%{transform:scaleY(.08)}96%{transform:scaleY(1)}}' +
+    '.sona-svg .sv-glow{animation:svGlow 2.6s ease-in-out infinite}@keyframes svGlow{50%{opacity:.35}}' +
+    '.sona-svg .sv-smile{transition:opacity .15s}.sona-svg .sv-talk{opacity:0;transform-box:fill-box;transform-origin:center}' +
+    '.sona-talk .sona-svg .sv-smile{opacity:0}.sona-talk .sona-svg .sv-talk{opacity:1;animation:svTalk .24s ease-in-out infinite alternate}' +
+    '@keyframes svTalk{from{transform:scaleY(.25) scaleX(.9)}to{transform:scaleY(1.15) scaleX(1)}}' +
+    '.sona-talk .sona-svg .sv-eyes{animation:svLook 1.6s ease-in-out infinite}' +
+    '@keyframes svLook{0%,100%{transform:translateX(0)}30%{transform:translateX(-2.4px)}70%{transform:translateX(2.4px)}}' +
+    '@media(prefers-reduced-motion:reduce){.sona-svg *{animation:none!important}}' +
+    '.sn-m.bot{gap:8px;align-items:flex-end}.sn-mav{width:30px;height:30px;flex:none;margin-bottom:2px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4))}' +
+    '.sn-ban .sn-banav{width:26px;height:26px;flex:none}' +
     'html.sona-open .sn-fab{display:none}@media(max-width:560px){html.sona-open,html.sona-open body{overflow:hidden}}' +
     '.sn-ad{position:relative;overflow:hidden;border-radius:18px;padding:18px;margin:14px 12px;color:#f3eadb;background:radial-gradient(120% 90% at 100% 0%,rgba(231,191,90,.28),transparent 60%),linear-gradient(160deg,#1c160c,#0f0c08);border:1px solid rgba(240,208,128,.3);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}' +
     '.sn-ad .sn-adk{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.12em;color:#1a1405;background:linear-gradient(135deg,#f6d77d,#d4a63c);border-radius:999px;padding:3px 9px}' +
-    '.sn-ad h3{font:800 21px/1.25 Georgia,serif;margin:10px 0 4px;padding-right:58px;color:#fff3d6}.sn-ad p{margin:0 0 12px;font-size:13.5px;color:#cfc4ad;line-height:1.5}' +
+    '.sn-ad h3{font:800 21px/1.25 Georgia,serif;margin:10px 0 4px;padding-right:84px;color:#fff3d6}.sn-ad p{margin:0 0 12px;font-size:13.5px;color:#cfc4ad;line-height:1.5}' +
     '.sn-ad .sn-adq{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}.sn-ad .sn-adq button{border:1px solid rgba(240,208,128,.35);background:rgba(231,191,90,.1);color:#f0d080;border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:600;cursor:pointer}' +
     '.sn-ad .sn-adgo{border:0;border-radius:12px;padding:12px 18px;font-weight:800;font-size:14px;cursor:pointer;color:#1a1405;background:linear-gradient(135deg,#f6d77d,#d4a63c 55%,#b98a24);box-shadow:0 8px 22px rgba(212,166,60,.3)}' +
-    '.sn-ad .sn-adav{position:absolute;right:16px;top:16px;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 21px Georgia,serif;color:#1a1405;background:radial-gradient(circle at 30% 30%,#fff3c4,#e7bf5a 45%,#9c7316);box-shadow:0 0 0 6px rgba(231,191,90,.12)}' +
+    '.sn-ad .sn-adav{position:absolute;right:10px;top:6px;width:84px;height:92px;font-size:0;color:transparent;filter:drop-shadow(0 8px 18px rgba(0,0,0,.45))}' +
     '@media(max-width:520px){.sn-fab{height:50px;padding:0 6px}.sn-fab .sn-lbl{display:none}}' +
     '.sn-panel{position:fixed;right:18px;bottom:18px;z-index:9500;width:410px;height:min(680px,calc(100vh - 36px));display:none;flex-direction:column;border-radius:24px;overflow:hidden;color:#f3eadb;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:radial-gradient(130% 60% at 100% 0%,rgba(231,191,90,.16),transparent 60%),#120f0a;border:1px solid rgba(240,208,128,.22);box-shadow:0 30px 80px rgba(0,0,0,.6)}' +
     'html.sona-open .sn-panel{display:flex;animation:snIn .28s cubic-bezier(.2,.8,.3,1)}@keyframes snIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}' +
     '@media(max-width:560px){.sn-panel{right:0;bottom:0;width:100%;height:100%;height:100dvh;border-radius:0;border:0}}' +
     '.sn-hd{display:flex;align-items:center;gap:11px;padding:14px 14px 12px 16px;border-bottom:1px solid rgba(240,208,128,.12)}' +
-    '.sn-av{position:relative;width:42px;height:42px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font:800 19px Georgia,serif;color:#1a1405;background:radial-gradient(circle at 30% 30%,#fff3c4,#e7bf5a 45%,#9c7316)}' +
-    '.sn-av:after{content:"";position:absolute;right:0;bottom:1px;width:10px;height:10px;border-radius:50%;background:#2fd18b;border:2px solid #120f0a}' +
+    '.sn-av{position:relative;width:48px;height:48px;flex:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.45))}' +
+    '.sn-av:after{content:"";position:absolute;right:1px;bottom:3px;width:10px;height:10px;border-radius:50%;background:#2fd18b;border:2px solid #120f0a}' +
     '.sn-hd b{display:block;font-size:15.5px}.sn-hd span{font-size:11.5px;color:#a99f8b}.sn-x{margin-left:auto;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.07);color:#f3eadb;font-size:18px;cursor:pointer}' +
     '.sn-body{flex:1;overflow-y:auto;padding:16px 14px 8px;scroll-behavior:smooth}' +
     '.sn-m{display:flex;margin:0 0 12px}.sn-m.me{justify-content:flex-end}' +
@@ -340,7 +391,7 @@
     if (panel) return;
     panel = document.createElement('div'); panel.className = 'sn-panel'; panel.id = 'sonaPanel';
     panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Sona, the jewellery assistant');
-    panel.innerHTML = '<div class="sn-hd"><div class="sn-av">S</div><div><b>Sona</b><span>Jewellery assistant · answers from today’s real rates</span></div><button class="sn-x" id="sonaClose" aria-label="Close">×</button></div>' +
+    panel.innerHTML = '<div class="sn-hd"><div class="sn-av" id="sonaHeadAv">' + avatar() + '</div><div><b>Sona</b><span>Jewellery assistant · answers from today’s real rates</span></div><button class="sn-x" id="sonaClose" aria-label="Close">×</button></div>' +
       '<div class="sn-body" aria-live="polite"></div><div class="sn-chips"></div>' +
       '<form class="sn-in"><input id="sonaInput" type="text" autocomplete="off" maxlength="200" placeholder="Ask about rates, jewellers, offers…" aria-label="Your question"><button class="sn-send" id="sonaSend" aria-label="Send">➤</button></form>' +
       '<div class="sn-foot">Free · answers from published data, not advice</div>';
@@ -362,29 +413,33 @@
     });
   }
   function setChips(list) { chips.innerHTML = (list || []).map(function (c) { return '<button class="sn-chip" type="button">' + esc(c) + '</button>'; }).join(''); }
-  function bubble(html, me) {
-    var m = document.createElement('div'); m.className = 'sn-m' + (me ? ' me' : '');
-    m.innerHTML = '<div class="sn-b">' + html + '</div>'; body.appendChild(m);
+  function bubble(html, me, talking) {
+    var m = document.createElement('div'); m.className = 'sn-m' + (me ? ' me' : ' bot') + (talking ? ' sona-talk' : '');
+    m.innerHTML = (me ? '' : '<div class="sn-mav">' + avatar() + '</div>') + '<div class="sn-b">' + html + '</div>';
+    body.appendChild(m);
     body.scrollTop = body.scrollHeight; return m;
   }
+  // While Sona writes a reply she talks: in her message and in the header.
+  function talking(on) { var h = $('#sonaHeadAv', panel); if (h) h.classList.toggle('sona-talk', on); }
   function ask(q) {
     q = String(q || '').trim(); if (!q) return;
     input.value = ''; bubble(esc(q), true); setChips([]);
-    var typing = bubble('<span class="sn-typing"><span></span><span></span><span></span></span>');
+    var typing = bubble('<span class="sn-typing"><span></span><span></span><span></span></span>', false, true);
+    talking(true);
     loadKB().then(function () {
       var a = null;
       try { a = answer(q); } catch (e) { a = null; }
       var ok = !!a;
       if (!a) a = { intent: 'unknown', html: '<p>I’m still learning that one — I’ve noted your question so we can add a proper answer soon. Meanwhile, I’m good at these:</p>', chips: SUGGEST };
       setTimeout(function () {
-        typing.remove();
+        typing.remove(); talking(false);
         var m = bubble(a.html + '<div class="sn-fb"><button type="button" data-v="1" aria-label="Helpful">👍</button><button type="button" data-v="0" aria-label="Not helpful">👎</button></div>');
         setChips(a.chips || SUGGEST);
         rpc('log_bot_question', { p_q: redact(q), p_intent: a.intent, p_answered: ok, p_page: location.pathname, p_sid: window.GR_SID || '' })
           .then(function (id) { if (id) $('.sn-fb', m).setAttribute('data-id', id); });
         track(ok ? 'answered' : 'unanswered');
       }, 350 + Math.min(600, a.html.length / 6));
-    }).catch(function () { typing.remove(); bubble('<p>I couldn’t load today’s data. Please check your connection and try again.</p>'); });
+    }).catch(function () { typing.remove(); talking(false); bubble('<p>I couldn’t load today’s data. Please check your connection and try again.</p>'); });
   }
   function open(q) {
     ui();
@@ -408,13 +463,13 @@
     var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
     var fab = document.createElement('button');
     fab.className = 'sn-fab'; fab.id = 'sonaFab'; fab.type = 'button'; fab.setAttribute('aria-label', 'Ask Sona, the jewellery assistant');
-    fab.innerHTML = '<span class="sn-orb">✨</span><span class="sn-lbl">Ask Sona</span><span class="sn-ping"></span>';
+    fab.innerHTML = '<span class="sn-orb">' + avatar() + '</span><span class="sn-lbl">Ask Sona</span><span class="sn-ping"></span>';
     fab.onclick = function () { open(); };
     document.body.appendChild(fab);
     var seen = null; try { seen = localStorage.getItem('sona_ban'); } catch (_) {}
     if (!seen) {
       var b = document.createElement('div'); b.className = 'sn-ban'; b.id = 'sonaBanner';
-      b.innerHTML = '<span class="nw">NEW</span><span>Meet <b>Sona</b>, our new gold-rate assistant — ask about any jeweller, city, making charge or offer. <u>Try it</u></span><button class="bx" type="button" aria-label="Dismiss">×</button>';
+      b.innerHTML = '<span class="sn-banav">' + avatar() + '</span><span class="nw">NEW</span><span>Meet <b>Sona</b>, our new gold-rate assistant — ask about any jeweller, city, making charge or offer. <u>Try it</u></span><button class="bx" type="button" aria-label="Dismiss">×</button>';
       b.onclick = function (e) {
         if (e.target.closest('.bx')) { b.remove(); try { localStorage.setItem('sona_ban', '1'); } catch (_) {} return; }
         open(); track('banner');
@@ -422,6 +477,8 @@
       document.body.insertBefore(b, document.body.firstChild);
     }
     if (/[?&]ask=1\b/.test(location.search) || location.hash === '#ask') setTimeout(function () { open(); }, 400);
+    // Feature cards carry an empty .sn-adav: Sona herself goes there.
+    [].forEach.call(document.querySelectorAll('.sn-adav'), function (el) { el.innerHTML = avatar(true); });
     // Feature cards on the pages: <button data-ask="question"> opens Sona with it.
     document.addEventListener('click', function (e) {
       var el = e.target.closest && e.target.closest('[data-ask]');

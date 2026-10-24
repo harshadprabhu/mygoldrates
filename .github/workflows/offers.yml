@@ -1,6 +1,7 @@
 name: offers
 # Today's jeweller offers, read from each jeweller's own website with fixed
-# rules (offers.py) - no paid service. Writes docs/offers.json; the next site
+# rules (offers.py) - no paid service. Offers shown only in banner pictures
+# are read with Tesseract OCR (free, banner_ocr.py). Writes docs/offers.json; the next site
 # build turns it into /gold-offers-today. Also exports the answers the owner
 # approved for Sona, the site assistant (bot_learn.py).
 on:
@@ -21,7 +22,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: |
-          pip install requests supabase playwright
+          sudo apt-get install -y -q tesseract-ocr
+          pip install requests supabase playwright pytesseract pillow
           playwright install --with-deps chromium
       - run: python offers.py
         env:
