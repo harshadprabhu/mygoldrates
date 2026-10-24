@@ -393,6 +393,16 @@ def nd_footer_html(year):
             'updated daily &middot; Not investment advice</p></footer>')
 
 
+def sona_bundle():
+    """/assistant.js: Sona's replies in ten languages, her language reader,
+    then Sona herself - one file, one request."""
+    parts = []
+    for name in ("sona_i18n.js", "sona_lang.js", "assistant.js"):
+        with open(name, encoding="utf-8") as f:
+            parts.append(f.read())
+    return "\n".join(parts)
+
+
 def analytics_snippet(supabase_url, anon_key):
     """The pageview beacon, as an inline <script> for the document head.
 
@@ -2147,8 +2157,8 @@ def main():
 
     # Covers alerts-pop.js too, which shares this tag: a change to the
     # popup must reach browsers that cached the old file for a day.
-    with open("assistant.js", encoding="utf-8") as _f:
-        assist_ver = hashlib.md5(_f.read().encode()).hexdigest()[:8]
+    _assist_src = sona_bundle()
+    assist_ver = hashlib.md5(_assist_src.encode()).hexdigest()[:8]
     sig_ver = hashlib.md5((SIGNUP_JS + alerts_pop_js + assist_ver).encode()).hexdigest()[:8]
     gate_html = GATE_HTML if gclient else ""
     gate_js   = GATE_JS   if gclient else ""
@@ -2454,8 +2464,6 @@ def main():
     with open("docs/alerts-pop.js", "w", encoding="utf-8") as f:
         f.write(alerts_pop_js)
     # Sona, the assistant: one static file, loaded deferred on every page.
-    with open("assistant.js", encoding="utf-8") as f:
-        _assist_src = f.read()
     with open("docs/assistant.js", "w", encoding="utf-8") as f:
         f.write(_assist_src)
 

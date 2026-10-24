@@ -216,6 +216,10 @@ def extract_offers(text: str, url: str, image: str | None = None) -> list[dict]:
     for kind, rx in RULES:
         for m in rx.finditer(text):
             sent = (_ocr_sentence if image else _sentence)(text, m.start(), m.end())
+            if image:                        # the date and T&C go in their own fields
+                sent = re.sub(r"[\s:;,.|*-]*(?:\boffer\b[\s:]*)?(?:\bvalid\b.*|\bt\s*&\s*c\b.*|\d{1,2}\s*(?:jan|feb|mar|apr|may|"
+                              r"jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?,?\s*20\d\d.*)$", "", sent, flags=re.I)
+                sent = re.sub(r"\s+offer$", "", sent, flags=re.I).strip()
             if len(sent) < 8 or FOREIGN_CURRENCY.search(sent) or REVIEW.search(sent):
                 continue                     # template junk, other markets, reviews
             # A benefit of a monthly plan is the plan's, not a shop-wide offer.
