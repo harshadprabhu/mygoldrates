@@ -255,6 +255,9 @@ def extract_offers(text: str, url: str, image: str | None = None) -> list[dict]:
             # A banner's dates and minimum spend usually cover all of it.
             mp = MIN_PURCHASE.search(text if image else sent)
             vd = VALID.findall(text if image else sent)
+            if image and not vd:            # the small "Valid till" may not be read, the date is
+                vd = re.findall(r"\b(\d{1,2}\s*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
+                                r"[a-z]*\.?,?\s*20\d\d)\b", text, re.I)
             out.append({
                 "kind": kind,
                 "pct": pct,
@@ -307,6 +310,12 @@ def _money(num: str, unit: str | None) -> int | None:
     return int(v)
 
 
+def _group(o):
+    if o["kind"] == "making_off" and re.search(r"diamond\s*jewell?ery", o["text"], re.I):
+        return "making_off_diamond"
+    return o["kind"]
+
+
 def summarise(offers: list[dict]) -> list[dict]:
     """Fold per-product repeats ("15% off on making charges" printed under 40
     products) into one line per kind, keeping the range and a count."""
@@ -315,10 +324,7 @@ def summarise(offers: list[dict]) -> list[dict]:
     # up to 50% on gold, up to 100% on diamond jewellery).
     by_kind: dict[str, list[dict]] = {}
     for o in offers:
-        key = o["kind"]
-        if key == "making_off" and re.search(r"diamond\s*jewell?ery", o["text"], re.I):
-            key = "making_off_diamond"
-        by_kind.setdefault(key, []).append(o)
+        by_kind.setdefault(_group(o), []).append(o)
     out = []
     for key, items in by_kind.items():
         kind = items[0]["kind"]
@@ -481,6 +487,22 @@ def read_banners(sess, imgs, page_url):
     return out
 
 
+def banner_extras(text_offers, banner_offers):
+    """The banner offers that add something to the page text: a kind of
+    offer the text does not have (PN Gadgil & Sons' "up to 50% on gold
+    making" banner next to an older page about diamond making), or the
+    dates the text leaves out."""
+    groups = {}
+    for o in text_offers:
+        groups.setdefault(_group(o), []).append(o)
+    out = []
+    for o in banner_offers:
+        g = groups.get(_group(o))
+        if not g or (o["dates"] and not any(t["dates"] for t in g)):
+            out.append(o)
+    return out
+
+
 def offer_links(html: str, base: str) -> list[str]:
     host = urlparse(base).netloc.replace("www.", "")
     found = []
@@ -567,9 +589,8 @@ def read_brand(sess, brand, render=True):
             u for u in (imgs if render else []) if u not in home]
     except Exception:
         imgs = []
-    text_kinds = {o["kind"] for o in raw}
     rec["banners"] = len(imgs)
-    raw += [o for o in read_banners(sess, imgs[:10], base) if o["kind"] not in text_kinds]
+    raw += banner_extras(raw, read_banners(sess, imgs[:10], base))
     rec["offers"] = summarise(raw)
     if not rec["offers"]:
         rec["status"] = "no offers published as text or in banners today"

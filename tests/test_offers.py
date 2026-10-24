@@ -178,3 +178,34 @@ def test_figures_inside_a_buy_two_deal_stay_in_the_deal():
     txt = "BUY 1 DIAMOND JEWELLERY\nGET YOUR 2ND AT\n100% OFF 15% OFF\nON DIAMOND VALUE"
     got = O.extract_offers(txt, "u", image="i")
     assert [o["kind"] for o in got] == ["combo"]
+
+
+def test_flat_beside_the_figure_and_a_second_smaller_offer_below(monkeypatch):
+    """CaratLane, 24 Oct 2026: "FLAT 20% OFF" on one line, and under it a
+    separate bank-card offer; the validity line belongs to both."""
+    import banner_ocr as B
+    monkeypatch.setattr(B, "_upto_beside", lambda im, f: False)
+    im = type("Im", (), {"width": 1760, "height": 630})()
+    words = [_w("20%", 219, 169, 119, 44), _w("FLAT", 112, 184, 93, 28), _w("OFF", 350, 184, 73, 29),
+             *[_w(t, x, 243, 40, 13) for t, x in (("On", 165), ("All", 193), ("Diamond", 220), ("Jewellery", 299))],
+             _w("5%", 116, 291, 36, 21), _w("INSTANT", 163, 292, 116, 19), _w("DISCOUNT", 289, 292, 141, 20),
+             *[_w(t, x, 322, 60, 17) for t, x in (("ON", 175), ("CREDIT", 214), ("CARDS", 300))],
+             *[_w(t, x, 472, 30, 12) for t, x in (("31", 215), ("Oct", 235), ("2026:", 274), ("T&C", 319), ("Apply", 353))]]
+    p = B._panels(im, words)
+    assert p[0].startswith("FLAT 20% OFF On All Diamond Jewellery") and "CREDIT" not in p[0]
+    assert p[1].startswith("5% INSTANT DISCOUNT ON CREDIT CARDS")
+    got = O.extract_offers("\n".join(p[:2]), "u", image="i")
+    assert {o["kind"] for o in got} == {"diamond_off", "cashback"}
+    assert all(o["dates"] == ["31 Oct 2026"] for o in got)
+
+
+def test_a_banner_adds_the_offer_the_page_text_does_not_have():
+    """PN Gadgil & Sons: an old page about diamond making must not hide the
+    banner's gold making offer."""
+    text = O.extract_offers("Get up to 100% on the making of diamond jewellery.", "u")
+    banner = O.extract_offers("Up to 50% ON MAKING CHARGES OF GOLD JEWELLERY Offer Valid Till 15 Nov 2026\n"
+                              "Up to 100% ON MAKING CHARGES OF CERTIFIED NATURAL DIAMOND JEWELLERY "
+                              "Offer Valid Till 15 Nov 2026", "u", image="i")
+    got = O.summarise(text + O.banner_extras(text, banner))
+    mk = sorted((o["pct_max"], o["dates"]) for o in got if o["kind"] == "making_off")
+    assert mk == [(50.0, ["15 Nov 2026"]), (100.0, ["15 Nov 2026"])]

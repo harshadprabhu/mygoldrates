@@ -174,21 +174,27 @@ def _lines_of(words):
 def _upto_beside(im, fig) -> bool:
     """The small rotated "UPTO" printed in the strip just left of a figure."""
     import pytesseract
-    pad = max(16, int(fig["h"] * 0.5))
-    box = (max(0, fig["x"] - pad), max(0, fig["y"] - fig["h"] // 4), fig["x"] + 4,
-           min(im.height, fig["y"] + fig["h"] + fig["h"] // 4))
-    if box[2] - box[0] < 6:
-        return False
-    strip = im.crop(box).convert("L")
-    strip = strip.resize((strip.width * 3, strip.height * 3))
-    # Printed reading upwards, so turned 270 degrees it reads "U P T O"
-    # (the O often comes out as a degree sign).
-    for angle in (270, 90):
-        for img in (strip, _invert(strip)):
-            for psm in (6, 7):
-                t = pytesseract.image_to_string(img.rotate(angle, expand=True), config=f"--psm {psm}")
-                if re.search(r"u\s*p+\s*t\s*[o0°]?", t, re.I):
-                    return True
+    h = fig["h"]
+    # The full strip beside the figure, then a tighter one: a tall figure
+    # box (PN Gadgil & Sons' "100") can reach the line of text below it.
+    boxes = [(max(0, fig["x"] - max(16, int(h * 0.5))), max(0, fig["y"] - h // 4), fig["x"] + 4,
+              min(im.height, fig["y"] + h + h // 4)),
+             (max(0, fig["x"] - max(16, int(h * 0.3))), max(0, fig["y"] - h // 10), fig["x"] - 2,
+              min(im.height, fig["y"] + int(h * 0.8)))]
+    for box in boxes:
+        if box[2] - box[0] < 6:
+            continue
+        strip = im.crop(box).convert("L")
+        strip = strip.resize((strip.width * 3, strip.height * 3))
+        # Printed reading upwards, so turned 270 degrees it reads "U P T O"
+        # (the O often comes out as a degree sign, the thin T as a "u":
+        # "U Pp u ce)" beside PN Gadgil & Sons' 100%).
+        for angle in (270, 90):
+            for img in (strip, _invert(strip)):
+                for psm in (6, 7):
+                    t = pytesseract.image_to_string(img.rotate(angle, expand=True), config=f"--psm {psm}")
+                    if re.search(r"\bu\s*p+\s*[tu]\s*[o0°c(]?", t, re.I):
+                        return True
     return False
 
 
@@ -220,10 +226,25 @@ def _panels(im, words) -> list[str] | None:
     edges = [-1e9] + [(centres[i] + centres[i + 1]) / 2 for i in range(len(figs) - 1)] + [1e9]
     bands = []
     for i, f in enumerate(figs):
-        lo = max(edges[i], f["x"] - 0.6 * f["wd"])
+        lo = max(edges[i], f["x"] - 0.6 * f["wd"] - f["h"])
         hi = min(edges[i + 1], f["x"] + 1.6 * f["wd"] + f["h"])
         bands.append((lo, hi))
     rest = [w for w in words if w not in figs and not (w["w"] == "%" and w["h"] >= 2.2 * small)]
+    # Words on the figure's own line, right next to it: "FLAT 20% OFF".
+    beside = [([], []) for _ in figs]
+    for i, f in enumerate(figs):
+        for w in sorted(rest, key=lambda v: v["x"]):
+            cy = w["y"] + w["h"] / 2
+            # headline-sized, close, and inside this figure's own panel
+            if (not (f["y"] <= cy <= f["y"] + f["h"]) or len(w["w"]) > 12 or w["h"] < 0.45 * f["h"]
+                    or w["x"] < bands[i][0] or w["x"] + w["wd"] > bands[i][1]):
+                continue
+            if 0 <= f["x"] - (w["x"] + w["wd"]) < 0.8 * f["h"]:
+                beside[i][0].append(w)
+            elif 0 <= w["x"] - (f["x"] + f["wd"]) < 0.8 * f["h"]:
+                beside[i][1].append(w)
+    used = [w for b in beside for side in b for w in side]
+    rest = [w for w in rest if w not in used]
     panel_lines = [[] for _ in figs]
     shared, other = [], []
     top = min(f["y"] for f in figs)
@@ -247,7 +268,8 @@ def _panels(im, words) -> list[str] | None:
             # CaratLane's "20%", "UPTO" over others), leads that panel
             above = [i for i, f in enumerate(figs)
                      if f["y"] - 1.3 * f["h"] <= y < f["y"] and x0 >= bands[i][0] and x1 <= bands[i][1]]
-            if above and len(text) <= 12:
+            if above and len(text) <= 12 and re.fullmatch(
+                    r"(?:flat|up\s*to|upto|extra|get|save|enjoy|special|min\.?|max\.?)\W*", text, re.I):
                 panel_lines[above[0]].append((-1, text))
             elif y <= top - small:
                 other.append(text)
@@ -258,11 +280,24 @@ def _panels(im, words) -> list[str] | None:
             else:
                 other.append(text)
     out = []
-    for f, lines in zip(figs, panel_lines):
-        pre = " ".join(t for y, t in lines if y == -1)
+    for i, (f, lines) in enumerate(zip(figs, panel_lines)):
+        pre = " ".join([t for y, t in lines if y == -1] + [w["w"] for w in beside[i][0]])
+        post = " ".join(w["w"] for w in beside[i][1])
         lead = "Up to " if (not re.search(r"up\s*to|flat", pre, re.I) and _upto_beside(im, f)) else ""
-        body = " ".join(t for y, t in sorted(lines) if y != -1)
-        out.append(f"{pre} {lead}{f['w']} {body}".strip() + (" " + " ".join(shared) if shared else ""))
+        # Under the headline: its own lines, then maybe a second, smaller
+        # offer ("5% INSTANT DISCOUNT / ON CREDIT CARDS") and the validity
+        # line, which belongs to every offer on the banner.
+        blocks, valid = [[f"{pre} {lead}{f['w']} {post}".strip()]], list(shared)
+        for y, t in sorted(lines):
+            if y == -1:
+                continue
+            if re.search(r"\bvalid|t\s*&\s*c|\b20\d\d\b", t, re.I):
+                valid.append(t)
+            elif re.match(r"(?:flat\s+|up\s*to\s+)?\d{1,3}\s*%", t, re.I):
+                blocks.append([t])
+            else:
+                blocks[-1].append(t)
+        out += [" ".join(b + valid) for b in blocks]
     return out + other
 
 
@@ -308,6 +343,9 @@ def read_image(data: bytes) -> str:
     lines = panels if panels else _lines(words)
     seen, out = set(), []
     for ln in lines:
+        # a small raised "st" read as "%": "31% Oct 2026" is 31 October
+        ln = re.sub(r"\b(\d{1,2})\s*(?:%|st|nd|rd|th)(?=\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))",
+                    r"\1", ln, flags=re.I)
         k = ln.lower()
         if k not in seen and len(ln) >= 3:
             seen.add(k)
