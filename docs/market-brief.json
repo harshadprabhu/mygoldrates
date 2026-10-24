@@ -106,10 +106,7 @@
    "date": "2026-10-24",
    "paragraphs": [
     "International gold is at $3,997 an ounce (-0.08% since 23 Oct), the rupee at ₹95.04 to the dollar (weaker by 0.14%), and the Indian jeweller board median at ₹14,259/g for 24K (+0.01%). In rupee terms the move came mostly from the rupee (-0.08% gold, +0.14% USD/INR).",
-    "What the world's gold news is about today: US interest rates (1 headline), Inflation (1 headline), Indian demand (1 headline).",
-    "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMisgFBVV95cUxNSkRMRnR4aHc0aXgwWW5qZnU3ZlVrMzFHdE90dDh1YzFfeUp1ZmI4SmRrUEtveVNsbnRyczNveG5GaEtYRjk1NTkwODRoQkJuMzgtbVpHRzVLZ0ZpUkhmTnVqeWIySnRJbng1UDVmYXZkRm1ac0xnQ25KNFFNRE5odm9SSTlzWDAtUVR4RWllZ0N2aTRrNjlPUG03b2xQLWl1b1EteGRhTzd0b3EwYk9YYk53?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold price set for steep weekly loss as rising oil prices bolster Fed rate hike bets</a> (Mining.com).",
-    "<strong>Inflation.</strong> Gold is held as an inflation hedge, though hot inflation can also mean higher rates, which cuts the other way. In the news: <a href=\"https://news.google.com/rss/articles/CBMiuwFBVV95cUxPZUUtZHJuN3lDVDVOWHVqbFRoZEFHckp0UDI3MUpHN2ZJMVpXMTdROTJQX29yMHgteWFYZDdXVUVOMXp6c3FLVzFLc2V2NTctMzBGTnlJSmJyQWxhWGs2azVqQ0JjUGx2M3BUNVFjNFY0cTgtMlc0NXpxYy1NZGdVRlNsaVU5Ump4cWFlRU9Fd2R3NVFvaGpDem9kT2xLSFc0YklVb2FQcE1ObGp6ek9NMUNVN1BfYndmb3BN?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold price trades near $4,000/oz after final Consumer Sentiment holds steady at 48, inflation expectations rise</a> (Kitco).",
-    "<strong>Indian demand.</strong> Festival and wedding buying, and import costs, move local premiums and the price on the jeweller board. In the news: <a href=\"https://news.google.com/rss/articles/CBMijgJBVV95cUxQZ1JCbWxWM1FwT0dDeDFuZEpIaEhvMFdYSzVlZnlkdjg4NkN2RTVhMlFibHRvODRZSGZsWDFLWkVqVDR3UXZaWUI4dnVPdTJGcVBHTU1KU3l4dXRaX25CWDFrYm1rTUlOZXFURlltV2hqbjZhTHJkWXduMmxydl9ESG9tRXo4LW1jUTZPcllDSno4aW9HbEMxbUJoa3EtWWpLbmh5VktmdnBNS3RoZGk2Nnp3LUhSelE0bHFrR2FYZllvLWpNTHZrdzNPWHE3TjRnTUFxb0d2SjRpRUVnWnZDZ09lU1Z4SWt1bGhuX0VNRzAtZlRJQ1RQRGpfT3QwaHVrZHJjSjlxbnVpYXVrM1HSAY4CQVVfeXFMUGdSQm1sVjNRcE9HQ3gxbmRKSGhIbzBXWEs1ZWZ5ZHY4ODZDdkU1YTJRYmx0bzg0WUhmbFgxS1pFalQ0d1F2WllCOHZ1T3UyRnFQR01NSlN5eHV0Wl9uQlgxa2Jta01JTmVxVEZZbVdoam42YUxyZFl3bjJscnZfREhvbUV6OC1tY1E2T3JZQ0p6OGlvR2xDMW1CaGtxLVlqS25oeVZLZnZwTUt0aGRpNjZ6dy1IUnpRNGxxa0dhWGZZby1qTUx2a3czT1hxN040Z01BcW9Hdko0aUVFZ1p2Q2dPZVNWeElrdWxobl9FTUcwLWZUSUNUUERqX090MGh1a2RyY0o5cW51aWF1azNR?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold rates in Chennai city crash this week: Can yellow metal rebound ahead of Diwali - Key levels to watch in future?</a> (Livemint).",
+    "No clear theme in today's gold headlines.",
     "For buyers: the gap between the cheapest and dearest jeweller on our board is ₹417/g today, and making charges usually differ by more than a day's price move. Compare the <a href=\"https://mygoldrates.com/\">live rates</a> and the <a href=\"https://mygoldrates.com/making-charges-comparison\">making charges</a> before you buy."
    ],
    "snap": {
@@ -117,12 +114,8 @@
     "gold_usd": 3996.899902,
     "usdinr": 95.036492
    },
-   "summary": "gold -0.1%, news led by us interest rates",
-   "themes": {
-    "india_demand": 1,
-    "inflation": 1,
-    "rates": 1
-   }
+   "summary": "gold -0.1%",
+   "themes": {}
   }
  }
 }
