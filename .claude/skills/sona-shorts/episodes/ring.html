@@ -1,0 +1,112 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Sona Shorts - Dhanteras ring</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Noto+Sans+Devanagari:wght@600;800&display=block">
+<link rel="stylesheet" href="../kit/stage.css">
+</head><body>
+<div id="stage">
+  <svg id="bg" viewBox="0 0 540 960"></svg><svg id="cast" viewBox="0 0 540 960"></svg>
+  <div id="phone"><div class="bezel"><iframe id="chat" title="Sona"></iframe></div></div>
+  <svg id="fx" viewBox="0 0 540 960"></svg><div id="ui"></div><div id="flash"></div>
+</div>
+<script>window.__SONA_TEST = 1;</script><script src="/assistant.js"></script>
+<script src="../kit/chars.js"></script><script src="../kit/kit.js"></script>
+<script>
+/* Episode 1 - "Dhanteras Ring" (romance + comedy, Hindi dialogue, Hinglish subtitles).
+ * Piku asks for a ring; Chiku's wallet holds only a butterfly; he quietly asks
+ * Sona, who shows the cheapest jewellers (real answer, real numbers); he
+ * proposes with the ring - and the money left over goes on golgappe.
+ * D (render.py): D.gap / D.gapHi = 10 g of 22K, cheapest to dearest national jeweller. */
+var D = window.D || { gap: '₹2,647', gapHi: 'दो हज़ार छह सौ सैंतालीस' };
+var LINES = [
+  { id: 'p1', who: 'piku', hi: 'चिकू... धनतेरस पे एक छोटी सी अंगूठी? प्लीज़ प्लीज़!', sub: 'Chiku… Dhanteras pe ek chhoti si ring? Please please! 🥺💍' },
+  { id: 'c1', who: 'chiku', hi: 'हाँ हाँ... बिल्कुल!', sub: 'Haan haan… bilkul! 😅' },
+  { id: 'c2', who: 'chiku', hi: 'अरे बाप रे! बटुए में तो बस तितली है!', sub: 'Arey baap re! Batue mein toh bas titli hai! 🦋' },
+  { id: 'c3', who: 'chiku', hi: 'सोना... सबसे सस्ता सोना कहाँ है?', sub: 'Sona… sabse sasta sona kahan hai? 🤫' },
+  { id: 's1', who: 'sona', hi: 'ये रहे आज के सबसे सस्ते ज्वैलर! दस ग्राम पर ' + D.gapHi + ' रुपये तक का फ़र्क़ है।' },
+  { id: 'c4', who: 'chiku', hi: 'वाह सोना! पैसे बच गए!', sub: 'Waah Sona! Paise bach gaye! 🎉' },
+  { id: 'c5', who: 'chiku', hi: 'ये लो पीकू... तुम्हारी अंगूठी!', sub: 'Ye lo Piku… tumhari ring! 💍' },
+  { id: 'p2', who: 'piku', hi: 'हाय चिकू! आई लव यू!', sub: 'Haaye Chiku! I love you! 😍' },
+  { id: 'c6', who: 'chiku', hi: 'और बचे पैसों से... गोलगप्पे!', sub: 'Aur bache paison se… golgappe! 😋' },
+  { id: 'p3', who: 'piku', hi: 'हा हा हा! चलो चलो!', sub: 'Hahaha! Chalo chalo! 😂' },
+  { id: 's2', who: 'sona', hi: 'पहले सोना से पूछो! माय गोल्ड रेट्स डॉट कॉम।' }
+];
+var SUB = {}; LINES.forEach(function (l) { SUB[l.id] = l.sub; });
+var BEAT = .5275, tl = K.timeline(window.VO, BEAT, 1.07);         // Happy Beats vol. 9, 114.8 BPM
+var L = {}, S = {};
+S.hook = 0;
+L.p1 = tl.say('p1', .45); L.c1 = tl.say('c1', .2);
+S.wallet = tl.cut(.35); L.c2 = tl.say('c2', .6);
+S.sona = tl.cut(.35); L.c3 = tl.say('c3', .2);
+S.up = tl.wait(.15);                                                   // the phone comes up
+var CH = { q: 'सबसे सस्ता सोना कहाँ है?', typeAt: S.up + .5, sendAt: S.up + 1.6, answerAt: S.up + 2.3, hold: 1.6 };
+tl.wait(CH.answerAt + .15 - tl.now()); L.s1 = tl.say('s1');
+S.save = tl.cut(.5); L.c4 = tl.say('c4', .3);
+S.love = tl.cut(1.0); L.c5 = tl.say('c5', .3); L.p2 = tl.say('p2', .25); L.c6 = tl.say('c6', .35); L.p3 = tl.say('p3', .1);
+S.outro = tl.cut(.4); L.s2 = tl.say('s2', .55);
+S.end = tl.cut(.9);
+var talk = function (t, id) { return K.talking(t, L[id]); };
+
+window.EP = {
+  lines: LINES, voice: tl.voice, dur: S.end, chat: CH, poster: L.p1.a + 1.2,
+  music: { file: 'music/vol-9.mp3', start: 0, gain: -5 },
+  sfx: [
+    ['ui/click2.ogg', L.c1.a - .1, -14], ['interface/error_005.ogg', S.wallet + .3, -12],
+    ['ui/rollover4.ogg', S.up, -14], ['ui/click2.ogg', CH.sendAt, -12], ['interface/bong_001.ogg', CH.answerAt, -16],
+    ['casino/chips-collide-1.ogg', S.save + .1, -11], ['casino/chips-stack-3.ogg', S.save + .8, -12],
+    ['impact/impactBell_heavy_000.ogg', L.p2.a, -19], ['impact/impactGeneric_light_002.ogg', S.outro + .05, -12]
+  ],
+  scene: function (t) {
+    var o = { bg: K.room(t), cast: '', fx: '', ui: '' };
+    if (t < S.wallet) {                                    // 1. the ask
+      var mx = K.lerp(640, 375, K.eo(t / .7)), sweat = t > L.c1.a - .25;
+      var jolt = K.env(t, L.c1.a - .25, L.c1.a + .1, .08, .2);
+      o.cast = CHAR.chiku({ x: 150, y: 790, s: .95, t: t, mood: sweat ? 'sweat' : 'happy', pose: sweat ? 'shrug' : 'idle', sq: -jolt * .12, talk: talk(t, 'c1') }) +
+        CHAR.piku({ x: mx, y: 800, s: .95, flip: -1, t: t, mood: 'love', pose: 'phone', prop: 'phone', talk: talk(t, 'p1'), rot: Math.sin(t * 5) * 2 });
+      o.ui = K.caption('POV: Dhanteras aa gaya 🪔', K.env(t, .15, S.wallet - .1), 168, 38) +
+        K.line(t, L.p1, { x: 360, y: 455, w: 400, tail: 'br', text: SUB.p1 }) +
+        K.line(t, L.c1, { x: 150, y: 470, w: 290, tail: 'bl', text: SUB.c1 });
+      o.flash = K.env(t, 0, .25, .01, .2) * .5;
+    } else if (t < S.sona) {                               // 2. the wallet
+      o.cast = CHAR.chiku({ x: 270, y: 930, s: 1.55, t: t, mood: t > S.wallet + .35 ? 'shock' : 'sweat', pose: 'hold', prop: 'wallet', talk: talk(t, 'c2'), sq: -K.env(t, S.wallet + .3, S.wallet + .6, .06, .2) * .1 });
+      o.fx = K.moth(t, S.wallet + .3, 312, 735);
+      o.ui = K.caption('Budget status: 🦋', K.env(t, S.wallet + .4, S.sona), 140, 44) +
+        K.line(t, L.c2, { x: 200, y: 330, w: 400, tail: 'bl', text: SUB.c2 });
+      o.flash = K.env(t, S.wallet, S.wallet + .2, .01, .18) * .5;
+    } else if (t < S.save) {                               // 3. ask Sona - the real chat
+      if (t < S.up) {
+        o.cast = CHAR.chiku({ x: 270, y: 900, s: 1.3, t: t, mood: 'sly', pose: 'phone', prop: 'phone', talk: talk(t, 'c3') });
+        o.ui = K.line(t, L.c3, { x: 300, y: 330, w: 400, tail: 'bl', text: SUB.c3 });
+      } else {
+        var up = K.eo((t - S.up) / .45), sc = 1.17, py = K.lerp(980, 70, up);
+        o.phone = 'translate(' + ((540 - 330 * sc) / 2) + 'px,' + py + 'px) scale(' + sc + ')';
+        o.bg += '<rect width="540" height="960" fill="#1a0f05" opacity="' + (.55 * up) + '"/>';
+        var bot = py + 690 * sc;                           // Chiku's paws hold the phone
+        o.ui = '<svg viewBox="0 0 540 960"><circle cx="86" cy="' + (bot - 40) + '" r="30" fill="#e6a966" stroke="#bf7d3d" stroke-width="4"/><circle cx="454" cy="' + (bot - 40) + '" r="30" fill="#e6a966" stroke="#bf7d3d" stroke-width="4"/></svg>' +
+          K.caption(t < L.s1.a ? 'Chiku ne Sona se poocha 👀' : 'Sona bol rahi hai 🔊', K.env(t, S.up + .3, S.save - .1), 16, 30);
+      }
+    } else if (t < S.love) {                               // 4. the saving
+      var jump = Math.abs(Math.sin((t - S.save) * Math.PI / BEAT / 2)) * 60;
+      o.cast = CHAR.chiku({ x: 270, y: 860 - jump, s: 1.2, t: t, mood: talk(t, 'c4') ? 'happy' : 'laugh', talk: talk(t, 'c4'), pose: 'cheer', earFlap: true, sq: jump < 8 ? .06 : -.04 });
+      o.fx = K.coins(t, S.save, 26);
+      o.ui = K.caption('<span style="font-size:1.25em">' + D.gap + '</span><br>tak bachat! 🎉<small>same sona · same 10 gram</small>', K.env(t, S.save + .1, S.love), 120, 54) +
+        K.line(t, L.c4, { x: 220, y: 450, w: 380, tail: 'bl', text: SUB.c4 });
+      o.flash = K.env(t, S.save, S.save + .2, .01, .18) * .6;
+    } else if (t < S.outro) {                              // 5. the ring, and the punchline
+      var laugh = t > L.p3.a - .1, given = t > L.p2.a - .2;
+      o.cast = CHAR.chiku({ x: 175, y: 800, s: 1.0, t: t, mood: laugh || t > L.c6.a ? 'happy' : 'love', pose: 'hold', prop: 'ring', kneel: t < L.c6.a, talk: talk(t, 'c5') || talk(t, 'c6') }) +
+        CHAR.piku({ x: 385, y: 805, s: 1.0, flip: -1, t: t, mood: laugh ? 'laugh' : given ? 'love' : 'shock', pose: laugh ? 'cheer' : 'cheeks', blush: true, talk: talk(t, 'p2') || talk(t, 'p3') });
+      o.fx = K.hearts(t, L.p2.a, 285, 520, 16) + K.hearts(t, L.p3.a, 385, 470, 10) + K.sparkles(t, 200, 650, 60, 5);
+      o.ui = K.line(t, L.c5, { x: 180, y: 470, w: 360, tail: 'bl', text: SUB.c5 }) +
+        K.line(t, L.p2, { x: 400, y: 460, w: 360, tail: 'br', text: SUB.p2 }) +
+        K.line(t, L.c6, { x: 180, y: 470, w: 390, tail: 'bl', text: SUB.c6 }) +
+        K.line(t, L.p3, { x: 400, y: 460, w: 330, tail: 'br', text: SUB.p3 });
+      o.flash = K.env(t, S.love, S.love + .2, .01, .18) * .5;
+    } else {                                               // 6. outro - Sona signs off
+      o.ui = K.outro(K.eo((t - S.outro) / .5), t, 'Pehle <b>Sona</b> se poochho 💛<br><span style="font-size:.62em;color:#f3e6c8">aapke shehar ka sabse sasta sona</span>');
+    }
+    return o;
+  }
+};
+K.boot();
+</script>
+</body></html>
