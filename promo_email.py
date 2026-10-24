@@ -10,6 +10,11 @@
 Every send is recorded in email_campaigns, so running --send again never
 emails anyone twice. Each email carries the reader's own invite link and a
 one-click unsubscribe. The example answers use today's real rates.
+
+It is written as a short personal letter (plain layout, one small picture,
+links in the text, a plain-text part, from a person), which Gmail is far
+likelier to put in Primary than a designed newsletter. --designed sends the
+newsletter-style version instead.
 """
 import argparse
 import os
@@ -19,7 +24,9 @@ from datetime import datetime
 import send_alerts as SA
 
 CAMPAIGN = "sona-launch-2026-10"
-SUBJECT = "Meet Sona: ask about gold in your own language, type or talk (free)"
+SUBJECT = "Sona can now answer your gold questions"
+SUBJECT_DESIGNED = "Meet Sona: ask about gold in your own language, type or talk (free)"
+LETTER_FROM = "Harshad from MyGoldRates"
 
 
 def examples(live):
@@ -40,6 +47,55 @@ def examples(live):
                 f"About {SA.inr(gold * 1.03)} for the gold with GST at {low['brands']['name']}, "
                 "plus the jeweller's making charge &mdash; Sona works it out for any jeweller and weight."))
     return out
+
+
+def letter(first, qa, invite, unsub):
+    """The personal-letter email: (html, text)."""
+    import html as H
+    site = SA.SITE_URL
+    ask = f"{site}/?ask=1&from=alert"
+    offers = f"{site}/gold-offers-today?from=alert"
+    plain = lambda x: H.unescape(x)
+    p = 'style="margin:0 0 14px"'
+    qa_html = "".join(
+        f'<p style="margin:0 0 12px;padding-left:12px;border-left:3px solid #e6c268">'
+        f'<i>&ldquo;{q}&rdquo;</i><br>{a}</p>' for q, a in qa)
+    body = f"""\
+<!DOCTYPE html><html><body style="margin:0;padding:0;background:#ffffff">
+<div style="max-width:560px;margin:0 auto;padding:24px 18px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222">
+<p {p}>Hi {first},</p>
+<p {p}>I wanted to tell you about something new on MyGoldRates.</p>
+<p {p}>You can now ask <b>Sona</b>, our jewellery assistant, any question before you buy gold, and she answers straight away from today&rsquo;s real rates at every jeweller we track. Type it, or tap the mic and just ask out loud &mdash; in English or in your own language: Hindi, Marathi, Gujarati, Punjabi, Bengali, Kannada, Tamil, Telugu or Malayalam.</p>
+<p {p}><img src="{site}/email-sona-face.png" width="40" height="40" alt="" style="width:40px;height:40px;vertical-align:middle;margin-right:8px;border:0">Here is what she told me this morning:</p>
+{qa_html}
+<p {p}>Try her here: <a href="{ask}" style="color:#8C6A18">ask Sona a question</a>.</p>
+<p {p}>We have also started putting every jeweller&rsquo;s offers in one place, with what each is really worth after making charges and GST: <a href="{offers}" style="color:#8C6A18">gold offers today</a>. And if you tell us your target price, we will email you the day 22K drops to it.</p>
+<p {p}>If a friend is buying gold soon, this is your personal invite link: <a href="{invite}" style="color:#8C6A18">{invite}</a>. When they join, we will let you know.</p>
+<p {p}>One small request: if this email landed in your Promotions tab, please move it to Primary, so the daily rate alerts reach you too.</p>
+<p style="margin:0 0 4px">Thank you for being one of our first subscribers,</p>
+<p style="margin:0 0 28px">Harshad<br><span style="color:#777777">MyGoldRates</span></p>
+<p style="margin:0;font-size:12px;color:#888888;border-top:1px solid #eeeeee;padding-top:12px">You are getting this because you subscribed at mygoldrates.com. <a href="{unsub}" style="color:#888888">Unsubscribe</a></p>
+</div></body></html>"""
+    text = "\n\n".join([
+        f"Hi {first},",
+        "I wanted to tell you about something new on MyGoldRates.",
+        "You can now ask Sona, our jewellery assistant, any question before you buy gold, and she "
+        "answers straight away from today's real rates at every jeweller we track. Type it, or tap the "
+        "mic and just ask out loud - in English or in your own language: Hindi, Marathi, Gujarati, "
+        "Punjabi, Bengali, Kannada, Tamil, Telugu or Malayalam.",
+        "Here is what she told me this morning:",
+        *[f'"{plain(q)}"\n{plain(a)}' for q, a in qa],
+        f"Try her here: {ask}",
+        "We have also started putting every jeweller's offers in one place, with what each is really "
+        f"worth after making charges and GST: {offers}\nAnd if you tell us your target price, we will "
+        "email you the day 22K drops to it.",
+        f"If a friend is buying gold soon, this is your personal invite link: {invite}\n"
+        "When they join, we will let you know.",
+        "One small request: if this email landed in your Promotions tab, please move it to Primary, "
+        "so the daily rate alerts reach you too.",
+        "Thank you for being one of our first subscribers,\nHarshad\nMyGoldRates",
+        f"--\nYou are getting this because you subscribed at mygoldrates.com. Unsubscribe: {unsub}"])
+    return body, text
 
 
 def html(first, qa, invite, unsub, date):
@@ -105,7 +161,15 @@ def main():
     g.add_argument("--preview")
     g.add_argument("--to")
     g.add_argument("--send", action="store_true")
+    ap.add_argument("--designed", action="store_true", help="the newsletter-style version")
     args = ap.parse_args()
+
+    def compose(first, invite, unsub):
+        """(html, text or None, subject, sender name or None)"""
+        if args.designed:
+            return html(first, qa, invite, unsub, date), None, SUBJECT_DESIGNED, None
+        b, tx = letter(first, qa, invite, unsub)
+        return b, tx, SUBJECT, LETTER_FROM
 
     from supabase import create_client
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
@@ -115,9 +179,11 @@ def main():
     qa = examples(live)
     date = datetime.now(SA.IST).strftime("%d %B %Y")
     if args.preview:                 # reads rates only; writes nothing anywhere
-        body = html("Asha", qa, SA.ref_link("SAMPLE1"),
-                    f"{SA.SITE_URL}/unsubscribe.html?t=00000000-0000-0000-0000-000000000000", date)
+        body, text, _, _ = compose("Asha", SA.ref_link("SAMPLE1"),
+                                   f"{SA.SITE_URL}/unsubscribe.html?t=00000000-0000-0000-0000-000000000000")
         open(args.preview, "w", encoding="utf-8").write(body)
+        if text:
+            open(args.preview + ".txt", "w", encoding="utf-8").write(text)
         print(f"promo: preview written to {args.preview}; nothing sent")
         return
     subs = sb.table("inquiries").select("name, email, unsub_token").execute().data
@@ -128,7 +194,7 @@ def main():
         first = (s.get("name") or "there").strip().split(" ")[0] or "there"
         unsub = f"{SA.SITE_URL}/unsubscribe.html?t={s['unsub_token']}"
         code = codes.get(s["email"].lower())
-        return html(first, qa, SA.ref_link(code) if code else f"{SA.SITE_URL}/", unsub, date), unsub
+        return compose(first, SA.ref_link(code) if code else f"{SA.SITE_URL}/", unsub), unsub
 
     key = os.environ.get("BREVO_API_KEY", "").strip()
     if not key:
@@ -136,15 +202,18 @@ def main():
     from_name, from_email = SA.parse_sender(
         os.environ.get("ALERTS_FROM", "GoldRates <alerts@mygoldrates.com>"))
 
-    def send(to_email, body, unsub):
+    def send(to_email, mail, unsub):
+        body, text, subject, sender = mail
+        msg = {"sender": {"name": sender or from_name, "email": from_email}, "to": [{"email": to_email}],
+               "subject": subject, "htmlContent": body,
+               "headers": {"List-Unsubscribe": f"<{unsub}>",
+                           "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"}}
+        if text:
+            msg["textContent"] = text
         r = SA.requests.post(
             "https://api.brevo.com/v3/smtp/email",
             headers={"api-key": key, "accept": "application/json", "content-type": "application/json"},
-            json={"sender": {"name": from_name, "email": from_email}, "to": [{"email": to_email}],
-                  "subject": SUBJECT, "htmlContent": body,
-                  "headers": {"List-Unsubscribe": f"<{unsub}>",
-                              "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"}},
-            timeout=30)
+            json=msg, timeout=30)
         if r.status_code >= 300:
             print(f"promo: {to_email[:2]}… not sent: HTTP {r.status_code} {r.text[:200]}")
         return r.status_code < 300
