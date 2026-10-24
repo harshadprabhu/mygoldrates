@@ -90,8 +90,8 @@ SONA = {
 }
 
 
-def _sona(qs):
-    inp = json.dumps({"kb": "docs/assistant.json", "qs": qs})
+def _sona(qs, kb="docs/assistant.json"):
+    inp = json.dumps({"kb": kb, "qs": qs})
     r = subprocess.run(["node", "tests/sona_harness.js"], input=inp, capture_output=True, text=True, check=True)
     return json.loads(r.stdout)
 
@@ -111,6 +111,33 @@ def test_a_chip_in_english_is_answered_in_the_chosen_language():
     r = _sona([{"lang": "ta", "q": "Cheapest 22K today"}])[0]
     assert r["intent"] == "cheapest" and r["lang"] == "ta"
     assert "மலிவான" in r["html"] and "ரூபாய்" in r["say"]
+
+
+def test_my_city_is_the_visitors_own_never_the_last_city_asked_about(tmp_path):
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    for c in kb["cities"]:
+        if c["n"] in gs.CITY_COORDS:
+            c["g"] = list(gs.CITY_COORDS[c["n"]])
+    p = tmp_path / "kb.json"
+    p.write_text(json.dumps(kb), encoding="utf-8")
+    r = _sona([
+        {"lang": "en", "q": "Gold rate in Kanpur"},       # asking about a city...
+        {"q": "Gold rate in my city", "chip": True},      # ...does not make it "my city"
+        {"q": "Mumbai", "chip": True},                    # the answer to "which city?" does
+        {"q": "Gold rate in Kanpur"},
+        {"q": "Gold rate in my city", "chip": True},
+        {"lang": "gu", "q": "Gold rate in my city", "chip": True},
+        {"near": [19.06, 72.84]},                         # Bandra
+        {"near": [28.61, 77.21]},                         # Connaught Place
+    ], kb=str(p))
+    assert r[0]["intent"] == "rate_city" and "Kanpur" in r[0]["say"]
+    assert r[1]["intent"] == "ask_city" and r[1]["chips"][0] == "#loc"
+    assert r[2]["intent"] == "rate_city" and "Mumbai" in r[2]["say"] and "#city" in r[2]["chips"]
+    assert "Kanpur" in r[3]["say"] and "#city" not in r[3]["chips"]
+    assert r[4]["intent"] == "rate_city" and "Mumbai" in r[4]["say"]
+    assert r[5]["lang"] == "gu" and "Mumbai" in r[5]["html"]
+    assert r[6]["city"] == "Mumbai" and r[7]["city"] == "Delhi"
+    assert "localStorage.setItem('sona_city'" not in JS
 
 
 def test_every_language_has_every_reply_with_the_same_blanks():

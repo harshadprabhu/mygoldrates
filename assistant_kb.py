@@ -113,7 +113,7 @@ def _load_answers():
 
 def build(*, live, med, trend, locations, place_state, region_map, brand_home,
           loc_slug, jeweller_pages, making, offers, ring_rows, offer_meaning,
-          offer_headline, guides, display_date, updated_iso, site_url):
+          offer_headline, guides, display_date, updated_iso, site_url, coords=None):
     """Everything the assistant knows today, as a compact dict."""
     rows = {}
     for r in live:
@@ -155,8 +155,10 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
         st = place_state.get(p) or p
         local = sorted({s for s, sts in region_map.items() if st in sts}
                        | {s for s, hs in brand_home.items() if p in hs})
+        # "g": the city's centre, for "use my location" (matched on the device)
         cities.append({"n": p, "st": st, "u": f"/gold-rate-today-in-{loc_slug(p)}",
-                       **({"loc": [s for s in local if s in rows]} if local else {})})
+                       **({"loc": [s for s in local if s in rows]} if local else {}),
+                       **({"g": list((coords or {})[p])} if p in (coords or {}) else {})})
     hist = [[d, round(v, 2)] for d, v in trend[-90:]]
     ring = [{"s": r["slug"], "n": r["name"], "a": round(r["after"]), "b": round(r["before"]),
              "mk": r["making"], "p": r["flat_pct"]} for r in (ring_rows or [])]

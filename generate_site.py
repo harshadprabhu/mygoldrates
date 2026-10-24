@@ -3953,7 +3953,7 @@ b.addEventListener('click',function(){
         _kb_r22 = {(r["brands"] or {}).get("slug"): r["canonical_24k_pre_gst"] * PURITY_FRACTION["22K"]
                    for r in live}
         _kb = assistant_kb.build(
-            live=live, med=med, trend=trend, locations=LOCATIONS,
+            live=live, med=med, trend=trend, locations=LOCATIONS, coords=CITY_COORDS,
             place_state=PLACE_STATE, region_map=REGION_MAP, brand_home=BRAND_HOME,
             loc_slug=loc_slug, jeweller_pages=jeweller_pages, making=_kb_mc,
             offers=_kb_off, ring_rows=_OP.ring_prices(_kb_off, _kb_mc, _kb_r22),
