@@ -45,9 +45,8 @@
     off_see: 'See who has offers →',
     off_brand_h: 'Offers on <b>{b}</b>’s website today:',
     off_page: 'Their page ↗', off_all: 'All jewellers’ offers compared →',
-    off_h: 'The real test of an offer is the final price. A 10 g 22K ring today, after offers, with GST:',
-    off_tag: '{p}% off making',
-    off_count: '{n} jewellers have offers on their sites today, e.g. {list}.',
+    off_all_h: '{n} jewellers have offers on their own websites today (A–Z):',
+    off_ring: 'Counting only offers that apply to every design, the lowest price for a 10 g 22K ring today is at <b>{b}</b>: {p} with GST. “Up to” and selected-design offers vary by piece — confirm with the jeweller.',
     off_every: 'Every offer, and what it really means →',
     price_h: '{w} of {k} at {who} today:', price_who: 'the cheapest national jeweller ({b})',
     price_gold: 'Gold ({g} g × {p})', price_mk: 'Making (~{p}, {c})', price_typ: 'typical', price_total: 'Total',
@@ -80,7 +79,7 @@
     say_mk_brand: '{b}’s usual making charge on a {c} is about {p}.',
     say_mk: 'The lowest making charge on a {c} is at {b}, about {p}.',
     say_mk_none: 'We have not measured {b}’s making charges yet.',
-    say_off: 'Counting the offers, a 10 gram 22 carat ring costs the least at {b} today: {p} with GST.',
+    say_off_all: '{n} jewellers have offers today. Counting only offers that apply to every design, a 10 gram 22 carat ring costs the least at {b}: {p} with GST.',
     say_off_brand: '{b} has {n} offers on its website today.',
     say_off_none: 'No offer is published on {b}’s website today.',
     say_price: '{w} of {k} gold at {b} comes to about {p}, with GST.',
@@ -136,9 +135,8 @@
     off_see: 'देखें किसके पास ऑफ़र है →',
     off_brand_h: 'आज <b>{b}</b> की वेबसाइट पर ऑफ़र:',
     off_page: 'उनका पेज ↗', off_all: 'सभी ज्वैलर्स के ऑफ़र की तुलना →',
-    off_h: 'ऑफ़र की असली परख आख़िरी क़ीमत है। आज 10 ग्राम 22K की अंगूठी, ऑफ़र के बाद, GST के साथ:',
-    off_tag: 'मेकिंग पर {p}% छूट',
-    off_count: 'आज {n} ज्वैलर्स की साइट पर ऑफ़र हैं, जैसे {list}।',
+    off_all_h: 'आज {n} ज्वैलर्स की अपनी वेबसाइट पर ऑफ़र हैं (A–Z):',
+    off_ring: 'सिर्फ़ हर डिज़ाइन पर लागू ऑफ़र गिनकर, आज 10 ग्राम 22K अंगूठी सबसे कम <b>{b}</b> पर है: GST के साथ {p}। “अप टू” और चुनिंदा डिज़ाइन वाले ऑफ़र हर गहने पर अलग होते हैं — ज्वैलर से पक्का कर लें।',
     off_every: 'हर ऑफ़र, और उसका असली मतलब →',
     price_h: 'आज {who} पर {w} {k}:', price_who: 'सबसे सस्ता राष्ट्रीय ज्वैलर ({b})',
     price_gold: 'सोना ({g} ग्राम × {p})', price_mk: 'मेकिंग (~{p}, {c})', price_typ: 'आम तौर पर', price_total: 'कुल',
@@ -171,7 +169,7 @@
     say_mk_brand: '{b} पर {c} का आम मेकिंग चार्ज लगभग {p} है।',
     say_mk: '{c} पर सबसे कम मेकिंग चार्ज {b} पर है, लगभग {p}।',
     say_mk_none: '{b} का मेकिंग चार्ज हमने अभी नहीं मापा है।',
-    say_off: 'ऑफ़र जोड़कर, आज 10 ग्राम 22 कैरेट की अंगूठी सबसे कम {b} पर है: GST के साथ {p}।',
+    say_off_all: 'आज {n} ज्वैलर्स के पास ऑफ़र हैं। सिर्फ़ हर डिज़ाइन पर लागू ऑफ़र गिनकर, 10 ग्राम 22 कैरेट अंगूठी सबसे कम {b} पर है: GST के साथ {p}।',
     say_off_brand: 'आज {b} की वेबसाइट पर {n} ऑफ़र हैं।',
     say_off_none: 'आज {b} की वेबसाइट पर कोई ऑफ़र नहीं है।',
     say_price: '{b} पर {w} {k} सोना GST के साथ लगभग {p} का पड़ेगा।',
@@ -227,9 +225,8 @@
     off_see: 'कोणाकडे ऑफर आहे ते पाहा →',
     off_brand_h: 'आज <b>{b}</b> च्या वेबसाइटवरील ऑफर्स:',
     off_page: 'त्यांचे पान ↗', off_all: 'सर्व ज्वेलर्सच्या ऑफर्सची तुलना →',
-    off_h: 'ऑफरची खरी कसोटी म्हणजे अंतिम किंमत. आज 10 ग्रॅम 22K अंगठी, ऑफरनंतर, GST सह:',
-    off_tag: 'मजुरीवर {p}% सूट',
-    off_count: 'आज {n} ज्वेलर्सच्या साइटवर ऑफर्स आहेत, उदा. {list}.',
+    off_all_h: 'आज {n} ज्वेलर्सच्या स्वतःच्या वेबसाइटवर ऑफर्स आहेत (A–Z):',
+    off_ring: 'फक्त प्रत्येक डिझाइनवर लागू ऑफर धरून, आज 10 ग्रॅम 22K अंगठी सर्वात कमी <b>{b}</b> येथे आहे: GST सह {p}. “अप टू” आणि निवडक डिझाइनच्या ऑफर्स प्रत्येक दागिन्यावर वेगळ्या असतात — ज्वेलरकडे खात्री करा.',
     off_every: 'प्रत्येक ऑफर, आणि तिचा खरा अर्थ →',
     price_h: 'आज {who} येथे {w} {k}:', price_who: 'सर्वात स्वस्त राष्ट्रीय ज्वेलर ({b})',
     price_gold: 'सोने ({g} ग्रॅम × {p})', price_mk: 'मजुरी (~{p}, {c})', price_typ: 'साधारण', price_total: 'एकूण',
@@ -262,7 +259,7 @@
     say_mk_brand: '{b} येथे {c} ची नेहमीची मजुरी साधारण {p} आहे.',
     say_mk: '{c} वर सर्वात कमी मजुरी {b} येथे आहे, साधारण {p}.',
     say_mk_none: '{b} ची मजुरी आम्ही अजून मोजलेली नाही.',
-    say_off: 'ऑफर धरून, आज 10 ग्रॅम 22 कॅरेट अंगठी सर्वात कमी {b} येथे आहे: GST सह {p}.',
+    say_off_all: 'आज {n} ज्वेलर्सकडे ऑफर्स आहेत. फक्त प्रत्येक डिझाइनवर लागू ऑफर धरून, 10 ग्रॅम 22 कॅरेट अंगठी सर्वात कमी {b} येथे आहे: GST सह {p}.',
     say_off_brand: 'आज {b} च्या वेबसाइटवर {n} ऑफर्स आहेत.',
     say_off_none: 'आज {b} च्या वेबसाइटवर कोणतीही ऑफर नाही.',
     say_price: '{b} येथे {w} {k} सोने GST सह साधारण {p} ला पडेल.',
@@ -318,9 +315,8 @@
     off_see: 'કોની પાસે ઑફર છે તે જુઓ →',
     off_brand_h: 'આજે <b>{b}</b> ની વેબસાઇટ પરની ઑફર:',
     off_page: 'તેમનું પેજ ↗', off_all: 'બધા જ્વેલર્સની ઑફરની સરખામણી →',
-    off_h: 'ઑફરની સાચી કસોટી અંતિમ કિંમત છે. આજે 10 ગ્રામ 22K વીંટી, ઑફર પછી, GST સાથે:',
-    off_tag: 'ઘડામણ પર {p}% છૂટ',
-    off_count: 'આજે {n} જ્વેલર્સની સાઇટ પર ઑફર છે, જેમ કે {list}.',
+    off_all_h: 'આજે {n} જ્વેલર્સની પોતાની વેબસાઇટ પર ઑફર છે (A–Z):',
+    off_ring: 'ફક્ત દરેક ડિઝાઇન પર લાગુ ઑફર ગણીને, આજે 10 ગ્રામ 22K વીંટી સૌથી ઓછી <b>{b}</b> પર છે: GST સાથે {p}. “અપ ટુ” અને પસંદગીની ડિઝાઇનની ઑફર દરેક દાગીના પર અલગ હોય છે — જ્વેલર પાસે ખાતરી કરો.',
     off_every: 'દરેક ઑફર, અને તેનો સાચો અર્થ →',
     price_h: 'આજે {who} પર {w} {k}:', price_who: 'સૌથી સસ્તો રાષ્ટ્રીય જ્વેલર ({b})',
     price_gold: 'સોનું ({g} ગ્રામ × {p})', price_mk: 'ઘડામણ (~{p}, {c})', price_typ: 'સામાન્ય', price_total: 'કુલ',
@@ -353,7 +349,7 @@
     say_mk_brand: '{b} પર {c} નું સામાન્ય ઘડામણ લગભગ {p} છે.',
     say_mk: '{c} પર સૌથી ઓછું ઘડામણ {b} પર છે, લગભગ {p}.',
     say_mk_none: '{b} નું ઘડામણ અમે હજી માપ્યું નથી.',
-    say_off: 'ઑફર ગણીને, આજે 10 ગ્રામ 22 કેરેટ વીંટી સૌથી ઓછી {b} પર છે: GST સાથે {p}.',
+    say_off_all: 'આજે {n} જ્વેલર્સ પાસે ઑફર છે. ફક્ત દરેક ડિઝાઇન પર લાગુ ઑફર ગણીને, 10 ગ્રામ 22 કેરેટ વીંટી સૌથી ઓછી {b} પર છે: GST સાથે {p}.',
     say_off_brand: 'આજે {b} ની વેબસાઇટ પર {n} ઑફર છે.',
     say_off_none: 'આજે {b} ની વેબસાઇટ પર કોઈ ઑફર નથી.',
     say_price: '{b} પર {w} {k} સોનું GST સાથે લગભગ {p} થશે.',
@@ -409,9 +405,8 @@
     off_see: 'ਵੇਖੋ ਕਿਸ ਕੋਲ ਆਫ਼ਰ ਹੈ →',
     off_brand_h: 'ਅੱਜ <b>{b}</b> ਦੀ ਵੈੱਬਸਾਈਟ ’ਤੇ ਆਫ਼ਰ:',
     off_page: 'ਉਹਨਾਂ ਦਾ ਪੰਨਾ ↗', off_all: 'ਸਾਰੇ ਜਿਊਲਰਾਂ ਦੀਆਂ ਆਫ਼ਰਾਂ ਦੀ ਤੁਲਨਾ →',
-    off_h: 'ਆਫ਼ਰ ਦੀ ਅਸਲ ਪਰਖ ਆਖ਼ਰੀ ਕੀਮਤ ਹੈ। ਅੱਜ 10 ਗ੍ਰਾਮ 22K ਮੁੰਦਰੀ, ਆਫ਼ਰ ਤੋਂ ਬਾਅਦ, GST ਸਮੇਤ:',
-    off_tag: 'ਘੜਾਈ ’ਤੇ {p}% ਛੋਟ',
-    off_count: 'ਅੱਜ {n} ਜਿਊਲਰਾਂ ਦੀ ਸਾਈਟ ’ਤੇ ਆਫ਼ਰਾਂ ਹਨ, ਜਿਵੇਂ {list}।',
+    off_all_h: 'ਅੱਜ {n} ਜਿਊਲਰਾਂ ਦੀਆਂ ਆਪਣੀਆਂ ਵੈੱਬਸਾਈਟਾਂ ’ਤੇ ਆਫ਼ਰਾਂ ਹਨ (A–Z):',
+    off_ring: 'ਸਿਰਫ਼ ਹਰ ਡਿਜ਼ਾਈਨ ’ਤੇ ਲਾਗੂ ਆਫ਼ਰ ਗਿਣ ਕੇ, ਅੱਜ 10 ਗ੍ਰਾਮ 22K ਮੁੰਦਰੀ ਸਭ ਤੋਂ ਘੱਟ <b>{b}</b> ’ਤੇ ਹੈ: GST ਸਮੇਤ {p}। “ਅੱਪ ਟੂ” ਅਤੇ ਚੁਣੇ ਡਿਜ਼ਾਈਨਾਂ ਵਾਲੀਆਂ ਆਫ਼ਰਾਂ ਹਰ ਗਹਿਣੇ ’ਤੇ ਵੱਖਰੀਆਂ ਹੁੰਦੀਆਂ ਹਨ — ਜਿਊਲਰ ਤੋਂ ਪੱਕਾ ਕਰ ਲਓ।',
     off_every: 'ਹਰ ਆਫ਼ਰ, ਅਤੇ ਉਸਦਾ ਅਸਲ ਮਤਲਬ →',
     price_h: 'ਅੱਜ {who} ’ਤੇ {w} {k}:', price_who: 'ਸਭ ਤੋਂ ਸਸਤਾ ਕੌਮੀ ਜਿਊਲਰ ({b})',
     price_gold: 'ਸੋਨਾ ({g} ਗ੍ਰਾਮ × {p})', price_mk: 'ਘੜਾਈ (~{p}, {c})', price_typ: 'ਆਮ ਤੌਰ ’ਤੇ', price_total: 'ਕੁੱਲ',
@@ -444,7 +439,7 @@
     say_mk_brand: '{b} ’ਤੇ {c} ਦੀ ਆਮ ਘੜਾਈ ਲਗਭਗ {p} ਹੈ।',
     say_mk: '{c} ’ਤੇ ਸਭ ਤੋਂ ਘੱਟ ਘੜਾਈ {b} ’ਤੇ ਹੈ, ਲਗਭਗ {p}।',
     say_mk_none: '{b} ਦੀ ਘੜਾਈ ਅਸੀਂ ਅਜੇ ਨਹੀਂ ਮਾਪੀ।',
-    say_off: 'ਆਫ਼ਰ ਜੋੜ ਕੇ, ਅੱਜ 10 ਗ੍ਰਾਮ 22 ਕੈਰਟ ਮੁੰਦਰੀ ਸਭ ਤੋਂ ਘੱਟ {b} ’ਤੇ ਹੈ: GST ਸਮੇਤ {p}।',
+    say_off_all: 'ਅੱਜ {n} ਜਿਊਲਰਾਂ ਕੋਲ ਆਫ਼ਰਾਂ ਹਨ। ਸਿਰਫ਼ ਹਰ ਡਿਜ਼ਾਈਨ ’ਤੇ ਲਾਗੂ ਆਫ਼ਰ ਗਿਣ ਕੇ, 10 ਗ੍ਰਾਮ 22 ਕੈਰਟ ਮੁੰਦਰੀ ਸਭ ਤੋਂ ਘੱਟ {b} ’ਤੇ ਹੈ: GST ਸਮੇਤ {p}।',
     say_off_brand: 'ਅੱਜ {b} ਦੀ ਵੈੱਬਸਾਈਟ ’ਤੇ {n} ਆਫ਼ਰਾਂ ਹਨ।',
     say_off_none: 'ਅੱਜ {b} ਦੀ ਵੈੱਬਸਾਈਟ ’ਤੇ ਕੋਈ ਆਫ਼ਰ ਨਹੀਂ ਹੈ।',
     say_price: '{b} ’ਤੇ {w} {k} ਸੋਨਾ GST ਸਮੇਤ ਲਗਭਗ {p} ਦਾ ਪਵੇਗਾ।',
@@ -500,9 +495,8 @@
     off_see: 'কার অফার আছে দেখুন →',
     off_brand_h: 'আজ <b>{b}</b>-এর ওয়েবসাইটে অফার:',
     off_page: 'ওদের পেজ ↗', off_all: 'সব জুয়েলারের অফারের তুলনা →',
-    off_h: 'অফারের আসল পরীক্ষা হল চূড়ান্ত দাম। আজ 10 গ্রাম 22K আংটি, অফারের পরে, GST সহ:',
-    off_tag: 'মজুরিতে {p}% ছাড়',
-    off_count: 'আজ {n}টি জুয়েলারের সাইটে অফার আছে, যেমন {list}।',
+    off_all_h: 'আজ {n}টি জুয়েলারের নিজস্ব ওয়েবসাইটে অফার আছে (A–Z):',
+    off_ring: 'শুধু সব ডিজাইনে প্রযোজ্য অফার ধরে, আজ 10 গ্রাম 22K আংটি সবচেয়ে কমে <b>{b}</b>-এ: GST সহ {p}। “আপ টু” আর বাছাই করা ডিজাইনের অফার গয়না ভেদে আলাদা — জুয়েলারের কাছে নিশ্চিত হয়ে নিন।',
     off_every: 'প্রতিটি অফার, আর তার আসল মানে →',
     price_h: 'আজ {who}-এ {w} {k}:', price_who: 'সবচেয়ে সস্তা জাতীয় জুয়েলার ({b})',
     price_gold: 'সোনা ({g} গ্রাম × {p})', price_mk: 'মজুরি (~{p}, {c})', price_typ: 'সাধারণত', price_total: 'মোট',
@@ -535,7 +529,7 @@
     say_mk_brand: '{b}-এ {c}-এর সাধারণ মজুরি প্রায় {p}।',
     say_mk: '{c}-এ সবচেয়ে কম মজুরি {b}-এ, প্রায় {p}।',
     say_mk_none: '{b}-এর মজুরি আমরা এখনও মাপিনি।',
-    say_off: 'অফার ধরে, আজ 10 গ্রাম 22 ক্যারেট আংটি সবচেয়ে কমে {b}-এ: GST সহ {p}।',
+    say_off_all: 'আজ {n}টি জুয়েলারের অফার আছে। শুধু সব ডিজাইনে প্রযোজ্য অফার ধরে, 10 গ্রাম 22 ক্যারেট আংটি সবচেয়ে কমে {b}-এ: GST সহ {p}।',
     say_off_brand: 'আজ {b}-এর ওয়েবসাইটে {n}টি অফার আছে।',
     say_off_none: 'আজ {b}-এর ওয়েবসাইটে কোনো অফার নেই।',
     say_price: '{b}-এ {w} {k} সোনা GST সহ প্রায় {p} পড়বে।',
@@ -591,9 +585,8 @@
     off_see: 'ಯಾರ ಬಳಿ ಆಫರ್ ಇದೆ ನೋಡಿ →',
     off_brand_h: 'ಇಂದು <b>{b}</b> ನ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿರುವ ಆಫರ್‌ಗಳು:',
     off_page: 'ಅವರ ಪುಟ ↗', off_all: 'ಎಲ್ಲಾ ಜ್ಯುವೆಲ್ಲರ್ಸ್ ಆಫರ್ ಹೋಲಿಕೆ →',
-    off_h: 'ಆಫರ್‌ನ ನಿಜವಾದ ಪರೀಕ್ಷೆ ಅಂತಿಮ ಬೆಲೆ. ಇಂದು 10 ಗ್ರಾಂ 22K ಉಂಗುರ, ಆಫರ್ ನಂತರ, GST ಸೇರಿ:',
-    off_tag: 'ಮೇಕಿಂಗ್ ಮೇಲೆ {p}% ರಿಯಾಯಿತಿ',
-    off_count: 'ಇಂದು {n} ಜ್ಯುವೆಲ್ಲರ್ಸ್ ಸೈಟ್‌ಗಳಲ್ಲಿ ಆಫರ್‌ಗಳಿವೆ, ಉದಾ. {list}.',
+    off_all_h: 'ಇಂದು {n} ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನ ಸ್ವಂತ ವೆಬ್‌ಸೈಟ್‌ಗಳಲ್ಲಿ ಆಫರ್‌ಗಳಿವೆ (A–Z):',
+    off_ring: 'ಎಲ್ಲಾ ವಿನ್ಯಾಸಗಳಿಗೆ ಅನ್ವಯಿಸುವ ಆಫರ್‌ಗಳನ್ನು ಮಾತ್ರ ಸೇರಿಸಿ, ಇಂದು 10 ಗ್ರಾಂ 22K ಉಂಗುರ ಅತಿ ಕಡಿಮೆ <b>{b}</b> ನಲ್ಲಿ: GST ಸೇರಿ {p}. “ಅಪ್ ಟು” ಮತ್ತು ಆಯ್ದ ವಿನ್ಯಾಸಗಳ ಆಫರ್‌ಗಳು ಆಭರಣದಿಂದ ಆಭರಣಕ್ಕೆ ಬದಲಾಗುತ್ತವೆ — ಜ್ಯುವೆಲ್ಲರ್ ಬಳಿ ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ.',
     off_every: 'ಪ್ರತಿ ಆಫರ್, ಮತ್ತು ಅದರ ನಿಜವಾದ ಅರ್ಥ →',
     price_h: 'ಇಂದು {who} ನಲ್ಲಿ {w} {k}:', price_who: 'ಅತಿ ಕಡಿಮೆ ದರದ ರಾಷ್ಟ್ರೀಯ ಜ್ಯುವೆಲ್ಲರ್ ({b})',
     price_gold: 'ಚಿನ್ನ ({g} ಗ್ರಾಂ × {p})', price_mk: 'ಮೇಕಿಂಗ್ (~{p}, {c})', price_typ: 'ಸಾಮಾನ್ಯ', price_total: 'ಒಟ್ಟು',
@@ -626,7 +619,7 @@
     say_mk_brand: '{b} ನಲ್ಲಿ {c} ಗೆ ಸಾಮಾನ್ಯ ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ ಸುಮಾರು {p}.',
     say_mk: '{c} ಗೆ ಅತಿ ಕಡಿಮೆ ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ {b} ನಲ್ಲಿ, ಸುಮಾರು {p}.',
     say_mk_none: '{b} ನ ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ ಅನ್ನು ನಾವು ಇನ್ನೂ ಅಳೆದಿಲ್ಲ.',
-    say_off: 'ಆಫರ್ ಸೇರಿಸಿ, ಇಂದು 10 ಗ್ರಾಂ 22 ಕ್ಯಾರೆಟ್ ಉಂಗುರ ಅತಿ ಕಡಿಮೆ {b} ನಲ್ಲಿ: GST ಸೇರಿ {p}.',
+    say_off_all: 'ಇಂದು {n} ಜ್ಯುವೆಲ್ಲರ್ಸ್ ಬಳಿ ಆಫರ್‌ಗಳಿವೆ. ಎಲ್ಲಾ ವಿನ್ಯಾಸಗಳಿಗೆ ಅನ್ವಯಿಸುವ ಆಫರ್‌ಗಳನ್ನು ಮಾತ್ರ ಸೇರಿಸಿ, 10 ಗ್ರಾಂ 22 ಕ್ಯಾರೆಟ್ ಉಂಗುರ ಅತಿ ಕಡಿಮೆ {b} ನಲ್ಲಿ: GST ಸೇರಿ {p}.',
     say_off_brand: 'ಇಂದು {b} ನ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ {n} ಆಫರ್‌ಗಳಿವೆ.',
     say_off_none: 'ಇಂದು {b} ನ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ ಯಾವುದೇ ಆಫರ್ ಇಲ್ಲ.',
     say_price: '{b} ನಲ್ಲಿ {w} {k} ಚಿನ್ನ GST ಸೇರಿ ಸುಮಾರು {p} ಆಗುತ್ತದೆ.',
@@ -682,9 +675,8 @@
     off_see: 'யாரிடம் ஆஃபர் உள்ளது பாருங்கள் →',
     off_brand_h: 'இன்று <b>{b}</b> இணையதளத்தில் உள்ள ஆஃபர்கள்:',
     off_page: 'அவர்கள் பக்கம் ↗', off_all: 'எல்லா நகைக்கடைகளின் ஆஃபர் ஒப்பீடு →',
-    off_h: 'ஆஃபரின் உண்மையான சோதனை இறுதி விலைதான். இன்று 10 கிராம் 22K மோதிரம், ஆஃபருக்குப் பிறகு, GST உடன்:',
-    off_tag: 'செய்கூலியில் {p}% தள்ளுபடி',
-    off_count: 'இன்று {n} நகைக்கடைகளின் தளங்களில் ஆஃபர்கள் உள்ளன, உதா. {list}.',
+    off_all_h: 'இன்று {n} நகைக்கடைகளின் சொந்த இணையதளங்களில் ஆஃபர்கள் உள்ளன (A–Z):',
+    off_ring: 'எல்லா டிசைன்களுக்கும் பொருந்தும் ஆஃபர்களை மட்டும் சேர்த்து, இன்று 10 கிராம் 22K மோதிரம் குறைந்த விலையில் <b>{b}</b> இல்: GST உடன் {p}. “அப் டு” மற்றும் தேர்ந்தெடுத்த டிசைன் ஆஃபர்கள் நகைக்கு நகை மாறும் — கடையில் உறுதிசெய்யுங்கள்.',
     off_every: 'ஒவ்வொரு ஆஃபரும், அதன் உண்மையான அர்த்தமும் →',
     price_h: 'இன்று {who} இல் {w} {k}:', price_who: 'மலிவான தேசிய நகைக்கடை ({b})',
     price_gold: 'தங்கம் ({g} கிராம் × {p})', price_mk: 'செய்கூலி (~{p}, {c})', price_typ: 'வழக்கமான', price_total: 'மொத்தம்',
@@ -717,7 +709,7 @@
     say_mk_brand: '{b} இல் {c} க்கு வழக்கமான செய்கூலி சுமார் {p}.',
     say_mk: '{c} க்கு குறைந்த செய்கூலி {b} இல், சுமார் {p}.',
     say_mk_none: '{b} இன் செய்கூலியை நாங்கள் இன்னும் அளவிடவில்லை.',
-    say_off: 'ஆஃபர்களைச் சேர்த்து, இன்று 10 கிராம் 22 கேரட் மோதிரம் குறைந்த விலையில் {b} இல்: GST உடன் {p}.',
+    say_off_all: 'இன்று {n} நகைக்கடைகளில் ஆஃபர்கள் உள்ளன. எல்லா டிசைன்களுக்கும் பொருந்தும் ஆஃபர்களை மட்டும் சேர்த்து, 10 கிராம் 22 கேரட் மோதிரம் குறைந்த விலையில் {b} இல்: GST உடன் {p}.',
     say_off_brand: 'இன்று {b} இணையதளத்தில் {n} ஆஃபர்கள் உள்ளன.',
     say_off_none: 'இன்று {b} இணையதளத்தில் எந்த ஆஃபரும் இல்லை.',
     say_price: '{b} இல் {w} {k} தங்கம் GST உடன் சுமார் {p} ஆகும்.',
@@ -773,9 +765,8 @@
     off_see: 'ఎవరి దగ్గర ఆఫర్ ఉందో చూడండి →',
     off_brand_h: 'ఈరోజు <b>{b}</b> వెబ్‌సైట్‌లోని ఆఫర్లు:',
     off_page: 'వారి పేజీ ↗', off_all: 'అన్ని జ్యువెలర్ల ఆఫర్ల పోలిక →',
-    off_h: 'ఆఫర్‌కు అసలు పరీక్ష తుది ధరే. ఈరోజు 10 గ్రాముల 22K ఉంగరం, ఆఫర్ తర్వాత, GST తో:',
-    off_tag: 'మేకింగ్‌పై {p}% తగ్గింపు',
-    off_count: 'ఈరోజు {n} జ్యువెలర్ల సైట్లలో ఆఫర్లు ఉన్నాయి, ఉదా. {list}.',
+    off_all_h: 'ఈరోజు {n} జ్యువెలర్ల సొంత వెబ్‌సైట్లలో ఆఫర్లు ఉన్నాయి (A–Z):',
+    off_ring: 'అన్ని డిజైన్లకు వర్తించే ఆఫర్లు మాత్రమే కలిపి, ఈరోజు 10 గ్రాముల 22K ఉంగరం తక్కువ ధర <b>{b}</b> వద్ద: GST తో {p}. “అప్ టు” మరియు ఎంపిక చేసిన డిజైన్ల ఆఫర్లు నగను బట్టి మారుతాయి — జ్యువెలర్ వద్ద నిర్ధారించుకోండి.',
     off_every: 'ప్రతి ఆఫర్, దాని అసలు అర్థం →',
     price_h: 'ఈరోజు {who} వద్ద {w} {k}:', price_who: 'చౌకైన జాతీయ జ్యువెలర్ ({b})',
     price_gold: 'బంగారం ({g} గ్రా × {p})', price_mk: 'మేకింగ్ (~{p}, {c})', price_typ: 'సాధారణంగా', price_total: 'మొత్తం',
@@ -808,7 +799,7 @@
     say_mk_brand: '{b} వద్ద {c} పై సాధారణ మేకింగ్ చార్జీ సుమారు {p}.',
     say_mk: '{c} పై తక్కువ మేకింగ్ చార్జీ {b} వద్ద, సుమారు {p}.',
     say_mk_none: '{b} మేకింగ్ చార్జీలను మేము ఇంకా కొలవలేదు.',
-    say_off: 'ఆఫర్లు కలిపి, ఈరోజు 10 గ్రాముల 22 క్యారెట్ ఉంగరం తక్కువ ధర {b} వద్ద: GST తో {p}.',
+    say_off_all: 'ఈరోజు {n} జ్యువెలర్ల వద్ద ఆఫర్లు ఉన్నాయి. అన్ని డిజైన్లకు వర్తించే ఆఫర్లు మాత్రమే కలిపి, 10 గ్రాముల 22 క్యారెట్ ఉంగరం తక్కువ ధర {b} వద్ద: GST తో {p}.',
     say_off_brand: 'ఈరోజు {b} వెబ్‌సైట్‌లో {n} ఆఫర్లు ఉన్నాయి.',
     say_off_none: 'ఈరోజు {b} వెబ్‌సైట్‌లో ఏ ఆఫర్ లేదు.',
     say_price: '{b} వద్ద {w} {k} బంగారం GST తో సుమారు {p} అవుతుంది.',
@@ -864,9 +855,8 @@
     off_see: 'ആർക്കൊക്കെ ഓഫറുണ്ടെന്ന് നോക്കൂ →',
     off_brand_h: 'ഇന്ന് <b>{b}</b> ന്റെ വെബ്സൈറ്റിലെ ഓഫറുകൾ:',
     off_page: 'അവരുടെ പേജ് ↗', off_all: 'എല്ലാ ജ്വല്ലറികളുടെയും ഓഫറുകൾ താരതമ്യം →',
-    off_h: 'ഓഫറിന്റെ യഥാർത്ഥ പരീക്ഷണം അന്തിമ വിലയാണ്. ഇന്ന് 10 ഗ്രാം 22K മോതിരം, ഓഫറിന് ശേഷം, GST ഉൾപ്പെടെ:',
-    off_tag: 'പണിക്കൂലിയിൽ {p}% കിഴിവ്',
-    off_count: 'ഇന്ന് {n} ജ്വല്ലറികളുടെ സൈറ്റുകളിൽ ഓഫറുകളുണ്ട്, ഉദാ. {list}.',
+    off_all_h: 'ഇന്ന് {n} ജ്വല്ലറികളുടെ സ്വന്തം വെബ്സൈറ്റുകളിൽ ഓഫറുകളുണ്ട് (A–Z):',
+    off_ring: 'എല്ലാ ഡിസൈനുകൾക്കും ബാധകമായ ഓഫറുകൾ മാത്രം ചേർത്ത്, ഇന്ന് 10 ഗ്രാം 22K മോതിരം ഏറ്റവും കുറവ് <b>{b}</b> ൽ: GST ഉൾപ്പെടെ {p}. “അപ് ടു”, തിരഞ്ഞെടുത്ത ഡിസൈൻ ഓഫറുകൾ ആഭരണം അനുസരിച്ച് മാറും — ജ്വല്ലറിയിൽ ഉറപ്പാക്കൂ.',
     off_every: 'എല്ലാ ഓഫറുകളും, അവയുടെ യഥാർത്ഥ അർത്ഥവും →',
     price_h: 'ഇന്ന് {who} ൽ {w} {k}:', price_who: 'ഏറ്റവും കുറഞ്ഞ ദേശീയ ജ്വല്ലറി ({b})',
     price_gold: 'സ്വർണം ({g} ഗ്രാം × {p})', price_mk: 'പണിക്കൂലി (~{p}, {c})', price_typ: 'സാധാരണ', price_total: 'ആകെ',
@@ -899,7 +889,7 @@
     say_mk_brand: '{b} ൽ {c} ന് സാധാരണ പണിക്കൂലി ഏകദേശം {p}.',
     say_mk: '{c} ന് കുറഞ്ഞ പണിക്കൂലി {b} ൽ, ഏകദേശം {p}.',
     say_mk_none: '{b} ന്റെ പണിക്കൂലി ഞങ്ങൾ ഇതുവരെ അളന്നിട്ടില്ല.',
-    say_off: 'ഓഫറുകൾ ചേർത്ത്, ഇന്ന് 10 ഗ്രാം 22 കാരറ്റ് മോതിരം ഏറ്റവും കുറവ് {b} ൽ: GST ഉൾപ്പെടെ {p}.',
+    say_off_all: 'ഇന്ന് {n} ജ്വല്ലറികളിൽ ഓഫറുകളുണ്ട്. എല്ലാ ഡിസൈനുകൾക്കും ബാധകമായ ഓഫറുകൾ മാത്രം ചേർത്ത്, 10 ഗ്രാം 22 കാരറ്റ് മോതിരം ഏറ്റവും കുറവ് {b} ൽ: GST ഉൾപ്പെടെ {p}.',
     say_off_brand: 'ഇന്ന് {b} ന്റെ വെബ്സൈറ്റിൽ {n} ഓഫറുകളുണ്ട്.',
     say_off_none: 'ഇന്ന് {b} ന്റെ വെബ്സൈറ്റിൽ ഓഫറൊന്നുമില്ല.',
     say_price: '{b} ൽ {w} {k} സ്വർണത്തിന് GST ഉൾപ്പെടെ ഏകദേശം {p} ആകും.',
@@ -1484,13 +1474,19 @@
       }).join('') + '<p>' + link('/gold-offers-today', t('off_all')) + '</p>',
         say: t('say_off_brand', { b: b.n, n: b.off.length }), chips: chips(['afteroff', 'cheap22']) };
     }
-    var rows = (KB.ring || []).slice(0, 5);
-    var h = '<p>' + t('off_h') + '</p>' +
-      (rows.length ? '<div class="sn-list">' + rows.map(function (r, i) { return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + esc(r.n) + (r.p ? ' <em>' + t('off_tag', { p: r.p }) + '</em>' : '') + '</span><span class="sn-v">' + inr(r.a) + '</span></div>'; }).join('') + '</div>' : '');
-    var withOff = KB.brands.filter(function (b) { return b.off && b.off.length; });
-    h += '<p>' + t('off_count', { n: withOff.length, list: withOff.slice(0, 4).map(function (b) { return esc(b.n) + ': ' + esc(b.off[0].h); }).join('; ') }) + '</p>' +
+    // Every jeweller with an offer today, A to Z, each with its own offers:
+    // no jeweller is singled out. The ring price after offers is one line,
+    // because only an offer on every design can be priced into it.
+    var withOff = KB.brands.filter(function (b) { return b.off && b.off.length; })
+      .sort(function (a, b) { return a.n.localeCompare(b.n); });
+    var ring = (KB.ring || [])[0];
+    var h = '<p>' + t('off_all_h', { n: withOff.length }) + '</p><div class="sn-list">' + withOff.map(function (b) {
+      return '<div class="sn-row sn-orow"><span class="sn-nm"><b>' + esc(b.n) + '</b>' +
+        b.off.slice(0, 3).map(function (o) { return '<small>' + esc(o.h) + '</small>'; }).join('') + '</span></div>';
+    }).join('') + '</div>' +
+      (ring ? '<p class="sn-dim">' + t('off_ring', { b: esc(ring.n), p: inr(ring.a) }) + '</p>' : '') +
       '<p>' + link('/gold-offers-today', t('off_every')) + '</p>';
-    return { intent: 'offers', html: h, say: rows.length ? t('say_off', { b: rows[0].n, p: sInr(rows[0].a) }) : '',
+    return { intent: 'offers', html: h, say: ring ? t('say_off_all', { n: withOff.length, b: ring.n, p: sInr(ring.a) }) : '',
       chips: chips(['goodmk', 'mkcmp', 'cheap22']) };
   }
   function aPrice(w, k, bs, ct) {
@@ -1700,6 +1696,7 @@
     '.sn-lchips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}.sn-lchips button{border:1px solid rgba(240,208,128,.25);background:none;color:#f0d080;border-radius:999px;padding:4px 10px;font-size:12.5px;cursor:pointer}.sn-lchips button:hover{background:rgba(231,191,90,.12)}' +
     '.sn-mic{width:46px;height:46px;flex:none;border-radius:50%;border:1px solid rgba(240,208,128,.4);background:rgba(231,191,90,.1);color:#f0d080;cursor:pointer;display:flex;align-items:center;justify-content:center}.sn-mic svg{width:21px;height:21px}' +
     '.sn-mic.on{background:#e5484d;border-color:#e5484d;color:#fff;animation:snMic 1.2s infinite}@keyframes snMic{0%{box-shadow:0 0 0 0 rgba(229,72,77,.6)}70%{box-shadow:0 0 0 12px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}' +
+    '.sn-orow .sn-nm b{display:block;font-size:13.5px}.sn-orow small{display:block;color:#cfc4ad;font-size:12px;line-height:1.45;margin-top:2px}' +
     '.sn-fb .sn-say{margin-left:auto}.sn-fab .sn-fmic{width:26px;height:26px;margin:0 -6px 0 -2px;border-radius:50%;background:rgba(26,20,5,.12);display:flex;align-items:center;justify-content:center}.sn-fab .sn-fmic svg{width:15px;height:15px}' +
     '@media(max-width:520px){.sn-fab .sn-fmic{display:none}}' +
     '.sn-ban .bx{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;border:0;border-radius:50%;background:rgba(26,20,5,.12);color:#1a1405;cursor:pointer;font-size:14px}';
