@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-24T08:44+05:30",
+ "updated": "2026-10-24T08:57+05:30",
  "note": "Offers as published on each jeweller's own website on the date shown. Read automatically; confirm terms with the jeweller before buying.",
  "brands": [
   {
@@ -109,7 +109,7 @@
      "pct_max": 100.0,
      "upto": true,
      "selected": true,
-     "mentions": 4,
+     "mentions": 7,
      "min_purchase": null,
      "dates": [],
      "applies_to": [],
@@ -117,11 +117,26 @@
      "text": "Up To 100% Off On Making Charges",
      "url": "https://www.bluestone.com/",
      "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "making_zero",
+     "pct_min": 100.0,
+     "pct_max": 100.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Offers, 0% Making Charge",
+     "url": "https://www.bluestone.com/",
+     "first_seen": "2026-10-24"
     }
    ],
    "read_from": "https://www.bluestone.com/",
    "rendered": true,
-   "banners": 8
+   "banners": 16
   },
   {
    "slug": "ckc",
@@ -235,19 +250,19 @@
      "kind": "diamond_off",
      "pct_min": 20.0,
      "pct_max": 20.0,
-     "upto": false,
+     "upto": true,
      "selected": false,
-     "mentions": 1,
+     "mentions": 2,
      "min_purchase": null,
      "dates": [],
      "applies_to": [
       "diamond jewellery only"
      ],
      "conditions": [],
-     "text": "FLAT 20% OFF On All Diamond Jewellery",
+     "text": "20% OFF On All Diamond Jewellery ON CREDIT CARDS",
      "url": "https://www.caratlane.com/",
      "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/10/Desktop.jpg",
-     "banner": "FLAT 20% OFF\nOn All Diamond Jewellery\n5% INSTANT DISCOUNT\nON CREDIT CARDS\n31% Oct 2026: T&C Apply Big Purple Deals!\non Bigger on\nAf SS\n31% Oct 2026: T&C Apply Big Purple",
+     "banner": "20% OFF On All Diamond Jewellery ON CREDIT CARDS 31% Oct 2026: T&C Apply\nFLAT\n5% INSTANT DISCOUNT\nsh SS\nBig\nPurple\nBigger\nDeals!",
      "first_seen": "2026-10-24"
     },
     {
@@ -256,15 +271,15 @@
      "pct_max": 5.0,
      "upto": true,
      "selected": false,
-     "mentions": 2,
+     "mentions": 1,
      "min_purchase": null,
      "dates": [],
      "applies_to": [],
      "conditions": [],
      "text": "5% INSTANT DISCOUNT ON CREDIT CARDS",
      "url": "https://www.caratlane.com/",
-     "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/10/Desktop.jpg",
-     "banner": "FLAT 20% OFF\nOn All Diamond Jewellery\n5% INSTANT DISCOUNT\nON CREDIT CARDS\n31% Oct 2026: T&C Apply Big Purple Deals!\non Bigger on\nAf SS\n31% Oct 2026: T&C Apply Big Purple",
+     "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/10/Mobile.jpg",
+     "banner": "FLAT 20% Off On All Diamond Jewellery\neft\n4 Z\nBig on\nBigger on Deals!\n5% INSTANT DISCOUNT\nON CREDIT CARDS\nBDBS D\nMin Trm\nMin Trxn\nMax. Discount €2,500 par card.\nMax. Discount €2,000 per card.\nValid till\nOct 2026. T&C Apply",
      "first_seen": "2026-10-24"
     },
     {
@@ -459,7 +474,7 @@
      "kind": "combo",
      "pct_min": null,
      "pct_max": null,
-     "upto": true,
+     "upto": false,
      "selected": false,
      "mentions": 2,
      "min_purchase": null,
@@ -469,10 +484,10 @@
       "gold jewellery"
      ],
      "conditions": [],
-     "text": "BUY 1 DIAMOND JEWELLERY GOLD JEWELLERY GET YOUR 2ND AT 15% OFF 100% OFF ON DIAMOND",
+     "text": "BUY 1 DIAMOND JEWELLERY GOLD JEWELLERY GET YOUR 2ND AT 100% OFF 15% OFF ON DIAMOND VALUE’ ONVA’",
      "url": "https://www.jewelone.in/",
      "image": "https://www.jewelone.in/home-new/section1/Banner_1.webp",
-     "banner": "JEWEL ONE\nGOLD DIAMONDS\nDIWALI\nDouble Carnival\nThis Diwali,\nMake Every Jewellery Purchase Count Twice\nBUY 1 DIAMOND\nJEWELLERY\nGOLD JEWELLERY\nGET YOUR 2ND AT 15% OFF\n100% OFF\nON DIAMOND",
+     "banner": "JEWEL ONE\nGOLD DIAMONDS\nip?\nDIWALI\nDouble Carnival ro\nThis Diwali,\nMake Every Jewellery Purchase Count Twice\nBUY 1 DIAMOND\nJEWELLERY\nGOLD JEWELLERY\nGET YOUR 2ND AT\n100% OFF 15% OFF\nON DIAMOND VALUE’\nONVA’",
      "first_seen": "2026-10-24"
     },
     {
@@ -486,10 +501,10 @@
      "dates": [],
      "applies_to": [],
      "conditions": [],
-     "text": "GOLD INVESTMENT PLAN Every contribution takes you one step closer to your jewell",
+     "text": "GOLD INVESTMENT PLAN",
      "url": "https://www.jewelone.in/",
      "image": "https://www.jewelone.in/home-new/section5/slide-1.webp",
-     "banner": "Big, Dreams dont\nhappen in a day\n4 SWARNA\nAS SAKTHI\nGOLD INVESTMENT PLAN\nEvery contribution takes you one step\ncloser to your jewellery goals\nSWARNA",
+     "banner": "Big, Dreams dont\nhappen in a day\nSWARNA\nSAKTHI\nGOLD INVESTMENT PLAN\nEvery contribution takes you one step\nOr)\ncloser to your jewellery goals\nfr,\nway\niW iE",
      "first_seen": "2026-10-24"
     }
    ],
@@ -515,11 +530,27 @@
    "slug": "joyalukkas",
    "name": "Joyalukkas",
    "domain": "joyalukkas.in",
-   "status": "no offers published as text or in banners today",
+   "status": "ok",
    "pages": [
     "https://joyalukkas.in/"
    ],
-   "offers": [],
+   "offers": [
+    {
+     "kind": "rate_protect",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Advance Booking",
+     "url": "https://joyalukkas.in/",
+     "first_seen": "2026-10-24"
+    }
+   ],
    "read_from": "https://joyalukkas.in/",
    "rendered": true,
    "banners": 0
@@ -582,15 +613,15 @@
      "pct_max": null,
      "upto": true,
      "selected": false,
-     "mentions": 8,
+     "mentions": 6,
      "min_purchase": null,
      "dates": [],
      "applies_to": [],
      "conditions": [],
-     "text": "AT THE BOOKED RATE rotection, PRICE DROPPED? GET THE LOWEST RATE FOR YOUR GOLD",
+     "text": "LOCK YOUR GOLD RATE",
      "url": "https://www.khimjijewellers.com/",
-     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639283828925782421",
-     "banner": "PRICE HIKED?\nRate’\nGET YOUR GOLD JEWELLERY AT THE\nBOOKED RATE\nrotection,\nPRICE DROPPED?\nGET THE LOWEST RATE FOR\nYOUR GOLD JEWELLRY\nDAAM BADLEGA.\nDIWALI KI KHUSHI NAHI\nLOCK YOUR GOLD RATE\nJEWELLERS SINCE 1936",
+     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639283836604344229",
+     "banner": "PRICE HIKED?\nGold\nGET YOUR GOLD JEWELLERY THE\nBOOKED\nrotectio\nPRICE DROPPED?\nGET THE LOWEST RATE FOR\nYOUR GOLD JEWELLRY DAAM BADLEGA.\nDIWALI KI KHUSHI NAHI.\nLOCK YOUR GOLD RATE\n1Q%\nJEWELLERS SINCE 1936",
      "first_seen": "2026-10-24"
     }
    ],
@@ -625,7 +656,7 @@
    ],
    "read_from": "https://www.kisna.com/",
    "rendered": true,
-   "banners": 15
+   "banners": 14
   },
   {
    "slug": "mahesh",
@@ -870,10 +901,25 @@
     {
      "kind": "making_off",
      "pct_min": 15.0,
+     "pct_max": 75.0,
+     "upto": false,
+     "selected": true,
+     "mentions": 11,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Flat 75% off on making charge",
+     "url": "https://www.pngjewellers.com/",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "making_off",
+     "pct_min": 50.0,
      "pct_max": 100.0,
      "upto": true,
      "selected": true,
-     "mentions": 13,
+     "mentions": 2,
      "min_purchase": null,
      "dates": [],
      "applies_to": [
@@ -1046,6 +1092,23 @@
    ],
    "offers": [
     {
+     "kind": "making_off",
+     "pct_min": 100.0,
+     "pct_max": 100.0,
+     "upto": true,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "100% on making charges Offer",
+     "url": "https://sencogoldanddiamonds.com/",
+     "image": "https://web.sencogoldanddiamonds.com/images/transform?key=cms/banners/875acf17-23a4-48aa-830f-a6d132a16f2e.jpg&width=1920&format=webp",
+     "banner": "per gram 100% on making charges Offer valid fora limited period in website App only\ncharges 10% OFI on Diamond Value How Offer valid fora limited period in website App only\nthet\nGold\nDhanteras\nof Gold\nRate\naay\nDiamond Jewellery",
+     "first_seen": "2026-10-24"
+    },
+    {
      "kind": "exchange",
      "pct_min": null,
      "pct_max": null,
@@ -1103,10 +1166,10 @@
      "dates": [],
      "applies_to": [],
      "conditions": [],
-     "text": "0 % DEDUCTION GOLD EXCHANGE Zero Hassle, High Craftsmanship",
+     "text": "0% DEDUCTION GOLD EXCHANGE",
      "url": "https://vaibhavjewellers.com/",
      "image": "https://www.vaibhavjewellers.com/cdn-cgi/image/width=1600,quality=82,format=auto/pub/media/wysiwyg/homepage_images/desktop/old_gold_exchange_desktop_banner.jpg",
-     "banner": "Your Old Gold, Our New\n0 %\nDEDUCTION\nGOLD EXCHANGE\nZero Hassle, High Craftsmanship.",
+     "banner": "GOLD 0% DEDUCTION GOLD EXCHANGE\nYour Old Gold, Our New\nZero Hassle, High Craftsmanship.",
      "first_seen": "2026-10-24"
     }
    ],
