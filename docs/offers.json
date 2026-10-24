@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-24T08:11+05:30",
+ "updated": "2026-10-24T08:44+05:30",
  "note": "Offers as published on each jeweller's own website on the date shown. Read automatically; confirm terms with the jeweller before buying.",
  "brands": [
   {
@@ -10,7 +10,10 @@
    "pages": [
     "https://abharan.com/"
    ],
-   "offers": []
+   "offers": [],
+   "read_from": "https://abharan.com/",
+   "rendered": true,
+   "banners": 2
   },
   {
    "slug": "avr",
@@ -56,7 +59,10 @@
      "url": "https://www.avrswarnamahal.com/silver-saving-scheme",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://www.avrswarnamahal.com/",
+   "rendered": true,
+   "banners": 8
   },
   {
    "slug": "bhima",
@@ -82,7 +88,10 @@
      "url": "https://bhimagold.com/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://bhimagold.com/",
+   "rendered": true,
+   "banners": 8
   },
   {
    "slug": "bluestone",
@@ -100,7 +109,7 @@
      "pct_max": 100.0,
      "upto": true,
      "selected": true,
-     "mentions": 7,
+     "mentions": 4,
      "min_purchase": null,
      "dates": [],
      "applies_to": [],
@@ -108,23 +117,11 @@
      "text": "Up To 100% Off On Making Charges",
      "url": "https://www.bluestone.com/",
      "first_seen": "2026-10-24"
-    },
-    {
-     "kind": "making_zero",
-     "pct_min": 100.0,
-     "pct_max": 100.0,
-     "upto": false,
-     "selected": false,
-     "mentions": 1,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [],
-     "conditions": [],
-     "text": "Offers, 0% Making Charge",
-     "url": "https://www.bluestone.com/",
-     "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://www.bluestone.com/",
+   "rendered": true,
+   "banners": 8
   },
   {
    "slug": "ckc",
@@ -157,7 +154,10 @@
      "url": "https://www.ckcjewellers.com/en_IN/thegrandgenuinediwalit-c.html",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://ckcjewellers.com/",
+   "rendered": true,
+   "banners": 15
   },
   {
    "slug": "candere",
@@ -216,7 +216,10 @@
      "url": "https://www.candere.com/offers-terms-and-conditions.html",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://www.candere.com/",
+   "rendered": true,
+   "banners": 8
   },
   {
    "slug": "caratlane",
@@ -244,14 +247,14 @@
      "text": "FLAT 20% OFF On All Diamond Jewellery",
      "url": "https://www.caratlane.com/",
      "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/10/Desktop.jpg",
-     "banner": "FLAT 20% OFF On All Diamond Jewellery 5% INSTANT DISCOUNT ON CREDIT CARDS 31% Oct 2026: T&C Apply Big Purple Deals! on Bigger on Af SS 31% Oct 2026: T&C Apply Big Purple",
+     "banner": "FLAT 20% OFF\nOn All Diamond Jewellery\n5% INSTANT DISCOUNT\nON CREDIT CARDS\n31% Oct 2026: T&C Apply Big Purple Deals!\non Bigger on\nAf SS\n31% Oct 2026: T&C Apply Big Purple",
      "first_seen": "2026-10-24"
     },
     {
      "kind": "cashback",
      "pct_min": 5.0,
      "pct_max": 5.0,
-     "upto": false,
+     "upto": true,
      "selected": false,
      "mentions": 2,
      "min_purchase": null,
@@ -261,7 +264,7 @@
      "text": "5% INSTANT DISCOUNT ON CREDIT CARDS",
      "url": "https://www.caratlane.com/",
      "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/10/Desktop.jpg",
-     "banner": "FLAT 20% OFF On All Diamond Jewellery 5% INSTANT DISCOUNT ON CREDIT CARDS 31% Oct 2026: T&C Apply Big Purple Deals! on Bigger on Af SS 31% Oct 2026: T&C Apply Big Purple",
+     "banner": "FLAT 20% OFF\nOn All Diamond Jewellery\n5% INSTANT DISCOUNT\nON CREDIT CARDS\n31% Oct 2026: T&C Apply Big Purple Deals!\non Bigger on\nAf SS\n31% Oct 2026: T&C Apply Big Purple",
      "first_seen": "2026-10-24"
     },
     {
@@ -279,7 +282,10 @@
      "url": "https://www.caratlane.com/treasure-chest-gold-scheme",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://www.caratlane.com/",
+   "rendered": "international",
+   "banners": 8
   },
   {
    "slug": "chandukaka",
@@ -306,7 +312,10 @@
      "url": "https://chandukakasaraf.in/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://chandukakasaraf.in/",
+   "rendered": true,
+   "banners": 8
   },
   {
    "slug": "grt",
@@ -369,7 +378,10 @@
      "url": "https://www.grtjewels.com/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://www.grtjewels.com/",
+   "rendered": true,
+   "banners": 1
   },
   {
    "slug": "indriya",
@@ -429,7 +441,10 @@
      "url": "https://indriya.com/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://indriya.com/",
+   "rendered": true,
+   "banners": 0
   },
   {
    "slug": "jewelone",
@@ -444,7 +459,7 @@
      "kind": "combo",
      "pct_min": null,
      "pct_max": null,
-     "upto": false,
+     "upto": true,
      "selected": false,
      "mentions": 2,
      "min_purchase": null,
@@ -457,14 +472,14 @@
      "text": "BUY 1 DIAMOND JEWELLERY GOLD JEWELLERY GET YOUR 2ND AT 15% OFF 100% OFF ON DIAMOND",
      "url": "https://www.jewelone.in/",
      "image": "https://www.jewelone.in/home-new/section1/Banner_1.webp",
-     "banner": "JEWEL ONE GOLD DIAMONDS DIWALI Double Carnival This Diwali, Make Every Jewellery Purchase Count Twice BUY 1 DIAMOND JEWELLERY GOLD JEWELLERY GET YOUR 2ND AT 15% OFF 100% OFF ON DIAMOND",
+     "banner": "JEWEL ONE\nGOLD DIAMONDS\nDIWALI\nDouble Carnival\nThis Diwali,\nMake Every Jewellery Purchase Count Twice\nBUY 1 DIAMOND\nJEWELLERY\nGOLD JEWELLERY\nGET YOUR 2ND AT 15% OFF\n100% OFF\nON DIAMOND",
      "first_seen": "2026-10-24"
     },
     {
      "kind": "scheme",
      "pct_min": null,
      "pct_max": null,
-     "upto": false,
+     "upto": true,
      "selected": false,
      "mentions": 1,
      "min_purchase": null,
@@ -474,10 +489,13 @@
      "text": "GOLD INVESTMENT PLAN Every contribution takes you one step closer to your jewell",
      "url": "https://www.jewelone.in/",
      "image": "https://www.jewelone.in/home-new/section5/slide-1.webp",
-     "banner": "Big, Dreams dont happen in a day 4 SWARNA AS SAKTHI GOLD INVESTMENT PLAN Every contribution takes you one step closer to your jewellery goals SWARNA",
+     "banner": "Big, Dreams dont\nhappen in a day\n4 SWARNA\nAS SAKTHI\nGOLD INVESTMENT PLAN\nEvery contribution takes you one step\ncloser to your jewellery goals\nSWARNA",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://www.jewelone.in/",
+   "rendered": true,
+   "banners": 12
   },
   {
    "slug": "josalukkas",
@@ -488,7 +506,10 @@
     "https://www.josalukkasonline.com/",
     "https://www.josalukkasonline.com/gold-jewellery?Collections=ValentinesDayCollection"
    ],
-   "offers": []
+   "offers": [],
+   "read_from": "https://www.josalukkasonline.com/",
+   "rendered": true,
+   "banners": 7
   },
   {
    "slug": "joyalukkas",
@@ -498,7 +519,10 @@
    "pages": [
     "https://joyalukkas.in/"
    ],
-   "offers": []
+   "offers": [],
+   "read_from": "https://joyalukkas.in/",
+   "rendered": true,
+   "banners": 0
   },
   {
    "slug": "kalyan",
@@ -508,7 +532,10 @@
    "pages": [
     "https://store.kalyanjewellers.net/"
    ],
-   "offers": []
+   "offers": [],
+   "read_from": "https://store.kalyanjewellers.net/",
+   "rendered": true,
+   "banners": 0
   },
   {
    "slug": "khazana",
@@ -535,17 +562,41 @@
      "url": "https://www.khazanajewellery.com/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://www.khazanajewellery.com/",
+   "rendered": true,
+   "banners": 8
   },
   {
    "slug": "khimji",
    "name": "Khimji Jewellers",
    "domain": "www.khimjijewellers.com",
-   "status": "no offers published as text or in banners today",
+   "status": "ok",
    "pages": [
     "https://www.khimjijewellers.com/"
    ],
-   "offers": []
+   "offers": [
+    {
+     "kind": "rate_protect",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": true,
+     "selected": false,
+     "mentions": 8,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "AT THE BOOKED RATE rotection, PRICE DROPPED? GET THE LOWEST RATE FOR YOUR GOLD",
+     "url": "https://www.khimjijewellers.com/",
+     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639283828925782421",
+     "banner": "PRICE HIKED?\nRate’\nGET YOUR GOLD JEWELLERY AT THE\nBOOKED RATE\nrotection,\nPRICE DROPPED?\nGET THE LOWEST RATE FOR\nYOUR GOLD JEWELLRY\nDAAM BADLEGA.\nDIWALI KI KHUSHI NAHI\nLOCK YOUR GOLD RATE\nJEWELLERS SINCE 1936",
+     "first_seen": "2026-10-24"
+    }
+   ],
+   "read_from": "https://www.khimjijewellers.com/",
+   "rendered": true,
+   "banners": 10
   },
   {
    "slug": "kisna",
@@ -571,7 +622,10 @@
      "url": "https://www.kisna.com/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://www.kisna.com/",
+   "rendered": true,
+   "banners": 15
   },
   {
    "slug": "mahesh",
@@ -581,15 +635,99 @@
    "pages": [
     "https://maheshjewellers.com/"
    ],
-   "offers": []
+   "offers": [],
+   "read_from": "https://maheshjewellers.com/",
+   "rendered": true,
+   "banners": 0
   },
   {
    "slug": "malabar",
    "name": "Malabar Gold",
    "domain": "www.malabargoldanddiamonds.com",
-   "status": "shows its international site to our reader, so no Indian offers",
-   "pages": [],
-   "offers": []
+   "status": "ok",
+   "pages": [
+    "https://www.malabargoldanddiamonds.com/in/pan-india/en/jewellery.html"
+   ],
+   "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 30.0,
+     "pct_max": 30.0,
+     "upto": true,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Up to 30% discount on making charges",
+     "url": "https://www.malabargoldanddiamonds.com/in/pan-india/en/jewellery.html",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "diamond_off",
+     "pct_min": 30.0,
+     "pct_max": 30.0,
+     "upto": true,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Up to 30% discount on diamond charges",
+     "url": "https://www.malabargoldanddiamonds.com/in/pan-india/en/jewellery.html",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "exchange",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 2,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "That's where our 100% Value on Gold Exchange promise comes in, ensuring you receive the full valu",
+     "url": "https://www.malabargoldanddiamonds.com/in/pan-india/en/jewellery.html",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "rate_protect",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "At the time of purchase, get the jewellery at the booked rate or prevailing rate, whichever is lower",
+     "url": "https://www.malabargoldanddiamonds.com/in/pan-india/en/jewellery.html",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "scheme",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 3,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Easy to buy gold with our latest Gold Purchase Plan & Advances !",
+     "url": "https://www.malabargoldanddiamonds.com/in/pan-india/en/jewellery.html",
+     "first_seen": "2026-10-24"
+    }
+   ],
+   "read_from": "https://www.malabargoldanddiamonds.com/in/pan-india/en/jewellery.html",
+   "rendered": true,
+   "banners": 8
   },
   {
    "slug": "mehta",
@@ -599,7 +737,10 @@
    "pages": [
     "https://www.mehtajewellers.com/"
    ],
-   "offers": []
+   "offers": [],
+   "read_from": "https://www.mehtajewellers.com/",
+   "rendered": true,
+   "banners": 1
   },
   {
    "slug": "nac",
@@ -645,7 +786,10 @@
      "url": "https://www.nacjewellers.com/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://www.nacjewellers.com/",
+   "rendered": true,
+   "banners": 12
   },
   {
    "slug": "orra",
@@ -671,7 +815,10 @@
      "url": "https://www.orra.co.in/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://www.orra.co.in/",
+   "rendered": true,
+   "banners": 8
   },
   {
    "slug": "pcchandra",
@@ -702,7 +849,10 @@
      "url": "https://www.pcchandraindia.com/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://www.pcchandraindia.com/",
+   "rendered": true,
+   "banners": 9
   },
   {
    "slug": "png",
@@ -734,13 +884,16 @@
      "url": "https://www.pngjewellers.com/pages/offer-t-c",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://www.pngjewellers.com/",
+   "rendered": true,
+   "banners": 15
   },
   {
    "slug": "pngsons",
    "name": "PN Gadgil & Sons",
    "domain": "pngadgilandsons.com",
-   "status": "no offers published as text or in banners today",
+   "status": "ok",
    "pages": [
     "https://pngadgilandsons.com/",
     "https://pngadgilandsons.com/fixed-deposit-scheme/",
@@ -748,7 +901,28 @@
     "https://pngadgilandsons.com/png-and-sons-exclusive-diamond-jewellery-offer-for-valentine-day-3/",
     "https://pngadgilandsons.com/products/diamond-jewellery/diamond-collection/festival-diamond/"
    ],
-   "offers": []
+   "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 100.0,
+     "pct_max": 100.0,
+     "upto": true,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "diamond jewellery only"
+     ],
+     "conditions": [],
+     "text": "up to 100% on the making of diamond jewellery",
+     "url": "https://pngadgilandsons.com/png-and-sons-exclusive-diamond-jewellery-offer-for-valentine-day-3/",
+     "first_seen": "2026-10-24"
+    }
+   ],
+   "read_from": "https://pngadgilandsons.com/",
+   "rendered": true,
+   "banners": 8
   },
   {
    "slug": "prince",
@@ -774,7 +948,10 @@
      "url": "https://princejewellery.com/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://princejewellery.com/",
+   "rendered": true,
+   "banners": 8
   },
   {
    "slug": "ranka",
@@ -801,7 +978,10 @@
      "url": "https://rankajewellers.in/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://rankajewellers.in/",
+   "rendered": true,
+   "banners": 16
   },
   {
    "slug": "reliance",
@@ -850,7 +1030,10 @@
      "url": "https://www.reliancejewels.com/diwali26/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://www.reliancejewels.com/",
+   "rendered": true,
+   "banners": 16
   },
   {
    "slug": "senco",
@@ -879,7 +1062,10 @@
      "url": "https://sencogoldanddiamonds.com/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://sencogoldanddiamonds.com/",
+   "rendered": true,
+   "banners": 2
   },
   {
    "slug": "tanishq",
@@ -910,7 +1096,7 @@
      "kind": "exchange",
      "pct_min": null,
      "pct_max": null,
-     "upto": false,
+     "upto": true,
      "selected": false,
      "mentions": 1,
      "min_purchase": null,
@@ -920,10 +1106,13 @@
      "text": "0 % DEDUCTION GOLD EXCHANGE Zero Hassle, High Craftsmanship",
      "url": "https://vaibhavjewellers.com/",
      "image": "https://www.vaibhavjewellers.com/cdn-cgi/image/width=1600,quality=82,format=auto/pub/media/wysiwyg/homepage_images/desktop/old_gold_exchange_desktop_banner.jpg",
-     "banner": "Your Old Gold, Our New 0 % DEDUCTION GOLD EXCHANGE Zero Hassle, High Craftsmanship.",
+     "banner": "Your Old Gold, Our New\n0 %\nDEDUCTION\nGOLD EXCHANGE\nZero Hassle, High Craftsmanship.",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://vaibhavjewellers.com/",
+   "rendered": true,
+   "banners": 14
   },
   {
    "slug": "vummidi",
@@ -936,6 +1125,24 @@
     "https://www.vummidi.com/jewellery.html"
    ],
    "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 10.0,
+     "pct_max": 20.0,
+     "upto": true,
+     "selected": true,
+     "mentions": 2,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "solitaires",
+      "gold jewellery"
+     ],
+     "conditions": [],
+     "text": "Invest once and get benefits of up to 20% off on VA on gold jewellery, 15% off on diamonds, and 7% off on solitaires",
+     "url": "https://www.vummidi.com/saving-scheme",
+     "first_seen": "2026-10-24"
+    },
     {
      "kind": "diamond_off",
      "pct_min": 3.5,
@@ -971,7 +1178,10 @@
      "url": "https://www.vummidi.com/saving-scheme",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://vummidi.com/",
+   "rendered": true,
+   "banners": 9
   },
   {
    "slug": "whp",
@@ -999,7 +1209,10 @@
      "url": "https://whpjewellers.com/",
      "first_seen": "2026-10-24"
     }
-   ]
+   ],
+   "read_from": "https://whpjewellers.com/",
+   "rendered": true,
+   "banners": 16
   }
  ]
 }
