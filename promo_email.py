@@ -158,7 +158,10 @@ def main():
         else:
             sample = {"name": "", "email": args.to, "unsub_token": "00000000-0000-0000-0000-000000000000"}
         body, unsub = build(sample)
-        print("promo: test copy", "sent" if send(args.to, body, unsub) else "FAILED")
+        ok = send(args.to, body, unsub)
+        print("promo: test copy", "sent" if ok else "FAILED")
+        if not ok:
+            sys.exit(1)                 # a red run, not a quiet green one
         return
 
     codes.update(SA.ensure_ref_codes(sb, subs))
@@ -172,6 +175,8 @@ def main():
             sb.table("email_campaigns").insert({"campaign": CAMPAIGN, "email": s["email"].lower()}).execute()
             sent += 1
     print(f"promo: sent {sent} of {len(todo)} ({len(done)} had it already)")
+    if sent < len(todo):
+        sys.exit(1)                     # some failed: the run shows red; re-running sends only those
 
 
 if __name__ == "__main__":
