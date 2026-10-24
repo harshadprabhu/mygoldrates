@@ -57,25 +57,38 @@ def letter(first, qa, invite, unsub):
     offers = f"{site}/gold-offers-today?from=alert"
     plain = lambda x: H.unescape(x)
     p = 'style="margin:0 0 14px"'
+    link = 'style="color:#8C6A18;font-weight:bold;text-decoration:underline"'
     qa_html = "".join(
-        f'<p style="margin:0 0 12px;padding-left:12px;border-left:3px solid #e6c268">'
-        f'<i>&ldquo;{q}&rdquo;</i><br>{a}</p>' for q, a in qa)
+        f'<tr><td style="padding:0 0 10px"><div style="background:#fbf7ec;border-left:3px solid #e0b64f;'
+        f'border-radius:0 10px 10px 0;padding:11px 14px">'
+        f'<div style="font-weight:bold;color:#2b2620">&ldquo;{q}&rdquo;</div>'
+        f'<div style="margin-top:3px;color:#4a443b">{a}</div></div></td></tr>' for q, a in qa)
     body = f"""\
-<!DOCTYPE html><html><body style="margin:0;padding:0;background:#ffffff">
-<div style="max-width:560px;margin:0 auto;padding:24px 18px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222">
+<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4efe4">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4efe4"><tr><td style="padding:22px 12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e9dfc8;border-radius:14px;overflow:hidden">
+  <tr><td style="background:#14100a;padding:16px 22px"><a href="{site}/?from=alert"><img src="{site}/email-logo.png" width="200" height="34" alt="MyGoldRates" style="display:block;width:200px;height:34px;border:0"></a></td></tr>
+  <tr><td style="height:3px;background:#e0b64f;background:linear-gradient(90deg,#8C6A18,#E3BF63 45%,#F4E3A6 55%,#C79A2E);font-size:0;line-height:0">&nbsp;</td></tr>
+  <tr><td style="padding:24px 22px 8px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#2b2620">
 <p {p}>Hi {first},</p>
 <p {p}>I wanted to tell you about something new on MyGoldRates.</p>
 <p {p}>You can now ask <b>Sona</b>, our jewellery assistant, any question before you buy gold, and she answers straight away from today&rsquo;s real rates at every jeweller we track. Type it, or tap the mic and just ask out loud &mdash; in English or in your own language: Hindi, Marathi, Gujarati, Punjabi, Bengali, Kannada, Tamil, Telugu or Malayalam.</p>
-<p {p}><img src="{site}/email-sona-face.png" width="40" height="40" alt="" style="width:40px;height:40px;vertical-align:middle;margin-right:8px;border:0">Here is what she told me this morning:</p>
-{qa_html}
-<p {p}>Try her here: <a href="{ask}" style="color:#8C6A18">ask Sona a question</a>.</p>
-<p {p}>We have also started putting every jeweller&rsquo;s offers in one place, with what each is really worth after making charges and GST: <a href="{offers}" style="color:#8C6A18">gold offers today</a>. And if you tell us your target price, we will email you the day 22K drops to it.</p>
-<p {p}>If a friend is buying gold soon, this is your personal invite link: <a href="{invite}" style="color:#8C6A18">{invite}</a>. When they join, we will let you know.</p>
-<p {p}>One small request: if this email landed in your Promotions tab, please move it to Primary, so the daily rate alerts reach you too.</p>
-<p style="margin:0 0 4px">Thank you for being one of our first subscribers,</p>
-<p style="margin:0 0 28px">Harshad<br><span style="color:#777777">MyGoldRates</span></p>
-<p style="margin:0;font-size:12px;color:#888888;border-top:1px solid #eeeeee;padding-top:12px">You are getting this because you subscribed at mygoldrates.com. <a href="{unsub}" style="color:#888888">Unsubscribe</a></p>
-</div></body></html>"""
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:4px 0 12px"><tr>
+  <td style="padding-right:10px"><img src="{site}/email-sona-face.png" width="44" height="44" alt="Sona" style="display:block;width:44px;height:44px;border:0"></td>
+  <td style="font-size:15px;color:#2b2620">Here is what she told me this morning:</td></tr></table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0">{qa_html}</table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 18px"><tr>
+  <td style="border-radius:999px;background:#d9b24a;background:linear-gradient(100deg,#b98a24,#e6c268 50%,#c79a2e)">
+    <a href="{ask}" style="display:inline-block;padding:11px 22px;font-size:15px;font-weight:bold;color:#1a1405;text-decoration:none">Ask Sona a question &rarr;</a></td></tr></table>
+<p {p}>We have also started putting every jeweller&rsquo;s offers in one place, with what each is really worth after making charges and GST: <a href="{offers}" {link}>gold offers today</a>. And if you tell us your target price, we will email you the day 22K drops to it.</p>
+<div style="margin:0 0 16px;padding:12px 14px;border:1px dashed #e0c98a;border-radius:10px;background:#fffdf7">If a friend is buying gold soon, this is your personal invite link:<br><a href="{invite}" {link}>{invite}</a><br><span style="color:#6b6458;font-size:13.5px">When they join, we will let you know.</span></div>
+<p style="margin:0 0 18px;font-size:13.5px;color:#6b6458;font-style:italic">One small request: if this email landed in your Promotions tab, please move it to Primary, so the daily rate alerts reach you too.</p>
+<p style="margin:0 0 2px">Thank you for being one of our first subscribers,</p>
+<p style="margin:0 0 20px"><b>Harshad</b><br><span style="color:#8C6A18">MyGoldRates</span></p>
+  </td></tr>
+</table>
+<p style="max-width:560px;margin:12px auto 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:#8f887c;text-align:center">You are getting this because you subscribed at mygoldrates.com. <a href="{unsub}" style="color:#8f887c">Unsubscribe</a></p>
+</td></tr></table></body></html>"""
     text = "\n\n".join([
         f"Hi {first},",
         "I wanted to tell you about something new on MyGoldRates.",
