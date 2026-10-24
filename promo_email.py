@@ -50,16 +50,25 @@ def html(first, qa, invite, unsub, date):
         f'padding:9px 13px;font-size:14px;font-weight:bold">{q}</div><br>'
         f'<div style="display:inline-block;margin-top:6px;background:#fbf7ec;border:1px solid #efe2c2;color:#2c2a26;'
         f'border-radius:14px 14px 14px 4px;padding:10px 13px;font-size:14px;line-height:1.5">'
+        f'<img src="{SA.SITE_URL}/email-sona-face.png" width="22" height="22" alt="" '
+        f'style="width:22px;height:22px;vertical-align:-6px;margin-right:4px;border:0">'
         f'<b style="color:#8C6A18">Sona:</b> {a}</div></td></tr>' for q, a in qa)
     return f"""\
 <!DOCTYPE html><html><body style="margin:0;background:#e9e6df;padding:26px 12px;font-family:Arial,Helvetica,sans-serif;color:#2c2a26">
-  <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e7e1d3">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e7e1d3">
     <tr><td style="height:4px;background:linear-gradient(90deg,#8C6A18,#E3BF63 45%,#F4E3A6 55%,#C79A2E);font-size:0;line-height:0">&nbsp;</td></tr>
     <tr><td style="background:#0b0805;background:linear-gradient(135deg,#1a1307 0%,#0b0805 58%,#17110a 100%);padding:26px 30px 24px">
       <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;letter-spacing:1.5px;line-height:1"><span style="color:#efe8d6">My</span><span style="color:#e6c268">Gold</span><span style="color:#efe8d6">Rates</span></div>
-      <div style="margin-top:18px;display:inline-block;background:#e6c268;color:#1a1405;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:bold;letter-spacing:1.5px">NEW &middot; FREE</div>
-      <div style="margin-top:10px;font-family:Georgia,serif;font-size:30px;line-height:1.2;color:#fff3d6">Meet Sona, your jewellery assistant</div>
-      <div style="margin-top:8px;font-size:14px;line-height:1.6;color:#cdbf9f">Ask anything before you buy gold &mdash; type it, or just say it out loud. She answers instantly from today&rsquo;s real rates at every jeweller we track.</div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px"><tr>
+        <td valign="middle" style="padding-right:14px">
+          <div style="display:inline-block;background:#e6c268;color:#1a1405;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:bold;letter-spacing:1.5px">NEW &middot; FREE</div>
+          <div style="margin-top:10px;font-family:Georgia,serif;font-size:30px;line-height:1.2;color:#fff3d6">Meet Sona, your jewellery assistant</div>
+          <div style="margin-top:8px;font-size:14px;line-height:1.6;color:#cdbf9f">Ask anything before you buy gold &mdash; type it, or just say it out loud. She answers instantly from today&rsquo;s real rates at every jeweller we track.</div>
+        </td>
+        <td valign="middle" width="110" style="width:110px;text-align:center">
+          <a href="{site}/?ask=1&amp;from=alert"><img src="{site}/email-sona.png" width="110" height="120" alt="Sona, the MyGoldRates assistant" style="display:block;width:110px;height:120px;border:0;margin:0 auto"></a>
+        </td>
+      </tr></table>
       <div style="margin-top:12px;font-size:13px;line-height:1.7;color:#e6c268">English &middot; &#2361;&#2367;&#2344;&#2381;&#2342;&#2368; &middot; &#2350;&#2352;&#2366;&#2336;&#2368; &middot; &#2711;&#2753;&#2716;&#2736;&#2750;&#2724;&#2752; &middot; &#2602;&#2672;&#2588;&#2622;&#2604;&#2624; &middot; &#2476;&#2494;&#2434;&#2482;&#2494; &middot; &#3221;&#3240;&#3277;&#3240;&#3233; &middot; &#2980;&#2990;&#3007;&#2996;&#3021; &middot; &#3108;&#3142;&#3122;&#3137;&#3095;&#3137; &middot; &#3374;&#3378;&#3375;&#3390;&#3379;&#3330;</div>
     </td></tr>
     <tr><td style="padding:26px 30px 6px">
