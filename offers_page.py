@@ -98,10 +98,17 @@ def _gold_jewellery_applies(o):
     return "diamond jewellery only" not in tags
 
 
+# A flat making-charge discount bigger than this across a whole range is not
+# plausible; above it, an offer is shown only as a best case on some designs.
+MAX_FLAT_PCT = 40
+
+
 def flat_making_offer(o):
     """A making-charge discount that applies across gold jewellery, so it can
-    go into the ranking: not "up to", not selected designs, not diamond-only."""
+    go into the ranking: not "up to", not selected designs, not diamond-only,
+    and not implausibly large."""
     return (o["kind"] == "making_off" and o.get("pct_max") and not o.get("upto")
+            and o["pct_max"] <= MAX_FLAT_PCT
             and not o.get("selected") and _gold_jewellery_applies(o)
             and (o.get("pct_min") == o.get("pct_max")))
 

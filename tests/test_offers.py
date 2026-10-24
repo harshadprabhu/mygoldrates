@@ -80,3 +80,19 @@ def test_making_charge_is_matched_by_website_not_by_similar_name():
           "making_pct_median": 16.4, "examples": [{"url": "https://www.pngjewellers.com/p/x"}]}]}]}
     assert P.making_for(mc, "PN Gadgil", "www.pngjewellers.com") == 16.4
     assert P.making_for(mc, "PN Gadgil & Sons", "pngadgilandsons.com") is None
+
+
+def test_a_customer_review_is_never_an_offer():
+    """CaratLane, 24 Oct 2026: a review was published as a 100% offer."""
+    assert not O.extract_offers(
+        "Beautiful necklace, got 100% discount on making charges making it worth it", "u")
+
+
+def test_an_implausible_flat_discount_never_enters_the_ranking():
+    data = {"brands": [{"slug": "a", "name": "A", "offers": [
+        {"kind": "making_off", "pct_min": 100.0, "pct_max": 100.0, "upto": False,
+         "selected": False, "applies_to": []}]}]}
+    mc = {"brands": [{"brand": "A", "categories": [{"category": "Ring", "making_pct_median": 20.0}]}]}
+    r = P.ring_prices(data, mc, {"a": 12000.0})[0]
+    assert r["flat_pct"] == 0 and r["after"] == r["before"]
+    assert r["best_case"]                      # shown only as a best case

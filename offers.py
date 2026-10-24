@@ -102,7 +102,14 @@ REVIEW = re.compile(
     r"\b(?:they|he|she)\s+gave\b|\bhighly\s+recommend|\bthank(?:s|\s+you)\b|"
     r"\b(?:we|i)\s+(?:really\s+)?(?:are\s+|am\s+|was\s+|were\s+)?(?:happy|loved|bought|visited|purchased)|"
     r"\bour\s+(?:purchase|experience|family)\b|\bexperience\s+was\b|"
-    r"for\s+the\s+customer.?s\s+money|\b(?:their|the)\s+\w+(?:\s+\w+){0,4}\s+is\s+very\b", re.I)
+    r"for\s+the\s+customer.?s\s+money|\b(?:their|the)\s+\w+(?:\s+\w+){0,4}\s+is\s+very\b|"
+    # "Beautiful necklace, got 100% discount on making charges making it worth
+    # it" - a customer review on CaratLane's homepage, read as an offer and
+    # published as CaratLane's on 24 Oct 2026. Past tense and praise mark a
+    # review; missing an offer is better than inventing one.
+    r"\b(?:i|we|she|he)?\s*got\b|\breceived\b|\bbeautiful\b|\blovely\b|\bamazing\b|"
+    r"\bworth\s+it\b|\bloved\b|\bsatisfied\b|\bexcellent\b|\bhappy\s+with\b|\bmy\s+(?:wife|mother|"
+    r"daughter|sister|husband|order|purchase)\b|\breview|\brated\b|\bstars?\b", re.I)
 # Leading clutter: ratings "4.7 (6)", prices "₹ 91,817", repeated menu text.
 LEAD_JUNK = re.compile(r"^(?:\d(?:\.\d)?\s*\(\d+\)\s*|(?:₹|rs\.?)\s*[\d,]+(?:\.\d+)?\s*)+", re.I)
 # Fine print: the conditions that decide what an offer is really worth.
