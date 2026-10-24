@@ -23,8 +23,12 @@
   if (!TEST && /^\/(analytics|unsubscribe|404)(\.html)?\/?$/.test(location.pathname)) return;
 
   var SB = (window.GR_SB_URL || '').replace(/\/$/, ''), KEY = window.GR_SB_KEY || '';
-  var KB = null, kbWait = null, opened = false, lastCity = null;
-  try { lastCity = localStorage.getItem('sona_city'); } catch (_) {}
+  var KB = null, kbWait = null, opened = false, home = null, wantHome = false;
+  // "My city" is the visitor's own city: one they said they live in, picked
+  // when Sona asked, or the nearest to the phone's location (worked out on
+  // the device, only when they tap for it). Never just the last city asked
+  // about - that was 'sona_city', dropped here.
+  try { home = localStorage.getItem('sona_home'); localStorage.removeItem('sona_city'); } catch (_) {}
   var LG = window.SONA_LANG, STR = window.SONA_STR || {};
   // Language is automatic. Each reply is in the language of its question
   // (the script it is written in). The browser's free speech recogniser
@@ -203,13 +207,32 @@
   }
   function aCity(c, k) {
     k = k || '22K';
-    lastCity = c.n; try { localStorage.setItem('sona_city', c.n); } catch (_) {}
     var list = ranked(cityBrands(c)).slice(0, 6), locals = (c.loc || []).length;
     var note = locals ? t('city_loc', { l: locals, s: esc(c.st) }) : t('city_nat');
     return { intent: 'rate_city', html: '<p>' + t('city_h', { k: k, c: esc(c.n), note: note }) + '</p>' + table(list, k) +
       '<p>' + link(c.u, t('city_link', { c: esc(c.n) })) + '</p>' + src(),
       say: t('say_city', { c: c.n, k: sK(k), b: list[0].n, p: sInr(rate(list[0], k)) }),
-      chips: chips(['p10', 'bestoff', 'k22v24']) };
+      chips: chips(['p10', 'bestoff', 'k22v24']).concat(c.n === home ? [{ l: t('ch_chcity'), q: '#city' }] : []) };
+  }
+  function setHome(c) { home = c.n; try { localStorage.setItem('sona_home', c.n); } catch (_) {} }
+  // Which city? The visitor's next city answer becomes their own.
+  function askCity(msg) {
+    wantHome = true;
+    var geo = typeof navigator !== 'undefined' && navigator.geolocation;
+    return { intent: 'ask_city', html: '<p>' + t(msg) + '</p>', say: t(msg),
+      chips: (geo ? [{ l: '📍 ' + t('ch_loc'), q: '#loc' }] : []).concat(['Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Hyderabad', 'Kolkata', 'Pune', 'Lucknow']
+        .map(function (n) { return { l: n, q: n }; })) };
+  }
+  // The covered city nearest a point (the knowledge file's centres, "g").
+  function nearest(la, lo) {
+    var r = Math.PI / 180, best = null, bd = 1e9;
+    KB.cities.forEach(function (c) {
+      if (!c.g) return;
+      var x = Math.sin((c.g[0] - la) * r / 2), y = Math.sin((c.g[1] - lo) * r / 2);
+      var d = 12742 * Math.asin(Math.sqrt(x * x + Math.cos(la * r) * Math.cos(c.g[0] * r) * y * y));
+      if (d < bd) { bd = d; best = c; }
+    });
+    return best;
   }
   function aCheapest(k, c) {
     if (c) return aCity(c, k);
@@ -342,10 +365,12 @@
 
   function answer(q) {
     var tx = norm(q), k = karatIn(tx), bs = brandsIn(tx), c = cityIn(tx), w = weightIn(tx), ct = catIn(tx);
-    if (/\b(my city|near me|nearby|mere sheher|mere shahar|my area)\b/.test(tx) && !c) {
-      if (lastCity) c = KB.cities.filter(function (x) { return x.n === lastCity; })[0];
-      if (!c) return { intent: 'ask_city', html: '<p>' + t('ask_city') + '</p>', say: t('ask_city'),
-        chips: ['Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Hyderabad', 'Kolkata', 'Pune', 'Lucknow'].map(function (n) { return { l: n, q: n }; }) };
+    var mine = /\b(my city|near me|nearby|mere sheher|mere shahar|my area)\b/.test(tx);
+    if (c && (wantHome || mine || /\b(i am in|i'm in|im in|i live in|i stay in)\b/.test(tx))) setHome(c);
+    wantHome = false;
+    if (mine && !c) {
+      c = home && KB.cities.filter(function (x) { return x.n === home; })[0];
+      if (!c) return askCity('ask_city');
     }
     if (has(tx, W.silver) && !has(tx, ['gold', 'sona'])) return { intent: 'silver', html: '<p>' + t('silver') + '</p>', say: t('silver'), chips: chips(['rate', 'cheap22']) };
     if (has(tx, ['alert', 'alerts', 'notify', 'subscribe', 'email me', 'whatsapp', 'set a price'])) return aAlerts();
@@ -543,7 +568,14 @@
       var lb = e.target.closest('[data-lang]');
       if (lb) { setLang(lb.getAttribute('data-lang')); return; }
       if (lmenu && !e.target.closest('#sonaLang')) lmenu.classList.remove('on');
-      var c = e.target.closest('.sn-chip'); if (c) { ask(c.getAttribute('data-q') || c.textContent, c.textContent); return; }
+      var c = e.target.closest('.sn-chip');
+      if (c) {
+        var cq = c.getAttribute('data-q') || c.textContent;
+        if (cq === '#loc') locate();
+        else if (cq === '#city') { home = null; try { localStorage.removeItem('sona_home'); } catch (_) {} ask(en('ch_mycity'), c.textContent); }
+        else ask(cq, c.textContent);
+        return;
+      }
       var s = e.target.closest('[data-sn="subscribe"]');
       if (s) { close(); if (window.GR_OPEN_SUBPOP) window.GR_OPEN_SUBPOP(); else location.href = '/inquiry'; track('subscribe'); return; }
       var sy = e.target.closest('.sn-say');
@@ -719,6 +751,25 @@
       });
     }).catch(function () { typing.remove(); talking(false); RL = LANG; bubble('<p>' + t('nodata') + '</p>'); });
   }
+  // "Use my location": the browser asks the visitor first; the position is
+  // only compared with the city centres here and is never sent anywhere.
+  function locate() {
+    RL = LANG; setChips([]);
+    var wait = bubble('<p class="sn-dim">' + t('loc_wait') + '</p>');
+    var fail = function () {
+      wait.remove(); RL = LANG;
+      loadKB().then(function () { var a = askCity('loc_fail'); bubble(a.html); setChips(a.chips); });
+    };
+    try {
+      navigator.geolocation.getCurrentPosition(function (p) {
+        loadKB().then(function () {
+          var c = nearest(p.coords.latitude, p.coords.longitude);
+          if (!c) return fail();
+          wait.remove(); setHome(c); ask(c.n, '📍 ' + c.n);
+        }).catch(fail);
+      }, fail, { timeout: 10000, maximumAge: 600000 });
+    } catch (_) { fail(); }
+  }
   function open(q) {
     ui();
     if (!opened) {
@@ -740,6 +791,7 @@
       setKB: function (d) { KB = d; prep(d); },
       setLang: function (c) { PICK = c === 'auto' ? '' : c; HEARD = ''; LANG = uiLang(); RL = LANG; },
       micLang: function () { return micLang(); },
+      nearest: function (la, lo) { return nearest(la, lo); },
       ask: function (q, chip) { var tx = understand(q, chip), a = answer(tx); return { text: tx, lang: RL, a: a }; }
     };
     return;

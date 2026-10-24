@@ -3,8 +3,9 @@
 global.window = globalThis;
 window.__SONA_TEST = 1;
 global.location = { pathname: '/', search: '', hash: '' };
-global.navigator = { languages: ['en-IN'] };
-global.localStorage = { getItem: function () { return null; }, setItem: function () {} };
+// (newer Node has a read-only navigator of its own)
+Object.defineProperty(global, 'navigator', { value: { languages: ['en-IN'], geolocation: {} }, configurable: true, writable: true });
+global.localStorage = { getItem: function () { return null; }, setItem: function () {}, removeItem: function () {} };
 var path = require('path'), fs = require('fs'), root = path.join(__dirname, '..');
 require(path.join(root, 'sona_i18n.js'));
 require(path.join(root, 'sona_lang.js'));
@@ -13,6 +14,8 @@ var S = window.__SONA_TEST, input = JSON.parse(fs.readFileSync(0, 'utf8'));
 S.setKB(JSON.parse(fs.readFileSync(input.kb, 'utf8')));
 console.log(JSON.stringify(input.qs.map(function (x) {
   if ('lang' in x) S.setLang(x.lang);                // otherwise the conversation carries on
+  if (x.near) return { q: 'near ' + x.near, city: (S.nearest(x.near[0], x.near[1]) || {}).n || null };
   var r = S.ask(x.q, !!x.chip), a = r.a || {};
-  return { q: x.q, text: r.text, lang: r.lang, mic: S.micLang(), intent: a.intent || null, html: a.html || '', say: a.say || '' };
+  return { q: x.q, text: r.text, lang: r.lang, mic: S.micLang(), intent: a.intent || null, html: a.html || '', say: a.say || '',
+           chips: (a.chips || []).map(function (c) { return c.q; }) };
 })));
