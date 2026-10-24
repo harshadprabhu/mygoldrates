@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-24T01:20+05:30",
+ "updated": "2026-10-24T07:04+05:30",
  "note": "Offers as published on each jeweller's own website on the date shown. Read automatically; confirm terms with the jeweller before buying.",
  "brands": [
   {
@@ -100,12 +100,27 @@
      "pct_max": 100.0,
      "upto": true,
      "selected": true,
-     "mentions": 4,
+     "mentions": 7,
      "min_purchase": null,
      "dates": [],
      "applies_to": [],
      "conditions": [],
      "text": "Up To 100% Off On Making Charges",
+     "url": "https://www.bluestone.com/",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "making_zero",
+     "pct_min": 100.0,
+     "pct_max": 100.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Offers, 0% Making Charge",
      "url": "https://www.bluestone.com/",
      "first_seen": "2026-10-24"
     }
@@ -150,13 +165,16 @@
    "domain": "www.candere.com",
    "status": "ok",
    "pages": [
-    "https://www.candere.com/"
+    "https://www.candere.com/",
+    "https://www.candere.com/offers-terms-and-conditions.html",
+    "https://www.candere.com/gifts.html",
+    "https://www.candere.com/jewellery/birthday-gifts.html"
    ],
    "offers": [
     {
-     "kind": "making_zero",
-     "pct_min": 100.0,
-     "pct_max": 100.0,
+     "kind": "making_off",
+     "pct_min": 15.0,
+     "pct_max": 15.0,
      "upto": false,
      "selected": false,
      "mentions": 1,
@@ -164,8 +182,38 @@
      "dates": [],
      "applies_to": [],
      "conditions": [],
+     "text": "15% OFF on Making",
+     "url": "https://www.candere.com/jewellery/birthday-gifts.html",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "making_zero",
+     "pct_min": 100.0,
+     "pct_max": 100.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 4,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
      "text": "Zero Making",
      "url": "https://www.candere.com/",
+     "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "diamond_off",
+     "pct_min": 30.0,
+     "pct_max": 30.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 3,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Flat 30% off on Diamond value",
+     "url": "https://www.candere.com/offers-terms-and-conditions.html",
      "first_seen": "2026-10-24"
     }
    ]
@@ -177,41 +225,9 @@
    "status": "ok",
    "pages": [
     "https://www.caratlane.com/",
-    "https://www.caratlane.com/treasure-chest-gold-scheme",
-    "https://www.caratlane.com/jewellery/festive+edit.html",
-    "https://www.caratlane.com/blog/stylish-earrings-classy-jhumkas-hoops-for-diwali/"
+    "https://www.caratlane.com/treasure-chest-gold-scheme"
    ],
    "offers": [
-    {
-     "kind": "making_off",
-     "pct_min": 100.0,
-     "pct_max": 100.0,
-     "upto": false,
-     "selected": false,
-     "mentions": 1,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [],
-     "conditions": [],
-     "text": "Beautiful necklace, got 100% discount on making charges making it worth it",
-     "url": "https://www.caratlane.com/",
-     "first_seen": "2026-10-24"
-    },
-    {
-     "kind": "exchange",
-     "pct_min": null,
-     "pct_max": null,
-     "upto": false,
-     "selected": false,
-     "mentions": 1,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [],
-     "conditions": [],
-     "text": "Enjoy 0% deduction on your exchange value",
-     "url": "https://www.caratlane.com/",
-     "first_seen": "2026-10-24"
-    },
     {
      "kind": "scheme",
      "pct_min": null,
@@ -488,12 +504,12 @@
      "pct_max": 15.0,
      "upto": false,
      "selected": true,
-     "mentions": 27,
+     "mentions": 28,
      "min_purchase": null,
      "dates": [],
      "applies_to": [],
      "conditions": [],
-     "text": "Opheliane Diamond Earring 15% off on making charges",
+     "text": "Anika Diamond Mangalsutra With Chain 15% off on making charges",
      "url": "https://www.kisna.com/",
      "first_seen": "2026-10-24"
     }
@@ -542,10 +558,8 @@
    "slug": "mehta",
    "name": "Mehta Jewellers",
    "domain": "www.mehtajewellers.com",
-   "status": "no offers published as text today",
-   "pages": [
-    "https://www.mehtajewellers.com/"
-   ],
+   "status": "unreachable (ConnectTimeout)",
+   "pages": [],
    "offers": []
   },
   {
