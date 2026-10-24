@@ -52,12 +52,15 @@
   function fill(s, v) { return String(s).replace(/\{(\w+)\}/g, function (_, n) { return v && v[n] != null ? v[n] : ''; }); }
   function t(k, v) { return fill((STR[RL] && STR[RL][k]) || (STR.en && STR.en[k]) || k, v); }
   function en(k, v) { return fill((STR.en && STR.en[k]) || k, v); }
+  // Urdu reads right to left.
+  function rtl(c) { return (LG ? LG.LANGS : []).some(function (x) { return x.c === c && x.rtl; }); }
   function langName(c) { var l = (LG ? LG.LANGS : []).filter(function (x) { return x.c === c; })[0]; return l ? l.n : c; }
 
   // ------------------------------------------------------------ helpers
   function $(s, r) { return (r || document).querySelector(s); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function inr(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
+  // A price stays "₹12,958" inside right-to-left (Urdu) text too.
+  function inr(n) { return '<bdi dir="ltr">₹' + Math.round(n).toLocaleString('en-IN') + '</bdi>'; }
   function pct(n) { return (Math.round(n * 10) / 10).toLocaleString('en-IN') + '%'; }
   var K = { '24K': 1, '22K': 22 / 24, '18K': 18 / 24, '14K': 14 / 24 };
   function rate(b, k) { return b.r24 * K[k]; }
@@ -487,6 +490,7 @@
     '.sn-hd b{display:block;font-size:15.5px}.sn-hd span{font-size:11.5px;color:#a99f8b}.sn-x{margin-left:auto;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.07);color:#f3eadb;font-size:18px;cursor:pointer}' +
     '.sn-body{flex:1;overflow-y:auto;padding:16px 14px 8px;scroll-behavior:smooth}' +
     '.sn-m{display:flex;margin:0 0 12px}.sn-m.me{justify-content:flex-end}' +
+    '.sn-b[dir=rtl] .sn-v,.sn-b[dir=rtl] .sn-cmp b,.sn-b[dir=rtl] .sn-tiles span{direction:ltr;unicode-bidi:isolate}' +
     '.sn-b{max-width:88%;padding:10px 13px;border-radius:18px 18px 18px 6px;background:rgba(255,255,255,.06);border:1px solid rgba(240,208,128,.1)}' +
     '.sn-m.me .sn-b{border-radius:18px 18px 6px 18px;background:linear-gradient(135deg,#f6d77d,#d4a63c);color:#1a1405;border:0;font-weight:600}' +
     '.sn-b p{margin:0 0 8px}.sn-b p:last-child{margin-bottom:0}.sn-b a{color:#f0d080;font-weight:600;text-decoration:none}.sn-b em{font-style:normal;font-size:10.5px;color:#a99f8b;border:1px solid rgba(240,208,128,.25);border-radius:6px;padding:0 5px}' +
@@ -595,6 +599,7 @@
     $('#sonaSub', panel).textContent = t('ui_sub');
     $('#sonaFoot', panel).textContent = t('ui_foot');
     if (!listening) input.placeholder = t('ui_ph');
+    input.dir = rtl(LANG) ? 'rtl' : 'auto';
     if (mic) { mic.setAttribute('aria-label', t('ui_mic')); mic.title = t('ui_mic'); }
     if (spk) { spk.innerHTML = ttsOn ? ICON.on : ICON.off; spk.classList.toggle('on', ttsOn); spk.setAttribute('aria-pressed', ttsOn ? 'true' : 'false'); spk.setAttribute('aria-label', t('ui_speak')); spk.title = ttsOn ? t('ui_mute') : t('ui_speak'); }
     if (LG) {
@@ -629,12 +634,12 @@
   function setChips(list) {
     chipBox.innerHTML = (list || []).map(function (c) {
       c = typeof c === 'string' ? { l: c, q: c } : c;
-      return '<button class="sn-chip" type="button" data-q="' + esc(c.q) + '">' + esc(c.l) + '</button>';
+      return '<button class="sn-chip" type="button" dir="auto" data-q="' + esc(c.q) + '">' + esc(c.l) + '</button>';
     }).join('');
   }
   function bubble(html, me, talking) {
     var m = document.createElement('div'); m.className = 'sn-m' + (me ? ' me' : ' bot') + (talking ? ' sona-talk' : '');
-    m.innerHTML = (me ? '' : '<div class="sn-mav">' + avatar() + '</div>') + '<div class="sn-b">' + html + '</div>';
+    m.innerHTML = (me ? '' : '<div class="sn-mav">' + avatar() + '</div>') + '<div class="sn-b" dir="' + (me ? 'auto' : rtl(RL) ? 'rtl' : 'ltr') + '">' + html + '</div>';
     body.appendChild(m);
     body.scrollTop = body.scrollHeight; return m;
   }
@@ -809,7 +814,7 @@
     var seen = null; try { seen = localStorage.getItem('sona_ban2'); } catch (_) {}
     if (!seen) {
       var b = document.createElement('div'); b.className = 'sn-ban'; b.id = 'sonaBanner';
-      b.innerHTML = '<span class="sn-banav">' + avatar() + '</span><span class="nw">NEW</span><span>Now <b>talk to Sona</b> about gold rates — in English, हिन्दी, मराठी, ગુજરાતી, தமிழ், తెలుగు, ಕನ್ನಡ, മലയാളം, বাংলা or ਪੰਜਾਬੀ. <u>Try it</u></span><button class="bx" type="button" aria-label="Dismiss">×</button>';
+      b.innerHTML = '<span class="sn-banav">' + avatar() + '</span><span class="nw">NEW</span><span>Now <b>talk to Sona</b> about gold rates — in English, हिन्दी, اردو, मराठी, ગુજરાતી, தமிழ், తెలుగు, ಕನ್ನಡ, മലയാളം, বাংলা, ਪੰਜਾਬੀ, ଓଡ଼ିଆ or অসমীয়া. <u>Try it</u></span><button class="bx" type="button" aria-label="Dismiss">×</button>';
       b.onclick = function (e) {
         if (e.target.closest('.bx')) { b.remove(); try { localStorage.setItem('sona_ban2', '1'); } catch (_) {} return; }
         open(); track('banner');

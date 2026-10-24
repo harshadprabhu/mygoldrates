@@ -62,6 +62,8 @@
     more: 'Read more →', guide_h: 'This guide covers it: <b>{t}</b> — {d}', guide_link: 'Read the guide →',
     en_only: 'This answer is in English for now:', translated: 'Translated on your device',
     ask_city: 'Which city are you in?',
+    ch_loc: 'Use my location', loc_wait: 'Finding your nearest city…',
+    loc_fail: 'I couldn\'t get your location. Type your city, or pick one:', ch_chcity: 'Change city',
     silver: 'I cover gold for now — jewellers’ 22K, 24K and 18K rates. Silver is on its way.',
     hello: 'Namaste! 🙏 I’m Sona. Ask me anything about buying gold — today’s rates at {n} jewellers, your city, making charges, offers or a price for any weight.',
     thanks: 'Happy to help! Anything else?',
@@ -153,6 +155,8 @@
     more: 'और पढ़ें →', guide_h: 'यह गाइड इसी बारे में है: <b>{t}</b> — {d}', guide_link: 'गाइड पढ़ें →',
     en_only: 'यह जवाब अभी अंग्रेज़ी में है:', translated: 'आपके डिवाइस पर अनुवाद किया गया',
     ask_city: 'आप किस शहर में हैं?',
+    ch_loc: 'मेरी लोकेशन से', loc_wait: 'आपका नज़दीकी शहर ढूँढ रही हूँ…',
+    loc_fail: 'लोकेशन नहीं मिली। अपने शहर का नाम लिखिए या चुनिए:', ch_chcity: 'शहर बदलें',
     silver: 'अभी मैं सिर्फ़ सोने की जानकारी देती हूँ — ज्वैलर्स के 22K, 24K और 18K भाव। चाँदी जल्द आ रही है।',
     hello: 'नमस्ते! 🙏 मैं सोना हूँ। सोना ख़रीदने से जुड़ा कुछ भी पूछिए — {n} ज्वैलर्स के आज के भाव, आपका शहर, मेकिंग चार्ज, ऑफ़र या किसी भी वज़न की क़ीमत।',
     thanks: 'ख़ुशी हुई! और कुछ?',
@@ -244,6 +248,8 @@
     more: 'अधिक वाचा →', guide_h: 'हे मार्गदर्शक याबद्दलच आहे: <b>{t}</b> — {d}', guide_link: 'मार्गदर्शक वाचा →',
     en_only: 'हे उत्तर सध्या इंग्रजीत आहे:', translated: 'तुमच्या डिव्हाइसवर भाषांतर केले',
     ask_city: 'तुम्ही कोणत्या शहरात आहात?',
+    ch_loc: 'माझे लोकेशन वापरा', loc_wait: 'तुमचे जवळचे शहर शोधत आहे…',
+    loc_fail: 'लोकेशन मिळाले नाही. तुमच्या शहराचे नाव लिहा किंवा निवडा:', ch_chcity: 'शहर बदला',
     silver: 'सध्या मी फक्त सोन्याची माहिती देते — ज्वेलर्सचे 22K, 24K आणि 18K दर. चांदी लवकरच येत आहे.',
     hello: 'नमस्कार! 🙏 मी सोना. सोने खरेदीबद्दल काहीही विचारा — {n} ज्वेलर्सचे आजचे दर, तुमचे शहर, मजुरी, ऑफर्स किंवा कोणत्याही वजनाची किंमत.',
     thanks: 'आनंद झाला! आणखी काही?',
@@ -335,6 +341,8 @@
     more: 'વધુ વાંચો →', guide_h: 'આ માર્ગદર્શિકા આ વિશે જ છે: <b>{t}</b> — {d}', guide_link: 'માર્ગદર્શિકા વાંચો →',
     en_only: 'આ જવાબ હાલ અંગ્રેજીમાં છે:', translated: 'તમારા ડિવાઇસ પર અનુવાદ કર્યો',
     ask_city: 'તમે કયા શહેરમાં છો?',
+    ch_loc: 'મારું લોકેશન વાપરો', loc_wait: 'તમારું નજીકનું શહેર શોધી રહી છું…',
+    loc_fail: 'લોકેશન ન મળ્યું. તમારા શહેરનું નામ લખો અથવા પસંદ કરો:', ch_chcity: 'શહેર બદલો',
     silver: 'હાલ હું ફક્ત સોનાની માહિતી આપું છું — જ્વેલર્સના 22K, 24K અને 18K ભાવ. ચાંદી જલદી આવે છે.',
     hello: 'નમસ્તે! 🙏 હું સોના છું. સોનું ખરીદવા વિશે કંઈ પણ પૂછો — {n} જ્વેલર્સના આજના ભાવ, તમારું શહેર, ઘડામણ, ઑફર કે કોઈ પણ વજનની કિંમત.',
     thanks: 'આનંદ થયો! બીજું કંઈ?',
@@ -426,6 +434,8 @@
     more: 'ਹੋਰ ਪੜ੍ਹੋ →', guide_h: 'ਇਹ ਗਾਈਡ ਇਸੇ ਬਾਰੇ ਹੈ: <b>{t}</b> — {d}', guide_link: 'ਗਾਈਡ ਪੜ੍ਹੋ →',
     en_only: 'ਇਹ ਜਵਾਬ ਅਜੇ ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ ਹੈ:', translated: 'ਤੁਹਾਡੇ ਡਿਵਾਈਸ ’ਤੇ ਅਨੁਵਾਦ ਕੀਤਾ',
     ask_city: 'ਤੁਸੀਂ ਕਿਹੜੇ ਸ਼ਹਿਰ ਵਿੱਚ ਹੋ?',
+    ch_loc: 'ਮੇਰੀ ਲੋਕੇਸ਼ਨ ਵਰਤੋ', loc_wait: 'ਤੁਹਾਡਾ ਨੇੜਲਾ ਸ਼ਹਿਰ ਲੱਭ ਰਹੀ ਹਾਂ…',
+    loc_fail: 'ਲੋਕੇਸ਼ਨ ਨਹੀਂ ਮਿਲੀ। ਆਪਣੇ ਸ਼ਹਿਰ ਦਾ ਨਾਮ ਲਿਖੋ ਜਾਂ ਚੁਣੋ:', ch_chcity: 'ਸ਼ਹਿਰ ਬਦਲੋ',
     silver: 'ਅਜੇ ਮੈਂ ਸਿਰਫ਼ ਸੋਨੇ ਦੀ ਜਾਣਕਾਰੀ ਦਿੰਦੀ ਹਾਂ — ਜਿਊਲਰਾਂ ਦੇ 22K, 24K ਅਤੇ 18K ਭਾਅ। ਚਾਂਦੀ ਜਲਦੀ ਆ ਰਹੀ ਹੈ।',
     hello: 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ! 🙏 ਮੈਂ ਸੋਨਾ ਹਾਂ। ਸੋਨਾ ਖ਼ਰੀਦਣ ਬਾਰੇ ਕੁਝ ਵੀ ਪੁੱਛੋ — {n} ਜਿਊਲਰਾਂ ਦੇ ਅੱਜ ਦੇ ਭਾਅ, ਤੁਹਾਡਾ ਸ਼ਹਿਰ, ਘੜਾਈ, ਆਫ਼ਰ ਜਾਂ ਕਿਸੇ ਵੀ ਭਾਰ ਦੀ ਕੀਮਤ।',
     thanks: 'ਖ਼ੁਸ਼ੀ ਹੋਈ! ਹੋਰ ਕੁਝ?',
@@ -517,6 +527,8 @@
     more: 'আরও পড়ুন →', guide_h: 'এই গাইডে এটাই আছে: <b>{t}</b> — {d}', guide_link: 'গাইড পড়ুন →',
     en_only: 'এই উত্তরটি আপাতত ইংরেজিতে:', translated: 'আপনার ডিভাইসে অনুবাদ করা',
     ask_city: 'আপনি কোন শহরে আছেন?',
+    ch_loc: 'আমার লোকেশন ব্যবহার করুন', loc_wait: 'আপনার কাছের শহর খুঁজছি…',
+    loc_fail: 'লোকেশন পাওয়া গেল না। আপনার শহরের নাম লিখুন বা বেছে নিন:', ch_chcity: 'শহর বদলান',
     silver: 'আপাতত আমি শুধু সোনার তথ্য দিই — জুয়েলারদের 22K, 24K আর 18K দাম। রুপো শিগগিরই আসছে।',
     hello: 'নমস্কার! 🙏 আমি সোনা। সোনা কেনা নিয়ে যা খুশি জিজ্ঞেস করুন — {n}টি জুয়েলারের আজকের দাম, আপনার শহর, মজুরি, অফার বা যেকোনো ওজনের দাম।',
     thanks: 'খুশি হলাম! আর কিছু?',
@@ -608,6 +620,8 @@
     more: 'ಇನ್ನಷ್ಟು ಓದಿ →', guide_h: 'ಈ ಮಾರ್ಗದರ್ಶಿ ಇದರ ಬಗ್ಗೆಯೇ: <b>{t}</b> — {d}', guide_link: 'ಮಾರ್ಗದರ್ಶಿ ಓದಿ →',
     en_only: 'ಈ ಉತ್ತರ ಸದ್ಯಕ್ಕೆ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿದೆ:', translated: 'ನಿಮ್ಮ ಸಾಧನದಲ್ಲೇ ಅನುವಾದಿಸಲಾಗಿದೆ',
     ask_city: 'ನೀವು ಯಾವ ನಗರದಲ್ಲಿದ್ದೀರಿ?',
+    ch_loc: 'ನನ್ನ ಸ್ಥಳ ಬಳಸಿ', loc_wait: 'ನಿಮ್ಮ ಹತ್ತಿರದ ನಗರವನ್ನು ಹುಡುಕುತ್ತಿದ್ದೇನೆ…',
+    loc_fail: 'ಸ್ಥಳ ಸಿಗಲಿಲ್ಲ. ನಿಮ್ಮ ನಗರದ ಹೆಸರು ಬರೆಯಿರಿ ಅಥವಾ ಆಯ್ಕೆಮಾಡಿ:', ch_chcity: 'ನಗರ ಬದಲಿಸಿ',
     silver: 'ಸದ್ಯಕ್ಕೆ ನಾನು ಚಿನ್ನದ ಮಾಹಿತಿ ಮಾತ್ರ ನೀಡುತ್ತೇನೆ — ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನ 22K, 24K ಮತ್ತು 18K ದರಗಳು. ಬೆಳ್ಳಿ ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿದೆ.',
     hello: 'ನಮಸ್ಕಾರ! 🙏 ನಾನು ಸೋನಾ. ಚಿನ್ನ ಖರೀದಿಯ ಬಗ್ಗೆ ಏನಾದರೂ ಕೇಳಿ — {n} ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನ ಇಂದಿನ ದರಗಳು, ನಿಮ್ಮ ನಗರ, ಮೇಕಿಂಗ್ ಚಾರ್ಜ್, ಆಫರ್‌ಗಳು ಅಥವಾ ಯಾವುದೇ ತೂಕದ ಬೆಲೆ.',
     thanks: 'ಸಂತೋಷ! ಇನ್ನೇನಾದರೂ?',
@@ -699,6 +713,8 @@
     more: 'மேலும் படிக்க →', guide_h: 'இந்த வழிகாட்டி இதைப் பற்றியது: <b>{t}</b> — {d}', guide_link: 'வழிகாட்டியைப் படிக்க →',
     en_only: 'இந்தப் பதில் இப்போதைக்கு ஆங்கிலத்தில்:', translated: 'உங்கள் சாதனத்திலேயே மொழிபெயர்க்கப்பட்டது',
     ask_city: 'நீங்கள் எந்த நகரில் இருக்கிறீர்கள்?',
+    ch_loc: 'என் இருப்பிடம்', loc_wait: 'உங்கள் அருகிலுள்ள நகரத்தைத் தேடுகிறேன்…',
+    loc_fail: 'இருப்பிடம் கிடைக்கவில்லை. உங்கள் நகரத்தின் பெயரை எழுதுங்கள் அல்லது தேர்ந்தெடுங்கள்:', ch_chcity: 'நகரத்தை மாற்று',
     silver: 'இப்போதைக்கு நான் தங்கம் பற்றி மட்டும் சொல்கிறேன் — நகைக்கடைகளின் 22K, 24K, 18K விலைகள். வெள்ளி விரைவில் வருகிறது.',
     hello: 'வணக்கம்! 🙏 நான் சோனா. தங்கம் வாங்குவது பற்றி எதையும் கேளுங்கள் — {n} நகைக்கடைகளின் இன்றைய விலைகள், உங்கள் நகரம், செய்கூலி, ஆஃபர்கள் அல்லது எந்த எடையின் விலையும்.',
     thanks: 'மகிழ்ச்சி! வேறு ஏதாவது?',
@@ -790,6 +806,8 @@
     more: 'ఇంకా చదవండి →', guide_h: 'ఈ గైడ్ దీని గురించే: <b>{t}</b> — {d}', guide_link: 'గైడ్ చదవండి →',
     en_only: 'ఈ సమాధానం ప్రస్తుతానికి ఇంగ్లీష్‌లో ఉంది:', translated: 'మీ పరికరంలోనే అనువదించబడింది',
     ask_city: 'మీరు ఏ నగరంలో ఉన్నారు?',
+    ch_loc: 'నా లొకేషన్ వాడండి', loc_wait: 'మీ దగ్గరి నగరాన్ని వెతుకుతున్నాను…',
+    loc_fail: 'లొకేషన్ దొరకలేదు. మీ నగరం పేరు రాయండి లేదా ఎంచుకోండి:', ch_chcity: 'నగరం మార్చండి',
     silver: 'ప్రస్తుతానికి నేను బంగారం గురించి మాత్రమే చెబుతాను — జ్యువెలర్ల 22K, 24K, 18K ధరలు. వెండి త్వరలో వస్తుంది.',
     hello: 'నమస్కారం! 🙏 నేను సోనా. బంగారం కొనడం గురించి ఏదైనా అడగండి — {n} జ్యువెలర్ల ఈరోజు ధరలు, మీ నగరం, మేకింగ్ చార్జీలు, ఆఫర్లు లేదా ఏ బరువుకైనా ధర.',
     thanks: 'సంతోషం! ఇంకేమైనా?',
@@ -881,6 +899,8 @@
     more: 'കൂടുതൽ വായിക്കൂ →', guide_h: 'ഈ ഗൈഡ് ഇതിനെക്കുറിച്ചാണ്: <b>{t}</b> — {d}', guide_link: 'ഗൈഡ് വായിക്കൂ →',
     en_only: 'ഈ ഉത്തരം ഇപ്പോൾ ഇംഗ്ലീഷിലാണ്:', translated: 'നിങ്ങളുടെ ഉപകരണത്തിൽ തന്നെ വിവർത്തനം ചെയ്തത്',
     ask_city: 'നിങ്ങൾ ഏത് നഗരത്തിലാണ്?',
+    ch_loc: 'എന്റെ ലൊക്കേഷൻ', loc_wait: 'നിങ്ങളുടെ അടുത്തുള്ള നഗരം തിരയുന്നു…',
+    loc_fail: 'ലൊക്കേഷൻ കിട്ടിയില്ല. നിങ്ങളുടെ നഗരത്തിന്റെ പേര് എഴുതുക അല്ലെങ്കിൽ തിരഞ്ഞെടുക്കുക:', ch_chcity: 'നഗരം മാറ്റുക',
     silver: 'ഇപ്പോൾ ഞാൻ സ്വർണത്തെക്കുറിച്ച് മാത്രമേ പറയൂ — ജ്വല്ലറികളുടെ 22K, 24K, 18K വിലകൾ. വെള്ളി ഉടൻ വരുന്നു.',
     hello: 'നമസ്കാരം! 🙏 ഞാൻ സോണ. സ്വർണം വാങ്ങുന്നതിനെക്കുറിച്ച് എന്തും ചോദിക്കൂ — {n} ജ്വല്ലറികളുടെ ഇന്നത്തെ വിലകൾ, നിങ്ങളുടെ നഗരം, പണിക്കൂലി, ഓഫറുകൾ, അല്ലെങ്കിൽ ഏത് തൂക്കത്തിന്റെയും വില.',
     thanks: 'സന്തോഷം! മറ്റെന്തെങ്കിലും?',
@@ -1247,8 +1267,12 @@
   if (!TEST && /^\/(analytics|unsubscribe|404)(\.html)?\/?$/.test(location.pathname)) return;
 
   var SB = (window.GR_SB_URL || '').replace(/\/$/, ''), KEY = window.GR_SB_KEY || '';
-  var KB = null, kbWait = null, opened = false, lastCity = null;
-  try { lastCity = localStorage.getItem('sona_city'); } catch (_) {}
+  var KB = null, kbWait = null, opened = false, home = null, wantHome = false;
+  // "My city" is the visitor's own city: one they said they live in, picked
+  // when Sona asked, or the nearest to the phone's location (worked out on
+  // the device, only when they tap for it). Never just the last city asked
+  // about - that was 'sona_city', dropped here.
+  try { home = localStorage.getItem('sona_home'); localStorage.removeItem('sona_city'); } catch (_) {}
   var LG = window.SONA_LANG, STR = window.SONA_STR || {};
   // Language is automatic. Each reply is in the language of its question
   // (the script it is written in). The browser's free speech recogniser
@@ -1427,13 +1451,32 @@
   }
   function aCity(c, k) {
     k = k || '22K';
-    lastCity = c.n; try { localStorage.setItem('sona_city', c.n); } catch (_) {}
     var list = ranked(cityBrands(c)).slice(0, 6), locals = (c.loc || []).length;
     var note = locals ? t('city_loc', { l: locals, s: esc(c.st) }) : t('city_nat');
     return { intent: 'rate_city', html: '<p>' + t('city_h', { k: k, c: esc(c.n), note: note }) + '</p>' + table(list, k) +
       '<p>' + link(c.u, t('city_link', { c: esc(c.n) })) + '</p>' + src(),
       say: t('say_city', { c: c.n, k: sK(k), b: list[0].n, p: sInr(rate(list[0], k)) }),
-      chips: chips(['p10', 'bestoff', 'k22v24']) };
+      chips: chips(['p10', 'bestoff', 'k22v24']).concat(c.n === home ? [{ l: t('ch_chcity'), q: '#city' }] : []) };
+  }
+  function setHome(c) { home = c.n; try { localStorage.setItem('sona_home', c.n); } catch (_) {} }
+  // Which city? The visitor's next city answer becomes their own.
+  function askCity(msg) {
+    wantHome = true;
+    var geo = typeof navigator !== 'undefined' && navigator.geolocation;
+    return { intent: 'ask_city', html: '<p>' + t(msg) + '</p>', say: t(msg),
+      chips: (geo ? [{ l: '📍 ' + t('ch_loc'), q: '#loc' }] : []).concat(['Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Hyderabad', 'Kolkata', 'Pune', 'Lucknow']
+        .map(function (n) { return { l: n, q: n }; })) };
+  }
+  // The covered city nearest a point (the knowledge file's centres, "g").
+  function nearest(la, lo) {
+    var r = Math.PI / 180, best = null, bd = 1e9;
+    KB.cities.forEach(function (c) {
+      if (!c.g) return;
+      var x = Math.sin((c.g[0] - la) * r / 2), y = Math.sin((c.g[1] - lo) * r / 2);
+      var d = 12742 * Math.asin(Math.sqrt(x * x + Math.cos(la * r) * Math.cos(c.g[0] * r) * y * y));
+      if (d < bd) { bd = d; best = c; }
+    });
+    return best;
   }
   function aCheapest(k, c) {
     if (c) return aCity(c, k);
@@ -1566,10 +1609,12 @@
 
   function answer(q) {
     var tx = norm(q), k = karatIn(tx), bs = brandsIn(tx), c = cityIn(tx), w = weightIn(tx), ct = catIn(tx);
-    if (/\b(my city|near me|nearby|mere sheher|mere shahar|my area)\b/.test(tx) && !c) {
-      if (lastCity) c = KB.cities.filter(function (x) { return x.n === lastCity; })[0];
-      if (!c) return { intent: 'ask_city', html: '<p>' + t('ask_city') + '</p>', say: t('ask_city'),
-        chips: ['Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Hyderabad', 'Kolkata', 'Pune', 'Lucknow'].map(function (n) { return { l: n, q: n }; }) };
+    var mine = /\b(my city|near me|nearby|mere sheher|mere shahar|my area)\b/.test(tx);
+    if (c && (wantHome || mine || /\b(i am in|i'm in|im in|i live in|i stay in)\b/.test(tx))) setHome(c);
+    wantHome = false;
+    if (mine && !c) {
+      c = home && KB.cities.filter(function (x) { return x.n === home; })[0];
+      if (!c) return askCity('ask_city');
     }
     if (has(tx, W.silver) && !has(tx, ['gold', 'sona'])) return { intent: 'silver', html: '<p>' + t('silver') + '</p>', say: t('silver'), chips: chips(['rate', 'cheap22']) };
     if (has(tx, ['alert', 'alerts', 'notify', 'subscribe', 'email me', 'whatsapp', 'set a price'])) return aAlerts();
@@ -1767,7 +1812,14 @@
       var lb = e.target.closest('[data-lang]');
       if (lb) { setLang(lb.getAttribute('data-lang')); return; }
       if (lmenu && !e.target.closest('#sonaLang')) lmenu.classList.remove('on');
-      var c = e.target.closest('.sn-chip'); if (c) { ask(c.getAttribute('data-q') || c.textContent, c.textContent); return; }
+      var c = e.target.closest('.sn-chip');
+      if (c) {
+        var cq = c.getAttribute('data-q') || c.textContent;
+        if (cq === '#loc') locate();
+        else if (cq === '#city') { home = null; try { localStorage.removeItem('sona_home'); } catch (_) {} ask(en('ch_mycity'), c.textContent); }
+        else ask(cq, c.textContent);
+        return;
+      }
       var s = e.target.closest('[data-sn="subscribe"]');
       if (s) { close(); if (window.GR_OPEN_SUBPOP) window.GR_OPEN_SUBPOP(); else location.href = '/inquiry'; track('subscribe'); return; }
       var sy = e.target.closest('.sn-say');
@@ -1943,6 +1995,25 @@
       });
     }).catch(function () { typing.remove(); talking(false); RL = LANG; bubble('<p>' + t('nodata') + '</p>'); });
   }
+  // "Use my location": the browser asks the visitor first; the position is
+  // only compared with the city centres here and is never sent anywhere.
+  function locate() {
+    RL = LANG; setChips([]);
+    var wait = bubble('<p class="sn-dim">' + t('loc_wait') + '</p>');
+    var fail = function () {
+      wait.remove(); RL = LANG;
+      loadKB().then(function () { var a = askCity('loc_fail'); bubble(a.html); setChips(a.chips); });
+    };
+    try {
+      navigator.geolocation.getCurrentPosition(function (p) {
+        loadKB().then(function () {
+          var c = nearest(p.coords.latitude, p.coords.longitude);
+          if (!c) return fail();
+          wait.remove(); setHome(c); ask(c.n, '📍 ' + c.n);
+        }).catch(fail);
+      }, fail, { timeout: 10000, maximumAge: 600000 });
+    } catch (_) { fail(); }
+  }
   function open(q) {
     ui();
     if (!opened) {
@@ -1964,6 +2035,7 @@
       setKB: function (d) { KB = d; prep(d); },
       setLang: function (c) { PICK = c === 'auto' ? '' : c; HEARD = ''; LANG = uiLang(); RL = LANG; },
       micLang: function () { return micLang(); },
+      nearest: function (la, lo) { return nearest(la, lo); },
       ask: function (q, chip) { var tx = understand(q, chip), a = answer(tx); return { text: tx, lang: RL, a: a }; }
     };
     return;

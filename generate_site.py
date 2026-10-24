@@ -394,7 +394,7 @@ def nd_footer_html(year):
 
 
 def sona_bundle():
-    """/assistant.js: Sona's replies in ten languages, her language reader,
+    """/assistant.js: Sona's replies in thirteen languages, her language reader,
     then Sona herself - one file, one request."""
     parts = []
     for name in ("sona_i18n.js", "sona_lang.js", "assistant.js"):

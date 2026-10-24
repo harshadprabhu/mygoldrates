@@ -81,12 +81,20 @@ SONA = {
     "mr": [("पुण्यात आज सोन्याचा दर किती आहे", "rate_city", "Pune")],
     "gu": [("અમદાવાદમાં આજે સોનાનો ભાવ", "rate_city", "Ahmedabad"), ("સૌથી સસ્તું સોનું", "cheapest", None)],
     "pa": [("ਲੁਧਿਆਣਾ ਵਿੱਚ ਸੋਨੇ ਦਾ ਰੇਟ", "rate_city", "Ludhiana")],
-    "bn": [("কলকাতায় আজ সোনার দাম", "rate_city", "Kolkata")],
+    "bn": [("কলকাতায় আজ সোনার দাম", "rate_city", "Kolkata"),
+           ("আজকে সবচেয়ে সস্তা সোনা", "cheapest", None)],      # Bengali stays Bengali beside Assamese
     "kn": [("ಬೆಂಗಳೂರಿನಲ್ಲಿ ಇಂದಿನ ಚಿನ್ನದ ದರ", "rate_city", "Bengaluru"), ("ಹತ್ತು ಗ್ರಾಂ ಚಿನ್ನದ ಬೆಲೆ", "price", None)],
     "ta": [("சென்னையில் இன்றைய தங்க விலை", "rate_city", "Chennai"), ("தனிஷ்க் தங்க விலை", "rate_brand", "Tanishq"),
            ("கோயம்புத்தூர் தங்க விலை", "rate_city", "Coimbatore")],
     "te": [("హైదరాబాద్‌లో ఈరోజు బంగారం ధర", "rate_city", "Hyderabad")],
     "ml": [("കൊച്ചിയിലെ ഇന്നത്തെ സ്വർണവില", "rate_city", "Kochi"), ("നമസ്കാരം", "hello", None)],
+    "ur": [("ممبئی میں آج سونے کا بھاؤ", "rate_city", "Mumbai"), ("سب سے سستا سونا کہاں ہے؟", "cheapest", None),
+           ("تنشق سونے کا بھاؤ", "rate_brand", "Tanishq"), ("دس گرام سونے کی قیمت", "price", None),
+           ("دہلی میں سونے کا ریٹ", "rate_city", "Delhi")],
+    "or": [("ଭୁବନେଶ୍ୱରରେ ଆଜି ସୁନା ଦର", "rate_city", "Bhubaneswar"), ("ଆଜି ସବୁଠୁ ଶସ୍ତା ସୁନା", "cheapest", None),
+           ("ତନିଷ୍କ ସୁନା ଦର", "rate_brand", "Tanishq"), ("ଦଶ ଗ୍ରାମ ସୁନାର ଦାମ", "price", None)],
+    "as": [("গুৱাহাটীত আজি সোণৰ দৰ", "rate_city", "Guwahati"), ("আজি আটাইতকৈ সস্তা সোণ", "cheapest", None),
+           ("দহ গ্ৰাম সোণৰ দাম", "price", None)],
 }
 
 
@@ -146,7 +154,7 @@ const S=require('./sona_i18n.js'), ph=s=>JSON.stringify((s.match(/\\{\\w+\\}/g)|
 const bad=[];for(const l in S)for(const k in S.en){if(!(k in S[l])||ph(S[l][k])!==ph(S.en[k]))bad.push(l+':'+k);}
 console.log(JSON.stringify({langs:Object.keys(S),bad}));"""], capture_output=True, text=True, check=True).stdout
     res = json.loads(out)
-    assert sorted(res["langs"]) == sorted(["en", "hi", "mr", "gu", "pa", "bn", "kn", "ta", "te", "ml"])
+    assert sorted(res["langs"]) == sorted(["en", "hi", "ur", "mr", "gu", "pa", "bn", "as", "or", "kn", "ta", "te", "ml"])
     assert res["bad"] == []
 
 
