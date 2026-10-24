@@ -147,3 +147,34 @@ def test_a_redirect_abroad_is_followed_back_to_the_indian_store():
     html = '<a href="https://x.com/in/">India</a><a href="https://x.com/uk/">UK</a>'
     assert O.india_url(S(), "https://x.com/", "https://x.com/us/", html) == "https://x.com/in/pan-india/en/"
     assert O.india_url(S(), "https://x.com/", "https://x.com/", "<p>₹1</p>") is None
+
+
+def _w(w, x, y, wd, h, c=95):
+    return {"w": w, "c": c, "x": x, "y": y, "wd": wd, "h": h}
+
+
+def test_a_two_offer_banner_is_read_panel_by_panel(monkeypatch):
+    """PN Gadgil & Sons, 24 Oct 2026: two offers side by side with a shared
+    validity line - each figure keeps its own words."""
+    import banner_ocr as B
+    monkeypatch.setattr(B, "_upto_beside", lambda im, f: True)
+    im = type("Im", (), {"width": 1920, "height": 850})()
+    words = [_w("50%", 942, 430, 319, 112), _w("100", 1403, 426, 251, 170),
+             *[_w(t, x, 584, 120, 23) for t, x in (("ON", 906), ("MAKING", 966), ("CHARGES", 1104))],
+             *[_w(t, x, 619, 120, 22) for t, x in (("OF", 911), ("GOLD", 964), ("JEWELLERY", 1063))],
+             *[_w(t, x, 595, 110, 18) for t, x in (("ON", 1360), ("MAKING", 1410), ("CHARGES", 1522), ("OF", 1655), ("CERTIFIED", 1699))],
+             *[_w(t, x, 623, 120, 18) for t, x in (("NATURAL", 1387), ("DIAMOND", 1517), ("JEWELLERY", 1654))],
+             *[_w(t, x, 701, 60, 22) for t, x in (("Offer", 1077), ("Valid", 1160), ("Till", 1242), ("15", 1291), ("Nov", 1330), ("2026", 1395))]]
+    p = B._panels(im, words)
+    assert p[0].startswith("Up to 50% ON MAKING CHARGES OF GOLD JEWELLERY")
+    assert "NATURAL DIAMOND JEWELLERY" in p[1] and "GOLD" not in p[1]
+    assert all("15 Nov 2026" in x for x in p[:2])
+    got = O.summarise(O.extract_offers("\n".join(p), "u", image="i"))
+    pct = sorted(o["pct_max"] for o in got if o["kind"] == "making_off")
+    assert pct == [50.0, 100.0]
+
+
+def test_figures_inside_a_buy_two_deal_stay_in_the_deal():
+    txt = "BUY 1 DIAMOND JEWELLERY\nGET YOUR 2ND AT\n100% OFF 15% OFF\nON DIAMOND VALUE"
+    got = O.extract_offers(txt, "u", image="i")
+    assert [o["kind"] for o in got] == ["combo"]

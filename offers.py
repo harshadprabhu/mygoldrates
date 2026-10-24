@@ -103,6 +103,7 @@ RULES = [
         r"(?:gold\s*)?(?:jewell?ery|collection|purchases?|products?|everything|"
         r"gold\s*value|metal\s*value)(?!\s*making)", re.I)),
 ]
+RULES_BY_KIND = {k: rx for k, rx in RULES}
 MIN_PURCHASE = re.compile(
     r"(?:on\s*(?:a\s*)?|with\s*(?:a\s*)?|minimum\s*)?(?:purchase|shopping|buy)\w*\s*"
     r"(?:of|above|worth|over)\s*" + MONEY, re.I)
@@ -191,7 +192,8 @@ def _ocr_sentence(text: str, start: int, end: int) -> str:
     lead = re.search(r"(?:\b(?:flat|up\s*to|upto|get|enjoy|extra|special)\b[ \t]*)+$",
                      text[max(0, start - 25):start].split("\n")[-1], re.I)
     a = start - (len(lead.group(0)) if lead else 0)
-    tail = text[end:end + 60]
+    nl = text.find("\n", end)                 # a panel is one line: stop at its end
+    tail = text[end:min(end + 60, nl if nl != -1 else len(text))]
     nxt = re.search(r"\d{1,3}\s*%|\bvalid\b|\bt\s*&\s*c\b|\bmin\b|\bmax\b", tail, re.I)
     b = end + (nxt.start() if nxt else len(tail))
     return re.sub(r"\s+", " ", text[a:b]).strip(" \u00b7.,")[:160]
@@ -203,6 +205,14 @@ def extract_offers(text: str, url: str, image: str | None = None) -> list[dict]:
     out, seen = [], set()
     if image:
         text = _ocr_prepare(text)
+        # A buy-two banner: its figures belong to the deal ("get your 2nd at
+        # 100% off on diamond value / 15% off on VA", Jewel One), not shop-wide.
+        if RULES_BY_KIND["combo"].search(text):
+            hit = RULES_BY_KIND["combo"].search(text)
+            return [{"kind": "combo", "pct": None, "upto": False, "selected": False,
+                     "min_purchase": None, "dates": [d.strip() for d in VALID.findall(text)][:2],
+                     "text": re.sub(r"\s+", " ", text[hit.start():hit.end() + 80]).strip()[:200],
+                     "url": url, "image": image, "banner": text[:300]}]
     for kind, rx in RULES:
         for m in rx.finditer(text):
             sent = (_ocr_sentence if image else _sentence)(text, m.start(), m.end())
@@ -237,8 +247,10 @@ def extract_offers(text: str, url: str, image: str | None = None) -> list[dict]:
             # Exception: a making-charge offer that names diamond jewellery
             # outright ("100% on making charges of certified natural diamond
             # jewellery", PN Gadgil & Sons) is clear on its own.
+            # With the banner read panel by panel, a big figure that says
+            # outright it is "on making charges" has its context and stays.
             if image and pct is not None and pct >= 50 and not (
-                    kind == "making_off" and re.search(r"diamond\s*jewell?ery", sent, re.I)):
+                    kind == "making_off" and re.search(r"making\s*charges?", sent, re.I)):
                 continue
             # A banner's dates and minimum spend usually cover all of it.
             mp = MIN_PURCHASE.search(text if image else sent)
@@ -254,7 +266,7 @@ def extract_offers(text: str, url: str, image: str | None = None) -> list[dict]:
                 "selected": bool(re.search(r"select(ed)?\s*(designs|range|collection|products|items)|"
                                            r"on\s*select", sent, re.I)),
                 "min_purchase": _money(mp.group(1), mp.group(2)) if mp else None,
-                "dates": [d.strip() for d in vd][:2],
+                "dates": list(dict.fromkeys(d.strip() for d in vd))[:2],
                 "text": sent,
                 "url": url,
                 **({"image": image, "banner": text[:300]} if image else {}),
@@ -298,11 +310,18 @@ def _money(num: str, unit: str | None) -> int | None:
 def summarise(offers: list[dict]) -> list[dict]:
     """Fold per-product repeats ("15% off on making charges" printed under 40
     products) into one line per kind, keeping the range and a count."""
+    # One line per kind - but a making-charge offer on diamond jewellery is
+    # its own line, never folded into the plain-gold one (PN Gadgil & Sons:
+    # up to 50% on gold, up to 100% on diamond jewellery).
     by_kind: dict[str, list[dict]] = {}
     for o in offers:
-        by_kind.setdefault(o["kind"], []).append(o)
+        key = o["kind"]
+        if key == "making_off" and re.search(r"diamond\s*jewell?ery", o["text"], re.I):
+            key = "making_off_diamond"
+        by_kind.setdefault(key, []).append(o)
     out = []
-    for kind, items in by_kind.items():
+    for key, items in by_kind.items():
+        kind = items[0]["kind"]
         pcts = sorted({o["pct"] for o in items if o["pct"] is not None})
         # Headline: the biggest figure in an offer statement (not fine
         # print), and of those the fullest wording, to a point.
