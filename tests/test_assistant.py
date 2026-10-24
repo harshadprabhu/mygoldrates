@@ -140,3 +140,16 @@ def test_offers_answer_lists_every_jeweller_with_an_offer_and_singles_out_none()
     pos = [r["html"].index(n.replace("&", "&amp;")) for n in names]
     assert pos == sorted(pos)                               # A to Z, not by who has the offer
     assert "<em>" not in r["html"]                          # no badge on one jeweller
+
+
+def test_language_is_automatic_and_the_mic_follows_the_visitor():
+    """No language to choose: each reply follows its question, and once a
+    visitor asks in Tamil the mic listens in Tamil (the browser's recogniser
+    has to be told a language; Hindi's also takes English, so it starts there)."""
+    got = _sona([{"lang": "auto", "q": "cheapest gold today"},
+                 {"q": "சென்னையில் இன்றைய தங்க விலை"},
+                 {"q": "Cheapest 22K today", "chip": True},
+                 {"q": "tanishq gold rate"},
+                 {"lang": "auto", "q": "आज सोने का भाव"}])
+    assert [g["lang"] for g in got] == ["en", "ta", "ta", "en", "hi"]
+    assert [g["mic"] for g in got] == ["hi", "ta", "ta", "ta", "hi"]

@@ -26,17 +26,24 @@
   var KB = null, kbWait = null, opened = false, lastCity = null;
   try { lastCity = localStorage.getItem('sona_city'); } catch (_) {}
   var LG = window.SONA_LANG, STR = window.SONA_STR || {};
-  var LANG = 'en', RL = 'en';             // chosen language; the language of this reply
-  try { LANG = localStorage.getItem('sona_lang') || ''; } catch (_) {}
-  if (!STR[LANG]) {
-    LANG = 'en';
-    (navigator.languages || [navigator.language || '']).some(function (l) {
-      var c = String(l).slice(0, 2).toLowerCase();
-      if (STR[c] && c !== 'en') { LANG = c; return true; }
-      return false;
-    });
-  }
-  RL = LANG;
+  // Language is automatic. Each reply is in the language of its question
+  // (the script it is written in). The browser's free speech recogniser
+  // must be told which language to listen for, so the mic listens in the
+  // last Indian language Sona read or heard from this visitor - at first the
+  // phone's own language, else Hindi, whose recogniser also takes English.
+  // A visitor can pin one language instead (PICK).
+  var PICK = '', HEARD = '', PHONE = '';
+  try { PICK = localStorage.getItem('sona_pick') || ''; HEARD = localStorage.getItem('sona_heard') || ''; } catch (_) {}
+  if (!STR[PICK]) PICK = '';
+  if (!STR[HEARD]) HEARD = '';
+  (navigator.languages || [navigator.language || '']).some(function (l) {
+    var c = String(l).slice(0, 2).toLowerCase();
+    if (STR[c] && c !== 'en') { PHONE = c; return true; }
+    return false;
+  });
+  function uiLang() { return PICK || HEARD || PHONE || 'en'; }
+  function micLang() { return PICK || HEARD || PHONE || 'hi'; }
+  var LANG = uiLang(), RL = LANG;      // the language of the labels; of this reply
   // Text in the reply language, falling back to English: t('city_h', {c: 'Pune'}).
   function fill(s, v) { return String(s).replace(/\{(\w+)\}/g, function (_, n) { return v && v[n] != null ? v[n] : ''; }); }
   function t(k, v) { return fill((STR[RL] && STR[RL][k]) || (STR.en && STR.en[k]) || k, v); }
@@ -364,9 +371,17 @@
   }
   // A question in any language: Indian scripts are first turned into the
   // words above (sona_lang.js); the reply comes in the asker's language.
-  function understand(q) {
-    RL = (LG && LG.detect(q, LANG)) || LANG;
-    if (!STR[RL]) RL = 'en';
+  // chip: a suggestion tapped (asked in English, shown in the visitor's language).
+  function understand(q, chip) {
+    var d = LG && LG.detect(q, PICK || HEARD);
+    if (d && STR[d]) {
+      RL = d;
+      if (!PICK && d !== HEARD) {                 // she now listens and labels in it too
+        HEARD = d; LANG = d; try { localStorage.setItem('sona_heard', d); } catch (_) {}
+        if (panel) labels();
+        RL = d;
+      }
+    } else RL = chip ? LANG : (PICK || 'en');
     if (LG && LG.isIndic(q)) return LG.understand(q, VOCAB, RL).text;
     return q;
   }
@@ -478,7 +493,7 @@
     '.sn-lp{height:32px;flex:none;border-radius:999px;border:1px solid rgba(240,208,128,.35);background:rgba(231,191,90,.1);color:#f0d080;font:700 12.5px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:0 11px;cursor:pointer;white-space:nowrap}' +
     '.sn-hb{width:34px;height:34px;flex:none;border-radius:50%;border:0;background:rgba(255,255,255,.07);color:#cfc4ad;cursor:pointer;display:flex;align-items:center;justify-content:center}.sn-hb svg{width:17px;height:17px}.sn-hb.on{background:rgba(231,191,90,.22);color:#f6d77d}' +
     '.sn-lm{display:none;position:absolute;left:12px;right:12px;top:72px;z-index:3;grid-template-columns:repeat(2,1fr);gap:6px;padding:10px;border-radius:16px;background:#1b160e;border:1px solid rgba(240,208,128,.25);box-shadow:0 18px 40px rgba(0,0,0,.55)}.sn-lm.on{display:grid}' +
-    '.sn-lm button{border:1px solid rgba(240,208,128,.16);background:rgba(255,255,255,.04);color:#f3eadb;border-radius:10px;padding:10px 12px;text-align:left;font-size:14.5px;cursor:pointer}.sn-lm button.on{border-color:#e7bf5a;background:rgba(231,191,90,.15);color:#f6d77d}' +
+    '.sn-lm button{border:1px solid rgba(240,208,128,.16);background:rgba(255,255,255,.04);color:#f3eadb;border-radius:10px;padding:10px 12px;text-align:left;font-size:14.5px;cursor:pointer}.sn-lm button.on{border-color:#e7bf5a;background:rgba(231,191,90,.15);color:#f6d77d}.sn-lm .sn-auto{grid-column:1/-1;font-weight:700}' +
     '.sn-lchips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}.sn-lchips button{border:1px solid rgba(240,208,128,.25);background:none;color:#f0d080;border-radius:999px;padding:4px 10px;font-size:12.5px;cursor:pointer}.sn-lchips button:hover{background:rgba(231,191,90,.12)}' +
     '.sn-mic{width:46px;height:46px;flex:none;border-radius:50%;border:1px solid rgba(240,208,128,.4);background:rgba(231,191,90,.1);color:#f0d080;cursor:pointer;display:flex;align-items:center;justify-content:center}.sn-mic svg{width:21px;height:21px}' +
     '.sn-mic.on{background:#e5484d;border-color:#e5484d;color:#fff;animation:snMic 1.2s infinite}@keyframes snMic{0%{box-shadow:0 0 0 0 rgba(229,72,77,.6)}70%{box-shadow:0 0 0 12px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}' +
@@ -505,7 +520,7 @@
       (LG ? '<button class="sn-lp" id="sonaLang" type="button" aria-haspopup="true"></button>' : '') +
       (TTS ? '<button class="sn-hb" id="sonaSpk" type="button"></button>' : '') +
       '<button class="sn-x" id="sonaClose" aria-label="Close">×</button></div>' +
-      (LG ? '<div class="sn-lm" id="sonaLm" role="menu">' + LG.LANGS.map(function (l) { return '<button type="button" role="menuitem" data-lang="' + l.c + '">' + l.n + '</button>'; }).join('') + '</div>' : '') +
+      (LG ? '<div class="sn-lm" id="sonaLm" role="menu"><button type="button" role="menuitem" data-lang="auto" class="sn-auto"></button>' + LG.LANGS.map(function (l) { return '<button type="button" role="menuitem" data-lang="' + l.c + '">' + l.n + '</button>'; }).join('') + '</div>' : '') +
       '<div class="sn-body" aria-live="polite"></div><div class="sn-chips"></div>' +
       '<form class="sn-in"><input id="sonaInput" type="text" autocomplete="off" maxlength="200" aria-label="Your question">' +
       (SR ? '<button class="sn-mic" id="sonaMic" type="button">' + ICON.mic + '</button>' : '') +
@@ -551,13 +566,20 @@
     if (mic) { mic.setAttribute('aria-label', t('ui_mic')); mic.title = t('ui_mic'); }
     if (spk) { spk.innerHTML = ttsOn ? ICON.on : ICON.off; spk.classList.toggle('on', ttsOn); spk.setAttribute('aria-pressed', ttsOn ? 'true' : 'false'); spk.setAttribute('aria-label', t('ui_speak')); spk.title = ttsOn ? t('ui_mute') : t('ui_speak'); }
     if (LG) {
-      var lp = $('#sonaLang', panel); lp.textContent = short(LANG) + ' ▾'; lp.setAttribute('aria-label', t('ui_lang') + ': ' + langName(LANG));
-      [].forEach.call(lmenu.querySelectorAll('button'), function (b) { b.classList.toggle('on', b.getAttribute('data-lang') === LANG); });
+      var lp = $('#sonaLang', panel); lp.textContent = (PICK ? short(PICK) : 'Auto') + ' ▾';
+      lp.setAttribute('aria-label', t('ui_lang') + ': ' + (PICK ? langName(PICK) : t('ui_auto')));
+      $('.sn-auto', lmenu).textContent = t('ui_auto');
+      [].forEach.call(lmenu.querySelectorAll('button'), function (b) { b.classList.toggle('on', b.getAttribute('data-lang') === (PICK || 'auto')); });
     }
   }
   function setLang(c) {
-    if (!STR[c]) return;
-    LANG = c; try { localStorage.setItem('sona_lang', c); } catch (_) {}
+    if (c === 'auto') {
+      PICK = ''; HEARD = '';
+      try { localStorage.removeItem('sona_pick'); localStorage.removeItem('sona_heard'); } catch (_) {}
+    } else if (STR[c]) {
+      PICK = c; try { localStorage.setItem('sona_pick', c); } catch (_) {}
+    } else return;
+    LANG = uiLang();
     if (lmenu) lmenu.classList.remove('on');
     hush(); labels(); track('lang_' + c);
     // Only the welcome so far: say it again in the new language.
@@ -631,7 +653,7 @@
     if (!SR) return;
     if (listening) { try { rec.stop(); } catch (_) {} return; }
     hush();
-    rec = new SR(); rec.lang = bcp(LANG); rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
+    rec = new SR(); rec.lang = bcp(micLang()); rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
     var heard = '';
     rec.onresult = function (e) {
       var now = '';
@@ -672,7 +694,7 @@
     talking(true);
     loadKB().then(function () {
       var a = null;
-      try { a = answer(understand(q)); } catch (e) { a = null; }
+      try { a = answer(understand(q, !!label)); } catch (e) { a = null; }
       var ok = !!a, rl = RL;
       if (!a) a = { intent: 'unknown', html: '<p>' + t('unknown') + '</p>', say: t('unknown'), chips: suggest() };
       var tr = a.en && rl !== 'en' ? translateTo(a.en, rl) : Promise.resolve(null);
@@ -716,8 +738,9 @@
   if (TEST) {                                   // tests drive the engine without a page
     window.__SONA_TEST = {
       setKB: function (d) { KB = d; prep(d); },
-      setLang: function (c) { LANG = c; RL = c; },
-      ask: function (q) { var tx = understand(q), a = answer(tx); return { text: tx, lang: RL, a: a }; }
+      setLang: function (c) { PICK = c === 'auto' ? '' : c; HEARD = ''; LANG = uiLang(); RL = LANG; },
+      micLang: function () { return micLang(); },
+      ask: function (q, chip) { var tx = understand(q, chip), a = answer(tx); return { text: tx, lang: RL, a: a }; }
     };
     return;
   }
