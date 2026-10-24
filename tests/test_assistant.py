@@ -128,3 +128,15 @@ def test_voice_is_the_browsers_own_and_the_bundle_ships_all_three_files():
     assert "api.anthropic" not in JS and "openai" not in JS.lower()
     b = gs.sona_bundle()
     assert b.index("root.SONA_STR") < b.index("root.SONA_LANG") < b.index("Sona - the MyGoldRates")
+
+
+def test_offers_answer_lists_every_jeweller_with_an_offer_and_singles_out_none():
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    names = sorted(b["n"] for b in kb["brands"] if b.get("off"))
+    r = _sona([{"lang": "hi", "q": "मुझे सब ज्वेलर्स का ऑफर बताइए"}])[0]
+    assert r["intent"] == "offers"
+    shown = [n for n in names if n.replace("&", "&amp;") in r["html"]]
+    assert shown == names                                   # every one, none left out
+    pos = [r["html"].index(n.replace("&", "&amp;")) for n in names]
+    assert pos == sorted(pos)                               # A to Z, not by who has the offer
+    assert "<em>" not in r["html"]                          # no badge on one jeweller
