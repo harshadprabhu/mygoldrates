@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-24T10:45+05:30",
+ "updated": "2026-10-25T11:02+05:30",
  "note": "Offers as published on each jeweller's own website on the date shown. Read automatically; confirm terms with the jeweller before buying.",
  "brands": [
   {
@@ -172,7 +172,7 @@
    ],
    "read_from": "https://ckcjewellers.com/",
    "rendered": true,
-   "banners": 14
+   "banners": 15
   },
   {
    "slug": "candere",
@@ -243,24 +243,48 @@
    "status": "ok",
    "pages": [
     "https://www.caratlane.com/",
-    "https://www.caratlane.com/treasure-chest-gold-scheme",
-    "https://www.caratlane.com/jewellery/festive+edit.html"
+    "https://www.caratlane.com/treasure-chest-gold-scheme"
    ],
    "offers": [
     {
-     "kind": "exchange",
-     "pct_min": null,
-     "pct_max": null,
+     "kind": "diamond_off",
+     "pct_min": 20.0,
+     "pct_max": 20.0,
      "upto": false,
      "selected": false,
-     "mentions": 1,
+     "mentions": 2,
      "min_purchase": null,
-     "dates": [],
+     "dates": [
+      "31 Oct 2026"
+     ],
+     "applies_to": [
+      "diamond jewellery only"
+     ],
+     "conditions": [],
+     "text": "FLAT 20% OFF On All Diamond Jewellery",
+     "url": "https://www.caratlane.com/",
+     "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/10/Desktop.jpg",
+     "banner": "FLAT 20% OFF On All Diamond Jewellery 31 Oct 2026: T&C Apply\n5% INSTANT DISCOUNT ON CREDIT CARDS 31 Oct 2026: T&C Apply\nsh SS\nBig\nPurple\nBigger\nDeals!",
+     "first_seen": "2026-10-25"
+    },
+    {
+     "kind": "cashback",
+     "pct_min": 5.0,
+     "pct_max": 5.0,
+     "upto": true,
+     "selected": false,
+     "mentions": 2,
+     "min_purchase": null,
+     "dates": [
+      "31 Oct 2026"
+     ],
      "applies_to": [],
      "conditions": [],
-     "text": "Enjoy 0% deduction on your exchange value",
+     "text": "5% INSTANT DISCOUNT ON CREDIT CARDS",
      "url": "https://www.caratlane.com/",
-     "first_seen": "2026-10-24"
+     "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/10/Desktop.jpg",
+     "banner": "FLAT 20% OFF On All Diamond Jewellery 31 Oct 2026: T&C Apply\n5% INSTANT DISCOUNT ON CREDIT CARDS 31 Oct 2026: T&C Apply\nsh SS\nBig\nPurple\nBigger\nDeals!",
+     "first_seen": "2026-10-25"
     },
     {
      "kind": "scheme",
@@ -280,7 +304,7 @@
    ],
    "read_from": "https://www.caratlane.com/",
    "rendered": "international",
-   "banners": 3
+   "banners": 8
   },
   {
    "slug": "chandukaka",
@@ -510,11 +534,27 @@
    "slug": "joyalukkas",
    "name": "Joyalukkas",
    "domain": "joyalukkas.in",
-   "status": "no offers published as text or in banners today",
+   "status": "ok",
    "pages": [
     "https://joyalukkas.in/"
    ],
-   "offers": [],
+   "offers": [
+    {
+     "kind": "rate_protect",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Advance Booking",
+     "url": "https://joyalukkas.in/",
+     "first_seen": "2026-10-25"
+    }
+   ],
    "read_from": "https://joyalukkas.in/",
    "rendered": true,
    "banners": 0
@@ -584,7 +624,7 @@
      "conditions": [],
      "text": "LOCK YOUR GOLD RATE",
      "url": "https://www.khimjijewellers.com/",
-     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639283901383072288",
+     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639284775597910635",
      "banner": "PRICE HIKED?\nGold\nGET YOUR GOLD JEWELLERY THE\nBOOKED\nrotectio\nPRICE DROPPED?\nGET THE LOWEST RATE FOR\nYOUR GOLD JEWELLRY DAAM BADLEGA.\nDIWALI KI KHUSHI NAHI.\nLOCK YOUR GOLD RATE\n1Q%\nJEWELLERS SINCE 1936",
      "first_seen": "2026-10-24"
     }
@@ -847,7 +887,7 @@
    ],
    "read_from": "https://www.pcchandraindia.com/",
    "rendered": true,
-   "banners": 10
+   "banners": 9
   },
   {
    "slug": "png",
