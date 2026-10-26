@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-26",
-  "last_updated": "2026-10-26T10:14:51.353990+05:30",
+  "last_updated": "2026-10-26T11:08:57.875146+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14271.77,
-    "22k": 13082.46,
-    "18k": 10703.83
+    "24k": 14277.5,
+    "22k": 13087.71,
+    "18k": 10708.12
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -22,13 +22,13 @@
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 142719.0,
-      "change_pct": 0.49
+      "price_per_10g_inr": 142745.0,
+      "change_pct": 0.51
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 141100.0,
+      "price_per_10g_inr": 141094.0,
       "change_pct": 0.46
     }
   ],
@@ -58,12 +58,6 @@
       "rate_18k_per_gram_inr": 10650.0
     },
     {
-      "jeweller": "Reliance Jewels",
-      "rate_24k_per_gram_inr": 14227.0,
-      "rate_22k_per_gram_inr": 13041.42,
-      "rate_18k_per_gram_inr": 10670.25
-    },
-    {
       "jeweller": "Mahesh Jewellers",
       "rate_24k_per_gram_inr": 14236.36,
       "rate_22k_per_gram_inr": 13050.0,
@@ -76,31 +70,13 @@
       "rate_18k_per_gram_inr": 10690.5
     },
     {
-      "jeweller": "Indriya",
-      "rate_24k_per_gram_inr": 14254.29,
-      "rate_22k_per_gram_inr": 13066.43,
-      "rate_18k_per_gram_inr": 10690.72
-    },
-    {
-      "jeweller": "Abharan Jewellers",
-      "rate_24k_per_gram_inr": 14258.0,
-      "rate_22k_per_gram_inr": 13069.83,
-      "rate_18k_per_gram_inr": 10693.5
-    },
-    {
-      "jeweller": "Khimji Jewellers",
-      "rate_24k_per_gram_inr": 14258.0,
-      "rate_22k_per_gram_inr": 13069.83,
-      "rate_18k_per_gram_inr": 10693.5
+      "jeweller": "Reliance Jewels",
+      "rate_24k_per_gram_inr": 14256.0,
+      "rate_22k_per_gram_inr": 13068.0,
+      "rate_18k_per_gram_inr": 10692.0
     },
     {
       "jeweller": "Thangamayil Jewellery",
-      "rate_24k_per_gram_inr": 14258.0,
-      "rate_22k_per_gram_inr": 13069.83,
-      "rate_18k_per_gram_inr": 10693.5
-    },
-    {
-      "jeweller": "Kalyan Jewellers",
       "rate_24k_per_gram_inr": 14258.0,
       "rate_22k_per_gram_inr": 13069.83,
       "rate_18k_per_gram_inr": 10693.5
@@ -110,12 +86,6 @@
       "rate_24k_per_gram_inr": 14258.0,
       "rate_22k_per_gram_inr": 13069.83,
       "rate_18k_per_gram_inr": 10693.5
-    },
-    {
-      "jeweller": "Jewel One",
-      "rate_24k_per_gram_inr": 14258.18,
-      "rate_22k_per_gram_inr": 13070.0,
-      "rate_18k_per_gram_inr": 10693.64
     },
     {
       "jeweller": "NAC Jewellers",
@@ -130,28 +100,28 @@
       "rate_18k_per_gram_inr": 10694.25
     },
     {
+      "jeweller": "Kalyan Jewellers",
+      "rate_24k_per_gram_inr": 14266.5,
+      "rate_22k_per_gram_inr": 13077.62,
+      "rate_18k_per_gram_inr": 10699.88
+    },
+    {
       "jeweller": "Prince Jewellery",
       "rate_24k_per_gram_inr": 14269.0,
       "rate_22k_per_gram_inr": 13079.92,
       "rate_18k_per_gram_inr": 10701.75
     },
     {
-      "jeweller": "Candere",
-      "rate_24k_per_gram_inr": 14269.0,
-      "rate_22k_per_gram_inr": 13079.92,
-      "rate_18k_per_gram_inr": 10701.75
+      "jeweller": "Indriya",
+      "rate_24k_per_gram_inr": 14270.65,
+      "rate_22k_per_gram_inr": 13081.43,
+      "rate_18k_per_gram_inr": 10702.99
     },
     {
-      "jeweller": "GRT Jewellers",
-      "rate_24k_per_gram_inr": 14269.0,
-      "rate_22k_per_gram_inr": 13079.92,
-      "rate_18k_per_gram_inr": 10701.75
-    },
-    {
-      "jeweller": "Vummidi Bangaru",
-      "rate_24k_per_gram_inr": 14269.0,
-      "rate_22k_per_gram_inr": 13079.92,
-      "rate_18k_per_gram_inr": 10701.75
+      "jeweller": "Jewel One",
+      "rate_24k_per_gram_inr": 14274.55,
+      "rate_22k_per_gram_inr": 13085.0,
+      "rate_18k_per_gram_inr": 10705.91
     },
     {
       "jeweller": "Malabar Gold",
@@ -164,6 +134,18 @@
       "rate_24k_per_gram_inr": 14274.55,
       "rate_22k_per_gram_inr": 13085.0,
       "rate_18k_per_gram_inr": 10705.91
+    },
+    {
+      "jeweller": "Abharan Jewellers",
+      "rate_24k_per_gram_inr": 14275.0,
+      "rate_22k_per_gram_inr": 13085.42,
+      "rate_18k_per_gram_inr": 10706.25
+    },
+    {
+      "jeweller": "Khimji Jewellers",
+      "rate_24k_per_gram_inr": 14275.0,
+      "rate_22k_per_gram_inr": 13085.42,
+      "rate_18k_per_gram_inr": 10706.25
     },
     {
       "jeweller": "Joyalukkas",
@@ -182,6 +164,24 @@
       "rate_24k_per_gram_inr": 14280.0,
       "rate_22k_per_gram_inr": 13090.0,
       "rate_18k_per_gram_inr": 10710.0
+    },
+    {
+      "jeweller": "Candere",
+      "rate_24k_per_gram_inr": 14285.0,
+      "rate_22k_per_gram_inr": 13094.58,
+      "rate_18k_per_gram_inr": 10713.75
+    },
+    {
+      "jeweller": "GRT Jewellers",
+      "rate_24k_per_gram_inr": 14285.0,
+      "rate_22k_per_gram_inr": 13094.58,
+      "rate_18k_per_gram_inr": 10713.75
+    },
+    {
+      "jeweller": "Vummidi Bangaru",
+      "rate_24k_per_gram_inr": 14285.0,
+      "rate_22k_per_gram_inr": 13094.58,
+      "rate_18k_per_gram_inr": 10713.75
     },
     {
       "jeweller": "Tanishq",
@@ -233,9 +233,9 @@
     },
     {
       "jeweller": "Ranka Jewellers",
-      "rate_24k_per_gram_inr": 14545.0,
-      "rate_22k_per_gram_inr": 13332.92,
-      "rate_18k_per_gram_inr": 10908.75
+      "rate_24k_per_gram_inr": 14605.0,
+      "rate_22k_per_gram_inr": 13387.92,
+      "rate_18k_per_gram_inr": 10953.75
     }
   ],
   "jeweller_count": 34,
