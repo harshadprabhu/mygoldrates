@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-26",
-  "last_updated": "2026-10-26T16:06:41.756723+05:30",
+  "last_updated": "2026-10-26T17:13:21.060752+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -16,20 +16,20 @@
     "jeweller": "PN Gadgil",
     "rate_per_gram_inr": 14165.0
   },
-  "ibja_reference_24k_999_per_gram_inr": 14129.0,
+  "ibja_reference_24k_999_per_gram_inr": 14171.0,
   "akgsma_south_india_22k_per_gram_inr": 13085.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 142945.0,
-      "change_pct": 0.65
+      "price_per_10g_inr": 142856.0,
+      "change_pct": 0.59
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 141285.0,
-      "change_pct": 0.59
+      "price_per_10g_inr": 141258.0,
+      "change_pct": 0.57
     }
   ],
   "jewellers": [
@@ -178,16 +178,16 @@
       "rate_18k_per_gram_inr": 10713.75
     },
     {
-      "jeweller": "Senco Gold",
-      "rate_24k_per_gram_inr": 14292.0,
-      "rate_22k_per_gram_inr": 13101.0,
-      "rate_18k_per_gram_inr": 10719.0
-    },
-    {
       "jeweller": "Tanishq",
       "rate_24k_per_gram_inr": 14318.18,
       "rate_22k_per_gram_inr": 13125.0,
       "rate_18k_per_gram_inr": 10738.64
+    },
+    {
+      "jeweller": "Senco Gold",
+      "rate_24k_per_gram_inr": 14320.0,
+      "rate_22k_per_gram_inr": 13126.67,
+      "rate_18k_per_gram_inr": 10740.0
     },
     {
       "jeweller": "Kisna",
