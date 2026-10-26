@@ -36,7 +36,7 @@ jobs:
       - name: Install dependencies
         # collect.py imports these at module load, so they are needed even
         # though the extractor tests never touch the network or the DB.
-        run: pip install pytest requests beautifulsoup4 supabase
+        run: pip install pytest requests beautifulsoup4 supabase pillow
 
       - name: Run extractor regression tests
         run: python -m pytest tests/ -q
