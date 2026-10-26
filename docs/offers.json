@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-24T10:45+05:30",
+ "updated": "2026-10-26T11:00+05:30",
  "note": "Offers as published on each jeweller's own website on the date shown. Read automatically; confirm terms with the jeweller before buying.",
  "brands": [
   {
@@ -172,7 +172,7 @@
    ],
    "read_from": "https://ckcjewellers.com/",
    "rendered": true,
-   "banners": 14
+   "banners": 15
   },
   {
    "slug": "candere",
@@ -243,24 +243,48 @@
    "status": "ok",
    "pages": [
     "https://www.caratlane.com/",
-    "https://www.caratlane.com/treasure-chest-gold-scheme",
-    "https://www.caratlane.com/jewellery/festive+edit.html"
+    "https://www.caratlane.com/treasure-chest-gold-scheme"
    ],
    "offers": [
     {
-     "kind": "exchange",
-     "pct_min": null,
-     "pct_max": null,
+     "kind": "diamond_off",
+     "pct_min": 20.0,
+     "pct_max": 20.0,
      "upto": false,
      "selected": false,
-     "mentions": 1,
+     "mentions": 2,
      "min_purchase": null,
-     "dates": [],
+     "dates": [
+      "31 Oct 2026"
+     ],
+     "applies_to": [
+      "diamond jewellery only"
+     ],
+     "conditions": [],
+     "text": "FLAT 20% OFF On All Diamond Jewellery",
+     "url": "https://www.caratlane.com/",
+     "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/10/Desktop.jpg",
+     "banner": "FLAT 20% OFF On All Diamond Jewellery 31 Oct 2026: T&C Apply\n5% INSTANT DISCOUNT ON CREDIT CARDS 31 Oct 2026: T&C Apply\nsh SS\nBig\nPurple\nBigger\nDeals!",
+     "first_seen": "2026-10-25"
+    },
+    {
+     "kind": "cashback",
+     "pct_min": 5.0,
+     "pct_max": 5.0,
+     "upto": true,
+     "selected": false,
+     "mentions": 2,
+     "min_purchase": null,
+     "dates": [
+      "31 Oct 2026"
+     ],
      "applies_to": [],
      "conditions": [],
-     "text": "Enjoy 0% deduction on your exchange value",
+     "text": "5% INSTANT DISCOUNT ON CREDIT CARDS",
      "url": "https://www.caratlane.com/",
-     "first_seen": "2026-10-24"
+     "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/10/Desktop.jpg",
+     "banner": "FLAT 20% OFF On All Diamond Jewellery 31 Oct 2026: T&C Apply\n5% INSTANT DISCOUNT ON CREDIT CARDS 31 Oct 2026: T&C Apply\nsh SS\nBig\nPurple\nBigger\nDeals!",
+     "first_seen": "2026-10-25"
     },
     {
      "kind": "scheme",
@@ -280,7 +304,7 @@
    ],
    "read_from": "https://www.caratlane.com/",
    "rendered": "international",
-   "banners": 3
+   "banners": 8
   },
   {
    "slug": "chandukaka",
@@ -584,7 +608,7 @@
      "conditions": [],
      "text": "LOCK YOUR GOLD RATE",
      "url": "https://www.khimjijewellers.com/",
-     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639283901383072288",
+     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639285638409084190",
      "banner": "PRICE HIKED?\nGold\nGET YOUR GOLD JEWELLERY THE\nBOOKED\nrotectio\nPRICE DROPPED?\nGET THE LOWEST RATE FOR\nYOUR GOLD JEWELLRY DAAM BADLEGA.\nDIWALI KI KHUSHI NAHI.\nLOCK YOUR GOLD RATE\n1Q%\nJEWELLERS SINCE 1936",
      "first_seen": "2026-10-24"
     }
@@ -847,7 +871,7 @@
    ],
    "read_from": "https://www.pcchandraindia.com/",
    "rendered": true,
-   "banners": 10
+   "banners": 9
   },
   {
    "slug": "png",
@@ -903,61 +927,9 @@
    "slug": "pngsons",
    "name": "PN Gadgil & Sons",
    "domain": "pngadgilandsons.com",
-   "status": "ok",
-   "pages": [
-    "https://pngadgilandsons.com/",
-    "https://pngadgilandsons.com/fixed-deposit-scheme/",
-    "https://pngadgilandsons.com/what-png-offer-to-customers/",
-    "https://pngadgilandsons.com/png-and-sons-exclusive-diamond-jewellery-offer-for-valentine-day-3/",
-    "https://pngadgilandsons.com/products/diamond-jewellery/diamond-collection/festival-diamond/"
-   ],
-   "offers": [
-    {
-     "kind": "making_off",
-     "pct_min": 100.0,
-     "pct_max": 100.0,
-     "upto": true,
-     "selected": false,
-     "mentions": 3,
-     "min_purchase": null,
-     "dates": [
-      "15 Nov 2026"
-     ],
-     "applies_to": [
-      "diamond jewellery only"
-     ],
-     "conditions": [],
-     "text": "Up to 100% ON MAKING CHARGES OF CERTIFIED NATURAL DIAMOND JEWELLERY",
-     "url": "https://pngadgilandsons.com/",
-     "image": "https://pngadgilandsons.com/wp-content/uploads/2026/10/PNGS_Corporate_Website_BannerD-w1920xh850Pix-1.png",
-     "banner": "Up to 50% ON MAKING CHARGES OF GOLD JEWELLERY Offer Valid Till 15 Nov 2026 *T&C Apply\nUp to 100% ON MAKING CHARGES OF CERTIFIED NATURAL DIAMOND JEWELLERY Offer Valid Till 15 Nov 2026 *T&C Apply\nFeatherlite”\nCOLLECTION",
-     "first_seen": "2026-10-24"
-    },
-    {
-     "kind": "making_off",
-     "pct_min": 50.0,
-     "pct_max": 50.0,
-     "upto": true,
-     "selected": false,
-     "mentions": 1,
-     "min_purchase": null,
-     "dates": [
-      "15 Nov 2026"
-     ],
-     "applies_to": [
-      "gold jewellery"
-     ],
-     "conditions": [],
-     "text": "Up to 50% ON MAKING CHARGES OF GOLD JEWELLERY",
-     "url": "https://pngadgilandsons.com/",
-     "image": "https://pngadgilandsons.com/wp-content/uploads/2026/10/PNGS_Corporate_Website_BannerD-w1920xh850Pix-1.png",
-     "banner": "Up to 50% ON MAKING CHARGES OF GOLD JEWELLERY Offer Valid Till 15 Nov 2026 *T&C Apply\nUp to 100% ON MAKING CHARGES OF CERTIFIED NATURAL DIAMOND JEWELLERY Offer Valid Till 15 Nov 2026 *T&C Apply\nFeatherlite”\nCOLLECTION",
-     "first_seen": "2026-10-24"
-    }
-   ],
-   "read_from": "https://pngadgilandsons.com/",
-   "rendered": true,
-   "banners": 8
+   "status": "unreachable (ReadTimeout)",
+   "pages": [],
+   "offers": []
   },
   {
    "slug": "prince",
@@ -1082,20 +1054,22 @@
    "offers": [
     {
      "kind": "making_off",
-     "pct_min": 100.0,
-     "pct_max": 100.0,
+     "pct_min": 10.0,
+     "pct_max": 10.0,
      "upto": true,
      "selected": false,
      "mentions": 1,
      "min_purchase": null,
      "dates": [],
-     "applies_to": [],
+     "applies_to": [
+      "diamond jewellery only"
+     ],
      "conditions": [],
-     "text": "100% on making charges",
+     "text": "10% on making charges OFF on Diamond Value now Diamond Jewellery OFF Offe",
      "url": "https://sencogoldanddiamonds.com/",
-     "image": "https://web.sencogoldanddiamonds.com/images/transform?key=cms/banners/875acf17-23a4-48aa-830f-a6d132a16f2e.jpg&width=1920&format=webp",
-     "banner": "100% on making charges Offer valid fora limited period in website App only\n10% OFI on Diamond Value How Offer valid fora limited period in website App only\nthet\nGold\nDhanteras\nof Gold\nper gram\nRate\ncharges\naay\nDiamond Jewellery",
-     "first_seen": "2026-10-24"
+     "image": "https://web.sencogoldanddiamonds.com/images/transform?key=cms/banners/8e30c21d-5313-4253-9a67-b13fa51aea8b.jpg&width=1920&format=webp",
+     "banner": "2 Diamond Jewellery OFF Offer valid fora limited period in website App only\n100% per ELAT charges Diamond Jewellery OFF Offer valid fora limited period in website App only\n10% on making charges OFF on Diamond Value now Diamond Jewellery OFF Offer valid fora limited period in website App only\nOffer\nG",
+     "first_seen": "2026-10-26"
     },
     {
      "kind": "exchange",
