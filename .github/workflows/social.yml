@@ -1,0 +1,56 @@
+name: social-post
+
+# One Instagram post a day: today's gold rate card (social_post.py). The card
+# is committed to the repo first, because Instagram fetches the image from a
+# public URL (raw.githubusercontent.com), then posted with Meta's free API.
+# Without the IG_ACCESS_TOKEN secret it only builds the card.
+on:
+  schedule:
+    - cron: "47 5 * * *"   # 05:47 UTC ~ 11:17 IST, after the morning rates have settled
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "preview (build the card only) or post"
+        default: "preview"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: social-post
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow requests supabase
+
+      - name: Build the card
+        run: python social_post.py build
+
+      - name: Publish the card to the repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/social
+          git commit -m "Instagram card $(TZ=Asia/Kolkata date +%F)" || exit 0
+          for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && break; sleep 5; done
+
+      - name: Post to Instagram
+        if: github.event_name == 'schedule' || inputs.mode == 'post'
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          D=$(TZ=Asia/Kolkata date +%F)
+          python social_post.py publish "https://raw.githubusercontent.com/${{ github.repository }}/main/docs/social/rates-$D.jpg"
+          git add docs/social/posted.json 2>/dev/null || true
+          git commit -m "Instagram posted $D" || exit 0
+          for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && break; sleep 5; done
