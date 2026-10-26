@@ -11,8 +11,8 @@
 - 18K (750) median: ₹10,712 per gram (pre-GST)
 - Lowest 24K today: ₹14,165 per gram at PN Gadgil
 - IBJA 24K (999) reference: ₹14,129 per gram (pre-GST)
-- MCX gold futures (04DEC2026): ₹142,940 per 10g (995), +0.65%
-- Last updated: 2026-10-26T14:18:47.617512+05:30
+- MCX gold futures (04DEC2026): ₹142,945 per 10g (995), +0.65%
+- Last updated: 2026-10-26T16:06:41.756723+05:30
 
 ## Key pages
 - Home: today's gold rate in India, live 24K/22K/18K per-gram rates from 34 jewellers lowest-first, with a GST toggle, MCX futures, the IBJA reference, spot gold and silver and this week's economic calendar: https://mygoldrates.com/
