@@ -291,3 +291,13 @@ def test_on_auto_each_question_decides_its_language_and_the_mic_follows():
     assert [r["mic"] for r in got[:3]] == ["mr", "hi", "mr"]              # the mic listens in the last one
     pinned = _sona([{"lang": "mr", "q": "आज सोने का भाव क्या है"}, {"q": "tanishq rate", "spoken": True}])
     assert [r["lang"] for r in pinned] == ["mr", "mr"]                    # a chosen language stays put
+
+
+def test_shops_sona_does_not_track_get_an_honest_answer_and_a_google_button():
+    got = _sona([{"lang": "en", "q": "what is the rate of 999 from amazon"}, {"q": "sbi gold coin rate"},
+                 {"q": "is digital gold on paytm safe"}])
+    assert got[0]["intent"] == "outside" and "Amazon" in got[0]["html"] and "google.com/search?q=" in got[0]["html"]
+    assert "24K" in got[0]["html"]                                         # today's jeweller rate to compare
+    assert got[1]["intent"] == "outside" and got[2]["intent"] == "faq"
+    src = open("assistant.js", encoding="utf-8").read()
+    assert "t('unknown') + '</p>' + gLink(q)" in src                     # anything unanswered offers the search too

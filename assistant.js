@@ -185,6 +185,25 @@
     }).join('') + '</div>';
   }
 
+  // Shops and banks whose prices Sona does not track ("999 rate on Amazon"):
+  // say so, give today's jeweller rate to compare, and a Google search the
+  // visitor opens themselves - Sona never quotes a price from the web.
+  var STORES = { amazon: 'Amazon', flipkart: 'Flipkart', myntra: 'Myntra', ajio: 'AJIO', 'tata cliq': 'Tata CLiQ', tatacliq: 'Tata CLiQ',
+    nykaa: 'Nykaa', meesho: 'Meesho', jiomart: 'JioMart', mmtc: 'MMTC-PAMP', augmont: 'Augmont', safegold: 'SafeGold',
+    sbi: 'SBI', hdfc: 'HDFC Bank', icici: 'ICICI Bank', axis: 'Axis Bank', kotak: 'Kotak Bank', 'post office': 'the post office',
+    bank: 'banks', banks: 'banks', zepto: 'Zepto', blinkit: 'Blinkit', swiggy: 'Swiggy Instamart', bigbasket: 'BigBasket' };
+  function storeIn(t) { for (var s in STORES) if (new RegExp('\\b' + s + '\\b').test(t)) return STORES[s]; return null; }
+  var rawQ = '';
+  function gLink(q) {
+    return '<p><a class="sn-g" href="https://www.google.com/search?q=' + encodeURIComponent(q || rawQ) + '" target="_blank" rel="noopener nofollow">\ud83d\udd0e Google</a></p>';
+  }
+  function aOutside(store, k) {
+    k = k || '24K';
+    var en = 'I don\'t track ' + store + (/s$/.test(store) ? '\'' : '\'s') + ' prices - my rates come from jewellers\' own websites. To compare, here is today\'s middle rate at ' +
+      KB.brands.length + ' jewellers. Tap Google to look up ' + store + '.';
+    return { intent: 'outside', en: en, html: '<p>' + esc(en) + '</p>' + tiles(KB.med, k) + gLink(), say: en,
+      chips: chips(['cheap22', 'bestoff']) };
+  }
   function aMedian(k) {
     k = k || '22K';
     var m = KB.med, low = ranked(natBrands())[0];
@@ -401,6 +420,8 @@
     if (meaning && k) return faqQ({ '22K': 'What is 916 gold?', '18K': 'Is 18K gold good for jewellery?', '14K': 'Is 14K gold real gold?' }[k] ||
                                   'What is the difference between 22K and 24K gold?');
     if (meaning && /\b(carat|karat|caret)\b/.test(tx)) return faqQ('What is the difference between carat and karat?');
+    var store = storeIn(tx);
+    if (store && !has(tx, ['digital', 'etf', 'loan', 'emi', 'scheme', 'bond', 'bonds', 'sgb'])) return aOutside(store, k);
     // "gold rate per gram 18 carat": that karat's rate, not its explainer
     if (k && /\b(rate|rates|price|bhav|dar|per gram|today|aaj)\b/.test(tx) && !meaning && !bs.length && !c && !w &&
         !has(tx, W.cheap) && !has(tx, W.making) && !has(tx, W.offer) && !has(tx, W.trend) && !has(tx, ['difference', 'vs', 'versus', 'better'])) return aMedian(k);
@@ -476,6 +497,7 @@
   }
   // The answer to a question as typed; a bare "in Marathi" gets a hello in it.
   function reply(q, chip, spoken) {
+    rawQ = q;
     var tx = understand(q, chip, spoken);
     if (!tx && justPicked) return { tx: tx, a: { intent: 'lang', html: '<p>' + t('greet1') + '</p><p>' + t('greet2') + '</p>',
       say: (t('greet1') + ' ' + t('greet2')).replace(/<[^>]+>/g, ''), chips: suggest() } };
@@ -594,6 +616,7 @@
     '.sn-lchips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}.sn-lchips button{border:1px solid rgba(240,208,128,.25);background:none;color:#f0d080;border-radius:999px;padding:4px 10px;font-size:12.5px;cursor:pointer}.sn-lchips button:hover{background:rgba(231,191,90,.12)}' +
     '.sn-mic{position:relative;width:46px;height:46px;flex:none;border-radius:50%;border:1px solid rgba(240,208,128,.4);background:rgba(231,191,90,.1);color:#f0d080;cursor:pointer;display:flex;align-items:center;justify-content:center}.sn-mic svg{width:21px;height:21px}' +
     '.sn-ml{position:absolute;right:-5px;bottom:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#e7bf5a;color:#1a1405;font:700 10px/17px system-ui,sans-serif;text-align:center;pointer-events:none}' +
+    '.sn-g{display:inline-block;padding:7px 14px;border-radius:999px;border:1px solid rgba(240,208,128,.45);color:#f0d080;text-decoration:none;font-weight:600}' +
     '.sn-mic.on{background:#e5484d;border-color:#e5484d;color:#fff;animation:snMic 1.2s infinite}@keyframes snMic{0%{box-shadow:0 0 0 0 rgba(229,72,77,.6)}70%{box-shadow:0 0 0 12px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}' +
     '.sn-orow .sn-nm b{display:block;font-size:13.5px}.sn-orow small{display:block;color:#cfc4ad;font-size:12px;line-height:1.45;margin-top:2px}' +
     '.sn-fb .sn-say{margin-left:auto}.sn-fab .sn-fmic{width:26px;height:26px;margin:0 -6px 0 -2px;border-radius:50%;background:rgba(26,20,5,.12);display:flex;align-items:center;justify-content:center}.sn-fab .sn-fmic svg{width:15px;height:15px}' +
@@ -833,7 +856,7 @@
       var a = null;
       try { a = reply(q, !!label, spoken).a; } catch (e) { a = null; }
       var ok = !!a, rl = RL;
-      if (!a) a = { intent: 'unknown', html: '<p>' + t('unknown') + '</p>', say: t('unknown'), chips: suggest() };
+      if (!a) a = { intent: 'unknown', html: '<p>' + t('unknown') + '</p>' + gLink(q), say: t('unknown'), chips: suggest() };
       var tr = a.en && rl !== 'en' ? translateTo(a.en, rl) : Promise.resolve(null);
       tr.then(function (txt) {
         RL = rl;
