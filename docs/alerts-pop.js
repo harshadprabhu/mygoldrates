@@ -20,7 +20,7 @@
   if(!eligible())return;
   // Filled in by the build: today's 22K gap between the cheapest and the
   // dearest jeweller, today's lowest 22K, and the Google client id.
-  var GAP=Number('236')||0,LOW=Number('13036')||0,GCID='459957139537-m6fl4clp90lua3ad2baupf20utkof6fl.apps.googleusercontent.com';
+  var GAP=Number('187')||0,LOW=Number('13036')||0,GCID='459957139537-m6fl4clp90lua3ad2baupf20utkof6fl.apps.googleusercontent.com';
   if(GCID.indexOf('__')===0)GCID='';
   function inr(n){return '₹'+Math.round(n).toLocaleString('en-IN');}
   // Sign-up funnel events for the private analytics dashboard.
