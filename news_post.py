@@ -11,8 +11,9 @@
          plus our own figures: the 22K middle today, its move over a week,
          and the gap between jewellers.
 
-The headlines are the ones the site shows (generate_site.fetch_news - the
-same links). Gemini's free text model writes the summary in our own words
+The headlines are the ones the site shows: India's gold news
+(generate_site.fetch_news) and the world headlines behind the daily market
+brief (gold_brief.fetch_global_news) - the same links. Gemini's free text model writes the summary in our own words
 from those headlines only, and it is checked before anything is posted,
 because a wrong figure is worse than no post:
   - every number must appear in the headlines or in our own data;
@@ -37,6 +38,9 @@ BANNED = ("guarantee", "scrap", "sure-shot", "assured")
 INDIA = re.compile(r"\b(india|indian|rupee|rs\.?|₹|jewell?er|jewell?ery|festive|festival|diwali|dhanteras|wedding|"
                    r"akshaya|import|rbi|demand|buyers?|consumers?|mcx|ibja|retail|mumbai|delhi|chennai|kolkata|"
                    r"bengaluru|hyderabad|kerala|sales|footfall|etf|sgb|households?)\b", re.I)
+
+# "Gold rate today: check prices in your city" pages carry no story.
+LISTING = re.compile(r"\b(rate|rates|price|prices) today\b|\bcheck\b|\blive\b|\bcity-wise\b|\bin your city\b", re.I)
 
 KINDS = {
     "news": {
@@ -69,7 +73,9 @@ Rules:
 - Use ONLY facts stated in the headlines or OUR DATA. Copy any number exactly as written \
 there; never calculate, round or invent one.
 - "headline": at most 60 characters, in your own words.
-- "points": exactly 3 points, at most 110 characters each, your own words, not copied.
+- "points": exactly 3 points, at most 110 characters each, your own words, not copied. Each \
+point is a distinct fact: a price move, its cause, a figure, or who said or did what. Never \
+"check the rates", never "X looks at / discusses ..." - say what they found.
 - "view": %s. At most 150 characters. Never your own prediction, never advice to buy or sell.
 - "sources": the publisher names you used, exactly as given.
 
@@ -98,9 +104,15 @@ def ours(kb=None):
 def fetch(kind):
     """The site's gold headlines from the last HOURS hours: [(source, title)]."""
     import generate_site as gs
+    import gold_brief
     cut = datetime.utcnow() - timedelta(hours=HOURS)
     out = [(n["source"] or "Google News", n["title"]) for n in gs.fetch_news(limit=40)
-           if n.get("dt") is None or n["dt"] >= cut]
+           if (n.get("dt") is None or n["dt"] >= cut) and not LISTING.search(n["title"])]
+    seen = {t.lower() for _, t in out}
+    for n in gold_brief.fetch_global_news(limit=40):         # the market brief's world headlines (last day)
+        if n["title"].lower() not in seen and not LISTING.search(n["title"]):
+            seen.add(n["title"].lower())
+            out.append((n["source"] or "Google News", n["title"]))
     if kind == "pulse":
         india = [x for x in out if INDIA.search(x[1])]
         out = india if len(india) >= 3 else out
