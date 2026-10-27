@@ -307,12 +307,22 @@
   var MR = /(आहे|किती|काय|मध्ये|सोन्या|आजचा|आजचे|कुठे|माझ्या|स्वस्त|तोळ|आणि|ाचा|ाचे|ाची|्यात)/;
   // Assamese is written in the Bengali script, with its own ৰ and ৱ.
   var AS = /([ৰৱ]|সোণ|আজি|কিমান|নেকি|মোৰ)/;
-  function detect(q, cur) {
+  // Hindi's own words, to tell it from Marathi in the same script.
+  var HI = /(है|हैं|क्या|कहाँ|कहां|कितना|कितने|कितनी|बताओ|बताइए|बताइये|सबसे|में|चाहिए|मुझे|रहा|रही|वाला|वाली|(^|\s)(का|की|के|को)(\s|$))/g;
+  var MRG = new RegExp(MR.source, 'g');
+  // cur: the language so far; pinned: the visitor chose it (keep it when the
+  // words could be either). Otherwise Hindi or Marathi is decided by the
+  // words of this question alone, so a visitor can switch freely.
+  function detect(q, cur, pinned) {
     if (AR.test(q)) return 'ur';
     var m = String(q).match(/[ऀ-ൿ]/);
     if (!m) return null;
     var b = scriptOf(m[0].charCodeAt(0));
-    if (b[1] === 'deva') return cur === 'mr' || MR.test(q) ? 'mr' : 'hi';
+    if (b[1] === 'deva') {
+      if (pinned && (cur === 'mr' || cur === 'hi')) return cur;
+      var nm = (q.match(MRG) || []).length, nh = (q.match(HI) || []).length;
+      return nm > nh ? 'mr' : nh > nm ? 'hi' : (cur === 'mr' ? 'mr' : 'hi');
+    }
     if (b[1] === 'beng') return cur === 'as' || AS.test(q) ? 'as' : 'bn';
     return SCRIPT_LANG[b[1]];
   }
