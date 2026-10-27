@@ -27,6 +27,7 @@ OUT = "docs/social"
 LOG = os.path.join(OUT, "posted.json")
 KB = "docs/assistant.json"
 FONTS = "assets/fonts"
+ART_DIR = "assets/social-art"     # jewellery photos made in Gemini/Flow; one a day, in turn
 GRAPH = "https://graph.instagram.com/v21.0"
 IST = timezone(timedelta(hours=5, minutes=30))
 GOLD, CREAM, MUTED, BG = (240, 196, 92), (246, 236, 214), (190, 172, 138), (18, 13, 6)
@@ -206,6 +207,21 @@ def ai_art(day=None):
     return None
 
 
+def library_art(day=None):
+    """Today's photo from ART_DIR (taken in turn by day of the year), or None."""
+    from PIL import Image
+    try:
+        files = sorted(f for f in os.listdir(ART_DIR) if f.lower().endswith((".jpg", ".jpeg", ".png", ".webp")))
+    except FileNotFoundError:
+        return None
+    if not files:
+        return None
+    day = day or datetime.now(IST)
+    name = files[day.timetuple().tm_yday % len(files)]
+    _say(f"artwork from the library: {name}")
+    return Image.open(os.path.join(ART_DIR, name)).convert("RGB")
+
+
 def _cover(im, W, H):
     """Scale and centre-crop an image to fill W x H."""
     from PIL import Image
@@ -308,7 +324,7 @@ def build():
     stamp = datetime.now(IST).strftime("%Y-%m-%d")
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, f"rates-{stamp}.jpg")
-    card(d, path, ai_art())
+    card(d, path, library_art() or ai_art())
     with open(os.path.join(OUT, f"rates-{stamp}.txt"), "w", encoding="utf-8") as fh:
         fh.write(caption(d))
     print(path)

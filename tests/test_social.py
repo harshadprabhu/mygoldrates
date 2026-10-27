@@ -37,3 +37,16 @@ def test_ai_artwork_only_paints_the_background_the_numbers_stay_ours(tmp_path, m
     sp.card(sp.today(_kb()), str(p), Image.new("RGB", (896, 1120), (240, 220, 180)))
     assert Image.open(p).size == (1080, 1350)
     assert "No text, no letters, no numbers" in sp.ART_PROMPT
+
+
+def test_the_photo_library_is_used_in_turn(tmp_path, monkeypatch):
+    from datetime import datetime
+    from PIL import Image
+    monkeypatch.setattr(sp, "ART_DIR", str(tmp_path / "none"))
+    assert sp.library_art() is None                                        # no library: Gemini or the drawn card
+    monkeypatch.setattr(sp, "ART_DIR", str(tmp_path))
+    for i, c in enumerate([(255, 0, 0), (0, 255, 0)]):
+        Image.new("RGB", (40, 50), c).save(tmp_path / f"{i}.jpg")
+    a = sp.library_art(datetime(2026, 1, 1)).getpixel((20, 25))
+    b = sp.library_art(datetime(2026, 1, 2)).getpixel((20, 25))
+    assert a != b                                                          # a different photo each day
