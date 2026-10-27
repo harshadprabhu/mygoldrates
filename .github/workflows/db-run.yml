@@ -59,6 +59,7 @@ jobs:
           P1: ${{ secrets.SUPABASE_DB_PASSWORD }}
           P2: ${{ secrets.DB_PASSWORD }}
           P3: ${{ secrets.SUPABASE_PASSWORD }}
+          SK: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
           names="C1:SUPABASE_DB_URL C2:DATABASE_URL C3:SUPABASE_DATABASE_URL C4:SUPABASE_DB C5:DB_URL C6:POSTGRES_URL C7:SUPABASE_CONNECTION_STRING C8:SUPABASE_POOLER_URL T1:SUPABASE_ACCESS_TOKEN T2:SUPABASE_TOKEN T3:SUPABASE_PAT T4:SUPABASE_MANAGEMENT_TOKEN P1:SUPABASE_DB_PASSWORD P2:DB_PASSWORD P3:SUPABASE_PASSWORD"
           found=""
@@ -71,6 +72,7 @@ jobs:
           tok=""; for v in T1 T2 T3 T4; do [ -z "$tok" ] && tok="$(printenv $v || true)"; done
           if [ -n "$url" ]; then echo "mode=psql" >> "$GITHUB_OUTPUT"
           elif [ -n "$tok" ]; then echo "mode=api" >> "$GITHUB_OUTPUT"
+          elif [ -n "$SK" ]; then echo "mode=service" >> "$GITHUB_OUTPUT"
           else echo "mode=none" >> "$GITHUB_OUTPUT"; fi
 
       - name: Run (connection string)
@@ -121,6 +123,34 @@ jobs:
                   out, code = r.read().decode(), 0
           except urllib.error.HTTPError as e:
               out, code = f"HTTP {e.code}: {e.read().decode()[:2000]}", 1
+          open("out.txt", "w").write(out)
+          open("code.txt", "w").write(str(code))
+          PY
+
+      # Last resort: the project's own SQL endpoint with the service key (the
+      # one the site's jobs already use), where the project exposes it.
+      - name: Run (service key)
+        if: steps.creds.outputs.mode == 'service'
+        env:
+          FILE: ${{ inputs.file }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SK: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request, urllib.error
+          sql = open(os.environ["FILE"], encoding="utf-8").read()
+          sql = "\n".join(l for l in sql.splitlines() if not l.lstrip().startswith("\\"))
+          base, k = os.environ["SUPABASE_URL"].rstrip("/"), os.environ["SK"]
+          out, code = "", 1
+          for path in ("/pg/query", "/pg-meta/default/query"):
+              req = urllib.request.Request(base + path, data=json.dumps({"query": sql}).encode(), method="POST",
+                  headers={"apikey": k, "Authorization": f"Bearer {k}", "Content-Type": "application/json"})
+              try:
+                  with urllib.request.urlopen(req, timeout=120) as r:
+                      out, code = r.read().decode(), 0
+                  break
+              except urllib.error.HTTPError as e:
+                  out += f"{path}: HTTP {e.code}: {e.read().decode()[:300]}\n"
           open("out.txt", "w").write(out)
           open("code.txt", "w").write(str(code))
           PY
