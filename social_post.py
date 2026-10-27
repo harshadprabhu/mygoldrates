@@ -15,8 +15,8 @@ public URL, and GitHub is never behind the site's bot protection.
 Posting uses Meta's free Instagram API (Instagram Login): create a media
 container from the image URL, wait until Instagram has processed it, then
 publish it. The access token lives in the IG_ACCESS_TOKEN secret; tokens
-expire after 60 days, so each run refreshes it and keeps the fresh one in a
-private Supabase Storage folder (service key only). It is never printed.
+expire after 60 days, so each run refreshes it and keeps the fresh one in
+the private app_tokens table (service key only). It is never printed.
 """
 import json
 import os
@@ -333,49 +333,37 @@ def build():
 
 
 # ------------------------------------------------------------------ Instagram
-BUCKET, TOKEN_FILE = "app-tokens", "instagram.txt"   # private Supabase Storage; service key only
-
-
-def _store():
-    """The private token folder in Supabase Storage (created on first use), or None."""
+def _sb():
     if not (os.environ.get("SUPABASE_URL") and os.environ.get("SUPABASE_SERVICE_KEY")):
         return None
-    try:
-        from supabase import create_client
-        st = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"]).storage
-        try:
-            st.get_bucket(BUCKET)
-        except Exception:
-            st.create_bucket(BUCKET, options={"public": False})
-        return st.from_(BUCKET)
-    except Exception as e:
-        print(f"::warning title=instagram::token store unavailable ({type(e).__name__}) - the token will expire in 60 days")
-        return None
+    from supabase import create_client
+    return create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
 
 
 def _token():
-    """The freshest token: the saved one if any, refreshed and saved back.
+    """The freshest token: the one saved in the private app_tokens table if
+    any (else the IG_ACCESS_TOKEN secret), refreshed and saved back.
     Instagram tokens last 60 days; refreshing every run keeps them alive."""
     import requests
-    store, tok = _store(), os.environ.get("IG_ACCESS_TOKEN", "")
-    if store:
-        try:
-            saved = store.download(TOKEN_FILE).decode().strip()
-            tok = saved or tok
-        except Exception:
-            pass                                   # first run: start from the secret
+    tok, sb = os.environ.get("IG_ACCESS_TOKEN", ""), None
+    try:
+        sb = _sb()
+        rows = sb.table("app_tokens").select("value").eq("name", "instagram").execute().data if sb else []
+        if rows and rows[0]["value"]:
+            tok = rows[0]["value"]
+    except Exception as e:
+        print(f"::warning title=instagram::token table unavailable ({type(e).__name__}) - using the secret")
+        sb = None
     if not tok:
         return ""
     r = requests.get("https://graph.instagram.com/refresh_access_token",
                      params={"grant_type": "ig_refresh_token", "access_token": tok}, timeout=30)
     if r.ok and r.json().get("access_token"):
         tok = r.json()["access_token"]
-        if store:
-            try:
-                store.upload(TOKEN_FILE, tok.encode(), {"content-type": "text/plain", "upsert": "true"})
-                print("::notice title=instagram::token renewed and saved")
-            except Exception as e:
-                print(f"::warning title=instagram::token renewed but not saved ({type(e).__name__})")
+        if sb:
+            sb.table("app_tokens").upsert({"name": "instagram", "value": tok,
+                                           "updated_at": datetime.now(timezone.utc).isoformat()}).execute()
+            print("::notice title=instagram::token renewed and saved")
     else:
         print(f"::notice title=instagram::token refresh skipped ({r.status_code})")
     return tok
