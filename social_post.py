@@ -164,11 +164,17 @@ ART_PROMPT = ("Bright, luxurious jewellery product photograph, high-key, warm so
               "space for text. No text, no letters, no numbers, no logos, no people, no hands. Vertical 4:5.")
 
 
+def _say(msg):
+    """A line in the run's summary on GitHub (a notice), plain print elsewhere."""
+    print(("::notice title=gemini::" if os.environ.get("GITHUB_ACTIONS") else "") + msg)
+
+
 def ai_art(day=None):
     """Today's background photo from the Gemini API (GEMINI_API_KEY), or None."""
     import base64, io
     key = os.environ.get("GEMINI_API_KEY", "")
     if not key:
+        _say("no GEMINI_API_KEY - drawn card")
         return None
     import requests
     from PIL import Image
@@ -183,16 +189,16 @@ def ai_art(day=None):
                                     "generationConfig": {"responseModalities": ["IMAGE"], "imageConfig": {"aspectRatio": "4:5"}}},
                               timeout=120)
         except requests.RequestException as e:
-            print("gemini: no answer -", type(e).__name__); continue
+            _say(f"{m}: no answer - {type(e).__name__}"); continue
         if not r.ok:
-            print("gemini:", m, r.status_code, (r.json().get("error", {}).get("message", "") if r.headers.get("content-type", "").startswith("application/json") else "")[:160])
+            _say(f"{m}: HTTP {r.status_code} " + (r.json().get("error", {}).get("message", "") if r.headers.get("content-type", "").startswith("application/json") else "")[:200])
             continue
         for part in (r.json().get("candidates") or [{}])[0].get("content", {}).get("parts", []):
             data = (part.get("inlineData") or part.get("inline_data") or {}).get("data")
             if data:
-                print("gemini: artwork from", m)
+                _say(f"artwork from {m}")
                 return Image.open(io.BytesIO(base64.b64decode(data))).convert("RGB")
-        print("gemini:", m, "returned no image")
+        _say(f"{m}: returned no image")
     return None
 
 
