@@ -158,10 +158,14 @@ THEMES = [
     "gold coins spilling from a small ivory pouch beside a gold bangle on light marble",
     "a gold mangalsutra-style chain and a pair of gold bangles on cream linen with marigold petals",
 ]
-ART_PROMPT = ("Bright, luxurious jewellery product photograph, high-key, warm soft daylight, ivory and champagne "
-              "tones, shallow depth of field. {theme}, arranged only around the edges of the frame - mainly the "
-              "top-right corner and the bottom - leaving the centre and the left side as clean, softly lit, empty "
-              "space for text. No text, no letters, no numbers, no logos, no people, no hands. Vertical 4:5.")
+ART_PROMPT = ("Award-winning luxury jewellery advertising photograph, the kind used for a premium festive campaign. "
+              "{theme}. Polished 22 karat yellow gold with rich, warm reflections and crisp fine detail, catching "
+              "soft golden-hour window light; gentle sparkle highlights and dreamy warm bokeh in the background. "
+              "Bright, airy and high-key: ivory, cream, champagne and soft blush tones, never dark, no black. "
+              "Shot on a 100mm macro lens, shallow depth of field, photorealistic, editorial magazine quality. "
+              "Composition: the jewellery sits only along the edges of the frame - mainly the top-right corner and "
+              "the bottom - leaving the centre and the left side as clean, softly lit, empty space for text. "
+              "No text, no letters, no numbers, no logos, no watermark, no people, no hands. Vertical 4:5.")
 
 
 def _say(msg):
