@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "preview (build the card only) or post"
+        description: "preview (build the card only), check (is Instagram connected?) or post"
         default: "preview"
 
 permissions:
@@ -32,12 +32,22 @@ jobs:
           python-version: "3.12"
       - run: pip install pillow requests supabase
 
+      - name: Check the Instagram connection
+        if: inputs.mode == 'check'
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python social_post.py check
+
       - name: Build the card
+        if: inputs.mode != 'check'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # optional: the day's jewellery photo
         run: python social_post.py build
 
       - name: Publish the card to the repo
+        if: inputs.mode != 'check'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
