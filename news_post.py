@@ -140,7 +140,7 @@ def check(s, items, data=()):
     if not re.search(r"analyst|expert|brokerage|securities|trader|market|says|expects|according|watch|report|"
                      r"jewell?er|buyer|quoted|survey|council", view, re.I):
         return None, "view not attributed"
-    names = {p for p, _ in items}
+    names = {p for p, _ in items if p.isascii()}             # English publisher names on the card
     src = [p for p in src if p in names] or sorted(names)[:4]
     return {"headline": head[:70], "points": [p[:130] for p in pts], "view": view[:180], "sources": src[:5]}, ""
 
