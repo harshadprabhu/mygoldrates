@@ -62,5 +62,5 @@ jobs:
               git add docs/offers.json data/assistant_answers.json
               git commit -m "offers: refresh offers.json and approved answers"
             }
-            git push
+            for i in 1 2 3; do git push -q origin HEAD:main && break; sleep 5; git pull --rebase -q origin main; done
           fi

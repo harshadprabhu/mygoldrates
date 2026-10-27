@@ -29,7 +29,7 @@ KB = "docs/assistant.json"
 SITE = "docs"
 MAX_NEW = 15
 IST = timezone(timedelta(hours=5, minutes=30))
-MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite"]
+MODELS = [m for m in [os.environ.get("GEMINI_TEXT_MODEL"), "gemini-3.8-flash", "gemini-flash-latest", "gemini-3.5-flash-lite"] if m]
 
 ALLOWED_FIGURES = re.compile(r"\b(?:24|22|18|14)\s?(?:k|kt|karat|carat)\b|\b(?:999|916|750|585)\b|\b6-digit\b|\b3\s?%",
                              re.I)
