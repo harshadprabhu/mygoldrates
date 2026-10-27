@@ -1,16 +1,24 @@
 name: social-post
 
-# One Instagram post a day: today's gold rate card (social_post.py). The card
-# is committed to the repo first, because Instagram fetches the image from a
-# public URL (raw.githubusercontent.com), then posted with Meta's free API.
-# With GEMINI_API_KEY the background is a fresh AI jewellery photo (the
-# numbers are always drawn by the code). Without IG_ACCESS_TOKEN it only
-# builds the card.
+# Instagram, three posts a day, all from this one job:
+#   ~08:47 IST  news   - today's gold news (news_post.py news)
+#   ~11:17 IST  rates  - today's rate card (social_post.py)
+#   ~14:47 IST  pulse  - India's gold pulse: Indian buyers' mood + our figures (news_post.py pulse)
+# Each card is committed to the repo first (Instagram fetches the image from
+# a public URL), then posted with Meta's free API. The news and pulse posts
+# use the site's own headlines, summarised by Gemini's free text model and
+# checked; a post that fails its checks is skipped that day. Every card
+# carries the logo header.
 on:
   schedule:
-    - cron: "47 5 * * *"   # 05:47 UTC ~ 11:17 IST, after the morning rates have settled
+    - cron: "17 3 * * *"    # 03:17 UTC ~ 08:47 IST: news
+    - cron: "47 5 * * *"    # 05:47 UTC ~ 11:17 IST: rates
+    - cron: "17 9 * * *"    # 09:17 UTC ~ 14:47 IST: pulse
   workflow_dispatch:
     inputs:
+      post:
+        description: "which post: news, rates or pulse"
+        default: "rates"
       mode:
         description: "preview (build the card only), check (is Instagram connected?) or post"
         default: "preview"
@@ -24,13 +32,30 @@ concurrency:
 jobs:
   post:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install pillow requests supabase
+
+      - name: Which post
+        id: which
+        env:
+          SCHED: ${{ github.event.schedule }}
+          PICK: ${{ inputs.post }}
+        run: |
+          case "$SCHED" in
+            "17 3 * * *") k=news ;;
+            "47 5 * * *") k=rates ;;
+            "17 9 * * *") k=pulse ;;
+            *) k="${PICK:-rates}" ;;
+          esac
+          case "$k" in news|rates|pulse) ;; *) echo "::error::post must be news, rates or pulse"; exit 1 ;; esac
+          echo "kind=$k" >> "$GITHUB_OUTPUT"
+          [ "$k" = rates ] && f=rates || f=$k
+          echo "file=docs/social/$f-$(TZ=Asia/Kolkata date +%F).jpg" >> "$GITHUB_OUTPUT"
 
       - name: Check the Instagram connection
         if: inputs.mode == 'check'
@@ -43,9 +68,10 @@ jobs:
       - name: Build the card
         if: inputs.mode != 'check'
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # optional: the day's jewellery photo
-          USEAPI_TOKEN: ${{ secrets.USEAPI_TOKEN }}       # optional: Google Flow via useapi.net, tried first
-        run: python social_post.py build
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # news/pulse text; optional jewellery photo for rates
+          KIND: ${{ steps.which.outputs.kind }}
+        run: |
+          if [ "$KIND" = rates ]; then python social_post.py build; else python news_post.py build "$KIND"; fi
 
       - name: Publish the card to the repo
         if: inputs.mode != 'check'
@@ -53,7 +79,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/social
-          git commit -m "Instagram card $(TZ=Asia/Kolkata date +%F)" || exit 0
+          git commit -m "Instagram ${{ steps.which.outputs.kind }} card $(TZ=Asia/Kolkata date +%F)" || exit 0
           for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && break; sleep 5; done
 
       - name: Post to Instagram
@@ -63,11 +89,14 @@ jobs:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          KIND: ${{ steps.which.outputs.kind }}
+          FILE: ${{ steps.which.outputs.file }}
         run: |
-          D=$(TZ=Asia/Kolkata date +%F)
+          [ -f "$FILE" ] || { echo "no $KIND card today - nothing to post"; exit 0; }
           # the exact commit, so a cached copy of an earlier card under the same name is never posted
           git fetch -q origin main && SHA=$(git rev-parse origin/main)
-          python social_post.py publish "https://raw.githubusercontent.com/${{ github.repository }}/$SHA/docs/social/rates-$D.jpg"
+          URL="https://raw.githubusercontent.com/${{ github.repository }}/$SHA/$FILE"
+          if [ "$KIND" = rates ]; then python social_post.py publish "$URL"; else python news_post.py publish "$KIND" "$URL"; fi
           git add docs/social/posted.json 2>/dev/null || true
-          git commit -m "Instagram posted $D" || exit 0
+          git commit -m "Instagram $KIND posted $(TZ=Asia/Kolkata date +%F)" || exit 0
           for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && break; sleep 5; done
