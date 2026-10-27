@@ -69,6 +69,11 @@ VISITOR QUESTIONS
 """
 
 
+def say(msg):
+    """A notice in the run's summary on GitHub (counts only), plain print elsewhere."""
+    print(("::notice title=bot_teach::" if os.environ.get("GITHUB_ACTIONS") else "") + msg)
+
+
 def norm(t):
     return re.sub(r"[^a-z0-9 ]+", "", (t or "").lower()).strip()
 
@@ -123,15 +128,16 @@ def ask_gemini(prompt, key):
                                     "generationConfig": {"responseMimeType": "application/json", "temperature": 0.2}},
                               timeout=120)
         except requests.RequestException as e:
-            print(f"bot_teach: {m} no answer ({type(e).__name__})"); continue
+            say(f"{m} no answer ({type(e).__name__})"); continue
         if not r.ok:
-            print(f"bot_teach: {m} HTTP {r.status_code}"); continue
+            msg = r.json().get("error", {}).get("message", "") if "json" in r.headers.get("content-type", "") else ""
+            say(f"{m} HTTP {r.status_code} {msg[:160]}"); continue
         try:
             text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
             out = json.loads(text)
             return out if isinstance(out, list) else []
         except (KeyError, IndexError, ValueError):
-            print(f"bot_teach: {m} gave no usable JSON")
+            say(f"{m} gave no usable JSON")
     return None
 
 
@@ -148,7 +154,7 @@ def pending(rows):
 def main():
     key = os.environ.get("GEMINI_API_KEY", "")
     if not key:
-        print("bot_teach: no GEMINI_API_KEY - skipped"); return
+        say("no GEMINI_API_KEY - skipped"); return
     from supabase import create_client
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
     days = int(os.environ.get("TEACH_DAYS") or 2)
@@ -156,7 +162,7 @@ def main():
     rows = sb.table("bot_questions").select("q, q_norm, answered, helpful, page, created_at") \
              .gte("day", since).limit(5000).execute().data
     qs = pending(rows)[:60]
-    print(f"bot_teach: {len(qs)} questions to look at from the last {days} days")
+    say(f"{len(qs)} questions to look at from the last {days} days")
     if not qs:
         return
     known = sb.table("bot_answers").select("q, a").eq("active", True).execute().data
@@ -167,7 +173,7 @@ def main():
                        "\n".join(f"{i}. {q}" for i, q in enumerate(qs)))
     out = ask_gemini(prompt, key)
     if out is None:
-        print("bot_teach: Gemini unavailable - nothing learned today"); return
+        say("Gemini unavailable - nothing learned today"); return
     seen = {norm(k["q"]) for k in known}
     new, rejected = [], 0
     for item in out:
@@ -178,7 +184,7 @@ def main():
     new = new[:MAX_NEW]
     for c in new:
         sb.table("bot_answers").insert({"q": c["q"], "a": c["a"], "u": c["u"] or None}).execute()
-    print(f"bot_teach: {len(new)} new answers saved, {rejected} drafts failed the checks, "
+    say(f"{len(new)} new answers saved, {rejected} drafts failed the checks, "
           f"{len(qs) - len(out)} skipped by Gemini")
 
 
