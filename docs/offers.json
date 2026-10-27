@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-26T11:00+05:30",
+ "updated": "2026-10-27T11:17+05:30",
  "note": "Offers as published on each jeweller's own website on the date shown. Read automatically; confirm terms with the jeweller before buying.",
  "brands": [
   {
@@ -252,20 +252,16 @@
      "pct_max": 20.0,
      "upto": false,
      "selected": false,
-     "mentions": 2,
+     "mentions": 1,
      "min_purchase": null,
-     "dates": [
-      "31 Oct 2026"
-     ],
-     "applies_to": [
-      "diamond jewellery only"
-     ],
+     "dates": [],
+     "applies_to": [],
      "conditions": [],
-     "text": "FLAT 20% OFF On All Diamond Jewellery",
+     "text": "FLAT 20% Off On All Diamond",
      "url": "https://www.caratlane.com/",
-     "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/10/Desktop.jpg",
-     "banner": "FLAT 20% OFF On All Diamond Jewellery 31 Oct 2026: T&C Apply\n5% INSTANT DISCOUNT ON CREDIT CARDS 31 Oct 2026: T&C Apply\nsh SS\nBig\nPurple\nBigger\nDeals!",
-     "first_seen": "2026-10-25"
+     "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/12/Mobile.jpg",
+     "banner": "FLAT 20% Off On All Diamond\n5% INSTANT DISCOUNT\nON CREDIT CARDS\nDBS\nRBLBANK\nMin. Transac\nMax. Discount\nOO per card.\nValid till\nOct 2026. T&C Apply",
+     "first_seen": "2026-10-27"
     },
     {
      "kind": "cashback",
@@ -280,11 +276,11 @@
      ],
      "applies_to": [],
      "conditions": [],
-     "text": "5% INSTANT DISCOUNT ON CREDIT CARDS",
+     "text": "5% INSTANT DISCOUNT ON CREDIT CARDS DBS b RBLBANK Mir 2,000 per card",
      "url": "https://www.caratlane.com/",
-     "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/10/Desktop.jpg",
-     "banner": "FLAT 20% OFF On All Diamond Jewellery 31 Oct 2026: T&C Apply\n5% INSTANT DISCOUNT ON CREDIT CARDS 31 Oct 2026: T&C Apply\nsh SS\nBig\nPurple\nBigger\nDeals!",
-     "first_seen": "2026-10-25"
+     "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/12/Desktop.jpg",
+     "banner": "FLAT 20% On All Diamond Jewellery Valid till 31 Oct 2026. T&C Apply\n5% INSTANT DISCOUNT ON CREDIT CARDS DBS b RBLBANK Mir 2,000 per card. Max Valid till 31 Oct 2026. T&C Apply\nts<\nwot\nGes\nZEN\nSAS",
+     "first_seen": "2026-10-27"
     },
     {
      "kind": "scheme",
@@ -608,7 +604,7 @@
      "conditions": [],
      "text": "LOCK YOUR GOLD RATE",
      "url": "https://www.khimjijewellers.com/",
-     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639285638409084190",
+     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639286512928162715",
      "banner": "PRICE HIKED?\nGold\nGET YOUR GOLD JEWELLERY THE\nBOOKED\nrotectio\nPRICE DROPPED?\nGET THE LOWEST RATE FOR\nYOUR GOLD JEWELLRY DAAM BADLEGA.\nDIWALI KI KHUSHI NAHI.\nLOCK YOUR GOLD RATE\n1Q%\nJEWELLERS SINCE 1936",
      "first_seen": "2026-10-24"
     }
@@ -808,7 +804,7 @@
    ],
    "read_from": "https://www.nacjewellers.com/",
    "rendered": true,
-   "banners": 12
+   "banners": 11
   },
   {
    "slug": "orra",
@@ -871,7 +867,7 @@
    ],
    "read_from": "https://www.pcchandraindia.com/",
    "rendered": true,
-   "banners": 9
+   "banners": 10
   },
   {
    "slug": "png",
@@ -927,9 +923,61 @@
    "slug": "pngsons",
    "name": "PN Gadgil & Sons",
    "domain": "pngadgilandsons.com",
-   "status": "unreachable (ReadTimeout)",
-   "pages": [],
-   "offers": []
+   "status": "ok",
+   "pages": [
+    "https://pngadgilandsons.com/",
+    "https://pngadgilandsons.com/fixed-deposit-scheme/",
+    "https://pngadgilandsons.com/what-png-offer-to-customers/",
+    "https://pngadgilandsons.com/png-and-sons-exclusive-diamond-jewellery-offer-for-valentine-day-3/",
+    "https://pngadgilandsons.com/products/diamond-jewellery/diamond-collection/festival-diamond/"
+   ],
+   "offers": [
+    {
+     "kind": "making_off",
+     "pct_min": 100.0,
+     "pct_max": 100.0,
+     "upto": true,
+     "selected": false,
+     "mentions": 3,
+     "min_purchase": null,
+     "dates": [
+      "15 Nov 2026"
+     ],
+     "applies_to": [
+      "diamond jewellery only"
+     ],
+     "conditions": [],
+     "text": "Up to 100% ON MAKING CHARGES OF CERTIFIED NATURAL DIAMOND JEWELLERY",
+     "url": "https://pngadgilandsons.com/",
+     "image": "https://pngadgilandsons.com/wp-content/uploads/2026/10/PNGS_Corporate_Website_BannerD-w1920xh850Pix-1.png",
+     "banner": "Up to 50% ON MAKING CHARGES OF GOLD JEWELLERY Offer Valid Till 15 Nov 2026 *T&C Apply\nUp to 100% ON MAKING CHARGES OF CERTIFIED NATURAL DIAMOND JEWELLERY Offer Valid Till 15 Nov 2026 *T&C Apply\nFeatherlite”\nCOLLECTION",
+     "first_seen": "2026-10-27"
+    },
+    {
+     "kind": "making_off",
+     "pct_min": 50.0,
+     "pct_max": 50.0,
+     "upto": true,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [
+      "15 Nov 2026"
+     ],
+     "applies_to": [
+      "gold jewellery"
+     ],
+     "conditions": [],
+     "text": "Up to 50% ON MAKING CHARGES OF GOLD JEWELLERY",
+     "url": "https://pngadgilandsons.com/",
+     "image": "https://pngadgilandsons.com/wp-content/uploads/2026/10/PNGS_Corporate_Website_BannerD-w1920xh850Pix-1.png",
+     "banner": "Up to 50% ON MAKING CHARGES OF GOLD JEWELLERY Offer Valid Till 15 Nov 2026 *T&C Apply\nUp to 100% ON MAKING CHARGES OF CERTIFIED NATURAL DIAMOND JEWELLERY Offer Valid Till 15 Nov 2026 *T&C Apply\nFeatherlite”\nCOLLECTION",
+     "first_seen": "2026-10-27"
+    }
+   ],
+   "read_from": "https://pngadgilandsons.com/",
+   "rendered": true,
+   "banners": 8
   },
   {
    "slug": "prince",
