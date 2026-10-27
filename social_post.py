@@ -345,7 +345,7 @@ def _token():
             if rows:
                 tok = rows[0]["value"]
         except Exception as e:                     # table not created yet: use the secret
-            print("token store unavailable:", type(e).__name__)
+            print(f"::warning title=instagram::token store unavailable ({type(e).__name__}) - run the app_tokens SQL, or the token expires in 60 days")
             sb = None
     if not tok:
         return ""
@@ -356,6 +356,7 @@ def _token():
         if sb:
             sb.table("app_tokens").upsert({"name": "instagram", "value": tok,
                                            "updated_at": datetime.now(timezone.utc).isoformat()}).execute()
+            print("::notice title=instagram::token renewed and saved")
     else:
         print("token refresh skipped:", r.status_code)
     return tok
