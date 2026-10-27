@@ -448,7 +448,7 @@
   // (as if picked from the menu); Hindi or Marathi typed in English letters
   // is answered in that language unless the visitor picked one.
   var justPicked = false;
-  function understand(q, chip) {
+  function understand(q, chip, spoken) {
     justPicked = false;
     var req = !chip && LG && LG.asked(q);
     if (req && STR[req.c]) {
@@ -459,7 +459,10 @@
       q = req.rest;
       if (!q.trim()) return '';
     }
-    var d = LG && (LG.detect(q, PICK || HEARD) || (PICK ? null : LG.roman(q)));
+    var d = LG && (LG.detect(q, PICK || HEARD) || (PICK && !spoken ? null : LG.roman(q)));
+    // spoken, but written back in English letters: the language the mic was set to
+    // (only a language the visitor chose or used, not the Hindi default)
+    if (!d && spoken && micUsed && micUsed !== 'en' && (micUsed === PICK || micUsed === HEARD)) d = micUsed;
     if (d && STR[d]) {
       RL = d;
       if (!PICK && d !== HEARD) {                 // she now listens and labels in it too
@@ -472,8 +475,8 @@
     return q;
   }
   // The answer to a question as typed; a bare "in Marathi" gets a hello in it.
-  function reply(q, chip) {
-    var tx = understand(q, chip);
+  function reply(q, chip, spoken) {
+    var tx = understand(q, chip, spoken);
     if (!tx && justPicked) return { tx: tx, a: { intent: 'lang', html: '<p>' + t('greet1') + '</p><p>' + t('greet2') + '</p>',
       say: (t('greet1') + ' ' + t('greet2')).replace(/<[^>]+>/g, ''), chips: suggest() } };
     return { tx: tx, a: answer(tx) };
@@ -589,7 +592,8 @@
     '.sn-lm{display:none;position:absolute;left:12px;right:12px;top:72px;z-index:3;grid-template-columns:repeat(2,1fr);gap:6px;padding:10px;border-radius:16px;background:#1b160e;border:1px solid rgba(240,208,128,.25);box-shadow:0 18px 40px rgba(0,0,0,.55)}.sn-lm.on{display:grid}' +
     '.sn-lm button{border:1px solid rgba(240,208,128,.16);background:rgba(255,255,255,.04);color:#f3eadb;border-radius:10px;padding:10px 12px;text-align:left;font-size:14.5px;cursor:pointer}.sn-lm button.on{border-color:#e7bf5a;background:rgba(231,191,90,.15);color:#f6d77d}.sn-lm .sn-auto{grid-column:1/-1;font-weight:700}' +
     '.sn-lchips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}.sn-lchips button{border:1px solid rgba(240,208,128,.25);background:none;color:#f0d080;border-radius:999px;padding:4px 10px;font-size:12.5px;cursor:pointer}.sn-lchips button:hover{background:rgba(231,191,90,.12)}' +
-    '.sn-mic{width:46px;height:46px;flex:none;border-radius:50%;border:1px solid rgba(240,208,128,.4);background:rgba(231,191,90,.1);color:#f0d080;cursor:pointer;display:flex;align-items:center;justify-content:center}.sn-mic svg{width:21px;height:21px}' +
+    '.sn-mic{position:relative;width:46px;height:46px;flex:none;border-radius:50%;border:1px solid rgba(240,208,128,.4);background:rgba(231,191,90,.1);color:#f0d080;cursor:pointer;display:flex;align-items:center;justify-content:center}.sn-mic svg{width:21px;height:21px}' +
+    '.sn-ml{position:absolute;right:-5px;bottom:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#e7bf5a;color:#1a1405;font:700 10px/17px system-ui,sans-serif;text-align:center;pointer-events:none}' +
     '.sn-mic.on{background:#e5484d;border-color:#e5484d;color:#fff;animation:snMic 1.2s infinite}@keyframes snMic{0%{box-shadow:0 0 0 0 rgba(229,72,77,.6)}70%{box-shadow:0 0 0 12px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}' +
     '.sn-orow .sn-nm b{display:block;font-size:13.5px}.sn-orow small{display:block;color:#cfc4ad;font-size:12px;line-height:1.45;margin-top:2px}' +
     '.sn-fb .sn-say{margin-left:auto}.sn-fab .sn-fmic{width:26px;height:26px;margin:0 -6px 0 -2px;border-radius:50%;background:rgba(26,20,5,.12);display:flex;align-items:center;justify-content:center}.sn-fab .sn-fmic svg{width:15px;height:15px}' +
@@ -617,7 +621,7 @@
       (LG ? '<div class="sn-lm" id="sonaLm" role="menu"><button type="button" role="menuitem" data-lang="auto" class="sn-auto"></button>' + LG.LANGS.map(function (l) { return '<button type="button" role="menuitem" data-lang="' + l.c + '">' + l.n + '</button>'; }).join('') + '</div>' : '') +
       '<div class="sn-body" aria-live="polite"></div><div class="sn-chips"></div>' +
       '<form class="sn-in"><input id="sonaInput" type="text" autocomplete="off" maxlength="200" aria-label="Your question">' +
-      (SR ? '<button class="sn-mic" id="sonaMic" type="button">' + ICON.mic + '</button>' : '') +
+      (SR ? '<button class="sn-mic" id="sonaMic" type="button">' + ICON.mic + '<span class="sn-ml" id="sonaMl"></span></button>' : '') +
       '<button class="sn-send" id="sonaSend" aria-label="Send">➤</button></form>' +
       '<div class="sn-foot" id="sonaFoot"></div>';
     document.body.appendChild(panel);
@@ -665,7 +669,9 @@
     $('#sonaFoot', panel).textContent = t('ui_foot');
     if (!listening) input.placeholder = t('ui_ph');
     input.dir = rtl(LANG) ? 'rtl' : 'auto';
-    if (mic) { mic.setAttribute('aria-label', t('ui_mic')); mic.title = t('ui_mic'); }
+    // the language the mic listens in, on the mic (change it with the language menu)
+    if (mic) { mic.setAttribute('aria-label', t('ui_mic') + ' (' + langName(micLang()) + ')'); mic.title = t('ui_mic') + ' - ' + langName(micLang());
+      var ml = $('#sonaMl', panel); if (ml) ml.textContent = short(micLang()); }
     if (spk) { spk.innerHTML = ttsOn ? ICON.on : ICON.off; spk.classList.toggle('on', ttsOn); spk.setAttribute('aria-pressed', ttsOn ? 'true' : 'false'); spk.setAttribute('aria-label', t('ui_speak')); spk.title = ttsOn ? t('ui_mute') : t('ui_speak'); }
     if (LG) {
       var lp = $('#sonaLang', panel); lp.textContent = (PICK ? short(PICK) : 'Auto') + ' ▾';
@@ -751,11 +757,16 @@
     if (mic) mic.classList.toggle('on', on);
     RL = LANG; input.placeholder = on ? t('ui_listen') : t('ui_ph');
   }
-  function listen() {
+  // The language the mic last listened for: a spoken question that comes back
+  // in English letters (a phone without that language's recogniser, or a
+  // recogniser that writes Latin) is still answered in it.
+  var micUsed = '';
+  function listen(fallback) {
     if (!SR) return;
-    if (listening) { try { rec.stop(); } catch (_) {} var r0 = rec; setTimeout(function () { if (rec === r0 && listening) { try { r0.abort(); } catch (_) {} if (r0.onend) r0.onend(); } }, 1200); return; }
+    if (listening && !fallback) { try { rec.stop(); } catch (_) {} var r0 = rec; setTimeout(function () { if (rec === r0 && listening) { try { r0.abort(); } catch (_) {} if (r0.onend) r0.onend(); } }, 1200); return; }
     hush();
-    rec = new SR(); rec.lang = bcp(micLang()); rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
+    micUsed = micLang();
+    rec = new SR(); rec.lang = fallback || bcp(micUsed); rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
     var heard = '', done = false, quiet = null, cap = null, me = rec;
     // iPhone Safari does not stop by itself when the visitor stops talking
     // (Android does): stop after a short silence, or if nothing is said, or
@@ -781,6 +792,14 @@
     };
     rec.onerror = function (e) {
       RL = LANG;
+      // no recogniser for this language on the phone: listen with Hindi's
+      // (it knows Marathi and other Indian words best), reply in the chosen one
+      if (e.error === 'language-not-supported' && !fallback && micUsed !== 'hi') {
+        done = true; clearTimeout(quiet); clearTimeout(cap);
+        var want = micUsed;
+        setTimeout(function () { listen('hi-IN'); micUsed = want; }, 50);
+        return;
+      }
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed') note(t('mic_denied'));
       else if (e.error === 'no-speech') note(t('mic_none'));
     };
@@ -814,7 +833,7 @@
     talking(true);
     loadKB().then(function () {
       var a = null;
-      try { a = reply(q, !!label).a; } catch (e) { a = null; }
+      try { a = reply(q, !!label, spoken).a; } catch (e) { a = null; }
       var ok = !!a, rl = RL;
       if (!a) a = { intent: 'unknown', html: '<p>' + t('unknown') + '</p>', say: t('unknown'), chips: suggest() };
       var tr = a.en && rl !== 'en' ? translateTo(a.en, rl) : Promise.resolve(null);
@@ -880,7 +899,7 @@
       setLang: function (c) { PICK = c === 'auto' ? '' : c; HEARD = ''; LANG = uiLang(); RL = LANG; },
       micLang: function () { return micLang(); },
       nearest: function (la, lo) { return nearest(la, lo); },
-      ask: function (q, chip) { var r = reply(q, chip); return { text: r.tx, lang: RL, a: r.a }; }
+      ask: function (q, chip, spoken) { if (spoken) micUsed = micLang(); var r = reply(q, chip, spoken); return { text: r.tx, lang: RL, a: r.a }; }
     };
     return;
   }

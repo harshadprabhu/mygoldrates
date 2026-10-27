@@ -15,7 +15,7 @@ S.setKB(JSON.parse(fs.readFileSync(input.kb, 'utf8')));
 console.log(JSON.stringify(input.qs.map(function (x) {
   if ('lang' in x) S.setLang(x.lang);                // otherwise the conversation carries on
   if (x.near) return { q: 'near ' + x.near, city: (S.nearest(x.near[0], x.near[1]) || {}).n || null };
-  var r = S.ask(x.q, !!x.chip), a = r.a || {};
+  var r = S.ask(x.q, !!x.chip, !!x.spoken), a = r.a || {};
   return { q: x.q, text: r.text, lang: r.lang, mic: S.micLang(), intent: a.intent || null, html: a.html || '', say: a.say || '',
            chips: (a.chips || []).map(function (c) { return c.q; }) };
 })));
