@@ -283,13 +283,7 @@ def card(d, path, art=None):
     the background (our library or Gemini); without one the jewellery is drawn."""
     from PIL import Image, ImageDraw, ImageFilter, ImageFont
     W, H, S = 1080, 1350, 2
-
-    def f(w, s):
-        if w.startswith("Serif"):
-            ft = ImageFont.truetype(os.path.join(FONTS, SERIF), s)
-            ft.set_variation_by_name(w.split("-")[1])
-            return ft
-        return ImageFont.truetype(os.path.join(FONTS, f"Poppins-{w}.ttf"), s)
+    f = fonts()
 
     if art is not None:
         img = _cover(art, W, H).convert("RGBA")
@@ -337,17 +331,34 @@ def _mark(g, x, y, s, fill):
     g.polygon([(x + s, y - s * .04), (x + s * .72, y + s * .02), (x + s * .96, y + s * .26)], fill=fill)
 
 
-def _texts(img, d, f, W, H, path):
-    """Every word and number on the card - always drawn here, never by the AI."""
-    from PIL import ImageDraw
-    g = ImageDraw.Draw(img)
-    # header pill: mark, name, tagline
+def fonts():
+    """f("Bold", 30) for Poppins, f("Serif-Black", 110) for Playfair Display."""
+    from PIL import ImageFont
+
+    def f(w, s):
+        if w.startswith("Serif"):
+            ft = ImageFont.truetype(os.path.join(FONTS, SERIF), s)
+            ft.set_variation_by_name(w.split("-")[1])
+            return ft
+        return ImageFont.truetype(os.path.join(FONTS, f"Poppins-{w}.ttf"), s)
+    return f
+
+
+def header(g, f):
+    """The logo pill at the top of every post: mark, name, tagline."""
     g.rounded_rectangle((-40, 26, 600, 136), 55, fill=INK)
     _mark(g, 52, 50, 58, (227, 191, 99))
     x = 130
     for t, c in (("My", (245, 238, 220)), ("Gold", (227, 191, 99)), ("Rates", (245, 238, 220)), (".com", (190, 176, 140))):
         g.text((x, 40), t, font=f("Bold", 42), fill=c); x += g.textlength(t, font=f("Bold", 42))
     g.text((132, 94), "Compare.  Track.  Save.", font=f("Medium", 22), fill=(230, 220, 196))
+
+
+def _texts(img, d, f, W, H, path):
+    """Every word and number on the card - always drawn here, never by the AI."""
+    from PIL import ImageDraw
+    g = ImageDraw.Draw(img)
+    header(g, f)
     # title
     g.text((56, 150), "Today\u2019s", font=f("Serif-Bold", 84), fill=INK)
     g.text((52, 236), "Gold Rates", font=f("Serif-Black", 116), fill=(150, 98, 14))
