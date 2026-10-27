@@ -2,15 +2,15 @@
   "source": "MyGoldRates.com",
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
-  "date": "2026-10-26",
-  "last_updated": "2026-10-27T03:23:17.921503+05:30",
+  "date": "2026-10-27",
+  "last_updated": "2026-10-27T06:31:53.826060+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14279.5,
-    "22k": 13089.54,
-    "18k": 10709.62
+    "24k": 14282.5,
+    "22k": 13092.29,
+    "18k": 10711.88
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -118,13 +118,13 @@
       "rate_18k_per_gram_inr": 10706.25
     },
     {
-      "jeweller": "Khimji Jewellers",
+      "jeweller": "Joyalukkas",
       "rate_24k_per_gram_inr": 14275.0,
       "rate_22k_per_gram_inr": 13085.42,
       "rate_18k_per_gram_inr": 10706.25
     },
     {
-      "jeweller": "Joyalukkas",
+      "jeweller": "Khimji Jewellers",
       "rate_24k_per_gram_inr": 14275.0,
       "rate_22k_per_gram_inr": 13085.42,
       "rate_18k_per_gram_inr": 10706.25
@@ -154,12 +154,6 @@
       "rate_18k_per_gram_inr": 10710.0
     },
     {
-      "jeweller": "Prince Jewellery",
-      "rate_24k_per_gram_inr": 14285.0,
-      "rate_22k_per_gram_inr": 13094.58,
-      "rate_18k_per_gram_inr": 10713.75
-    },
-    {
       "jeweller": "Candere",
       "rate_24k_per_gram_inr": 14285.0,
       "rate_22k_per_gram_inr": 13094.58,
@@ -173,6 +167,12 @@
     },
     {
       "jeweller": "Vummidi Bangaru",
+      "rate_24k_per_gram_inr": 14285.0,
+      "rate_22k_per_gram_inr": 13094.58,
+      "rate_18k_per_gram_inr": 10713.75
+    },
+    {
+      "jeweller": "Prince Jewellery",
       "rate_24k_per_gram_inr": 14285.0,
       "rate_22k_per_gram_inr": 13094.58,
       "rate_18k_per_gram_inr": 10713.75
@@ -202,6 +202,18 @@
       "rate_18k_per_gram_inr": 10809.83
     },
     {
+      "jeweller": "BlueStone",
+      "rate_24k_per_gram_inr": 14424.79,
+      "rate_22k_per_gram_inr": 13222.72,
+      "rate_18k_per_gram_inr": 10818.59
+    },
+    {
+      "jeweller": "CaratLane",
+      "rate_24k_per_gram_inr": 14425.0,
+      "rate_22k_per_gram_inr": 13222.92,
+      "rate_18k_per_gram_inr": 10818.75
+    },
+    {
       "jeweller": "Waman Hari Pethe",
       "rate_24k_per_gram_inr": 14444.0,
       "rate_22k_per_gram_inr": 13240.33,
@@ -226,7 +238,7 @@
       "rate_18k_per_gram_inr": 10953.75
     }
   ],
-  "jeweller_count": 32,
+  "jeweller_count": 34,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
