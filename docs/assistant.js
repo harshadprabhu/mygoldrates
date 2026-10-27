@@ -1827,10 +1827,11 @@
     });
     return best;
   }
-  function aCheapest(k, c) {
+  // all: every national jeweller, cheapest to dearest ("compare jewellers").
+  function aCheapest(k, c, all) {
     if (c) return aCity(c, k);
     k = k || '22K';
-    var list = ranked(natBrands()).slice(0, 6), hi = ranked(natBrands()).slice(-1)[0];
+    var list = ranked(natBrands()).slice(0, all ? 99 : 6), hi = ranked(natBrands()).slice(-1)[0];
     var gap = (rate(hi, k) - rate(list[0], k)) * 10;
     return { intent: 'cheapest', html: '<p>' + t('cheap_h', { k: k }) + '</p>' + table(list, k) +
       '<p>' + t('cheap_gap', { p: inr(gap) }) + '</p>' + src(),
@@ -1968,7 +1969,11 @@
     if (has(tx, W.silver) && !has(tx, ['gold', 'sona'])) return { intent: 'silver', html: '<p>' + t('silver') + '</p>', say: t('silver'), chips: chips(['rate', 'cheap22']) };
     if (has(tx, ['alert', 'alerts', 'notify', 'subscribe', 'email me', 'whatsapp', 'set a price'])) return aAlerts();
     if (bs.length >= 2) return aCompare(bs, k);
-    if (has(tx, W.making) && has(tx, W.cheap) && !w) return aMaking(bs, ct);    // "lowest making charge": the ranking
+    var across = has(tx, ['compare', 'comparison', 'compared', 'difference', 'differ', 'gap', 'vs', 'versus', 'across', 'other', 'all']);
+    if (has(tx, W.making) && (has(tx, W.cheap) || across) && !w) return aMaking(bs, ct);    // "lowest making charge", "compare making charges": the ranking
+    // "compare jewellers", "rate difference between jewellers": all of them, cheapest first
+    if (across && /\b(jewell?ers|jewelers|shops|stores|brands|showrooms)\b/.test(tx) && !bs.length && !w &&
+        !has(tx, W.offer) && !has(tx, W.making) && !/\b(why|kyon|kyun|kyu)\b/.test(tx)) return aCheapest(k, c, true);
     var strong = aSearch(tx);                // a question the FAQ answers word for word
     if (strong && strong.score >= 1.0 && !w && !bs.length && !c) return strong;
     if (has(tx, W.offer) || /\bafter offers?\b/.test(tx)) return aOffers(bs);

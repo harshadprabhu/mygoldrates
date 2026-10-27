@@ -1,4 +1,46 @@
 {
  "note": "Answers the owner approved from real visitor questions to Sona, the site assistant. Exported daily from the private database by bot_learn.py; only approved questions and answers are kept here, never the raw questions.",
- "answers": []
+ "answers": [
+  {
+   "q": "[mr] tumhi harshad la olakhata ka?",
+   "a": "Yes. Harshad Prabhu is the creator of this website. He is the one struggling for finding gold rates so that common people get better ubderstanding of rates.",
+   "d": "2026-10-27"
+  },
+  {
+   "q": "What are the best gold offers today?",
+   "a": "You can check today's top jeweller offers and deals on our offers page.",
+   "u": "/gold-offers-today",
+   "d": "2026-10-27"
+  },
+  {
+   "q": "How do gold rates compare across different jewellers?",
+   "a": "We compare published rates from many jewellers every day so you can check and compare them side by side.",
+   "u": "/gold-rate-by-jeweller",
+   "d": "2026-10-27"
+  },
+  {
+   "q": "Which jeweller has the cheapest 22K gold rate today?",
+   "a": "You can check today's cheapest 22K gold rate across our listed jewellers on our market page.",
+   "u": "/gold-market-today",
+   "d": "2026-10-27"
+  },
+  {
+   "q": "How can I check prices after offers?",
+   "a": "You can view current jeweller offers and deals to see how they affect the final price on our offers page.",
+   "u": "/gold-offers-today",
+   "d": "2026-10-27"
+  },
+  {
+   "q": "Where can I compare making charges?",
+   "a": "You can compare making charges across different jewellers and designs on our making charges comparison page.",
+   "u": "/making-charges-comparison",
+   "d": "2026-10-27"
+  },
+  {
+   "q": "How do gold rates compare at other jewellers?",
+   "a": "You can browse daily rates from multiple jewellers side by side on our jeweller rates page.",
+   "u": "/gold-rate-by-jeweller",
+   "d": "2026-10-27"
+  }
+ ]
 }
