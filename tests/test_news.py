@@ -24,7 +24,7 @@ def test_a_summary_quotes_only_numbers_from_the_news_or_our_data_and_attributes_
 
 def test_both_story_cards_carry_the_logo_header_and_say_not_advice(tmp_path):
     from PIL import Image
-    for kind, figs in (("news", None), ("pulse", [("22K today", "₹13,135/g"), ("7-day move", "▼ ₹243/g"), ("Gap on 10 g", "₹2,365")])):
+    for kind, figs in (("news", None), ("pulse", [("22K today", "₹13,135/g"), ("22K, last 7 days", "down ₹243/g"), ("Gap on 10 g", "₹2,365")])):
         p = tmp_path / f"{kind}.jpg"
         n.card(kind, GOOD, "27 October 2026", str(p), figs)
         im = Image.open(p)

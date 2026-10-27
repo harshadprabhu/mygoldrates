@@ -259,7 +259,7 @@ def build(kind):
     if kind == "pulse":
         d, wk, data = ours()
         figures = [("22K today", sp.inr(d["med"]["22K"]) + "/g"),
-                   ("7-day move", ("▲ " if (wk or 0) >= 0 else "▼ ") + sp.inr(abs(wk or 0)) + "/g" if wk is not None else "—"),
+                   ("22K, last 7 days", ("up " if wk >= 0 else "down ") + sp.inr(abs(wk)) + "/g" if wk is not None else "—"),
                    ("Gap on 10 g", sp.inr(d["gap"]))]
     n = summarise(kind, items, key, data)
     if not n:
