@@ -6,6 +6,10 @@ name: offers
 # approved for Sona, the site assistant (bot_learn.py).
 on:
   workflow_dispatch:
+    inputs:
+      teach_days:
+        description: "How many days of Sona's unanswered questions to learn from"
+        default: "2"
   schedule:
     - cron: "41 0 * * *"   # 06:11 IST, before the morning rate runs
 
@@ -29,7 +33,15 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-      # Sona's learned answers: the owner-approved ones, into git.
+      # Sona learns: answers for what she could not answer (bot_teach.py,
+      # Gemini's free text model, checked), then every approved answer into git.
+      - run: python bot_teach.py
+        continue-on-error: true
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          TEACH_DAYS: ${{ inputs.teach_days }}
       - run: python bot_learn.py
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
