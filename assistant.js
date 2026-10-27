@@ -459,10 +459,10 @@
       q = req.rest;
       if (!q.trim()) return '';
     }
-    var d = LG && (LG.detect(q, PICK || HEARD) || (PICK && !spoken ? null : LG.roman(q)));
-    // spoken, but written back in English letters: the language the mic was set to
-    // (only a language the visitor chose or used, not the Hindi default)
-    if (!d && spoken && micUsed && micUsed !== 'en' && (micUsed === PICK || micUsed === HEARD)) d = micUsed;
+    // On Auto, each question's own words decide its language (Hindi and
+    // Marathi told apart word by word), so the visitor can switch freely and
+    // the mic follows; a language the visitor chose stays put.
+    var d = LG && (LG.detect(q, PICK || HEARD, !!PICK) || (PICK ? null : LG.roman(q)));
     if (d && STR[d]) {
       RL = d;
       if (!PICK && d !== HEARD) {                 // she now listens and labels in it too
@@ -757,9 +757,7 @@
     if (mic) mic.classList.toggle('on', on);
     RL = LANG; input.placeholder = on ? t('ui_listen') : t('ui_ph');
   }
-  // The language the mic last listened for: a spoken question that comes back
-  // in English letters (a phone without that language's recogniser, or a
-  // recogniser that writes Latin) is still answered in it.
+  // The language the mic is listening for (for the fallback below).
   var micUsed = '';
   function listen(fallback) {
     if (!SR) return;

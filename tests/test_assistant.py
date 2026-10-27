@@ -281,12 +281,13 @@ def test_the_mic_stops_by_itself_after_a_pause_on_iphones_too():
     assert "stop(fin ? 400 : 1500)" in src and "me.abort()" in src and "cap = setTimeout" in src
 
 
-def test_a_spoken_question_in_english_letters_is_answered_in_the_mics_language():
-    got = _sona([{"lang": "auto", "q": "सोन्याचा भाव काय आहे"},            # Marathi read: the mic now listens in it
-                 {"q": "tanishq rate", "spoken": True},                     # the phone wrote it back in English letters
-                 {"q": "tanishq rate"}])                                    # typed in English: English
-    assert got[0]["lang"] == "mr" and got[0]["mic"] == "mr"
-    assert got[1]["lang"] == "mr" and got[1]["intent"] == "rate_brand"
-    assert got[2]["lang"] == "en"
-    first = _sona([{"lang": "auto", "q": "tanishq rate", "spoken": True}])[0]
-    assert first["lang"] == "en"                                           # the Hindi default alone never forces Hindi
+def test_on_auto_each_question_decides_its_language_and_the_mic_follows():
+    got = _sona([{"lang": "auto", "q": "सोन्याचा भाव काय आहे"},            # Marathi
+                 {"q": "आज सोने का भाव क्या है", "spoken": True},           # then Hindi
+                 {"q": "पुण्यात सर्वात स्वस्त सोने कुठे आहे", "spoken": True},  # back to Marathi
+                 {"q": "what is the gold rate today", "spoken": True},    # English
+                 {"q": "sonyacha bhav kay aahe", "spoken": True}])        # Marathi in English letters
+    assert [r["lang"] for r in got] == ["mr", "hi", "mr", "en", "mr"]
+    assert [r["mic"] for r in got[:3]] == ["mr", "hi", "mr"]              # the mic listens in the last one
+    pinned = _sona([{"lang": "mr", "q": "आज सोने का भाव क्या है"}, {"q": "tanishq rate", "spoken": True}])
+    assert [r["lang"] for r in pinned] == ["mr", "mr"]                    # a chosen language stays put
