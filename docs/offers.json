@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-27T11:17+05:30",
+ "updated": "2026-10-27T13:26+05:30",
  "note": "Offers as published on each jeweller's own website on the date shown. Read automatically; confirm terms with the jeweller before buying.",
  "brands": [
   {
@@ -22,18 +22,35 @@
    "status": "ok",
    "pages": [
     "https://www.avrswarnamahal.com/",
-    "https://www.avrswarnamahal.com/silver-saving-scheme",
-    "https://www.avrswarnamahal.com/diamond-festival-offers-2026",
-    "https://www.avrswarnamahal.com/diwali-gold-scheme-offers-2026"
+    "https://www.avrswarnamahal.com/silver-saving-scheme"
    ],
    "offers": [
+    {
+     "kind": "combo",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "silver"
+     ],
+     "conditions": [],
+     "text": "Buy 1 gram Gold and Get 2 SILVER FREE NO WASTAGE 4 Buy 1 gram Gold and Get 2 SILVER FREE NO WASTAGE 3 os Buy 1 gram Gold and Get 2 SILVER FREE",
+     "url": "https://www.avrswarnamahal.com/",
+     "image": "https://www.avrswarnamahal.com/avr-images/images/double-diwali-offer-2026/diwali-offer-2026-desktop.webp",
+     "banner": "7 a Buy 1 gram Gold and Get 2 SILVER FREE NO WASTAGE\n4 Buy 1 gram Gold and Get 2 SILVER FREE NO WASTAGE\n3 os Buy 1 gram Gold and Get 2 SILVER FREE NO WASTAGE\n26% 0 grams Buy 1 gram Gold and Get 2 SILVER FREE NO WASTAGE\nTRADITION OF PURITY\nFOR A BRIGHTER TOMORROW\nrit\nale\nOUBL\n(zg\nOF FE\nCTOBER to 15 N",
+     "first_seen": "2026-10-27"
+    },
     {
      "kind": "rate_protect",
      "pct_min": null,
      "pct_max": null,
      "upto": false,
      "selected": false,
-     "mentions": 2,
+     "mentions": 1,
      "min_purchase": null,
      "dates": [],
      "applies_to": [
@@ -50,7 +67,7 @@
      "pct_max": null,
      "upto": false,
      "selected": false,
-     "mentions": 6,
+     "mentions": 4,
      "min_purchase": null,
      "dates": [],
      "applies_to": [],
@@ -62,7 +79,7 @@
    ],
    "read_from": "https://www.avrswarnamahal.com/",
    "rendered": true,
-   "banners": 8
+   "banners": 12
   },
   {
    "slug": "bhima",
@@ -604,7 +621,7 @@
      "conditions": [],
      "text": "LOCK YOUR GOLD RATE",
      "url": "https://www.khimjijewellers.com/",
-     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639286512928162715",
+     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639286590190951509",
      "banner": "PRICE HIKED?\nGold\nGET YOUR GOLD JEWELLERY THE\nBOOKED\nrotectio\nPRICE DROPPED?\nGET THE LOWEST RATE FOR\nYOUR GOLD JEWELLRY DAAM BADLEGA.\nDIWALI KI KHUSHI NAHI.\nLOCK YOUR GOLD RATE\n1Q%\nJEWELLERS SINCE 1936",
      "first_seen": "2026-10-24"
     }
