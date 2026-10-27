@@ -65,7 +65,9 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
           D=$(TZ=Asia/Kolkata date +%F)
-          python social_post.py publish "https://raw.githubusercontent.com/${{ github.repository }}/main/docs/social/rates-$D.jpg"
+          # the exact commit, so a cached copy of an earlier card under the same name is never posted
+          git fetch -q origin main && SHA=$(git rev-parse origin/main)
+          python social_post.py publish "https://raw.githubusercontent.com/${{ github.repository }}/$SHA/docs/social/rates-$D.jpg"
           git add docs/social/posted.json 2>/dev/null || true
           git commit -m "Instagram posted $D" || exit 0
           for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && break; sleep 5; done
