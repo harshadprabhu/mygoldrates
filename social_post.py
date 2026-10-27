@@ -3,6 +3,7 @@
 
     python social_post.py build              # card + caption -> docs/social/
     python social_post.py publish <image_url> # post them to Instagram
+    python social_post.py check              # is Instagram connected? (posts nothing)
 
 The card is drawn from docs/assistant.json (the file Sona answers from, so
 every number matches the site): the market middle for 24K/22K/18K, the five
@@ -384,6 +385,21 @@ def publish(image_url, text):
     return r.json()["id"]
 
 
+def check():
+    """Is Instagram connected? Prints the account's username, posts nothing."""
+    import requests
+    tok = _token()
+    if not tok:
+        print("::warning::No Instagram token yet (IG_ACCESS_TOKEN secret)."); return
+    r = requests.get(f"{GRAPH}/me", params={"fields": "username,account_type", "access_token": tok}, timeout=30)
+    if r.ok:
+        j = r.json()
+        print(f"::notice title=instagram::Connected to @{j.get('username')} ({j.get('account_type', '?')}) - ready to post.")
+    else:
+        msg = r.json().get("error", {}).get("message", "") if "json" in r.headers.get("content-type", "") else ""
+        print(f"::warning title=instagram::Token refused: {r.status_code} {msg[:160]}")
+
+
 def posted_today():
     try:
         log = json.load(open(LOG, encoding="utf-8"))
@@ -395,6 +411,8 @@ def posted_today():
 def main():
     if sys.argv[1:2] == ["build"]:
         build()
+    elif sys.argv[1:2] == ["check"]:
+        check()
     elif sys.argv[1:2] == ["publish"] and len(sys.argv) > 2:
         if posted_today():
             print("already posted today")
