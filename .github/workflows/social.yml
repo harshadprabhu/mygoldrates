@@ -3,7 +3,9 @@ name: social-post
 # One Instagram post a day: today's gold rate card (social_post.py). The card
 # is committed to the repo first, because Instagram fetches the image from a
 # public URL (raw.githubusercontent.com), then posted with Meta's free API.
-# Without the IG_ACCESS_TOKEN secret it only builds the card.
+# With GEMINI_API_KEY the background is a fresh AI jewellery photo (the
+# numbers are always drawn by the code). Without IG_ACCESS_TOKEN it only
+# builds the card.
 on:
   schedule:
     - cron: "47 5 * * *"   # 05:47 UTC ~ 11:17 IST, after the morning rates have settled
@@ -31,6 +33,8 @@ jobs:
       - run: pip install pillow requests supabase
 
       - name: Build the card
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # optional: the day's jewellery photo
         run: python social_post.py build
 
       - name: Publish the card to the repo

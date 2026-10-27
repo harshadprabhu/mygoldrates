@@ -145,11 +145,80 @@ def _sparkle(g, x, y, s):
               fill=(255, 255, 255, 235))
 
 
-def card(d, path):
-    """A bright 1080x1350 (4:5) JPEG: ivory and champagne, framed with gold jewellery and coins."""
+# ------------------------------------------------------------- AI artwork
+# Gemini paints the day's jewellery photo; the numbers are always drawn by
+# card() on top, never by the model (image models garble figures). Any
+# failure - no key, quota spent, a refusal - falls back to the drawn card.
+THEMES = [
+    "an elegant gold temple-style necklace with a small ruby pendant and a few gold coins on soft ivory silk",
+    "a neat stack of shiny gold coins and two gold bangles on cream marble",
+    "gold jhumka earrings and a delicate gold chain on champagne satin",
+    "a gold kada bracelet, two gold rings and scattered gold coins on warm beige velvet",
+    "a layered gold necklace and matching earrings on a pale gold silk drape with soft bokeh lights",
+    "gold coins spilling from a small ivory pouch beside a gold bangle on light marble",
+    "a gold mangalsutra-style chain and a pair of gold bangles on cream linen with marigold petals",
+]
+ART_PROMPT = ("Bright, luxurious jewellery product photograph, high-key, warm soft daylight, ivory and champagne "
+              "tones, shallow depth of field. {theme}, arranged only around the edges of the frame - mainly the "
+              "top-right corner and the bottom - leaving the centre and the left side as clean, softly lit, empty "
+              "space for text. No text, no letters, no numbers, no logos, no people, no hands. Vertical 4:5.")
+
+
+def ai_art(day=None):
+    """Today's background photo from the Gemini API (GEMINI_API_KEY), or None."""
+    import base64, io
+    key = os.environ.get("GEMINI_API_KEY", "")
+    if not key:
+        return None
+    import requests
+    from PIL import Image
+    day = day or datetime.now(IST)
+    prompt = ART_PROMPT.format(theme=THEMES[day.timetuple().tm_yday % len(THEMES)])
+    models = [m for m in [os.environ.get("GEMINI_IMAGE_MODEL"), "gemini-2.5-flash-image", "gemini-3.1-flash-image"] if m]
+    for m in models:
+        try:
+            r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent",
+                              headers={"x-goog-api-key": key},             # the key never goes in a URL or a log
+                              json={"contents": [{"parts": [{"text": prompt}]}],
+                                    "generationConfig": {"responseModalities": ["IMAGE"], "imageConfig": {"aspectRatio": "4:5"}}},
+                              timeout=120)
+        except requests.RequestException as e:
+            print("gemini: no answer -", type(e).__name__); continue
+        if not r.ok:
+            print("gemini:", m, r.status_code, (r.json().get("error", {}).get("message", "") if r.headers.get("content-type", "").startswith("application/json") else "")[:160])
+            continue
+        for part in (r.json().get("candidates") or [{}])[0].get("content", {}).get("parts", []):
+            data = (part.get("inlineData") or part.get("inline_data") or {}).get("data")
+            if data:
+                print("gemini: artwork from", m)
+                return Image.open(io.BytesIO(base64.b64decode(data))).convert("RGB")
+        print("gemini:", m, "returned no image")
+    return None
+
+
+def _cover(im, W, H):
+    """Scale and centre-crop an image to fill W x H."""
+    from PIL import Image
+    k = max(W / im.width, H / im.height)
+    im = im.resize((round(im.width * k), round(im.height * k)), Image.LANCZOS)
+    x, y = (im.width - W) // 2, (im.height - H) // 2
+    return im.crop((x, y, x + W, y + H))
+
+
+def card(d, path, art=None):
+    """A bright 1080x1350 (4:5) JPEG. art: Gemini's photo for the background;
+    without it the card is ivory and champagne, framed with drawn jewellery."""
     from PIL import Image, ImageDraw, ImageFilter, ImageFont
     W, H, S = 1080, 1350, 2
     f = lambda w, s: ImageFont.truetype(os.path.join(FONTS, f"Poppins-{w}.ttf"), s)
+    if art is not None:
+        img = _cover(art, W, H).convert("RGBA")
+        veil = Image.new("RGBA", (W, H), (255, 250, 240, 0))       # a soft ivory veil keeps the text readable
+        v = ImageDraw.Draw(veil)
+        v.rounded_rectangle((40, 40, 700, 450), 36, fill=(255, 250, 240, 175))
+        v.rounded_rectangle((40, 452, 1040, 1312), 36, fill=(255, 250, 240, 165))
+        img = Image.alpha_composite(img, veil.filter(ImageFilter.GaussianBlur(6)))
+        return _texts(img, d, f, W, H, path)
     # background: warm ivory to champagne, with a soft glow
     img = Image.new("RGB", (W, H))
     bg = ImageDraw.Draw(img)
@@ -179,6 +248,13 @@ def card(d, path):
     g = ImageDraw.Draw(img)
     for x, y, s in [(760, 120, 16), (1040, 470, 12), (640, 360, 10), (1010, 1060, 14), (250, 1290, 10)]:
         _sparkle(g, x, y, s)
+    return _texts(img, d, f, W, H, path)
+
+
+def _texts(img, d, f, W, H, path):
+    """Every word and number on the card - always drawn here, never by the AI."""
+    from PIL import Image, ImageDraw
+    g = ImageDraw.Draw(img)
     # header and title
     try:
         logo = Image.open("docs/icon-192.png").convert("RGBA").resize((84, 84))
@@ -222,7 +298,7 @@ def build():
     stamp = datetime.now(IST).strftime("%Y-%m-%d")
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, f"rates-{stamp}.jpg")
-    card(d, path)
+    card(d, path, ai_art())
     with open(os.path.join(OUT, f"rates-{stamp}.txt"), "w", encoding="utf-8") as fh:
         fh.write(caption(d))
     print(path)
