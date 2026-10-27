@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-27T13:26+05:30",
+ "updated": "2026-10-27T13:51+05:30",
  "note": "Offers as published on each jeweller's own website on the date shown. Read automatically; confirm terms with the jeweller before buying.",
  "brands": [
   {
@@ -126,27 +126,12 @@
      "pct_max": 100.0,
      "upto": true,
      "selected": true,
-     "mentions": 7,
+     "mentions": 4,
      "min_purchase": null,
      "dates": [],
      "applies_to": [],
      "conditions": [],
      "text": "Up To 100% Off On Making Charges",
-     "url": "https://www.bluestone.com/",
-     "first_seen": "2026-10-24"
-    },
-    {
-     "kind": "making_zero",
-     "pct_min": 100.0,
-     "pct_max": 100.0,
-     "upto": false,
-     "selected": false,
-     "mentions": 1,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [],
-     "conditions": [],
-     "text": "Offers, 0% Making Charge",
      "url": "https://www.bluestone.com/",
      "first_seen": "2026-10-24"
     }
@@ -621,7 +606,7 @@
      "conditions": [],
      "text": "LOCK YOUR GOLD RATE",
      "url": "https://www.khimjijewellers.com/",
-     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639286590190951509",
+     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639286605139486428",
      "banner": "PRICE HIKED?\nGold\nGET YOUR GOLD JEWELLERY THE\nBOOKED\nrotectio\nPRICE DROPPED?\nGET THE LOWEST RATE FOR\nYOUR GOLD JEWELLRY DAAM BADLEGA.\nDIWALI KI KHUSHI NAHI.\nLOCK YOUR GOLD RATE\n1Q%\nJEWELLERS SINCE 1936",
      "first_seen": "2026-10-24"
     }
@@ -759,7 +744,7 @@
    ],
    "read_from": "https://www.malabargoldanddiamonds.com/in/pan-india/en/jewellery.html",
    "rendered": true,
-   "banners": 8
+   "banners": 7
   },
   {
    "slug": "mehta",
