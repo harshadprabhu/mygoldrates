@@ -218,3 +218,18 @@ def test_the_launch_email_has_no_invite_link():
     body, text = P.letter("Asha", qa, "https://u")
     for out in (body, text, P.html("Asha", qa, "https://u", "25 October 2026")):
         assert "invite" not in out.lower() and "?ref=" not in out
+
+
+def test_compare_jewellers_lists_every_one_and_making_comparisons_give_the_ranking():
+    # questions Sona once missed (learned from visitors' thumbs-down and unanswered ones)
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    n = sum(1 for b in kb["brands"] if b.get("nat"))
+    qs = ["compare jewellers", "rate difference between jewellers",
+          "How do gold rates compare across different jewellers?", "compare making charges",
+          "making charges comparison", "why do jewellers rates differ", "difference between 22k and 24k"]
+    got = _sona([{"lang": "en", "q": q} for q in qs])
+    for r in got[:3]:
+        assert r["intent"] == "cheapest", (r["q"], r["intent"])
+        assert r["html"].count('class="sn-row"') >= n or r["html"].count("<tr") >= n, r["q"]   # all of them
+    assert [r["intent"] for r in got[3:5]] == ["making", "making"]
+    assert got[5]["intent"] == "faq" and got[6]["intent"] == "faq"         # "why" and karat questions explain
