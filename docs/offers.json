@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-27T13:51+05:30",
+ "updated": "2026-10-27T14:05+05:30",
  "note": "Offers as published on each jeweller's own website on the date shown. Read automatically; confirm terms with the jeweller before buying.",
  "brands": [
   {
@@ -606,7 +606,7 @@
      "conditions": [],
      "text": "LOCK YOUR GOLD RATE",
      "url": "https://www.khimjijewellers.com/",
-     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639286605139486428",
+     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639286613374486467",
      "banner": "PRICE HIKED?\nGold\nGET YOUR GOLD JEWELLERY THE\nBOOKED\nrotectio\nPRICE DROPPED?\nGET THE LOWEST RATE FOR\nYOUR GOLD JEWELLRY DAAM BADLEGA.\nDIWALI KI KHUSHI NAHI.\nLOCK YOUR GOLD RATE\n1Q%\nJEWELLERS SINCE 1936",
      "first_seen": "2026-10-24"
     }
@@ -744,7 +744,7 @@
    ],
    "read_from": "https://www.malabargoldanddiamonds.com/in/pan-india/en/jewellery.html",
    "rendered": true,
-   "banners": 7
+   "banners": 8
   },
   {
    "slug": "mehta",
@@ -763,50 +763,9 @@
    "slug": "nac",
    "name": "NAC Jewellers",
    "domain": "www.nacjewellers.com",
-   "status": "ok",
-   "pages": [
-    "https://www.nacjewellers.com/"
-   ],
-   "offers": [
-    {
-     "kind": "making_off",
-     "pct_min": 50.0,
-     "pct_max": 50.0,
-     "upto": false,
-     "selected": false,
-     "mentions": 1,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [
-      "diamond jewellery only",
-      "silver"
-     ],
-     "conditions": [],
-     "text": "Vijayawada Diwali Offer : Enjoy a flat 50% off on Value Addition (VA)!* , Diamond Jewellery Offer - Enjoy zero making charges and get 30g of silver free on the purchase of 1 carat of diamonds!",
-     "url": "https://www.nacjewellers.com/",
-     "first_seen": "2026-10-24"
-    },
-    {
-     "kind": "making_zero",
-     "pct_min": 100.0,
-     "pct_max": 100.0,
-     "upto": false,
-     "selected": false,
-     "mentions": 1,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [
-      "silver"
-     ],
-     "conditions": [],
-     "text": "zero making charges and get 30g of silver free on the purchase of 1 carat of diamonds!",
-     "url": "https://www.nacjewellers.com/",
-     "first_seen": "2026-10-24"
-    }
-   ],
-   "read_from": "https://www.nacjewellers.com/",
-   "rendered": true,
-   "banners": 11
+   "status": "unreachable (ConnectionError)",
+   "pages": [],
+   "offers": []
   },
   {
    "slug": "orra",
@@ -869,7 +828,7 @@
    ],
    "read_from": "https://www.pcchandraindia.com/",
    "rendered": true,
-   "banners": 10
+   "banners": 11
   },
   {
    "slug": "png",
