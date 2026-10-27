@@ -210,6 +210,44 @@ def ai_art(day=None):
     return None
 
 
+def flow_art(day=None):
+    """Today's background from Google Flow via useapi.net (USEAPI_TOKEN), or None.
+    Flow's Nano Banana model; the photo carries no text - card() draws it all."""
+    import base64, io
+    key = os.environ.get("USEAPI_TOKEN", "")
+    if not key:
+        return None
+    import requests
+    from PIL import Image
+    day = day or datetime.now(IST)
+    prompt = ART_PROMPT.format(theme=THEMES[day.timetuple().tm_yday % len(THEMES)])
+    for model in [os.environ.get("FLOW_IMAGE_MODEL") or "nano-banana-2", "nano-banana-2-lite"]:
+        try:
+            r = requests.post("https://api.useapi.net/v1/google-flow/images",
+                              headers={"Authorization": f"Bearer {key}"},   # never in a URL or a log
+                              json={"prompt": prompt, "model": model, "aspectRatio": "3:4", "count": 1}, timeout=300)
+        except requests.RequestException as e:
+            _say(f"flow {model}: no answer - {type(e).__name__}"); continue
+        if not r.ok:
+            msg = r.json().get("error", "") if "json" in r.headers.get("content-type", "") else ""
+            _say(f"flow {model}: HTTP {r.status_code} {str(msg)[:160]}"); continue
+        for m in r.json().get("media") or []:
+            gi = (m.get("image") or {}).get("generatedImage") or {}
+            try:
+                if gi.get("fifeUrl"):
+                    raw = requests.get(gi["fifeUrl"], timeout=120).content
+                elif gi.get("encodedImage"):
+                    raw = base64.b64decode(gi["encodedImage"])
+                else:
+                    continue
+                _say(f"artwork from Google Flow ({model})")
+                return Image.open(io.BytesIO(raw)).convert("RGB")
+            except Exception as e:
+                _say(f"flow {model}: image unreadable - {type(e).__name__}")
+        _say(f"flow {model}: returned no image")
+    return None
+
+
 def library_art(day=None):
     """Today's photo from ART_DIR (taken in turn by day of the year), or None."""
     from PIL import Image
@@ -365,7 +403,7 @@ def build():
     stamp = datetime.now(IST).strftime("%Y-%m-%d")
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, f"rates-{stamp}.jpg")
-    card(d, path, library_art() or ai_art())
+    card(d, path, library_art() or flow_art() or ai_art())
     with open(os.path.join(OUT, f"rates-{stamp}.txt"), "w", encoding="utf-8") as fh:
         fh.write(caption(d))
     print(path)
