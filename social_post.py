@@ -53,6 +53,8 @@ def today(kb):
         "date": kb["date"], "n": len(kb["brands"]), "med": kb["med"],
         "top": [(b["n"], r22(b)) for b in nat[:5]],
         "gap": (r22(nat[-1]) - r22(nat[0])) * 10,
+        # the card's table: cheapest first; making = median on rings, if measured
+        "rows": [(b["n"], b["r24"] * 18 / 24, r22(b), (b.get("mk") or {}).get("Ring")) for b in nat],
     }
 
 
@@ -232,90 +234,128 @@ def _cover(im, W, H):
     return im.crop((x, y, x + W, y + H))
 
 
+SERIF = "PlayfairDisplay.ttf"                     # OFL, variable weight
+INK, CREAM_ROW, GOLD_ROW = (24, 16, 6), (255, 251, 242), (252, 238, 200)
+
+
 def card(d, path, art=None):
-    """A bright 1080x1350 (4:5) JPEG. art: Gemini's photo for the background;
-    without it the card is ivory and champagne, framed with drawn jewellery."""
+    """A bright 1080x1350 (4:5) JPEG in the style of a jewellery ad: big
+    "Today's Gold Rates" title, every national jeweller's 18K and 22K rate
+    in a table (cheapest first), gold jewellery around it. art: a photo for
+    the background (our library or Gemini); without one the jewellery is drawn."""
     from PIL import Image, ImageDraw, ImageFilter, ImageFont
     W, H, S = 1080, 1350, 2
-    f = lambda w, s: ImageFont.truetype(os.path.join(FONTS, f"Poppins-{w}.ttf"), s)
+
+    def f(w, s):
+        if w.startswith("Serif"):
+            ft = ImageFont.truetype(os.path.join(FONTS, SERIF), s)
+            ft.set_variation_by_name(w.split("-")[1])
+            return ft
+        return ImageFont.truetype(os.path.join(FONTS, f"Poppins-{w}.ttf"), s)
+
     if art is not None:
         img = _cover(art, W, H).convert("RGBA")
-        veil = Image.new("RGBA", (W, H), (255, 250, 240, 0))       # a soft ivory veil keeps the text readable
+        veil = Image.new("RGBA", (W, H), (255, 250, 240, 0))       # an ivory veil keeps the text readable
         v = ImageDraw.Draw(veil)
-        v.rounded_rectangle((40, 40, 700, 450), 36, fill=(255, 250, 240, 175))
-        v.rounded_rectangle((40, 452, 1040, 1312), 36, fill=(255, 250, 240, 165))
-        img = Image.alpha_composite(img, veil.filter(ImageFilter.GaussianBlur(6)))
-        return _texts(img, d, f, W, H, path)
-    # background: warm ivory to champagne, with a soft glow
-    img = Image.new("RGB", (W, H))
-    bg = ImageDraw.Draw(img)
-    for y in range(H):
-        k = y / H
-        bg.line([(0, y), (W, y)], fill=(round(255 - 6 * k), round(250 - 22 * k), round(238 - 48 * k)))
-    glow = Image.new("RGBA", (W, H), (255, 222, 140, 0))       # warm even where clear, so the blur adds no grey
-    ImageDraw.Draw(glow).ellipse((420, -260, 1360, 520), fill=(255, 222, 140, 120))
-    img = Image.alpha_composite(img.convert("RGBA"), glow.filter(ImageFilter.GaussianBlur(120)))
-    # jewellery, drawn at 2x for smooth edges
-    orn = Image.new("RGBA", (W * S, H * S), (0, 0, 0, 0))
-    o = ImageDraw.Draw(orn)
-    fs = lambda w, s: f(w, s * S)
-    _necklace(o, 560 * S, 1130 * S, -30 * S, 220 * S)
-    for i, (x, y) in enumerate([(905, 392), (905, 368), (905, 344), (905, 320)]):
-        _flat_coin(o, x * S, y * S, 92 * S)
-    _coin(o, fs, 1000 * S, 300 * S, 62 * S)
-    _bangle(o, 960 * S, 1265 * S, 150 * S, 112 * S, 30 * S)
-    _bangle(o, 1045 * S, 1170 * S, 120 * S, 90 * S, 26 * S)
-    for x, y, r in [(70, 1330, 54), (175, 1342, 40), (36, 1240, 34)]:
-        _coin(o, fs, x * S, y * S, r * S)
-    orn = orn.resize((W, H), Image.LANCZOS)
-    sh = Image.new("RGBA", (W, H), (120, 72, 10, 0))
-    sh.paste((120, 72, 10, 90), (6, 10), orn)
-    img = Image.alpha_composite(img, sh.filter(ImageFilter.GaussianBlur(8)))
-    img = Image.alpha_composite(img, orn)
-    g = ImageDraw.Draw(img)
-    for x, y, s in [(760, 120, 16), (1040, 470, 12), (640, 360, 10), (1010, 1060, 14), (250, 1290, 10)]:
-        _sparkle(g, x, y, s)
+        v.rounded_rectangle((20, 140, 700, 400), 40, fill=(255, 250, 240, 190))
+        v.rounded_rectangle((36, 404, 1044, 1180), 30, fill=(255, 250, 240, 210))
+        img = Image.alpha_composite(img, veil.filter(ImageFilter.GaussianBlur(8)))
+    else:
+        img = Image.new("RGB", (W, H))
+        bg = ImageDraw.Draw(img)
+        for y in range(H):
+            k = y / H
+            bg.line([(0, y), (W, y)], fill=(round(255 - 4 * k), round(248 - 18 * k), round(232 - 40 * k)))
+        glow = Image.new("RGBA", (W, H), (255, 214, 130, 0))
+        gl = ImageDraw.Draw(glow)
+        gl.ellipse((560, -300, 1400, 520), fill=(255, 214, 130, 150))
+        gl.ellipse((-300, 1050, 500, 1700), fill=(255, 226, 160, 90))
+        img = Image.alpha_composite(img.convert("RGBA"), glow.filter(ImageFilter.GaussianBlur(110)))
+        orn = Image.new("RGBA", (W * S, H * S), (0, 0, 0, 0))
+        o = ImageDraw.Draw(orn)
+        fs = lambda w, s: f(w, s * S)
+        _bangle(o, 870 * S, 150 * S, 150 * S, 112 * S, 30 * S)              # two bangles, top right
+        _bangle(o, 985 * S, 235 * S, 135 * S, 100 * S, 28 * S)
+        for x, y in [(1000, 1300), (1000, 1276), (1000, 1252)]:          # coins, bottom right
+            _flat_coin(o, x * S, y * S, 70 * S)
+        _coin(o, fs, 905 * S, 1250 * S, 52 * S)
+        _coin(o, fs, 40 * S, 1325 * S, 46 * S)
+        orn = orn.resize((W, H), Image.LANCZOS)
+        sh = Image.new("RGBA", (W, H), (120, 72, 10, 0))
+        sh.paste((120, 72, 10, 90), (6, 10), orn)
+        img = Image.alpha_composite(img, sh.filter(ImageFilter.GaussianBlur(8)))
+        img = Image.alpha_composite(img, orn)
+        g = ImageDraw.Draw(img)
+        for x, y, s in [(740, 70, 14), (1050, 380, 12), (700, 330, 9), (860, 1180, 12)]:
+            _sparkle(g, x, y, s)
     return _texts(img, d, f, W, H, path)
+
+
+def _mark(g, x, y, s, fill):
+    """The site's mark - two bars and a rising arrow - in an s x s box."""
+    g.rounded_rectangle((x, y + s * .52, x + s * .3, y + s), int(s * .06), fill=fill)
+    g.rounded_rectangle((x + s * .4, y + s * .28, x + s * .7, y + s), int(s * .06), fill=fill)
+    g.line([(x + s * .05, y + s * .55), (x + s * .55, y + s * .22), (x + s * .92, y + s * .02)], fill=fill, width=max(3, int(s * .1)))
+    g.polygon([(x + s, y - s * .04), (x + s * .72, y + s * .02), (x + s * .96, y + s * .26)], fill=fill)
 
 
 def _texts(img, d, f, W, H, path):
     """Every word and number on the card - always drawn here, never by the AI."""
-    from PIL import Image, ImageDraw
+    from PIL import ImageDraw
     g = ImageDraw.Draw(img)
-    # header and title
-    try:
-        logo = Image.open("docs/icon-192.png").convert("RGBA").resize((84, 84))
-        img.paste(logo, (72, 64), logo)
-    except OSError:
-        pass
-    g.text((176, 70), "MyGoldRates", font=f("Bold", 40), fill=GOLD_DK)
-    g.text((176, 118), "mygoldrates.com", font=f("Medium", 26), fill=SOFT)
-    g.text((70, 196), "Gold Rate", font=f("ExtraBold", 84), fill=BROWN)
-    g.text((70, 288), "Today", font=f("ExtraBold", 84), fill=GOLD_DK)
-    g.text((74, 392), d["date"], font=f("SemiBold", 34), fill=BROWN)
-    # three tiles: the market middle
-    for i, k in enumerate(("24K", "22K", "18K")):
-        x, hi = 72 + i * 318, k == "22K"
-        g.rounded_rectangle((x + 4, 474, x + 298, 644), 28, fill=(214, 170, 90))
-        g.rounded_rectangle((x, 466, x + 294, 636), 28, fill=(255, 236, 178) if hi else (255, 253, 247), outline=(206, 150, 44), width=3)
-        g.text((x + 28, 482), k, font=f("Bold", 30), fill=GOLD_DK)
-        g.text((x + 28, 526), inr(d["med"][k]), font=f("ExtraBold", 50), fill=BROWN)
-        g.text((x + 28, 592), "per gram", font=f("Medium", 22), fill=SOFT)
-    g.text((72, 654), f"Middle of {d['n']} jewellers' published rates, before GST", font=f("Medium", 24), fill=SOFT)
-    # cheapest 22K
-    g.text((72, 712), "Cheapest 22K today", font=f("Bold", 40), fill=BROWN)
-    y = 776
-    for r, (n, p) in enumerate(d["top"], 1):
-        hi = r == 1
-        g.rounded_rectangle((72, y, 900, y + 64), 22, fill=(255, 236, 178) if hi else (255, 252, 244), outline=(226, 186, 104), width=2)
-        g.ellipse((92, y + 12, 132, y + 52), fill=(206, 150, 44) if hi else (245, 226, 180))
-        g.text((112, y + 32), str(r), font=f("Bold", 24), fill=(255, 255, 255) if hi else BROWN, anchor="mm")
-        g.text((150, y + 32), n, font=f("SemiBold", 29), fill=BROWN, anchor="lm")
-        g.text((878, y + 32), inr(p) + "/g", font=f("Bold", 31), fill=GOLD_DK if hi else BROWN, anchor="rm")
-        y += 74
-    g.text((72, y + 8), f"Same 10 g of 22K: up to {inr(d['gap'])} apart!", font=f("Bold", 31), fill=(176, 36, 36))
-    g.rounded_rectangle((250, H - 138, 820, H - 62), 38, fill=(200, 140, 30))
-    g.text((535, H - 100), "Your city's cheapest → mygoldrates.com".replace("→", "·"), font=f("Bold", 26), fill=(255, 255, 255), anchor="mm")
+    # header pill: mark, name, tagline
+    g.rounded_rectangle((-40, 26, 600, 136), 55, fill=INK)
+    _mark(g, 52, 50, 58, (227, 191, 99))
+    x = 130
+    for t, c in (("My", (245, 238, 220)), ("Gold", (227, 191, 99)), ("Rates", (245, 238, 220)), (".com", (190, 176, 140))):
+        g.text((x, 40), t, font=f("Bold", 42), fill=c); x += g.textlength(t, font=f("Bold", 42))
+    g.text((132, 94), "Compare.  Track.  Save.", font=f("Medium", 22), fill=(230, 220, 196))
+    # title
+    g.text((56, 150), "Today\u2019s", font=f("Serif-Bold", 84), fill=INK)
+    g.text((52, 236), "Gold Rates", font=f("Serif-Black", 116), fill=(150, 98, 14))
+    g.text((60, 372), f"{d['date']}  \u00b7  per gram, before GST", font=f("Medium", 28), fill=SOFT)
+    # seal, right of the title
+    cx, cy, r = 935, 420, 92
+    for i in range(24):
+        a = __import__("math").radians(i * 15)
+        g.ellipse((cx + (r + 4) * __import__("math").cos(a) - 14, cy + (r + 4) * __import__("math").sin(a) - 14,
+                   cx + (r + 4) * __import__("math").cos(a) + 14, cy + (r + 4) * __import__("math").sin(a) + 14), fill=(206, 150, 44))
+    _ball(g, cx, cy, r, glint=False)
+    g.ellipse((cx - r + 10, cy - r + 10, cx + r - 10, cy + r - 10), outline=(150, 98, 14), width=2)
+    for i, t in enumerate(("SAME", "GOLD.", "BETTER", "CHOICES.")):
+        g.text((cx, cy - 48 + i * 32), t, font=f("Bold", 25), fill=INK, anchor="mm")
+    # table
+    rows = d["rows"][:12]
+    x0, x1, y = 44, 1036, 520
+    cols = [(x0 + 28, "Jeweller", "lm"), (560, "18K  \u20b9/g", "mm"), (750, "22K  \u20b9/g", "mm"), (936, "Making*", "mm")]
+    g.rounded_rectangle((x0, y, x1, y + 62), 22, fill=INK)
+    g.rectangle((x0, y + 30, x1, y + 62), fill=INK)
+    for cx_, t, an in cols:
+        g.text((cx_, y + 31), t, font=f("SemiBold", 26), fill=(240, 220, 170), anchor=an)
+    y += 62
+    rh = 45
+    for i, (n, r18, r22, mk) in enumerate(rows):
+        hi = i == 0
+        g.rectangle((x0, y, x1, y + rh), fill=GOLD_ROW if hi else (CREAM_ROW if i % 2 == 0 else (248, 241, 226)))
+        g.text((x0 + 28, y + rh / 2), f"{i + 1}.  {n}", font=f("Bold" if hi else "SemiBold", 27), fill=INK, anchor="lm")
+        if hi:
+            g.text((x0 + 36 + g.textlength(f"{i + 1}.  {n}", font=f("Bold", 27)), y + rh / 2), "  CHEAPEST", font=f("Bold", 17), fill=(176, 36, 36), anchor="lm")
+        g.text((560, y + rh / 2), inr(r18), font=f("SemiBold", 27), fill=INK, anchor="mm")
+        g.text((750, y + rh / 2), inr(r22), font=f("Bold", 28), fill=(150, 98, 14) if hi else INK, anchor="mm")
+        g.text((936, y + rh / 2), f"{mk:g}%" if mk else "\u2014", font=f("SemiBold", 26), fill=INK if mk else SOFT, anchor="mm")
+        y += rh
+    g.line([(x0, y), (x1, y)], fill=(214, 180, 110), width=2)
+    g.text((x0 + 6, y + 14), "*Making charges: median on rings, from real products.  \u2014 = not measured yet.", font=f("Medium", 19), fill=SOFT)
+    g.text((x0 + 6, y + 46), f"Same 10 g of 22K: up to {inr(d['gap'])} apart between jewellers!", font=f("Bold", 27), fill=(176, 36, 36))
+    # call to action
+    g.rounded_rectangle((44, H - 128, 800, H - 40), 44, fill=INK)
+    g.text((96, H - 84), "Compare on ", font=f("Bold", 34), fill=(227, 191, 99), anchor="lm")
+    xx = 96 + g.textlength("Compare on ", font=f("Bold", 34))
+    g.text((xx, H - 84), "MyGoldRates.com", font=f("Bold", 34), fill=(245, 238, 220), anchor="lm")
+    ax, ay = 740, H - 84
+    _ball(g, ax, ay, 34, glint=False)
+    g.line([(ax - 15, ay), (ax + 14, ay)], fill=INK, width=5)
+    g.line([(ax + 3, ay - 12), (ax + 15, ay), (ax + 3, ay + 12)], fill=INK, width=5)
     img.convert("RGB").save(path, "JPEG", quality=92, optimize=True)
 
 
