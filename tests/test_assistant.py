@@ -1,5 +1,6 @@
 """Sona, the site assistant: its knowledge file, learning export, referrals."""
 import json
+import os
 import subprocess
 
 import assistant_kb as KB
@@ -233,3 +234,48 @@ def test_compare_jewellers_lists_every_one_and_making_comparisons_give_the_ranki
         assert r["html"].count('class="sn-row"') >= n or r["html"].count("<tr") >= n, r["q"]   # all of them
     assert [r["intent"] for r in got[3:5]] == ["making", "making"]
     assert got[5]["intent"] == "faq" and got[6]["intent"] == "faq"         # "why" and karat questions explain
+
+
+def test_asking_for_a_language_by_name_switches_and_keeps_it():
+    got = _sona([{"lang": "auto", "q": "gold rate in hindi"}, {"q": "what is the gold rate today"},
+                 {"lang": "auto", "q": "marathi madhe sanga"}, {"lang": "auto", "q": "can you speak in bengali"},
+                 {"lang": "auto", "q": "Tamil"}])
+    assert got[0]["intent"] == "rate" and got[0]["lang"] == "hi" and got[0]["text"] == "gold rate"
+    assert got[1]["lang"] == "hi"                                          # kept for the next question
+    assert got[2]["intent"] == "lang" and got[2]["lang"] == "mr" and got[2]["mic"] == "mr"
+    assert got[3]["lang"] == "bn" and got[4]["lang"] == "ta"
+
+
+def test_hindi_and_marathi_typed_in_english_letters_are_answered_in_them():
+    got = _sona([{"lang": "auto", "q": q} for q in
+                 ["aaj sone ka bhav kya hai", "sonyacha bhav kay aahe aaj", "pune madhe sone swasta kuthe",
+                  "mumbai me sabse sasta sona kahan hai", "what is the gold rate today", "show me the cheapest jeweller"]])
+    assert [r["lang"] for r in got] == ["hi", "mr", "mr", "hi", "en", "en"]
+    assert got[2]["intent"] == "rate_city" and "Pune" in got[2]["html"]
+
+
+def test_ready_answers_for_common_questions_never_fall_back_to_the_days_rate():
+    import assistant_kb
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    kb["faq"] = assistant_kb.FAQ
+    p = "tests/.kb_ready.json"
+    json.dump(kb, open(p, "w", encoding="utf-8"), ensure_ascii=False)
+    want = {"is digital gold safe": "Digital gold", "how much gold can i keep at home": "500 g",
+            "is gold cheaper in dubai": "UAE", "what is 916 gold": "91.6%", "is tanishq gold pure": "HUID",
+            "gold rate tomorrow": "predict", "pan card required for gold purchase": "2 lakh",
+            "what is 1 gram gold jewellery": "imitation", "how often are rates updated": "Every morning",
+            "are your rates accurate": "published rate", "do you sell gold": "don't sell", "unsubscribe": "Unsubscribe",
+            "what is carat": "Karat", "gold saving scheme": "every month", "what is wastage": "crafting"}
+    try:
+        got = _sona([{"lang": "en", "q": q} for q in want], kb=p)
+    finally:
+        os.remove(p)
+    for r in got:
+        assert r["intent"] == "faq" and want[r["q"]] in r["html"], (r["q"], r["intent"], r["html"][:80])
+    for f in assistant_kb.FAQ:                                             # no daily figure in a ready answer
+        assert "₹" not in f["a"] and "scrap" not in f["a"].lower(), f["q"]
+
+
+def test_the_mic_stops_by_itself_after_a_pause_on_iphones_too():
+    src = open("assistant.js", encoding="utf-8").read()
+    assert "stop(fin ? 400 : 1500)" in src and "me.abort()" in src and "cap = setTimeout" in src

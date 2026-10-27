@@ -317,6 +317,59 @@
     return SCRIPT_LANG[b[1]];
   }
 
+  // Hindi or Marathi typed in English letters ("aaj sone ka bhav kya hai",
+  // "sonyacha bhav kay aahe"): a few words only these languages use. Two
+  // or more are needed, so an English question never trips it.
+  var ROM = {
+    mr: ['aahe', 'ahe', 'aahet', 'kay', 'kaay', 'madhe', 'madhye', 'mdhe', 'kuthe', 'kuthla', 'sanga', 'sang', 'kiti',
+         'sonyacha', 'sonyache', 'sonyachi', 'sonyachya', 'swasta', 'mahag', 'ajcha', 'aajcha', 'aajche', 'majha',
+         'mazha', 'maza', 'pahije', 'dakhva', 'ani', 'tola', 'kasa', 'kashi', 'naahi', 'nahi', 'aaj', 'sone', 'bhav', 'dar'],
+    hi: ['kya', 'hai', 'hain', 'kahan', 'kaha', 'batao', 'bataiye', 'bataye', 'kitna', 'kitne', 'kitni', 'chahiye',
+         'sabse', 'sasta', 'sasti', 'mein', 'mai', 'wala', 'wali', 'raha', 'rahi', 'karo', 'kijiye', 'ka', 'ki', 'ke',
+         'aaj', 'sone', 'sona', 'bhav', 'nahi', 'mehenga', 'mehnga', 'kaise', 'kyun', 'acha', 'accha']
+  };
+  // Words both share count for neither on their own.
+  var ROM_STRONG = { mr: ['aahe', 'ahe', 'aahet', 'kay', 'kaay', 'madhe', 'madhye', 'mdhe', 'kuthe', 'sanga', 'kiti',
+    'sonyacha', 'sonyache', 'sonyachi', 'sonyachya', 'swasta', 'ajcha', 'aajcha', 'aajche', 'pahije', 'dakhva'],
+    hi: ['kya', 'hai', 'hain', 'kahan', 'batao', 'bataiye', 'kitna', 'kitne', 'kitni', 'chahiye', 'sabse', 'sasta', 'mein', 'kijiye'] };
+  function roman(q) {
+    var ws = String(q || '').toLowerCase().split(/[^a-z]+/), best = null, bn = 0;
+    ['mr', 'hi'].forEach(function (c) {
+      var n = 0, s = 0;
+      ws.forEach(function (w) { if (ROM[c].indexOf(w) > -1) n += 1; if (ROM_STRONG[c].indexOf(w) > -1) s += 1; });
+      if (s >= 1 && n >= 2 && s > bn) { bn = s; best = c; }
+    });
+    return best;
+  }
+
+  // "in Hindi", "marathi madhe sanga", "speak Tamil", or just "Bangla":
+  // the visitor asks for a language. Returns {c, rest}: the language, and
+  // what is left of the question once the request is taken out.
+  var NAMES = {
+    en: ['english', 'angrezi', 'angreji', 'इंग्लिश', 'अंग्रेजी', 'अंग्रेज़ी', 'इंग्रजी'],
+    hi: ['hindi', 'हिंदी', 'हिन्दी'], mr: ['marathi', 'मराठी'], gu: ['gujarati', 'gujrati', 'ગુજરાતી'],
+    pa: ['punjabi', 'panjabi', 'ਪੰਜਾਬੀ'], bn: ['bengali', 'bangla', 'বাংলা'], as: ['assamese', 'asomiya', 'অসমীয়া'],
+    or: ['odia', 'oriya', 'ଓଡ଼ିଆ', 'ଓଡିଆ'], ur: ['urdu', 'اردو'], kn: ['kannada', 'ಕನ್ನಡ'],
+    ta: ['tamil', 'தமிழ்', 'தமிழில்'], te: ['telugu', 'తెలుగు', 'తెలుగులో'], ml: ['malayalam', 'മലയാളം', 'മലയാളത്തിൽ']
+  };
+  var FILL = ['in', 'me', 'mein', 'mai', 'madhe', 'madhye', 'mdhe', 'ma', 'mon', 'la', 'language', 'bhasha', 'please',
+    'pls', 'plz', 'speak', 'talk', 'bolo', 'bol', 'boliye', 'bola', 'baat', 'karo', 'answer', 'reply', 'tell', 'batao',
+    'bataiye', 'sanga', 'sang', 'can', 'you', 'now', 'from', 'only', 'switch', 'to', 'use', 'chat', 'write', 'type',
+    'में', 'मध्ये', 'मे', 'बोलो', 'बोलिए', 'बताओ', 'बताइए', 'सांगा', 'बोला', 'भाषा', 'मधे', 'मध्ये'];
+  function asked(q) {
+    var ws = String(q || '').split(/[\s,.!?।॥;:()"“”‘’؟،۔]+/).filter(Boolean), c = null, at = -1;
+    ws.forEach(function (w, i) {
+      var l = w.toLowerCase();
+      Object.keys(NAMES).forEach(function (k) { if (NAMES[k].indexOf(l) > -1) { c = k; at = i; } });
+    });
+    if (!c) return null;
+    // the name and the request words right around it ("in", "me batao", "speak")
+    var rest = ws.filter(function (w, i) {
+      return i !== at && !(Math.abs(i - at) <= 5 && FILL.indexOf(w.toLowerCase()) > -1);
+    });
+    return { c: c, rest: rest.join(' ') };
+  }
+
   // A question in any script -> the words the answer engine knows.
   // vocab: [key, word] for the jewellers and cities (vocabOf()).
   function understand(q, vocab, lang) {
@@ -348,7 +401,7 @@
     return { text: out.filter(function (w) { return w !== '_'; }).join(' '), indic: indic };
   }
 
-  root.SONA_LANG = { LANGS: LANGS, romWord: romWord, key: key, detect: detect, understand: understand,
+  root.SONA_LANG = { LANGS: LANGS, romWord: romWord, key: key, detect: detect, understand: understand, roman: roman, asked: asked,
     vocabOf: vocabOf, isIndic: isIndic, LEX: LEX };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.SONA_LANG;
 })(typeof window !== 'undefined' ? window : globalThis);
