@@ -1552,6 +1552,59 @@
     return SCRIPT_LANG[b[1]];
   }
 
+  // Hindi or Marathi typed in English letters ("aaj sone ka bhav kya hai",
+  // "sonyacha bhav kay aahe"): a few words only these languages use. Two
+  // or more are needed, so an English question never trips it.
+  var ROM = {
+    mr: ['aahe', 'ahe', 'aahet', 'kay', 'kaay', 'madhe', 'madhye', 'mdhe', 'kuthe', 'kuthla', 'sanga', 'sang', 'kiti',
+         'sonyacha', 'sonyache', 'sonyachi', 'sonyachya', 'swasta', 'mahag', 'ajcha', 'aajcha', 'aajche', 'majha',
+         'mazha', 'maza', 'pahije', 'dakhva', 'ani', 'tola', 'kasa', 'kashi', 'naahi', 'nahi', 'aaj', 'sone', 'bhav', 'dar'],
+    hi: ['kya', 'hai', 'hain', 'kahan', 'kaha', 'batao', 'bataiye', 'bataye', 'kitna', 'kitne', 'kitni', 'chahiye',
+         'sabse', 'sasta', 'sasti', 'mein', 'mai', 'wala', 'wali', 'raha', 'rahi', 'karo', 'kijiye', 'ka', 'ki', 'ke',
+         'aaj', 'sone', 'sona', 'bhav', 'nahi', 'mehenga', 'mehnga', 'kaise', 'kyun', 'acha', 'accha']
+  };
+  // Words both share count for neither on their own.
+  var ROM_STRONG = { mr: ['aahe', 'ahe', 'aahet', 'kay', 'kaay', 'madhe', 'madhye', 'mdhe', 'kuthe', 'sanga', 'kiti',
+    'sonyacha', 'sonyache', 'sonyachi', 'sonyachya', 'swasta', 'ajcha', 'aajcha', 'aajche', 'pahije', 'dakhva'],
+    hi: ['kya', 'hai', 'hain', 'kahan', 'batao', 'bataiye', 'kitna', 'kitne', 'kitni', 'chahiye', 'sabse', 'sasta', 'mein', 'kijiye'] };
+  function roman(q) {
+    var ws = String(q || '').toLowerCase().split(/[^a-z]+/), best = null, bn = 0;
+    ['mr', 'hi'].forEach(function (c) {
+      var n = 0, s = 0;
+      ws.forEach(function (w) { if (ROM[c].indexOf(w) > -1) n += 1; if (ROM_STRONG[c].indexOf(w) > -1) s += 1; });
+      if (s >= 1 && n >= 2 && s > bn) { bn = s; best = c; }
+    });
+    return best;
+  }
+
+  // "in Hindi", "marathi madhe sanga", "speak Tamil", or just "Bangla":
+  // the visitor asks for a language. Returns {c, rest}: the language, and
+  // what is left of the question once the request is taken out.
+  var NAMES = {
+    en: ['english', 'angrezi', 'angreji', 'इंग्लिश', 'अंग्रेजी', 'अंग्रेज़ी', 'इंग्रजी'],
+    hi: ['hindi', 'हिंदी', 'हिन्दी'], mr: ['marathi', 'मराठी'], gu: ['gujarati', 'gujrati', 'ગુજરાતી'],
+    pa: ['punjabi', 'panjabi', 'ਪੰਜਾਬੀ'], bn: ['bengali', 'bangla', 'বাংলা'], as: ['assamese', 'asomiya', 'অসমীয়া'],
+    or: ['odia', 'oriya', 'ଓଡ଼ିଆ', 'ଓଡିଆ'], ur: ['urdu', 'اردو'], kn: ['kannada', 'ಕನ್ನಡ'],
+    ta: ['tamil', 'தமிழ்', 'தமிழில்'], te: ['telugu', 'తెలుగు', 'తెలుగులో'], ml: ['malayalam', 'മലയാളം', 'മലയാളത്തിൽ']
+  };
+  var FILL = ['in', 'me', 'mein', 'mai', 'madhe', 'madhye', 'mdhe', 'ma', 'mon', 'la', 'language', 'bhasha', 'please',
+    'pls', 'plz', 'speak', 'talk', 'bolo', 'bol', 'boliye', 'bola', 'baat', 'karo', 'answer', 'reply', 'tell', 'batao',
+    'bataiye', 'sanga', 'sang', 'can', 'you', 'now', 'from', 'only', 'switch', 'to', 'use', 'chat', 'write', 'type',
+    'में', 'मध्ये', 'मे', 'बोलो', 'बोलिए', 'बताओ', 'बताइए', 'सांगा', 'बोला', 'भाषा', 'मधे', 'मध्ये'];
+  function asked(q) {
+    var ws = String(q || '').split(/[\s,.!?।॥;:()"“”‘’؟،۔]+/).filter(Boolean), c = null, at = -1;
+    ws.forEach(function (w, i) {
+      var l = w.toLowerCase();
+      Object.keys(NAMES).forEach(function (k) { if (NAMES[k].indexOf(l) > -1) { c = k; at = i; } });
+    });
+    if (!c) return null;
+    // the name and the request words right around it ("in", "me batao", "speak")
+    var rest = ws.filter(function (w, i) {
+      return i !== at && !(Math.abs(i - at) <= 5 && FILL.indexOf(w.toLowerCase()) > -1);
+    });
+    return { c: c, rest: rest.join(' ') };
+  }
+
   // A question in any script -> the words the answer engine knows.
   // vocab: [key, word] for the jewellers and cities (vocabOf()).
   function understand(q, vocab, lang) {
@@ -1583,7 +1636,7 @@
     return { text: out.filter(function (w) { return w !== '_'; }).join(' '), indic: indic };
   }
 
-  root.SONA_LANG = { LANGS: LANGS, romWord: romWord, key: key, detect: detect, understand: understand,
+  root.SONA_LANG = { LANGS: LANGS, romWord: romWord, key: key, detect: detect, understand: understand, roman: roman, asked: asked,
     vocabOf: vocabOf, isIndic: isIndic, LEX: LEX };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.SONA_LANG;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -1944,6 +1997,13 @@
   }
   // FAQ and approved answers are written in English: `en` carries the text
   // so it can be translated on the visitor's device, where the browser can.
+  // One FAQ answer by its question (b: a jeweller to link as well).
+  function faqQ(q, b) {
+    var d = KB.faq.filter(function (f) { return f.q === q; })[0];
+    if (!d) return null;
+    return { intent: 'faq', score: 2, en: d.a, html: '<p>' + esc(d.a) + '</p>' + (d.u ? '<p>' + link(d.u, t('more')) + '</p>' : ''),
+      say: d.a, chips: b ? [chip('boff', { b: b.n.split(' ')[0] }), chip('cheap22')] : chips(['cheap22', 'bestoff']) };
+  }
   function aSearch(s) {
     var best = null, bs = 0;
     (KB.learned || []).forEach(function (d) { var v = scoreDoc(s, d.q, []) * 1.2; if (v > bs) { bs = v; best = d; } });
@@ -1967,10 +2027,36 @@
       if (!c) return askCity('ask_city');
     }
     if (has(tx, W.silver) && !has(tx, ['gold', 'sona'])) return { intent: 'silver', html: '<p>' + t('silver') + '</p>', say: t('silver'), chips: chips(['rate', 'cheap22']) };
+    if (has(tx, ['unsubscribe', 'opt out'])) return faqQ('How do I unsubscribe from the emails?');
     if (has(tx, ['alert', 'alerts', 'notify', 'subscribe', 'email me', 'whatsapp', 'set a price'])) return aAlerts();
+    // "gold rate tomorrow", "will gold go up": nobody can say - the honest answer
+    if (/\b(tomorrow|next (week|month|year)|forecast|predict|prediction)\b/.test(tx) ||
+        /\bwill\b.*\b(go|rise|fall|increase|decrease|drop|come down|go up|go down)\b/.test(tx)) return faqQ('Is now a good time to buy gold?');
+    // "is Tanishq gold pure", "is CaratLane trustworthy": the hallmark, not a ranking
+    if (bs.length === 1 && has(tx, ['pure', 'purity', 'trust', 'trustworthy', 'genuine', 'reliable', 'safe', 'fake', 'quality', 'honest', 'real', 'original']) &&
+        !has(tx, W.making) && !has(tx, W.offer)) return faqQ('Is this jeweller\'s gold pure and trustworthy?', bs[0]);
+    // "1 gram gold jewellery" is imitation jewellery, not a weight
+    if (/\b(1|one|ek) ?(gram|gm|g) gold (jewell?ery|jewelry|chain|bangles?|necklace|set|ornaments?)\b|\b(imitation|gold plated|gold covering)\b/.test(tx))
+      return faqQ('What is 1 gram gold jewellery?');
+    if (has(tx, ['free']) && has(tx, ['website', 'site', 'sona', 'app', 'service', 'this', 'it'])) return faqQ('Is this website free?');
+    // "what is 916 / 22K gold", "what is carat": a meaning, not the day's rate
+    var meaning = /\b(what is|whats|what does|meaning|means|mean|matlab|mhanje)\b/.test(tx) && !has(tx, W.rate) && !w && !bs.length && !c;
+    if (meaning && k) return faqQ({ '22K': 'What is 916 gold?', '18K': 'Is 18K gold good for jewellery?', '14K': 'Is 14K gold real gold?' }[k] ||
+                                  'What is the difference between 22K and 24K gold?');
+    if (meaning && /\b(carat|karat|caret)\b/.test(tx)) return faqQ('What is the difference between carat and karat?');
+    // "gold rate per gram 18 carat": that karat's rate, not its explainer
+    if (k && /\b(rate|rates|price|bhav|dar|per gram|today|aaj)\b/.test(tx) && !meaning && !bs.length && !c && !w &&
+        !has(tx, W.cheap) && !has(tx, W.making) && !has(tx, W.offer) && !has(tx, W.trend) && !has(tx, ['difference', 'vs', 'versus', 'better'])) return aMedian(k);
+    // "are your rates accurate", "how do you get the rates"
+    if (/\b(accurate|correct|reliable|authentic|source|sources|come from|how do you get|where do you get|how do you collect)\b/.test(tx) &&
+        /\b(rates?|prices?|data|figures)\b/.test(tx) && !bs.length && !c) return faqQ('Where do these rates come from?');
     if (bs.length >= 2) return aCompare(bs, k);
     var across = has(tx, ['compare', 'comparison', 'compared', 'difference', 'differ', 'gap', 'vs', 'versus', 'across', 'other', 'all']);
     if (has(tx, W.making) && (has(tx, W.cheap) || across) && !w) return aMaking(bs, ct);    // "lowest making charge", "compare making charges": the ranking
+    // "what is wastage / VA": the explanation; "making charges on bangles", "making kitna hai": the figures
+    if (has(tx, W.making) && !w && !bs.length && !ct && /\b(what is|what are|whats|meaning|explain|define|matlab|mhanje)\b/.test(tx))
+      return faqQ('What are making charges?');
+    if (has(tx, W.making) && !w && (ct || /\b(how much|kitna|kitni|kitne|kiti)\b/.test(tx))) return aMaking(bs, ct);
     // "compare jewellers", "rate difference between jewellers": all of them, cheapest first
     if (across && /\b(jewell?ers|jewelers|shops|stores|brands|showrooms)\b/.test(tx) && !bs.length && !w &&
         !has(tx, W.offer) && !has(tx, W.making) && !/\b(why|kyon|kyun|kyu)\b/.test(tx)) return aCheapest(k, c, true);
@@ -1982,11 +2068,17 @@
     if (has(tx, W.trend) && !bs.length) return aTrend(k);
     var search = aSearch(tx);
     if (search && search.score > 0.9) return search;
+    if (search && /\b(dubai|uae|abroad|singapore|overseas|foreign)\b/.test(tx)) return search;   // not "cheapest here"
     if (has(tx, W.cheap)) return aCheapest(k, c);
     if (bs.length) return aBrand(bs[0], k);
     if (c) return aCity(c, k);
     if (search) return search;
-    if (has(tx, W.rate) || k || /\b(gold|sona)\b/.test(tx)) return aMedian(k);
+    if (has(tx, W.rate) || k) return aMedian(k);
+    // "gold" alone, or "gold today": the rate. A real question about gold that
+    // nothing above covers is better left unanswered (and learned) than
+    // answered with the day's rate.
+    if (/\b(gold|sona)\b/.test(tx) && (!/\b(what|how|why|when|can|could|is|are|should|do|does|which|kya|kaise|kyun|kay|kasa|kashi)\b/.test(tx) ||
+        tx.split(/\s+/).length <= 3)) return aMedian(k);
     if (has(tx, W.hello)) return { intent: 'hello', html: '<p>' + t('hello', { n: KB.brands.length }) + '</p>', say: t('hello', { n: KB.brands.length }), chips: suggest() };
     if (has(tx, W.thanks)) return { intent: 'thanks', html: '<p>' + t('thanks') + '</p>', say: t('thanks'), chips: chips(['cheap22', 'bestoff']) };
     if (W.who.some(function (x) { return tx.indexOf(x) > -1; })) return { intent: 'about', html: '<p>' + t('about', { n: KB.brands.length }) + '</p>', say: t('about', { n: KB.brands.length }), chips: suggest() };
@@ -1995,8 +2087,22 @@
   // A question in any language: Indian scripts are first turned into the
   // words above (sona_lang.js); the reply comes in the asker's language.
   // chip: a suggestion tapped (asked in English, shown in the visitor's language).
+  // "in Hindi", "marathi madhe sanga": a language asked for by name is kept
+  // (as if picked from the menu); Hindi or Marathi typed in English letters
+  // is answered in that language unless the visitor picked one.
+  var justPicked = false;
   function understand(q, chip) {
-    var d = LG && LG.detect(q, PICK || HEARD);
+    justPicked = false;
+    var req = !chip && LG && LG.asked(q);
+    if (req && STR[req.c]) {
+      PICK = req.c; try { localStorage.setItem('sona_pick', PICK); } catch (_) {}
+      LANG = uiLang(); RL = PICK; justPicked = true;
+      if (panel) labels();
+      track('lang_ask_' + PICK);
+      q = req.rest;
+      if (!q.trim()) return '';
+    }
+    var d = LG && (LG.detect(q, PICK || HEARD) || (PICK ? null : LG.roman(q)));
     if (d && STR[d]) {
       RL = d;
       if (!PICK && d !== HEARD) {                 // she now listens and labels in it too
@@ -2007,6 +2113,13 @@
     } else RL = chip ? LANG : (PICK || 'en');
     if (LG && LG.isIndic(q)) return LG.understand(q, VOCAB, RL).text;
     return q;
+  }
+  // The answer to a question as typed; a bare "in Marathi" gets a hello in it.
+  function reply(q, chip) {
+    var tx = understand(q, chip);
+    if (!tx && justPicked) return { tx: tx, a: { intent: 'lang', html: '<p>' + t('greet1') + '</p><p>' + t('greet2') + '</p>',
+      say: (t('greet1') + ' ' + t('greet2')).replace(/<[^>]+>/g, ''), chips: suggest() } };
+    return { tx: tx, a: answer(tx) };
   }
 
   // ------------------------------------------------------------- avatar
@@ -2283,25 +2396,43 @@
   }
   function listen() {
     if (!SR) return;
-    if (listening) { try { rec.stop(); } catch (_) {} return; }
+    if (listening) { try { rec.stop(); } catch (_) {} var r0 = rec; setTimeout(function () { if (rec === r0 && listening) { try { r0.abort(); } catch (_) {} if (r0.onend) r0.onend(); } }, 1200); return; }
     hush();
     rec = new SR(); rec.lang = bcp(micLang()); rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
-    var heard = '';
+    var heard = '', done = false, quiet = null, cap = null, me = rec;
+    // iPhone Safari does not stop by itself when the visitor stops talking
+    // (Android does): stop after a short silence, or if nothing is said, or
+    // after a hard limit - and finish even if Safari never sends "end".
+    function finish() {
+      if (done) return; done = true;
+      clearTimeout(quiet); clearTimeout(cap);
+      if (rec === me) setListening(false);
+      if (heard.trim()) { voiceQ = true; ask(heard); }
+    }
+    function stop(ms) {
+      clearTimeout(quiet);
+      quiet = setTimeout(function () {
+        try { me.stop(); } catch (_) {}
+        setTimeout(function () { try { me.abort(); } catch (_) {} finish(); }, 1200);
+      }, ms);
+    }
     rec.onresult = function (e) {
-      var now = '';
-      for (var i = 0; i < e.results.length; i++) now += e.results[i][0].transcript;
+      var now = '', fin = false;
+      for (var i = 0; i < e.results.length; i++) { now += e.results[i][0].transcript; fin = e.results[i].isFinal; }
       heard = now; input.value = now;
+      stop(fin ? 400 : 1500);                     // 1.5 s of silence ends the question
     };
     rec.onerror = function (e) {
       RL = LANG;
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed') note(t('mic_denied'));
       else if (e.error === 'no-speech') note(t('mic_none'));
     };
-    rec.onend = function () {
-      setListening(false);
-      if (heard.trim()) { voiceQ = true; ask(heard); }
-    };
-    try { rec.start(); setListening(true); track('voice'); } catch (_) { setListening(false); }
+    rec.onend = finish;
+    try {
+      rec.start(); setListening(true); track('voice');
+      stop(8000);                                 // nothing said at all
+      cap = setTimeout(function () { stop(0); }, 20000);
+    } catch (_) { setListening(false); }
   }
   // FAQ answers are written in English; where the browser can translate on
   // the device (free, nothing sent anywhere), Sona answers in the reply
@@ -2326,7 +2457,7 @@
     talking(true);
     loadKB().then(function () {
       var a = null;
-      try { a = answer(understand(q, !!label)); } catch (e) { a = null; }
+      try { a = reply(q, !!label).a; } catch (e) { a = null; }
       var ok = !!a, rl = RL;
       if (!a) a = { intent: 'unknown', html: '<p>' + t('unknown') + '</p>', say: t('unknown'), chips: suggest() };
       var tr = a.en && rl !== 'en' ? translateTo(a.en, rl) : Promise.resolve(null);
@@ -2392,7 +2523,7 @@
       setLang: function (c) { PICK = c === 'auto' ? '' : c; HEARD = ''; LANG = uiLang(); RL = LANG; },
       micLang: function () { return micLang(); },
       nearest: function (la, lo) { return nearest(la, lo); },
-      ask: function (q, chip) { var tx = understand(q, chip), a = answer(tx); return { text: tx, lang: RL, a: a }; }
+      ask: function (q, chip) { var r = reply(q, chip); return { text: r.tx, lang: RL, a: r.a }; }
     };
     return;
   }
