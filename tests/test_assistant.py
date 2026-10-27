@@ -279,3 +279,14 @@ def test_ready_answers_for_common_questions_never_fall_back_to_the_days_rate():
 def test_the_mic_stops_by_itself_after_a_pause_on_iphones_too():
     src = open("assistant.js", encoding="utf-8").read()
     assert "stop(fin ? 400 : 1500)" in src and "me.abort()" in src and "cap = setTimeout" in src
+
+
+def test_a_spoken_question_in_english_letters_is_answered_in_the_mics_language():
+    got = _sona([{"lang": "auto", "q": "सोन्याचा भाव काय आहे"},            # Marathi read: the mic now listens in it
+                 {"q": "tanishq rate", "spoken": True},                     # the phone wrote it back in English letters
+                 {"q": "tanishq rate"}])                                    # typed in English: English
+    assert got[0]["lang"] == "mr" and got[0]["mic"] == "mr"
+    assert got[1]["lang"] == "mr" and got[1]["intent"] == "rate_brand"
+    assert got[2]["lang"] == "en"
+    first = _sona([{"lang": "auto", "q": "tanishq rate", "spoken": True}])[0]
+    assert first["lang"] == "en"                                           # the Hindi default alone never forces Hindi
