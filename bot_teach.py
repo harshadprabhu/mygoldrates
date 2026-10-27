@@ -41,19 +41,27 @@ visitor questions Sona could not answer, or answered badly. For each one, write 
 answer Sona should give in future.
 
 Rules:
-- Use ONLY the facts in SITE FACTS. If they do not cover the question, or it is \
-off-topic, personal, abusive or about a specific order, skip it.
-- Never write any number, price, rate, percentage or date (gold rates change every \
-day). Instead point to the page that shows today's figure. Karat and purity marks \
-(22K, 24K, 916) are fine.
-- 1 to 3 short, friendly sentences in plain English, at most 350 characters.
+- Questions may be in English, Hinglish or any Indian language (a tag like [hi] or \
+[mr] gives the visitor's language). Always answer in plain English; Sona translates.
+- Use ONLY the facts in SITE FACTS and the pages in SITE PAGES. Do not invent \
+features, policies or advice the site does not give.
+- Questions about a figure (today's rate, a price, making charges, a city, a \
+jeweller, offers, history) ARE answerable: say where on the site to find it and give \
+that page as "u" (for example a city or jeweller page, the making charges comparison, \
+the offers page, the rate history).
+- Never write any number, price, rate, percentage or date (they change every day). \
+Karat and purity marks (22K, 24K, 916) are fine.
+- 1 to 3 short, friendly sentences, at most 350 characters.
 - "u": one link from SITE PAGES that helps most, or "".
 - "q": a short, general English question that this answer is for, in your own words \
 (never copy the visitor's wording, names or details).
-- Skip anything ALREADY ANSWERED covers.
 
-Reply with JSON only: a list of {"i": <question number>, "q": "...", "a": "...", "u": "..."} \
-for the questions you answer; leave out the ones you skip.
+Reply with JSON only: a list with ONE entry for EVERY visitor question, either \
+{"i": <question number>, "q": "...", "a": "...", "u": "..."} to answer it, or \
+{"i": <question number>, "skip": "<reason>"} where reason is one of: off_topic \
+(nothing to do with gold or the site), personal (about a person, an order or an \
+account), not_covered (about gold, but SITE FACTS and SITE PAGES have nothing on it), \
+already_answered (ALREADY ANSWERED covers it), unclear (gibberish or too vague).
 
 SITE FACTS
 %s
@@ -119,16 +127,19 @@ def check(item, pages, n_questions):
 
 
 def ask_gemini(prompt, key):
+    import time
     import requests
-    for m in MODELS:
+    for m in [m for m in MODELS for _ in range(2)]:   # each model twice: "high demand" passes
         try:
             r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent",
                               headers={"x-goog-api-key": key},
                               json={"contents": [{"parts": [{"text": prompt}]}],
                                     "generationConfig": {"responseMimeType": "application/json", "temperature": 0.2}},
-                              timeout=120)
+                              timeout=180)
         except requests.RequestException as e:
             say(f"{m} no answer ({type(e).__name__})"); continue
+        if r.status_code in (429, 500, 503):
+            time.sleep(20)
         if not r.ok:
             msg = r.json().get("error", {}).get("message", "") if "json" in r.headers.get("content-type", "") else ""
             say(f"{m} HTTP {r.status_code} {msg[:160]}"); continue
@@ -175,8 +186,10 @@ def main():
     if out is None:
         say("Gemini unavailable - nothing learned today"); return
     seen = {norm(k["q"]) for k in known}
-    new, rejected = [], 0
+    new, rejected, skips = [], 0, {}
     for item in out:
+        if isinstance(item, dict) and item.get("skip"):
+            r = str(item["skip"])[:20]; skips[r] = skips.get(r, 0) + 1; continue
         c = check(item, pages, len(qs))
         if not c or norm(c["q"]) in seen:
             rejected += 1; continue
@@ -184,8 +197,9 @@ def main():
     new = new[:MAX_NEW]
     for c in new:
         sb.table("bot_answers").insert({"q": c["q"], "a": c["a"], "u": c["u"] or None}).execute()
-    say(f"{len(new)} new answers saved, {rejected} drafts failed the checks, "
-          f"{len(qs) - len(out)} skipped by Gemini")
+    say(f"{len(new)} new answers saved, {rejected} drafts failed the checks or repeated one, skipped: "
+        + (", ".join(f"{k} {v}" for k, v in sorted(skips.items())) or "none")
+        + f", no reply for {max(0, len(qs) - len(out))}")
 
 
 if __name__ == "__main__":
