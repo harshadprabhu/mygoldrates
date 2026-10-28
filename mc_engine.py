@@ -590,6 +590,58 @@ def s_dom_breakup_section(html: str) -> ExtractionResult:
     return _labelled_text_scan(block, "dom_breakup_section")
 
 
+def s_product_price_keys(html: str) -> ExtractionResult:
+    """A product's own price object embedded in the page data, keyed by name:
+    Jos Alukkas ("ProductPrice": GoldValue, MakingCharges, *NetValue stones,
+    SubTotal) and NAC ("sku": metalCost, makingChargeAmount, stoneRate,
+    diamondRate). Only the page's main product object is read (the first one),
+    never a "similar products" list further down."""
+    t = html.replace('\\"', '"')
+    m = re.search(r'"ProductPrice"\s*:\s*\[\s*\{(.*?)\}', t, re.S) or \
+        re.search(r'"sku"\s*:\s*\{([^{}]*"makingChargeAmount"[^{}]*)\}', t, re.S)
+    if not m:
+        return ExtractionResult("product_price_keys", None, 0.0, {}, "no product price object")
+    obj = m.group(1)
+
+    def num(k):
+        v = re.search(r'"' + k + r'"\s*:\s*"?(-?[\d.]+)', obj)
+        return float(v.group(1)) if v else None
+
+    gold = num("GoldValue") or num("metalCost")
+    making = num("MakingCharges") if num("MakingCharges") is not None else num("makingChargeAmount")
+    stones = [num(k) for k in ("ColorStoneNetValue", "TotalDiamondNetValue", "UncutNetValue", "StarNetValue",
+                               "DiaNetValue", "FancyNetValue", "MeleeNetValue", "stoneRate", "diamondRate")]
+    fields = {}
+    if gold:
+        fields["gold_value"] = gold
+    if making:
+        fields["making_charge"] = making
+    fields["stone_value"] = sum(x for x in stones if x)
+    return _finish("product_price_keys", fields)
+
+
+def s_sku_breakup_json(html: str) -> ExtractionResult:
+    """A per-item breakup service response, e.g. Reliance Jewels'
+    skuBreakupDetails: {"goldNetWeight": "6.1470", "goldRate": "13135.00",
+    "makingCharges": "17762.99", "stoneValue": "0.00", "sellingPrice": "98503.84"}.
+    Gold value is weight x rate; the selling price (before GST) is the
+    subtotal the parts must add up to."""
+    m = re.search(r'"skuDetails"\s*:\s*\[\s*(\{.*?\})', html, re.S)
+    if not m:
+        return ExtractionResult("sku_breakup_json", None, 0.0, {}, "no skuDetails")
+    try:
+        d = json.loads(m.group(1))
+        gold = float(d.get("goldNetWeight") or 0) * float(d.get("goldRate") or 0)
+        fields = {"gold_value": round(gold, 2), "making_charge": float(d.get("makingCharges") or 0)}
+        if d.get("stoneValue") not in (None, ""):
+            fields["stone_value"] = float(d["stoneValue"])
+        if d.get("sellingPrice"):
+            fields["total"] = float(d["sellingPrice"])
+    except (ValueError, TypeError):
+        return ExtractionResult("sku_breakup_json", None, 0.0, {}, "unreadable skuDetails")
+    return _finish("sku_breakup_json", fields)
+
+
 def s_div_row_breakup(html: str) -> ExtractionResult:
     """A price breakup built from divs, not a table: "row-wrapper" blocks of
     "col-wrapper" cells, e.g. Khazana's Component | Gold Rate | Weight | Value |
@@ -720,6 +772,8 @@ def s_direct_percent(html: str) -> ExtractionResult:
 
 
 STRATEGIES: list[tuple[str, Callable[[str], ExtractionResult]]] = [
+    ("sku_breakup_json", s_sku_breakup_json),       # a breakup service's own JSON
+    ("product_price_keys", s_product_price_keys),   # Jos Alukkas / NAC page data
     ("json_typed_percent", s_json_typed_percent),   # must precede flat_keys
     ("weight_rate_join", s_weight_rate_join),       # specific join, try early
     ("escaped_json_block", s_escaped_json_block),
@@ -942,6 +996,22 @@ _FIXTURES = [
      <div class="col-wrapper"><span class="val">\u20b9 118109.45</span></div><div class="col-wrapper"><span class="val">\u20b9 4397.23</span></div>
      <div class="col-wrapper"><span class="price-value">\u20b9 113712.22</span></div></div>""",
      17.5, "div_row_breakup"),
+
+    # Reliance Jewels: the breakup service the product page itself calls
+    ("RelianceSku", """<html>...</html><!--breakup-->{"skuDetails":[{"sku":"SKU10656985",
+     "mrp":"101459.00","sellingPrice":"98503.84","gst":"2896.01","stoneValue":"0.00",
+     "goldNetWeight":"6.1470","goldRate":"13135.00","makingCharges":"17762.99"}]}""",
+     22.0, "sku_breakup_json"),
+
+    # Jos Alukkas: the page's own ProductPrice object (plain-gold piece)
+    ("JosPrice", r"""x:["$","div",{"initialProduct":{"ProductPrice":[{\"Id\":1,\"GoldValue\":50000.0,
+     \"ColorStoneNetValue\":0,\"TotalDiamondNetValue\":0,\"SubTotal\":59000,
+     \"MakingCharges\":9000.0,\"DiscountedMakingCharges\":6300.0}]}]""", 18.0, "product_price_keys"),
+
+    # NAC: making is called wastage/making amount next to the metal cost
+    ("NacPrice", """<script>window.__INITIAL_STATE__ = {"productData":{"sku":{"metalRate":13135,
+     "skuWeight":9.67,"metalCost":127015.45,"diamondRate":0,"stoneRate":0,"wastageAmount":25293,
+     "makingChargeAmount":25293,"taxAmount":5653.01}}}</script>""", 19.9, "product_price_keys"),
 
     # REGRESSION GUARD (Senco): making_charge is a PERCENTAGE, not rupees.
     # Reading 27 as an amount and dividing by gold value shipped "Ring 0.1%"

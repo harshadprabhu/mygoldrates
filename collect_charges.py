@@ -306,6 +306,23 @@ DISCOVER = [
     # Khazana Jewellery: the product page carries a real price-breakup table
     # (gold value, making charges, subtotal; read by mc_engine's
     # div_row_breakup). Product pages are ~1 MB each, so a few workers only.
+    # Reliance Jewels: the breakup comes from the site's own per-item service
+    # (see FOLLOW / _reliance_breakup), read by mc_engine's sku_breakup_json.
+    # Showroom-only designs ("Approx. Price") have no breakup and are skipped.
+    {"brand": "Reliance Jewels", "fetch_workers": 3,
+     "sitemaps": ["https://www.reliancejewels.com/sitemap.xml"]},
+
+    # Jos Alukkas: the product page's own data carries a ProductPrice object
+    # (GoldValue, MakingCharges, stone values) - mc_engine's
+    # product_price_keys. The making charge is read before any offer.
+    {"brand": "Jos Alukkas", "fetch_workers": 3, "require_path": "/gold-jewellery/",
+     "sitemaps": ["https://www.josalukkasonline.com/sitemap.xml"]},
+
+    # NAC Jewellers: page data has metalCost and makingChargeAmount (also
+    # called wastage). A small online catalogue, so samples are small.
+    {"brand": "NAC Jewellers", "fetch_workers": 2, "require_path": "/product/",
+     "sitemaps": ["https://www.nacjewellers.com/sitemap.xml"]},
+
     {"brand": "Khazana Jewellery", "fetch_workers": 3,
      "sitemaps": ["https://www.khazanajewellery.com/sitemap_index.xml"]},
 ]
@@ -602,6 +619,29 @@ def collect_urls(sess, d):
     return buckets
 
 
+def _reliance_breakup(sess, url, html):
+    """Reliance Jewels shows a product's price breakup only once a size is
+    picked: the page then asks its own /product/ajax/skuBreakupDetails for
+    it. Ask the same, for the page's first item (showroom-only designs have
+    none, and return nothing to read)."""
+    pid = re.search(r"-(\d+)/?(?:[?#]|$)", url)
+    item = re.search(r'data-item-id\s*=\s*"(\d+)"', html or "")
+    if not (pid and item):
+        return ""
+    api = (f"https://www.reliancejewels.com/product/ajax/skuBreakupDetails"
+           f"?productId={pid.group(1)}&itemId={item.group(1)}")
+    try:
+        r = sess.get(api, timeout=20, headers={"Accept": "application/json", "Referer": url})
+        return r.text if r.ok else ""
+    except requests.RequestException:
+        return ""
+
+
+# Brands whose product page loads its breakup separately: fetch that too and
+# hand both to the engine.
+FOLLOW = {"Reliance Jewels": _reliance_breakup}
+
+
 def fetch_batch(sess, engine, brand, items, workers=None):
     """Fetch + extract a batch of (cat, url) candidates concurrently.
 
@@ -643,8 +683,12 @@ def fetch_batch(sess, engine, brand, items, workers=None):
         run_pass(failed, max(2, workers // 2))
 
     out = []
+    follow = FOLLOW.get(brand)
     for i, (cat, u) in enumerate(items):
         html, src = fetched[i]
+        if html and follow:
+            extra = follow(sess, u, html)
+            html = html + "\n<!--breakup-->" + extra if extra else html
         res = engine.extract(html, brand=brand) if html else None
         out.append((cat, u, res, src))
     return out
