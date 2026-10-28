@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-28",
-  "last_updated": "2026-10-28T21:44:52.215912+05:30",
+  "last_updated": "2026-10-28T22:13:39.769598+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14402.5,
-    "22k": 13202.29,
-    "18k": 10801.88
+    "24k": 14400.0,
+    "22k": 13200.0,
+    "18k": 10800.0
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -22,17 +22,23 @@
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 143675.0,
-      "change_pct": -0.32
+      "price_per_10g_inr": 143740.0,
+      "change_pct": -0.28
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 142002.0,
-      "change_pct": -0.36
+      "price_per_10g_inr": 142099.0,
+      "change_pct": -0.29
     }
   ],
   "jewellers": [
+    {
+      "jeweller": "Rushabh Jewels",
+      "rate_24k_per_gram_inr": 14262.0,
+      "rate_22k_per_gram_inr": 13073.5,
+      "rate_18k_per_gram_inr": 10696.5
+    },
     {
       "jeweller": "PN Gadgil",
       "rate_24k_per_gram_inr": 14276.0,
@@ -202,12 +208,6 @@
       "rate_18k_per_gram_inr": 10900.73
     },
     {
-      "jeweller": "CaratLane",
-      "rate_24k_per_gram_inr": 14545.0,
-      "rate_22k_per_gram_inr": 13332.92,
-      "rate_18k_per_gram_inr": 10908.75
-    },
-    {
       "jeweller": "BlueStone",
       "rate_24k_per_gram_inr": 14551.38,
       "rate_22k_per_gram_inr": 13338.76,
@@ -236,9 +236,15 @@
       "rate_24k_per_gram_inr": 14705.45,
       "rate_22k_per_gram_inr": 13480.0,
       "rate_18k_per_gram_inr": 11029.09
+    },
+    {
+      "jeweller": "Swarn Jewellers",
+      "rate_24k_per_gram_inr": 14716.36,
+      "rate_22k_per_gram_inr": 13490.0,
+      "rate_18k_per_gram_inr": 11037.27
     }
   ],
-  "jeweller_count": 34,
+  "jeweller_count": 35,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
