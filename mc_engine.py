@@ -590,6 +590,34 @@ def s_dom_breakup_section(html: str) -> ExtractionResult:
     return _labelled_text_scan(block, "dom_breakup_section")
 
 
+def s_rendered_breakup_text(html: str) -> ExtractionResult:
+    """The price breakup as a visitor sees it once it is opened, read from the
+    rendered page text (Malabar: "Price Breakup Gold Value (22Kt) \u20b9 22,339.14
+    Gold Making Charges \u20b9 3,473.29 \u20b9 3,775.31 Taxes ..."). Two amounts on
+    one row are the offer price and the original: the larger is the making
+    charge before any offer, the same basis as every other brand."""
+    m = re.search(r"Price\s*Break\s*-?up(.{0,700}?)(?:All Taxes Included|Product Details|$)", html, re.S | re.I)
+    if not m:
+        return ExtractionResult("rendered_breakup_text", None, 0.0, {}, "no rendered breakup")
+    fields: dict[str, float] = {}
+    stone = 0.0
+    for label, amts in re.findall(r"([A-Za-z][A-Za-z ()0-9.]*?)\s*((?:\u20b9\s*[\d,]+(?:\.\d+)?\s*)+)", m.group(1)):
+        vals = [_num(a) for a in re.findall(r"\u20b9\s*([\d,]+(?:\.\d+)?)", amts)]
+        vals = [v for v in vals if v]
+        if not vals:
+            continue
+        lab = label.strip().lower()
+        if "making" in lab or "wastage" in lab or "value addition" in lab:
+            fields.setdefault("making_charge", max(vals))
+        elif re.search(r"\bgold\b.*\bvalue\b|\bmetal\b.*\bvalue\b", lab):
+            fields.setdefault("gold_value", vals[0])
+        elif re.search(r"stone|diamond|gem|pearl|polki|kundan", lab):
+            stone += max(vals)
+    if stone:
+        fields["stone_value"] = stone
+    return _finish("rendered_breakup_text", fields)
+
+
 def s_product_price_keys(html: str) -> ExtractionResult:
     """A product's own price object embedded in the page data, keyed by name:
     Jos Alukkas ("ProductPrice": GoldValue, MakingCharges, *NetValue stones,
@@ -786,6 +814,7 @@ STRATEGIES: list[tuple[str, Callable[[str], ExtractionResult]]] = [
     ("div_row_breakup", s_div_row_breakup),
     ("table_row_columns", s_table_row_columns),
     ("direct_percent", s_direct_percent),
+    ("rendered_breakup_text", s_rendered_breakup_text),   # a browser-opened breakup (Malabar)
     ("labelled_text", s_labelled_text),
 ]
 _BY_NAME = dict(STRATEGIES)
@@ -1012,6 +1041,12 @@ _FIXTURES = [
     ("NacPrice", """<script>window.__INITIAL_STATE__ = {"productData":{"sku":{"metalRate":13135,
      "skuWeight":9.67,"metalCost":127015.45,"diamondRate":0,"stoneRate":0,"wastageAmount":25293,
      "makingChargeAmount":25293,"taxAmount":5653.01}}}</script>""", 19.9, "product_price_keys"),
+
+    # Malabar: the breakup text once opened in a browser; offer price and
+    # original price on the making row - the original (larger) is used
+    ("MalabarRendered", """Eye-catching Gold Pendant Price Breakup Gold Value (22Kt) \u20b9 22,339.14
+     Gold Making Charges \u20b9 3,473.29 \u20b9 3,775.31 Taxes \u20b9 774.37 \u20b9 783.43 All Taxes Included
+     Up to 30% discount on making charges""", 16.9, "rendered_breakup_text"),
 
     # REGRESSION GUARD (Senco): making_charge is a PERCENTAGE, not rupees.
     # Reading 27 as an amount and dividing by gold value shipped "Ring 0.1%"
