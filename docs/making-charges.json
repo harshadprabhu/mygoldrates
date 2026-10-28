@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-28T18:25:23.141016+05:30",
+  "updated": "2026-10-28T20:52:10.787619+05:30",
   "note": "Making charge as % of gold value, median across multiple real products per category from each jeweller's public price breakup. Indicative - varies by specific design.",
   "brands": [
     {
@@ -7,9 +7,9 @@
       "categories": [
         {
           "category": "Bangle",
-          "items": 24,
-          "making_pct_median": 24.5,
-          "making_pct_min": 18.0,
+          "items": 12,
+          "making_pct_median": 25.5,
+          "making_pct_min": 19.0,
           "making_pct_max": 40.1,
           "confidence": "high",
           "rejected_outliers": 0,
@@ -19,35 +19,12 @@
               "pct": 31.9
             },
             {
-              "url": "https://www.bluestone.com/bangles/the-kamla-round-bangle~17851.html",
-              "pct": 30.7
+              "url": "https://www.bluestone.com/bangles/the-maver-luxe-kada-for-him~107573.html",
+              "pct": 21.0
             },
             {
-              "url": "https://www.bluestone.com/bangles/the-afifi-round-bangle~53646.html",
-              "pct": 32.0
-            }
-          ]
-        },
-        {
-          "category": "Earrings",
-          "items": 19,
-          "making_pct_median": 26.0,
-          "making_pct_min": 25.0,
-          "making_pct_max": 31.9,
-          "confidence": "high",
-          "rejected_outliers": 6,
-          "examples": [
-            {
-              "url": "https://www.bluestone.com/earrings/the-kalka-stud-earrings~19028.html",
-              "pct": 26.0
-            },
-            {
-              "url": "https://www.bluestone.com/earrings/the-cascading-carpel-earrings~5803.html",
-              "pct": 34.0
-            },
-            {
-              "url": "https://www.bluestone.com/earrings/the-dripplet-drop-earrings~64359.html",
-              "pct": 26.0
+              "url": "https://www.bluestone.com/bangles/the-ogechi-round-bangle~108793.html",
+              "pct": 24.0
             }
           ]
         },
@@ -69,23 +46,23 @@
               "pct": 30.7
             },
             {
-              "url": "https://www.bluestone.com/watch+accessory/the-estere-evil-eye-mangalsutra-watch-charm~81527.html",
-              "pct": 37.6
+              "url": "https://www.bluestone.com/bracelets/the-holika-mangalsutra-bracelet~23810.html",
+              "pct": 35.0
             }
           ]
         },
         {
           "category": "Ring",
-          "items": 25,
+          "items": 23,
           "making_pct_median": 27.0,
           "making_pct_min": 26.0,
-          "making_pct_max": 45.5,
+          "making_pct_max": 45.9,
           "confidence": "high",
           "rejected_outliers": 0,
           "examples": [
             {
-              "url": "https://www.bluestone.com/rings/the-bryant-band-for-him~93952.html",
-              "pct": 36.0
+              "url": "https://www.bluestone.com/rings/the-aural-ring~42485.html",
+              "pct": 26.0
             },
             {
               "url": "https://www.bluestone.com/rings/the-dimas-textured-band-for-her~81692.html",
@@ -294,51 +271,148 @@
       ]
     },
     {
-      "brand": "GRT Jewellers",
+      "brand": "CaratLane",
       "categories": [
         {
           "category": "Bangle",
-          "items": 12,
-          "making_pct_median": 7.7,
-          "making_pct_min": 7.7,
-          "making_pct_max": 10.8,
+          "items": 59,
+          "making_pct_median": 24.0,
+          "making_pct_min": 19.0,
+          "making_pct_max": 35.0,
           "confidence": "high",
           "rejected_outliers": 0,
           "examples": [
             {
-              "url": "https://www.grtjewels.com/all-jewellery/bangles-bracelets/traditional-floral-bangle-in-22kt-yellow-gold-omgbg00001.html",
-              "pct": 7.7
+              "url": "https://www.caratlane.com/jewellery/gilded-sparkle-22kt-gold-bangle-kb00858-2y0000.html",
+              "pct": 23.0
             },
             {
-              "url": "https://www.grtjewels.com/all-jewellery/bangles-bracelets/floral-geometric-bangle-for-kids-in-22kt-yellow-gold-omgbg00002.html",
-              "pct": 7.7
+              "url": "https://www.caratlane.com/jewellery/reena-22kt-gold-bangles-kb00704-2y0000.html",
+              "pct": 23.0
             },
             {
-              "url": "https://www.grtjewels.com/all-jewellery/bangles-bracelets/textured-clover-floral-bangle-for-kids-in-22kt-yellow-gold-omgbg00003.html",
-              "pct": 7.7
+              "url": "https://www.caratlane.com/jewellery/sharvisha-22kt-gold-bangle-kb00839-2y0000.html",
+              "pct": 23.0
             }
           ]
         },
         {
           "category": "Earrings",
-          "items": 11,
-          "making_pct_median": 15.7,
-          "making_pct_min": 15.7,
-          "making_pct_max": 30.6,
+          "items": 22,
+          "making_pct_median": 50.0,
+          "making_pct_min": 38.0,
+          "making_pct_max": 50.0,
+          "confidence": "high",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.caratlane.com/jewellery/triangle-earring-ue06486-1y0000.html",
+              "pct": 50.0
+            },
+            {
+              "url": "https://www.caratlane.com/jewellery/trigonal-cutout-9kt-gold-stud-earrings-ue07990-8y0000.html",
+              "pct": 50.0
+            },
+            {
+              "url": "https://www.caratlane.com/jewellery/urban-gleam-gold-jhumka-ue07882-1y0000.html",
+              "pct": 38.0
+            }
+          ]
+        },
+        {
+          "category": "Mangalsutra",
+          "items": 60,
+          "making_pct_median": 24.0,
+          "making_pct_min": 22.0,
+          "making_pct_max": 38.0,
+          "confidence": "high",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.caratlane.com/jewellery/gleaming-wreath-gold-mangalsutra-us00597-1y0000.html",
+              "pct": 38.0
+            },
+            {
+              "url": "https://www.caratlane.com/jewellery/glint-ratna-22kt-gold-mangalsutra-ks00521-2y0000.html",
+              "pct": 24.0
+            },
+            {
+              "url": "https://www.caratlane.com/jewellery/naira-22kt-gold-mangalsutra-ks00600-2y0000.html",
+              "pct": 24.0
+            }
+          ]
+        },
+        {
+          "category": "Ring",
+          "items": 9,
+          "making_pct_median": 50.0,
+          "making_pct_min": 35.0,
+          "making_pct_max": 50.0,
           "confidence": "medium",
           "rejected_outliers": 0,
           "examples": [
             {
-              "url": "https://www.grtjewels.com/all-jewellery/earrings/floral-motif-earrings-with-drops-in-22kt-yellow-gold-omger00020.html",
-              "pct": 15.7
+              "url": "https://www.caratlane.com/jewellery/wavy-stackable-gold-ring-ur00659-1y0000.html",
+              "pct": 49.0
             },
             {
-              "url": "https://www.grtjewels.com/all-jewellery/earrings/textured-heart-drop-earrings-in-22kt-yellow-gold-omger00021.html",
-              "pct": 15.7
+              "url": "https://www.caratlane.com/jewellery/horizon-9kt-gold-ring-ur02449-8y0000.html",
+              "pct": 50.0
             },
             {
-              "url": "https://www.grtjewels.com/all-jewellery/earrings/openwork-floral-drop-earrings-in-22kt-yellow-gold-omger00022.html",
+              "url": "https://www.caratlane.com/jewellery/clasp-9kt-gold-ring-ur02470-8y0000.html",
+              "pct": 50.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "GRT Jewellers",
+      "categories": [
+        {
+          "category": "Bangle",
+          "items": 12,
+          "making_pct_median": 11.8,
+          "making_pct_min": 7.7,
+          "making_pct_max": 18.9,
+          "confidence": "high",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/bangles-bracelets/textured-bar-bracelet-for-kids-in-22kt-yellow-gold-omgbr00021.html",
+              "pct": 18.9
+            },
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/bangles-bracelets/leaf-and-swirl-bracelet-for-kids-in-22kt-yellow-gold-omgbr00023.html",
+              "pct": 18.9
+            },
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/bangles-bracelets/floral-enamel-bracelet-for-kids-in-22kt-yellow-gold-omgbr00024.html",
+              "pct": 15.7
+            }
+          ]
+        },
+        {
+          "category": "Earrings",
+          "items": 8,
+          "making_pct_median": 23.4,
+          "making_pct_min": 15.7,
+          "making_pct_max": 30.7,
+          "confidence": "medium",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/earrings/elegant-floral-drop-earrings-for-kids-in-22kt-yellow-gold-omger00039.html",
               "pct": 30.6
+            },
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/earrings/ethnic-floral-drop-earrings-for-kids-in-22kt-yellow-gold-omger00041.html",
+              "pct": 30.7
+            },
+            {
+              "url": "https://www.grtjewels.com/all-jewellery/earrings/minimalist-trefoil-earrings-for-kids-in-22kt-yellow-gold-omger00043.html",
+              "pct": 16.1
             }
           ]
         },
@@ -385,6 +459,107 @@
             {
               "url": "https://www.grtjewels.com/all-jewellery/ring/twinkling-heart-and-leaf-motif-gold-ring.html",
               "pct": 15.7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brand": "Indriya",
+      "categories": [
+        {
+          "category": "Bangle",
+          "items": 25,
+          "making_pct_median": 22.9,
+          "making_pct_min": 7.2,
+          "making_pct_max": 34.0,
+          "confidence": "high",
+          "rejected_outliers": 0,
+          "source": "price",
+          "examples": [
+            {
+              "url": "https://www.indriya.com/jewellery-products/ilyora-gold-bangles-gtmya00-apbr109",
+              "pct": 21.03
+            },
+            {
+              "url": "https://www.indriya.com/jewellery-products/ilyana-gold-plain-bangle-gtmya00-apbr861",
+              "pct": 22.86
+            },
+            {
+              "url": "https://www.indriya.com/jewellery-products/ekshika-glow-gold-bangle-gtlya00-aqbr492",
+              "pct": 18.06
+            }
+          ]
+        },
+        {
+          "category": "Earrings",
+          "items": 23,
+          "making_pct_median": 18.2,
+          "making_pct_min": 14.2,
+          "making_pct_max": 22.9,
+          "confidence": "high",
+          "rejected_outliers": 2,
+          "source": "price",
+          "examples": [
+            {
+              "url": "https://www.indriya.com/jewellery-products/pranvisha-gold-drop-earrings-gtyyb00-dqea371",
+              "pct": 16.6
+            },
+            {
+              "url": "https://www.indriya.com/jewellery-products/harivya-gold-drop-earrings-gtayb00-amed987",
+              "pct": 18.13
+            },
+            {
+              "url": "https://www.indriya.com/jewellery-products/elnora-gold-drop-earrings-gtyyb00-dyea279",
+              "pct": 18.3
+            }
+          ]
+        },
+        {
+          "category": "Mangalsutra",
+          "items": 13,
+          "making_pct_median": 20.1,
+          "making_pct_min": 16.1,
+          "making_pct_max": 31.9,
+          "confidence": "high",
+          "rejected_outliers": 1,
+          "source": "price",
+          "examples": [
+            {
+              "url": "https://www.indriya.com/jewellery-products/nidhi-gold-mangalsutra-gtayj00-apmp672",
+              "pct": 16.15
+            },
+            {
+              "url": "https://www.indriya.com/jewellery-products/asha-mangalsutra-pendant-gtaya10-apmp416",
+              "pct": 38.45
+            },
+            {
+              "url": "https://www.indriya.com/jewellery-products/charvi-gold-mangalsutra-gtayj00-apmp683",
+              "pct": 18.13
+            }
+          ]
+        },
+        {
+          "category": "Ring",
+          "items": 17,
+          "making_pct_median": 16.3,
+          "making_pct_min": 16.0,
+          "making_pct_max": 21.1,
+          "confidence": "high",
+          "rejected_outliers": 8,
+          "source": "price",
+          "examples": [
+            {
+              "url": "https://www.indriya.com/jewellery-products/saanviya-gold-ring-band-gtnya00-aqfw177",
+              "pct": 4.51
+            },
+            {
+              "url": "https://www.indriya.com/jewellery-products/elvina-gold-ring-gtlya00-dyfa134",
+              "pct": 16.23
+            },
+            {
+              "url": "https://www.indriya.com/jewellery-products/triveni-gold-ring-gtmya00-ddfc049",
+              "pct": 16.14
             }
           ]
         }
@@ -592,7 +767,7 @@
           "items": 57,
           "making_pct_median": 66.0,
           "making_pct_min": 28.5,
-          "making_pct_max": 66.4,
+          "making_pct_max": 66.0,
           "confidence": "high",
           "rejected_outliers": 0,
           "examples": [
@@ -659,7 +834,7 @@
         {
           "category": "Ring",
           "items": 150,
-          "making_pct_median": 40.5,
+          "making_pct_median": 40.3,
           "making_pct_min": 28.5,
           "making_pct_max": 77.0,
           "confidence": "high",
@@ -675,7 +850,7 @@
             },
             {
               "url": "https://www.kisna.com/products/andelise-ring",
-              "pct": 28.6
+              "pct": 28.5
             }
           ]
         }
@@ -856,17 +1031,17 @@
           "items": 6,
           "making_pct_median": 16.0,
           "making_pct_min": 16.0,
-          "making_pct_max": 20.2,
+          "making_pct_max": 20.1,
           "confidence": "medium",
           "rejected_outliers": 0,
           "examples": [
             {
               "url": "https://www.orra.co.in/product/glamorous-blackbeads-mangalsutra-omg23001-d000xcb",
-              "pct": 20.2
+              "pct": 20.1
             },
             {
               "url": "https://www.orra.co.in/product/radiant-blackbeads-yellow-gold-mangalsutra-omg23002-d000ycb",
-              "pct": 20.2
+              "pct": 20.1
             },
             {
               "url": "https://www.orra.co.in/product/sylish-mangalsutra-in-18kt-yellow-gold-omg14002",
@@ -1166,6 +1341,108 @@
           ]
         }
       ]
+    },
+    {
+      "brand": "Tanishq",
+      "categories": [
+        {
+          "category": "Bangle",
+          "items": 8,
+          "making_pct_median": 25.5,
+          "making_pct_min": 19.0,
+          "making_pct_max": 27.5,
+          "confidence": "medium",
+          "rejected_outliers": 1,
+          "examples": [
+            {
+              "url": "https://www.tanishq.co.in/product/22kt-yellow-gold-sublime-minimal-bangles-512822vul2a00.html",
+              "pct": 27.5
+            },
+            {
+              "url": "https://www.tanishq.co.in/product/22kt-yellow-gold-minimal-textured-bangles-512822vuj2a00.html",
+              "pct": 27.5
+            },
+            {
+              "url": "https://www.tanishq.co.in/product/richly-carved-gold-bangle-512411vsw2a00.html",
+              "pct": 19.0
+            }
+          ]
+        },
+        {
+          "category": "Earrings",
+          "items": 8,
+          "making_pct_median": 27.5,
+          "making_pct_min": 24.5,
+          "making_pct_max": 27.5,
+          "confidence": "medium",
+          "rejected_outliers": 2,
+          "examples": [
+            {
+              "url": "https://www.tanishq.co.in/product/fascinating-22-karat-yellow-gold-filigree-patterned-drop-earrings-511072disaba00.html",
+              "pct": 26.5
+            },
+            {
+              "url": "https://www.tanishq.co.in/product/22kt-yellow-gold-bars-style-stud-earrings-512822sywaba00.html",
+              "pct": 27.5
+            },
+            {
+              "url": "https://www.tanishq.co.in/product/22kt-yellow-gold-subtle-glamorous-hoop-earrings-512822htlaaa00.html",
+              "pct": 27.5
+            }
+          ]
+        },
+        {
+          "category": "Mangalsutra",
+          "items": 14,
+          "making_pct_median": 25.0,
+          "making_pct_min": 20.5,
+          "making_pct_max": 29.5,
+          "confidence": "high",
+          "rejected_outliers": 1,
+          "examples": [
+            {
+              "url": "https://www.tanishq.co.in/product/infinite-starlight-gold-mangalsutra-51o6fdyctaap3.html",
+              "pct": 29.5
+            },
+            {
+              "url": "https://www.tanishq.co.in/product/linear-focus-gold-mangalsutra-51ya99yjiaa00.html",
+              "pct": 20.5
+            },
+            {
+              "url": "https://www.tanishq.co.in/product/detailed-heritage-gold-mangalsutra-51m5v2ycslap1.html",
+              "pct": 25.0
+            }
+          ]
+        },
+        {
+          "category": "Ring",
+          "items": 5,
+          "making_pct_median": 19.5,
+          "making_pct_min": 14.0,
+          "making_pct_max": 22.5,
+          "confidence": "medium",
+          "rejected_outliers": 0,
+          "examples": [
+            {
+              "url": "https://www.tanishq.co.in/product/dashing-22-karat-yellow-gold-embossed-ring-511518favaa00.html",
+              "pct": 14.0
+            },
+            {
+              "url": "https://www.tanishq.co.in/product/eclectic-22-karat-yellow-gold-leaf-finger-ring-511518fbuaa00.html",
+              "pct": 22.5
+            },
+            {
+              "url": "https://www.tanishq.co.in/product/delicate-22-karat-yellow-gold-finger-ring-510120fraaa00.html",
+              "pct": 19.5
+            }
+          ]
+        }
+      ],
+      "offer": {
+        "making_pct_off": 10.0,
+        "max_pct_off": 10.0,
+        "share": 0.26
+      }
     },
     {
       "brand": "Waman Hari Pethe",
