@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
     inputs:
       post:
-        description: "which post: news, rates, pulse or awareness"
+        description: "which post: news, rates, pulse, awareness or reel (a video made ahead: docs/social/reel-<date>.mp4)"
         default: "rates"
       mode:
         description: "preview (build the card only), check (is Instagram connected?) or post"
@@ -56,10 +56,10 @@ jobs:
             "47 13 * * 2,4,6") k=awareness ;;
             *) k="${PICK:-rates}" ;;
           esac
-          case "$k" in news|rates|pulse|awareness) ;; *) echo "::error::post must be news, rates, pulse or awareness"; exit 1 ;; esac
+          case "$k" in news|rates|pulse|awareness|reel) ;; *) echo "::error::post must be news, rates, pulse, awareness or reel"; exit 1 ;; esac
           echo "kind=$k" >> "$GITHUB_OUTPUT"
           # the file that says "there is a post today" (the awareness caption stands for its slides)
-          if [ "$k" = awareness ]; then ext=txt; else ext=jpg; fi
+          case "$k" in awareness) ext=txt ;; reel) ext=mp4 ;; *) ext=jpg ;; esac
           echo "file=docs/social/$k-$(TZ=Asia/Kolkata date +%F).$ext" >> "$GITHUB_OUTPUT"
 
       - name: Check the Instagram connection
@@ -71,7 +71,7 @@ jobs:
         run: python social_post.py check
 
       - name: Build the card
-        if: inputs.mode != 'check'
+        if: inputs.mode != 'check' && steps.which.outputs.kind != 'reel'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # news/pulse text; optional jewellery photo for rates
           KIND: ${{ steps.which.outputs.kind }}
@@ -107,6 +107,7 @@ jobs:
           URL="https://raw.githubusercontent.com/${{ github.repository }}/$SHA/$FILE"
           case "$KIND" in
             rates) python social_post.py publish "$URL" ;;
+            reel) python social_post.py reel "$URL" ;;
             awareness) python awareness.py publish "https://raw.githubusercontent.com/${{ github.repository }}/$SHA/docs/social" ;;
             *) python news_post.py publish "$KIND" "$URL" ;;
           esac
