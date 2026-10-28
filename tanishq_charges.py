@@ -31,7 +31,7 @@ PROD_RE = re.compile(r"/product/[^?#<]*-([0-9a-z]{10,})\.html", re.I)
 # karats other than 22 and coloured gold, named in the product's own address
 _OTHER_KT = re.compile(r"\b(9|14|18|24) ?(kt|k|karat|carat)\b|\brose gold\b|\bwhite gold\b|\bplatinum\b", re.I)
 PER_CAT = 15          # plain 22K pieces read per category
-TRIES_PER_CAT = 30    # product data requests per category at most (each one costs a proxy credit)
+TRIES_PER_CAT = 40    # product data requests per category at most (each one costs a proxy credit)
 WORKERS = 3
 DEBUG = False
 
@@ -97,32 +97,37 @@ def parse(txt):
     return {"pct": pct, "gold": gold, "making": making, "offer": offer}
 
 
-CACHE = "data/tanishq_products.txt"
+CACHE = "data/tanishq_products.json"
 
 
 def product_urls(sess):
     """{category: [product url, ...]} from the sitemaps, plain-gold-looking only.
-    A sitemap the proxies give up on comes from the last good list (CACHE)."""
-    urls, failed = set(), False
+    A sitemap the proxies give up on (they are 3-8 MB) comes from its last
+    good copy (CACHE, one list per sitemap)."""
+    import json
+    try:
+        cache = json.load(open(CACHE, encoding="utf-8"))
+    except (OSError, ValueError):
+        cache = {}
+    urls = set()
     for sm in SITEMAPS:
-        for _ in range(3):                     # big files: a proxy sometimes gives up
+        for _ in range(4):                     # big files: a proxy sometimes gives up
             x, how = fetch(sess, sm, min_len=100, proxy_timeout=150)
             if x:
                 break
         found = {u.split("?")[0] for u in re.findall(r"<loc>([^<]+)</loc>", x or "")}
-        print(f"  {BRAND}: {sm.rsplit('/', 1)[1]} {how}, {len(found)} products")
+        name = sm.rsplit("/", 1)[1]
+        if found:
+            cache[name] = sorted(found)
+        else:
+            found = set(cache.get(name, []))
+            how += f", last good copy {len(found)}"
+        print(f"  {BRAND}: {name} {how}, {len(found)} products")
         urls |= found
-        failed |= not found
-    try:
-        old = set(open(CACHE, encoding="utf-8").read().split())
-    except OSError:
-        old = set()
-    if failed:
-        urls |= old
-    elif urls:
+    if cache:
         os.makedirs(os.path.dirname(CACHE), exist_ok=True)
         with open(CACHE, "w", encoding="utf-8") as f:
-            f.write("\n".join(sorted(urls)) + "\n")
+            json.dump(cache, f, indent=0)
     cats = {}
     for u in sorted(urls):
         name = u.replace("-", " ")
