@@ -112,7 +112,7 @@ def probe(name, domain):
 def main():
     from supabase import create_client
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
-    have = {b["brand"].lower() for b in json.load(open("docs/making-charges.json"))["brands"]}
+    have = {b["brand"].lower() for b in json.load(open(__import__("private_store").MC))["brands"]}
     rows = sb.table("brands").select("name,domain,active").eq("active", True).order("name").execute().data
     todo = [r for r in rows if r.get("domain") and r["name"].lower() not in have]
     print(f"probe: {len(todo)} jewellers without making charges, {len(have)} with")

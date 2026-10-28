@@ -4,3 +4,5 @@
 __pycache__/
 *.pyc
 build/
+# collected jeweller data: kept in Supabase (private_store.py), never in git
+private/

@@ -4,23 +4,25 @@
     python jeweller_making.py
 
 Reads what listed jewellers sent through /list-your-jewellery (the private
-jeweller_making table, service key), writes it to data/jeweller_making.json
+jeweller_making table, service key), writes it to private/jeweller_making.json
 (brand, category, %, date - figures the jeweller chose to publish) and merges
-it into docs/making-charges.json, which every page and Sona read:
+it into the making charges (private/making-charges.json, saved to Supabase), which every page and Sona read:
   - a category we measure from real products keeps the measured figure;
   - otherwise the jeweller's figure is added, marked source "jeweller" and
     confidence "jeweller", so the pages say "supplied by the jeweller";
   - a figure the jeweller no longer sends is dropped.
 Runs every morning (offers job) and after each making-charge collection,
-which rewrites docs/making-charges.json from scratch. If the table is not
+which writes the making charges from scratch. If the table is not
 there yet, it changes nothing.
 """
 import json
 import os
 from datetime import datetime, timedelta, timezone
 
-OUT = "data/jeweller_making.json"
-MC = "docs/making-charges.json"
+import private_store
+
+OUT = private_store.JM
+MC = private_store.MC
 IST = timezone(timedelta(hours=5, minutes=30))
 NOTE = ("Making charges sent by the jewellers themselves through /list-your-jewellery "
         "(% of gold value on plain gold, before offers). Shown as supplied by the jeweller.")
@@ -66,12 +68,16 @@ def main():
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump({"note": NOTE, "items": items}, f, ensure_ascii=False, indent=1)
         f.write("\n")
+    if not os.path.exists(MC):
+        private_store.pull()
     try:
         mc = json.load(open(MC, encoding="utf-8"))
     except (OSError, ValueError):
         mc = {"updated": datetime.now(IST).isoformat(), "brands": []}
+    merged = merge(mc, items)
     with open(MC, "w", encoding="utf-8") as f:
-        json.dump(merge(mc, items), f, ensure_ascii=False, indent=2)
+        json.dump(merged, f, ensure_ascii=False, indent=2)
+    private_store.push_making(merged)
     print(f"::notice title=jeweller making::{len(items)} figures from {len({i['brand'] for i in items})} jewellers merged")
 
 
