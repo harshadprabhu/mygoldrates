@@ -4,6 +4,7 @@ name: social-post
 #   ~08:47 IST  news   - today's gold news (news_post.py news)
 #   ~11:17 IST  rates  - today's rate card (social_post.py)
 #   ~14:47 IST  pulse  - India's gold pulse: Indian buyers' mood + our figures (news_post.py pulse)
+#   ~18:37 IST  reel   - a short video made ahead (docs/social/reel-<date>.mp4 + .txt), only on days one is saved
 #   ~19:17 IST  Tue/Thu/Sat  awareness - a six-slide swipe post on gold purity, hallmarking or
 #               HUID, in turn (awareness.py)
 # Each card is committed to the repo first (Instagram fetches the image from
@@ -17,6 +18,7 @@ on:
     - cron: "47 5 * * *"    # 05:47 UTC ~ 11:17 IST: rates
     - cron: "17 9 * * *"    # 09:17 UTC ~ 14:47 IST: pulse
     - cron: "47 13 * * 2,4,6"  # 13:47 UTC ~ 19:17 IST, Tue/Thu/Sat: awareness carousel
+    - cron: "7 13 * * *"    # 13:07 UTC ~ 18:37 IST: a Reel, only on days one is saved (docs/social/reel-<date>.mp4)
   workflow_dispatch:
     inputs:
       post:
@@ -54,6 +56,7 @@ jobs:
             "47 5 * * *") k=rates ;;
             "17 9 * * *") k=pulse ;;
             "47 13 * * 2,4,6") k=awareness ;;
+            "7 13 * * *") k=reel ;;
             *) k="${PICK:-rates}" ;;
           esac
           case "$k" in news|rates|pulse|awareness|reel) ;; *) echo "::error::post must be news, rates, pulse, awareness or reel"; exit 1 ;; esac

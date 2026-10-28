@@ -34,19 +34,19 @@ const HIDE = "#liveChip,.live-chip,.sn-fab,#sonaFab,#sonaBanner,.sn-ban,#subPop,
   }
   fs.mkdirSync('frames', { recursive: true });
   await scene('intro', ''); await shot(1.5);
-  await scene('', 'Ask Sona: “Best offer today”');
+  await scene('', 'Dhanteras shopping? Ask Sona: “Best offer today”');
   await f.evaluate(() => window.GR_ASK()); await p.waitForTimeout(700); await f.addStyleTag({ content: HIDE }); await shot(0.35);
   await typeAsk('Best offer today', 0.55);
   await reveal(0.75, 0.01, 0.01);
-  await scene('', 'Pick a piece – Sona ranks every jeweller');
+  await scene('', 'Pick your Dhanteras buy – Sona ranks every jeweller');
   await f.locator('#sonaPanel .sn-chip', { hasText: 'Bangle' }).first().click();
   await p.waitForTimeout(150); await scrollTo(await lastQTop()); await shot(0.3);
   await f.waitForFunction(() => !document.querySelector('#sonaPanel .sn-typing'), null, { timeout: 8000 }); await p.waitForTimeout(200);
   await reveal(1.0, 1.3, 0.6, 520);
-  await scene('', 'Gold + making after offer + GST, worked out');
+  await scene('', 'Gold + making after Diwali offer + GST, worked out');
   await typeAsk('best offer on a ring', 0.55);
   await reveal(0.9, 1.0, 0.5, 420);
-  await scene('', 'Making charges &amp; offers, jeweller by jeweller');
+  await scene('', 'Making charges &amp; festive offers, jeweller by jeweller');
   await typeAsk('tanishq making charges', 0.55);
   await reveal(1.5, 0.01, 0.01);
   await scene('outro', ''); await shot(2.5);
