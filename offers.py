@@ -12,9 +12,10 @@ Daily (offers.yml). For every active jeweller:
      old-gold exchange terms, free coins, rate-protection / advance booking,
      monthly schemes, bank cashback. Each keeps the jeweller's own sentence,
      the page it came from, "up to" wording, minimum purchase and dates.
-  3. Write docs/offers.json. The site (generate_site.py) turns it into the
+  3. Write private/offers.json and save the day to Supabase (private_store.py;
+     not git, which is public). The site (generate_site.py) turns it into the
      /gold-offers-today page, working out what a making-charge discount is
-     worth in rupees from today's rate and docs/making-charges.json.
+     worth in rupees from today's rate and the making charges.
 
 A site that blocks plain requests but is in collect_charges.PROXY_HOSTS
 (Tanishq) is read through the same proxy waterfall as its daily rate: the
@@ -36,7 +37,9 @@ from datetime import datetime, timezone, timedelta
 from urllib.parse import urljoin, urlparse
 
 IST = timezone(timedelta(hours=5, minutes=30))
-OUT = "docs/offers.json"
+import private_store
+
+OUT = private_store.OFFERS
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/141.0 Safari/537.36 MyGoldRatesOffers/1.0")
 MAX_PAGES = 5            # homepage + up to 4 offer pages per jeweller
@@ -659,6 +662,8 @@ def main(argv=None):
     sess = requests.Session()
     sess.headers.update({"User-Agent": UA, "Accept-Language": "en-IN,en;q=0.9"})
 
+    if not os.path.exists(OUT):
+        private_store.pull()                  # yesterday's, for "first seen"
     prev = {}
     try:
         for b in json.load(open(OUT)).get("brands", []):
@@ -681,8 +686,10 @@ def main(argv=None):
     if only:
         print(json.dumps(data, ensure_ascii=False, indent=1)[:6000])
         return
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
+    private_store.push_offers(data)
     print(f"offers: {sum(len(b['offers']) for b in result)} from "
           f"{sum(1 for b in result if b['offers'])} of {len(result)} jewellers")
 

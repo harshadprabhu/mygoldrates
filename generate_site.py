@@ -9,6 +9,7 @@ anon key (insert-only table behind RLS); no privileged keys are shipped.
 
 from __future__ import annotations
 
+import private_store
 import glob
 import hashlib
 import html as _html
@@ -1743,6 +1744,8 @@ def _articles(rate_str, med, inr):
 
 
 def main():
+    # jewellers' making charges and offers: from Supabase (private), not git
+    private_store.pull()
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
     anon_key = os.environ.get("SUPABASE_ANON_KEY", "")
     supabase_url = os.environ["SUPABASE_URL"]
@@ -3022,7 +3025,7 @@ def main():
 
     # ---- Making charges comparison (from collect_charges.py output) ----
     try:
-        with open("docs/making-charges.json", encoding="utf-8") as f:
+        with open(private_store.MC, encoding="utf-8") as f:
             mc = json.load(f)
     except Exception:
         mc = None
@@ -3628,10 +3631,10 @@ b.addEventListener('click',function(){
     # charges in docs/making-charges.json. No offers file: no page.
     try:
         import offers_page
-        with open("docs/offers.json", encoding="utf-8") as _f:
+        with open(private_store.OFFERS, encoding="utf-8") as _f:
             _offers = json.load(_f)
         try:
-            with open("docs/making-charges.json", encoding="utf-8") as _f:
+            with open(private_store.MC, encoding="utf-8") as _f:
                 _mc = json.load(_f)
         except Exception:
             _mc = {}
@@ -3670,7 +3673,7 @@ b.addEventListener('click',function(){
         print(f"offers page: {sum(1 for b in _offers.get('brands', []) if b.get('offers'))} "
               f"jewellers with offers; {_osum or 'no ring ranking'}")
     except FileNotFoundError:
-        print("offers page: skipped - docs/offers.json not written yet")
+        print("offers page: skipped - no offers saved yet")
     except Exception as e:
         print("offers page: skipped -", type(e).__name__, str(e)[:120])
 
@@ -3720,7 +3723,7 @@ b.addEventListener('click',function(){
             # jeweller's page has enough of its own history to be indexed
             _jdays = {sl: len(v) for sl, v in _jhist.items()}
             try:
-                with open("docs/making-charges.json", encoding="utf-8") as f:
+                with open(private_store.MC, encoding="utf-8") as f:
                     _mcb = {b["brand"].lower(): b for b in json.load(f).get("brands", [])}
             except (OSError, ValueError):
                 _mcb = {}
@@ -3942,12 +3945,12 @@ b.addEventListener('click',function(){
         import assistant_kb
         import offers_page as _OP
         try:
-            with open("docs/offers.json", encoding="utf-8") as _f:
+            with open(private_store.OFFERS, encoding="utf-8") as _f:
                 _kb_off = json.load(_f)
         except Exception:
             _kb_off = {}
         try:
-            with open("docs/making-charges.json", encoding="utf-8") as _f:
+            with open(private_store.MC, encoding="utf-8") as _f:
                 _kb_mc = json.load(_f)
         except Exception:
             _kb_mc = {}

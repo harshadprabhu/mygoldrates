@@ -3,13 +3,13 @@ on:
   workflow_dispatch:
     inputs:
       probe:
-        description: "true = only survey which jewellers show a making charge in their product pages; tanishq = read a few Tanishq products through the proxies; price = a few from price_making.py (all change nothing)"
+        description: "true = only survey which jewellers show a making charge in their product pages; tanishq = read a few Tanishq products through the proxies; price = a few from price_making.py (these change nothing); migrate = move the old git data into Supabase"
         default: "false"
   schedule:
     - cron: "17 4 1,16 * *"   # ~every 15 days (1st & 16th), ~09:47 IST
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   charges:
@@ -30,12 +30,23 @@ jobs:
       - name: Tanishq survey (probe=tanishq)
         if: inputs.probe == 'tanishq'
         env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
           SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
           ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
           CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
           ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
         run: python tanishq_charges.py
+      - name: One-off move of the old git data into Supabase (probe=migrate)
+        if: inputs.probe == 'migrate'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          python private_store.py migrate
+          python private_store.py push-making
+          python private_store.py push-offers
       - name: Survey of the readers in price_making.py (probe=price)
         if: inputs.probe == 'price'
         env:
@@ -45,14 +56,16 @@ jobs:
           CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
         run: python price_making.py
       - name: Browser for jewellers whose breakup only shows in a browser (Malabar)
-        if: inputs.probe != 'true' && inputs.probe != 'tanishq' && inputs.probe != 'price'
+        if: inputs.probe != 'true' && inputs.probe != 'tanishq' && inputs.probe != 'price' && inputs.probe != 'migrate'
         run: |
           pip install playwright
           python -m playwright install --with-deps chromium
       - name: Collect making charges
-        if: inputs.probe != 'true' && inputs.probe != 'tanishq' && inputs.probe != 'price'
+        if: inputs.probe != 'true' && inputs.probe != 'tanishq' && inputs.probe != 'price' && inputs.probe != 'migrate'
         run: python collect_charges.py
         env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
           # Tanishq answers only through the proxies (tanishq_charges.py)
           SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
@@ -61,28 +74,16 @@ jobs:
           CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
       # the collection rewrites the file: put the jewellers' own figures back in
       - name: Merge the jewellers' own making charges
-        if: inputs.probe != 'true' && inputs.probe != 'tanishq' && inputs.probe != 'price'
+        if: inputs.probe != 'true' && inputs.probe != 'tanishq' && inputs.probe != 'price' && inputs.probe != 'migrate'
         continue-on-error: true
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python jeweller_making.py
-      - name: Commit making-charges.json
-        if: inputs.probe != 'true' && inputs.probe != 'tanishq' && inputs.probe != 'price'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/making-charges.json data/jeweller_making.json data/tanishq_products.json
-          if git diff --cached --quiet; then
-            echo "unchanged"
-          else
-            git commit -m "charges: refresh making-charges.json"
-            git fetch origin main
-            git rebase -X ours origin/main || {
-              git rebase --abort
-              git reset --soft origin/main
-              git add docs/making-charges.json data/jeweller_making.json data/tanishq_products.json
-              git commit -m "charges: refresh making-charges.json"
-            }
-            git push
-          fi
+      # the data is private: saved to Supabase (private_store.py), never to git
+      - name: Confirm the run is saved in Supabase
+        if: inputs.probe != 'true' && inputs.probe != 'tanishq' && inputs.probe != 'price' && inputs.probe != 'migrate'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python private_store.py push-making

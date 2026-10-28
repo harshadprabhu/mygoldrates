@@ -1,7 +1,8 @@
 name: offers
 # Today's jeweller offers, read from each jeweller's own website with fixed
 # rules (offers.py) - no paid service. Offers shown only in banner pictures
-# are read with Tesseract OCR (free, banner_ocr.py). Writes docs/offers.json; the next site
+# are read with Tesseract OCR (free, banner_ocr.py). Saves the day's offers to Supabase
+# (private_store.py - private, not git); the next site
 # build turns it into /gold-offers-today. Also exports the answers the owner
 # approved for Sona, the site assistant (bot_learn.py).
 on:
@@ -57,21 +58,27 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-      - name: Commit offers.json and Sona's approved answers
+      - name: Commit Sona's approved answers
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/offers.json data/assistant_answers.json docs/making-charges.json data/jeweller_making.json
+          git add data/assistant_answers.json
           if git diff --cached --quiet; then
             echo "unchanged"
           else
-            git commit -m "offers: refresh offers.json and approved answers"
+            git commit -m "offers: Sona's approved answers"
             git fetch origin main
             git rebase -X ours origin/main || {
               git rebase --abort
               git reset --soft origin/main
-              git add docs/offers.json data/assistant_answers.json docs/making-charges.json data/jeweller_making.json
-              git commit -m "offers: refresh offers.json and approved answers"
+              git add data/assistant_answers.json
+              git commit -m "offers: Sona's approved answers"
             }
             for i in 1 2 3; do git push -q origin HEAD:main && break; sleep 5; git pull --rebase -q origin main; done
           fi
+      # the offers are private: saved to Supabase, never to git
+      - name: Confirm today's offers are saved in Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python private_store.py push-offers

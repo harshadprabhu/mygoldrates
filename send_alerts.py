@@ -53,9 +53,13 @@ def offers_line(live):
     try:
         import json as _json
         import offers_page
-        offers = _json.load(open("docs/offers.json", encoding="utf-8"))
+        import os as _os
+        import private_store
+        if not _os.path.exists(private_store.OFFERS):
+            private_store.pull()
+        offers = _json.load(open(private_store.OFFERS, encoding="utf-8"))
         try:
-            mc = _json.load(open("docs/making-charges.json", encoding="utf-8"))
+            mc = _json.load(open(private_store.MC, encoding="utf-8"))
         except Exception:
             mc = {}
         # 22/24, exactly as the offers page computes it, so the two agree.

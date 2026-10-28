@@ -5,7 +5,8 @@ For brands that publish a product price breakup, sample MULTIPLE products per
 category and record the making charge as % of gold value, then aggregate to a
 median per (brand, category). Discovery brands are enumerated from their
 product sitemap; others use a curated URL. Best-effort - items without a clean
-% are skipped. Writes docs/making-charges.json.
+% are skipped. Writes private/making-charges.json and saves the run to
+Supabase (private_store.py) - not to git, which is public.
 """
 import json
 import os
@@ -931,9 +932,11 @@ def main():
                 "breakup. Indicative - varies by specific design.",
         "brands": out,
     }
-    os.makedirs("docs", exist_ok=True)
-    with open("docs/making-charges.json", "w", encoding="utf-8") as f:
+    import private_store
+    os.makedirs(private_store.DIR, exist_ok=True)
+    with open(private_store.MC, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
+    private_store.push_making(payload)
     engine.save(PROFILE_PATH)
     tot = sum(len(v) for v in agg.values())
     print(f"charges: {len(out)} brands, {tot} products with a making %")

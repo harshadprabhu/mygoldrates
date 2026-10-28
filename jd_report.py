@@ -42,7 +42,6 @@ KEY = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_ANON_KE
 # short-lived signed URL from the JD worker, never a public path.
 OUT = os.environ.get("JD_REPORT_OUT", "build/jewellers-digest.xlsx")
 BUCKET = os.environ.get("JD_REPORT_BUCKET", "jd-reports")
-MC_URL = "https://mygoldrates.com/making-charges.json"
 
 DISCLAIMER = (
     "IMPORTANT - PLEASE READ. Jewellers Digest is market analysis prepared "
@@ -82,13 +81,12 @@ def get(path):
 
 
 def fetch_making_charges():
-    try:
-        req = urllib.request.Request(MC_URL, headers={"User-Agent": "mygoldrates-jd"})
-        with urllib.request.urlopen(req, timeout=30) as r:
-            return json.loads(r.read())
-    except Exception as e:
-        print(f"  making charges unavailable ({type(e).__name__}) - sheet skipped")
-        return None
+    """The latest making charges, from Supabase (private_store), no longer a public file."""
+    import private_store
+    mc = private_store.pull_making() or private_store.load(private_store.MC)
+    if not mc:
+        print("  making charges unavailable - sheet skipped")
+    return mc
 
 
 def _hrow(ws, row, headers, width=None):

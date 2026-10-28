@@ -98,18 +98,17 @@ def parse(txt):
     return {"pct": pct, "gold": gold, "making": making, "offer": offer}
 
 
-CACHE = "data/tanishq_products.json"
+CACHE = "data/tanishq_products.json"     # old git copy, read once if Supabase has none
+CACHE_KEY = "tanishq_sitemaps"            # private_store.collector_cache
 
 
 def product_urls(sess):
     """{category: [product url, ...]} from the sitemaps, plain-gold-looking only.
     A sitemap the proxies give up on (they are 3-8 MB) comes from its last
-    good copy (CACHE, one list per sitemap)."""
+    good copy (Supabase collector_cache, one list per sitemap)."""
     import json
-    try:
-        cache = json.load(open(CACHE, encoding="utf-8"))
-    except (OSError, ValueError):
-        cache = {}
+    import private_store
+    cache = private_store.cache_get(CACHE_KEY) or private_store.load(CACHE, {}) or {}
     urls = set()
     for sm in SITEMAPS:
         for i in range(6):                     # big files (3-8 MB): proxies often give up,
@@ -127,9 +126,7 @@ def product_urls(sess):
         print(f"  {BRAND}: {name} {how}, {len(found)} products")
         urls |= found
     if cache:
-        os.makedirs(os.path.dirname(CACHE), exist_ok=True)
-        with open(CACHE, "w", encoding="utf-8") as f:
-            json.dump(cache, f, indent=0)
+        private_store.cache_put(CACHE_KEY, cache)
     cats = {}
     for u in sorted(urls):
         name = u.replace("-", " ")
