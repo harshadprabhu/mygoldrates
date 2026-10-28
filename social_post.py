@@ -3,6 +3,7 @@
 
     python social_post.py build              # card + caption -> docs/social/
     python social_post.py publish <image_url> # post them to Instagram
+    python social_post.py reel <video_url>    # post docs/social/reel-<date>.mp4 as a Reel
     python social_post.py check              # is Instagram connected? (posts nothing)
 
 The card is drawn from docs/assistant.json (the file Sona answers from, so
@@ -482,6 +483,35 @@ def publish(image_url, text):
     return r.json()["id"]
 
 
+def publish_reel(video_url, text):
+    """A Reel from a public .mp4 (1080x1920, H.264/AAC): container with
+    media_type REELS, wait while Instagram processes the video, publish."""
+    import requests
+    tok = _token()
+    if not tok:
+        print("::notice::No Instagram token yet (IG_ACCESS_TOKEN) - nothing posted.")
+        return None
+    me = os.environ.get("IG_USER_ID") or "me"
+    r = requests.post(f"{GRAPH}/{me}/media", data={"media_type": "REELS", "video_url": video_url, "caption": text,
+                                                   "share_to_feed": "true", "access_token": tok}, timeout=60)
+    if not r.ok:
+        raise SystemExit(f"Instagram refused the video: {r.status_code} {r.json().get('error', {}).get('message', '')}")
+    cid = r.json()["id"]
+    for _ in range(60):                            # video processing takes a minute or two
+        st = requests.get(f"{GRAPH}/{cid}", params={"fields": "status_code,status", "access_token": tok}, timeout=30).json()
+        if st.get("status_code") == "FINISHED":
+            break
+        if st.get("status_code") == "ERROR":
+            raise SystemExit(f"Instagram could not process the video: {st.get('status', '')}")
+        time.sleep(6)
+    else:
+        raise SystemExit("Instagram took too long to process the video")
+    r = requests.post(f"{GRAPH}/{me}/media_publish", data={"creation_id": cid, "access_token": tok}, timeout=60)
+    if not r.ok:
+        raise SystemExit(f"Instagram refused to publish: {r.status_code} {r.json().get('error', {}).get('message', '')}")
+    return r.json()["id"]
+
+
 def _wait(cid, tok):
     """Wait until Instagram has fetched and processed a container."""
     import requests
@@ -569,6 +599,23 @@ def main():
             with open(LOG, "w", encoding="utf-8") as fh:
                 json.dump(log, fh, indent=1, sort_keys=True)
             print("posted", mid)
+    elif sys.argv[1:2] == ["reel"] and len(sys.argv) > 2:
+        # a Reel made ahead (docs/social/reel-<date>.mp4 + .txt caption), posted once
+        stamp = datetime.now(IST).strftime("%Y-%m-%d")
+        try:
+            log = json.load(open(LOG, encoding="utf-8"))
+        except (OSError, ValueError):
+            log = {}
+        if log.get(f"reel-{stamp}"):
+            print("reel already posted today")
+            return
+        text = open(os.path.join(OUT, f"reel-{stamp}.txt"), encoding="utf-8").read()
+        mid = publish_reel(sys.argv[2], text)
+        if mid:
+            log[f"reel-{stamp}"] = mid
+            with open(LOG, "w", encoding="utf-8") as fh:
+                json.dump(log, fh, indent=1, sort_keys=True)
+            print("posted reel", mid)
     else:
         print(__doc__)
         sys.exit(2)
