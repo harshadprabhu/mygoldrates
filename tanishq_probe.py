@@ -38,7 +38,10 @@ def main():
     if html:
         print("\n".join(re.findall(r"<loc>([^<]+)</loc>", html)[:15]))
     for sm in ("sitemap_0.xml", "sitemap_1.xml", "sitemap_2.xml"):
-        x, how = fetch(s, BASE + "/" + sm, min_len=100)
+        for _ in range(3):
+            x, how = fetch(s, BASE + "/" + sm, min_len=100)
+            if x:
+                break
         locs = sorted({l.split("?")[0] for l in re.findall(r"<loc>([^<]+)</loc>", x or "")})
         print(f"== {sm}: {how} {len(x or '')} bytes, {len(locs)} urls")
         plain = [l for l in locs if "/product/" in l and not _STUDDED_RE.search(l.replace("-", " "))]
@@ -46,8 +49,9 @@ def main():
         for l in plain:
             cats.setdefault(categorize(l), []).append(l)
         print("   plain gold by category:", {c: len(v) for c, v in cats.items()})
-        for c in ("Ring", "Bangle"):
-            prods += cats.get(c, [])[:1]
+        for c in ("Ring", "Bangle", "Earrings", "Mangalsutra"):
+            if not any(categorize(p) == c for p in prods):
+                prods += cats.get(c, [])[:1]
     for u in []:
         html, how = fetch(s, u)
         found = sorted({p if p.startswith("http") else BASE + p for p in PROD_RE.findall(html or "")})
@@ -59,7 +63,7 @@ def main():
             print("   .html links:", len(hrefs), hrefs[:8])
             for snip in around(html, r"product-tile|data-pid|pdp-link", n=2, w=300):
                 print("   tile:", snip)
-    for u in prods[:3]:
+    for u in prods[:4]:
         html, how = fetch(s, u)
         print(f"\n== PRODUCT {u}: {how} {len(html or '')} bytes")
         if not html:
