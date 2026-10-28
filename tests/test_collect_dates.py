@@ -19,3 +19,11 @@ def test_a_rate_dated_more_than_a_day_back_is_refused():
     assert collect.stale_page("<p>Rates updated on 11 October 2026</p>", today) == "STALE: rate dated 2026-10-11"
     assert collect.stale_page("<p>22K: 13,880/g</p>", today) == "STALE: no date on the page"
     assert {"swarn-jewellers", "rushabh"} <= collect.DATED_PAGES
+
+
+def test_the_rate_is_taken_from_the_22k_a_jeweller_publishes():
+    png = {"24K": 14276.0, "22K": 13213.0, "18K": 10900.0}
+    assert collect.basis_purity(png) == "22K"
+    assert collect.basis_purity({"24K": 14400.0, "18K": 10800.0}) == "24K"
+    assert collect.basis_purity(png, "24K") == "24K"
+    assert collect.basis_purity({"14K": 8431.0}) == "14K"
