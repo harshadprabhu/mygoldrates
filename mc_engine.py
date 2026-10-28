@@ -590,6 +590,43 @@ def s_dom_breakup_section(html: str) -> ExtractionResult:
     return _labelled_text_scan(block, "dom_breakup_section")
 
 
+def s_variant_config_formula(html: str) -> ExtractionResult:
+    """A pricing formula instead of a breakup (Waman Hari Pethe's Shopify
+    store): var variantConfigs = {<id>: {"metal_weight": 24.9,
+    "wastage_charges": 30, "making_charges": 200, "remarks": "percentage",
+    "tax": 3, ...}} and the variant's price in paise. With "percentage" the
+    store charges wastage as a % of the gold plus making per gram, so
+    price / (1 + tax) = W x rate x (1 + wastage%) + making x W. The page does
+    not state its rate: solve for it from the price (it comes out the same,
+    about Rs 13,250/g, on every such piece - which is how the formula was
+    verified), then making % = wastage% + making / rate. "fixed" pieces are
+    left to the other strategies."""
+    m = re.search(r"var\s+variantConfigs\s*=\s*\{\s*(\d+)\s*:\s*(\{.*?\})\s*[,}]", html, re.S)
+    if not m:
+        return ExtractionResult("variant_config_formula", None, 0.0, {}, "no variantConfigs")
+    vid = m.group(1)
+    try:
+        c = json.loads(m.group(2))
+    except ValueError:
+        return ExtractionResult("variant_config_formula", None, 0.0, {}, "unreadable variantConfigs")
+    if str(c.get("remarks", "")).lower() != "percentage":
+        return ExtractionResult("variant_config_formula", None, 0.0, {}, "not a percentage formula")
+    p = re.search(r'"id"\s*:\s*' + vid + r'\b[^{}]*?"price"\s*:\s*(\d+)', html)
+    W, wst, mpg = c.get("metal_weight"), c.get("wastage_charges") or 0, c.get("making_charges") or 0
+    tax = c.get("tax") if c.get("tax") is not None else 3
+    if not (p and W):
+        return ExtractionResult("variant_config_formula", None, 0.0, {}, "no price or weight")
+    pre_tax = int(p.group(1)) / 100 / (1 + tax / 100)
+    rate = (pre_tax / W - mpg) / (1 + wst / 100)
+    if not (3000 <= rate <= 30000):
+        return ExtractionResult("variant_config_formula", None, 0.0, {}, f"implausible rate {rate:.0f}")
+    stones = sum(float(c.get(k) or 0) for k in ("diamond_charges", "stone_charges", "moissanite_charges"))
+    gold = W * rate
+    fields = {"gold_value": round(gold, 2), "making_charge": round(gold * wst / 100 + mpg * W, 2),
+              "stone_value": stones}
+    return _finish("variant_config_formula", fields)
+
+
 def s_rendered_breakup_text(html: str) -> ExtractionResult:
     """The price breakup as a visitor sees it once it is opened, read from the
     rendered page text (Malabar: "Price Breakup Gold Value (22Kt) \u20b9 22,339.14
@@ -804,6 +841,7 @@ STRATEGIES: list[tuple[str, Callable[[str], ExtractionResult]]] = [
     ("product_price_keys", s_product_price_keys),   # Jos Alukkas / NAC page data
     ("json_typed_percent", s_json_typed_percent),   # must precede flat_keys
     ("weight_rate_join", s_weight_rate_join),       # specific join, try early
+    ("variant_config_formula", s_variant_config_formula),   # WHP pricing formula
     ("escaped_json_block", s_escaped_json_block),
     ("rsc_price_breakup", s_rsc_price_breakup),
     ("json_breakup_arrays", s_json_breakup_arrays),
@@ -1047,6 +1085,13 @@ _FIXTURES = [
     ("MalabarRendered", """Eye-catching Gold Pendant Price Breakup Gold Value (22Kt) \u20b9 22,339.14
      Gold Making Charges \u20b9 3,473.29 \u20b9 3,775.31 Taxes \u20b9 774.37 \u20b9 783.43 All Taxes Included
      Up to 30% discount on making charges""", 16.9, "rendered_breakup_text"),
+
+    # Waman Hari Pethe: a pricing formula, not a breakup (30% wastage + Rs 200/g)
+    ("WhpFormula", """<script>var variantConfigs = { 45416486928557: {"version":"V2","metal_type":"gold",
+     "purity":"22K","metal_weight":24.9,"diamond_charges":null,"stone_charges":null,"making_charges":200,
+     "wastage_charges":30,"tax":3,"remarks":"percentage"}};</script>
+     <script>{"variants":[{"id":45416486928557,"title":"24.9 Grams / 22KT","price":44717700,"weight":25}]}</script>""",
+     31.5, "variant_config_formula"),
 
     # REGRESSION GUARD (Senco): making_charge is a PERCENTAGE, not rupees.
     # Reading 27 as an amount and dividing by gold value shipped "Ring 0.1%"

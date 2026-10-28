@@ -311,8 +311,10 @@ DISCOVER = [
     # Reliance Jewels: the breakup comes from the site's own per-item service
     # (see FOLLOW / _reliance_breakup), read by mc_engine's sku_breakup_json.
     # Showroom-only designs ("Approx. Price") have no breakup and are skipped.
-    {"brand": "Reliance Jewels", "fetch_workers": 3,
-     "sitemaps": ["https://www.reliancejewels.com/sitemap.xml"]},
+    # Most bangles and mangalsutras are showroom-only, so every one is opened
+    # to find the few sold online.
+    {"brand": "Reliance Jewels", "fetch_workers": 3, "sample_all": ["Bangle", "Mangalsutra"],
+     "total_cap": 1100, "sitemaps": ["https://www.reliancejewels.com/sitemap.xml"]},
 
     # Jos Alukkas: the product page's own data carries a ProductPrice object
     # (GoldValue, MakingCharges, stone values) - mc_engine's
@@ -329,9 +331,13 @@ DISCOVER = [
     # (gold value, making charge before and after any offer), so it is read
     # by opening each product in a browser - collect_rendered and mc_engine's
     # rendered_breakup_text. Category ids from the site's own filters.
-    {"brand": "Malabar Gold", "render_per_cat": 30,
+    # Mangalsutra is listed as "tanmaniya" (type 81, product codes TM-) - the
+    # Maharashtrian name; the site has no separate mangalsutra type. About
+    # half the rings carry stones and are excluded, so open 45 a category.
+    {"brand": "Malabar Gold", "render_per_cat": 45,
      "product_re": r"/product\.html\?sku=",
-     "render": {"Ring": _MAL + "102", "Earrings": _MAL + "99", "Bangle": _MAL + "87"}},
+     "render": {"Ring": _MAL + "102", "Earrings": _MAL + "99", "Bangle": _MAL + "87",
+                "Mangalsutra": _MAL + "81"}},
 
     {"brand": "Khazana Jewellery", "fetch_workers": 3,
      "sitemaps": ["https://www.khazanajewellery.com/sitemap_index.xml"]},
@@ -804,11 +810,13 @@ def main():
         # nothing at all.
         per_cat = []
         for cat, us in buckets.items():
-            target = sample_size(len(us))
+            # sample_all: categories where only a few pieces carry a breakup
+            # (Reliance: most bangles are showroom-only), so open every one
+            target = len(us) if cat in d.get("sample_all", ()) else sample_size(len(us))
             per_cat.append([(cat, u) for u in us[:target]])
         candidates = [item for row in zip_longest(*per_cat) for item in row
                       if item is not None]
-        candidates = candidates[:TOTAL_CAP]
+        candidates = candidates[:d.get("total_cap", TOTAL_CAP)]
 
         # Probe phase first, fetched concurrently: bail on the whole brand
         # only if that first batch lands zero hits - the engine has already
