@@ -748,6 +748,20 @@ def extract(html):
     return found, counts, how
 
 
+def basis_purity(found, override=None):
+    """The purity a jeweller's rate is taken from. 22K when the jeweller
+    publishes it: jewellery is bought in 22K, and jewellers do not price 22K
+    at exactly 22/24 of their 24K (PN Gadgil, 28 Oct 2026: 22K 13,213, while
+    its 24K worked down gave 13,086 - shown as the cheapest in India when it
+    was not). Otherwise the highest purity found. purity_override wins
+    (AVR Swarna Mahal's 24K is a coin price)."""
+    if override in found:
+        return override
+    if "22K" in found:
+        return "22K"
+    return max(found, key=lambda k: PURITY_FRACTION[k])
+
+
 def ordering_sane(found):
     """Higher purity must cost more. Catches mislabelled extractions."""
     ranked = sorted(found, key=lambda k: PURITY_FRACTION[k])
@@ -1473,8 +1487,7 @@ def main():
         # purity_override pins the purity a brand's rate is read from, for a
         # jeweller whose other purities are priced differently (AVR Swarna
         # Mahal's 24K is a coin price, not 24/22 of its 22K board rate).
-        purity = (b["purity_override"] if b.get("purity_override") in found
-                  else max(found, key=lambda k: PURITY_FRACTION[k]))
+        purity = basis_purity(found, b.get("purity_override"))
         canonical = found[purity] / PURITY_FRACTION[purity]
         if b.get("includes_gst"):
             canonical /= 1.03
