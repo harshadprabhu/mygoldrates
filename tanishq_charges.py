@@ -31,6 +31,7 @@ _OTHER_KT = re.compile(r"\b(9|14|18|24) ?(kt|k|karat|carat)\b|\brose gold\b|\bwh
 PER_CAT = 15          # plain 22K pieces read per category
 TRIES_PER_CAT = 30    # product data requests per category at most (each one costs a proxy credit)
 WORKERS = 3
+DEBUG = False
 
 
 def _num(txt, key):
@@ -131,6 +132,9 @@ def _read(sess, url):
         if v:
             txt, how = fetch(sess, v, min_len=200)
             r = parse(txt) if txt else None
+    if DEBUG:
+        print("   ", url.rsplit("/", 1)[1], how, r, why_not(txt),
+              re.findall(r'"priceInfo"\s*:\s*\{[^}]*\}', htmllib.unescape(txt or ""))[-1:])
     return url, r, how
 
 
@@ -180,7 +184,8 @@ if __name__ == "__main__":
     from collect_charges import UA
     s = requests.Session()
     s.headers.update({"User-Agent": UA})
-    res, off = collect(s, per_cat=3, tries=6, seed=1)
+    DEBUG = True
+    res, off = collect(s, per_cat=3, tries=4, seed=1)
     for r in res:
         print(r)
     print(offer_summary(off), off)
