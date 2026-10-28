@@ -13,3 +13,11 @@ Post: copy to docs/social/reel-<IST date>.mp4 with a caption in .txt beside it,
 then run the social-post workflow with post=reel, mode=post.
 Edit the questions and captions in capture.js; check Sona's answers first
 with tests/sona_harness.js. Credit the music in the caption.
+
+Voices (optional): lines.json holds each spoken line (`hi` = what is said,
+`sub` = the subtitle). Voice them with ../voice.py (Indic Parler-TTS; Hindi
+in Sona's voice "Divya", English in the model's English voice "Mary" - the
+Hindi voice mispronounces English words like "gold"), check every line by
+transcribing it (faster-whisper "medium"), speed up with atempo=1.1, and put
+the lengths in vo.json: capture.js stretches each scene to fit its line and
+writes frames/marks.json (where each line starts) for the audio mix.

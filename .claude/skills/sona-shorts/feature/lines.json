@@ -1,0 +1,44 @@
+[
+ {
+  "id": "l1",
+  "who": "sona",
+  "lang": "en",
+  "hi": "Buying gold this Dhanteras?",
+  "sub": "Buying gold this Dhanteras? 🪔"
+ },
+ {
+  "id": "l2",
+  "who": "sona",
+  "lang": "hi",
+  "hi": "ऑफ़र के बाद सबसे सस्ता ज्वैलर कौन? मुझसे पूछिए!",
+  "sub": "सबसे सस्ता सोना कहाँ मिलेगा? मुझसे पूछिए!"
+ },
+ {
+  "id": "l3",
+  "who": "sona",
+  "lang": "en",
+  "hi": "Pick a piece, and I rank every jeweller by the final price.",
+  "sub": "Pick a piece – Sona ranks every jeweller by the final price"
+ },
+ {
+  "id": "l4",
+  "who": "sona",
+  "lang": "hi",
+  "hi": "सोने का दाम, मेकिंग चार्ज, ऑफ़र और जी एस टी, सब जोड़कर।",
+  "sub": "सोने का दाम + मेकिंग चार्ज + ऑफ़र + GST, सब जोड़कर"
+ },
+ {
+  "id": "l5",
+  "who": "sona",
+  "lang": "en",
+  "hi": "Making charges and Diwali offers, jeweller by jeweller.",
+  "sub": "Making charges & Diwali offers, for every jeweller"
+ },
+ {
+  "id": "l6",
+  "who": "sona",
+  "lang": "hi",
+  "hi": "इस धनतेरस, समझदारी से ख़रीदिए। विज़िट कीजिए, माई गोल्ड रेट्स डॉट कॉम!",
+  "sub": "इस धनतेरस समझदारी से ख़रीदिए 🪔 mygoldrates.com"
+ }
+]
