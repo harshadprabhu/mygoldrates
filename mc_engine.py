@@ -590,6 +590,120 @@ def s_dom_breakup_section(html: str) -> ExtractionResult:
     return _labelled_text_scan(block, "dom_breakup_section")
 
 
+def s_rendered_breakup_text(html: str) -> ExtractionResult:
+    """The price breakup as a visitor sees it once it is opened, read from the
+    rendered page text (Malabar: "Price Breakup Gold Value (22Kt) \u20b9 22,339.14
+    Gold Making Charges \u20b9 3,473.29 \u20b9 3,775.31 Taxes ..."). Two amounts on
+    one row are the offer price and the original: the larger is the making
+    charge before any offer, the same basis as every other brand."""
+    m = re.search(r"Price\s*Break\s*-?up(.{0,700}?)(?:All Taxes Included|Product Details|$)", html, re.S | re.I)
+    if not m:
+        return ExtractionResult("rendered_breakup_text", None, 0.0, {}, "no rendered breakup")
+    fields: dict[str, float] = {}
+    stone = 0.0
+    for label, amts in re.findall(r"([A-Za-z][A-Za-z ()0-9.]*?)\s*((?:\u20b9\s*[\d,]+(?:\.\d+)?\s*)+)", m.group(1)):
+        vals = [_num(a) for a in re.findall(r"\u20b9\s*([\d,]+(?:\.\d+)?)", amts)]
+        vals = [v for v in vals if v]
+        if not vals:
+            continue
+        lab = label.strip().lower()
+        if "making" in lab or "wastage" in lab or "value addition" in lab:
+            fields.setdefault("making_charge", max(vals))
+        elif re.search(r"\bgold\b.*\bvalue\b|\bmetal\b.*\bvalue\b", lab):
+            fields.setdefault("gold_value", vals[0])
+        elif re.search(r"stone|diamond|gem|pearl|polki|kundan", lab):
+            stone += max(vals)
+    if stone:
+        fields["stone_value"] = stone
+    return _finish("rendered_breakup_text", fields)
+
+
+def s_product_price_keys(html: str) -> ExtractionResult:
+    """A product's own price object embedded in the page data, keyed by name:
+    Jos Alukkas ("ProductPrice": GoldValue, MakingCharges, *NetValue stones,
+    SubTotal) and NAC ("sku": metalCost, makingChargeAmount, stoneRate,
+    diamondRate). Only the page's main product object is read (the first one),
+    never a "similar products" list further down."""
+    t = html.replace('\\"', '"')
+    m = re.search(r'"ProductPrice"\s*:\s*\[\s*\{(.*?)\}', t, re.S) or \
+        re.search(r'"sku"\s*:\s*\{([^{}]*"makingChargeAmount"[^{}]*)\}', t, re.S)
+    if not m:
+        return ExtractionResult("product_price_keys", None, 0.0, {}, "no product price object")
+    obj = m.group(1)
+
+    def num(k):
+        v = re.search(r'"' + k + r'"\s*:\s*"?(-?[\d.]+)', obj)
+        return float(v.group(1)) if v else None
+
+    gold = num("GoldValue") or num("metalCost")
+    making = num("MakingCharges") if num("MakingCharges") is not None else num("makingChargeAmount")
+    stones = [num(k) for k in ("ColorStoneNetValue", "TotalDiamondNetValue", "UncutNetValue", "StarNetValue",
+                               "DiaNetValue", "FancyNetValue", "MeleeNetValue", "stoneRate", "diamondRate")]
+    fields = {}
+    if gold:
+        fields["gold_value"] = gold
+    if making:
+        fields["making_charge"] = making
+    fields["stone_value"] = sum(x for x in stones if x)
+    return _finish("product_price_keys", fields)
+
+
+def s_sku_breakup_json(html: str) -> ExtractionResult:
+    """A per-item breakup service response, e.g. Reliance Jewels'
+    skuBreakupDetails: {"goldNetWeight": "6.1470", "goldRate": "13135.00",
+    "makingCharges": "17762.99", "stoneValue": "0.00", "sellingPrice": "98503.84"}.
+    Gold value is weight x rate; the selling price (before GST) is the
+    subtotal the parts must add up to."""
+    m = re.search(r'"skuDetails"\s*:\s*\[\s*(\{.*?\})', html, re.S)
+    if not m:
+        return ExtractionResult("sku_breakup_json", None, 0.0, {}, "no skuDetails")
+    try:
+        d = json.loads(m.group(1))
+        gold = float(d.get("goldNetWeight") or 0) * float(d.get("goldRate") or 0)
+        fields = {"gold_value": round(gold, 2), "making_charge": float(d.get("makingCharges") or 0)}
+        if d.get("stoneValue") not in (None, ""):
+            fields["stone_value"] = float(d["stoneValue"])
+        if d.get("sellingPrice"):
+            fields["total"] = float(d["sellingPrice"])
+    except (ValueError, TypeError):
+        return ExtractionResult("sku_breakup_json", None, 0.0, {}, "unreadable skuDetails")
+    return _finish("sku_breakup_json", fields)
+
+
+def s_div_row_breakup(html: str) -> ExtractionResult:
+    """A price breakup built from divs, not a table: "row-wrapper" blocks of
+    "col-wrapper" cells, e.g. Khazana's Component | Gold Rate | Weight | Value |
+    Discount | Final Value. The gold row's label is the purity ("22KT"); each
+    row's FIRST rupee amount is its Value column - the making charge before any
+    offer discount, so a "25% off making charges" offer never understates it -
+    and the subtotal row lets _finish confirm the parts add up."""
+    chunks = re.split(r'<div[^>]*class="[^"]*\brow-wrapper\b', html)[1:]
+    fields: dict[str, float] = {}
+    for ch in chunks:
+        body = re.split(r'<div[^>]*class="[^"]*\bheading-row-wrapper', ch)[0][:3000]
+        cells = re.findall(r'<div[^>]*class="[^"]*\bcol-wrapper\b[^"]*"[^>]*>(.*?)</div>\s*(?=<div[^>]*class="[^"]*\bcol-wrapper|$)', body, re.S)
+        if not cells:
+            continue
+        label = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", cells[0])).strip()
+        amts = [_num(m.group(1)) for m in re.finditer(_CUR + r"\s*" + _AMT, re.sub(r"<[^>]+>", " ", " ".join(cells[1:])))]
+        amts = [a for a in amts if a is not None]
+        if not label or not amts:
+            continue
+        if re.fullmatch(r"\d{2}\s*K(?:T|t)?", label):
+            fields.setdefault("gold_value", amts[0])
+        elif re.match(r"sub\s*total", label, re.I):
+            fields.setdefault("total", amts[0])
+        elif _NEGATIVE_CONTEXT.search(label):
+            continue
+        else:
+            concept, score = match_concept(label)
+            if concept and score >= 0.9:
+                fields.setdefault(concept, amts[0])
+    if "making_charge" not in fields:
+        return ExtractionResult("div_row_breakup", None, 0.0, fields, "no div breakup rows")
+    return _finish("div_row_breakup", fields)
+
+
 def s_table_row_columns(html: str) -> ExtractionResult:
     """A price-breakup table with extra columns between label and value.
 
@@ -686,6 +800,8 @@ def s_direct_percent(html: str) -> ExtractionResult:
 
 
 STRATEGIES: list[tuple[str, Callable[[str], ExtractionResult]]] = [
+    ("sku_breakup_json", s_sku_breakup_json),       # a breakup service's own JSON
+    ("product_price_keys", s_product_price_keys),   # Jos Alukkas / NAC page data
     ("json_typed_percent", s_json_typed_percent),   # must precede flat_keys
     ("weight_rate_join", s_weight_rate_join),       # specific join, try early
     ("escaped_json_block", s_escaped_json_block),
@@ -695,8 +811,10 @@ STRATEGIES: list[tuple[str, Callable[[str], ExtractionResult]]] = [
     ("id_tagged_spans", s_id_tagged_spans),
     ("js_object_literal", s_js_object_literal),
     ("dom_breakup_section", s_dom_breakup_section),
+    ("div_row_breakup", s_div_row_breakup),
     ("table_row_columns", s_table_row_columns),
     ("direct_percent", s_direct_percent),
+    ("rendered_breakup_text", s_rendered_breakup_text),   # a browser-opened breakup (Malabar)
     ("labelled_text", s_labelled_text),
 ]
 _BY_NAME = dict(STRATEGIES)
@@ -887,6 +1005,48 @@ _FIXTURES = [
      <tr><td>Value Addition</td><td>Rs. 10,000</td></tr>
      <tr><td>Total</td><td>Rs. 60,000</td></tr></table></div>""",
      20.0, None),
+
+    # Khazana: a div-based breakup; the Value column is the making charge
+    # before the offer discount, and the parts add up to the subtotal
+    ("Khazana", """<div class="row-wrapper d-flex"><div class="col-wrapper"><span class="purity-val">22KT</span></div>
+     <div class="col-wrapper"><span class="val">13195.00/g</span></div><div class="col-wrapper"><span class="val">7.618 g</span></div>
+     <div class="col-wrapper"><span class="val">\u20b9 100519.51</span></div><div class="col-wrapper"><span class="val">\u20b90.00</span></div>
+     <div class="col-wrapper"><span class="price-value">\u20b9 100519.51</span></div></div>
+     <div class="row-wrapper d-flex"><div class="col-wrapper"><span class="sub-heading">Stone Detail</span></div>
+     <div class="col-wrapper"><span class="val">-</span></div><div class="col-wrapper"><span class="val">0.33 g</span></div>
+     <div class="col-wrapper"><span class="val">\u20b9 1.00</span></div><div class="col-wrapper"><span class="val">\u20b90.00</span></div>
+     <div class="col-wrapper"><span class="price-value">\u20b9 1.00</span></div></div>
+     <div class="row-wrapper d-flex"><div class="col-wrapper"><span class="sub-heading">Making Charges</span></div>
+     <div class="col-wrapper"><span class="val">-</span></div><div class="col-wrapper"><span class="val">-</span></div>
+     <div class="col-wrapper"><span class="val">\u20b9 17588.94</span></div><div class="col-wrapper"><span class="val">\u20b9 4397.23</span></div>
+     <div class="col-wrapper"><span class="price-value">\u20b9 13191.71</span></div></div>
+     <div class="row-wrapper d-flex"><div class="col-wrapper"><span class="sub-heading">Sub Total</span></div>
+     <div class="col-wrapper"><span class="val">-</span></div><div class="col-wrapper"><span class="val">7.948 g</span></div>
+     <div class="col-wrapper"><span class="val">\u20b9 118109.45</span></div><div class="col-wrapper"><span class="val">\u20b9 4397.23</span></div>
+     <div class="col-wrapper"><span class="price-value">\u20b9 113712.22</span></div></div>""",
+     17.5, "div_row_breakup"),
+
+    # Reliance Jewels: the breakup service the product page itself calls
+    ("RelianceSku", """<html>...</html><!--breakup-->{"skuDetails":[{"sku":"SKU10656985",
+     "mrp":"101459.00","sellingPrice":"98503.84","gst":"2896.01","stoneValue":"0.00",
+     "goldNetWeight":"6.1470","goldRate":"13135.00","makingCharges":"17762.99"}]}""",
+     22.0, "sku_breakup_json"),
+
+    # Jos Alukkas: the page's own ProductPrice object (plain-gold piece)
+    ("JosPrice", r"""x:["$","div",{"initialProduct":{"ProductPrice":[{\"Id\":1,\"GoldValue\":50000.0,
+     \"ColorStoneNetValue\":0,\"TotalDiamondNetValue\":0,\"SubTotal\":59000,
+     \"MakingCharges\":9000.0,\"DiscountedMakingCharges\":6300.0}]}]""", 18.0, "product_price_keys"),
+
+    # NAC: making is called wastage/making amount next to the metal cost
+    ("NacPrice", """<script>window.__INITIAL_STATE__ = {"productData":{"sku":{"metalRate":13135,
+     "skuWeight":9.67,"metalCost":127015.45,"diamondRate":0,"stoneRate":0,"wastageAmount":25293,
+     "makingChargeAmount":25293,"taxAmount":5653.01}}}</script>""", 19.9, "product_price_keys"),
+
+    # Malabar: the breakup text once opened in a browser; offer price and
+    # original price on the making row - the original (larger) is used
+    ("MalabarRendered", """Eye-catching Gold Pendant Price Breakup Gold Value (22Kt) \u20b9 22,339.14
+     Gold Making Charges \u20b9 3,473.29 \u20b9 3,775.31 Taxes \u20b9 774.37 \u20b9 783.43 All Taxes Included
+     Up to 30% discount on making charges""", 16.9, "rendered_breakup_text"),
 
     # REGRESSION GUARD (Senco): making_charge is a PERCENTAGE, not rupees.
     # Reading 27 as an amount and dividing by gold value shipped "Ring 0.1%"

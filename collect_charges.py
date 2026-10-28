@@ -126,6 +126,8 @@ _GRT_PROD = r'href="(/all-jewellery/[a-z-]+/[a-z0-9-]+\.html)"'
 # returns real results on a fresh, cookie-less request.
 _CKC_PROD = r'href="(/en_IN/[a-z0-9][a-z0-9-]+-CKCJ_\d+\.html)"'
 
+_MAL = "https://www.malabargoldanddiamonds.com/in/pan-india/en/product-list.html?malabar_product_type="
+
 DISCOVER = [
     # Sitemap route works well here (80 items in the last full run).
     {"brand": "Senco Gold",
@@ -302,6 +304,37 @@ DISCOVER = [
                   "Ring": "https://www.ckcjewellers.com/en_IN/search?q=gold+ring",
                   "Earrings": "https://www.ckcjewellers.com/en_IN/search?q=gold+earrings",
                   "Mangalsutra": "https://www.ckcjewellers.com/en_IN/search?q=gold+mangalsutra"}},
+
+    # Khazana Jewellery: the product page carries a real price-breakup table
+    # (gold value, making charges, subtotal; read by mc_engine's
+    # div_row_breakup). Product pages are ~1 MB each, so a few workers only.
+    # Reliance Jewels: the breakup comes from the site's own per-item service
+    # (see FOLLOW / _reliance_breakup), read by mc_engine's sku_breakup_json.
+    # Showroom-only designs ("Approx. Price") have no breakup and are skipped.
+    {"brand": "Reliance Jewels", "fetch_workers": 3,
+     "sitemaps": ["https://www.reliancejewels.com/sitemap.xml"]},
+
+    # Jos Alukkas: the product page's own data carries a ProductPrice object
+    # (GoldValue, MakingCharges, stone values) - mc_engine's
+    # product_price_keys. The making charge is read before any offer.
+    {"brand": "Jos Alukkas", "fetch_workers": 3, "require_path": "/gold-jewellery/",
+     "sitemaps": ["https://www.josalukkasonline.com/sitemap.xml"]},
+
+    # NAC Jewellers: page data has metalCost and makingChargeAmount (also
+    # called wastage). A small online catalogue, so samples are small.
+    {"brand": "NAC Jewellers", "fetch_workers": 2, "require_path": "/product/",
+     "sitemaps": ["https://www.nacjewellers.com/sitemap.xml"]},
+
+    # Malabar Gold: the price breakup is worked out in the visitor's browser
+    # (gold value, making charge before and after any offer), so it is read
+    # by opening each product in a browser - collect_rendered and mc_engine's
+    # rendered_breakup_text. Category ids from the site's own filters.
+    {"brand": "Malabar Gold", "render_per_cat": 30,
+     "product_re": r"/product\.html\?sku=",
+     "render": {"Ring": _MAL + "102", "Earrings": _MAL + "99", "Bangle": _MAL + "87"}},
+
+    {"brand": "Khazana Jewellery", "fetch_workers": 3,
+     "sitemaps": ["https://www.khazanajewellery.com/sitemap_index.xml"]},
 ]
 CURATED = []
 
@@ -596,6 +629,29 @@ def collect_urls(sess, d):
     return buckets
 
 
+def _reliance_breakup(sess, url, html):
+    """Reliance Jewels shows a product's price breakup only once a size is
+    picked: the page then asks its own /product/ajax/skuBreakupDetails for
+    it. Ask the same, for the page's first item (showroom-only designs have
+    none, and return nothing to read)."""
+    pid = re.search(r"-(\d+)/?(?:[?#]|$)", url)
+    item = re.search(r'data-item-id\s*=\s*"(\d+)"', html or "")
+    if not (pid and item):
+        return ""
+    api = (f"https://www.reliancejewels.com/product/ajax/skuBreakupDetails"
+           f"?productId={pid.group(1)}&itemId={item.group(1)}")
+    try:
+        r = sess.get(api, timeout=20, headers={"Accept": "application/json", "Referer": url})
+        return r.text if r.ok else ""
+    except requests.RequestException:
+        return ""
+
+
+# Brands whose product page loads its breakup separately: fetch that too and
+# hand both to the engine.
+FOLLOW = {"Reliance Jewels": _reliance_breakup}
+
+
 def fetch_batch(sess, engine, brand, items, workers=None):
     """Fetch + extract a batch of (cat, url) candidates concurrently.
 
@@ -637,8 +693,12 @@ def fetch_batch(sess, engine, brand, items, workers=None):
         run_pass(failed, max(2, workers // 2))
 
     out = []
+    follow = FOLLOW.get(brand)
     for i, (cat, u) in enumerate(items):
         html, src = fetched[i]
+        if html and follow:
+            extra = follow(sess, u, html)
+            html = html + "\n<!--breakup-->" + extra if extra else html
         res = engine.extract(html, brand=brand) if html else None
         out.append((cat, u, res, src))
     return out
@@ -660,6 +720,57 @@ def record_results(agg, detail, brand, results):
     return hits, proxy_hits
 
 
+def collect_rendered(d, engine):
+    """Brands that work out the price breakup in the visitor's browser
+    (Malabar): open each category listing like a visitor, collect product
+    links (scrolling to load more), then open each product, open its "Price
+    Breakup" and read the text it shows. One page at a time, with pauses.
+    Returns (cat, url, ExtractionResult|None, "browser") like fetch_batch."""
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        print(f"  {d['brand']}: playwright not installed, skipped")
+        return []
+    per_cat, out = d.get("render_per_cat", 30), []
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page(viewport={"width": 1300, "height": 1000})
+        for cat, listing in d["render"].items():
+            links = []
+            try:
+                page.goto(listing, wait_until="domcontentloaded", timeout=60000)
+                page.wait_for_timeout(6000)
+                for _ in range(8):
+                    hrefs = page.eval_on_selector_all("a[href]", "as => as.map(a => a.href)")
+                    links = list(dict.fromkeys(h for h in hrefs if re.search(d["product_re"], h)))
+                    if len(links) >= per_cat:
+                        break
+                    page.mouse.wheel(0, 4000)
+                    page.wait_for_timeout(2500)
+            except Exception as e:
+                print(f"  {d['brand']} {cat}: listing failed ({type(e).__name__})")
+                continue
+            links = [u for u in links if not _NON_GOLD_RE.search(u.lower())][:per_cat]
+            print(f"  {d['brand']} {cat}: {len(links)} products to open")
+            for u in links:
+                text = ""
+                try:
+                    page.goto(u, wait_until="domcontentloaded", timeout=60000)
+                    page.wait_for_timeout(4500)
+                    btn = page.get_by_text(re.compile(r"price\s*break", re.I)).first
+                    if btn.count():
+                        btn.click(timeout=3000)
+                        page.wait_for_timeout(1500)
+                    text = page.evaluate("() => document.body.innerText")
+                except Exception:
+                    pass
+                res = engine.extract(text, brand=d["brand"]) if text else None
+                out.append((cat, u, res, "browser"))
+                time.sleep(1.0)
+        browser.close()
+    return out
+
+
 def main():
     sess = requests.Session()
     sess.headers.update({"User-Agent": UA})
@@ -676,6 +787,12 @@ def main():
 
     for d in DISCOVER:
         brand = d["brand"]
+        if d.get("render"):                  # breakup only in the visitor's browser
+            results = collect_rendered(d, engine)
+            hits, _ = record_results(agg, detail, brand, results)
+            print(f"{brand}: opened {len(results)} in a browser, {hits} read, "
+                  f"cats {[(c, len(v)) for (b, c), v in agg.items() if b == brand]}")
+            continue
         buckets = collect_urls(sess, d)
         # Interleave categories round-robin instead of one full category
         # block at a time, so a brand's largest category doesn't consume
