@@ -368,7 +368,13 @@ def _proxy_attempts(url):
         yield name, url_tpl, p
 
 
-def fetch(sess, url, allow_proxy=True, timeout=25, min_len=500):
+# The free-tier proxies (ScraperAPI, ScrapingBee, ZenRows, Crawlbase) are
+# spent only on sites that answer nothing else; a slow page anywhere else
+# must not use up the month's credits.
+PROXY_HOSTS = {"www.tanishq.co.in"}
+
+
+def fetch(sess, url, allow_proxy=True, timeout=25, min_len=500, proxy_timeout=60):
     """Direct first (free), proxy waterfall only if direct fails.
 
     Honors the 'avoid proxy where possible' rule. Sitemap fetches pass
@@ -390,9 +396,9 @@ def fetch(sess, url, allow_proxy=True, timeout=25, min_len=500):
     if not allow_proxy:
         return None, direct_err
 
-    for name, u, p in _proxy_attempts(url):
+    for name, u, p in (_proxy_attempts(url) if urlsplit(url).netloc in PROXY_HOSTS else ()):
         try:
-            r = sess.get(u, params=p, timeout=60)
+            r = sess.get(u, params=p, timeout=proxy_timeout)
             if r.status_code == 200 and len(r.text) > min_len:
                 return r.text, name
         except Exception:
@@ -843,6 +849,24 @@ def main():
         print(f"{brand}: fetched {fetched} ({proxy_hits} via proxy), "
               f"cats {cat_summary}")
 
+    # Tanishq: blocked to plain requests, read through the proxies from its
+    # own product data (tanishq_charges.py), with its making-charge offer
+    brand_offer = {}
+    if os.environ.get("TANISHQ", "1") != "0":
+        import tanishq_charges as tq
+        try:
+            res, off = tq.collect(sess)
+        except Exception as e:
+            res, off = [], {}
+            print(f"{tq.BRAND}: failed ({type(e).__name__}: {e})")
+        for cat, u, pct in res:
+            agg.setdefault((tq.BRAND, cat), []).append(pct)
+            detail.setdefault((tq.BRAND, cat), []).append(
+                {"url": u, "pct": pct, "confidence": 1.0, "strategy": "tanishq_price_info", "fields": {}})
+        if tq.offer_summary(off):
+            brand_offer[tq.BRAND] = tq.offer_summary(off)
+        print(f"{tq.BRAND}: {len(res)} read, offer {brand_offer.get(tq.BRAND)}")
+
     for p in CURATED:
         html, _ = fetch(sess, p["url"], allow_proxy=True, timeout=25)
         res = engine.extract(html, brand=p["brand"]) if html else None
@@ -877,7 +901,8 @@ def main():
             row["examples"] = [{"url": e["url"], "pct": e["pct"]} for e in ex]
         brands.setdefault(brand, []).append(row)
 
-    out = [{"brand": b, "categories": sorted(c, key=lambda x: x["category"])}
+    out = [dict({"brand": b, "categories": sorted(c, key=lambda x: x["category"])},
+                **({"offer": brand_offer[b]} if b in brand_offer else {}))
            for b, c in sorted(brands.items())]
 
     payload = {
