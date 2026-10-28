@@ -877,11 +877,12 @@ def main():
         except Exception as e:
             res = []
             print(f"from price: failed ({type(e).__name__}: {e})")
-        for b, cat, u, pct in res:
+        for b, cat, u, pct, src in res:
             agg.setdefault((b, cat), []).append(pct)
             detail.setdefault((b, cat), []).append(
-                {"url": u, "pct": pct, "confidence": 1.0, "strategy": "from_price", "fields": {}})
-            from_price.add((b, cat))
+                {"url": u, "pct": pct, "confidence": 1.0, "strategy": src or "breakup", "fields": {}})
+            if src == "price":
+                from_price.add((b, cat))
 
     for p in CURATED:
         html, _ = fetch(sess, p["url"], allow_proxy=True, timeout=25)

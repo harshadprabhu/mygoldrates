@@ -26,3 +26,15 @@ def test_stones_other_karats_and_other_metals_are_skipped():
 def test_the_site_labels_figures_worked_out_from_the_price():
     src = open("generate_site.py", encoding="utf-8").read()
     assert "Worked out from the price" in src and '"src": c.get("source", "")' in src
+
+
+TM = ('<div>Price Breakup</div><div>22KT GOLD</div><span>₹293,721.00</span> + <div>MC</div><span>₹49,933.00</span>'
+      ' + <div>HMC</div><span>₹150.00</span> + <div>GST(3.00%)</div><span>₹10,314.00</span>'
+      '<table><tr><th>Metal Purity</th><td>22K</td></tr><tr><th>Making Charge</th><td>17</td></tr></table>')
+
+
+def test_thangamayil_reads_its_own_breakup():
+    assert pm.Thangamayil.parse(TM) == 17.0
+    assert pm.Thangamayil.parse(TM.replace("<div>HMC</div>", "<div>STONE</div>")) is None
+    assert pm.Thangamayil.parse(TM.replace(">22K<", ">18K<")) is None
+    assert pm.Thangamayil.source is None and pm.Indriya.source == "price"

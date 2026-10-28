@@ -12,10 +12,13 @@ diamond or other karat are skipped, as are results outside 2-60%. Categories
 recorded this way carry source "price", and the site labels them "worked out
 from the price".
 
-Jewellers read this way (READERS):
+Jewellers read here (READERS; source "price" marks the worked-out ones):
   Indriya  sitemaps -> each product's own data (product.pdp.json): price
            before tax, gold weight, karat, stones; the 22K rate is printed
            on every product page ("Rs.13195 per gm (22kt)").
+  Thangamayil  not worked out: its product pages print the breakup itself
+           ("22KT GOLD Rs x + MC Rs y + HMC + GST"), so MC / gold is measured
+           like any other breakup (source unset).
 
     python price_making.py      # a small sample, printed (changes nothing)
 """
@@ -49,6 +52,7 @@ def _num(s):
 
 class Indriya:
     brand = "Indriya"
+    source = "price"
     base = "https://www.indriya.com"
     sitemaps = ["https://www.indriya.com/skusitemap-%d.xml" % i for i in (1, 2, 3)]
     data = "https://www.indriya.com" + ("/content/noveljewels/in/en/jewellery-products/jcr:content/root/container/"
@@ -94,11 +98,51 @@ class Indriya:
         return making_pct(_num(d.get("formattedPrice")), _num(spec.get("Gold Weight")), rate)
 
 
-READERS = [Indriya()]
+class Thangamayil:
+    brand = "Thangamayil"
+    source = None                       # its own breakup, not worked out
+    sitemaps = ["https://www.thangamayil.com/sitemap.xml"]
+
+    def products(self, sess):
+        try:
+            return re.findall(r"<loc>([^<]+\.html)</loc>", sess.get(self.sitemaps[0], timeout=60).text)
+        except Exception:
+            return []
+
+    def rate22(self, sess, urls):
+        return 1.0                      # not needed: the page has the gold value
+
+    def read(self, sess, url, rate):
+        try:
+            return self.parse(sess.get(url, timeout=30).text)
+        except Exception:
+            return None
+
+    @staticmethod
+    def parse(page):
+        import html as htmllib
+        t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " | ", htmllib.unescape(page or "")))
+        i = t.find("Price Breakup")
+        if i < 0 or not re.search(r"Metal Purity \|?\s*\|?\s*22K", t):
+            return None
+        bd = t[i:i + 600]
+        bd = bd[:bd.find("GST")] if "GST" in bd else bd
+        if re.search(r"stone|diamond|pearl|polki|kundan|platinum|silver", bd, re.I):
+            return None
+        g = re.search(r"22KT GOLD[ |]*₹\s*([\d,]+(?:\.\d+)?)", bd)
+        mc = re.search(r"\bMC[ |]*₹\s*([\d,]+(?:\.\d+)?)", bd)
+        if not (g and mc):
+            return None
+        gold, making = _num(g.group(1)), _num(mc.group(1))
+        pct = round(making / gold * 100, 2) if gold else None
+        return pct if pct and 2 <= pct <= 60 else None
+
+
+READERS = [Indriya(), Thangamayil()]
 
 
 def collect(sess, per_cat=PER_CAT, tries=TRIES_PER_CAT, seed=None):
-    """-> [(brand, category, url, pct)] for every reader."""
+    """-> [(brand, category, url, pct, source)] for every reader."""
     out, rnd = [], random.Random(seed)
     for r in READERS:
         urls = r.products(sess)
@@ -116,7 +160,7 @@ def collect(sess, per_cat=PER_CAT, tries=TRIES_PER_CAT, seed=None):
             for cat, us in cats.items():
                 rnd.shuffle(us)
                 pcts = [(u, p) for u, p in zip(us[:tries], ex.map(lambda u: r.read(sess, u, rate), us[:tries])) if p]
-                out += [(r.brand, cat, u, p) for u, p in pcts[:per_cat]]
+                out += [(r.brand, cat, u, p, r.source) for u, p in pcts[:per_cat]]
                 print(f"  {r.brand} {cat}: {len(pcts[:per_cat])} plain 22K from {min(tries, len(us))} read")
     return out
 
@@ -128,6 +172,6 @@ if __name__ == "__main__":
     s = requests.Session()
     s.headers.update({"User-Agent": UA})
     res = collect(s, per_cat=8, tries=20, seed=1)
-    for b, c in sorted({(b, c) for b, c, _, _ in res}):
-        v = [p for bb, cc, _, p in res if (bb, cc) == (b, c)]
+    for b, c in sorted({(b, c) for b, c, _, _, _ in res}):
+        v = [p for bb, cc, _, p, _ in res if (bb, cc) == (b, c)]
         print(b, c, "median", statistics.median(v), v)
