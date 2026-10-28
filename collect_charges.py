@@ -302,6 +302,12 @@ DISCOVER = [
                   "Ring": "https://www.ckcjewellers.com/en_IN/search?q=gold+ring",
                   "Earrings": "https://www.ckcjewellers.com/en_IN/search?q=gold+earrings",
                   "Mangalsutra": "https://www.ckcjewellers.com/en_IN/search?q=gold+mangalsutra"}},
+
+    # Khazana Jewellery: the product page carries a real price-breakup table
+    # (gold value, making charges, subtotal; read by mc_engine's
+    # div_row_breakup). Product pages are ~1 MB each, so a few workers only.
+    {"brand": "Khazana Jewellery", "fetch_workers": 3,
+     "sitemaps": ["https://www.khazanajewellery.com/sitemap_index.xml"]},
 ]
 CURATED = []
 

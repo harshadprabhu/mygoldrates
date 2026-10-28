@@ -590,6 +590,40 @@ def s_dom_breakup_section(html: str) -> ExtractionResult:
     return _labelled_text_scan(block, "dom_breakup_section")
 
 
+def s_div_row_breakup(html: str) -> ExtractionResult:
+    """A price breakup built from divs, not a table: "row-wrapper" blocks of
+    "col-wrapper" cells, e.g. Khazana's Component | Gold Rate | Weight | Value |
+    Discount | Final Value. The gold row's label is the purity ("22KT"); each
+    row's FIRST rupee amount is its Value column - the making charge before any
+    offer discount, so a "25% off making charges" offer never understates it -
+    and the subtotal row lets _finish confirm the parts add up."""
+    chunks = re.split(r'<div[^>]*class="[^"]*\brow-wrapper\b', html)[1:]
+    fields: dict[str, float] = {}
+    for ch in chunks:
+        body = re.split(r'<div[^>]*class="[^"]*\bheading-row-wrapper', ch)[0][:3000]
+        cells = re.findall(r'<div[^>]*class="[^"]*\bcol-wrapper\b[^"]*"[^>]*>(.*?)</div>\s*(?=<div[^>]*class="[^"]*\bcol-wrapper|$)', body, re.S)
+        if not cells:
+            continue
+        label = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", cells[0])).strip()
+        amts = [_num(m.group(1)) for m in re.finditer(_CUR + r"\s*" + _AMT, re.sub(r"<[^>]+>", " ", " ".join(cells[1:])))]
+        amts = [a for a in amts if a is not None]
+        if not label or not amts:
+            continue
+        if re.fullmatch(r"\d{2}\s*K(?:T|t)?", label):
+            fields.setdefault("gold_value", amts[0])
+        elif re.match(r"sub\s*total", label, re.I):
+            fields.setdefault("total", amts[0])
+        elif _NEGATIVE_CONTEXT.search(label):
+            continue
+        else:
+            concept, score = match_concept(label)
+            if concept and score >= 0.9:
+                fields.setdefault(concept, amts[0])
+    if "making_charge" not in fields:
+        return ExtractionResult("div_row_breakup", None, 0.0, fields, "no div breakup rows")
+    return _finish("div_row_breakup", fields)
+
+
 def s_table_row_columns(html: str) -> ExtractionResult:
     """A price-breakup table with extra columns between label and value.
 
@@ -695,6 +729,7 @@ STRATEGIES: list[tuple[str, Callable[[str], ExtractionResult]]] = [
     ("id_tagged_spans", s_id_tagged_spans),
     ("js_object_literal", s_js_object_literal),
     ("dom_breakup_section", s_dom_breakup_section),
+    ("div_row_breakup", s_div_row_breakup),
     ("table_row_columns", s_table_row_columns),
     ("direct_percent", s_direct_percent),
     ("labelled_text", s_labelled_text),
@@ -887,6 +922,26 @@ _FIXTURES = [
      <tr><td>Value Addition</td><td>Rs. 10,000</td></tr>
      <tr><td>Total</td><td>Rs. 60,000</td></tr></table></div>""",
      20.0, None),
+
+    # Khazana: a div-based breakup; the Value column is the making charge
+    # before the offer discount, and the parts add up to the subtotal
+    ("Khazana", """<div class="row-wrapper d-flex"><div class="col-wrapper"><span class="purity-val">22KT</span></div>
+     <div class="col-wrapper"><span class="val">13195.00/g</span></div><div class="col-wrapper"><span class="val">7.618 g</span></div>
+     <div class="col-wrapper"><span class="val">\u20b9 100519.51</span></div><div class="col-wrapper"><span class="val">\u20b90.00</span></div>
+     <div class="col-wrapper"><span class="price-value">\u20b9 100519.51</span></div></div>
+     <div class="row-wrapper d-flex"><div class="col-wrapper"><span class="sub-heading">Stone Detail</span></div>
+     <div class="col-wrapper"><span class="val">-</span></div><div class="col-wrapper"><span class="val">0.33 g</span></div>
+     <div class="col-wrapper"><span class="val">\u20b9 1.00</span></div><div class="col-wrapper"><span class="val">\u20b90.00</span></div>
+     <div class="col-wrapper"><span class="price-value">\u20b9 1.00</span></div></div>
+     <div class="row-wrapper d-flex"><div class="col-wrapper"><span class="sub-heading">Making Charges</span></div>
+     <div class="col-wrapper"><span class="val">-</span></div><div class="col-wrapper"><span class="val">-</span></div>
+     <div class="col-wrapper"><span class="val">\u20b9 17588.94</span></div><div class="col-wrapper"><span class="val">\u20b9 4397.23</span></div>
+     <div class="col-wrapper"><span class="price-value">\u20b9 13191.71</span></div></div>
+     <div class="row-wrapper d-flex"><div class="col-wrapper"><span class="sub-heading">Sub Total</span></div>
+     <div class="col-wrapper"><span class="val">-</span></div><div class="col-wrapper"><span class="val">7.948 g</span></div>
+     <div class="col-wrapper"><span class="val">\u20b9 118109.45</span></div><div class="col-wrapper"><span class="val">\u20b9 4397.23</span></div>
+     <div class="col-wrapper"><span class="price-value">\u20b9 113712.22</span></div></div>""",
+     17.5, "div_row_breakup"),
 
     # REGRESSION GUARD (Senco): making_charge is a PERCENTAGE, not rupees.
     # Reading 27 as an amount and dividing by gold value shipped "Ring 0.1%"
