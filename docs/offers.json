@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-27T14:05+05:30",
+ "updated": "2026-10-28T12:07+05:30",
  "note": "Offers as published on each jeweller's own website on the date shown. Read automatically; confirm terms with the jeweller before buying.",
  "brands": [
   {
@@ -37,12 +37,14 @@
      "applies_to": [
       "silver"
      ],
-     "conditions": [],
-     "text": "Buy 1 gram Gold and Get 2 SILVER FREE NO WASTAGE 4 Buy 1 gram Gold and Get 2 SILVER FREE NO WASTAGE 3 os Buy 1 gram Gold and Get 2 SILVER FREE",
+     "conditions": [
+      "Buy 1 gram Gold and Get 2 grams OFF SILVER FREE NO WASTAGE MAKING CHARGES *Terms Conditions apply."
+     ],
+     "text": "Buy 1 gram Gold and Get 2 grams OFF SILVER FREE NO WASTAGE MAKING CHARGES *Terms Conditions apply.",
      "url": "https://www.avrswarnamahal.com/",
      "image": "https://www.avrswarnamahal.com/avr-images/images/double-diwali-offer-2026/diwali-offer-2026-desktop.webp",
-     "banner": "7 a Buy 1 gram Gold and Get 2 SILVER FREE NO WASTAGE\n4 Buy 1 gram Gold and Get 2 SILVER FREE NO WASTAGE\n3 os Buy 1 gram Gold and Get 2 SILVER FREE NO WASTAGE\n26% 0 grams Buy 1 gram Gold and Get 2 SILVER FREE NO WASTAGE\nTRADITION OF PURITY\nFOR A BRIGHTER TOMORROW\nrit\nale\nOUBL\n(zg\nOF FE\nCTOBER to 15 N",
-     "first_seen": "2026-10-27"
+     "banner": "20% Flat Flat on Diamonds in Platinum Jewellery’\n20% % Diamonds* OFF 3 on Diamonds in Platinum Jewellery’\nDOUBLE\nte)\n<a.\nETZ\nOFFE R!\n26' OCTOBER to 15!\" NOVEMBER\nBuy 1 gram Gold\nand Get 2\ngrams\nOFF\nSILVER FREE\nNO WASTAGE\nMAKING CHARGES\n*Terms Conditions apply.",
+     "first_seen": "2026-10-28"
     },
     {
      "kind": "rate_protect",
@@ -138,7 +140,7 @@
    ],
    "read_from": "https://www.bluestone.com/",
    "rendered": true,
-   "banners": 16
+   "banners": 8
   },
   {
    "slug": "ckc",
@@ -174,7 +176,7 @@
    ],
    "read_from": "https://ckcjewellers.com/",
    "rendered": true,
-   "banners": 15
+   "banners": 14
   },
   {
    "slug": "candere",
@@ -249,42 +251,6 @@
    ],
    "offers": [
     {
-     "kind": "diamond_off",
-     "pct_min": 20.0,
-     "pct_max": 20.0,
-     "upto": false,
-     "selected": false,
-     "mentions": 1,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [],
-     "conditions": [],
-     "text": "FLAT 20% Off On All Diamond",
-     "url": "https://www.caratlane.com/",
-     "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/12/Mobile.jpg",
-     "banner": "FLAT 20% Off On All Diamond\n5% INSTANT DISCOUNT\nON CREDIT CARDS\nDBS\nRBLBANK\nMin. Transac\nMax. Discount\nOO per card.\nValid till\nOct 2026. T&C Apply",
-     "first_seen": "2026-10-27"
-    },
-    {
-     "kind": "cashback",
-     "pct_min": 5.0,
-     "pct_max": 5.0,
-     "upto": true,
-     "selected": false,
-     "mentions": 2,
-     "min_purchase": null,
-     "dates": [
-      "31 Oct 2026"
-     ],
-     "applies_to": [],
-     "conditions": [],
-     "text": "5% INSTANT DISCOUNT ON CREDIT CARDS DBS b RBLBANK Mir 2,000 per card",
-     "url": "https://www.caratlane.com/",
-     "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/12/Desktop.jpg",
-     "banner": "FLAT 20% On All Diamond Jewellery Valid till 31 Oct 2026. T&C Apply\n5% INSTANT DISCOUNT ON CREDIT CARDS DBS b RBLBANK Mir 2,000 per card. Max Valid till 31 Oct 2026. T&C Apply\nts<\nwot\nGes\nZEN\nSAS",
-     "first_seen": "2026-10-27"
-    },
-    {
      "kind": "scheme",
      "pct_min": null,
      "pct_max": null,
@@ -302,7 +268,7 @@
    ],
    "read_from": "https://www.caratlane.com/",
    "rendered": "international",
-   "banners": 8
+   "banners": 0
   },
   {
    "slug": "chandukaka",
@@ -478,7 +444,7 @@
      "pct_max": null,
      "upto": false,
      "selected": false,
-     "mentions": 2,
+     "mentions": 1,
      "min_purchase": null,
      "dates": [],
      "applies_to": [
@@ -498,7 +464,7 @@
      "pct_max": null,
      "upto": true,
      "selected": false,
-     "mentions": 1,
+     "mentions": 2,
      "min_purchase": null,
      "dates": [],
      "applies_to": [],
@@ -512,7 +478,7 @@
    ],
    "read_from": "https://www.jewelone.in/",
    "rendered": true,
-   "banners": 12
+   "banners": 9
   },
   {
    "slug": "josalukkas",
@@ -526,7 +492,7 @@
    "offers": [],
    "read_from": "https://www.josalukkasonline.com/",
    "rendered": true,
-   "banners": 7
+   "banners": 0
   },
   {
    "slug": "joyalukkas",
@@ -606,7 +572,7 @@
      "conditions": [],
      "text": "LOCK YOUR GOLD RATE",
      "url": "https://www.khimjijewellers.com/",
-     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639286613374486467",
+     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639287402222007375",
      "banner": "PRICE HIKED?\nGold\nGET YOUR GOLD JEWELLERY THE\nBOOKED\nrotectio\nPRICE DROPPED?\nGET THE LOWEST RATE FOR\nYOUR GOLD JEWELLRY DAAM BADLEGA.\nDIWALI KI KHUSHI NAHI.\nLOCK YOUR GOLD RATE\n1Q%\nJEWELLERS SINCE 1936",
      "first_seen": "2026-10-24"
     }
@@ -800,35 +766,17 @@
    "slug": "pcchandra",
    "name": "P.C. Chandra Jewellers",
    "domain": "www.pcchandraindia.com",
-   "status": "ok",
+   "status": "no offers published as text or in banners today",
    "pages": [
     "https://www.pcchandraindia.com/",
-    "https://pcchandraindia.com/collections/promotions",
-    "https://www.pcchandraindia.com/collections/promotions",
+    "https://pcchandraindia.com/pages/promotions",
+    "https://www.pcchandraindia.com/pages/promotions",
     "https://pcchandraindia.com/"
    ],
-   "offers": [
-    {
-     "kind": "making_off",
-     "pct_min": 20.0,
-     "pct_max": 20.0,
-     "upto": true,
-     "selected": false,
-     "mentions": 4,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [
-      "gold jewellery"
-     ],
-     "conditions": [],
-     "text": "Upto 20% off on Gold jewellery making charges",
-     "url": "https://www.pcchandraindia.com/",
-     "first_seen": "2026-10-24"
-    }
-   ],
+   "offers": [],
    "read_from": "https://www.pcchandraindia.com/",
    "rendered": true,
-   "banners": 11
+   "banners": 10
   },
   {
    "slug": "png",
@@ -878,7 +826,7 @@
    ],
    "read_from": "https://www.pngjewellers.com/",
    "rendered": true,
-   "banners": 15
+   "banners": 14
   },
   {
    "slug": "pngsons",
@@ -937,7 +885,7 @@
     }
    ],
    "read_from": "https://pngadgilandsons.com/",
-   "rendered": true,
+   "rendered": false,
    "banners": 8
   },
   {
@@ -1061,25 +1009,6 @@
     "https://sencogoldanddiamonds.com/deal-of-the-day"
    ],
    "offers": [
-    {
-     "kind": "making_off",
-     "pct_min": 10.0,
-     "pct_max": 10.0,
-     "upto": true,
-     "selected": false,
-     "mentions": 1,
-     "min_purchase": null,
-     "dates": [],
-     "applies_to": [
-      "diamond jewellery only"
-     ],
-     "conditions": [],
-     "text": "10% on making charges OFF on Diamond Value now Diamond Jewellery OFF Offe",
-     "url": "https://sencogoldanddiamonds.com/",
-     "image": "https://web.sencogoldanddiamonds.com/images/transform?key=cms/banners/8e30c21d-5313-4253-9a67-b13fa51aea8b.jpg&width=1920&format=webp",
-     "banner": "2 Diamond Jewellery OFF Offer valid fora limited period in website App only\n100% per ELAT charges Diamond Jewellery OFF Offer valid fora limited period in website App only\n10% on making charges OFF on Diamond Value now Diamond Jewellery OFF Offer valid fora limited period in website App only\nOffer\nG",
-     "first_seen": "2026-10-26"
-    },
     {
      "kind": "exchange",
      "pct_min": null,

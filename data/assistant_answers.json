@@ -41,6 +41,18 @@
    "a": "You can browse daily rates from multiple jewellers side by side on our jeweller rates page.",
    "u": "/gold-rate-by-jeweller",
    "d": "2026-10-27"
+  },
+  {
+   "q": "What can you help me with on this site?",
+   "a": "I can help you compare daily gold rates, making charges, and offers from jewellers across different cities. You can also explore guides on gold purity and hallmarking, or calculate jewellery prices.",
+   "u": "/about",
+   "d": "2026-10-28"
+  },
+  {
+   "q": "Is a discount on making charges a good deal?",
+   "a": "A discount on making charges is only worth it if the remaining fee is lower than what other jewellers charge without offers. The discount applies only to crafting fees, never to the gold itself. Always compare the final price rather than the size of the discount.",
+   "u": "/gold-offers-today",
+   "d": "2026-10-28"
   }
  ]
 }
