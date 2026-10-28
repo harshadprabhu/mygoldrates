@@ -42,6 +42,13 @@ def _str(txt, key):
     return m.group(1) if m else ""
 
 
+def why_not(txt):
+    """What a product's data says, for the log when parse() says no."""
+    t = htmllib.unescape(txt or "")
+    return {k: (_str(t, k) or _num(t, k)) for k in ("karatage", "metal", "pricingGroupType", "stoneWeight",
+                                                   "diamondWeight", "GDV", "MGR")} | {"bytes": len(t)}
+
+
 def parse(txt):
     """One product's data -> {pct, karat, gold, making, offer} or None when
     it is not plain 22K gold or the breakup is missing."""
@@ -74,7 +81,7 @@ def product_urls(sess):
     urls = set()
     for sm in SITEMAPS:
         for _ in range(3):                     # big files: a proxy sometimes gives up
-            x, how = fetch(sess, sm, min_len=100)
+            x, how = fetch(sess, sm, min_len=100, proxy_timeout=150)
             if x:
                 break
         found = {u.split("?")[0] for u in re.findall(r"<loc>([^<]+)</loc>", x or "")}
@@ -144,7 +151,16 @@ if __name__ == "__main__":
     from collect_charges import UA
     s = requests.Session()
     s.headers.update({"User-Agent": UA})
-    res, off = collect(s, per_cat=3, tries=8, seed=1)
+    cats = product_urls(s)
+    for c, us in cats.items():
+        print(c, len(us), us[:2])
+        for u in us[:3]:
+            m = PROD_RE.search(u)
+            txt, how = fetch(s, VARIATION.format(pid=m.group(1)), min_len=200)
+            print("  ", u.rsplit("/", 1)[1], how, parse(txt) if txt else None, why_not(txt))
+            if txt and not parse(txt):
+                print("     ", re.sub(r"\s+", " ", txt[:600]))
+    res, off = [], {}
     for r in res:
         print(r)
     print(offer_summary(off), off)

@@ -374,7 +374,7 @@ def _proxy_attempts(url):
 PROXY_HOSTS = {"www.tanishq.co.in"}
 
 
-def fetch(sess, url, allow_proxy=True, timeout=25, min_len=500):
+def fetch(sess, url, allow_proxy=True, timeout=25, min_len=500, proxy_timeout=60):
     """Direct first (free), proxy waterfall only if direct fails.
 
     Honors the 'avoid proxy where possible' rule. Sitemap fetches pass
@@ -398,7 +398,7 @@ def fetch(sess, url, allow_proxy=True, timeout=25, min_len=500):
 
     for name, u, p in (_proxy_attempts(url) if urlsplit(url).netloc in PROXY_HOSTS else ()):
         try:
-            r = sess.get(u, params=p, timeout=60)
+            r = sess.get(u, params=p, timeout=proxy_timeout)
             if r.status_code == 200 and len(r.text) > min_len:
                 return r.text, name
         except Exception:
