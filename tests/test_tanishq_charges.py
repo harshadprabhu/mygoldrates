@@ -6,7 +6,8 @@ import tanishq_charges as tq
 PLAIN = ('{"product": {"karatage": "22", "metal": "Gold", "diamondWeight": 0, "stoneWeight": 0, '
          '"pricingGroupType": "PLAINGOLD", "customDataFeed": {"priceInfo": {"dtt": "F2", "dtp": "15", "vpg": "", '
          '"dttText": "<DISCOUNT_PERCENTAGE>% off on making charges"}}, '
-         '"priceInfo": {"MGR": "13245", "GDV": "14609.24", "WTV": "0", "AF1": "0", "F2": "3287.08", "UTP": "18433.21"}}}')
+         '"priceInfo": {"MGR": "14065", "GDV": "48735.23", "WTV": "10965.43", "AF1": "0", "F2": "0", "UTP": "61491.67", '
+         '"TXV": "1791.02", "WTP": "22.5"}}}')
 
 
 def test_plain_22k_gives_making_pct_and_its_offer():
@@ -18,9 +19,9 @@ def test_other_karats_stones_and_missing_breakups_are_skipped():
     assert tq.parse(PLAIN.replace('"karatage": "22"', '"karatage": "14"')) is None
     assert tq.parse(PLAIN.replace('"stoneWeight": 0', '"stoneWeight": 0.41')) is None
     assert tq.parse(PLAIN.replace("PLAINGOLD", "GOLDSTUDDED")) is None
-    assert tq.parse(PLAIN.replace('"GDV": "14609.24"', '"GDV": ""')) is None
+    assert tq.parse(PLAIN.replace('"GDV": "48735.23"', '"GDV": ""')) is None
     assert tq.parse("<html>Access Blocked</html>") is None
-    assert tq.parse(PLAIN.replace('"UTP": "18433.21"', '"UTP": "25000"')) is None    # parts must add up
+    assert tq.parse(PLAIN.replace('"UTP": "61491.67"', '"UTP": "80000"')) is None    # parts must add up
 
 
 def test_a_master_product_points_to_a_variant_that_has_the_price():
@@ -31,7 +32,7 @@ def test_a_master_product_points_to_a_variant_that_has_the_price():
 
 
 def test_per_gram_offer_and_html_escaped_data():
-    t = PLAIN.replace('"dtp": "15", "vpg": ""', '"dtp": "", "vpg": "301"').replace('"', "&quot;")
+    t = PLAIN.replace('"dtp": "15", "vpg": ""', '"dtp": "0", "vpg": "301"').replace('"', "&quot;")
     assert tq.parse(t)["offer"] == {"per_gram": 301.0}
 
 

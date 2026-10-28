@@ -6,8 +6,9 @@ through the proxy waterfall the daily rate collector already uses
 (collect_charges.fetch). Its product list comes from its own sitemaps; for
 each product its own product data (the same response its page asks for when
 a visitor opens "Price Breakup") carries a priceInfo block:
-  GDV  gold value      F2   making charge (before any offer)
-  AF1  stones          UTP  the total with 3% GST   (MGR is the gold rate per gram)
+  GDV  gold value      WTV  making charge on plain gold ("wastage", WTP its %)
+  AF1  stones          F2   making charge on studded pieces
+  TXV  3% GST          UTP  the total               (MGR is the gold rate per gram)
 plus the karat, stone and diamond weight, and the offer the page shows
 ("15% off on making charges", "Rs 301 off per gram"). Only plain 22K gold
 counts: making % = MGR / GDV x 100, as for every other jeweller.
@@ -15,6 +16,7 @@ counts: making % = MGR / GDV x 100, as for every other jeweller.
     python tanishq_charges.py      # a small sample, printed (changes nothing)
 """
 import html as htmllib
+import os
 import random
 import re
 from concurrent.futures import ThreadPoolExecutor
@@ -48,7 +50,8 @@ def why_not(txt):
     """What a product's data says, for the log when parse() says no."""
     t = htmllib.unescape(txt or "")
     return {k: (_str(t, k) or _num(t, k)) for k in ("productType", "karatage", "metal", "pricingGroupType",
-                                                   "stoneWeight", "diamondWeight", "GDV", "F2", "AF1", "UTP")} | {"bytes": len(t)}
+                                                   "stoneWeight", "diamondWeight", "GDV", "WTV", "WTP", "F2", "AF1", "TXV",
+                                                   "UTP")} | {"bytes": len(t)}
 
 
 def variant_url(txt):
@@ -65,17 +68,19 @@ def parse(txt):
     """One product's data -> {pct, karat, gold, making, offer} or None when
     it is not plain 22K gold or the breakup is missing."""
     t = htmllib.unescape(txt or "")
-    gold, making, total = _num(t, "GDV"), _num(t, "F2"), _num(t, "UTP")
+    gold, total = _num(t, "GDV"), _num(t, "UTP")
+    making = (_num(t, "WTV") or 0) + (_num(t, "F2") or 0)
     karat, metal = _str(t, "karatage"), _str(t, "metal")
     stone, diamond = _num(t, "stoneWeight") or 0, _num(t, "diamondWeight") or 0
     group = _str(t, "pricingGroupType").upper()
-    if not gold or making is None or karat != "22" or metal.lower() != "gold":
+    if not gold or not making or karat != "22" or metal.lower() != "gold":
         return None
     if stone or diamond or "STUDDED" in group:
         return None
     # the parts must add up to Tanishq's own total (gold + making + stones + GST)
-    parts = gold + making + (_num(t, "AF1") or 0) + (_num(t, "WTV") or 0)
-    if not total or abs(parts * 1.03 - total) > total * 0.02:
+    parts = gold + making + (_num(t, "AF1") or 0)
+    tax = _num(t, "TXV") or parts * 0.03
+    if not total or abs(parts + tax - total) > total * 0.02:
         return None
     pct = round(making / gold * 100, 2)
     if not 2 <= pct <= 60:
@@ -92,9 +97,13 @@ def parse(txt):
     return {"pct": pct, "gold": gold, "making": making, "offer": offer}
 
 
+CACHE = "data/tanishq_products.txt"
+
+
 def product_urls(sess):
-    """{category: [product url, ...]} from the sitemaps, plain-gold-looking only."""
-    urls = set()
+    """{category: [product url, ...]} from the sitemaps, plain-gold-looking only.
+    A sitemap the proxies give up on comes from the last good list (CACHE)."""
+    urls, failed = set(), False
     for sm in SITEMAPS:
         for _ in range(3):                     # big files: a proxy sometimes gives up
             x, how = fetch(sess, sm, min_len=100, proxy_timeout=150)
@@ -103,6 +112,17 @@ def product_urls(sess):
         found = {u.split("?")[0] for u in re.findall(r"<loc>([^<]+)</loc>", x or "")}
         print(f"  {BRAND}: {sm.rsplit('/', 1)[1]} {how}, {len(found)} products")
         urls |= found
+        failed |= not found
+    try:
+        old = set(open(CACHE, encoding="utf-8").read().split())
+    except OSError:
+        old = set()
+    if failed:
+        urls |= old
+    elif urls:
+        os.makedirs(os.path.dirname(CACHE), exist_ok=True)
+        with open(CACHE, "w", encoding="utf-8") as f:
+            f.write("\n".join(sorted(urls)) + "\n")
     cats = {}
     for u in sorted(urls):
         name = u.replace("-", " ")
@@ -133,8 +153,9 @@ def _read(sess, url):
             txt, how = fetch(sess, v, min_len=200)
             r = parse(txt) if txt else None
     if DEBUG:
-        print("   ", url.rsplit("/", 1)[1], how, r, why_not(txt),
-              re.findall(r'"priceInfo"\s*:\s*\{[^}]*\}', htmllib.unescape(txt or ""))[-1:])
+        print("   ", url.rsplit("/", 1)[1], how, r, why_not(txt))
+        if txt and not r and "master" in txt:
+            print("     dwvar:", [re.sub(r"\s+", " ", x) for x in re.findall(r".{120}dwvar.{120}", htmllib.unescape(txt))[:2]])
     return url, r, how
 
 
