@@ -6,7 +6,8 @@ through the proxy waterfall the daily rate collector already uses
 (collect_charges.fetch). Its product list comes from its own sitemaps; for
 each product its own product data (the same response its page asks for when
 a visitor opens "Price Breakup") carries a priceInfo block:
-  GDV  gold value      MGR  making charge (before any offer)
+  GDV  gold value      F2   making charge (before any offer)
+  AF1  stones          UTP  the total with 3% GST   (MGR is the gold rate per gram)
 plus the karat, stone and diamond weight, and the offer the page shows
 ("15% off on making charges", "Rs 301 off per gram"). Only plain 22K gold
 counts: making % = MGR / GDV x 100, as for every other jeweller.
@@ -45,21 +46,35 @@ def _str(txt, key):
 def why_not(txt):
     """What a product's data says, for the log when parse() says no."""
     t = htmllib.unescape(txt or "")
-    return {k: (_str(t, k) or _num(t, k)) for k in ("karatage", "metal", "pricingGroupType", "stoneWeight",
-                                                   "diamondWeight", "GDV", "MGR")} | {"bytes": len(t)}
+    return {k: (_str(t, k) or _num(t, k)) for k in ("productType", "karatage", "metal", "pricingGroupType",
+                                                   "stoneWeight", "diamondWeight", "GDV", "F2", "AF1", "UTP")} | {"bytes": len(t)}
+
+
+def variant_url(txt):
+    """A master product's first variant (a size/weight), which carries the price."""
+    m = re.search(r'(?:https://www\.tanishq\.co\.in)?/on/demandware\.store/Sites-Tanishq-Site/en_IN/Product-Variation\?dwvar_[^"\'\s\\]+',
+                  htmllib.unescape(txt or ""))
+    if not m:
+        return None
+    u = m.group(0).replace("&amp;", "&")
+    return u if u.startswith("http") else BASE + u
 
 
 def parse(txt):
     """One product's data -> {pct, karat, gold, making, offer} or None when
     it is not plain 22K gold or the breakup is missing."""
     t = htmllib.unescape(txt or "")
-    gold, making = _num(t, "GDV"), _num(t, "MGR")
+    gold, making, total = _num(t, "GDV"), _num(t, "F2"), _num(t, "UTP")
     karat, metal = _str(t, "karatage"), _str(t, "metal")
     stone, diamond = _num(t, "stoneWeight") or 0, _num(t, "diamondWeight") or 0
     group = _str(t, "pricingGroupType").upper()
     if not gold or making is None or karat != "22" or metal.lower() != "gold":
         return None
     if stone or diamond or "STUDDED" in group:
+        return None
+    # the parts must add up to Tanishq's own total (gold + making + stones + GST)
+    parts = gold + making + (_num(t, "AF1") or 0) + (_num(t, "WTV") or 0)
+    if not total or abs(parts * 1.03 - total) > total * 0.02:
         return None
     pct = round(making / gold * 100, 2)
     if not 2 <= pct <= 60:
@@ -92,10 +107,17 @@ def product_urls(sess):
         name = u.replace("-", " ")
         if "/product/" not in u or _STUDDED_RE.search(name) or _OTHER_KT.search(name):
             continue
+        pid = PROD_RE.search(u)
+        if not pid or pid.group(1).startswith("55"):    # 55...: Mia, Tanishq's 14K line
+            continue
         c = categorize(u)
         if c:
             cats.setdefault(c, []).append(u)
     return cats
+
+
+def _says_22(u):
+    return bool(re.search(r"\b22 ?(kt|k|karat|carat)\b", u.replace("-", " "), re.I))
 
 
 def _read(sess, url):
@@ -103,7 +125,13 @@ def _read(sess, url):
     if not m:
         return url, None, "no pid"
     txt, how = fetch(sess, VARIATION.format(pid=m.group(1)), min_len=200)
-    return url, parse(txt) if txt else None, how
+    r = parse(txt) if txt else None
+    if txt and not r and '"productType": "master"' in txt and '"karatage": "22"' in txt:
+        v = variant_url(txt)                   # sizes carry the price, the master does not
+        if v:
+            txt, how = fetch(sess, v, min_len=200)
+            r = parse(txt) if txt else None
+    return url, r, how
 
 
 def collect(sess, per_cat=PER_CAT, tries=TRIES_PER_CAT, seed=None):
@@ -114,6 +142,7 @@ def collect(sess, per_cat=PER_CAT, tries=TRIES_PER_CAT, seed=None):
     results, offers = [], {}
     for cat, urls in product_urls(sess).items():
         rnd.shuffle(urls)
+        urls.sort(key=lambda u: not _says_22(u))        # "22kt" in the name first
         got, i = [], 0
         with ThreadPoolExecutor(WORKERS) as ex:
             while len(got) < per_cat and i < min(tries, len(urls)):
@@ -151,16 +180,7 @@ if __name__ == "__main__":
     from collect_charges import UA
     s = requests.Session()
     s.headers.update({"User-Agent": UA})
-    cats = product_urls(s)
-    for c, us in cats.items():
-        print(c, len(us), us[:2])
-        for u in us[:3]:
-            m = PROD_RE.search(u)
-            txt, how = fetch(s, VARIATION.format(pid=m.group(1)), min_len=200)
-            print("  ", u.rsplit("/", 1)[1], how, parse(txt) if txt else None, why_not(txt))
-            if txt and not parse(txt):
-                print("     ", re.sub(r"\s+", " ", txt[:600]))
-    res, off = [], {}
+    res, off = collect(s, per_cat=3, tries=6, seed=1)
     for r in res:
         print(r)
     print(offer_summary(off), off)

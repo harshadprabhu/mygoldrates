@@ -6,7 +6,7 @@ import tanishq_charges as tq
 PLAIN = ('{"product": {"karatage": "22", "metal": "Gold", "diamondWeight": 0, "stoneWeight": 0, '
          '"pricingGroupType": "PLAINGOLD", "customDataFeed": {"priceInfo": {"dtt": "F2", "dtp": "15", "vpg": "", '
          '"dttText": "<DISCOUNT_PERCENTAGE>% off on making charges"}}, '
-         '"priceInfo": {"MGR": "3287.08", "GDV": "14609.24", "UTP": "17896.32"}}}')
+         '"priceInfo": {"MGR": "13245", "GDV": "14609.24", "WTV": "0", "AF1": "0", "F2": "3287.08", "UTP": "18433.21"}}}')
 
 
 def test_plain_22k_gives_making_pct_and_its_offer():
@@ -20,6 +20,14 @@ def test_other_karats_stones_and_missing_breakups_are_skipped():
     assert tq.parse(PLAIN.replace("PLAINGOLD", "GOLDSTUDDED")) is None
     assert tq.parse(PLAIN.replace('"GDV": "14609.24"', '"GDV": ""')) is None
     assert tq.parse("<html>Access Blocked</html>") is None
+    assert tq.parse(PLAIN.replace('"UTP": "18433.21"', '"UTP": "25000"')) is None    # parts must add up
+
+
+def test_a_master_product_points_to_a_variant_that_has_the_price():
+    master = ('{"productType": "master", "karatage": "22", "url": '
+              '"https://www.tanishq.co.in/on/demandware.store/Sites-Tanishq-Site/en_IN/Product-Variation?'
+              'dwvar_51t815fbraa00_grossWeight=4.2&amp;pid=51t815fbraa00&amp;quantity=1"}')
+    assert tq.variant_url(master).endswith("grossWeight=4.2&pid=51t815fbraa00&quantity=1")
 
 
 def test_per_gram_offer_and_html_escaped_data():
