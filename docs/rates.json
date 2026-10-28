@@ -8,9 +8,9 @@
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14397.5,
-    "22k": 13197.71,
-    "18k": 10798.12
+    "24k": 14402.5,
+    "22k": 13202.29,
+    "18k": 10801.88
   },
   "lowest_24k": {
     "jeweller": "PN Gadgil",
@@ -74,12 +74,6 @@
       "rate_24k_per_gram_inr": 14362.0,
       "rate_22k_per_gram_inr": 13165.17,
       "rate_18k_per_gram_inr": 10771.5
-    },
-    {
-      "jeweller": "Senco Gold",
-      "rate_24k_per_gram_inr": 14372.0,
-      "rate_22k_per_gram_inr": 13174.33,
-      "rate_18k_per_gram_inr": 10779.0
     },
     {
       "jeweller": "Reliance Jewels",
@@ -148,6 +142,12 @@
       "rate_18k_per_gram_inr": 10796.25
     },
     {
+      "jeweller": "Thangamayil Jewellery",
+      "rate_24k_per_gram_inr": 14395.0,
+      "rate_22k_per_gram_inr": 13195.42,
+      "rate_18k_per_gram_inr": 10796.25
+    },
+    {
       "jeweller": "Khazana Jewellery",
       "rate_24k_per_gram_inr": 14396.0,
       "rate_22k_per_gram_inr": 13196.33,
@@ -182,6 +182,12 @@
       "rate_24k_per_gram_inr": 14405.0,
       "rate_22k_per_gram_inr": 13204.58,
       "rate_18k_per_gram_inr": 10803.75
+    },
+    {
+      "jeweller": "Senco Gold",
+      "rate_24k_per_gram_inr": 14410.0,
+      "rate_22k_per_gram_inr": 13209.17,
+      "rate_18k_per_gram_inr": 10807.5
     },
     {
       "jeweller": "Tanishq",
