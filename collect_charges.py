@@ -371,7 +371,7 @@ def _proxy_attempts(url):
 # The free-tier proxies (ScraperAPI, ScrapingBee, ZenRows, Crawlbase) are
 # spent only on sites that answer nothing else; a slow page anywhere else
 # must not use up the month's credits.
-PROXY_HOSTS = {"www.tanishq.co.in"}
+PROXY_HOSTS = {"www.tanishq.co.in", "www.thangamayil.com"}   # both refuse GitHub's servers
 
 
 def fetch(sess, url, allow_proxy=True, timeout=25, min_len=500, proxy_timeout=60):

@@ -290,6 +290,7 @@
       var c1 = ct && b.mk[ct] != null ? ct : (b.mk.Ring != null ? 'Ring' : Object.keys(b.mk)[0]);
       return { intent: 'making', html: '<p>' + t('mk_brand_h', { b: esc(b.n) }) + '</p><div class="sn-list">' +
         Object.keys(b.mk).map(function (c) { return '<div class="sn-row"><span class="sn-nm">' + esc(catName(c)) + '</span><span class="sn-v">' + pct(b.mk[c]) + '</span></div>'; }).join('') + '</div>' +
+        (b.mo && b.mo.u ? '<p>' + t('off_mo', { p: pct(b.mo.u) }) + '</p>' : '') +
         '<p class="sn-dim">' + t('mk_note') + '</p><p>' + link('/making-charges-comparison', t('mk_all')) + '</p>',
         say: t('say_mk_brand', { b: b.n, c: catName(c1), p: pct(b.mk[c1]) }),
         chips: [chip('boff', { b: b.n.split(' ')[0] }), chip('afteroff'), chip('cheap22')] };
@@ -306,11 +307,13 @@
   function aOffers(bs) {
     if (bs.length) {
       var b = bs[0];
-      if (!b.off || !b.off.length) return { intent: 'offers', html: '<p>' + t('off_none', { b: esc(b.n) }) + ' ' + link('/gold-offers-today', t('off_see')) + '</p>',
-        say: t('say_off_none', { b: b.n }) };
+      // the making-charge offer seen on the jeweller's own products (Tanishq)
+      var mo = b.mo && b.mo.u && !b.mo.f ? '<p>' + t('off_mo', { p: pct(b.mo.u) }) + '</p>' : '';
+      if (!b.off || !b.off.length) return { intent: 'offers', html: (mo || '<p>' + t('off_none', { b: esc(b.n) }) + '</p>') + '<p>' + link('/gold-offers-today', t('off_see')) + '</p>',
+        say: mo ? t('off_mo', { p: pct(b.mo.u) }).replace(/<[^>]+>/g, '') : t('say_off_none', { b: b.n }) };
       return { intent: 'offers', html: '<p>' + t('off_brand_h', { b: esc(b.n) }) + '</p>' + b.off.map(function (o) {
         return '<div class="sn-card"><b>' + esc(o.h) + '</b><q>' + esc(o.t) + '</q><p>' + o.m + '</p><a href="' + esc(o.u) + '" target="_blank" rel="nofollow noopener">' + t('off_page') + '</a></div>';
-      }).join('') + '<p>' + link('/gold-offers-today', t('off_all')) + '</p>',
+      }).join('') + mo + '<p>' + link('/gold-offers-today', t('off_all')) + '</p>',
         say: t('say_off_brand', { b: b.n, n: b.off.length }), chips: chips(['afteroff', 'cheap22']) };
     }
     // Every jeweller with an offer today, A to Z, each with its own offers:

@@ -26,7 +26,7 @@ import random
 import re
 from concurrent.futures import ThreadPoolExecutor
 
-from collect_charges import categorize
+from collect_charges import categorize, fetch
 
 PER_CAT = 25          # plain 22K pieces per category
 TRIES_PER_CAT = 70    # product reads per category at most
@@ -103,20 +103,23 @@ class Thangamayil:
     source = None                       # its own breakup, not worked out
     sitemaps = ["https://www.thangamayil.com/sitemap.xml"]
 
+    # refuses GitHub's servers: direct first, then the proxies
+    # (collect_charges.PROXY_HOSTS), so fewer pieces per run to spare credits
+    per_cat, tries = 12, 25
+
     def products(self, sess):
-        try:
-            return re.findall(r"<loc>([^<]+\.html)</loc>", sess.get(self.sitemaps[0], timeout=60).text)
-        except Exception:
-            return []
+        for _ in range(3):
+            x, _how = fetch(sess, self.sitemaps[0], min_len=100, proxy_timeout=120)
+            if x:
+                return re.findall(r"<loc>([^<]+\.html)</loc>", x)
+        return []
 
     def rate22(self, sess, urls):
         return 1.0                      # not needed: the page has the gold value
 
     def read(self, sess, url, rate):
-        try:
-            return self.parse(sess.get(url, timeout=30).text)
-        except Exception:
-            return None
+        html, _how = fetch(sess, url)
+        return self.parse(html) if html else None
 
     @staticmethod
     def parse(page):
@@ -158,10 +161,11 @@ def collect(sess, per_cat=PER_CAT, tries=TRIES_PER_CAT, seed=None):
         print(f"  {r.brand}: {len(urls)} products, 22K rate {rate}, {({c: len(v) for c, v in cats.items()})}")
         with ThreadPoolExecutor(WORKERS) as ex:
             for cat, us in cats.items():
+                pc, tr = min(per_cat, getattr(r, "per_cat", per_cat)), min(tries, getattr(r, "tries", tries))
                 rnd.shuffle(us)
-                pcts = [(u, p) for u, p in zip(us[:tries], ex.map(lambda u: r.read(sess, u, rate), us[:tries])) if p]
-                out += [(r.brand, cat, u, p, r.source) for u, p in pcts[:per_cat]]
-                print(f"  {r.brand} {cat}: {len(pcts[:per_cat])} plain 22K from {min(tries, len(us))} read")
+                pcts = [(u, p) for u, p in zip(us[:tr], ex.map(lambda u: r.read(sess, u, rate), us[:tr])) if p]
+                out += [(r.brand, cat, u, p, r.source) for u, p in pcts[:pc]]
+                print(f"  {r.brand} {cat}: {len(pcts[:pc])} plain 22K from {min(tr, len(us))} read")
     return out
 
 
@@ -171,7 +175,7 @@ if __name__ == "__main__":
     from collect_charges import UA
     s = requests.Session()
     s.headers.update({"User-Agent": UA})
-    res = collect(s, per_cat=8, tries=20, seed=1)
+    res = collect(s, per_cat=3, tries=6, seed=1)
     for b, c in sorted({(b, c) for b, c, _, _, _ in res}):
         v = [p for bb, cc, _, p, _ in res if (bb, cc) == (b, c)]
         print(b, c, "median", statistics.median(v), v)
