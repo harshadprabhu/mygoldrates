@@ -301,3 +301,36 @@ def test_shops_sona_does_not_track_get_an_honest_answer_and_a_google_button():
     assert got[1]["intent"] == "outside" and got[2]["intent"] == "faq"
     src = open("assistant.js", encoding="utf-8").read()
     assert "t('unknown') + '</p>' + gLink(q)" in src                     # anything unanswered offers the search too
+
+
+def test_best_offer_asks_which_piece_then_ranks_jewellers_after_making_offers(tmp_path):
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    mk = [b for b in kb["brands"] if (b.get("mk") or {}).get("Ring") is not None]
+    assert len(mk) >= 3
+    dear = max(mk, key=lambda b: b["mk"]["Ring"])
+    for b in kb["brands"]:
+        b.pop("mo", None)
+    dear["mo"] = {"f": 100.0, "u": 100.0}            # a free making charge puts it first
+    p = tmp_path / "kb.json"
+    p.write_text(json.dumps(kb), encoding="utf-8")
+    r = _sona([{"lang": "en", "q": "best offer today"},
+               {"q": "Ring"},
+               {"lang": "en", "q": "sabse best offer kaunsa hai"},
+               {"lang": "hi", "q": "best offer bangle", "chip": True},
+               {"lang": "en", "q": "Tanishq offers"}], kb=str(p))
+    assert r[0]["intent"] == "ask_cat" and len(r[0]["chips"]) == 4
+    assert r[1]["intent"] == "best_offer" and dear["n"] in r[1]["say"]
+    assert "(−100%)" in r[1]["html"] and "tentative" in r[1]["html"]
+    assert r[2]["intent"] == "ask_cat"
+    assert r[3]["intent"] in ("best_offer",) and r[3]["lang"] == "hi"
+    assert r[4]["intent"] == "offers"                 # one jeweller's offers stay as they were
+
+
+def test_making_offer_ranks_only_flat_offers_on_gold_jewellery():
+    flat = {"kind": "making_off", "pct_min": 20, "pct_max": 20, "applies_to": []}
+    upto = {"kind": "making_off", "pct_min": 75, "pct_max": 75, "upto": True, "applies_to": []}
+    diamond = {"kind": "making_off", "pct_min": 30, "pct_max": 30, "applies_to": ["diamond jewellery only"]}
+    banner = dict(flat, pct_min=35, pct_max=35, image=True)
+    assert KB._making_offer([flat, upto, diamond, banner]) == (20.0, 75.0)
+    assert KB._making_offer([upto]) == (0.0, 75.0)
+    assert KB._making_offer([]) == (0.0, 0.0)
