@@ -110,7 +110,11 @@ jobs:
           URL="https://raw.githubusercontent.com/${{ github.repository }}/$SHA/$FILE"
           case "$KIND" in
             rates) python social_post.py publish "$URL" ;;
-            reel) python social_post.py reel "$URL" ;;
+            reel)
+              # the site serves it as video/mp4 (GitHub's raw link is a plain download)
+              SITE="https://mygoldrates.com/social/$(basename "$FILE")"
+              if curl -sfI "$SITE" | grep -qi "content-type: video/mp4"; then URL="$SITE"; fi
+              python social_post.py reel "$URL" ;;
             awareness) python awareness.py publish "https://raw.githubusercontent.com/${{ github.repository }}/$SHA/docs/social" ;;
             *) python news_post.py publish "$KIND" "$URL" ;;
           esac
