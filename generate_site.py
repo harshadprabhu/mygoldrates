@@ -765,6 +765,10 @@ REGION_MAP = {
     "prince": ["Tamil Nadu"],
     "whp": ["Maharashtra"],
     "khimji": ["Odisha"],
+    # added 2026-10-28 (north and west sweep)
+    "rushabh": ["Gujarat"],
+    "swarn-jewellers": ["Haryana"],
+    "navratan-jewellers": ["Madhya Pradesh"],
 }
 
 
@@ -784,6 +788,7 @@ BRAND_HOME = {
     "whp": ["Mumbai"], "thangamayil": ["Madurai"], "khazana": ["Chennai"],
     "avr": ["Salem"], "mehta": ["Delhi"], "jewelone": ["Coimbatore"],
     "pcchandra": ["Kolkata"], "nac": ["Chennai"], "prince": ["Chennai"],
+    "rushabh": ["Ahmedabad"], "navratan-jewellers": ["Indore"],
 }
 
 # Approximate centre of each city on LOCATIONS (lat, lon), for the
@@ -4121,6 +4126,7 @@ document.getElementById('mkGo').addEventListener('click',function(){
             "pcchandra": "east", "abharan": "south", "nac": "south",
             "prince": "south", "whp": "west",
             "khimji": "east",
+            "rushabh": "west", "swarn-jewellers": "north", "navratan-jewellers": "west",
         }
         pulse_brands = []
         for _r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):
