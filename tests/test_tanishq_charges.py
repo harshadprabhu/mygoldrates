@@ -56,3 +56,17 @@ def test_only_tanishq_spends_proxy_credits(monkeypatch):
     assert len(calls) == 1                                  # direct only
     cc.fetch(S(), "https://www.tanishq.co.in/x")
     assert len(calls) == 3 and "scraperapi" in calls[-1]
+
+
+def test_offers_read_tanishq_through_the_proxies_and_others_stay_blocked(monkeypatch):
+    import offers
+    page = ("<html><body><h2>Diwali offer</h2><p>Flat 20% off on making charges on gold jewellery. "
+            "Valid till 5 November.</p></body></html>") * 3
+    seen = []
+    monkeypatch.setattr(cc, "fetch", lambda sess, u, **k: (seen.append(u) or page, "zenrows"))
+    monkeypatch.setattr(offers, "read_banners", lambda *a, **k: [])
+    rec = offers.read_via_proxy(None, {"pages": [], "offers": [], "status": "ok"}, "https://www.tanishq.co.in/")
+    assert rec["via"] == "proxy" and any(o["kind"] == "making_off" for o in rec["offers"])
+    assert len(seen) <= offers.PROXY_PAGES
+    other = offers.read_via_proxy(None, {"pages": [], "offers": [], "status": "ok"}, "https://www.joyalukkas.in/")
+    assert other["status"].startswith("not readable")
