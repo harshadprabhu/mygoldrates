@@ -17,6 +17,7 @@ counts: making % = MGR / GDV x 100, as for every other jeweller.
 """
 import html as htmllib
 import os
+import time
 import random
 import re
 from concurrent.futures import ThreadPoolExecutor
@@ -111,10 +112,11 @@ def product_urls(sess):
         cache = {}
     urls = set()
     for sm in SITEMAPS:
-        for _ in range(4):                     # big files: a proxy sometimes gives up
-            x, how = fetch(sess, sm, min_len=100, proxy_timeout=150)
-            if x:
+        for i in range(6):                     # big files (3-8 MB): proxies often give up,
+            x, how = fetch(sess, sm, min_len=100, proxy_timeout=180)
+            if x:                              # and succeed a little later
                 break
+            time.sleep(20 * (i + 1))
         found = {u.split("?")[0] for u in re.findall(r"<loc>([^<]+)</loc>", x or "")}
         name = sm.rsplit("/", 1)[1]
         if found:

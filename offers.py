@@ -16,9 +16,13 @@ Daily (offers.yml). For every active jeweller:
      /gold-offers-today page, working out what a making-charge discount is
      worth in rupees from today's rate and docs/making-charges.json.
 
-What is NOT done: no attempt to get past a site that blocks visitors, no
-images or text copied beyond the short offer sentence, and no judgement of
-which designs are "better" - that is taste, not a fact we can check.
+A site that blocks plain requests but is in collect_charges.PROXY_HOSTS
+(Tanishq) is read through the same proxy waterfall as its daily rate: the
+homepage and up to two offer pages, about three proxy requests a day.
+
+What is NOT done: no images or text copied beyond the short offer sentence,
+and no judgement of which designs are "better" - that is taste, not a fact
+we can check.
 """
 from __future__ import annotations
 
@@ -523,6 +527,45 @@ def offer_links(html: str, base: str) -> list[str]:
     return found[:MAX_PAGES - 1]
 
 
+PROXY_PAGES = 3          # homepage + up to 2 offer pages, each one proxy credit
+
+
+def read_via_proxy(sess, rec, base):
+    """A blocked site the daily rate already reads through the proxies
+    (collect_charges.PROXY_HOSTS): its homepage and offer pages, rendered."""
+    try:
+        from collect_charges import PROXY_HOSTS, fetch
+    except Exception:
+        PROXY_HOSTS = ()
+    if urlparse(base).netloc not in PROXY_HOSTS:
+        rec["status"] = "not readable (the site blocks automated visits)"
+        return rec
+    home, how = fetch(sess, base)
+    if not home or _blocked(200, home):
+        rec["status"] = f"not readable today (proxies: {how})"
+        return rec
+    rec["read_from"], rec["via"] = base, "proxy"
+    pages, raw = [(base, home)], []
+    for u in offer_links(home, base)[:PROXY_PAGES - 1]:
+        h, _ = fetch(sess, u)
+        if h and not _blocked(200, h):
+            pages.append((u, h))
+    for u, h in pages:
+        rec["pages"].append(u)
+        raw += extract_offers(page_text(h), u)
+    try:
+        import banner_ocr
+        imgs = banner_ocr.banner_urls_from_html(home, base)
+    except Exception:
+        imgs = []
+    rec["banners"] = len(imgs)
+    raw += banner_extras(raw, read_banners(sess, imgs[:10], base))
+    rec["offers"] = summarise(raw)
+    if not rec["offers"]:
+        rec["status"] = "no offers published as text or in banners today"
+    return rec
+
+
 def read_brand(sess, brand, render=True):
     domain = (brand.get("domain") or "").strip()
     rec = {"slug": brand["slug"], "name": brand["name"], "domain": brand.get("domain") or "",
@@ -541,8 +584,7 @@ def read_brand(sess, brand, render=True):
         rec["status"] = f"unreachable ({type(e).__name__})"
         return rec
     if _blocked(status, home):
-        rec["status"] = "not readable (the site blocks automated visits)"
-        return rec
+        return read_via_proxy(sess, rec, base)
     ind = india_url(sess, base, r.url, home)
     if ind:                                  # sent abroad: read the Indian store
         base = ind

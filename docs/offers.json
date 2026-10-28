@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-28T12:07+05:30",
+ "updated": "2026-10-28T17:00+05:30",
  "note": "Offers as published on each jeweller's own website on the date shown. Read automatically; confirm terms with the jeweller before buying.",
  "brands": [
   {
@@ -128,7 +128,7 @@
      "pct_max": 100.0,
      "upto": true,
      "selected": true,
-     "mentions": 4,
+     "mentions": 7,
      "min_purchase": null,
      "dates": [],
      "applies_to": [],
@@ -136,11 +136,26 @@
      "text": "Up To 100% Off On Making Charges",
      "url": "https://www.bluestone.com/",
      "first_seen": "2026-10-24"
+    },
+    {
+     "kind": "making_zero",
+     "pct_min": 100.0,
+     "pct_max": 100.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 1,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "Offers, 0% Making Charge",
+     "url": "https://www.bluestone.com/",
+     "first_seen": "2026-10-28"
     }
    ],
    "read_from": "https://www.bluestone.com/",
    "rendered": true,
-   "banners": 8
+   "banners": 16
   },
   {
    "slug": "ckc",
@@ -176,7 +191,7 @@
    ],
    "read_from": "https://ckcjewellers.com/",
    "rendered": true,
-   "banners": 14
+   "banners": 15
   },
   {
    "slug": "candere",
@@ -251,6 +266,27 @@
    ],
    "offers": [
     {
+     "kind": "diamond_off",
+     "pct_min": 20.0,
+     "pct_max": 20.0,
+     "upto": false,
+     "selected": false,
+     "mentions": 2,
+     "min_purchase": null,
+     "dates": [
+      "31 Oct 2026"
+     ],
+     "applies_to": [
+      "diamond jewellery only"
+     ],
+     "conditions": [],
+     "text": "FLAT 20% OFF On All Diamond Jewellery INSTANT DISCOUNT pe",
+     "url": "https://www.caratlane.com/",
+     "image": "https://cdn.caratlane.com/media/static/images/V4/2026/10_OCT/Banner/Flat20/13/Desktop.jpg",
+     "banner": "FLAT 20% OFF On All Diamond Jewellery INSTANT DISCOUNT pe Valid till Oct 2026. T&C Apply\n10% INSTANT b RBLBANK Max. Valid till Oct 2026. T&C Apply\ntao",
+     "first_seen": "2026-10-28"
+    },
+    {
      "kind": "scheme",
      "pct_min": null,
      "pct_max": null,
@@ -268,7 +304,7 @@
    ],
    "read_from": "https://www.caratlane.com/",
    "rendered": "international",
-   "banners": 0
+   "banners": 8
   },
   {
    "slug": "chandukaka",
@@ -572,7 +608,7 @@
      "conditions": [],
      "text": "LOCK YOUR GOLD RATE",
      "url": "https://www.khimjijewellers.com/",
-     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639287402222007375",
+     "image": "https://www.khimjijewellers.com/img/banner/websitebanner3.jpeg?v=639287579626496037",
      "banner": "PRICE HIKED?\nGold\nGET YOUR GOLD JEWELLERY THE\nBOOKED\nrotectio\nPRICE DROPPED?\nGET THE LOWEST RATE FOR\nYOUR GOLD JEWELLRY DAAM BADLEGA.\nDIWALI KI KHUSHI NAHI.\nLOCK YOUR GOLD RATE\n1Q%\nJEWELLERS SINCE 1936",
      "first_seen": "2026-10-24"
     }
@@ -729,9 +765,14 @@
    "slug": "nac",
    "name": "NAC Jewellers",
    "domain": "www.nacjewellers.com",
-   "status": "unreachable (ConnectionError)",
-   "pages": [],
-   "offers": []
+   "status": "no offers published as text or in banners today",
+   "pages": [
+    "https://www.nacjewellers.com/"
+   ],
+   "offers": [],
+   "read_from": "https://www.nacjewellers.com/",
+   "rendered": false,
+   "banners": 8
   },
   {
    "slug": "orra",
@@ -769,8 +810,9 @@
    "status": "no offers published as text or in banners today",
    "pages": [
     "https://www.pcchandraindia.com/",
-    "https://pcchandraindia.com/pages/promotions",
     "https://www.pcchandraindia.com/pages/promotions",
+    "https://pcchandraindia.com/collections/promotions",
+    "https://www.pcchandraindia.com/collections/promotions",
     "https://pcchandraindia.com/"
    ],
    "offers": [],
@@ -826,7 +868,7 @@
    ],
    "read_from": "https://www.pngjewellers.com/",
    "rendered": true,
-   "banners": 14
+   "banners": 15
   },
   {
    "slug": "pngsons",
@@ -1035,9 +1077,49 @@
    "slug": "tanishq",
    "name": "Tanishq",
    "domain": "www.tanishq.co.in",
-   "status": "not readable (the site blocks automated visits)",
-   "pages": [],
-   "offers": []
+   "status": "ok",
+   "pages": [
+    "https://www.tanishq.co.in/",
+    "https://www.tanishq.co.in/offers-terms-and-conditions.html?lang=en_IN",
+    "https://www.tanishq.co.in/festive-picks?lang=en_IN"
+   ],
+   "offers": [
+    {
+     "kind": "exchange",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 2,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [
+      "gold jewellery"
+     ],
+     "conditions": [],
+     "text": "Flat 0% deduction* on exchange of old gold (18KT and above) from any jeweller",
+     "url": "https://www.tanishq.co.in/",
+     "first_seen": "2026-10-28"
+    },
+    {
+     "kind": "rate_protect",
+     "pct_min": null,
+     "pct_max": null,
+     "upto": false,
+     "selected": false,
+     "mentions": 4,
+     "min_purchase": null,
+     "dates": [],
+     "applies_to": [],
+     "conditions": [],
+     "text": "There will be no switchover from normal advance booking to Best Gold Rate offer",
+     "url": "https://www.tanishq.co.in/offers-terms-and-conditions.html?lang=en_IN",
+     "first_seen": "2026-10-28"
+    }
+   ],
+   "read_from": "https://www.tanishq.co.in/",
+   "via": "proxy",
+   "banners": 8
   },
   {
    "slug": "thangamayil",

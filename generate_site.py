@@ -3051,7 +3051,8 @@ def main():
                 continue          # no live rate today -> cannot price it
             cats_d = {c["category"]: {"pct": c["making_pct_median"],
                                       "n": c.get("items", 0),
-                                      "conf": c.get("confidence", "")}
+                                      "conf": c.get("confidence", ""),
+                                      "src": c.get("source", "")}
                       for c in b["categories"]}
             if cats_d:
                 dash[nm] = {"rates": rate_by_brand[nm], "mc": cats_d}
@@ -7029,7 +7030,7 @@ BUDGET_JS = r"""
       var gold = rate * grams;
       var making = state.incMc ? gold * (mc.pct/100) : 0;
       var gst = state.incGst ? (gold + making) * GST : 0;
-      out.push({ name:name, rate:rate, pct:mc.pct, n:mc.n, conf:mc.conf,
+      out.push({ name:name, rate:rate, pct:mc.pct, n:mc.n, conf:mc.conf, src:mc.src,
                  cpg:cpg, grams:grams, gold:gold, making:making, gst:gst,
                  mine:false });
     });
@@ -7418,7 +7419,7 @@ MC_DASH_JS = r"""
       var gold   = rate * state.weight;
       var making = gold * (mc.pct/100);
       var gst    = (gold + making) * GST;
-      out.push({ name:name, rate:rate, pct:mc.pct, n:mc.n, conf:mc.conf,
+      out.push({ name:name, rate:rate, pct:mc.pct, n:mc.n, conf:mc.conf, src:mc.src,
                  gold:gold, making:making, gst:gst,
                  total: gold + making + gst });
     });
@@ -7474,7 +7475,9 @@ MC_DASH_JS = r"""
 
     host.innerHTML = rows.map(function(r, i){
       var gp = r.gold/r.total*100, mp = r.making/r.total*100, sp = r.gst/r.total*100;
-      var confLab = r.conf === "high" ? "" : r.conf === "jeweller"
+      var confLab = r.src === "price"
+        ? '<span class="mc-badge soft" title="Price before GST minus gold weight at the jeweller’s own 22K rate, on plain gold pieces">Worked out from the price</span>'
+        : r.conf === "high" ? "" : r.conf === "jeweller"
         ? '<span class="mc-badge soft">Supplied by the jeweller</span>'
         : '<span class="mc-badge soft">' + (r.n||0) + ' item' + (r.n===1?'':'s') + '</span>';
       return '<div class="mc-row' + (i===0?' best':'') + '">'
