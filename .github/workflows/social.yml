@@ -4,6 +4,8 @@ name: social-post
 #   ~08:47 IST  news   - today's gold news (news_post.py news)
 #   ~11:17 IST  rates  - today's rate card (social_post.py)
 #   ~14:47 IST  pulse  - India's gold pulse: Indian buyers' mood + our figures (news_post.py pulse)
+#   ~19:17 IST  Tue/Thu/Sat  awareness - a six-slide swipe post on gold purity, hallmarking or
+#               HUID, in turn (awareness.py)
 # Each card is committed to the repo first (Instagram fetches the image from
 # a public URL), then posted with Meta's free API. The news and pulse posts
 # use the site's own headlines, summarised by Gemini's free text model and
@@ -14,10 +16,11 @@ on:
     - cron: "17 3 * * *"    # 03:17 UTC ~ 08:47 IST: news
     - cron: "47 5 * * *"    # 05:47 UTC ~ 11:17 IST: rates
     - cron: "17 9 * * *"    # 09:17 UTC ~ 14:47 IST: pulse
+    - cron: "47 13 * * 2,4,6"  # 13:47 UTC ~ 19:17 IST, Tue/Thu/Sat: awareness carousel
   workflow_dispatch:
     inputs:
       post:
-        description: "which post: news, rates or pulse"
+        description: "which post: news, rates, pulse or awareness"
         default: "rates"
       mode:
         description: "preview (build the card only), check (is Instagram connected?) or post"
@@ -50,12 +53,14 @@ jobs:
             "17 3 * * *") k=news ;;
             "47 5 * * *") k=rates ;;
             "17 9 * * *") k=pulse ;;
+            "47 13 * * 2,4,6") k=awareness ;;
             *) k="${PICK:-rates}" ;;
           esac
-          case "$k" in news|rates|pulse) ;; *) echo "::error::post must be news, rates or pulse"; exit 1 ;; esac
+          case "$k" in news|rates|pulse|awareness) ;; *) echo "::error::post must be news, rates, pulse or awareness"; exit 1 ;; esac
           echo "kind=$k" >> "$GITHUB_OUTPUT"
-          [ "$k" = rates ] && f=rates || f=$k
-          echo "file=docs/social/$f-$(TZ=Asia/Kolkata date +%F).jpg" >> "$GITHUB_OUTPUT"
+          # the file that says "there is a post today" (the awareness caption stands for its slides)
+          if [ "$k" = awareness ]; then ext=txt; else ext=jpg; fi
+          echo "file=docs/social/$k-$(TZ=Asia/Kolkata date +%F).$ext" >> "$GITHUB_OUTPUT"
 
       - name: Check the Instagram connection
         if: inputs.mode == 'check'
@@ -71,7 +76,11 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # news/pulse text; optional jewellery photo for rates
           KIND: ${{ steps.which.outputs.kind }}
         run: |
-          if [ "$KIND" = rates ]; then python social_post.py build; else python news_post.py build "$KIND"; fi
+          case "$KIND" in
+            rates) python social_post.py build ;;
+            awareness) python awareness.py build ;;
+            *) python news_post.py build "$KIND" ;;
+          esac
 
       - name: Publish the card to the repo
         if: inputs.mode != 'check'
@@ -96,7 +105,11 @@ jobs:
           # the exact commit, so a cached copy of an earlier card under the same name is never posted
           git fetch -q origin main && SHA=$(git rev-parse origin/main)
           URL="https://raw.githubusercontent.com/${{ github.repository }}/$SHA/$FILE"
-          if [ "$KIND" = rates ]; then python social_post.py publish "$URL"; else python news_post.py publish "$KIND" "$URL"; fi
+          case "$KIND" in
+            rates) python social_post.py publish "$URL" ;;
+            awareness) python awareness.py publish "https://raw.githubusercontent.com/${{ github.repository }}/$SHA/docs/social" ;;
+            *) python news_post.py publish "$KIND" "$URL" ;;
+          esac
           git add docs/social/posted.json 2>/dev/null || true
           git commit -m "Instagram $KIND posted $(TZ=Asia/Kolkata date +%F)" || exit 0
           for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && break; sleep 5; done
