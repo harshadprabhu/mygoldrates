@@ -63,13 +63,27 @@ def main():
             print("   .html links:", len(hrefs), hrefs[:8])
             for snip in around(html, r"product-tile|data-pid|pdp-link", n=2, w=300):
                 print("   tile:", snip)
-    for u in prods[:4]:
+    for u in prods[:2]:
         html, how = fetch(s, u)
         print(f"\n== PRODUCT {u}: {how} {len(html or '')} bytes")
         if not html:
             continue
         print("   title:", (re.findall(r"<title>([^<]*)", html) or ["?"])[0][:120])
-        for word in ("making", "breakup", "break-up", "gold value", "grand total", "discount", "13[0-9]{3}"):
+        for m in re.findall(r'<input[^>]*type="hidden"[^>]*>', html)[:80]:
+            if re.search(r'value="[^"]*\d', m):
+                print("[hidden]", m[:240])
+        for m in re.findall(r'data-[\w-]*(?:price|weight|making|metal|gold|rate|breakup|value)[\w-]*="[^"]{0,200}"', html, re.I)[:40]:
+            print("[data]", m)
+        for m in re.finditer(r'(?:makingCharge|making_charge|metalValue|goldValue|goldRate|netWeight|priceBreakup)\W', html):
+            print("[key]", re.sub(r"\s+", " ", html[max(0, m.start() - 120):m.end() + 260]))
+        pv = re.search(r'https://www\.tanishq\.co\.in/on/demandware\.store/[^"\' ]*Product-Variation[^"\' ]*', html)
+        if pv:
+            j, how = fetch(s, pv.group(0).replace("&amp;", "&"), min_len=50)
+            print(f"[variation] {how} {len(j or '')} bytes")
+            for word in ("making", "breakup", "metal", "gold"):
+                for snip in around(j or "", word, n=4, w=200):
+                    print(f"[variation {word}] …{snip}…")
+        for word in ("making", "gold value", "grand total"):
             for snip in around(html, word, n=3):
                 print(f"[{word}] …{snip}…")
         for m in re.findall(r"https://[^\"' ]*(?:price|breakup|Product-)[^\"' ]{0,120}", html)[:10]:
