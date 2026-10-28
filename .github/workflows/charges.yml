@@ -37,12 +37,20 @@ jobs:
         run: python collect_charges.py
         env:
           ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
+      # the collection rewrites the file: put the jewellers' own figures back in
+      - name: Merge the jewellers' own making charges
+        if: inputs.probe != 'true'
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python jeweller_making.py
       - name: Commit making-charges.json
         if: inputs.probe != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/making-charges.json
+          git add docs/making-charges.json data/jeweller_making.json
           if git diff --cached --quiet; then
             echo "unchanged"
           else
@@ -51,7 +59,7 @@ jobs:
             git rebase -X ours origin/main || {
               git rebase --abort
               git reset --soft origin/main
-              git add docs/making-charges.json
+              git add docs/making-charges.json data/jeweller_making.json
               git commit -m "charges: refresh making-charges.json"
             }
             git push
