@@ -52,12 +52,6 @@
       "rate_18k_per_gram_inr": 10725.0
     },
     {
-      "jeweller": "Mahesh Jewellers",
-      "rate_24k_per_gram_inr": 14323.64,
-      "rate_22k_per_gram_inr": 13130.0,
-      "rate_18k_per_gram_inr": 10742.73
-    },
-    {
       "jeweller": "Chandukaka Saraf",
       "rate_24k_per_gram_inr": 14325.0,
       "rate_22k_per_gram_inr": 13131.25,
@@ -74,6 +68,12 @@
       "rate_24k_per_gram_inr": 14376.0,
       "rate_22k_per_gram_inr": 13178.0,
       "rate_18k_per_gram_inr": 10782.0
+    },
+    {
+      "jeweller": "Mahesh Jewellers",
+      "rate_24k_per_gram_inr": 14378.18,
+      "rate_22k_per_gram_inr": 13180.0,
+      "rate_18k_per_gram_inr": 10783.64
     },
     {
       "jeweller": "Indriya",
@@ -196,12 +196,6 @@
       "rate_18k_per_gram_inr": 10840.35
     },
     {
-      "jeweller": "ORRA",
-      "rate_24k_per_gram_inr": 14523.79,
-      "rate_22k_per_gram_inr": 13313.47,
-      "rate_18k_per_gram_inr": 10892.84
-    },
-    {
       "jeweller": "C Krishniah Chetty",
       "rate_24k_per_gram_inr": 14534.31,
       "rate_22k_per_gram_inr": 13323.12,
@@ -218,6 +212,12 @@
       "rate_24k_per_gram_inr": 14551.38,
       "rate_22k_per_gram_inr": 13338.76,
       "rate_18k_per_gram_inr": 10913.53
+    },
+    {
+      "jeweller": "ORRA",
+      "rate_24k_per_gram_inr": 14562.55,
+      "rate_22k_per_gram_inr": 13349.0,
+      "rate_18k_per_gram_inr": 10921.91
     },
     {
       "jeweller": "Waman Hari Pethe",
