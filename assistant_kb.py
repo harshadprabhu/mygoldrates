@@ -286,6 +286,13 @@ def _load_answers():
         return []
 
 
+def _product_offer(po):
+    """(flat %, up-to %) from the offer seen on the products themselves:
+    flat only when (nearly) every piece read carried it."""
+    pct, top = float(po.get("making_pct_off") or 0), float(po.get("max_pct_off") or 0)
+    return (pct if po.get("share", 0) >= 0.9 else 0.0), float(min(max(pct, top), 100))
+
+
 def _making_offer(offers):
     """(flat %, best up-to %) off the making charge on gold jewellery."""
     import offers_page as op
@@ -307,7 +314,7 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
         rows[b["slug"]] = {"s": b["slug"], "n": b["name"],
                            "r24": round(r["canonical_24k_pre_gst"], 2)}
     off_by = {b["slug"]: b for b in (offers or {}).get("brands", [])}
-    mk_by = {}
+    mk_by, mko_by = {}, {}
     for b in (making or {}).get("brands", []):
         ex = [e.get("url", "") for c in b.get("categories", []) for e in c.get("examples", [])]
         host = ""
@@ -315,6 +322,8 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
             host = ex[0].split("/")[2].replace("www.", "")
         mk_by[host] = {c["category"]: c["making_pct_median"] for c in b.get("categories", [])
                        if c.get("making_pct_median") is not None}
+        if b.get("offer"):                     # read from the products themselves (Tanishq)
+            mko_by[host] = b["offer"]
     brands = []
     for slug, b in sorted(rows.items(), key=lambda kv: kv[1]["r24"]):
         rec = dict(b)
@@ -333,6 +342,9 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
         # discount on all gold jewellery (used for the ranking), u = the best
         # "up to" / selected-designs discount (shown only as a best case).
         mo_f, mo_u = _making_offer(ob.get("offers") or [])
+        po = mko_by.get(dom) if dom else None
+        if po and not (mo_f or mo_u):
+            mo_f, mo_u = _product_offer(po)
         if mo_f or mo_u:
             rec["mo"] = {"f": mo_f, "u": mo_u}
         if ob.get("offers"):
