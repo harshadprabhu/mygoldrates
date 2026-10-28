@@ -46,11 +46,17 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      # Making charges the jewellers sent themselves (jeweller_making.py).
+      - run: python jeweller_making.py
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
       - name: Commit offers.json and Sona's approved answers
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/offers.json data/assistant_answers.json
+          git add docs/offers.json data/assistant_answers.json docs/making-charges.json data/jeweller_making.json
           if git diff --cached --quiet; then
             echo "unchanged"
           else
@@ -59,7 +65,7 @@ jobs:
             git rebase -X ours origin/main || {
               git rebase --abort
               git reset --soft origin/main
-              git add docs/offers.json data/assistant_answers.json
+              git add docs/offers.json data/assistant_answers.json docs/making-charges.json data/jeweller_making.json
               git commit -m "offers: refresh offers.json and approved answers"
             }
             for i in 1 2 3; do git push -q origin HEAD:main && break; sleep 5; git pull --rebase -q origin main; done

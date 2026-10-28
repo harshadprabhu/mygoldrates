@@ -4025,6 +4025,17 @@ b.addEventListener('click',function(){
         + _rates.format(p="dr")
         + '<button type="button" id="drGo" class="nm-btn">Update today&rsquo;s rate</button>'
           '<div id="drOut" class="calcout" style="display:none" aria-live="polite"></div></div>'
+        + '<h2 id="making">Listed jeweller: your making charges</h2>'
+          '<p>Buyers compare the full price, not just the rate. Send your usual making charge '
+          'on plain gold for each kind of piece, as a % of the gold value, before offers. It '
+          'appears on the <a href="' + SITE_URL + '/making-charges-comparison">making charges '
+          'comparison</a> marked &ldquo;supplied by the jeweller&rdquo;. Send it again whenever it changes.</p>'
+          '<div class="calcbox" id="mk"><label for="mkK">Your code</label><input id="mkK" maxlength="40" autocomplete="off">'
+          '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">'
+        + "".join(f'<div><label for="mk{c}">{c} %</label><input id="mk{c}" inputmode="decimal" placeholder="e.g. 14"></div>'
+                  for c in ("Ring", "Earrings", "Bangle", "Mangalsutra", "Chain"))
+        + '</div><button type="button" id="mkGo" class="nm-btn">Send making charges</button>'
+          '<div id="mkOut" class="calcout" style="display:none" aria-live="polite"></div></div>'
         + "<p style='font-size:13px'>We use your details only to verify and list your "
           "store, and never share your phone or email. "
           f'Questions: <a href="{SITE_URL}/contact">contact us</a>.</p>')
@@ -4050,6 +4061,11 @@ document.getElementById('drGo').addEventListener('click',function(){
  if(!v('drK'))return out('drOut',false,'Enter your code.');
  call('submit_daily_rate',{code:v('drK'),r24:n('dr24'),r22:n('dr22'),r18:n('dr18'),gst:v('drgst')},this,'drOut',
   Object.assign({ok:'Today’s rate is saved. It appears on the site after the next update.',code:'That code is not recognised. Check it, or apply above.'},RM));
+});
+document.getElementById('mkGo').addEventListener('click',function(){
+ if(!v('mkK'))return out('mkOut',false,'Enter your code.');
+ call('submit_making_charges',{code:v('mkK'),ring:n('mkRing'),earrings:n('mkEarrings'),bangle:n('mkBangle'),mangalsutra:n('mkMangalsutra'),chain:n('mkChain')},this,'mkOut',
+  {ok:'Thank you. Your making charges appear on the comparison after the next morning update.',code:'That code is not recognised. Check it, or apply above.',empty:'Enter at least one making charge.',range:'A making charge should be a percentage between 3 and 60.'});
 });
 })();</script>""")
     render_content(
@@ -7458,8 +7474,9 @@ MC_DASH_JS = r"""
 
     host.innerHTML = rows.map(function(r, i){
       var gp = r.gold/r.total*100, mp = r.making/r.total*100, sp = r.gst/r.total*100;
-      var confLab = r.conf === "high" ? "" :
-        '<span class="mc-badge soft">' + (r.n||0) + ' item' + (r.n===1?'':'s') + '</span>';
+      var confLab = r.conf === "high" ? "" : r.conf === "jeweller"
+        ? '<span class="mc-badge soft">Supplied by the jeweller</span>'
+        : '<span class="mc-badge soft">' + (r.n||0) + ' item' + (r.n===1?'':'s') + '</span>';
       return '<div class="mc-row' + (i===0?' best':'') + '">'
         + '<div class="mc-top">'
           + '<span class="mc-rank">' + (i+1) + '</span>'
