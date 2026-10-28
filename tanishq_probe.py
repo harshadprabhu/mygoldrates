@@ -12,7 +12,7 @@ import sys
 
 import requests
 
-from collect_charges import UA, fetch
+from collect_charges import UA, fetch, _STUDDED_RE, categorize
 
 BASE = "https://www.tanishq.co.in"
 LISTINGS = [BASE + "/shop/gold-rings", BASE + "/shop/rings", BASE + "/shop/gold-earrings",
@@ -32,17 +32,23 @@ def around(html, word, n=4, w=220):
 def main():
     s = requests.Session()
     s.headers.update({"User-Agent": UA})
+    prods = []
     html, how = fetch(s, BASE + "/sitemap_index.xml", min_len=100)
     print(f"== sitemap_index: {how} {len(html or '')} bytes")
     if html:
         print("\n".join(re.findall(r"<loc>([^<]+)</loc>", html)[:15]))
     for sm in ("sitemap_0.xml", "sitemap_1.xml", "sitemap_2.xml"):
         x, how = fetch(s, BASE + "/" + sm, min_len=100)
-        locs = re.findall(r"<loc>([^<]+)</loc>", x or "")
+        locs = sorted({l.split("?")[0] for l in re.findall(r"<loc>([^<]+)</loc>", x or "")})
         print(f"== {sm}: {how} {len(x or '')} bytes, {len(locs)} urls")
-        print("\n".join([l for l in locs if "ring" in l.lower()][:3] + locs[:3]))
-    prods = []
-    for u in LISTINGS:
+        plain = [l for l in locs if "/product/" in l and not _STUDDED_RE.search(l.replace("-", " "))]
+        cats = {}
+        for l in plain:
+            cats.setdefault(categorize(l), []).append(l)
+        print("   plain gold by category:", {c: len(v) for c, v in cats.items()})
+        for c in ("Ring", "Bangle"):
+            prods += cats.get(c, [])[:1]
+    for u in []:
         html, how = fetch(s, u)
         found = sorted({p if p.startswith("http") else BASE + p for p in PROD_RE.findall(html or "")})
         print(f"== {u}: {how} {len(html or '')} bytes, {len(found)} products")
@@ -58,7 +64,8 @@ def main():
         print(f"\n== PRODUCT {u}: {how} {len(html or '')} bytes")
         if not html:
             continue
-        for word in ("making", "breakup", "break-up", "gold value", "grand total", "discount"):
+        print("   title:", (re.findall(r"<title>([^<]*)", html) or ["?"])[0][:120])
+        for word in ("making", "breakup", "break-up", "gold value", "grand total", "discount", "13[0-9]{3}"):
             for snip in around(html, word, n=3):
                 print(f"[{word}] …{snip}…")
         for m in re.findall(r"https://[^\"' ]*(?:price|breakup|Product-)[^\"' ]{0,120}", html)[:10]:
