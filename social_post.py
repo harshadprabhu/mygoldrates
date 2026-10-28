@@ -482,6 +482,48 @@ def publish(image_url, text):
     return r.json()["id"]
 
 
+def _wait(cid, tok):
+    """Wait until Instagram has fetched and processed a container."""
+    import requests
+    for _ in range(40):
+        s = requests.get(f"{GRAPH}/{cid}", params={"fields": "status_code", "access_token": tok}, timeout=30).json()
+        if s.get("status_code") == "FINISHED":
+            return
+        if s.get("status_code") == "ERROR":
+            raise SystemExit("Instagram could not process an image")
+        time.sleep(4)
+    raise SystemExit("Instagram took too long to process the images")
+
+
+def publish_carousel(image_urls, text):
+    """A swipe post of 2-10 images: one container per image, one for the
+    carousel, then publish. Returns the media id."""
+    import requests
+    tok = _token()
+    if not tok:
+        print("::notice::No Instagram token yet (IG_ACCESS_TOKEN) - cards built, nothing posted.")
+        return None
+    me = os.environ.get("IG_USER_ID") or "me"
+    kids = []
+    for u in image_urls:
+        r = requests.post(f"{GRAPH}/{me}/media", data={"image_url": u, "is_carousel_item": "true", "access_token": tok}, timeout=60)
+        if not r.ok:
+            raise SystemExit(f"Instagram refused a slide: {r.status_code} {r.json().get('error', {}).get('message', '')}")
+        kids.append(r.json()["id"])
+    for k in kids:
+        _wait(k, tok)
+    r = requests.post(f"{GRAPH}/{me}/media", data={"media_type": "CAROUSEL", "children": ",".join(kids),
+                                                 "caption": text, "access_token": tok}, timeout=60)
+    if not r.ok:
+        raise SystemExit(f"Instagram refused the carousel: {r.status_code} {r.json().get('error', {}).get('message', '')}")
+    cid = r.json()["id"]
+    _wait(cid, tok)
+    r = requests.post(f"{GRAPH}/{me}/media_publish", data={"creation_id": cid, "access_token": tok}, timeout=60)
+    if not r.ok:
+        raise SystemExit(f"Instagram refused to publish: {r.status_code} {r.json().get('error', {}).get('message', '')}")
+    return r.json()["id"]
+
+
 def check():
     """Is Instagram connected? Prints the account's username, posts nothing."""
     import requests
