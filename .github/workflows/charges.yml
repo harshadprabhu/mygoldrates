@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       probe:
-        description: "true = only survey which jewellers show a making charge in their product pages; tanishq = read a few Tanishq products through the proxies (both change nothing)"
+        description: "true = only survey which jewellers show a making charge in their product pages; tanishq = read a few Tanishq products through the proxies; price = a few from price_making.py (all change nothing)"
         default: "false"
   schedule:
     - cron: "17 4 1,16 * *"   # ~every 15 days (1st & 16th), ~09:47 IST
@@ -36,13 +36,21 @@ jobs:
           CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
           ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
         run: python tanishq_charges.py
+      - name: Survey of the readers in price_making.py (probe=price)
+        if: inputs.probe == 'price'
+        env:
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
+          ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
+          CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
+        run: python price_making.py
       - name: Browser for jewellers whose breakup only shows in a browser (Malabar)
-        if: inputs.probe != 'true' && inputs.probe != 'tanishq'
+        if: inputs.probe != 'true' && inputs.probe != 'tanishq' && inputs.probe != 'price'
         run: |
           pip install playwright
           python -m playwright install --with-deps chromium
       - name: Collect making charges
-        if: inputs.probe != 'true' && inputs.probe != 'tanishq'
+        if: inputs.probe != 'true' && inputs.probe != 'tanishq' && inputs.probe != 'price'
         run: python collect_charges.py
         env:
           ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
@@ -53,14 +61,14 @@ jobs:
           CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
       # the collection rewrites the file: put the jewellers' own figures back in
       - name: Merge the jewellers' own making charges
-        if: inputs.probe != 'true' && inputs.probe != 'tanishq'
+        if: inputs.probe != 'true' && inputs.probe != 'tanishq' && inputs.probe != 'price'
         continue-on-error: true
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python jeweller_making.py
       - name: Commit making-charges.json
-        if: inputs.probe != 'true' && inputs.probe != 'tanishq'
+        if: inputs.probe != 'true' && inputs.probe != 'tanishq' && inputs.probe != 'price'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

@@ -334,3 +334,16 @@ def test_making_offer_ranks_only_flat_offers_on_gold_jewellery():
     assert KB._making_offer([flat, upto, diamond, banner]) == (20.0, 75.0)
     assert KB._making_offer([upto]) == (0.0, 75.0)
     assert KB._making_offer([]) == (0.0, 0.0)
+
+
+def test_a_jewellers_product_making_offer_is_in_its_offers_and_making_answers(tmp_path):
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    b = next(x for x in kb["brands"] if x["s"] == "tanishq")
+    b["mk"], b["mo"], b["off"] = {"Ring": 19.5}, {"f": 0.0, "u": 10.0}, []
+    p = tmp_path / "kb.json"
+    p.write_text(json.dumps(kb), encoding="utf-8")
+    first = "tanishq"
+    r = _sona([{"lang": "en", "q": f"does {first} give discount on making"},
+               {"lang": "en", "q": f"{first} making charges"}], kb=str(p))
+    assert r[0]["intent"] == "offers" and "up to <b>10%</b> off the making charge" in r[0]["html"]
+    assert r[1]["intent"] == "making" and "up to <b>10%</b>" in r[1]["html"]
