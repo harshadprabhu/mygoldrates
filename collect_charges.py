@@ -867,6 +867,22 @@ def main():
             brand_offer[tq.BRAND] = tq.offer_summary(off)
         print(f"{tq.BRAND}: {len(res)} read, offer {brand_offer.get(tq.BRAND)}")
 
+    # Jewellers with prices and gold weights but no breakup: the making
+    # charge worked out from the price (price_making.py), source "price"
+    from_price = set()
+    if os.environ.get("FROM_PRICE", "1") != "0":
+        import price_making as pm
+        try:
+            res = pm.collect(sess)
+        except Exception as e:
+            res = []
+            print(f"from price: failed ({type(e).__name__}: {e})")
+        for b, cat, u, pct in res:
+            agg.setdefault((b, cat), []).append(pct)
+            detail.setdefault((b, cat), []).append(
+                {"url": u, "pct": pct, "confidence": 1.0, "strategy": "from_price", "fields": {}})
+            from_price.add((b, cat))
+
     for p in CURATED:
         html, _ = fetch(sess, p["url"], allow_proxy=True, timeout=25)
         res = engine.extract(html, brand=p["brand"]) if html else None
@@ -894,6 +910,8 @@ def main():
         }
         if s.get("drift_flag"):
             row["drift_vs_last"] = s.get("drift_vs_last")
+        if (brand, cat) in from_price:
+            row["source"] = "price"
         # a couple of real examples power the dashboard's "based on ..." text
         ex = sorted(detail.get((brand, cat), []),
                     key=lambda x: -x["confidence"])[:3]
