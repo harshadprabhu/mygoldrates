@@ -581,6 +581,24 @@ def extract_candere_cards(html):
     return buckets
 
 
+# Rate cards that state the per-gram price under each karat:
+# "22K Hallmark Gold 91.6% Fine Rs 1,31,211 / 10g ... Per 1g Rs 13,121"
+# (Rushabh Jewels). The karat and its "Per 1g" figure must sit within one
+# card - another karat label in between ends the match.
+_PER_1G_CARD_RE = re.compile(
+    r"\b(24|22|18|14)\s*K\b((?:(?!\b(?:24|22|18|14)\s*K\b).){0,160}?)"
+    r"Per\s*1\s*g(?:ram|m)?\s*(?:₹|Rs\.?|INR)\s*([\d,]{4,7}(?:\.\d{1,2})?)", re.I)
+
+
+def extract_per_1g_card(text):
+    out = {}
+    for m in _PER_1G_CARD_RE.finditer(text):
+        v = _f(m.group(3))
+        if v and 1000 < v < 50000:
+            out.setdefault(m.group(1) + "K", []).append(v)
+    return out
+
+
 def extract_rate_json(html):
     """Rate tables shipped as JSON in a <script>, not rendered as text.
 
@@ -709,7 +727,8 @@ def extract(html):
         buckets, how = extract_rate_json(html), "ratejson"
     if not buckets:
         text = soup.get_text(" ", strip=True)
-        for fn, name in ((extract_metal_net_weight, "metalnet"),
+        for fn, name in ((extract_per_1g_card, "per1gcard"),
+                         (extract_metal_net_weight, "metalnet"),
                          (extract_labeled_rates, "labeled"),
                          (extract_karat_unit_value, "karatunit"),
                          (extract_value_then_karat, "valuekarat"),
@@ -1057,11 +1076,62 @@ def fetch_via_proxy_waterfall(url, session, actions=None, wait_selector=None):
     return fetch_via_zyte(url, session, actions=actions)
 
 
+# Jewellers whose rate page prints the date of the rate. A rate dated more
+# than a day before today (IST) is refused: such a page is not kept up daily
+# (Swarn showed a two-day-old rate on 20 Oct 2026), and an old rate must not
+# pass for today's.
+DATED_PAGES = {"swarn-jewellers", "rushabh", "navratan-jewellers"}
+_current_slug = None        # set by collect_brand (brands are read one at a time)
+_MONTHS = {m: i for i, m in enumerate(["jan", "feb", "mar", "apr", "may", "jun", "jul",
+                                         "aug", "sep", "oct", "nov", "dec"], 1)}
+_PAGE_DATE_RES = (
+    re.compile(r"\b(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?([A-Za-z]{3,9}),?\s+(20\d\d)\b"),   # 28th October, 2026
+    re.compile(r"\b([A-Za-z]{3,9})\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(20\d\d)\b"),             # October 28, 2026
+    re.compile(r"\b(\d{1,2})[/.-](\d{1,2})[/.-](20\d\d)\b"),                                   # 28/10/2026
+)
+
+
+def page_dates(text):
+    """Every date printed on a page, as datetime.date."""
+    from datetime import date
+    out = []
+    for i, rx in enumerate(_PAGE_DATE_RES):
+        for m in rx.finditer(text):
+            try:
+                if i == 0:
+                    d, mo, y = int(m.group(1)), _MONTHS.get(m.group(2)[:3].lower()), int(m.group(3))
+                elif i == 1:
+                    mo, d, y = _MONTHS.get(m.group(1)[:3].lower()), int(m.group(2)), int(m.group(3))
+                else:
+                    d, mo, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
+                if mo:
+                    out.append(date(y, mo, d))
+            except ValueError:
+                pass
+    return out
+
+
+def stale_page(html, today=None):
+    """A note if the page's newest date is more than a day old, else None."""
+    from datetime import timedelta
+    today = today or datetime.now(timezone(timedelta(hours=5, minutes=30))).date()
+    text = BeautifulSoup(html, "html.parser").get_text(" ", strip=True)
+    ds = [d for d in page_dates(text) if d <= today]
+    if not ds:
+        return "STALE: no date on the page"
+    newest = max(ds)
+    return None if (today - newest).days <= 1 else f"STALE: rate dated {newest.isoformat()}"
+
+
 def try_html(html):
     """-> (found, counts, how) if it passes sanity, else (None, note)."""
     found, counts, how = extract(html)
     if not found:
         return None, None, None, "no values"
+    if _current_slug in DATED_PAGES:
+        why = stale_page(html)
+        if why:
+            return None, None, None, why
     ok, why = ordering_sane(found)
     if not ok:
         return None, None, None, f"MISLABELLED: {why}"
@@ -1135,9 +1205,11 @@ def discover_products(b, session, limit=3):
 
 
 def collect_brand(b, session):
+    global _current_slug
     started = time.monotonic()
     tried, blocked = [], False
     slug = b.get("slug")
+    _current_slug = slug
     ws = WAIT_SELECTOR.get(slug)
 
     # Joyalukkas exposes an open GraphQL endpoint — faster and more reliable

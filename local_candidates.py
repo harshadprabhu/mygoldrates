@@ -303,4 +303,18 @@ CANDIDATES = [
      "domain": "www.mayfairjewellers.com"},
     {"state": "Maharashtra", "city": "Nagpur", "name": "Rokde Jewellers",
      "domain": "www.rokdejewellers.com"},
+
+    # ---- 2026-10-28 North and West: Gujarat, MP, Rajasthan, Punjab, Delhi, Haryana ----
+    # Added: Rushabh Jewels (Ahmedabad; dated daily "Per 1g" cards, read by
+    # collect.extract_per_1g_card) and Swarn Jewellers (Panchkula; now dated
+    # daily - collect.DATED_PAGES refuses a rate more than a day old).
+    # Answer but show no rate, re-checked weekly:
+    {"state": "Gujarat", "city": "Ahmedabad", "name": "Kantilal Chhotalal",
+     "domain": "www.kantilalchhotalal.com"},
+    {"state": "Punjab", "city": "Jalandhar", "name": "Maliram Jewellers",
+     "domain": "maliramjewellers.com"},
+    {"state": "Punjab", "city": "Ludhiana", "name": "New Punjab Jewellers",
+     "domain": "www.newpunjabjewellers.com"},
+    {"state": "Rajasthan", "city": "Jaipur", "name": "Raniwala 1881",
+     "domain": "www.raniwala1881.com"},
 ]
