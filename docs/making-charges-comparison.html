@@ -579,8 +579,9 @@ last rupee. Updated 2026-10-16.</p>
 
     host.innerHTML = rows.map(function(r, i){
       var gp = r.gold/r.total*100, mp = r.making/r.total*100, sp = r.gst/r.total*100;
-      var confLab = r.conf === "high" ? "" :
-        '<span class="mc-badge soft">' + (r.n||0) + ' item' + (r.n===1?'':'s') + '</span>';
+      var confLab = r.conf === "high" ? "" : r.conf === "jeweller"
+        ? '<span class="mc-badge soft">Supplied by the jeweller</span>'
+        : '<span class="mc-badge soft">' + (r.n||0) + ' item' + (r.n===1?'':'s') + '</span>';
       return '<div class="mc-row' + (i===0?' best':'') + '">'
         + '<div class="mc-top">'
           + '<span class="mc-rank">' + (i+1) + '</span>'
