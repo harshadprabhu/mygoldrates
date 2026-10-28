@@ -23,7 +23,7 @@
   if (!TEST && /^\/(analytics|unsubscribe|404)(\.html)?\/?$/.test(location.pathname)) return;
 
   var SB = (window.GR_SB_URL || '').replace(/\/$/, ''), KEY = window.GR_SB_KEY || '';
-  var KB = null, kbWait = null, opened = false, home = null, wantHome = false;
+  var KB = null, kbWait = null, opened = false, home = null, wantHome = false, wantOffer = false;
   // "My city" is the visitor's own city: one they said they live in, picked
   // when Sona asked, or the nearest to the phone's location (worked out on
   // the device, only when they tap for it). Never just the last city asked
@@ -328,6 +328,36 @@
     return { intent: 'offers', html: h, say: ring ? t('say_off_all', { n: withOff.length, b: ring.n, p: sInr(ring.a) }) : '',
       chips: chips(['goodmk', 'mkcmp', 'cheap22']) };
   }
+  // "best offer on a ring": every jeweller with a measured making charge for
+  // that piece, priced for 10 g of 22K (or the weight asked) after its flat
+  // making-charge offer today; an "up to" offer (some designs only) is shown
+  // as the best case beside it, never ranked on.
+  var BO_CATS = ['Ring', 'Earrings', 'Bangle', 'Mangalsutra'];
+  function aBestOffer(c, w) {
+    w = w || { g: 10, n: '10', u: 'g' };
+    var rows = KB.brands.filter(function (b) { return b.mk && b.mk[c] != null && rate(b, '22K'); }).map(function (b) {
+      var gold = rate(b, '22K') * w.g, mk = b.mk[c], mo = b.mo || {}, f = mo.f || 0, u = mo.u || 0;
+      var after = mk * (1 - f / 100);
+      return { b: b, mk: mk, f: f, u: u, after: after, tot: (gold + gold * after / 100) * 1.03,
+        best: u > f ? (gold + gold * mk * (1 - u / 100) / 100) * 1.03 : null };
+    }).sort(function (a, b) { return a.tot - b.tot; });
+    var others = BO_CATS.filter(function (x) { return x !== c; }).map(function (x) { return { l: catName(x), q: 'best offer ' + x.toLowerCase() }; });
+    if (rows.length < 2) return { intent: 'best_offer', html: '<p>' + t('bo_none', { c: esc(catName(c)) }) + ' ' + link('/gold-offers-today', t('off_see')) + '</p>',
+      say: t('bo_none', { c: catName(c) }), chips: others };
+    var h = '<p>' + t('bo_h', { w: esc(wLabel(w)), c: esc(catName(c)) }) + '</p><div class="sn-list">' + rows.slice(0, 8).map(function (r, i) {
+      var mk = pct(r.mk) + (r.f ? ' → ' + pct(r.after) + ' (−' + pct(r.f) + ')' : r.u ? '' : ' · ' + t('bo_noff'));
+      var up = r.best != null ? '<small>(' + t('bo_upto') + ' −' + pct(r.u) + '* → ' + inr(r.best) + ')</small>' : '';
+      return '<div class="sn-row sn-orow"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm"><b>' + esc(r.b.n) + '</b><small>' + mk + '</small>' + up +
+        '</span><span class="sn-v">' + inr(r.tot) + '</span></div>';
+    }).join('') + '</div><p class="sn-dim">' + t('bo_note') + '</p><p>' + link('/making-charges-comparison', t('mk_every')) + ' · ' + link('/gold-offers-today', t('off_see')) + '</p>';
+    return { intent: 'best_offer', html: h, say: t('say_bo', { w: wLabel(w), c: catName(c), b: rows[0].b.n, p: sInr(rows[0].tot) }), chips: others };
+  }
+  // Which piece? The next answer is priced (see wantOffer in answer()).
+  function askOfferCat() {
+    wantOffer = true;
+    return { intent: 'ask_cat', html: '<p>' + t('bo_ask') + '</p>', say: t('bo_ask'),
+      chips: BO_CATS.map(function (c) { return { l: catName(c), q: 'best offer ' + c.toLowerCase() }; }) };
+  }
   function aPrice(w, k, bs, ct) {
     k = k || (ct === 'Coin' ? '24K' : '22K');
     var b = bs[0] || ranked(natBrands())[0], who = bs[0] ? esc(b.n) : t('price_who', { b: esc(b.n) });
@@ -398,6 +428,8 @@
     var mine = /\b(my city|near me|nearby|mere sheher|mere shahar|my area)\b/.test(tx);
     if (c && (wantHome || mine || /\b(i am in|i'm in|im in|i live in|i stay in)\b/.test(tx))) setHome(c);
     wantHome = false;
+    var offerAsk = wantOffer; wantOffer = false;
+    if (offerAsk && ct && ct !== 'Coin') return aBestOffer(ct, w);
     if (mine && !c) {
       c = home && KB.cities.filter(function (x) { return x.n === home; })[0];
       if (!c) return askCity('ask_city');
@@ -438,6 +470,9 @@
     // "compare jewellers", "rate difference between jewellers": all of them, cheapest first
     if (across && /\b(jewell?ers|jewelers|shops|stores|brands|showrooms)\b/.test(tx) && !bs.length && !w &&
         !has(tx, W.offer) && !has(tx, W.making) && !/\b(why|kyon|kyun|kyu)\b/.test(tx)) return aCheapest(k, c, true);
+    // "best offer", "best offer on bangles", "which jeweller is cheapest after offers on a ring": the calculator
+    if (has(tx, W.offer) && !bs.length && !c && (ct ? ct !== 'Coin' : /\b(best|cheapest|lowest|calculate|which|kaunsa|konsa|kaunsi|sabse)\b/.test(tx)))
+      return ct ? aBestOffer(ct, w) : askOfferCat();
     var strong = aSearch(tx);                // a question the FAQ answers word for word
     if (strong && strong.score >= 1.0 && !w && !bs.length && !c) return strong;
     if (has(tx, W.offer) || /\bafter offers?\b/.test(tx)) return aOffers(bs);

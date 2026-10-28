@@ -286,6 +286,15 @@ def _load_answers():
         return []
 
 
+def _making_offer(offers):
+    """(flat %, best up-to %) off the making charge on gold jewellery."""
+    import offers_page as op
+    flat = max((o["pct_max"] for o in offers if op.flat_making_offer(o)), default=0)
+    upto = max((o["pct_max"] for o in offers if o.get("kind") == "making_off" and o.get("pct_max")
+                and op._gold_jewellery_applies(o) and not o.get("image")), default=0)
+    return float(flat), float(min(upto, 100))
+
+
 def build(*, live, med, trend, locations, place_state, region_map, brand_home,
           loc_slug, jeweller_pages, making, offers, ring_rows, offer_meaning,
           offer_headline, guides, display_date, updated_iso, site_url, coords=None):
@@ -320,6 +329,12 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
         dom = (ob.get("domain") or "").replace("www.", "")
         if dom and mk_by.get(dom):
             rec["mk"] = mk_by[dom]
+        # Making-charge offers, for "best offer on a bangle": f = a flat
+        # discount on all gold jewellery (used for the ranking), u = the best
+        # "up to" / selected-designs discount (shown only as a best case).
+        mo_f, mo_u = _making_offer(ob.get("offers") or [])
+        if mo_f or mo_u:
+            rec["mo"] = {"f": mo_f, "u": mo_u}
         if ob.get("offers"):
             rec["off"] = [{"h": offer_headline(o), "t": o["text"][:160], "u": o["url"],
                            "m": offer_meaning(o, b["n"], None, med["24K"])}
