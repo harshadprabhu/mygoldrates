@@ -50,6 +50,17 @@
     say_bo: 'For {w} of 22K {c}, {b} is cheapest after offers, about {p} with GST.',
     bo_upto: 'up to',
     bo_noff: 'no offer',
+    bo_bill_h: 'Approximate bill for <b>{w}</b> of 22K <b>{c}</b> at <b>{b}</b>:',
+    bo_mk: 'Making charge ({p})',
+    bo_mk_typ: 'Making charge (~{p}, typical – not measured here)',
+    bo_off: 'Offer on making (−{p})',
+    bo_mk_after: 'Making after offer',
+    bo_off_upto: 'Offer: up to −{p} on some designs (not applied)',
+    bo_off_none: 'No making-charge offer published today',
+    bo_best_case: 'With the best “up to” offer: about {p}',
+    bo_disc: 'Approximate. The making charge and offer differ by design and product – confirm with the jeweller before you commit.',
+    say_bo_bill: 'At {b}, {w} of 22K {c} comes to about {p} with GST. It is approximate; confirm with the jeweller.',
+    bo_ask_b: 'Which piece at {b}?',
     off_none: 'No offer is published as text on <b>{b}</b>’s website today.',
     off_see: 'See who has offers →',
     off_brand_h: 'Offers on <b>{b}</b>’s website today:',
@@ -152,6 +163,17 @@
     say_bo: '{w} 22K {c} के लिए ऑफ़र के बाद {b} सबसे सस्ता है, GST के साथ लगभग {p}.',
     bo_upto: 'तक',
     bo_noff: 'कोई ऑफ़र नहीं',
+    bo_bill_h: '<b>{b}</b> पर <b>{w}</b> 22K <b>{c}</b> का अनुमानित बिल:',
+    bo_mk: 'मेकिंग चार्ज ({p})',
+    bo_mk_typ: 'मेकिंग चार्ज (~{p}, आम तौर पर – यहाँ मापा नहीं गया)',
+    bo_off: 'मेकिंग पर ऑफ़र (−{p})',
+    bo_mk_after: 'ऑफ़र के बाद मेकिंग',
+    bo_off_upto: 'ऑफ़र: कुछ डिज़ाइनों पर −{p} तक (जोड़ा नहीं गया)',
+    bo_off_none: 'आज मेकिंग चार्ज पर कोई ऑफ़र नहीं',
+    bo_best_case: 'सबसे अच्छे “तक” ऑफ़र के साथ: लगभग {p}',
+    bo_disc: 'अनुमानित। मेकिंग चार्ज और ऑफ़र डिज़ाइन और प्रोडक्ट के हिसाब से बदलते हैं – कुछ तय करने से पहले ज्वैलर से पक्का करें।',
+    say_bo_bill: '{b} पर {w} 22K {c} GST के साथ लगभग {p} का पड़ेगा। यह अनुमान है; ज्वैलर से पक्का करें।',
+    bo_ask_b: '{b} पर कौन सा गहना?',
     off_none: 'आज <b>{b}</b> की वेबसाइट पर कोई ऑफ़र लिखा हुआ नहीं है।',
     off_see: 'देखें किसके पास ऑफ़र है →',
     off_brand_h: 'आज <b>{b}</b> की वेबसाइट पर ऑफ़र:',
@@ -254,6 +276,17 @@
     say_bo: '{w} 22K {c} साठी ऑफरनंतर {b} सर्वात स्वस्त आहे, GST सह सुमारे {p}.',
     bo_upto: 'पर्यंत',
     bo_noff: 'ऑफर नाही',
+    bo_bill_h: '<b>{b}</b> येथे <b>{w}</b> 22K <b>{c}</b> चे अंदाजे बिल:',
+    bo_mk: 'मजुरी ({p})',
+    bo_mk_typ: 'मजुरी (~{p}, साधारण – इथे मोजलेली नाही)',
+    bo_off: 'मजुरीवर ऑफर (−{p})',
+    bo_mk_after: 'ऑफरनंतर मजुरी',
+    bo_off_upto: 'ऑफर: काही डिझाइनवर −{p} पर्यंत (धरलेली नाही)',
+    bo_off_none: 'आज मजुरीवर ऑफर नाही',
+    bo_best_case: 'सर्वोत्तम “पर्यंत” ऑफरसह: सुमारे {p}',
+    bo_disc: 'अंदाजे. मजुरी आणि ऑफर डिझाइन व उत्पादनानुसार बदलतात – काहीही ठरवण्यापूर्वी ज्वेलरकडून खात्री करा.',
+    say_bo_bill: '{b} येथे {w} 22K {c} GST सह सुमारे {p} पडेल. हा अंदाज आहे; ज्वेलरकडून खात्री करा.',
+    bo_ask_b: '{b} येथे कोणता दागिना?',
     off_none: 'आज <b>{b}</b> च्या वेबसाइटवर कोणतीही ऑफर लिहिलेली नाही.',
     off_see: 'कोणाकडे ऑफर आहे ते पाहा →',
     off_brand_h: 'आज <b>{b}</b> च्या वेबसाइटवरील ऑफर्स:',
@@ -356,6 +389,17 @@
     say_bo: '{w} 22K {c} માટે ઑફર પછી {b} સૌથી સસ્તું છે, GST સાથે આશરે {p}.',
     bo_upto: 'સુધી',
     bo_noff: 'કોઈ ઑફર નથી',
+    bo_bill_h: '<b>{b}</b> પર <b>{w}</b> 22K <b>{c}</b> નું અંદાજિત બિલ:',
+    bo_mk: 'ઘડામણ ({p})',
+    bo_mk_typ: 'ઘડામણ (~{p}, સામાન્ય – અહીં માપેલ નથી)',
+    bo_off: 'ઘડામણ પર ઑફર (−{p})',
+    bo_mk_after: 'ઑફર પછી ઘડામણ',
+    bo_off_upto: 'ઑફર: કેટલીક ડિઝાઇન પર −{p} સુધી (ઉમેરેલ નથી)',
+    bo_off_none: 'આજે ઘડામણ પર કોઈ ઑફર નથી',
+    bo_best_case: 'શ્રેષ્ઠ “સુધી” ઑફર સાથે: આશરે {p}',
+    bo_disc: 'અંદાજિત. ઘડામણ અને ઑફર ડિઝાઇન અને પ્રોડક્ટ પ્રમાણે બદલાય છે – કંઈ નક્કી કરતાં પહેલાં જ્વેલર પાસે ખાતરી કરો.',
+    say_bo_bill: '{b} પર {w} 22K {c} GST સાથે આશરે {p} થશે. આ અંદાજ છે; જ્વેલર પાસે ખાતરી કરો.',
+    bo_ask_b: '{b} પર કયો દાગીનો?',
     off_none: 'આજે <b>{b}</b> ની વેબસાઇટ પર કોઈ ઑફર લખેલી નથી.',
     off_see: 'કોની પાસે ઑફર છે તે જુઓ →',
     off_brand_h: 'આજે <b>{b}</b> ની વેબસાઇટ પરની ઑફર:',
@@ -458,6 +502,17 @@
     say_bo: '{w} 22K {c} ਲਈ ਆਫ਼ਰ ਤੋਂ ਬਾਅਦ {b} ਸਭ ਤੋਂ ਸਸਤਾ ਹੈ, GST ਸਮੇਤ ਲਗਭਗ {p}.',
     bo_upto: 'ਤੱਕ',
     bo_noff: 'ਕੋਈ ਆਫ਼ਰ ਨਹੀਂ',
+    bo_bill_h: '<b>{b}</b> ’ਤੇ <b>{w}</b> 22K <b>{c}</b> ਦਾ ਅੰਦਾਜ਼ਨ ਬਿੱਲ:',
+    bo_mk: 'ਘੜਾਈ ({p})',
+    bo_mk_typ: 'ਘੜਾਈ (~{p}, ਆਮ ਤੌਰ ’ਤੇ – ਇੱਥੇ ਮਾਪੀ ਨਹੀਂ)',
+    bo_off: 'ਘੜਾਈ ’ਤੇ ਆਫ਼ਰ (−{p})',
+    bo_mk_after: 'ਆਫ਼ਰ ਤੋਂ ਬਾਅਦ ਘੜਾਈ',
+    bo_off_upto: 'ਆਫ਼ਰ: ਕੁਝ ਡਿਜ਼ਾਈਨਾਂ ’ਤੇ −{p} ਤੱਕ (ਜੋੜੀ ਨਹੀਂ)',
+    bo_off_none: 'ਅੱਜ ਘੜਾਈ ’ਤੇ ਕੋਈ ਆਫ਼ਰ ਨਹੀਂ',
+    bo_best_case: 'ਸਭ ਤੋਂ ਵਧੀਆ “ਤੱਕ” ਆਫ਼ਰ ਨਾਲ: ਲਗਭਗ {p}',
+    bo_disc: 'ਅੰਦਾਜ਼ਨ। ਘੜਾਈ ਅਤੇ ਆਫ਼ਰ ਡਿਜ਼ਾਈਨ ਅਤੇ ਪ੍ਰੋਡਕਟ ਮੁਤਾਬਕ ਬਦਲਦੇ ਹਨ – ਕੁਝ ਤੈਅ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਜਿਊਲਰ ਤੋਂ ਪੱਕਾ ਕਰੋ।',
+    say_bo_bill: '{b} ’ਤੇ {w} 22K {c} GST ਸਮੇਤ ਲਗਭਗ {p} ਪਵੇਗਾ। ਇਹ ਅੰਦਾਜ਼ਾ ਹੈ; ਜਿਊਲਰ ਤੋਂ ਪੱਕਾ ਕਰੋ।',
+    bo_ask_b: '{b} ’ਤੇ ਕਿਹੜਾ ਗਹਿਣਾ?',
     off_none: 'ਅੱਜ <b>{b}</b> ਦੀ ਵੈੱਬਸਾਈਟ ’ਤੇ ਕੋਈ ਆਫ਼ਰ ਲਿਖੀ ਨਹੀਂ ਹੈ।',
     off_see: 'ਵੇਖੋ ਕਿਸ ਕੋਲ ਆਫ਼ਰ ਹੈ →',
     off_brand_h: 'ਅੱਜ <b>{b}</b> ਦੀ ਵੈੱਬਸਾਈਟ ’ਤੇ ਆਫ਼ਰ:',
@@ -560,6 +615,17 @@
     say_bo: '{w} 22K {c}-এর জন্য অফারের পরে {b} সবচেয়ে সস্তা, GST সহ প্রায় {p}.',
     bo_upto: 'পর্যন্ত',
     bo_noff: 'অফার নেই',
+    bo_bill_h: '<b>{b}</b>-এ <b>{w}</b> 22K <b>{c}</b>-এর আনুমানিক বিল:',
+    bo_mk: 'মজুরি ({p})',
+    bo_mk_typ: 'মজুরি (~{p}, সাধারণ – এখানে মাপা হয়নি)',
+    bo_off: 'মজুরিতে অফার (−{p})',
+    bo_mk_after: 'অফারের পরে মজুরি',
+    bo_off_upto: 'অফার: কিছু ডিজাইনে −{p} পর্যন্ত (ধরা হয়নি)',
+    bo_off_none: 'আজ মজুরিতে কোনো অফার নেই',
+    bo_best_case: 'সেরা “পর্যন্ত” অফারে: প্রায় {p}',
+    bo_disc: 'আনুমানিক। মজুরি ও অফার ডিজাইন ও পণ্য অনুযায়ী আলাদা – কিছু ঠিক করার আগে জুয়েলারের কাছে নিশ্চিত করুন।',
+    say_bo_bill: '{b}-এ {w} 22K {c} GST সহ প্রায় {p} পড়বে। এটি আনুমানিক; জুয়েলারের কাছে নিশ্চিত করুন।',
+    bo_ask_b: '{b}-এ কোন গয়না?',
     off_none: 'আজ <b>{b}</b>-এর ওয়েবসাইটে কোনো অফার লেখা নেই।',
     off_see: 'কার অফার আছে দেখুন →',
     off_brand_h: 'আজ <b>{b}</b>-এর ওয়েবসাইটে অফার:',
@@ -662,6 +728,17 @@
     say_bo: '{w} 22K {c}ಗೆ ಆಫರ್ ನಂತರ {b} ಅಗ್ಗ, GST ಸೇರಿ ಸುಮಾರು {p}.',
     bo_upto: 'ವರೆಗೆ',
     bo_noff: 'ಆಫರ್ ಇಲ್ಲ',
+    bo_bill_h: '<b>{b}</b> ನಲ್ಲಿ <b>{w}</b> 22K <b>{c}</b> ಅಂದಾಜು ಬಿಲ್:',
+    bo_mk: 'ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ ({p})',
+    bo_mk_typ: 'ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ (~{p}, ಸಾಮಾನ್ಯ – ಇಲ್ಲಿ ಅಳೆದಿಲ್ಲ)',
+    bo_off: 'ಮೇಕಿಂಗ್ ಮೇಲೆ ಆಫರ್ (−{p})',
+    bo_mk_after: 'ಆಫರ್ ನಂತರ ಮೇಕಿಂಗ್',
+    bo_off_upto: 'ಆಫರ್: ಕೆಲವು ವಿನ್ಯಾಸಗಳಿಗೆ −{p} ವರೆಗೆ (ಸೇರಿಸಿಲ್ಲ)',
+    bo_off_none: 'ಇಂದು ಮೇಕಿಂಗ್ ಮೇಲೆ ಆಫರ್ ಇಲ್ಲ',
+    bo_best_case: 'ಉತ್ತಮ “ವರೆಗೆ” ಆಫರ್‌ನೊಂದಿಗೆ: ಸುಮಾರು {p}',
+    bo_disc: 'ಅಂದಾಜು. ಮೇಕಿಂಗ್ ಚಾರ್ಜ್ ಮತ್ತು ಆಫರ್ ವಿನ್ಯಾಸ ಮತ್ತು ಉತ್ಪನ್ನಕ್ಕೆ ತಕ್ಕಂತೆ ಬದಲಾಗುತ್ತವೆ – ನಿರ್ಧರಿಸುವ ಮೊದಲು ಜ್ಯುವೆಲ್ಲರ್ ಬಳಿ ಖಚಿತಪಡಿಸಿ.',
+    say_bo_bill: '{b} ನಲ್ಲಿ {w} 22K {c} GST ಸೇರಿ ಸುಮಾರು {p} ಆಗುತ್ತದೆ. ಇದು ಅಂದಾಜು; ಜ್ಯುವೆಲ್ಲರ್ ಬಳಿ ಖಚಿತಪಡಿಸಿ.',
+    bo_ask_b: '{b} ನಲ್ಲಿ ಯಾವ ಆಭರಣ?',
     off_none: 'ಇಂದು <b>{b}</b> ನ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ ಯಾವುದೇ ಆಫರ್ ಬರೆದಿಲ್ಲ.',
     off_see: 'ಯಾರ ಬಳಿ ಆಫರ್ ಇದೆ ನೋಡಿ →',
     off_brand_h: 'ಇಂದು <b>{b}</b> ನ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿರುವ ಆಫರ್‌ಗಳು:',
@@ -764,6 +841,17 @@
     say_bo: '{w} 22K {c}க்கு ஆஃபருக்குப் பின் {b} மலிவானது, GST உடன் சுமார் {p}.',
     bo_upto: 'வரை',
     bo_noff: 'ஆஃபர் இல்லை',
+    bo_bill_h: '<b>{b}</b> இல் <b>{w}</b> 22K <b>{c}</b> தோராய பில்:',
+    bo_mk: 'செய்கூலி ({p})',
+    bo_mk_typ: 'செய்கூலி (~{p}, பொதுவாக – இங்கு அளக்கப்படவில்லை)',
+    bo_off: 'செய்கூலியில் ஆஃபர் (−{p})',
+    bo_mk_after: 'ஆஃபருக்குப் பின் செய்கூலி',
+    bo_off_upto: 'ஆஃபர்: சில வடிவமைப்புகளுக்கு −{p} வரை (சேர்க்கப்படவில்லை)',
+    bo_off_none: 'இன்று செய்கூலியில் ஆஃபர் இல்லை',
+    bo_best_case: 'சிறந்த “வரை” ஆஃபருடன்: சுமார் {p}',
+    bo_disc: 'தோராயமானது. செய்கூலியும் ஆஃபரும் வடிவமைப்பு மற்றும் பொருளுக்கு ஏற்ப மாறும் – முடிவெடுக்கும் முன் நகைக்கடையிடம் உறுதிசெய்யுங்கள்.',
+    say_bo_bill: '{b} இல் {w} 22K {c} GST உடன் சுமார் {p} ஆகும். இது தோராயம்; நகைக்கடையிடம் உறுதிசெய்யுங்கள்.',
+    bo_ask_b: '{b} இல் எந்த நகை?',
     off_none: 'இன்று <b>{b}</b> இணையதளத்தில் எந்த ஆஃபரும் எழுதப்படவில்லை.',
     off_see: 'யாரிடம் ஆஃபர் உள்ளது பாருங்கள் →',
     off_brand_h: 'இன்று <b>{b}</b> இணையதளத்தில் உள்ள ஆஃபர்கள்:',
@@ -866,6 +954,17 @@
     say_bo: '{w} 22K {c}కి ఆఫర్ తర్వాత {b} చౌక, GST తో సుమారు {p}.',
     bo_upto: 'వరకు',
     bo_noff: 'ఆఫర్ లేదు',
+    bo_bill_h: '<b>{b}</b> లో <b>{w}</b> 22K <b>{c}</b> అంచనా బిల్లు:',
+    bo_mk: 'మేకింగ్ చార్జీ ({p})',
+    bo_mk_typ: 'మేకింగ్ చార్జీ (~{p}, సాధారణం – ఇక్కడ కొలవలేదు)',
+    bo_off: 'మేకింగ్‌పై ఆఫర్ (−{p})',
+    bo_mk_after: 'ఆఫర్ తర్వాత మేకింగ్',
+    bo_off_upto: 'ఆఫర్: కొన్ని డిజైన్లకు −{p} వరకు (కలపలేదు)',
+    bo_off_none: 'ఈరోజు మేకింగ్‌పై ఆఫర్ లేదు',
+    bo_best_case: 'ఉత్తమ “వరకు” ఆఫర్‌తో: సుమారు {p}',
+    bo_disc: 'అంచనా మాత్రమే. మేకింగ్ చార్జీ, ఆఫర్ డిజైన్ మరియు ఉత్పత్తిని బట్టి మారుతాయి – నిర్ణయించే ముందు జ్యువెలర్‌తో నిర్ధారించుకోండి.',
+    say_bo_bill: '{b} లో {w} 22K {c} GST తో సుమారు {p} అవుతుంది. ఇది అంచనా; జ్యువెలర్‌తో నిర్ధారించుకోండి.',
+    bo_ask_b: '{b} లో ఏ నగ?',
     off_none: 'ఈరోజు <b>{b}</b> వెబ్‌సైట్‌లో ఏ ఆఫర్ రాసి లేదు.',
     off_see: 'ఎవరి దగ్గర ఆఫర్ ఉందో చూడండి →',
     off_brand_h: 'ఈరోజు <b>{b}</b> వెబ్‌సైట్‌లోని ఆఫర్లు:',
@@ -968,6 +1067,17 @@
     say_bo: '{w} 22K {c}ന് ഓഫറിന് ശേഷം {b} ആണ് വിലകുറഞ്ഞത്, GST ഉൾപ്പെടെ ഏകദേശം {p}.',
     bo_upto: 'വരെ',
     bo_noff: 'ഓഫർ ഇല്ല',
+    bo_bill_h: '<b>{b}</b> ൽ <b>{w}</b> 22K <b>{c}</b> ഏകദേശ ബിൽ:',
+    bo_mk: 'പണിക്കൂലി ({p})',
+    bo_mk_typ: 'പണിക്കൂലി (~{p}, സാധാരണ – ഇവിടെ അളന്നിട്ടില്ല)',
+    bo_off: 'പണിക്കൂലിയിൽ ഓഫർ (−{p})',
+    bo_mk_after: 'ഓഫറിന് ശേഷം പണിക്കൂലി',
+    bo_off_upto: 'ഓഫർ: ചില ഡിസൈനുകൾക്ക് −{p} വരെ (ചേർത്തിട്ടില്ല)',
+    bo_off_none: 'ഇന്ന് പണിക്കൂലിയിൽ ഓഫർ ഇല്ല',
+    bo_best_case: 'മികച്ച “വരെ” ഓഫറോടെ: ഏകദേശം {p}',
+    bo_disc: 'ഏകദേശം. പണിക്കൂലിയും ഓഫറും ഡിസൈനും ഉൽപ്പന്നവും അനുസരിച്ച് മാറും – തീരുമാനിക്കുന്നതിന് മുൻപ് ജ്വല്ലറിയിൽ ഉറപ്പാക്കുക.',
+    say_bo_bill: '{b} ൽ {w} 22K {c} GST ഉൾപ്പെടെ ഏകദേശം {p} ആകും. ഇത് ഏകദേശമാണ്; ജ്വല്ലറിയിൽ ഉറപ്പാക്കുക.',
+    bo_ask_b: '{b} ൽ ഏത് ആഭരണം?',
     off_none: 'ഇന്ന് <b>{b}</b> ന്റെ വെബ്സൈറ്റിൽ ഓഫറൊന്നും എഴുതിയിട്ടില്ല.',
     off_see: 'ആർക്കൊക്കെ ഓഫറുണ്ടെന്ന് നോക്കൂ →',
     off_brand_h: 'ഇന്ന് <b>{b}</b> ന്റെ വെബ്സൈറ്റിലെ ഓഫറുകൾ:',
@@ -1070,6 +1180,17 @@
     say_bo: '{w} 22K {c} کے لیے آفر کے بعد {b} سب سے سستا ہے، GST سمیت تقریباً {p}.',
     bo_upto: 'تک',
     bo_noff: 'کوئی آفر نہیں',
+    bo_bill_h: '<b>{b}</b> پر <b>{w}</b> 22K <b>{c}</b> کا اندازاً بل:',
+    bo_mk: 'میکنگ چارج ({p})',
+    bo_mk_typ: 'میکنگ چارج (~{p}، عام طور پر – یہاں ناپا نہیں گیا)',
+    bo_off: 'میکنگ پر آفر (−{p})',
+    bo_mk_after: 'آفر کے بعد میکنگ',
+    bo_off_upto: 'آفر: کچھ ڈیزائنوں پر −{p} تک (شامل نہیں)',
+    bo_off_none: 'آج میکنگ چارج پر کوئی آفر نہیں',
+    bo_best_case: 'بہترین “تک” آفر کے ساتھ: تقریباً {p}',
+    bo_disc: 'اندازاً۔ میکنگ چارج اور آفر ڈیزائن اور پروڈکٹ کے حساب سے بدلتے ہیں – کچھ طے کرنے سے پہلے جیولر سے تصدیق کریں۔',
+    say_bo_bill: '{b} پر {w} 22K {c} GST سمیت تقریباً {p} کا پڑے گا۔ یہ اندازہ ہے؛ جیولر سے تصدیق کریں۔',
+    bo_ask_b: '{b} پر کون سا زیور؟',
     off_none: 'آج <b>{b}</b> کی ویب سائٹ پر کوئی آفر لکھی ہوئی نہیں ہے۔',
     off_see: 'دیکھیں کس کے پاس آفر ہے ←',
     off_brand_h: 'آج <b>{b}</b> کی ویب سائٹ پر آفرز:',
@@ -1172,6 +1293,17 @@
     say_bo: '{w} 22K {c}ৰ বাবে অফাৰৰ পিছত {b} আটাইতকৈ সস্তা, GST সহ প্ৰায় {p}.',
     bo_upto: 'লৈকে',
     bo_noff: 'অফাৰ নাই',
+    bo_bill_h: '<b>{b}</b>ত <b>{w}</b> 22K <b>{c}</b>ৰ আনুমানিক বিল:',
+    bo_mk: 'মেকিং চাৰ্জ ({p})',
+    bo_mk_typ: 'মেকিং চাৰ্জ (~{p}, সাধাৰণ – ইয়াত জোখা হোৱা নাই)',
+    bo_off: 'মেকিংত অফাৰ (−{p})',
+    bo_mk_after: 'অফাৰৰ পিছৰ মেকিং',
+    bo_off_upto: 'অফাৰ: কিছুমান ডিজাইনত −{p} লৈকে (যোগ কৰা হোৱা নাই)',
+    bo_off_none: 'আজি মেকিং চাৰ্জত অফাৰ নাই',
+    bo_best_case: 'শ্ৰেষ্ঠ “লৈকে” অফাৰৰ সৈতে: প্ৰায় {p}',
+    bo_disc: 'আনুমানিক। মেকিং চাৰ্জ আৰু অফাৰ ডিজাইন আৰু সামগ্ৰী অনুসৰি বেলেগ – একো থিৰ কৰাৰ আগতে জুৱেলাৰৰ পৰা নিশ্চিত কৰক।',
+    say_bo_bill: '{b}ত {w} 22K {c} GST সহ প্ৰায় {p} হ’ব। এইটো আনুমানিক; জুৱেলাৰৰ পৰা নিশ্চিত কৰক।',
+    bo_ask_b: '{b}ত কোনটো গহনা?',
     off_none: 'আজি <b>{b}</b>ৰ ৱেবছাইটত কোনো অফাৰ লিখা নাই।',
     off_see: 'কাৰ অফাৰ আছে চাওক →',
     off_brand_h: 'আজি <b>{b}</b>ৰ ৱেবছাইটত অফাৰ:',
@@ -1274,6 +1406,17 @@
     say_bo: '{w} 22K {c} ପାଇଁ ଅଫର ପରେ {b} ସବୁଠୁ ଶସ୍ତା, GST ସହ ପ୍ରାୟ {p}.',
     bo_upto: 'ପର୍ଯ୍ୟନ୍ତ',
     bo_noff: 'ଅଫର ନାହିଁ',
+    bo_bill_h: '<b>{b}</b>ରେ <b>{w}</b> 22K <b>{c}</b>ର ଆନୁମାନିକ ବିଲ:',
+    bo_mk: 'ମେକିଂ ଚାର୍ଜ ({p})',
+    bo_mk_typ: 'ମେକିଂ ଚାର୍ଜ (~{p}, ସାଧାରଣ – ଏଠାରେ ମପା ହୋଇନି)',
+    bo_off: 'ମେକିଂରେ ଅଫର (−{p})',
+    bo_mk_after: 'ଅଫର ପରେ ମେକିଂ',
+    bo_off_upto: 'ଅଫର: କିଛି ଡିଜାଇନରେ −{p} ପର୍ଯ୍ୟନ୍ତ (ଯୋଡ଼ା ଯାଇନି)',
+    bo_off_none: 'ଆଜି ମେକିଂ ଚାର୍ଜରେ ଅଫର ନାହିଁ',
+    bo_best_case: 'ସର୍ବୋତ୍ତମ “ପର୍ଯ୍ୟନ୍ତ” ଅଫର ସହ: ପ୍ରାୟ {p}',
+    bo_disc: 'ଆନୁମାନିକ। ମେକିଂ ଚାର୍ଜ ଓ ଅଫର ଡିଜାଇନ ଓ ଉତ୍ପାଦ ଅନୁସାରେ ଭିନ୍ନ – କିଛି ସ୍ଥିର କରିବା ପୂର୍ବରୁ ଜୁଏଲରଙ୍କ ଠାରୁ ନିଶ୍ଚିତ କରନ୍ତୁ।',
+    say_bo_bill: '{b}ରେ {w} 22K {c} GST ସହ ପ୍ରାୟ {p} ହେବ। ଏହା ଆନୁମାନିକ; ଜୁଏଲରଙ୍କ ଠାରୁ ନିଶ୍ଚିତ କରନ୍ତୁ।',
+    bo_ask_b: '{b}ରେ କେଉଁ ଗହଣା?',
     off_none: 'ଆଜି <b>{b}</b>ର ୱେବସାଇଟରେ କୌଣସି ଅଫର ଲେଖାଯାଇନାହିଁ।',
     off_see: 'କାହାର ଅଫର ଅଛି ଦେଖନ୍ତୁ →',
     off_brand_h: 'ଆଜି <b>{b}</b>ର ୱେବସାଇଟରେ ଅଫର:',
@@ -1481,7 +1624,7 @@
     cheapest: 'सस्ता सस्ते सस्ती सबसे-सस्ता कम स्वस्त स्वस्तात સસ્તું સસ્તો સસ્તા સસ્તી ਸਸਤਾ ਸਸਤੇ ਸਸਤੀ ਘੱਟ সস্তা সস্তায় কম ಕಡಿಮೆ ಅಗ್ಗ ಅಗ್ಗದ குறைவு குறைந்த குறைவான மலிவு மலிவான తక్కువ చౌక చౌకైన കുറഞ്ഞ കുറവ് വിലക്കുറവ് ଶସ୍ତା ଶସ୍ତାରେ ସସ୍ତା କମ সস্তীয়া سستا سستے سستی کم',
     making: 'मेकिंग घड़ाई गढ़ाई घडाई बनवाई मजदूरी मजुरी मजूरी घडणावळ चार्ज चार्जेस ઘડામણ ઘડાઈ મેકિંગ મજૂરી ચાર્જ ਘੜਾਈ ਮੇਕਿੰਗ ਬਣਵਾਈ ਚਾਰਜ মজুরি মেকিং বানি চার্জ ಮೇಕಿಂಗ್ ಮಜೂರಿ ಚಾರ್ಜ್ செய்கூலி கூலி மேக்கிங் சார்ஜ் మేకింగ్ మజూరీ మజూరి తయారీ చార్జీ చార్జీలు ఛార్జీలు పణిక్కూలి പണിക്കൂലി പണിക്കുറവ് മേക്കിംഗ് മേക്കിങ് ചാർജ് ମେକିଂ ମଜୁରି ଗଢ଼ାଇ ଚାର୍ଜ বনোৱা মজুৰি চাৰ্জ میکنگ بنوائی مزدوری گھڑائی چارج چارجز',
     wastage: 'सेदारम वेस्टेज சேதாரம் తరుగు ತರುಗು',
-    offer: 'ऑफर ऑफ़र ऑफर्स ऑफ़र्स ओफर छूट डिस्काउंट सवलत सूट ઑફર ઓફર ઑફર્સ ડિસ્કાઉન્ટ છૂટ ਆਫ਼ਰ ਆਫਰ ਛੋਟ ਡਿਸਕਾਊਂਟ অফার ছাড় ডিসকাউন্ট ಆಫರ್ ರಿಯಾಯಿತಿ ಡಿಸ್ಕೌಂಟ್ ஆஃபர் ஆபர் தள்ளுபடி சலுகை ఆఫర్ ఆఫర్లు డిస్కౌంట్ తగ్గింపు రాయితీ ഓഫർ ഓഫറ ഡിസ്കൗണ്ട് കിഴിവ് ଅଫର ରିହାତି ଡିସକାଉଣ୍ଟ অফাৰ ৰেহাই ডিচকাউণ্ট آفر آفرز چھوٹ ڈسکاؤنٹ رعایت',
+    offer: 'डील डील्स ડીલ ਡੀਲ ডিল ಡೀಲ್ டீல் డీల్ ഡീൽ ଡିଲ ڈیل ऑफर ऑफ़र ऑफर्स ऑफ़र्स ओफर छूट डिस्काउंट सवलत सूट ઑફર ઓફર ઑફર્સ ડિસ્કાઉન્ટ છૂટ ਆਫ਼ਰ ਆਫਰ ਛੋਟ ਡਿਸਕਾਊਂਟ অফার ছাড় ডিসকাউন্ট ಆಫರ್ ರಿಯಾಯಿತಿ ಡಿಸ್ಕೌಂಟ್ ஆஃபர் ஆபர் தள்ளுபடி சலுகை ఆఫర్ ఆఫర్లు డిస్కౌంట్ తగ్గింపు రాయితీ ഓഫർ ഓഫറ ഡിസ്കൗണ്ട് കിഴിവ് ଅଫର ରିହାତି ଡିସକାଉଣ୍ଟ অফাৰ ৰেহাই ডিচকাউণ্ট آفر آفرز چھوٹ ڈسکاؤنٹ رعایت',
     diwali: 'दिवाली दीवाली दिवाळी धनतेरस धनत्रयोदशी अक्षय દિવાળી ધનતેરસ ਦੀਵਾਲੀ দীপাবলি দিওয়ালি ধনতেরাস ದೀಪಾವಳಿ ಅಕ್ಷಯ தீபாவளி அட்சய దీపావళి అక్షయ ദീപാവലി അക്ഷയ ଦୀପାବଳି ଧନତେରସ দীপাৱলী ধনতেৰাছ دیوالی دھنتیرس',
     yesterday: 'कल काल ગઈકાલ ગઈકાલે ਕੱਲ੍ਹ ਕੱਲ গতকাল ಮೊನ್ನೆ ನಿನ್ನೆ நேற்று నిన్న ഇന്നലെ ଗତକାଲି যোৱাকালি کل',
     trend: 'ट्रेंड इतिहास ટ્રેન્ડ ઇતિહાસ ਟ੍ਰੈਂਡ ইতিহাস ಟ್ರೆಂಡ್ ಇತಿಹಾಸ டிரெண்ட் வரலாறு ట్రెండ్ చరిత్ర ട്രെൻഡ് ചരിത്രം ଟ୍ରେଣ୍ଡ ଇତିହାସ ট্ৰেণ্ড ٹرینڈ تاریخ',
@@ -2109,8 +2252,50 @@
       var up = r.best != null ? '<small>(' + t('bo_upto') + ' −' + pct(r.u) + '* → ' + inr(r.best) + ')</small>' : '';
       return '<div class="sn-row sn-orow"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm"><b>' + esc(r.b.n) + '</b><small>' + mk + '</small>' + up +
         '</span><span class="sn-v">' + inr(r.tot) + '</span></div>';
-    }).join('') + '</div><p class="sn-dim">' + t('bo_note') + '</p><p>' + link('/making-charges-comparison', t('mk_every')) + ' · ' + link('/gold-offers-today', t('off_see')) + '</p>';
+    }).join('') + '</div><p class="sn-dim">' + t('bo_note') + '</p>';
+    var top = bill(rows[0].b, c, w);                 // the breakup for #1
+    if (top) h += '<p>' + t('bo_bill_h', { w: esc(wLabel(w)), c: esc(catName(c)), b: esc(rows[0].b.n) }) + '</p>' + top.html;
+    h += '<p>' + link('/making-charges-comparison', t('mk_every')) + ' · ' + link('/gold-offers-today', t('off_see')) + '</p>';
     return { intent: 'best_offer', html: h, say: t('say_bo', { w: wLabel(w), c: catName(c), b: rows[0].b.n, p: sInr(rows[0].tot) }), chips: others };
+  }
+  // An approximate bill for one jeweller and piece: gold at its rate today,
+  // its making charge (the typical one when not measured there), the offer
+  // on making (a flat offer applied; an "up to" one only shown), GST, total.
+  function bill(b, c, w) {
+    var r22 = rate(b, '22K'), gold = r22 * w.g, typ = false, mk = b.mk && b.mk[c] != null ? b.mk[c] : null;
+    if (mk == null) {
+      var all = KB.brands.filter(function (x) { return x.mk && x.mk[c] != null; }).map(function (x) { return x.mk[c]; }).sort(function (a, z) { return a - z; });
+      if (!all.length) return null;
+      mk = all[Math.floor(all.length / 2)]; typ = true;
+    }
+    var mo = b.mo || {}, f = typ ? 0 : (mo.f || 0), u = typ ? 0 : (mo.u || 0);
+    var mkAmt = gold * mk / 100, off = mkAmt * f / 100, after = mkAmt - off, gst = (gold + after) * 0.03, tot = gold + after + gst;
+    var best = u > f ? (gold + mkAmt * (1 - u / 100)) * 1.03 : null;
+    var h = '<div class="sn-bill">' +
+      '<div><span>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(r22) }) + '</span><b>' + inr(gold) + '</b></div>' +
+      '<div><span>' + (typ ? t('bo_mk_typ', { p: pct(mk) }) : t('bo_mk', { p: pct(mk) })) + '</span><b>' + inr(mkAmt) + '</b></div>' +
+      (f ? '<div><span>' + t('bo_off', { p: pct(f) }) + '</span><b>−' + inr(off) + '</b></div>' +
+           '<div><span>' + t('bo_mk_after') + '</span><b>' + inr(after) + '</b></div>' : '') +
+      '<div><span>GST 3%</span><b>' + inr(gst) + '</b></div>' +
+      '<div class="sn-tot"><span>' + t('price_total') + '</span><b>≈ ' + inr(tot) + '</b></div></div>' +
+      (!f && u ? '<p class="sn-dim">' + t('bo_off_upto', { p: pct(u) }) + '</p>' : '') +
+      (!f && !u && !typ ? '<p class="sn-dim">' + t('bo_off_none') + '</p>' : '') +
+      (best ? '<p>' + t('bo_best_case', { p: inr(best) }) + '</p>' : '') +
+      '<p class="sn-dim">' + t('bo_disc') + '</p>';
+    return { html: h, tot: tot };
+  }
+  // "best deal at Tanishq (on a ring)": that jeweller's approximate bill
+  function aBrandDeal(b, c, w) {
+    if (!b.r24) return aOffers([b]);
+    if (!c || c === 'Coin' || BO_CATS.indexOf(c) < 0) return { intent: 'ask_cat', html: '<p>' + t('bo_ask_b', { b: esc(b.n) }) + '</p>', say: t('bo_ask_b', { b: b.n }),
+      chips: BO_CATS.map(function (x) { return { l: catName(x), q: 'best deal ' + x.toLowerCase() + ' at ' + b.n }; }) };
+    w = w || { g: 10, n: '10', u: 'g' };
+    var bl = bill(b, c, w);
+    if (!bl) return aOffers([b]);
+    return { intent: 'brand_deal', html: '<p>' + t('bo_bill_h', { w: esc(wLabel(w)), c: esc(catName(c)), b: esc(b.n) }) + '</p>' + bl.html +
+      '<p>' + link('/making-charges-comparison', t('mk_every')) + ' · ' + link('/gold-offers-today', t('off_see')) + '</p>',
+      say: t('say_bo_bill', { b: b.n, w: wLabel(w), c: catName(c), p: sInr(bl.tot) }),
+      chips: BO_CATS.filter(function (x) { return x !== c; }).map(function (x) { return { l: catName(x), q: 'best deal ' + x.toLowerCase() + ' at ' + b.n }; }).concat([{ l: t('ch_bestoff'), q: 'best offer ' + c.toLowerCase() }]) };
   }
   // Which piece? The next answer is priced (see wantOffer in answer()).
   function askOfferCat() {
@@ -2230,6 +2415,9 @@
     // "compare jewellers", "rate difference between jewellers": all of them, cheapest first
     if (across && /\b(jewell?ers|jewelers|shops|stores|brands|showrooms)\b/.test(tx) && !bs.length && !w &&
         !has(tx, W.offer) && !has(tx, W.making) && !/\b(why|kyon|kyun|kyu)\b/.test(tx)) return aCheapest(k, c, true);
+    // "best deal at Tanishq", "Indriya ring final price with offer": that jeweller's approximate bill
+    if (bs.length === 1 && (has(tx, W.offer) || /\b(bill|breakup|break up|final price|total cost|total price)\b/.test(tx)) &&
+        /\b(best|deal|deals|bill|breakup|break up|calculate|final|total|kitna|kitne|kitni)\b/.test(tx)) return aBrandDeal(bs[0], ct, w);
     // "best offer", "best offer on bangles", "which jeweller is cheapest after offers on a ring": the calculator
     if (has(tx, W.offer) && !bs.length && !c && (ct ? ct !== 'Coin' : /\b(best|cheapest|lowest|calculate|which|kaunsa|konsa|kaunsi|sabse)\b/.test(tx)))
       return ct ? aBestOffer(ct, w) : askOfferCat();
