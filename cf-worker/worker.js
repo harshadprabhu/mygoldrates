@@ -3,8 +3,8 @@
  *
  * Cloudflare Cron Triggers fire on time (within seconds), unlike GitHub's
  * scheduled workflows which are delayed 1-2h on private repos. This Worker
- * dispatches the `fetch-rates` workflow via the GitHub API at the exact IST
- * times, and tells the morning run to send the daily email.
+ * dispatches the rate collection and the Instagram posts via the GitHub API
+ * at the exact IST times (PLAN), and tells the morning run to send the email.
  *
  * Secret required:  GH_PAT  (fine-grained token, repo mygoldrates,
  *                            Actions: Read and write)
@@ -15,56 +15,57 @@ const OWNER = "harshadprabhu";
 // that's not something to depend on, especially now that this dispatch is
 // the SOLE trigger for the daily alert email (see rates.yml).
 const REPO = "mygoldrates";
-const WORKFLOW = "rates.yml"; // the workflow FILE name (not its display name)
-const MORNING_CRON = "30 5 * * *"; // 11:00 IST -> this run emails the digest
+// What runs when (UTC "HH:MM"). GitHub's own schedules run hours late or not
+// at all, so everything time-bound is dispatched from here, on time.
+// days: 0 = Sunday. The Instagram job posts each kind at most once a day, so a
+// late GitHub-scheduled run of the same post does nothing.
+const PLAN = {
+  "05:30": [{ wf: "rates.yml", inputs: { alerts: "true" } }],    // 11:00 IST, sends the digest
+  "08:30": [{ wf: "rates.yml", inputs: { alerts: "false" } }],   // 14:00 IST
+  "11:30": [{ wf: "rates.yml", inputs: { alerts: "false" } }],   // 17:00 IST
+  "03:17": [{ wf: "social.yml", inputs: { post: "news", mode: "post" } }],    // 08:47 IST
+  "05:47": [{ wf: "social.yml", inputs: { post: "rates", mode: "post" } }],   // 11:17 IST
+  "09:17": [{ wf: "social.yml", inputs: { post: "pulse", mode: "post" } }],   // 14:47 IST
+  "11:47": [{ wf: "social.yml", inputs: { post: "deals", mode: "post" } }],   // 17:17 IST
+  "13:07": [{ wf: "social.yml", inputs: { post: "reel", mode: "post" } }],    // 18:37 IST
+  "13:47": [{ wf: "social.yml", inputs: { post: "awareness", mode: "post" }, days: [2, 4, 6] }], // 19:17 IST
+};
+
+async function dispatch(env, wf, inputs) {
+  const res = await fetch(
+    `https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${wf}/dispatches`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.GH_PAT}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "mygoldrates-cron",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ref: "main", inputs }),
+    }
+  );
+  // 204 = accepted. Anything else, log for `wrangler tail`.
+  if (res.status !== 204) console.log("dispatch failed", wf, res.status, await res.text());
+  else console.log("dispatched", wf, JSON.stringify(inputs));
+  return res.status;
+}
 
 export default {
   async scheduled(event, env, ctx) {
-    const alerts = event.cron === MORNING_CRON ? "true" : "false";
-    const res = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/` +
-        `${WORKFLOW}/dispatches`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${env.GH_PAT}`,
-          Accept: "application/vnd.github+json",
-          "X-GitHub-Api-Version": "2022-11-28",
-          "User-Agent": "mygoldrates-cron",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ref: "main", inputs: { alerts } }),
-      }
-    );
-    // 204 = accepted. Anything else, log for `wrangler tail`.
-    if (res.status !== 204) {
-      console.log("dispatch failed", res.status, await res.text());
-    } else {
-      console.log(`dispatched (${event.cron}, alerts=${alerts})`);
+    const t = new Date(event.scheduledTime);
+    const key = String(t.getUTCHours()).padStart(2, "0") + ":" + String(t.getUTCMinutes()).padStart(2, "0");
+    for (const job of PLAN[key] || []) {
+      if (job.days && !job.days.includes(t.getUTCDay())) continue;
+      ctx.waitUntil(dispatch(env, job.wf, job.inputs));
     }
   },
 
   // Optional: hitting the Worker URL in a browser triggers a manual run,
   // handy for testing. Remove if you don't want that.
   async fetch(request, env, ctx) {
-    const res = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/` +
-        `${WORKFLOW}/dispatches`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${env.GH_PAT}`,
-          Accept: "application/vnd.github+json",
-          "X-GitHub-Api-Version": "2022-11-28",
-          "User-Agent": "mygoldrates-cron",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ref: "main", inputs: { alerts: "false" } }),
-      }
-    );
-    return new Response(
-      res.status === 204 ? "Run dispatched ✅" : `Failed: ${res.status}`,
-      { status: res.status === 204 ? 200 : 500 }
-    );
+    const st = await dispatch(env, "rates.yml", { alerts: "false" });
+    return new Response(st === 204 ? "Run dispatched ✅" : `Failed: ${st}`, { status: st === 204 ? 200 : 500 });
   },
 };

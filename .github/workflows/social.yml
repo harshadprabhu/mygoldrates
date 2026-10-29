@@ -4,6 +4,8 @@ name: social-post
 #   ~08:47 IST  news   - today's gold news (news_post.py news)
 #   ~11:17 IST  rates  - today's rate card (social_post.py)
 #   ~14:47 IST  pulse  - India's gold pulse: Indian buyers' mood + our figures (news_post.py pulse)
+#   ~17:17 IST  deals  - best deals today: cheapest jeweller per jewel after making-charge offers,
+#               today's rates and offers, with each jeweller's logo (deals_post.py; 7 slides)
 #   ~18:37 IST  reel   - a short video made ahead (docs/social/reel-<date>.mp4 + .txt), only on days one is saved
 #   ~19:17 IST  Tue/Thu/Sat  awareness - a six-slide swipe post on gold purity, hallmarking or
 #               HUID, in turn (awareness.py)
@@ -18,11 +20,12 @@ on:
     - cron: "47 5 * * *"    # 05:47 UTC ~ 11:17 IST: rates
     - cron: "17 9 * * *"    # 09:17 UTC ~ 14:47 IST: pulse
     - cron: "47 13 * * 2,4,6"  # 13:47 UTC ~ 19:17 IST, Tue/Thu/Sat: awareness carousel
+    - cron: "47 11 * * *"   # 11:47 UTC ~ 17:17 IST: best deals carousel
     - cron: "7 13 * * *"    # 13:07 UTC ~ 18:37 IST: a Reel, only on days one is saved (docs/social/reel-<date>.mp4)
   workflow_dispatch:
     inputs:
       post:
-        description: "which post: news, rates, pulse, awareness or reel (a video made ahead: docs/social/reel-<date>.mp4)"
+        description: "which post: news, rates, pulse, deals, awareness or reel (a video made ahead: docs/social/reel-<date>.mp4)"
         default: "rates"
       mode:
         description: "preview (build the card only), check (is Instagram connected?) or post"
@@ -56,13 +59,14 @@ jobs:
             "47 5 * * *") k=rates ;;
             "17 9 * * *") k=pulse ;;
             "47 13 * * 2,4,6") k=awareness ;;
+            "47 11 * * *") k=deals ;;
             "7 13 * * *") k=reel ;;
             *) k="${PICK:-rates}" ;;
           esac
-          case "$k" in news|rates|pulse|awareness|reel) ;; *) echo "::error::post must be news, rates, pulse, awareness or reel"; exit 1 ;; esac
+          case "$k" in news|rates|pulse|deals|awareness|reel) ;; *) echo "::error::post must be news, rates, pulse, deals, awareness or reel"; exit 1 ;; esac
           echo "kind=$k" >> "$GITHUB_OUTPUT"
           # the file that says "there is a post today" (the awareness caption stands for its slides)
-          case "$k" in awareness) ext=txt ;; reel) ext=mp4 ;; *) ext=jpg ;; esac
+          case "$k" in awareness|deals) ext=txt ;; reel) ext=mp4 ;; *) ext=jpg ;; esac
           echo "file=docs/social/$k-$(TZ=Asia/Kolkata date +%F).$ext" >> "$GITHUB_OUTPUT"
 
       - name: Check the Instagram connection
@@ -82,6 +86,7 @@ jobs:
           case "$KIND" in
             rates) python social_post.py build ;;
             awareness) python awareness.py build ;;
+            deals) python deals_post.py build ;;
             *) python news_post.py build "$KIND" ;;
           esac
 
@@ -116,6 +121,7 @@ jobs:
               if curl -sfI "$SITE" | grep -qi "content-type: video/mp4"; then URL="$SITE"; fi
               python social_post.py reel "$URL" ;;
             awareness) python awareness.py publish "https://raw.githubusercontent.com/${{ github.repository }}/$SHA/docs/social" ;;
+            deals) python deals_post.py publish "https://raw.githubusercontent.com/${{ github.repository }}/$SHA/docs/social" ;;
             *) python news_post.py publish "$KIND" "$URL" ;;
           esac
           git add docs/social/posted.json 2>/dev/null || true

@@ -27,3 +27,11 @@ def test_the_rate_is_taken_from_the_22k_a_jeweller_publishes():
     assert collect.basis_purity({"24K": 14400.0, "18K": 10800.0}) == "24K"
     assert collect.basis_purity(png, "24K") == "24K"
     assert collect.basis_purity({"14K": 8431.0}) == "14K"
+
+
+def test_caratlane_rate_cards_and_not_its_coin_prices():
+    page = ("Select City ₹ 14,545 /Gram · 24KT 22KT ₹ 13,333 18KT ₹ 10,909 14KT ₹ 8,509 9KT ₹ 5,454 "
+            "*Price may vary by city ₹15,881 1g, 24Kt Lakshmi Gold Coin ₹14,557 1g, 22Kt Lakshmi Gold Coin "
+            "22KT Plain Gold Coin ₹1,25,843 8g")
+    assert collect.extract_rate_cards(page) == {"24K": [14545.0], "22K": [13333.0], "18K": [10909.0], "14K": [8509.0]}
+    assert collect.extract_rate_cards("22KT ₹ 13,333 only one karat") == {}

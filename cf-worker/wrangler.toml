@@ -2,9 +2,12 @@ name = "mygoldrates-cron"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 
-# Cloudflare cron times are UTC. IST = UTC + 5:30.
-#   30 5  UTC = 11:00 IST  (morning: refresh rates + send daily email)
-#   30 8  UTC = 14:00 IST  (afternoon revision)
-#   30 11 UTC = 17:00 IST  (late revision)
+# Cloudflare cron times are UTC. IST = UTC + 5:30. One trigger (the free plan
+# allows five in all) wakes the Worker at :07, :17, :30 and :47 past every hour;
+# worker.js's PLAN says what is due at that minute:
+#   05:30 / 08:30 / 11:30 UTC = 11:00 / 14:00 / 17:00 IST  fetch-rates (11:00 sends the email)
+#   03:17 UTC = 08:47 IST news   05:47 = 11:17 rates   09:17 = 14:47 pulse   11:47 = 17:17 deals
+#   13:07 UTC = 18:37 IST reel (only if one is saved for the day)
+#   13:47 UTC = 19:17 IST awareness (Tue, Thu, Sat)
 [triggers]
-crons = ["30 5 * * *", "30 8 * * *", "30 11 * * *"]
+crons = ["7,17,30,47 * * * *"]
