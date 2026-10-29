@@ -144,6 +144,10 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
 .trend-tip .t{color:var(--text3);font-size:9.5px;margin-top:1px}
 .trend-note{font-size:10.5px;color:var(--text2);text-align:center;padding:6px 4px 4px;text-shadow:0 1px 3px rgba(0,0,0,.85)}
 #s-market .trend-svg{height:220px}
+.wg-wrap{overflow-x:auto;margin-top:6px}.wg{width:100%;border-collapse:collapse;font-size:15px}
+.wg th{text-align:left;font-weight:600;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;opacity:.7;padding:8px 10px;border-bottom:1px solid rgba(201,162,74,.35)}
+.wg td{padding:11px 10px;border-bottom:1px solid rgba(201,162,74,.15);vertical-align:top}
+.wg td b{font-weight:700}.wg small{display:block;opacity:.65;font-size:12.5px;margin-top:2px}.wg .wg-n{opacity:.6}
 
 /* ─── Trend range filter chips ─── */
 .trend-range{display:flex;gap:6px;margin:0 12px 8px}
@@ -1199,6 +1203,14 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
         <div class="mcard"><div class="ac mt"></div><div class="mc-l">USD / INR</div><div class="mc-r usd" id="mkUsdInrS">&mdash;</div><div class="mc-s">Reference FX &middot; live</div><div class="mc-d" id="mkUsdInrDS">&mdash;</div></div>
         <div class="mcard"><div class="ac sv"></div><div class="mc-l">Silver 999</div><div class="mc-r" id="mkSilverInrS">&#8377;&mdash;</div><div class="mc-s">Per kg &middot; spot &plus; India premium</div><div class="mc-d" id="mkSilverInrDS">&mdash;</div></div>
       </div>
+      <div class="site-section-head" style="margin-top:36px" id="s-world">
+        <div><span class="site-eyebrow-sm">International</span><h2>Gold Around the World</h2></div>
+      </div>
+      <div class="wg-wrap"><table class="wg" id="worldGold">
+        <thead><tr><th>Country</th><th>24K per gram</th><th>Popular here</th></tr></thead>
+        <tbody id="worldGoldBody"><tr><td colspan="3" class="wg-n">Loading live prices&hellip;</td></tr></tbody>
+      </table></div>
+      <p class="calc-note">International spot gold converted at today&rsquo;s exchange rates, live: reference prices before local taxes (UAE 5% VAT, Saudi 15% VAT), dealer premiums and making charges &mdash; not jewellers&rsquo; shop rates. Russia also shows the Bank of Russia&rsquo;s official price.</p>
       <div class="ic-card">
     <div class="ic-head">
       <div class="ic-title"><span class="ic-name">Gold Spot</span><span class="ic-sub">XAU/USD &middot; per troy oz</span></div>
@@ -1719,6 +1731,35 @@ function handleCredentialResponse(resp){
     }
     pulseTile(v||d, tick==null?dn:tick);
   }
+  // Gold around the world: spot per gram in each currency, plus the karat or
+  // unit people there buy in. Reference prices, not shop rates.
+  var WORLD=[
+    {f:'🇦🇪',n:'UAE (Dubai)',c:'AED',s:'AED ',k:[['22K',22/24,'g']],note:'Dubai sets board rates daily · <a href="/gold-rate-today-in-dubai">Dubai vs India &rarr;</a>'},
+    {f:'🇸🇦',n:'Saudi Arabia',c:'SAR',s:'SAR ',k:[['21K',21/24,'g']],note:'21K is the usual jewellery gold'},
+    {f:'🇺🇸',n:'USA',c:'USD',s:'$',k:[['24K',1,'oz']],note:'Spot is the US reference'},
+    {f:'🇰🇭',n:'Cambodia',c:'KHR',s:'៛',k:[['24K',1,'chi']],note:'Gold is bought by the chi (3.75 g), often in US dollars'},
+    {f:'🇰🇿',n:'Kazakhstan',c:'KZT',s:'₸',k:[['585 (14K)',0.585,'g']],note:''},
+    {f:'🇷🇺',n:'Russia',c:'RUB',s:'₽',k:[['585 (14K)',0.585,'g']],note:''},
+  ];
+  function wnum(v,dec){return v.toLocaleString('en-US',{maximumFractionDigits:dec,minimumFractionDigits:dec});}
+  function paintWorld(){
+    var body=document.getElementById('worldGoldBody');
+    if(!body||!LIVE.goldUsdOz||!LIVE.fx)return;
+    var usdG=LIVE.goldUsdOz/OZ_TO_G, rows='';
+    WORLD.forEach(function(w){
+      var rate=w.c==='USD'?1:LIVE.fx[w.c]; if(!(rate>0))return;
+      var g=usdG*rate, dec=g>=1000?0:2, pop='';
+      w.k.forEach(function(k){
+        if(k[2]==='oz')pop+='<b>$'+wnum(LIVE.goldUsdOz,2)+'</b> per troy oz';
+        else if(k[2]==='chi')pop+='<b>$'+wnum(usdG*3.75,0)+'</b> per chi (3.75 g)';
+        else{var v=g*k[1];pop+='<b>'+w.s+wnum(v,v>=1000?0:2)+'</b> per g, '+k[0];}
+      });
+      var note=w.note;
+      if(w.c==='RUB'&&LIVE.cbr&&LIVE.cbr.rub_g)note='Bank of Russia official: ₽'+wnum(LIVE.cbr.rub_g,0)+'/g ('+LIVE.cbr.date+')';
+      rows+='<tr><td>'+w.f+' <b>'+w.n+'</b><small>'+w.c+'</small></td><td><b>'+w.s+wnum(g,dec)+'</b></td><td>'+pop+(note?'<small>'+note+'</small>':'')+'</td></tr>';
+    });
+    if(rows)body.innerHTML=rows;
+  }
   function paintMarket(){
     if(!LIVE.ibja24)return;
     var i24=LIVE.ibja24,i22=LIVE.ibja22;
@@ -2119,7 +2160,7 @@ function handleCredentialResponse(resp){
           ? m.mcx_silver.chg
           : (LIVE.prevMcxSilver?m.mcx_silver.ltp-LIVE.prevMcxSilver:0);
       }
-      return {usdOz:m.gold_usd,usdinr:m.usd_inr,silverUsdOz:m.silver_usd,mcx:m,
+      return {usdOz:m.gold_usd,usdinr:m.usd_inr,silverUsdOz:m.silver_usd,mcx:m,fx:m.fx,cbr:m.cbr,
               prevs:{goldUsd:m.gold_usd_prev,silverUsd:m.silver_usd_prev,
                      usdInr:m.usd_inr_prev}};
     }).catch(function(e){
@@ -2133,6 +2174,7 @@ function handleCredentialResponse(resp){
       ]).then(function(res){
         return {usdOz:res[0]&&res[0].price,
                 usdinr:res[1]&&res[1].rates&&res[1].rates.INR,
+                fx:res[1]&&res[1].rates,
                 silverUsdOz:res[2]&&res[2].price,
                 mcx:res[3]};
       });
@@ -2141,11 +2183,12 @@ function handleCredentialResponse(resp){
       var silverUsdOz=res.silverUsdOz;
       if(!usdOz||!usdinr)throw new Error('bad payload');
       applyLive(usdOz,usdinr,silverUsdOz,res.prevs);
+      if(res.fx)LIVE.fx=res.fx;if(res.cbr)LIVE.cbr=res.cbr;
       LIVE.ts=Date.now();LIVE.ok=true;LIVE.source='live';
       try{localStorage.setItem('mgr_live_cache',JSON.stringify({usdOz:usdOz,usdinr:usdinr,silverUsdOz:silverUsdOz}))}catch(e){}
       recordHistoryPoint(LIVE.ibja24);
       icRecordTick(LIVE.goldUsdOz);
-      renderAll();paintMarket();paintLiveChip(currentDotState());paintLiveStrip();renderTrend();
+      renderAll();paintMarket();paintWorld();paintLiveChip(currentDotState());paintLiveStrip();renderTrend();
       renderIc();
     }).catch(function(err){
       console.warn('Live gold rate fetch failed',err);

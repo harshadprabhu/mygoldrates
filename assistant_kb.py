@@ -304,7 +304,7 @@ def _making_offer(offers):
 
 def build(*, live, med, trend, locations, place_state, region_map, brand_home,
           loc_slug, jeweller_pages, making, offers, ring_rows, offer_meaning,
-          offer_headline, guides, display_date, updated_iso, site_url, coords=None):
+          offer_headline, guides, display_date, updated_iso, site_url, coords=None, intl=None):
     """Everything the assistant knows today, as a compact dict."""
     rows = {}
     for r in live:
@@ -379,6 +379,7 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
         "faq": FAQ,
         "guides": [{"t": t, "u": u, "d": d} for t, u, d in guides],
         "learned": _load_answers(),
+        **({"intl": intl} if intl and intl.get("usd_g") and intl.get("fx") else {}),
     }
 
 

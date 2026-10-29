@@ -371,3 +371,16 @@ def test_best_deal_at_one_jeweller_is_an_approximate_bill(tmp_path):
     assert r[3]["intent"] == "brand_deal" and "typical" in r[3]["html"]
     assert r[4]["intent"] == "offers"                                  # a jeweller's offers stay as they were
     assert r[5]["intent"] == "best_offer" and "Approximate bill for" in r[5]["html"]   # the breakup for #1
+
+
+def test_gold_around_the_world(tmp_path):
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    kb["intl"] = {"usd_g": 129.42, "fx": {"AED": 3.6725, "SAR": 3.75, "KHR": 4072.42, "KZT": 455.74, "RUB": 80.53, "INR": 95.30}}
+    p = tmp_path / "kb.json"
+    p.write_text(json.dumps(kb), encoding="utf-8")
+    r = _sona([{"lang": "en", "q": "gold rate in dubai"}, {"lang": "hi", "q": "दुबई में सोने का भाव"},
+               {"lang": "en", "q": "saudi gold price"}, {"lang": "en", "q": "how much gold can i bring from dubai"}], kb=str(p))
+    assert r[0]["intent"] == "intl" and "AED 475.29/g" in r[0]["html"] and "22K" in r[0]["html"] and "not a shop rate" in r[0]["html"]
+    assert r[1]["intent"] == "intl" and r[1]["lang"] == "hi"
+    assert r[2]["intent"] == "intl" and "21K" in r[2]["html"]
+    assert r[3]["intent"] != "intl"                         # customs questions keep their own answer

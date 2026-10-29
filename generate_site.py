@@ -350,6 +350,7 @@ def site_links_html():
         f'<a href="{SITE_URL}/gold-offers-today">Gold offers today</a>'
         f'<a href="{SITE_URL}/gold-market-today">Gold market today</a>'
         f'<a href="{SITE_URL}/gold-rate-near-me">Gold rate near me</a>'
+        f'<a href="{SITE_URL}/gold-rate-today-in-dubai">Gold rate in Dubai</a>'
         f'<a href="{SITE_URL}/gold-rate-by-jeweller">Gold rate by jeweller</a>'
         f'<a href="{SITE_URL}/list-your-jewellery">List your jewellery</a>'
         f'<a href="{SITE_URL}/gold-rate-history">Gold rate history</a>'
@@ -1129,6 +1130,17 @@ def fetch_usdinr():
     except Exception as e:
         print("usdinr: fetch failed:", type(e).__name__, str(e)[:80])
     return None
+
+
+def fetch_fx_rates(codes=("AED", "SAR", "KHR", "KZT", "RUB", "INR")):
+    """Today's USD exchange rates for "Gold around the world" (open.er-api.com)."""
+    try:
+        r = requests.get("https://open.er-api.com/v6/latest/USD", headers={"User-Agent": UA}, timeout=15)
+        rates = (r.json() or {}).get("rates") or {}
+        return {c: float(rates[c]) for c in codes if rates.get(c)}
+    except Exception as e:
+        print("fx: fetch failed:", type(e).__name__, str(e)[:80])
+        return {}
 
 
 def fetch_bullion_news(limit=8):
@@ -3049,6 +3061,71 @@ def main():
                        + body, jsonld_block=_art_ld)
         extra_urls.append((f"learn/{slug}", "monthly", "0.5"))
 
+    # ---- Dubai: today's reference price and Dubai vs India ----
+    # Spot gold converted to AED (the dirham is pegged at 3.6725 to the
+    # dollar), with the karats Dubai sells, per gram and per tola, and the
+    # same 10 g of 24K in rupees beside India's own middle rate. A reference
+    # price, not the Dubai Gold & Jewellery Group's shop board.
+    _fx = fetch_fx_rates() if gold_usd else {}
+    if gold_usd and _fx.get("AED") and _fx.get("INR"):
+        _g = gold_usd / OZ_TO_G * _fx["AED"]
+        _k = [("24K", 1.0), ("22K", 22 / 24), ("21K", 21 / 24), ("18K", 18 / 24)]
+        _aed = lambda v: f"AED {v:,.2f}"
+        _dxb10 = gold_usd / OZ_TO_G * _fx["INR"] * 10
+        _ind10 = med["24K"] * 10
+        _gap = (_ind10 / _dxb10 - 1) * 100
+        _rows = "".join(f"<tr><td>{k}</td><td>{_aed(_g * f)}</td><td>{_aed(_g * f * 11.664)}</td><td>{_aed(_g * f * 10)}</td></tr>" for k, f in _k)
+        _faq = [
+            ("Is gold cheaper in Dubai than in India?",
+             f"Today 10 g of 24K is about {inr(_dxb10)} at the Dubai reference price against {inr(_ind10)}, "
+             f"the middle of Indian jewellers' rates before GST - India about {abs(_gap):.0f}% "
+             f"{'higher' if _gap > 0 else 'lower'}. Most of the gap is India's import duty; the UAE adds 5% VAT, "
+             "and making charges differ by shop and design in both places."),
+            ("How much is 1 tola of gold in Dubai today?",
+             f"About {_aed(_g * 11.664)} for 24K and {_aed(_g * 22 / 24 * 11.664)} for 22K "
+             "(1 tola = 11.664 g), before VAT and making charges."),
+            ("Which gold karat is popular in Dubai?",
+             "22K and 21K for jewellery, 24K for bars and coins; 18K for diamond and designer pieces."),
+            ("How much gold can I bring from Dubai to India?",
+             "Indian customs gives travellers a duty-free allowance for jewellery that depends on who is "
+             "travelling and how long they stayed abroad; bars and coins are dutiable. Check the current "
+             "rules on the CBIC (Indian Customs) website before you fly."),
+        ]
+        _body = (crumbs(("Gold around the world", f"{SITE_URL}/#s-world"), ("Dubai", None))
+            + f"<h1>Gold Rate Today in Dubai ({display_date})</h1>"
+            f'<p class="updated-on">Reference price, updated with every refresh of this site. 1 USD = AED {_fx["AED"]:.4f} (pegged).</p>'
+            '<div class="tbl-wrap"><table class="jt"><tr><th>Karat</th><th>Per gram</th><th>Per tola (11.664 g)</th><th>Per 10 g</th></tr>'
+            + _rows + "</table></div>"
+            "<p class=\"calc-note\">International spot gold converted to dirhams, before 5% VAT, the shop's premium "
+            "and making charges. Dubai's shops price from the board the Dubai Gold &amp; Jewellery Group sets each day, "
+            "which sits close to this.</p>"
+            "<h2>Dubai vs India today</h2>"
+            '<div class="tbl-wrap"><table class="jt"><tr><th>10 g of 24K</th><th>In rupees</th></tr>'
+            f"<tr><td>Dubai (reference, before VAT)</td><td>{inr(_dxb10)}</td></tr>"
+            f"<tr><td>India (middle of {len(live)} jewellers, before GST)</td><td>{inr(_ind10)}</td></tr>"
+            f"<tr><td><b>Difference</b></td><td><b>{inr(abs(_ind10 - _dxb10))} ({abs(_gap):.0f}% "
+            f"{'more in India' if _gap > 0 else 'less in India'})</b></td></tr></table></div>"
+            "<p>Why the gap: gold entering India pays import duty, and jewellery adds 3% GST on gold and making. "
+            "The UAE charges 5% VAT, and visitors can claim part of it back under the UAE tourist refund scheme. "
+            "Making charges vary by shop and design in both countries, so compare the full bill, not just the rate.</p>"
+            f'<p>Compare Indian jewellers\' rates: <a href="{SITE_URL}/">gold rate today in India</a> · '
+            f'<a href="{SITE_URL}/making-charges-comparison">making charges</a> · '
+            f'<a href="{SITE_URL}/#s-world">gold around the world</a>.</p>'
+            "<h2>Questions</h2>" + "".join(f"<h3>{_html.escape(q)}</h3><p>{_html.escape(a)}</p>" for q, a in _faq))
+        _dld = ('<script type="application/ld+json">' + json.dumps([
+            {"@context": "https://schema.org", "@type": "WebPage", "name": f"Gold Rate Today in Dubai ({display_date})",
+             "url": f"{SITE_URL}/gold-rate-today-in-dubai", "inLanguage": "en-IN", "dateModified": now_ist.strftime("%Y-%m-%d")},
+            {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+                {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in _faq]},
+        ], ensure_ascii=False) + "</script>")
+        render_content(
+            "gold-rate-today-in-dubai",
+            f"Gold Rate Today in Dubai ({now_ist.strftime('%-d %b')}): 24K, 22K, 21K in AED vs India | MyGoldRates",
+            f"Dubai gold rate today: 24K about {_aed(_g)}/g, 22K {_aed(_g * 22 / 24)}/g, per tola too - "
+            "and the same gold in rupees against India's rate.",
+            _body, jsonld_block=_dld)
+        extra_urls.append(("gold-rate-today-in-dubai", "daily", "0.7"))
+
     # ---- Making charges comparison (from collect_charges.py output) ----
     try:
         with open(private_store.MC, encoding="utf-8") as f:
@@ -4045,7 +4122,9 @@ b.addEventListener('click',function(){
             guides=[(h1, f"/learn/{slug}", desc)
                     for slug, title, desc, h1, body in _articles(rate_str, med, inr)],
             display_date=display_date, updated_iso=now_ist.isoformat(timespec="minutes"),
-            site_url=SITE_URL)
+            site_url=SITE_URL,
+            # gold around the world: spot per gram and the exchange rates
+            intl=({"usd_g": round(gold_usd / OZ_TO_G, 4), "fx": fetch_fx_rates()} if gold_usd else None))
         print(f"assistant: knowledge file {assistant_kb.write(_kb) // 1024} KB, "
               f"{len(_kb['brands'])} jewellers, {len(_kb['learned'])} learned answers")
     except Exception as e:
