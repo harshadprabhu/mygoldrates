@@ -396,7 +396,7 @@
       h += '<p>' + t('intl_inr', { p: inr(inr10) }) + '</p>' +
         (x ? '<p>' + t(ind10 > inr10 ? 'intl_more' : 'intl_less', { p: inr(ind10), x: x, c: esc(w.n) }) + '</p>' : '');
     }
-    h += '<p class="sn-dim">' + t('intl_note') + '</p><p>' + link('/#s-world', 'Gold around the world →') + '</p>';
+    h += '<p class="sn-dim">' + t('intl_note') + '</p><p>' + (code === 'AE' ? link('/gold-rate-today-in-dubai', 'Dubai vs India →') + ' · ' : '') + link('/#s-world', 'Gold around the world →') + '</p>';
     return { intent: 'intl', html: h, say: t('say_intl', { c: w.n, p: money(w.s, g) }),
       chips: ['AE', 'SA', 'US', 'RU'].filter(function (x) { return x !== code; }).map(function (x) { return { l: CTRY[x].n, q: 'gold rate in ' + CTRY[x].n }; }) };
   }
