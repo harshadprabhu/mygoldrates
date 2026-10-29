@@ -356,7 +356,20 @@ def site_links_html():
         f'<a href="{SITE_URL}/news">Gold news</a>'
         f'<a href="{SITE_URL}/jewellers-digest">Jewellers Digest</a>'
         f'<a href="{SITE_URL}/inquiry">Daily rate alerts</a>'
-        '<h3>Gold rate by state</h3>'
+        # every page links the big jewellers' pages and the guides, so search
+        # engines have many paths to them (not only /gold-rate-by-jeweller)
+        '<h3>Gold rate at popular jewellers</h3>'
+        + "".join(f'<a href="{SITE_URL}/{sl}-gold-rate-today">{nm}</a>' for nm, sl in (
+            ("Tanishq", "tanishq"), ("Malabar Gold", "malabar"), ("Kalyan Jewellers", "kalyan-jewellers"),
+            ("Joyalukkas", "joyalukkas"), ("GRT Jewellers", "grt-jewellers"), ("PN Gadgil", "pn-gadgil"),
+            ("Senco Gold", "senco"), ("Indriya", "indriya"), ("CaratLane", "caratlane"),
+            ("Reliance Jewels", "reliance-jewels"), ("Bhima Jewels", "bhima-jewels"), ("Candere", "candere")))
+        + '<h3>Guides</h3>'
+        f'<a href="{SITE_URL}/learn/making-charges-explained">Making charges explained</a>'
+        f'<a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K gold</a>'
+        f'<a href="{SITE_URL}/learn/gold-hallmarking">Gold hallmarking &amp; HUID</a>'
+        f'<a href="{SITE_URL}/learn/how-gold-rates-are-set">How gold rates are set</a>'
+        + '<h3>Gold rate by state</h3>'
         + "".join(f'<a href="{SITE_URL}/gold-rate-today-in-{loc_slug(p)}">{p}</a>'
                   for p in states)
         + '<h3>About</h3>'
@@ -3021,11 +3034,19 @@ def main():
 
     # ---- Learn / evergreen articles ----
     for slug, title, desc, h1, body in _articles(rate_str, med, inr):
+        _art_ld = ('<script type="application/ld+json">' + json.dumps({
+            "@context": "https://schema.org", "@type": "Article", "headline": h1, "description": desc,
+            "url": f"{SITE_URL}/learn/{slug}", "mainEntityOfPage": f"{SITE_URL}/learn/{slug}",
+            "dateModified": datetime.now(IST).strftime("%Y-%m-%d"), "inLanguage": "en-IN",
+            "author": {"@type": "Organization", "name": "MyGoldRates", "url": SITE_URL},
+            "publisher": {"@type": "Organization", "name": "MyGoldRates", "url": SITE_URL,
+                          "logo": {"@type": "ImageObject", "url": f"{SITE_URL}/icon-512.png"}},
+        }, ensure_ascii=False) + "</script>")
         render_content(f"learn/{slug}", title, desc,
                        crumbs(("Learn", f"{SITE_URL}/news"), (h1, None)) +
                        f"<h1>{h1}</h1>"
                        f'<p class="updated-on">Last updated {display_date}</p>'
-                       + body)
+                       + body, jsonld_block=_art_ld)
         extra_urls.append((f"learn/{slug}", "monthly", "0.5"))
 
     # ---- Making charges comparison (from collect_charges.py output) ----
@@ -3076,14 +3097,67 @@ def main():
         mc_js = MC_DASH_JS.replace(
             "__DATA__", json.dumps({"brands": dash, "cats": dash_cats}))
 
+        # The same figures as a plain table, FAQ and structured data: the
+        # dashboard is drawn by script, which search engines and AI answer
+        # engines read poorly, and this table is data no other site has.
+        _mc_cats = [c for c in ("Ring", "Earrings", "Bangle", "Mangalsutra") if c in cats]
+        _mc_rows = sorted(mc["brands"], key=lambda b: b["brand"].lower())
+        def _mc_cell(b, c):
+            x = look.get((b["brand"], c))
+            if not x or x.get("making_pct_median") is None:
+                return "<td>&mdash;</td>"
+            note = {"price": " *", "jeweller": " †"}.get(x.get("source") or "", "")
+            return f'<td>{x["making_pct_median"]:.1f}%{note}</td>'
+        _low = {}
+        for c in _mc_cats:
+            vals = [(look[(b["brand"], c)]["making_pct_median"], b["brand"]) for b in _mc_rows
+                    if look.get((b["brand"], c)) and look[(b["brand"], c)].get("making_pct_median") is not None]
+            if vals:
+                _low[c] = min(vals)
+        mc_table = (
+            '<section class="site-section"><div class="site-container">'
+            f'<h2>Making charges by jeweller, {mc.get("updated", "")[:10]}</h2>'
+            '<p>Typical making charge as a % of the gold value on plain 22K gold, before offers: '
+            'the median of real products on each jeweller\'s own website. * worked out from the '
+            'price; † sent by the jeweller.</p><div class="tbl-wrap"><table class="jt"><tr><th>Jeweller</th>'
+            + "".join(f"<th>{c}</th>" for c in _mc_cats) + "</tr>"
+            + "".join("<tr><td>" + _html.escape(b["brand"]) + "</td>" + "".join(_mc_cell(b, c) for c in _mc_cats) + "</tr>"
+                      for b in _mc_rows)
+            + "</table></div>"
+            + "".join(f"<p><b>Lowest on a {c.lower()}:</b> {_html.escape(v[1])}, {v[0]:.1f}%.</p>" for c, v in _low.items())
+            + "<h2>Questions</h2>"
+            "<h3>What are making charges on gold jewellery?</h3><p>The jeweller's fee for crafting the piece, "
+            "charged on top of the gold value, usually as a % of it. 3% GST applies to gold and making together.</p>"
+            "<h3>Which jeweller has the lowest making charges?</h3><p>It depends on the piece: "
+            + "; ".join(f"for a {c.lower()}, {_html.escape(v[1])} ({v[0]:.1f}%)" for c, v in _low.items())
+            + ", from the table above. Making charges vary by design, so confirm with the jeweller.</p>"
+            "<h3>Can making charges be negotiated?</h3><p>Often, yes: it is the most negotiable part of the bill, and "
+            f'festive offers commonly cut it. See <a href="{SITE_URL}/gold-offers-today">today\'s offers</a>.</p>'
+            "</div></section>")
+        _mc_faq = [
+            ("What are making charges on gold jewellery?", "The jeweller's fee for crafting the piece, charged on top of the gold value, usually as a % of it. 3% GST applies to gold and making together."),
+            ("Which jeweller has the lowest making charges?", "It depends on the piece: " + "; ".join(f"for a {c.lower()}, {v[1]} ({v[0]:.1f}%)" for c, v in _low.items()) + ". Making charges vary by design, so confirm with the jeweller."),
+            ("Can making charges be negotiated?", "Often, yes: it is the most negotiable part of the bill, and festive offers commonly cut it."),
+        ]
+        mc_ld = ('<script type="application/ld+json">' + json.dumps([
+            {"@context": "https://schema.org", "@type": "Dataset",
+             "name": "Gold jewellery making charges by jeweller (India)",
+             "description": "Median making charge as % of gold value on plain 22K gold, by jeweller and piece, from real products on each jeweller's website.",
+             "url": f"{SITE_URL}/making-charges-comparison", "dateModified": mc.get("updated", "")[:10],
+             "creator": {"@type": "Organization", "name": "MyGoldRates", "url": SITE_URL},
+             "isAccessibleForFree": True, "spatialCoverage": "India"},
+            {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+                {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in _mc_faq]},
+        ], ensure_ascii=False) + "</script>")
         render_content(
             "making-charges-comparison",
-            "Gold Making Charge Calculator - Compare Real Prices | MyGoldRates",
-            "See what a bangle, ring, earrings or mangalsutra actually costs at "
-            "each jeweller - gold value, making charge and GST broken out, "
-            "ranked cheapest first.",
-            crumbs(("Making Charges", None)) + mc_body,
-            extra_js=mc_js)
+            f"Gold Making Charges Compared: {len(_mc_rows)} Jewellers by Ring, Bangle, Earrings | MyGoldRates",
+            f"Making charges at {len(_mc_rows)} jewellers - "
+            + ", ".join([n for n in ("Tanishq", "Malabar Gold", "GRT Jewellers", "PN Gadgil", "Senco Gold")
+                         if any(b["brand"] == n for b in _mc_rows)][:4]) + " and more - "
+            "for rings, earrings, bangles and mangalsutras, with the real price after GST.",
+            crumbs(("Making Charges", None)) + mc_body + mc_table,
+            extra_js=mc_js, jsonld_block=mc_ld)
         extra_urls.append(("making-charges-comparison", "monthly", "0.6"))
 
         # ---- Dhanteras 2026 report: the citable version of the above ----
@@ -3670,9 +3744,8 @@ b.addEventListener('click',function(){
             "gold-offers-today",
             f"Gold Jewellery Offers Today ({now_ist.strftime('%-d %b')}): Making Charge "
             "Discounts Compared | MyGoldRates",
-            ("Today's gold jewellery offers from India's jewellers, read from their own "
-             "websites: making-charge discounts, old-gold exchange, free coins - and what a "
-             "10 g 22K ring really costs after them."),
+            ("Today's gold offers at Tanishq, Malabar, GRT and more: making-charge discounts, "
+             "old-gold exchange, and a 10 g ring's real price after them."),
             _ostyle + _obody, jsonld_block=_old)
         extra_urls.append(("gold-offers-today", "daily", "0.8"))
         print(f"offers page: {sum(1 for b in _offers.get('brands', []) if b.get('offers'))} "
