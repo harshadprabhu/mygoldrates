@@ -251,7 +251,7 @@
   "2026-10-30": {
    "date": "2026-10-30",
    "paragraphs": [
-    "International gold is at $4,029 an ounce, the rupee at ₹95.30 to the dollar, and the Indian jeweller board median at ₹14,395/g for 24K (+0.00%).",
+    "International gold is at $4,026 an ounce, the rupee at ₹95.30 to the dollar, and the Indian jeweller board median at ₹14,395/g for 24K (+0.00%).",
     "What the world's gold news is about today: US interest rates (10 headlines), Inflation (6 headlines), Records and profit-taking (3 headlines), The US dollar (2 headlines).",
     "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMimAFBVV95cUxQSlEzUVl0alVzMldGRGc3MlRENDhKQUp1V0R2cndFYWVCRTktQzJaMFNKdldCZXkya2RLV1BuUEdjUWR6Qnp5M2h4NVJzSlltNkF5X2Z6ZG8yckM1bFgtRGNIMGc3SjVHbktXd1JONFFEeTYydldLNDVqajRZRW1waDFKaEpXc3F3U29KRlhLcVJuaDRNVkZzTw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Prices Slip as Fed Rate Outlook Shifts; Silver Hits 11-Month Low</a> (BullionVault); <a href=\"https://news.google.com/rss/articles/CBMiggJBVV95cUxNclRxb0szRExxazlPX1gtN19mcHUzQTBWWHdmUlpINGYzeGtRTlhoNzdRQzRBMm9aTDZzeHUzb0kxMl9BWGx0TWdxM1dZWEtuWUU0NTRhekU4QzRjR1FleXVTNTBqbFVqcnI3QjZxN2lMTlN0Sk9hNWs0a0J5dW16TVFXOXlTZWQ0NG9LYTZXa1htX3ZvbUR6YUFteXJUTFJrLTY2WG02R280TFl4T0lEQS1FLWhXMU5pdUxqUHBuSElfNTJxTTQzN2s1djV2blJOeUg2bVNKd0ZKRmh2S2JuQU5DQktYcURKcXlPVGg3UHRqcXhRWDNwalgycm1WRHl1M2c?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold prices today, Thursday, October 29, 2026: Gold prices hardly budge after Fed holds rates steady</a> (Yahoo Finance).",
     "<strong>Inflation.</strong> Gold is held as an inflation hedge, though hot inflation can also mean higher rates, which cuts the other way. In the news: <a href=\"https://news.google.com/rss/articles/CBMirgFBVV95cUxQYlhrT3hjaWJ0VXJlcHYxRUdvdVJsVEpGN2lzQXA4a1pLNW5SdklwTFpMYmRNTGRNQ2w2MTRTR2g0UUJfMkx0c21Ja1Fqbzd4eVk1U1gySHF5cnYwQ0FqUzFWWVVMVXpWaUMtQ3d2VGs1TERHQ0dtbFpMWWgxbVpoVS13bGRORTByVkZaS0piSjNxYTk0eUtoZ0ItV2wxbzNnOXhCM2R1bW1Sa1laZUE?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold slides as higher US inflation reinforces Fed tightening bets</a> (Reuters); <a href=\"https://news.google.com/rss/articles/CBMigAFBVV95cUxNT0RTOG5yNmpOYl9VU2hfbE1vN2l1dnF1NlNvaXE5WjQ1M19SakpYa3dkcDVNWUEtR2xPUUtBZzJSMURRZGZxYi12SjZMeXlmUjVPLVk4NVFDWmN0eHkzRDFOdzRzVVpjMi13aHZTTHBDeXBCdnlSTHQtbkVCa0tTcg?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold price falls as PCE data fuels US rate hike bets</a> (Mining.com.au).",
@@ -261,13 +261,12 @@
    ],
    "snap": {
     "board24": 14394.55,
-    "gold_usd": 4029.199951,
+    "gold_usd": 4025.899902,
     "usdinr": 95.29615
    },
    "summary": "news led by us interest rates",
    "themes": {
     "dollar": 2,
-    "india_demand": 1,
     "inflation": 6,
     "momentum": 3,
     "rates": 10
