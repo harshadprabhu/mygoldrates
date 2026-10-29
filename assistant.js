@@ -541,7 +541,7 @@
     if (meaning && /\b(carat|karat|caret)\b/.test(tx)) return faqQ('What is the difference between carat and karat?');
     // "gold rate in Dubai", "saudi gold price", "रूस में सोने का भाव": that country's reference price
     var ctry = countryIn(tx);
-    if (ctry && !bs.length && KB.intl && !/\b(duty|customs|carry|allowed|allowance|limit|bring|import)\b/.test(tx)) {
+    if (ctry && !bs.length && KB.intl && !/\b(duty|customs|carry|allowed|allowance|limit|bring|import|cheaper|cheap|costlier|saving|worth)\b/.test(tx)) {
       var ia = aIntl(ctry); if (ia) return ia;
     }
     var store = storeIn(tx);
