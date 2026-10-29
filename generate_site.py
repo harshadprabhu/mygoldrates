@@ -1131,6 +1131,17 @@ def fetch_usdinr():
     return None
 
 
+def fetch_fx_rates(codes=("AED", "SAR", "KHR", "KZT", "RUB", "INR")):
+    """Today's USD exchange rates for "Gold around the world" (open.er-api.com)."""
+    try:
+        r = requests.get("https://open.er-api.com/v6/latest/USD", headers={"User-Agent": UA}, timeout=15)
+        rates = (r.json() or {}).get("rates") or {}
+        return {c: float(rates[c]) for c in codes if rates.get(c)}
+    except Exception as e:
+        print("fx: fetch failed:", type(e).__name__, str(e)[:80])
+        return {}
+
+
 def fetch_bullion_news(limit=8):
     """Gold + silver + bullion PRICE headlines via Google News RSS.
 
@@ -4045,7 +4056,9 @@ b.addEventListener('click',function(){
             guides=[(h1, f"/learn/{slug}", desc)
                     for slug, title, desc, h1, body in _articles(rate_str, med, inr)],
             display_date=display_date, updated_iso=now_ist.isoformat(timespec="minutes"),
-            site_url=SITE_URL)
+            site_url=SITE_URL,
+            # gold around the world: spot per gram and the exchange rates
+            intl=({"usd_g": round(gold_usd / OZ_TO_G, 4), "fx": fetch_fx_rates()} if gold_usd else None))
         print(f"assistant: knowledge file {assistant_kb.write(_kb) // 1024} KB, "
               f"{len(_kb['brands'])} jewellers, {len(_kb['learned'])} learned answers")
     except Exception as e:

@@ -358,6 +358,48 @@
     h += '<p>' + link('/making-charges-comparison', t('mk_every')) + ' · ' + link('/gold-offers-today', t('off_see')) + '</p>';
     return { intent: 'best_offer', html: h, say: t('say_bo', { w: wLabel(w), c: catName(c), b: rows[0].b.n, p: sInr(rows[0].tot) }), chips: others };
   }
+  // Gold around the world: spot per gram in the country's currency (from the
+  // knowledge file's "intl"), the karat or unit people there buy in, the rupee
+  // equivalent and India's own middle rate beside it. Reference prices.
+  var COUNTRY = {
+    dubai: 'AE', uae: 'AE', emirates: 'AE', 'abu dhabi': 'AE', sharjah: 'AE',
+    saudi: 'SA', 'saudi arabia': 'SA', riyadh: 'SA', jeddah: 'SA', ksa: 'SA',
+    usa: 'US', america: 'US', 'united states': 'US', 'new york': 'US',
+    cambodia: 'KH', 'phnom penh': 'KH', kazakhstan: 'KZ', almaty: 'KZ', astana: 'KZ',
+    russia: 'RU', moscow: 'RU'
+  };
+  var CTRY = {
+    AE: { n: 'UAE (Dubai)', c: 'AED', s: 'AED ', k: '22K', f: 22 / 24 },
+    SA: { n: 'Saudi Arabia', c: 'SAR', s: 'SAR ', k: '21K', f: 21 / 24 },
+    US: { n: 'USA', c: 'USD', s: '$', oz: true },
+    KH: { n: 'Cambodia', c: 'KHR', s: '៛', chi: true },
+    KZ: { n: 'Kazakhstan', c: 'KZT', s: '₸', k: '585 (14K)', f: 0.585 },
+    RU: { n: 'Russia', c: 'RUB', s: '₽', k: '585 (14K)', f: 0.585 }
+  };
+  function countryIn(t) {
+    for (var w in COUNTRY) if (new RegExp('\\b' + w + '\\b').test(t)) return COUNTRY[w];
+    return null;
+  }
+  function money(sym, v) { return sym + (v >= 1000 ? Math.round(v).toLocaleString('en-US') : v.toFixed(2)); }
+  function aIntl(code) {
+    var I = KB.intl, w = CTRY[code];
+    if (!I || !w) return null;
+    var fx = w.c === 'USD' ? 1 : I.fx[w.c], inrFx = I.fx.INR;
+    if (!(fx > 0)) return null;
+    var g = I.usd_g * fx, rows = '<div class="sn-row"><span class="sn-nm">24K</span><span class="sn-v">' + money(w.s, g) + '/g</span></div>';
+    if (w.k) rows += '<div class="sn-row"><span class="sn-nm">' + w.k + '</span><span class="sn-v">' + money(w.s, g * w.f) + '/g</span></div>';
+    if (w.oz) rows += '<div class="sn-row"><span class="sn-nm">24K, troy oz</span><span class="sn-v">' + money('$', I.usd_g * 31.1034768) + '</span></div>';
+    if (w.chi) rows += '<div class="sn-row"><span class="sn-nm">24K, chi (3.75 g)</span><span class="sn-v">' + money('$', I.usd_g * 3.75) + '</span></div>';
+    var h = '<p>' + t('intl_h', { c: esc(w.n) }) + '</p><div class="sn-list">' + rows + '</div>';
+    if (inrFx > 0) {
+      var inr10 = I.usd_g * inrFx * 10, ind10 = KB.med['24K'] * 10, x = Math.round(Math.abs(ind10 / inr10 - 1) * 100);
+      h += '<p>' + t('intl_inr', { p: inr(inr10) }) + '</p>' +
+        (x ? '<p>' + t(ind10 > inr10 ? 'intl_more' : 'intl_less', { p: inr(ind10), x: x, c: esc(w.n) }) + '</p>' : '');
+    }
+    h += '<p class="sn-dim">' + t('intl_note') + '</p><p>' + link('/#s-world', 'Gold around the world →') + '</p>';
+    return { intent: 'intl', html: h, say: t('say_intl', { c: w.n, p: money(w.s, g) }),
+      chips: ['AE', 'SA', 'US', 'RU'].filter(function (x) { return x !== code; }).map(function (x) { return { l: CTRY[x].n, q: 'gold rate in ' + CTRY[x].n }; }) };
+  }
   // An approximate bill for one jeweller and piece: gold at its rate today,
   // its making charge (the typical one when not measured there), the offer
   // on making (a flat offer applied; an "up to" one only shown), GST, total.
@@ -497,6 +539,11 @@
     if (meaning && k) return faqQ({ '22K': 'What is 916 gold?', '18K': 'Is 18K gold good for jewellery?', '14K': 'Is 14K gold real gold?' }[k] ||
                                   'What is the difference between 22K and 24K gold?');
     if (meaning && /\b(carat|karat|caret)\b/.test(tx)) return faqQ('What is the difference between carat and karat?');
+    // "gold rate in Dubai", "saudi gold price", "रूस में सोने का भाव": that country's reference price
+    var ctry = countryIn(tx);
+    if (ctry && !bs.length && KB.intl && !/\b(duty|customs|carry|allowed|allowance|limit|bring|import)\b/.test(tx)) {
+      var ia = aIntl(ctry); if (ia) return ia;
+    }
     var store = storeIn(tx);
     if (store && !has(tx, ['digital', 'etf', 'loan', 'emi', 'scheme', 'bond', 'bonds', 'sgb'])) return aOutside(store, k);
     // "gold rate per gram 18 carat": that karat's rate, not its explainer
