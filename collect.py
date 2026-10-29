@@ -599,6 +599,25 @@ def extract_per_1g_card(text):
     return out
 
 
+# CaratLane's /gold-rate cards (Oct 2026): "Rs 14,545 /Gram · 24KT" for the
+# selected purity, then "22KT Rs 13,333 18KT Rs 10,909 ...". The karat label sits
+# right next to its price, which keeps out the coin listing further down the
+# same page ("22Kt Lakshmi Gold Coin Rs 15,881 1g" - a coin's price, not a rate).
+_CARD_SEL_RE = re.compile(r"(?:₹|Rs\.?)\s*([\d,]{4,7})\s*/\s*Gram\s*[·•|-]?\s*(24|22|18|14)\s*KT\b", re.I)
+_CARD_KT_RE = re.compile(r"\b(24|22|18|14)\s*KT\s*(?:₹|Rs\.?)\s*([\d,]{4,7})\b", re.I)
+
+
+def extract_rate_cards(text):
+    out = {}
+    for m in _CARD_SEL_RE.finditer(text):
+        out.setdefault(m.group(2) + "K", []).append(_f(m.group(1)))
+    for m in _CARD_KT_RE.finditer(text):
+        out.setdefault(m.group(1) + "K", []).append(_f(m.group(2)))
+    out = {k: [v for v in vs if v and 1000 < v < 50000] for k, vs in out.items()}
+    out = {k: vs for k, vs in out.items() if vs}
+    return out if len(out) >= 2 else {}      # a real rate card shows several karats
+
+
 def extract_rate_json(html):
     """Rate tables shipped as JSON in a <script>, not rendered as text.
 
@@ -728,6 +747,7 @@ def extract(html):
     if not buckets:
         text = soup.get_text(" ", strip=True)
         for fn, name in ((extract_per_1g_card, "per1gcard"),
+                         (extract_rate_cards, "ratecards"),
                          (extract_metal_net_weight, "metalnet"),
                          (extract_labeled_rates, "labeled"),
                          (extract_karat_unit_value, "karatunit"),
