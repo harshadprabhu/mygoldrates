@@ -144,7 +144,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
 .trend-tip .t{color:var(--text3);font-size:9.5px;margin-top:1px}
 .trend-note{font-size:10.5px;color:var(--text2);text-align:center;padding:6px 4px 4px;text-shadow:0 1px 3px rgba(0,0,0,.85)}
 #s-market .trend-svg{height:220px}
-.wg-wrap{overflow-x:auto;margin-top:6px}.wg{width:100%;border-collapse:collapse;font-size:15px}
+.wg-wrap{overflow-x:auto;margin-top:6px;-webkit-overflow-scrolling:touch}.wg{width:100%;min-width:620px;border-collapse:collapse;font-size:15px}.wg td b{white-space:nowrap}
 .wg th{text-align:left;font-weight:600;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;opacity:.7;padding:8px 10px;border-bottom:1px solid rgba(201,162,74,.35)}
 .wg td{padding:11px 10px;border-bottom:1px solid rgba(201,162,74,.15);vertical-align:top}
 .wg td b{font-weight:700}.wg small{display:block;opacity:.65;font-size:12.5px;margin-top:2px}.wg .wg-n{opacity:.6}
@@ -1207,10 +1207,10 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
         <div><span class="site-eyebrow-sm">International</span><h2>Gold Around the World</h2></div>
       </div>
       <div class="wg-wrap"><table class="wg" id="worldGold">
-        <thead><tr><th>Country</th><th>24K per gram</th><th>Popular here</th></tr></thead>
-        <tbody id="worldGoldBody"><tr><td colspan="3" class="wg-n">Loading live prices&hellip;</td></tr></tbody>
+        <thead><tr><th>Country</th><th>24K per gram</th><th>24K in &#8377; per gram</th><th>Popular here</th></tr></thead>
+        <tbody id="worldGoldBody"><tr><td colspan="4" class="wg-n">Loading live prices&hellip;</td></tr></tbody>
       </table></div>
-      <p class="calc-note">International spot gold converted at today&rsquo;s exchange rates, live: reference prices before local taxes (UAE 5% VAT, Saudi 15% VAT), dealer premiums and making charges &mdash; not jewellers&rsquo; shop rates. Russia also shows the Bank of Russia&rsquo;s official price.</p>
+      <p class="calc-note">International spot gold converted at today&rsquo;s exchange rates, live: reference prices before local taxes (UAE 5% VAT, Saudi 15% VAT), dealer premiums and making charges &mdash; not jewellers&rsquo; shop rates. Russia also shows the Bank of Russia&rsquo;s official price. Rupee figures use live exchange rates; India is the IBJA 24K rate (import duty included, before 3% GST), so the gap is mostly India&rsquo;s duty and taxes.</p>
       <div class="ic-card">
     <div class="ic-head">
       <div class="ic-title"><span class="ic-name">Gold Spot</span><span class="ic-sub">XAU/USD &middot; per troy oz</span></div>
@@ -1745,10 +1745,20 @@ function handleCredentialResponse(resp){
   function paintWorld(){
     var body=document.getElementById('worldGoldBody');
     if(!body||!LIVE.goldUsdOz||!LIVE.fx)return;
-    var usdG=LIVE.goldUsdOz/OZ_TO_G, rows='';
+    var usdG=LIVE.goldUsdOz/OZ_TO_G, inr=LIVE.usdinr||LIVE.fx.INR, ind=LIVE.ibja24, rows='';
+    function rs(v){return '₹'+Math.round(v).toLocaleString('en-IN');}
+    if(ind)rows+='<tr><td>🇮🇳 <b>India</b><small>INR</small></td><td><b>'+rs(ind)+'</b></td><td><b>'+rs(ind)+'</b><small>IBJA, before 3% GST</small></td><td><b>'+rs(ind*22/24)+'</b> per g, 22K<small>22K is the usual jewellery gold</small></td></tr>';
     WORLD.forEach(function(w){
       var rate=w.c==='USD'?1:LIVE.fx[w.c]; if(!(rate>0))return;
-      var g=usdG*rate, dec=g>=1000?0:2, pop='';
+      var g=usdG*rate, dec=g>=1000?0:2, pop='', inrCell='—';
+      if(inr>0){
+        var perUnit=inr/rate, gi=usdG*inr;
+        if(w.c==='RUB'&&LIVE.cbr&&LIVE.cbr.rub_g)gi=LIVE.cbr.rub_g*perUnit;
+        var fxTxt=perUnit>=1?'1 '+w.c+' = ₹'+wnum(perUnit,2):'₹1 = '+wnum(1/perUnit,perUnit<0.1?0:2)+' '+w.c;
+        inrCell='<b>'+rs(gi)+'</b>';
+        if(ind){var d=(ind-gi)/gi*100;inrCell+='<small>India '+Math.abs(d).toFixed(1)+'% '+(d>=0?'dearer':'cheaper')+'</small>';}
+        inrCell+='<small>'+fxTxt+' · live</small>';
+      }
       w.k.forEach(function(k){
         if(k[2]==='oz')pop+='<b>$'+wnum(LIVE.goldUsdOz,2)+'</b> per troy oz';
         else if(k[2]==='chi')pop+='<b>$'+wnum(usdG*3.75,0)+'</b> per chi (3.75 g)';
@@ -1756,7 +1766,7 @@ function handleCredentialResponse(resp){
       });
       var note=w.note;
       if(w.c==='RUB'&&LIVE.cbr&&LIVE.cbr.rub_g)note='Bank of Russia official: ₽'+wnum(LIVE.cbr.rub_g,0)+'/g ('+LIVE.cbr.date+')';
-      rows+='<tr><td>'+w.f+' <b>'+w.n+'</b><small>'+w.c+'</small></td><td><b>'+w.s+wnum(g,dec)+'</b></td><td>'+pop+(note?'<small>'+note+'</small>':'')+'</td></tr>';
+      rows+='<tr><td>'+w.f+' <b>'+w.n+'</b><small>'+w.c+'</small></td><td><b>'+w.s+wnum(g,dec)+'</b></td><td>'+inrCell+'</td><td>'+pop+(note?'<small>'+note+'</small>':'')+'</td></tr>';
     });
     if(rows)body.innerHTML=rows;
   }
