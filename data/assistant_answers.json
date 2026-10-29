@@ -53,6 +53,12 @@
    "a": "A discount on making charges is only worth it if the remaining fee is lower than what other jewellers charge without offers. The discount applies only to crafting fees, never to the gold itself. Always compare the final price rather than the size of the discount.",
    "u": "/gold-offers-today",
    "d": "2026-10-28"
+  },
+  {
+   "q": "How is the price of gold jewellery calculated?",
+   "a": "The total price is calculated from the gold value for its weight and karat, plus making charges, any stone costs, and GST on the total amount. You can see the full price breakdown on our calculators page.",
+   "u": "/calculators",
+   "d": "2026-10-29"
   }
  ]
 }
