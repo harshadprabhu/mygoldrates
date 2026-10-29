@@ -169,13 +169,14 @@ async function withCache(request, ttlSeconds, computeFn) {
 // available for each metric.
 async function handleMarket() {
   const mcxExpiries = mcxCandidateExpiries();
-  const [xau, xag, fx, mcxG, mcxS, refs] = await Promise.all([
+  const [xau, xag, fx, mcxG, mcxS, refs, cbr] = await Promise.all([
     safeFetchJson('https://api.gold-api.com/price/XAU'),
     safeFetchJson('https://api.gold-api.com/price/XAG'),
     safeFetchJson('https://open.er-api.com/v6/latest/USD'),
     findMcx('GOLD', mcxExpiries),
     findMcx('SILVER', mcxExpiries),
     prevCloses(),
+    cbrGold().catch(() => null),
   ]);
 
   const goldUsd = xau?.price ?? null;
@@ -206,8 +207,29 @@ async function handleMarket() {
                        prev: mcxG.prev, chg: mcxG.chg } : null,
     mcx_silver: mcxS ? { ltp: mcxS.ltp, expiry: mcxS.expiry, pchg: mcxS.pchg,
                          prev: mcxS.prev, chg: mcxS.chg } : null,
+    // "Gold around the world": the currencies the market section converts
+    // spot into, and the Bank of Russia's official gold price.
+    fx: fx?.rates ? Object.fromEntries(['AED', 'SAR', 'KHR', 'KZT', 'RUB', 'INR']
+      .filter((c) => fx.rates[c] > 0).map((c) => [c, fx.rates[c]])) : null,
+    cbr,
     updated_at: new Date().toISOString(),
   });
+}
+
+// The Bank of Russia's official gold price (RUB per gram) - its free daily
+// XML. Cached for six hours: it is set once a working day.
+async function cbrGold() {
+  const day = (d) => [String(d.getUTCDate()).padStart(2, '0'), String(d.getUTCMonth() + 1).padStart(2, '0'), d.getUTCFullYear()].join('/');
+  const now = new Date(), from = new Date(now.getTime() - 10 * 864e5);
+  const xml = await safeFetchText(
+    `https://www.cbr.ru/scripts/xml_metall.asp?date_req1=${day(from)}&date_req2=${day(now)}`,
+    { cacheTtl: 21600, timeoutMs: 8000, accept: 'application/xml,*/*' });
+  if (!xml) return null;
+  const recs = [...xml.matchAll(/<Record Date="(\d\d)\.(\d\d)\.(\d{4})" Code="1"><Buy>([\d,]+)<\/Buy>/g)];
+  if (!recs.length) return null;
+  const r = recs[recs.length - 1];
+  const rub = parseFloat(r[4].replace(',', '.'));
+  return rub > 0 ? { rub_g: rub, date: `${r[3]}-${r[2]}-${r[1]}` } : null;
 }
 
 // Convert a reference instrument's day move into a percentage and apply it
