@@ -184,10 +184,10 @@
     // Little words that carry no meaning here; listed so they are never
     // mistaken for a jeweller's name ("कहाँ" is not Khazana).
     _: 'का की के को में मे है हैं हे था थी क्या से पर और भी तो ही कौन कौनसा सा वाला वाले आप मुझे बताओ बताइए बताएं चाहिए मिलेगा मिलता होगा रहा रही ' +
-       'आहे चा ची चे च्या ला ना काय मला सांगा आणि होता ' +
-       'છે નો ની નું ના માં શું મને કહો અને હતો ' +
+       'आहे चा ची चे च्या ला ना काय मला सांगा आणि होता सर्वात ' +
+       'છે નો ની નું ના માં શું મને કહો અને હતો સૌથી ' +
        'ਦਾ ਦੀ ਦੇ ਵਿੱਚ ਹੈ ਕੀ ਮੈਨੂੰ ਦੱਸੋ ਅਤੇ ' +
-       'কি কী এর আছে আমাকে বলুন এবং ' +
+       'কি কী এর আছে আমাকে বলুন এবং সবচেয়ে ' +
        'ಏನು ಇದೆ ಹೇಳಿ ಮತ್ತು ನನಗೆ ' +
        'என்ன உள்ளது சொல்லுங்கள் மற்றும் எனக்கு ' +
        'ఏమిటి ఉంది చెప్పండి మరియు నాకు ' +
@@ -216,7 +216,9 @@
 
   // Words are looked up within their own script: in Latin letters Bengali
   // কত ("how much") and Punjabi ਘੱਟ ("less") would read the same.
-  var EXACT = null, PREFIX = null, NUMK = {}, UR = {}, URP = [];
+  // RAW: the exact spelling first, since the Latin key can merge two words
+  // (Gujarati સૌથી "most" and સાઉદી "Saudi" both read "sauti").
+  var EXACT = null, PREFIX = null, RAW = {}, NUMK = {}, UR = {}, URP = [];
   function scriptName(w) { var m = String(w).match(/[ऀ-ൿ]/); return m ? scriptOf(m[0].charCodeAt(0))[1] : ''; }
   function compile() {
     if (EXACT) return;
@@ -226,6 +228,7 @@
         if (AR.test(w)) { if (!UR[w]) UR[w] = tok; URP.push([w, tok]); return; }
         var k = key(romWord(w.replace(/-/g, ''))), sc = scriptName(w);
         if (!k) return;
+        if (!RAW[w]) RAW[w] = tok;
         if (!EXACT[sc + ':' + k]) EXACT[sc + ':' + k] = tok;
         (PREFIX[sc] = PREFIX[sc] || []).push([k, tok]);
       });
@@ -408,6 +411,7 @@
       }
       var k = key(romWord(w)), sc = scriptName(w);
       if (nums[k]) { out.push(nums[k]); return; }
+      if (RAW[w]) { out.push(RAW[w]); return; }
       if (EXACT[sc + ':' + k]) { out.push(EXACT[sc + ':' + k]); return; }
       var nm = nameMatch(k, vocab || []);
       if (nm && nm[1] <= 1) { out.push(nm[0]); return; }
