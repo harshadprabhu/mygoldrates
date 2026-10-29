@@ -56,6 +56,7 @@ def today(kb):
         "gap": (r22(nat[-1]) - r22(nat[0])) * 10,
         # the card's table: cheapest first; making = median on rings, if measured
         "rows": [(b["n"], b["r24"] * 18 / 24, r22(b), (b.get("mk") or {}).get("Ring")) for b in nat],
+        "dom": {b["n"]: b.get("d") for b in kb["brands"]},          # for each jeweller's logo
     }
 
 
@@ -387,9 +388,20 @@ def _texts(img, d, f, W, H, path):
     for i, (n, r18, r22, mk) in enumerate(rows):
         hi = i == 0
         g.rectangle((x0, y, x1, y + rh), fill=GOLD_ROW if hi else (CREAM_ROW if i % 2 == 0 else (248, 241, 226)))
-        g.text((x0 + 28, y + rh / 2), f"{i + 1}.  {n}", font=f("Bold" if hi else "SemiBold", 27), fill=INK, anchor="lm")
+        g.text((x0 + 28, y + rh / 2), f"{i + 1}.", font=f("Bold" if hi else "SemiBold", 27), fill=INK, anchor="lm")
+        nx = x0 + 74
+        try:                                            # the jeweller's logo, as on the website
+            from deals_post import logo
+            lg = logo((d.get("dom") or {}).get(n), 34, n)
+            if lg:
+                img.alpha_composite(lg, (nx, int(y + (rh - 34) / 2)))
+                g = ImageDraw.Draw(img)
+                nx += 44
+        except Exception:
+            pass
+        g.text((nx, y + rh / 2), n, font=f("Bold" if hi else "SemiBold", 27), fill=INK, anchor="lm")
         if hi:
-            g.text((x0 + 36 + g.textlength(f"{i + 1}.  {n}", font=f("Bold", 27)), y + rh / 2), "  CHEAPEST", font=f("Bold", 17), fill=(176, 36, 36), anchor="lm")
+            g.text((nx + 8 + g.textlength(n, font=f("Bold", 27)), y + rh / 2), "  CHEAPEST", font=f("Bold", 17), fill=(176, 36, 36), anchor="lm")
         g.text((560, y + rh / 2), inr(r18), font=f("SemiBold", 27), fill=INK, anchor="mm")
         g.text((750, y + rh / 2), inr(r22), font=f("Bold", 28), fill=(150, 98, 14) if hi else INK, anchor="mm")
         g.text((936, y + rh / 2), f"{mk:g}%" if mk else "\u2014", font=f("SemiBold", 26), fill=INK if mk else SOFT, anchor="mm")

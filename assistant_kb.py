@@ -336,6 +336,8 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
             rec["u"] = "/" + jeweller_pages[slug]
         ob = off_by.get(slug) or {}
         dom = (ob.get("domain") or "").replace("www.", "")
+        if ob.get("domain"):
+            rec["d"] = ob["domain"]           # for the jeweller's logo (its site's favicon) on posts
         if dom and mk_by.get(dom):
             rec["mk"] = mk_by[dom]
         # Making-charge offers, for "best offer on a bangle": f = a flat

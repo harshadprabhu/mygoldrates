@@ -26,6 +26,7 @@ const PLAN = {
   "03:17": [{ wf: "social.yml", inputs: { post: "news", mode: "post" } }],    // 08:47 IST
   "05:47": [{ wf: "social.yml", inputs: { post: "rates", mode: "post" } }],   // 11:17 IST
   "09:17": [{ wf: "social.yml", inputs: { post: "pulse", mode: "post" } }],   // 14:47 IST
+  "11:47": [{ wf: "social.yml", inputs: { post: "deals", mode: "post" } }],   // 17:17 IST
   "13:07": [{ wf: "social.yml", inputs: { post: "reel", mode: "post" } }],    // 18:37 IST
   "13:47": [{ wf: "social.yml", inputs: { post: "awareness", mode: "post" }, days: [2, 4, 6] }], // 19:17 IST
 };
