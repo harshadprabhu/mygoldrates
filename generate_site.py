@@ -3108,6 +3108,8 @@ def main():
                 return "<td>&mdash;</td>"
             note = {"price": " *", "jeweller": " †"}.get(x.get("source") or "", "")
             return f'<td>{x["making_pct_median"]:.1f}%{note}</td>'
+        def _a(c):                       # "a ring", "earrings"
+            return c.lower() if c.endswith("s") else "a " + c.lower()
         _low = {}
         for c in _mc_cats:
             vals = [(look[(b["brand"], c)]["making_pct_median"], b["brand"]) for b in _mc_rows
@@ -3124,19 +3126,19 @@ def main():
             + "".join("<tr><td>" + _html.escape(b["brand"]) + "</td>" + "".join(_mc_cell(b, c) for c in _mc_cats) + "</tr>"
                       for b in _mc_rows)
             + "</table></div>"
-            + "".join(f"<p><b>Lowest on a {c.lower()}:</b> {_html.escape(v[1])}, {v[0]:.1f}%.</p>" for c, v in _low.items())
+            + "".join(f"<p><b>Lowest on {_a(c)}:</b> {_html.escape(v[1])}, {v[0]:.1f}%.</p>" for c, v in _low.items())
             + "<h2>Questions</h2>"
             "<h3>What are making charges on gold jewellery?</h3><p>The jeweller's fee for crafting the piece, "
             "charged on top of the gold value, usually as a % of it. 3% GST applies to gold and making together.</p>"
             "<h3>Which jeweller has the lowest making charges?</h3><p>It depends on the piece: "
-            + "; ".join(f"for a {c.lower()}, {_html.escape(v[1])} ({v[0]:.1f}%)" for c, v in _low.items())
+            + "; ".join(f"for {_a(c)}, {_html.escape(v[1])} ({v[0]:.1f}%)" for c, v in _low.items())
             + ", from the table above. Making charges vary by design, so confirm with the jeweller.</p>"
             "<h3>Can making charges be negotiated?</h3><p>Often, yes: it is the most negotiable part of the bill, and "
             f'festive offers commonly cut it. See <a href="{SITE_URL}/gold-offers-today">today\'s offers</a>.</p>'
             "</div></section>")
         _mc_faq = [
             ("What are making charges on gold jewellery?", "The jeweller's fee for crafting the piece, charged on top of the gold value, usually as a % of it. 3% GST applies to gold and making together."),
-            ("Which jeweller has the lowest making charges?", "It depends on the piece: " + "; ".join(f"for a {c.lower()}, {v[1]} ({v[0]:.1f}%)" for c, v in _low.items()) + ". Making charges vary by design, so confirm with the jeweller."),
+            ("Which jeweller has the lowest making charges?", "It depends on the piece: " + "; ".join(f"for {_a(c)}, {v[1]} ({v[0]:.1f}%)" for c, v in _low.items()) + ". Making charges vary by design, so confirm with the jeweller."),
             ("Can making charges be negotiated?", "Often, yes: it is the most negotiable part of the bill, and festive offers commonly cut it."),
         ]
         mc_ld = ('<script type="application/ld+json">' + json.dumps([
