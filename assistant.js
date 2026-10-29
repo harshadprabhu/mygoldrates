@@ -352,8 +352,50 @@
       var up = r.best != null ? '<small>(' + t('bo_upto') + ' −' + pct(r.u) + '* → ' + inr(r.best) + ')</small>' : '';
       return '<div class="sn-row sn-orow"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm"><b>' + esc(r.b.n) + '</b><small>' + mk + '</small>' + up +
         '</span><span class="sn-v">' + inr(r.tot) + '</span></div>';
-    }).join('') + '</div><p class="sn-dim">' + t('bo_note') + '</p><p>' + link('/making-charges-comparison', t('mk_every')) + ' · ' + link('/gold-offers-today', t('off_see')) + '</p>';
+    }).join('') + '</div><p class="sn-dim">' + t('bo_note') + '</p>';
+    var top = bill(rows[0].b, c, w);                 // the breakup for #1
+    if (top) h += '<p>' + t('bo_bill_h', { w: esc(wLabel(w)), c: esc(catName(c)), b: esc(rows[0].b.n) }) + '</p>' + top.html;
+    h += '<p>' + link('/making-charges-comparison', t('mk_every')) + ' · ' + link('/gold-offers-today', t('off_see')) + '</p>';
     return { intent: 'best_offer', html: h, say: t('say_bo', { w: wLabel(w), c: catName(c), b: rows[0].b.n, p: sInr(rows[0].tot) }), chips: others };
+  }
+  // An approximate bill for one jeweller and piece: gold at its rate today,
+  // its making charge (the typical one when not measured there), the offer
+  // on making (a flat offer applied; an "up to" one only shown), GST, total.
+  function bill(b, c, w) {
+    var r22 = rate(b, '22K'), gold = r22 * w.g, typ = false, mk = b.mk && b.mk[c] != null ? b.mk[c] : null;
+    if (mk == null) {
+      var all = KB.brands.filter(function (x) { return x.mk && x.mk[c] != null; }).map(function (x) { return x.mk[c]; }).sort(function (a, z) { return a - z; });
+      if (!all.length) return null;
+      mk = all[Math.floor(all.length / 2)]; typ = true;
+    }
+    var mo = b.mo || {}, f = typ ? 0 : (mo.f || 0), u = typ ? 0 : (mo.u || 0);
+    var mkAmt = gold * mk / 100, off = mkAmt * f / 100, after = mkAmt - off, gst = (gold + after) * 0.03, tot = gold + after + gst;
+    var best = u > f ? (gold + mkAmt * (1 - u / 100)) * 1.03 : null;
+    var h = '<div class="sn-bill">' +
+      '<div><span>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(r22) }) + '</span><b>' + inr(gold) + '</b></div>' +
+      '<div><span>' + (typ ? t('bo_mk_typ', { p: pct(mk) }) : t('bo_mk', { p: pct(mk) })) + '</span><b>' + inr(mkAmt) + '</b></div>' +
+      (f ? '<div><span>' + t('bo_off', { p: pct(f) }) + '</span><b>−' + inr(off) + '</b></div>' +
+           '<div><span>' + t('bo_mk_after') + '</span><b>' + inr(after) + '</b></div>' : '') +
+      '<div><span>GST 3%</span><b>' + inr(gst) + '</b></div>' +
+      '<div class="sn-tot"><span>' + t('price_total') + '</span><b>≈ ' + inr(tot) + '</b></div></div>' +
+      (!f && u ? '<p class="sn-dim">' + t('bo_off_upto', { p: pct(u) }) + '</p>' : '') +
+      (!f && !u && !typ ? '<p class="sn-dim">' + t('bo_off_none') + '</p>' : '') +
+      (best ? '<p>' + t('bo_best_case', { p: inr(best) }) + '</p>' : '') +
+      '<p class="sn-dim">' + t('bo_disc') + '</p>';
+    return { html: h, tot: tot };
+  }
+  // "best deal at Tanishq (on a ring)": that jeweller's approximate bill
+  function aBrandDeal(b, c, w) {
+    if (!b.r24) return aOffers([b]);
+    if (!c || c === 'Coin' || BO_CATS.indexOf(c) < 0) return { intent: 'ask_cat', html: '<p>' + t('bo_ask_b', { b: esc(b.n) }) + '</p>', say: t('bo_ask_b', { b: b.n }),
+      chips: BO_CATS.map(function (x) { return { l: catName(x), q: 'best deal ' + x.toLowerCase() + ' at ' + b.n }; }) };
+    w = w || { g: 10, n: '10', u: 'g' };
+    var bl = bill(b, c, w);
+    if (!bl) return aOffers([b]);
+    return { intent: 'brand_deal', html: '<p>' + t('bo_bill_h', { w: esc(wLabel(w)), c: esc(catName(c)), b: esc(b.n) }) + '</p>' + bl.html +
+      '<p>' + link('/making-charges-comparison', t('mk_every')) + ' · ' + link('/gold-offers-today', t('off_see')) + '</p>',
+      say: t('say_bo_bill', { b: b.n, w: wLabel(w), c: catName(c), p: sInr(bl.tot) }),
+      chips: BO_CATS.filter(function (x) { return x !== c; }).map(function (x) { return { l: catName(x), q: 'best deal ' + x.toLowerCase() + ' at ' + b.n }; }).concat([{ l: t('ch_bestoff'), q: 'best offer ' + c.toLowerCase() }]) };
   }
   // Which piece? The next answer is priced (see wantOffer in answer()).
   function askOfferCat() {
@@ -473,6 +515,9 @@
     // "compare jewellers", "rate difference between jewellers": all of them, cheapest first
     if (across && /\b(jewell?ers|jewelers|shops|stores|brands|showrooms)\b/.test(tx) && !bs.length && !w &&
         !has(tx, W.offer) && !has(tx, W.making) && !/\b(why|kyon|kyun|kyu)\b/.test(tx)) return aCheapest(k, c, true);
+    // "best deal at Tanishq", "Indriya ring final price with offer": that jeweller's approximate bill
+    if (bs.length === 1 && (has(tx, W.offer) || /\b(bill|breakup|break up|final price|total cost|total price)\b/.test(tx)) &&
+        /\b(best|deal|deals|bill|breakup|break up|calculate|final|total|kitna|kitne|kitni)\b/.test(tx)) return aBrandDeal(bs[0], ct, w);
     // "best offer", "best offer on bangles", "which jeweller is cheapest after offers on a ring": the calculator
     if (has(tx, W.offer) && !bs.length && !c && (ct ? ct !== 'Coin' : /\b(best|cheapest|lowest|calculate|which|kaunsa|konsa|kaunsi|sabse)\b/.test(tx)))
       return ct ? aBestOffer(ct, w) : askOfferCat();

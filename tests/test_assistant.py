@@ -347,3 +347,27 @@ def test_a_jewellers_product_making_offer_is_in_its_offers_and_making_answers(tm
                {"lang": "en", "q": f"{first} making charges"}], kb=str(p))
     assert r[0]["intent"] == "offers" and "up to <b>10%</b> off the making charge" in r[0]["html"]
     assert r[1]["intent"] == "making" and "up to <b>10%</b>" in r[1]["html"]
+
+
+def test_best_deal_at_one_jeweller_is_an_approximate_bill(tmp_path):
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    b = next(x for x in kb["brands"] if x["s"] == "tanishq")
+    b["mk"], b["mo"] = {"Ring": 20.0}, {"f": 10.0, "u": 10.0}
+    nomk = next(x for x in kb["brands"] if x.get("r24") and not x.get("mk"))
+    p = tmp_path / "kb.json"
+    p.write_text(json.dumps(kb), encoding="utf-8")
+    r = _sona([{"lang": "en", "q": "best deal at tanishq"},
+               {"lang": "en", "q": "best deal ring at tanishq"},
+               {"lang": "hi", "q": "तनिष्क पर बेस्ट डील अंगूठी"},
+               {"lang": "en", "q": f"best deal ring at {nomk['n']}"},
+               {"lang": "en", "q": "tanishq offers"},
+               {"lang": "en", "q": "best offer on a ring"}], kb=str(p))
+    assert r[0]["intent"] == "ask_cat" and len(r[0]["chips"]) == 4
+    gold = b["r24"] * 22 / 24 * 10
+    total = round(gold + gold * 0.20 * 0.90 + (gold + gold * 0.20 * 0.90) * 0.03)
+    assert r[1]["intent"] == "brand_deal" and "Offer on making (−10%)" in r[1]["html"]
+    assert f"{total:,}"[-3:] in r[1]["html"] and "confirm with the jeweller" in r[1]["html"]
+    assert r[2]["intent"] == "brand_deal" and r[2]["lang"] == "hi" and "अनुमानित" in r[2]["html"]
+    assert r[3]["intent"] == "brand_deal" and "typical" in r[3]["html"]
+    assert r[4]["intent"] == "offers"                                  # a jeweller's offers stay as they were
+    assert r[5]["intent"] == "best_offer" and "Approximate bill for" in r[5]["html"]   # the breakup for #1
