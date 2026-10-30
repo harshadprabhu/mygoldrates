@@ -104,6 +104,8 @@
 
 
 /* disclaimer band */
+#jd .free{margin:14px 0;padding:14px 16px;border:1px solid var(--brass);border-radius:10px;font-size:14px;line-height:1.55}
+#jd .free a{color:var(--brass);font-weight:600;margin-left:4px}
 #jd .disc{border:1px solid var(--rule);border-left:3px solid var(--down);background:var(--card);
   padding:12px 14px;margin-top:20px;font-size:12px;line-height:1.55;color:var(--ink-2);max-width:78ch}
 #jd .disc b{color:var(--down);display:block;font-size:11px;letter-spacing:.09em;
@@ -290,9 +292,15 @@
       <span>Issue <b id="m-date"></b></span>
       <span>24K &middot; pre-GST &middot; per gram</span>
       <span><b id="m-brands"></b> jewellers &middot; <b id="m-days"></b> days</span>
-      <span class="flag">Members</span>
+      <span class="flag" id="m-flag">Members</span>
     </div>
   </header>
+
+  <div class="free" id="free" hidden>
+    <b>Free till Dhanteras</b> &mdash; you are reading today&rsquo;s market outlook free until
+    <span id="free-end"></span>. The full Digest (every jeweller, the workbook) is for members.
+    <a href="https://mygoldrates.com/jewellers-digest">See Jewellers Digest</a>
+  </div>
 
   <div class="disc">
     <b>Important &mdash; please read</b>
@@ -344,7 +352,7 @@
     <div id="o-body"></div>
   </section>
 
-  <section>
+  <section data-paid>
     <div class="h"><h2>Today&rsquo;s board</h2><p id="b-sub"></p></div>
     <div class="scroll">
       <table class="fit">
@@ -355,7 +363,7 @@
     </div>
   </section>
 
-  <section>
+  <section data-paid>
     <div class="h"><h2>Jeweller by jeweller</h2><p>across the full window</p></div>
     <div class="scroll">
       <table>
@@ -366,18 +374,18 @@
     </div>
   </section>
 
-  <section>
+  <section data-paid>
     <div class="h"><h2>By weekday</h2><p>mean of the daily median, with the sample size attached</p></div>
     <div class="scroll"><div class="wk" id="wk"></div></div>
   </section>
 
-  <section>
+  <section data-paid>
     <div class="h"><h2>What this window supports</h2><p>and what it does not</p></div>
     <ul class="limits" id="limits"></ul>
   </section>
 
 
-  <section>
+  <section data-paid>
     <div class="h"><h2>The full workbook</h2><p>every sheet, every day, to pivot yourself</p></div>
     <div class="note"><button class="dl" id="dl" type="button">Download today&rsquo;s workbook (.xlsx)</button>
       <div id="dl-msg" style="margin-top:8px;font-size:12.5px"></div></div>
@@ -402,7 +410,7 @@ function call(path){
     .then(function(r){ return r.json().catch(function(){ return {}; })
       .then(function(j){ return {status: r.status, ok: r.ok, j: j}; }); });
 }
-if (!token) { gate('This page is for Jewellers Digest members. Sign in to read today\u2019s issue.', 'Sign in', 'https://mygoldrates.com/jd-sign-in'); return; }
+if (!token) { gate('Sign in with your email to read today\u2019s issue. Until Dhanteras (6 Nov) the market outlook is free for everyone.', 'Sign in free', 'https://mygoldrates.com/jd-sign-in'); return; }
 call('/jd/issue').then(function(r){
   if (r.ok && r.j.issue) {
     document.getElementById('gate').hidden = true;
@@ -411,7 +419,7 @@ call('/jd/issue').then(function(r){
     return;
   }
   if (r.status === 401) return gate('Your sign-in has ended. Sign in again to read today\u2019s issue.', 'Sign in', 'https://mygoldrates.com/jd-sign-in');
-  if (r.status === 402) return gate('There is no active Jewellers Digest subscription on this account.', 'See Jewellers Digest', 'https://mygoldrates.com/jewellers-digest');
+  if (r.status === 402) return gate('The free preview ended on Dhanteras, and there is no active Jewellers Digest subscription on this account.', 'See Jewellers Digest', 'https://mygoldrates.com/jewellers-digest');
   if (r.status === 404) return gate('Today\u2019s issue is not ready yet. It is published every morning.');
   gate('Could not load the issue. Please try again shortly.');
 }).catch(function(){ gate('Could not reach the server. Check your connection.'); });
@@ -425,6 +433,16 @@ document.getElementById('dl').addEventListener('click', function(){
 });
 
 function render(D){
+if (D.free) {
+  // Free till Dhanteras: the outlook only. The paid sections are hidden and
+  // given empty data so the rest of this function runs unchanged.
+  D.board = []; D.stats = []; D.weekday = []; D.confidence = []; D.excluded = []; D.note = null;
+  document.querySelectorAll('[data-paid]').forEach(function (e) { e.hidden = true; });
+  document.getElementById('free').hidden = false;
+  document.getElementById('free-end').textContent = new Date(D.free_until)
+    .toLocaleDateString('en-IN', {day: 'numeric', month: 'long', timeZone: 'Asia/Kolkata'}) + ' (Dhanteras)';
+  document.getElementById('m-flag').textContent = 'Free preview';
+}
 const E = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const inr = n => Math.round(n).toLocaleString('en-IN');
 const pct = n => (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
@@ -435,7 +453,7 @@ const dmy = s => { const [y,m,d] = s.split('-');
 /* masthead + headline figures */
 const T = D.trend;
 document.getElementById('m-date').textContent   = dmy(D.last) + ' ' + D.last.slice(0,4);
-document.getElementById('m-brands').textContent = D.stats.length;
+document.getElementById('m-brands').textContent = D.free ? (D.brands || '') : D.stats.length;
 document.getElementById('m-days').textContent   = T.days;
 
 document.getElementById('f-close').textContent    = '₹' + inr(T.close);

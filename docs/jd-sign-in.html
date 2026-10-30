@@ -121,7 +121,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <h1>Jewellers Digest</h1>
 
   <div id="v-email">
-    <p class="sub">Sign in with the email you subscribed with. We will send
+    <p class="sub" id="free-in" hidden><b>Free till Dhanteras (6 Nov).</b> Enter your
+    email to read the daily gold market outlook &mdash; no payment, no card.</p>
+    <p class="sub">Sign in with your email. We will send
     you a 6-digit code &mdash; no password needed.</p>
     <form id="f-email" novalidate>
       <div><label for="em">Email</label>
@@ -131,8 +133,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
   </div>
 
   <div id="v-code" hidden>
-    <p class="sub">If <b id="em-show"></b> has a Jewellers Digest account, a
-    code is on its way. It expires in 10 minutes.</p>
+    <p class="sub">A code is on its way to <b id="em-show"></b> (check the
+    Promotions or Spam folder too). It expires in 10 minutes.</p>
     <form id="f-code" novalidate>
       <div><label for="code">6-digit code</label>
         <input id="code" inputmode="numeric" autocomplete="one-time-code"
@@ -183,13 +185,19 @@ button:disabled{opacity:.45;cursor:not-allowed}
         ? 'Complimentary access.' : 'Complimentary access until ' + day(e.current_end) + '.';
     } else if (e && e.active) {
       a.textContent = 'Subscription active' + (e.current_end ? ', paid until ' + day(e.current_end) : '') + '.';
+    } else if (e && e.free_until) {
+      a.textContent = 'Free till Dhanteras: today’s market outlook is yours until ' + day(e.free_until) + '. No payment, no card.';
     } else {
       a.textContent = 'There is no active subscription on this email.';
     }
     dl.hidden = !(e && e.active);
-    $('open-wrap').hidden = !(e && e.active);
+    $('open-wrap').hidden = !(e && (e.active || e.free_until));
     show('v-in');
   }
+
+  fetch(API + '/jd/ready').then(function(r){ return r.json(); }).then(function(j){
+    if (j && j.free_until && new Date(j.free_until) > new Date()) $('free-in').hidden = false;
+  }).catch(function(){});
 
   if (token) {
     call('GET', '/jd/status').then(function(r){

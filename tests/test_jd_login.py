@@ -92,3 +92,26 @@ def test_issue_is_served_to_members_only(run):
     assert run["issue"]["read"] == "jewellers-digest-2026-10-14.json"
     assert run["issue"]["last"] == "2026-10-14"
     assert run["issue_anon"]["status"] == 401
+
+
+def test_free_till_dhanteras_joins_by_signing_in(run):
+    assert run["free_join"] == {"status": 200, "mails": 1, "account": True}
+    assert run["free_verify"]["status"] == 200
+    assert run["free_verify"]["ent"]["active"] is False and run["free_verify"]["ent"]["free_until"]
+
+
+def test_free_readers_get_the_outlook_only(run):
+    assert run["free_issue"]["status"] == 200
+    keys = run["free_issue"]["keys"]
+    assert "outlook" in keys and "free" in keys
+    assert not {"stats", "board", "note"} & set(keys)
+    assert run["free_report"]["status"] == 402          # never the workbook
+
+
+def test_members_keep_the_full_issue_during_the_offer(run):
+    assert run["paid_issue_in_free"] == {"status": 200, "free": False, "has_stats": True}
+
+
+def test_after_dhanteras_the_free_outlook_stops(run):
+    assert run["free_over"]["status"] == 402
+    assert run["free_over_join"]["mails"] == 0
