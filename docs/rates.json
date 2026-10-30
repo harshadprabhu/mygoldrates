@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-30",
-  "last_updated": "2026-10-30T08:22:59.251889+05:30",
+  "last_updated": "2026-10-30T08:41:18.056043+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -68,6 +68,12 @@
       "rate_24k_per_gram_inr": 14378.18,
       "rate_22k_per_gram_inr": 13180.0,
       "rate_18k_per_gram_inr": 10783.64
+    },
+    {
+      "jeweller": "Prince Jewellery",
+      "rate_24k_per_gram_inr": 14394.55,
+      "rate_22k_per_gram_inr": 13195.0,
+      "rate_18k_per_gram_inr": 10795.91
     },
     {
       "jeweller": "Joyalukkas",
@@ -244,7 +250,7 @@
       "rate_18k_per_gram_inr": 11192.73
     }
   ],
-  "jeweller_count": 35,
+  "jeweller_count": 36,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
