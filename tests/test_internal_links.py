@@ -26,6 +26,14 @@ from urllib.parse import urlsplit, urljoin
 import pytest
 
 DOCS = "docs"
+
+
+def _country_slugs():
+    import generate_site as gs
+    return {c["slug"] for c in gs.COUNTRIES}
+
+
+_COUNTRY_SLUGS = _country_slugs()
 SITE = "mygoldrates.com"
 
 # Hrefs assembled by JavaScript at runtime: href="/'+it.url+'". There is
@@ -169,7 +177,7 @@ def test_the_redirects_cover_every_city_the_homepage_links():
     """Whatever cities the homepage offers, the legacy paths for them must be
     rescued - otherwise a city added later quietly loses its old URL."""
     home = open(f"{DOCS}/index.html", encoding="utf-8").read()
-    linked = set(re.findall(r'href="/gold-rate-today-in-([a-z0-9-]+)"', home)) - {"dubai"}   # a country page, not a city
+    linked = set(re.findall(r'href="/gold-rate-today-in-([a-z0-9-]+)"', home)) - _COUNTRY_SLUGS   # country pages, not cities
     assert linked, "no city links found on the homepage"
     # Read rules only. The comment in _redirects quotes the broken chain
     # /city/jaipur/city/pune/city/nashik/ as the example, so a whole-file
@@ -200,7 +208,7 @@ def test_no_city_page_the_homepage_links_is_left_unmaintained():
 
     maintained = {gs.loc_slug(nm) for nm in gs.LOCATIONS}
     home = open(f"{DOCS}/index.html", encoding="utf-8").read()
-    linked = set(re.findall(r'href="/gold-rate-today-in-([a-z0-9-]+)"', home)) - {"dubai"}   # a country page, not a city
+    linked = set(re.findall(r'href="/gold-rate-today-in-([a-z0-9-]+)"', home)) - _COUNTRY_SLUGS   # country pages, not cities
     assert linked, "no city links found on the homepage"
     orphaned = sorted(linked - maintained)
     assert not orphaned, (
@@ -216,7 +224,7 @@ def test_no_built_city_page_is_unmaintained():
     without their files being removed."""
     import glob
     import generate_site as gs
-    live = {gs.loc_slug(n) for n in gs.LOCATIONS} | {"dubai"}   # the Dubai page is rebuilt daily too
+    live = {gs.loc_slug(n) for n in gs.LOCATIONS} | _COUNTRY_SLUGS   # rebuilt daily too
     frozen = sorted(
         os.path.basename(p)[len("gold-rate-today-in-"):-len(".html")]
         for p in glob.glob(f"{DOCS}/gold-rate-today-in-*.html"))

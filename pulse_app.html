@@ -149,7 +149,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
 .wg td{padding:11px 10px;border-bottom:1px solid rgba(201,162,74,.15);vertical-align:top}
 .wg,.wg td,.wg td b{color:#fff}.wg th{color:#e8d3a0}
 .wg td b{font-weight:700}.wg small{display:block;color:rgba(255,255,255,.78);font-size:12.5px;margin-top:2px}.wg .wg-n{color:rgba(255,255,255,.7)}
-.wg a{color:#e8c56b;text-decoration:underline}
+.wg a,.wg-all{color:#e8c56b;text-decoration:underline}.wg td a b{color:#fff}
 
 /* ─── Trend range filter chips ─── */
 .trend-range{display:flex;gap:6px;margin:0 12px 8px}
@@ -811,7 +811,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
     <thead><tr><th>Country</th><th>24K per gram</th><th>24K in &#8377; per gram</th><th>Popular here</th></tr></thead>
     <tbody id="worldGoldBodyM"><tr><td colspan="4" class="wg-n">Loading live prices&hellip;</td></tr></tbody>
   </table></div>
-  <p class="calc-note">Swipe the table sideways for more. International spot gold at live exchange rates, before local taxes (UAE 5% VAT, Saudi 15% VAT) and making charges. India is the IBJA 24K rate (duty included, before 3% GST), so the gap is mostly India&rsquo;s duty and taxes.</p>
+  <p class="calc-note">Swipe the table sideways for more. International spot gold at live exchange rates, before local taxes (UAE 5% VAT, Saudi 15% VAT) and making charges. India is the IBJA 24K rate (duty included, before 3% GST), so the gap is mostly India&rsquo;s duty and taxes. <a class="wg-all" href="/gold-rate-around-the-world">All countries &amp; FAQs &rarr;</a></p>
 
   <div class="sh"><div class="ic bl">&#128201;</div><h2>Live Chart</h2></div>
   <div class="ic-card">
@@ -1219,7 +1219,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
         <thead><tr><th>Country</th><th>24K per gram</th><th>24K in &#8377; per gram</th><th>Popular here</th></tr></thead>
         <tbody id="worldGoldBody"><tr><td colspan="4" class="wg-n">Loading live prices&hellip;</td></tr></tbody>
       </table></div>
-      <p class="calc-note">International spot gold converted at today&rsquo;s exchange rates, live: reference prices before local taxes (UAE 5% VAT, Saudi 15% VAT), dealer premiums and making charges &mdash; not jewellers&rsquo; shop rates. Russia also shows the Bank of Russia&rsquo;s official price. Rupee figures use live exchange rates; India is the IBJA 24K rate (import duty included, before 3% GST), so the gap is mostly India&rsquo;s duty and taxes.</p>
+      <p class="calc-note">International spot gold converted at today&rsquo;s exchange rates, live: reference prices before local taxes (UAE 5% VAT, Saudi 15% VAT), dealer premiums and making charges &mdash; not jewellers&rsquo; shop rates. Russia also shows the Bank of Russia&rsquo;s official price. Rupee figures use live exchange rates; India is the IBJA 24K rate (import duty included, before 3% GST), so the gap is mostly India&rsquo;s duty and taxes. <a class="wg-all" href="/gold-rate-around-the-world">All countries &amp; FAQs &rarr;</a></p>
       <div class="ic-card">
     <div class="ic-head">
       <div class="ic-title"><span class="ic-name">Gold Spot</span><span class="ic-sub">XAU/USD &middot; per troy oz</span></div>
@@ -1743,12 +1743,12 @@ function handleCredentialResponse(resp){
   // Gold around the world: spot per gram in each currency, plus the karat or
   // unit people there buy in. Reference prices, not shop rates.
   var WORLD=[
-    {f:'🇦🇪',n:'UAE (Dubai)',c:'AED',s:'AED ',k:[['22K',22/24,'g']],note:'Dubai sets board rates daily · <a href="/gold-rate-today-in-dubai">Dubai vs India &rarr;</a>'},
-    {f:'🇸🇦',n:'Saudi Arabia',c:'SAR',s:'SAR ',k:[['21K',21/24,'g']],note:'21K is the usual jewellery gold'},
-    {f:'🇺🇸',n:'USA',c:'USD',s:'$',k:[['24K',1,'oz']],note:'Spot is the US reference'},
-    {f:'🇰🇭',n:'Cambodia',c:'KHR',s:'៛',k:[['24K',1,'chi']],note:'Gold is bought by the chi (3.75 g), often in US dollars'},
-    {f:'🇰🇿',n:'Kazakhstan',c:'KZT',s:'₸',k:[['585 (14K)',0.585,'g']],note:''},
-    {f:'🇷🇺',n:'Russia',c:'RUB',s:'₽',k:[['585 (14K)',0.585,'g']],note:''},
+    {f:'🇦🇪',n:'UAE (Dubai)',u:'dubai',c:'AED',s:'AED ',k:[['22K',22/24,'g']],note:'Dubai sets board rates daily · <a href="/gold-rate-today-in-dubai">Dubai vs India &rarr;</a>'},
+    {f:'🇸🇦',n:'Saudi Arabia',u:'saudi-arabia',c:'SAR',s:'SAR ',k:[['21K',21/24,'g']],note:'21K is the usual jewellery gold'},
+    {f:'🇺🇸',n:'USA',u:'usa',c:'USD',s:'$',k:[['24K',1,'oz']],note:'Spot is the US reference'},
+    {f:'🇰🇭',n:'Cambodia',u:'cambodia',c:'KHR',s:'៛',k:[['24K',1,'chi']],note:'Gold is bought by the chi (3.75 g), often in US dollars'},
+    {f:'🇰🇿',n:'Kazakhstan',u:'kazakhstan',c:'KZT',s:'₸',k:[['585 (14K)',0.585,'g']],note:''},
+    {f:'🇷🇺',n:'Russia',u:'russia',c:'RUB',s:'₽',k:[['585 (14K)',0.585,'g']],note:''},
   ];
   function wnum(v,dec){return v.toLocaleString('en-US',{maximumFractionDigits:dec,minimumFractionDigits:dec});}
   function paintWorld(){
@@ -1775,7 +1775,7 @@ function handleCredentialResponse(resp){
       });
       var note=w.note;
       if(w.c==='RUB'&&LIVE.cbr&&LIVE.cbr.rub_g)note='Bank of Russia official: ₽'+wnum(LIVE.cbr.rub_g,0)+'/g ('+LIVE.cbr.date+')';
-      rows+='<tr><td>'+w.f+' <b>'+w.n+'</b><small>'+w.c+'</small></td><td><b>'+w.s+wnum(g,dec)+'</b></td><td>'+inrCell+'</td><td>'+pop+(note?'<small>'+note+'</small>':'')+'</td></tr>';
+      rows+='<tr><td>'+w.f+' <a href="/gold-rate-today-in-'+w.u+'"><b>'+w.n+'</b></a><small>'+w.c+'</small></td><td><b>'+w.s+wnum(g,dec)+'</b></td><td>'+inrCell+'</td><td>'+pop+(note?'<small>'+note+'</small>':'')+'</td></tr>';
     });
     if(rows)bodies.forEach(function(b){b.innerHTML=rows;});
   }
