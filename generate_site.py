@@ -784,6 +784,8 @@ REGION_MAP = {
     "rushabh": ["Gujarat"],
     "swarn-jewellers": ["Haryana"],
     "navratan-jewellers": ["Madhya Pradesh"],
+    # added 2026-10-31: 14 stores in MP, Rajasthan and Gujarat (based in Ratlam)
+    "dp-jewellers": ["Madhya Pradesh", "Rajasthan", "Gujarat"],
 }
 
 
@@ -4398,6 +4400,7 @@ document.getElementById('mkGo').addEventListener('click',function(){
             "prince": "south", "whp": "west",
             "khimji": "east",
             "rushabh": "west", "swarn-jewellers": "north", "navratan-jewellers": "west",
+            "dp-jewellers": "west",
         }
         pulse_brands = []
         for _r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):

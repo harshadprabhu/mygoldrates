@@ -1016,6 +1016,45 @@ def _fetch_joyalukkas_graphql(session):
         return None
 
 
+# D.P. Jewellers: the rate strip at the top of its site reads an open JSON
+# feed - per-gram sale rates, pre-GST, for 24/22/18/14KT with the date they
+# were set. The website itself sits behind a browser check; the feed does not.
+_DP_RATES = "https://prod-dpj.acmepadm.com/api/v1/metal_rates?locale=en"
+_DP_PURITY = {"24KT": "24K", "22KT": "22K", "18KT": "18K", "14KT": "14K"}
+
+
+def parse_dp_rates(payload, today=None):
+    """The feed's JSON -> (found, counts), or None if it is not a usable,
+    current day's board (set more than a day before `today`, IST)."""
+    if not isinstance(payload, dict) or not payload.get("success"):
+        return None
+    today = today or datetime.now(timezone(timedelta(hours=5, minutes=30))).date()
+    found, counts = {}, {}
+    for row in payload.get("data") or []:
+        purity = _DP_PURITY.get(str(row.get("purity_description", "")).upper())
+        if row.get("metal_type") != "gold" or not purity:
+            continue
+        try:
+            day = datetime.strptime(str(row.get("open_date"))[:10], "%Y-%m-%d").date()
+        except ValueError:
+            continue
+        if (today - day).days > 1:
+            continue
+        val = _f(str(row.get("sale_rate") or ""))
+        pg = _per_gram(val) if val else None
+        if pg:
+            found[purity], counts[purity] = pg, 1
+    return (found, counts) if found else None
+
+
+def _fetch_dp_rates(session):
+    try:
+        r = session.get(_DP_RATES, timeout=15, headers={"User-Agent": UA, "Accept": "application/json"})
+        return parse_dp_rates(r.json()) if r.status_code == 200 else None
+    except Exception:
+        return None
+
+
 ZYTE_ENDPOINT = "https://api.zyte.com/v1/extract"
 
 
@@ -1255,6 +1294,14 @@ def collect_brand(b, session):
             ok, why = ordering_sane(found)
             if ok:
                 return (b.get("rate_url") or "graphql"), found, counts, "api/graphql", "ok"
+
+    if slug == "dp-jewellers":
+        hit = _fetch_dp_rates(session)
+        if hit:
+            found, counts = hit
+            ok, why = ordering_sane(found)
+            if ok:
+                return (b.get("rate_url") or _DP_RATES), found, counts, "api/json", "ok"
 
     # Try the configured URL first, then fall back to path discovery on the
     # same domain so a stale rate_url can recover itself automatically.
