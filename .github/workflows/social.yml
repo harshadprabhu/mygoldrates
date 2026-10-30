@@ -25,7 +25,7 @@ on:
   workflow_dispatch:
     inputs:
       post:
-        description: "which post: news, rates, pulse, deals, awareness or reel (a video made ahead: docs/social/reel-<date>.mp4)"
+        description: "which post: news, rates, pulse, deals, awareness, reel (a video made ahead: docs/social/reel-<date>.mp4) or campaign (slides made ahead by campaign_post.py)"
         default: "rates"
       mode:
         description: "preview (build the card only), check (is Instagram connected?) or post"
@@ -63,10 +63,10 @@ jobs:
             "7 13 * * *") k=reel ;;
             *) k="${PICK:-rates}" ;;
           esac
-          case "$k" in news|rates|pulse|deals|awareness|reel) ;; *) echo "::error::post must be news, rates, pulse, deals, awareness or reel"; exit 1 ;; esac
+          case "$k" in news|rates|pulse|deals|awareness|reel|campaign) ;; *) echo "::error::post must be news, rates, pulse, deals, awareness, reel or campaign"; exit 1 ;; esac
           echo "kind=$k" >> "$GITHUB_OUTPUT"
           # the file that says "there is a post today" (the awareness caption stands for its slides)
-          case "$k" in awareness|deals) ext=txt ;; reel) ext=mp4 ;; *) ext=jpg ;; esac
+          case "$k" in awareness|deals|campaign) ext=txt ;; reel) ext=mp4 ;; *) ext=jpg ;; esac
           echo "file=docs/social/$k-$(TZ=Asia/Kolkata date +%F).$ext" >> "$GITHUB_OUTPUT"
 
       - name: Check the Instagram connection
@@ -78,7 +78,7 @@ jobs:
         run: python social_post.py check
 
       - name: Build the card
-        if: inputs.mode != 'check' && steps.which.outputs.kind != 'reel'
+        if: inputs.mode != 'check' && steps.which.outputs.kind != 'reel' && steps.which.outputs.kind != 'campaign'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # news/pulse text; optional jewellery photo for rates
           KIND: ${{ steps.which.outputs.kind }}
@@ -122,6 +122,7 @@ jobs:
               python social_post.py reel "$URL" ;;
             awareness) python awareness.py publish "https://raw.githubusercontent.com/${{ github.repository }}/$SHA/docs/social" ;;
             deals) python deals_post.py publish "https://raw.githubusercontent.com/${{ github.repository }}/$SHA/docs/social" ;;
+            campaign) python campaign_post.py publish "https://raw.githubusercontent.com/${{ github.repository }}/$SHA/docs/social" ;;
             *) python news_post.py publish "$KIND" "$URL" ;;
           esac
           git add docs/social/posted.json 2>/dev/null || true
