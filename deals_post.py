@@ -217,6 +217,51 @@ def slide_offers(kb, path, n, total):
     img.convert("RGB").save(path, "JPEG", quality=92, optimize=True)
 
 
+# Gold around the world: 24K per gram in each currency and in rupees, from
+# the knowledge file's spot price and live exchange rates (as on the site).
+WORLD = [("Dubai (UAE)", "AED", "AED "), ("Saudi Arabia", "SAR", "SAR "), ("USA", "USD", "$"),
+         ("Russia", "RUB", "RUB "), ("Kazakhstan", "KZT", "KZT "), ("Cambodia", "KHR", "KHR ")]
+
+
+def world(kb):
+    """[(country, local price text, rupees)] or [] without today's exchange rates."""
+    I = kb.get("intl") or {}
+    fx, usd_g = I.get("fx") or {}, I.get("usd_g")
+    if not usd_g or not fx.get("INR"):
+        return []
+    out = []
+    for name, cur, sym in WORLD:
+        rate = 1.0 if cur == "USD" else fx.get(cur)
+        if rate:
+            v = usd_g * rate
+            out.append((name, sym + (f"{v:,.0f}" if v >= 1000 else f"{v:,.2f}"), usd_g * fx["INR"]))
+    return out
+
+
+def slide_world(kb, rows, path, n, total):
+    img = _canvas()
+    f = sp.fonts()
+    g = _frame(img, f, n, total, "Gold around the world", f"{kb['date']}  ·  24K per gram, in rupees at live exchange rates")
+    india = kb["med"]["24K"]
+    y = 335
+    g.rounded_rectangle((60, y, W - 60, y + 100), 26, fill=(64, 46, 16), outline=GOLD, width=3)
+    g.text((96, y + 50), "India", font=f("Bold", 38), fill=CREAM, anchor="lm")
+    g.text((W - 96, y + 50), sp.inr(india), font=f("Bold", 42), fill=GOLD, anchor="rm")
+    y += 114
+    for name, local, rs in rows:
+        g.rounded_rectangle((60, y, W - 60, y + 90), 22, fill=(34, 25, 10), outline=(80, 62, 28), width=2)
+        g.text((96, y + 28), name, font=f("Bold", 30), fill=CREAM, anchor="lm")
+        g.text((96, y + 63), local, font=f("Medium", 23), fill=MUTED, anchor="lm")
+        g.text((W - 96, y + 45), sp.inr(rs), font=f("Bold", 36), fill=CREAM, anchor="rm")
+        y += 100
+    gap = (india / rows[0][2] - 1) * 100
+    g.text((60, y + 4), f"India is about {abs(gap):.0f}% {'dearer' if gap > 0 else 'cheaper'}: mostly import duty.",
+           font=f("SemiBold", 28), fill=GOLD)
+    g.text((60, y + 46), "India: middle of jewellers' rates before GST. Others: spot before local taxes.",
+           font=f("Medium", 22), fill=MUTED)
+    img.convert("RGB").save(path, "JPEG", quality=92, optimize=True)
+
+
 def caption(kb, d):
     lines = []
     for cat, label in CATS:
@@ -228,10 +273,13 @@ def caption(kb, d):
         + "\n".join(lines) + "\n\n"
         f"Swipe for the top 5 in each, today's gold rate (22K {sp.inr(kb['med']['22K'])}/g, the middle of "
         f"{len(kb['brands'])} jewellers) and the offers on every jeweller's site.\n\n"
-        "👉 Your exact piece and weight: ask Sona, free, on mygoldrates.com (link in bio)\n"
+        + (f"🌍 Gold around the world: 24K is about {sp.inr(world(kb)[0][2])}/g in Dubai vs "
+           f"{sp.inr(kb['med']['24K'])}/g in India. Saudi, USA, Russia and more on the world slide "
+           "and at mygoldrates.com/gold-rate-around-the-world\n\n" if world(kb) else "")
+        + "👉 Your exact piece and weight: ask Sona, free, on mygoldrates.com (link in bio)\n"
         "📌 Save this for Dhanteras (6 Nov) and share it with whoever is buying gold.\n\n"
         "Offer % is tentative; confirm with the jeweller. Logos belong to their owners; no affiliation.\n\n"
-        "#goldrate #dhanteras #diwali #makingcharges #goldjewellery"
+        "#goldrate #dhanteras #diwali #makingcharges #goldjewellery #dubaigold #goldrateindia"
     )
 
 
@@ -241,7 +289,8 @@ def build():
     stamp = datetime.now(sp.IST).strftime("%Y-%m-%d")
     os.makedirs(sp.OUT, exist_ok=True)
     cats = [(c, l) for c, l in CATS if len(d[c]) >= 2]
-    total = 3 + len(cats)
+    w = world(kb)
+    total = 3 + len(cats) + (1 if w else 0)
     files = []
 
     def name(i):
@@ -251,6 +300,8 @@ def build():
     slide_rates(kb, name(2), 2, total)
     for i, (c, l) in enumerate(cats, 3):
         slide_cat(kb, d[c], c, l, name(i), i, total)
+    if w:
+        slide_world(kb, w, name(total - 1), total - 1, total)
     slide_offers(kb, name(total), total, total)
     with open(os.path.join(sp.OUT, f"deals-{stamp}.txt"), "w", encoding="utf-8") as fh:
         fh.write(caption(kb, d))
