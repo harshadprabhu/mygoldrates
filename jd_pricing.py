@@ -48,3 +48,16 @@ def rupees(n):
         head, pair = divmod(head, 100)
         out = f"{pair:02d},{out}"
     return f"{head},{out}"
+
+# Free till Dhanteras: the daily market outlook (not the workbook) is free to
+# anyone who signs in with their email, to the end of this day (IST). The JD
+# worker enforces it (FREE_UNTIL there); the pages only advertise it, and stop
+# on their own after this date. The regular price above applies afterwards.
+FREE_UNTIL = "2026-11-06"
+FREE_LABEL = "Dhanteras, 6 Nov"
+
+
+def free_open(today=None):
+    from datetime import datetime, timedelta, timezone
+    today = today or datetime.now(timezone(timedelta(hours=5, minutes=30))).date().isoformat()
+    return today <= FREE_UNTIL

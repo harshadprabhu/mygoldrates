@@ -16,6 +16,7 @@
  *   GET  /jd/report        short-lived signed URL for the latest workbook
  *   GET  /jd/rates         the rate history as JSON, for programmatic use
  *   GET  /jd/issue         today's analysis as JSON, for the /jd-today page
+ *                           (until FREE_UNTIL: the outlook only, for anyone signed in)
  *   GET  /jd/ready         public: can a signup actually be taken right now
  *   POST /jd/login/start   email a 6-digit sign-in code (website login)
  *   POST /jd/login/verify  code -> 30-day session token
@@ -177,6 +178,23 @@ async function razorpay(env, path, method = 'GET', payload) {
 // asked of them, and making them wait for the first settlement would be a
 // poor first impression. `halted` (retries exhausted) and `cancelled` do not.
 const LIVE_STATUSES = new Set(['active', 'authenticated']);
+
+// Free till Dhanteras: until the end of 6 Nov 2026 (IST) anyone who signs in
+// with their email reads the daily OUTLOOK - the direction, the horizons and
+// the levels - and nothing else: no workbook, no rate history, no jeweller
+// tables. Signing in creates the account. After this moment it switches off
+// by itself; paid and complimentary access are untouched throughout.
+const FREE_UNTIL = '2026-11-06T23:59:59+05:30';
+const freeUntil = (env) => (env && env.JD_FREE_UNTIL) || FREE_UNTIL;   // tests move it
+const freeOpen = (env) => Date.now() < Date.parse(freeUntil(env));
+// The issue fields a free reader gets; everything else is the paid product.
+const FREE_FIELDS = ['last', 'generated', 'trend', 'series', 'outlook', 'disclaimer'];
+
+// What a status / sign-in answer says about access: paid entitlement, or the
+// free outlook while the offer runs.
+function access(env, e) {
+  return !e.active && freeOpen(env) ? { ...e, free_until: freeUntil(env) } : e;
+}
 
 async function entitlementFor(env, accountId) {
   // Complimentary access first: granted by hand, needs no mandate.
@@ -551,6 +569,7 @@ async function handleReady(request, env) {
   const hit = await cache.match(key).catch(() => null);
   if (hit) return hit;
   const r = await billingReady(env);
+  if (freeOpen(env)) r.free_until = freeUntil(env);
   const res = json(r, 200, { 'cache-control': 'public, max-age=60' });
   // json() sets no-store for every other route; readiness overrides it.
   res.headers.set('cache-control', 'public, max-age=60');
@@ -565,7 +584,7 @@ async function handleStatus(request, env) {
   const { body } = await sb(env,
     `jd_accounts?id=eq.${a.accountId}&select=email&limit=1`);
   const email = Array.isArray(body) ? body[0]?.email ?? null : null;
-  return json({ account_id: a.accountId, email, entitlement: e });
+  return json({ account_id: a.accountId, email, entitlement: access(env, e) });
 }
 
 // ─── GET /jd/report ─────────────────────────────────────────────────────
@@ -627,8 +646,12 @@ async function latestObject(env, ext) {
 // The latest day's analysis, for the members' page. Returned inline rather
 // than as a signed URL: it is small, and the page renders it directly.
 async function handleIssue(request, env) {
-  const gate = await requireEntitled(env, request);
-  if (gate.resp) return gate.resp;
+  const a = await authenticate(env, request);
+  if (!a.ok) return json({ error: a.error }, 401);
+  const e = await entitlementFor(env, a.accountId);
+  if (!e.active && !freeOpen(env)) {
+    return json({ error: 'subscription not active', detail: e }, 402);
+  }
 
   const latest = await latestObject(env, '.json');
   if (!latest) return json({ error: 'no issue available yet' }, 404);
@@ -642,7 +665,11 @@ async function handleIssue(request, env) {
   if (!r.ok) return json({ error: 'could not read the issue' }, 502);
   const issue = await r.json().catch(() => null);
   if (!issue) return json({ error: 'could not read the issue' }, 502);
-  return json({ name: latest, issue });
+  if (e.active) return json({ name: latest, issue });
+  const free = { free: true, free_until: freeUntil(env),
+    brands: Array.isArray(issue.stats) ? issue.stats.length : null };
+  for (const k of FREE_FIELDS) if (k in issue) free[k] = issue[k];
+  return json({ name: latest, issue: free });
 }
 
 // ─── GET /jd/rates ──────────────────────────────────────────────────────
@@ -697,7 +724,9 @@ async function handleRates(request, env, url) {
 // The answer is the same whether or not the address has an account, so the
 // endpoint cannot be used to find out who subscribes. It only ever mails
 // addresses already in jd_accounts, so it cannot be used to send mail to
-// strangers, and at most 5 codes per address per hour.
+// strangers, and at most 5 codes per address per hour. (While the free
+// outlook runs - FREE_UNTIL - an unknown address is given an account first,
+// so the code goes to whoever asks for it, within the same hourly limit.)
 const CODE_TTL_MIN = 10;
 const CODES_PER_HOUR = 5;
 const MAX_ATTEMPTS = 5;
@@ -725,7 +754,21 @@ async function handleLoginStart(request, env) {
     console.error('login: accounts lookup failed', acc.status);
     return json({ error: 'sign-in is not available right now' }, 503);
   }
-  if (!Array.isArray(acc.body) || !acc.body[0]) return generic;
+  if (!Array.isArray(acc.body) || !acc.body[0]) {
+    if (!freeOpen(env)) return generic;
+    // Free till Dhanteras: signing in is joining. The address still has to
+    // receive the code before anything is readable, and the per-address
+    // hourly limit below still applies.
+    const made = await sb(env, 'jd_accounts', {
+      method: 'POST',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify([{ email }]),
+    });
+    if (!made.ok && made.status !== 409) {     // 409: made a moment ago
+      console.error('login: free account create failed', made.status);
+      return json({ error: 'sign-in is not available right now' }, 503);
+    }
+  }
 
   const since = new Date(Date.now() - 3600 * 1000).toISOString();
   const recent = await sb(env,
@@ -815,7 +858,7 @@ async function handleLoginVerify(request, env) {
   return json({
     token: await newSession(env, account.id),
     email,
-    entitlement: await entitlementFor(env, account.id),
+    entitlement: access(env, await entitlementFor(env, account.id)),
     expires_in_days: SESSION_DAYS,
   });
 }

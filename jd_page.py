@@ -39,6 +39,22 @@ SHEETS = [
 
 def build(price=P):
     disc = price.DISCOUNT_PCT
+    # Free till Dhanteras: the outlook, free, above the paid offer. Built
+    # daily, so it drops off the page by itself once the date has passed.
+    free_box = "" if not price.free_open() else f"""
+    <div class="price" id="free-box" style="border-color:var(--gold)">
+      <span class="badge">Limited period &middot; free</span>
+      <div class="amt"><span class="now">Free</span></div>
+      <div class="per">till {price.FREE_LABEL} &middot; no payment, no card</div>
+      <div class="save">Today&rsquo;s gold market outlook every day: direction for the week, month and
+        quarter, the expected range, and the levels where gold keeps turning.
+        Regular price &#8377;{price.REGULAR_INR}/month.</div>
+      <p style="margin-top:16px"><a href="{SITE}/jd-sign-in"
+        style="display:block;padding:16px;border-radius:10px;font-weight:700;text-decoration:none;
+        background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#1a0a04;text-align:center">Read today&rsquo;s outlook free</a></p>
+      <p class="fineprint">A reading of market signals, not investment advice. The workbook and
+        jeweller-by-jeweller tables stay with the paid Digest.</p>
+    </div>"""
     analytics = _analytics()
     # The site's shared header (with the logo and main menu) and footer, so
     # this page is not the one place that looks like a different website.
@@ -165,6 +181,7 @@ footer a{{color:var(--ink2)}}
         <a href="#" id="m-out">Sign out</a></p>
     </div>
 
+{free_box}
     <div class="price" id="buy">
       <span class="badge">Launch offer</span>
       <div class="amt">
@@ -449,7 +466,9 @@ button:disabled{{opacity:.45;cursor:not-allowed}}
   <h1>Jewellers Digest</h1>
 
   <div id="v-email">
-    <p class="sub">Sign in with the email you subscribed with. We will send
+    <p class="sub" id="free-in" hidden><b>Free till Dhanteras (6 Nov).</b> Enter your
+    email to read the daily gold market outlook &mdash; no payment, no card.</p>
+    <p class="sub">Sign in with your email. We will send
     you a 6-digit code &mdash; no password needed.</p>
     <form id="f-email" novalidate>
       <div><label for="em">Email</label>
@@ -459,8 +478,8 @@ button:disabled{{opacity:.45;cursor:not-allowed}}
   </div>
 
   <div id="v-code" hidden>
-    <p class="sub">If <b id="em-show"></b> has a Jewellers Digest account, a
-    code is on its way. It expires in 10 minutes.</p>
+    <p class="sub">A code is on its way to <b id="em-show"></b> (check the
+    Promotions or Spam folder too). It expires in 10 minutes.</p>
     <form id="f-code" novalidate>
       <div><label for="code">6-digit code</label>
         <input id="code" inputmode="numeric" autocomplete="one-time-code"
@@ -511,13 +530,19 @@ button:disabled{{opacity:.45;cursor:not-allowed}}
         ? 'Complimentary access.' : 'Complimentary access until ' + day(e.current_end) + '.';
     }} else if (e && e.active) {{
       a.textContent = 'Subscription active' + (e.current_end ? ', paid until ' + day(e.current_end) : '') + '.';
+    }} else if (e && e.free_until) {{
+      a.textContent = 'Free till Dhanteras: today\u2019s market outlook is yours until ' + day(e.free_until) + '. No payment, no card.';
     }} else {{
       a.textContent = 'There is no active subscription on this email.';
     }}
     dl.hidden = !(e && e.active);
-    $('open-wrap').hidden = !(e && e.active);
+    $('open-wrap').hidden = !(e && (e.active || e.free_until));
     show('v-in');
   }}
+
+  fetch(API + '/jd/ready').then(function(r){{ return r.json(); }}).then(function(j){{
+    if (j && j.free_until && new Date(j.free_until) > new Date()) $('free-in').hidden = false;
+  }}).catch(function(){{}});
 
   if (token) {{
     call('GET', '/jd/status').then(function(r){{

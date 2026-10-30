@@ -12,7 +12,8 @@ const worker = (await import(pathToFileURL(join(dir, 'worker.mjs')))).default;
 
 const SB = 'https://sb.test';
 const env = { SUPABASE_URL: SB, SUPABASE_SERVICE_KEY: 'svc', JD_SESSION_SECRET: 'x'.repeat(64),
-              BREVO_API_KEY: 'brevo', ALERTS_FROM: 'MyGoldRates <alerts@mygoldrates.com>' };
+              BREVO_API_KEY: 'brevo', ALERTS_FROM: 'MyGoldRates <alerts@mygoldrates.com>',
+              JD_FREE_UNTIL: '2000-01-01T00:00:00Z' };   // the free outlook is over, until the end
 const db = { jd_accounts: [], jd_login_codes: [], jd_subscriptions: [] };
 let nextId = 1;
 const mail = [];
@@ -52,7 +53,8 @@ globalThis.fetch = async (url, opts = {}) => {
   }
   if (u.pathname.startsWith('/storage/v1/object/authenticated/')) {
     issueName = u.pathname.split('/').pop();
-    return reply({ last: '2026-10-14', trend: { days: 87 } });
+    return reply({ last: '2026-10-14', trend: { days: 87 }, outlook: { stance: { label: 'Bearish' } },
+                   stats: [{ brand: 'a' }, { brand: 'b' }], board: [{ brand: 'a' }], note: 'paid note' });
   }
   const table = u.pathname.replace('/rest/v1/', '');
   const rows = db[table];
@@ -146,4 +148,26 @@ const code3 = codeFrom(mail.at(-1));
 db.jd_login_codes.at(-1).expires_at = '2020-01-01T00:00:00.000Z';
 r = await call('POST', '/jd/login/verify', { email: 'owner@shop.in', code: code3 });
 res.expired_code = { status: r.status };
+// Free till Dhanteras: an unknown address joins by signing in, reads the
+// outlook (and only the outlook), not the workbook; after the date, nothing.
+env.JD_FREE_UNTIL = '2099-01-01T00:00:00Z';
+mail.length = 0;
+r = await call('POST', '/jd/login/start', { email: 'new@buyer.in' });
+res.free_join = { status: r.status, mails: mail.length,
+  account: db.jd_accounts.some((a) => a.email === 'new@buyer.in') };
+r = await call('POST', '/jd/login/verify', { email: 'new@buyer.in', code: codeFrom(mail.at(-1)) });
+const ftoken = r.j?.token;
+res.free_verify = { status: r.status, ent: r.j?.entitlement };
+r = await call('GET', '/jd/issue', null, ftoken);
+res.free_issue = { status: r.status, keys: Object.keys(r.j?.issue || {}).sort() };
+r = await call('GET', '/jd/report', null, ftoken);
+res.free_report = { status: r.status };
+r = await call('GET', '/jd/issue', null, token);
+res.paid_issue_in_free = { status: r.status, free: !!r.j?.issue?.free, has_stats: !!r.j?.issue?.stats };
+env.JD_FREE_UNTIL = '2000-01-01T00:00:00Z';
+r = await call('GET', '/jd/issue', null, ftoken);
+res.free_over = { status: r.status };
+mail.length = 0;
+r = await call('POST', '/jd/login/start', { email: 'later@buyer.in' });
+res.free_over_join = { mails: mail.length };
 console.log(JSON.stringify(res));
