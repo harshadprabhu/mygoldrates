@@ -804,6 +804,13 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   </div>
   <p class="calc-note">Global Market shows international spot from gold-api.com and USD/INR from open.er-api.com; Silver INR is computed from XAG spot &plus; FX &plus; India duty premium.</p>
 
+  <div class="market-sub" id="m-world">Gold Around the World</div>
+  <div class="wg-wrap"><table class="wg">
+    <thead><tr><th>Country</th><th>24K per gram</th><th>24K in &#8377; per gram</th><th>Popular here</th></tr></thead>
+    <tbody id="worldGoldBodyM"><tr><td colspan="4" class="wg-n">Loading live prices&hellip;</td></tr></tbody>
+  </table></div>
+  <p class="calc-note">Swipe the table sideways for more. International spot gold at live exchange rates, before local taxes (UAE 5% VAT, Saudi 15% VAT) and making charges. India is the IBJA 24K rate (duty included, before 3% GST), so the gap is mostly India&rsquo;s duty and taxes.</p>
+
   <div class="sh"><div class="ic bl">&#128201;</div><h2>Live Chart</h2></div>
   <div class="ic-card">
     <div class="ic-head">
@@ -1743,8 +1750,8 @@ function handleCredentialResponse(resp){
   ];
   function wnum(v,dec){return v.toLocaleString('en-US',{maximumFractionDigits:dec,minimumFractionDigits:dec});}
   function paintWorld(){
-    var body=document.getElementById('worldGoldBody');
-    if(!body||!LIVE.goldUsdOz||!LIVE.fx)return;
+    var bodies=['worldGoldBody','worldGoldBodyM'].map(function(i){return document.getElementById(i);}).filter(Boolean);
+    if(!bodies.length||!LIVE.goldUsdOz||!LIVE.fx)return;
     var usdG=LIVE.goldUsdOz/OZ_TO_G, inr=LIVE.usdinr||LIVE.fx.INR, ind=LIVE.ibja24, rows='';
     function rs(v){return '₹'+Math.round(v).toLocaleString('en-IN');}
     if(ind)rows+='<tr><td>🇮🇳 <b>India</b><small>INR</small></td><td><b>'+rs(ind)+'</b></td><td><b>'+rs(ind)+'</b><small>IBJA, before 3% GST</small></td><td><b>'+rs(ind*22/24)+'</b> per g, 22K<small>22K is the usual jewellery gold</small></td></tr>';
@@ -1768,7 +1775,7 @@ function handleCredentialResponse(resp){
       if(w.c==='RUB'&&LIVE.cbr&&LIVE.cbr.rub_g)note='Bank of Russia official: ₽'+wnum(LIVE.cbr.rub_g,0)+'/g ('+LIVE.cbr.date+')';
       rows+='<tr><td>'+w.f+' <b>'+w.n+'</b><small>'+w.c+'</small></td><td><b>'+w.s+wnum(g,dec)+'</b></td><td>'+inrCell+'</td><td>'+pop+(note?'<small>'+note+'</small>':'')+'</td></tr>';
     });
-    if(rows)body.innerHTML=rows;
+    if(rows)bodies.forEach(function(b){b.innerHTML=rows;});
   }
   function paintMarket(){
     if(!LIVE.ibja24)return;
