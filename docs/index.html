@@ -139,6 +139,15 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',system-ui,sans-serif
 .trend-tip .t{color:var(--text3);font-size:9.5px;margin-top:1px}
 .trend-note{font-size:10.5px;color:var(--text2);text-align:center;padding:6px 4px 4px;text-shadow:0 1px 3px rgba(0,0,0,.85)}
 #s-market .trend-svg{height:220px}
+.jdfree{display:block;margin:14px 16px 6px;padding:16px 18px;border-radius:16px;text-decoration:none;color:#fff;text-align:left;
+  background:linear-gradient(135deg,rgba(212,166,60,.22),rgba(212,166,60,.06));border:1.5px solid #D4A63C;box-shadow:0 0 0 0 rgba(212,166,60,.5);animation:jdfPulse 2.6s ease-out infinite}
+.site-hero .jdfree{max-width:720px;margin:22px auto 0}
+.jdfree span{display:block}.jdf-tag{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#F0D080;font-weight:700}
+.jdf-h{font-family:'Playfair Display',Georgia,serif;font-size:21px;font-weight:800;margin-top:4px;color:#fff}
+.jdf-p{font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.85);margin-top:6px}
+.jdf-b{display:inline-block!important;margin-top:12px;padding:10px 16px;border-radius:999px;background:linear-gradient(135deg,#F0D080,#D4A63C);color:#1a0a04;font-weight:700;font-size:14px}
+@keyframes jdfPulse{0%{box-shadow:0 0 0 0 rgba(212,166,60,.45)}70%{box-shadow:0 0 0 10px rgba(212,166,60,0)}100%{box-shadow:0 0 0 0 rgba(212,166,60,0)}}
+@media (prefers-reduced-motion:reduce){.jdfree{animation:none}}
 .wg-wrap{overflow-x:auto;margin-top:6px;-webkit-overflow-scrolling:touch}.wg{width:100%;min-width:620px;border-collapse:collapse;font-size:15px}.wg td b{white-space:nowrap}
 .wg th{text-align:left;font-weight:600;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid rgba(201,162,74,.35)}
 .wg td{padding:11px 10px;border-bottom:1px solid rgba(201,162,74,.15);vertical-align:top}
@@ -784,6 +793,12 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
     <div class="savings"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>Save up to <strong id="saveAmt">&#8377;363/g</strong> &mdash; pick the cheapest</span></div>
     <button class="gst-btn" id="gstBtn" aria-pressed="false">+3% GST</button>
   </div>
+  <a class="jdfree" href="/jd-sign-in" data-jdfree>
+    <span class="jdf-tag">Free till Dhanteras &middot; <b class="jdf-left"></b></span>
+    <span class="jdf-h">Today&rsquo;s gold market outlook &mdash; free</span>
+    <span class="jdf-p">Which way gold is heading this week, month and quarter, the expected range and the levels it keeps turning at. From our Jewellers Digest (&#8377;499/month after 6 Nov) &mdash; free now with just your email.</span>
+    <span class="jdf-b">Read today&rsquo;s outlook free &rarr;</span>
+  </a>
 
   <!-- Near Me toggle (adds regional jewellers from your area) -->
   <div class="region-row" id="regionRow">
@@ -1189,6 +1204,12 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
           <button class="gst-btn" id="gstBtnS" aria-pressed="false">+3% GST</button>
         </div>
       </div>
+      <a class="jdfree" href="/jd-sign-in" data-jdfree>
+    <span class="jdf-tag">Free till Dhanteras &middot; <b class="jdf-left"></b></span>
+    <span class="jdf-h">Today&rsquo;s gold market outlook &mdash; free</span>
+    <span class="jdf-p">Which way gold is heading this week, month and quarter, the expected range and the levels it keeps turning at. From our Jewellers Digest (&#8377;499/month after 6 Nov) &mdash; free now with just your email.</span>
+    <span class="jdf-b">Read today&rsquo;s outlook free &rarr;</span>
+  </a>
     </div>
   </section>
 
@@ -1761,6 +1782,14 @@ function handleCredentialResponse(resp){
   }
   // Gold around the world: spot per gram in each currency, plus the karat or
   // unit people there buy in. Reference prices, not shop rates.
+  // Jewellers Digest free till Dhanteras (end of 6 Nov IST): days left, then gone.
+  (function(){
+    var end=Date.parse('2026-11-06T23:59:59+05:30'), left=Math.ceil((end-Date.now())/86400000);
+    document.querySelectorAll('[data-jdfree]').forEach(function(c){
+      if(left<=0){c.remove();return;}
+      c.querySelector('.jdf-left').textContent=left===1?'last day':left+' days left';
+    });
+  })();
   var WORLD=[
     {f:'🇦🇪',n:'UAE (Dubai)',u:'dubai',c:'AED',s:'AED ',k:[['22K',22/24,'g']],note:'Dubai sets board rates daily · <a href="/gold-rate-today-in-dubai">Dubai vs India &rarr;</a>'},
     {f:'🇸🇦',n:'Saudi Arabia',u:'saudi-arabia',c:'SAR',s:'SAR ',k:[['21K',21/24,'g']],note:'21K is the usual jewellery gold'},
