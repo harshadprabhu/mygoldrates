@@ -21,8 +21,6 @@ const REPO = "mygoldrates";
 // late GitHub-scheduled run of the same post does nothing.
 const PLAN = {
   "05:30": [{ wf: "rates.yml", inputs: { alerts: "true" } }],    // 11:00 IST, sends the digest
-  "08:30": [{ wf: "rates.yml", inputs: { alerts: "false" } }],   // 14:00 IST
-  "11:30": [{ wf: "rates.yml", inputs: { alerts: "false" } }],   // 17:00 IST
   "03:17": [{ wf: "social.yml", inputs: { post: "news", mode: "post" } }],    // 08:47 IST
   "05:47": [{ wf: "social.yml", inputs: { post: "rates", mode: "post" } }],   // 11:17 IST
   "09:17": [{ wf: "social.yml", inputs: { post: "pulse", mode: "post" } }],   // 14:47 IST
@@ -30,6 +28,15 @@ const PLAN = {
   "13:07": [{ wf: "social.yml", inputs: { post: "reel", mode: "post" } }],    // 18:37 IST
   "13:47": [{ wf: "social.yml", inputs: { post: "awareness", mode: "post" }, days: [2, 4, 6] }], // 19:17 IST
 };
+
+// Rates every 30 minutes from 09:00 to 21:00 IST (03:30-15:30 UTC), so the
+// board follows the jewellers through the day. 11:00 IST stays the one run
+// that sends the alert email.
+for (let m = 3 * 60 + 30; m <= 15 * 60 + 30; m += 30) {
+  const key = String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+  if (!PLAN[key]) PLAN[key] = [];
+  if (!PLAN[key].some((j) => j.wf === "rates.yml")) PLAN[key].push({ wf: "rates.yml", inputs: { alerts: "false" } });
+}
 
 async function dispatch(env, wf, inputs) {
   const res = await fetch(
