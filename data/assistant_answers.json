@@ -2,11 +2,6 @@
  "note": "Answers the owner approved from real visitor questions to Sona, the site assistant. Exported daily from the private database by bot_learn.py; only approved questions and answers are kept here, never the raw questions.",
  "answers": [
   {
-   "q": "[mr] tumhi harshad la olakhata ka?",
-   "a": "Yes. Harshad Prabhu is the creator of this website. He is the one struggling for finding gold rates so that common people get better ubderstanding of rates.",
-   "d": "2026-10-27"
-  },
-  {
    "q": "What are the best gold offers today?",
    "a": "You can check today's top jeweller offers and deals on our offers page.",
    "u": "/gold-offers-today",
@@ -59,6 +54,18 @@
    "a": "The total price is calculated from the gold value for its weight and karat, plus making charges, any stone costs, and GST on the total amount. You can see the full price breakdown on our calculators page.",
    "u": "/calculators",
    "d": "2026-10-29"
+  },
+  {
+   "q": "Can you provide a price breakup?",
+   "a": "Yes! You can see the complete price breakup including gold value, making charges, and GST on our calculators page.",
+   "u": "/calculators",
+   "d": "2026-10-31"
+  },
+  {
+   "q": "Where can I find D.P. Jewellers rates?",
+   "a": "You can check D.P. Jewellers' daily rates, offers, and making charges right here on our D.P. Jewellers page.",
+   "u": "/dp-jewellers-gold-rate-today",
+   "d": "2026-10-31"
   }
  ]
 }
