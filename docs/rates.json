@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-31",
-  "last_updated": "2026-10-31T13:09:16.562142+05:30",
+  "last_updated": "2026-10-31T13:39:35.298968+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -58,16 +58,22 @@
       "rate_18k_per_gram_inr": 10363.09
     },
     {
-      "jeweller": "PN Gadgil & Sons",
-      "rate_24k_per_gram_inr": 13850.18,
-      "rate_22k_per_gram_inr": 12696.0,
-      "rate_18k_per_gram_inr": 10387.64
+      "jeweller": "Mahesh Jewellers",
+      "rate_24k_per_gram_inr": 13854.55,
+      "rate_22k_per_gram_inr": 12700.0,
+      "rate_18k_per_gram_inr": 10390.91
     },
     {
       "jeweller": "Reliance Jewels",
       "rate_24k_per_gram_inr": 13868.0,
       "rate_22k_per_gram_inr": 12712.33,
       "rate_18k_per_gram_inr": 10401.0
+    },
+    {
+      "jeweller": "PN Gadgil & Sons",
+      "rate_24k_per_gram_inr": 13880.73,
+      "rate_22k_per_gram_inr": 12724.0,
+      "rate_18k_per_gram_inr": 10410.55
     },
     {
       "jeweller": "Candere",
@@ -214,10 +220,10 @@
       "rate_18k_per_gram_inr": 10605.27
     },
     {
-      "jeweller": "Mahesh Jewellers",
-      "rate_24k_per_gram_inr": 14170.91,
-      "rate_22k_per_gram_inr": 12990.0,
-      "rate_18k_per_gram_inr": 10628.18
+      "jeweller": "Swarn Jewellers",
+      "rate_24k_per_gram_inr": 14203.64,
+      "rate_22k_per_gram_inr": 13020.0,
+      "rate_18k_per_gram_inr": 10652.73
     },
     {
       "jeweller": "Thangamayil Jewellery",
@@ -244,7 +250,7 @@
       "rate_18k_per_gram_inr": 10816.36
     }
   ],
-  "jeweller_count": 35,
+  "jeweller_count": 36,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
