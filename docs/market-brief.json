@@ -293,6 +293,7 @@
    "summary": "gold -0.5%, news led by records and profit-taking",
    "themes": {
     "india_demand": 3,
+    "inflation": 1,
     "investment": 2,
     "momentum": 4,
     "rates": 1
