@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-10-31",
-  "last_updated": "2026-10-31T12:33:05.308822+05:30",
+  "last_updated": "2026-10-31T13:09:16.562142+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -44,6 +44,12 @@
       "rate_24k_per_gram_inr": 13780.36,
       "rate_22k_per_gram_inr": 12632.0,
       "rate_18k_per_gram_inr": 10335.27
+    },
+    {
+      "jeweller": "Mehta Jewellers",
+      "rate_24k_per_gram_inr": 13784.73,
+      "rate_22k_per_gram_inr": 12636.0,
+      "rate_18k_per_gram_inr": 10338.55
     },
     {
       "jeweller": "Rushabh Jewels",
@@ -178,6 +184,12 @@
       "rate_18k_per_gram_inr": 10456.36
     },
     {
+      "jeweller": "Senco Gold",
+      "rate_24k_per_gram_inr": 13955.0,
+      "rate_22k_per_gram_inr": 12792.08,
+      "rate_18k_per_gram_inr": 10466.25
+    },
+    {
       "jeweller": "CaratLane",
       "rate_24k_per_gram_inr": 14037.0,
       "rate_22k_per_gram_inr": 12867.25,
@@ -214,22 +226,10 @@
       "rate_18k_per_gram_inr": 10669.09
     },
     {
-      "jeweller": "Senco Gold",
-      "rate_24k_per_gram_inr": 14239.0,
-      "rate_22k_per_gram_inr": 13052.42,
-      "rate_18k_per_gram_inr": 10679.25
-    },
-    {
       "jeweller": "Kisna",
       "rate_24k_per_gram_inr": 14284.19,
       "rate_22k_per_gram_inr": 13093.84,
       "rate_18k_per_gram_inr": 10713.14
-    },
-    {
-      "jeweller": "Mehta Jewellers",
-      "rate_24k_per_gram_inr": 14285.45,
-      "rate_22k_per_gram_inr": 13095.0,
-      "rate_18k_per_gram_inr": 10714.09
     },
     {
       "jeweller": "ORRA",
