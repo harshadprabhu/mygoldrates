@@ -25,6 +25,7 @@ If anything fails, that post is skipped for the day. Every card carries the
 logo header (social_post.header), like the rate card.
 """
 import json
+import time
 import os
 import re
 import sys
@@ -149,7 +150,11 @@ def summarise(kind, items, key, data=()):
     import requests
     k = KINDS[kind]
     prompt = PROMPT % (k["brief"], k["view"], "\n".join(data) or "(none)", "\n".join(f"- [{p}] {t}" for p, t in items))
-    for m in MODELS:
+    # Two rounds: Gemini's busy spells (timeouts, 503s) are usually over in a
+    # minute, and one bad spell used to cost the day's post.
+    for i, m in enumerate(MODELS + MODELS):
+        if i == len(MODELS):
+            time.sleep(60)
         try:
             r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent",
                               headers={"x-goog-api-key": key},
