@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-11-01",
-  "last_updated": "2026-11-01T10:39:46.573186+05:30",
+  "last_updated": "2026-11-01T11:09:25.911431+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 13903.09,
-    "22k": 12744.5,
-    "18k": 10427.32
+    "24k": 13887.27,
+    "22k": 12730.0,
+    "18k": 10415.45
   },
   "lowest_24k": {
     "jeweller": "Reliance Jewels",
@@ -74,6 +74,12 @@
       "rate_24k_per_gram_inr": 13880.73,
       "rate_22k_per_gram_inr": 12724.0,
       "rate_18k_per_gram_inr": 10410.55
+    },
+    {
+      "jeweller": "Kalyan Jewellers",
+      "rate_24k_per_gram_inr": 13887.27,
+      "rate_22k_per_gram_inr": 12730.0,
+      "rate_18k_per_gram_inr": 10415.45
     },
     {
       "jeweller": "NAC Jewellers",
@@ -212,12 +218,6 @@
       "rate_24k_per_gram_inr": 14037.0,
       "rate_22k_per_gram_inr": 12867.25,
       "rate_18k_per_gram_inr": 10527.75
-    },
-    {
-      "jeweller": "Kalyan Jewellers",
-      "rate_24k_per_gram_inr": 14056.36,
-      "rate_22k_per_gram_inr": 12885.0,
-      "rate_18k_per_gram_inr": 10542.27
     },
     {
       "jeweller": "BlueStone",
