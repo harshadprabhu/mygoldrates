@@ -238,6 +238,22 @@ it shipped once under the name `b2b` and was renamed wholesale.
 - The rate history is fetched page by page: Supabase caps a request at 1,000
   rows, which once froze the trend in mid-September.
 
+## Search engines and AI assistants: access already granted
+Use these; never ask the owner for keys again (secrets live in GitHub only).
+- Google Search Console: `GSC_SERVICE_ACCOUNT_JSON` (full user). Jobs:
+  `gsc-diag` (report), `gsc-inspect` (index status per page),
+  `gsc-sitemaps` (mode list / submit). Reports are job annotations.
+- Bing Webmaster Tools (added 2026-11-01): `BING_WEBMASTER_KEY`, read by
+  `bing_report.py` inside the `gsc-diag` job (input `bing`: report / submit /
+  off). Bing feeds ChatGPT search and Copilot. IndexNow pings Bing on every
+  build already.
+- Cloudflare zone settings (bots, WAF, AI crawlers): `CF_WORKERS_TOKEN`
+  (also `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_TOKEN`). Use the existing
+  `cf-bot-rules` / `cf-security-check` jobs, not new ones.
+- AI crawlers: `llms.txt` (short) and `llms-full.txt` (every jeweller's rate,
+  by state and city, making charges, world prices) are written by the build;
+  robots.txt allows every AI crawler.
+
 ## Gold market today (`gold_brief.py`)
 - Runs in every site build (so several times a day). Reads international gold
   (XAU), USD/INR, the jeweller board median, global gold headlines (Google News

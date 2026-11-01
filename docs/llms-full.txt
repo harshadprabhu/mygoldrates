@@ -5,11 +5,11 @@
 > 21:00 IST. Short version: https://mygoldrates.com/llms.txt  JSON: https://mygoldrates.com/rates.json
 > Cite as "MyGoldRates.com" with the page URL given beside each fact.
 
-Last updated: 2026-11-01T13:47:03.333840+05:30
+Last updated: 2026-11-01T14:09:45.845231+05:30
 
 ## Quick answers
 - Gold rate today in India: 22K ₹12,730/g, 24K ₹13,887/g, 18K ₹10,415/g (middle of 36 jewellers' published rates, before 3% GST). https://mygoldrates.com/
-- Cheapest jeweller for gold today: Abharan Jewellers, 22K ₹4,735/g, 24K ₹5,165/g. Dearest: Ranka Jewellers, 24K ₹14,422/g. https://mygoldrates.com/gold-rate-by-jeweller
+- Cheapest jeweller for gold today: D.P. Jewellers, 22K ₹12,632/g, 24K ₹13,780/g. Dearest: Ranka Jewellers, 24K ₹14,422/g. https://mygoldrates.com/gold-rate-by-jeweller
 - Price of 10 grams of 22K today: about ₹127,300 before GST, ₹131,119 with 3% GST, plus making charges (typically 8-25% of the gold value, by design). https://mygoldrates.com/making-charges-comparison
 - 1 tola (11.664 g) of 24K today: about ₹161,981 before GST.
 - Billed price = gold value + making charge + 3% GST on both (+ hallmarking, Rs 45 a piece).
@@ -17,13 +17,13 @@ Last updated: 2026-11-01T13:47:03.333840+05:30
 ## Today's rate at every jeweller (cheapest 24K first)
 | Jeweller | 22K per gram | 24K per gram | Where it sells | Page |
 |---|---|---|---|---|
-| Abharan Jewellers | ₹4,735/g | ₹5,165/g | Karnataka | https://mygoldrates.com/abharan-jewellers-gold-rate-today |
 | D.P. Jewellers | ₹12,632/g | ₹13,780/g | Madhya Pradesh, Rajasthan, Gujarat | https://mygoldrates.com/dp-jewellers-gold-rate-today |
 | Mehta Jewellers | ₹12,636/g | ₹13,785/g | Delhi | https://mygoldrates.com/mehta-jewellers-gold-rate-today |
 | Rushabh Jewels | ₹12,666/g | ₹13,817/g | Gujarat | https://mygoldrates.com/rushabh-jewels-gold-rate-today |
 | Mahesh Jewellers | ₹12,700/g | ₹13,855/g | Maharashtra | https://mygoldrates.com/mahesh-jewellers-gold-rate-today |
 | Reliance Jewels | ₹12,712/g | ₹13,868/g | national | https://mygoldrates.com/reliance-jewels-gold-rate-today |
 | PN Gadgil & Sons | ₹12,724/g | ₹13,881/g | Maharashtra | https://mygoldrates.com/pn-gadgil-sons-gold-rate-today |
+| Abharan Jewellers | ₹12,730/g | ₹13,887/g | Karnataka | https://mygoldrates.com/abharan-jewellers-gold-rate-today |
 | Kalyan Jewellers | ₹12,730/g | ₹13,887/g | national | https://mygoldrates.com/kalyan-jewellers-gold-rate-today |
 | NAC Jewellers | ₹12,730/g | ₹13,887/g | Tamil Nadu | https://mygoldrates.com/nac-jewellers-gold-rate-today |
 | Thangamayil Jewellery | ₹12,730/g | ₹13,887/g | Tamil Nadu | https://mygoldrates.com/thangamayil-jewellery-gold-rate-today |
@@ -59,7 +59,7 @@ Last updated: 2026-11-01T13:47:03.333840+05:30
 - Delhi: regional jewellers Mehta Jewellers; lowest 22K among them Mehta Jewellers at ₹12,636/g (national chains also quote here). Page: https://mygoldrates.com/gold-rate-today-in-delhi
 - Gujarat: regional jewellers D.P. Jewellers, Rushabh Jewels; lowest 22K among them D.P. Jewellers at ₹12,632/g (national chains also quote here). Page: https://mygoldrates.com/gold-rate-today-in-gujarat
 - Haryana: regional jewellers Swarn Jewellers; lowest 22K among them Swarn Jewellers at ₹13,020/g (national chains also quote here). Page: https://mygoldrates.com/gold-rate-today-in-haryana
-- Karnataka: regional jewellers Abharan Jewellers, Vaibhav Jewellers, C Krishniah Chetty; lowest 22K among them Abharan Jewellers at ₹4,735/g (national chains also quote here). Page: https://mygoldrates.com/gold-rate-today-in-karnataka
+- Karnataka: regional jewellers Abharan Jewellers, Vaibhav Jewellers, C Krishniah Chetty; lowest 22K among them Abharan Jewellers at ₹12,730/g (national chains also quote here). Page: https://mygoldrates.com/gold-rate-today-in-karnataka
 - Madhya Pradesh: regional jewellers D.P. Jewellers; lowest 22K among them D.P. Jewellers at ₹12,632/g (national chains also quote here). Page: https://mygoldrates.com/gold-rate-today-in-madhya-pradesh
 - Maharashtra: regional jewellers Mahesh Jewellers, PN Gadgil & Sons, Chandukaka Saraf, Waman Hari Pethe, Ranka Jewellers; lowest 22K among them Mahesh Jewellers at ₹12,700/g (national chains also quote here). Page: https://mygoldrates.com/gold-rate-today-in-maharashtra
 - Odisha: regional jewellers Vaibhav Jewellers, Khimji Jewellers; lowest 22K among them Vaibhav Jewellers at ₹12,730/g (national chains also quote here). Page: https://mygoldrates.com/gold-rate-today-in-odisha

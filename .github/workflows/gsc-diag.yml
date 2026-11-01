@@ -1,12 +1,17 @@
 name: gsc-diag
 
-# Read-only Search Console diagnosis (gsc_diag.py). The report is forwarded
+# Read-only Search Console diagnosis (gsc_diag.py), plus the same for Bing
+# Webmaster Tools (bing_report.py; `submit` also sends key pages to Bing). The report is forwarded
 # as job annotations instead of being committed, because this repository is
 # public and search queries are business data. Annotations are readable
 # from the run's check-run in the Actions UI and through the API.
 
 on:
   workflow_dispatch:
+    inputs:
+      bing:
+        description: "Bing Webmaster part (bing_report.py): report, submit (report + send key pages), or off"
+        default: "report"
 
 permissions:
   contents: read
@@ -20,16 +25,25 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install google-auth google-api-python-client
+      - run: pip install google-auth google-api-python-client requests
       - name: Run
         env:
           GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
         run: python gsc_diag.py > report.txt 2>&1 || true
+      - name: Bing
+        if: inputs.bing != 'off'
+        env:
+          BING_WEBMASTER_KEY: ${{ secrets.BING_WEBMASTER_KEY }}
+          MODE: ${{ inputs.bing }}
+        run: |
+          { echo; echo "############ BING WEBMASTER ############"; } >> report.txt
+          if [ "$MODE" = submit ]; then python bing_report.py submit >> report.txt 2>&1 || true
+          else python bing_report.py >> report.txt 2>&1 || true; fi
       - name: Forward report as annotations
         run: |
           python - <<'PY'
           t = open("report.txt", encoding="utf-8", errors="replace").read()
-          chunks = [t[i:i+3500] for i in range(0, len(t), 3500)][:10]
+          chunks = [t[i:i+3500] for i in range(0, len(t), 3500)][:14]
           for n, c in enumerate(chunks, 1):
               enc = c.replace("%", "%25").replace("\r", "").replace("\n", "%0A")
               print(f"::notice title=gsc part {n} of {len(chunks)}::{enc}")
