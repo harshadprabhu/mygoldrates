@@ -176,6 +176,63 @@ def main():
         print(f"{n:5}  {hst}")
 
     funnel(url, h, rows)
+    popup_audit(url, h)
+
+
+def popup_audit(url, h, days=14):
+    """Why is "popup shown" so much higher than closes and signups? For each
+    session the popup was shown in: seconds from its first page view to the
+    popup (a person needs 5-10 s - a search engine's renderer fast-forwards
+    timers and gets it at once), whether anything was clicked after it, pages
+    viewed, and the host. Counts only."""
+    from datetime import datetime
+    since = (date.today() - timedelta(days=days)).isoformat()
+    ce = _all(url, h, "click_events", "created_at,target,session_id,page", {"day": f"gte.{since}"}) or []
+    pv = _all(url, h, "page_views", "created_at,session_id,host,page,referrer", {"day": f"gte.{since}"}) or []
+    ts = lambda x: datetime.fromisoformat(x["created_at"].replace("Z", "+00:00"))
+    first_pv, n_pv, host, ref = {}, Counter(), {}, {}
+    for x in pv:
+        sid = x.get("session_id")
+        n_pv[sid] += 1
+        if sid not in first_pv or ts(x) < first_pv[sid]:
+            first_pv[sid] = ts(x); host[sid] = x.get("host") or "?"; ref[sid] = source(x.get("referrer")) or "direct"
+    shown, after, ok, closes = {}, Counter(), set(), set()
+    for x in sorted(ce, key=ts):
+        sid, tg = x.get("session_id"), x.get("target") or ""
+        if tg.endswith("popup_shown"):
+            shown.setdefault(sid, ts(x))
+        elif sid in shown and ts(x) >= shown[sid]:
+            after[sid] += 1
+            if tg.endswith(("popup_email_ok", "popup_google_ok")):
+                ok.add(sid)
+            if any(k in tg.lower() for k in ("close", "spno", "spsureno", "dismiss", "x")):
+                closes.add(sid)
+    print(f"\n== POPUP AUDIT (last {days} days): {len(shown)} sessions saw it ==")
+    if not shown:
+        return
+    buckets = Counter()
+    groups = defaultdict(list)
+    for sid, t in shown.items():
+        d = (t - first_pv[sid]).total_seconds() if sid in first_pv else None
+        b = ("no page view" if d is None else "<3 s" if d < 3 else "3-9 s" if d < 9.5 else "10-30 s" if d < 30 else "30 s+")
+        buckets[b] += 1
+        groups[b].append(sid)
+    print("seconds from landing to popup   sessions  clicked after  signed up  1-page visits  hosts / arrived from")
+    for b in ("no page view", "<3 s", "3-9 s", "10-30 s", "30 s+"):
+        g = groups.get(b, [])
+        if not g:
+            continue
+        hosts = Counter(host.get(s, "?") for s in g).most_common(3)
+        refs = Counter(ref.get(s, "?") for s in g).most_common(3)
+        print(f"{b:31} {len(g):9} {sum(1 for s in g if after[s]):14} {sum(1 for s in g if s in ok):10} "
+              f"{sum(1 for s in g if n_pv[s] <= 1):14}  {hosts} {refs}")
+    print(f"signed up: {len(ok)}  clicked anything after the popup: {sum(1 for s in shown if after[s])}  "
+          f"close-like clicks: {len(closes)}")
+    by_day = Counter(t.date().isoformat() for t in shown.values())
+    print("popup sessions by day: " + ", ".join(f"{d[5:]} {n}" for d, n in sorted(by_day.items())))
+    tg_after = Counter(x["target"] for x in ce if x.get("session_id") in shown and x.get("target") and
+                       ts(x) >= shown[x["session_id"]])
+    print("what was clicked after the popup: " + ", ".join(f"{k} {v}" for k, v in tg_after.most_common(15)))
 
 
 def _all(url, h, table, select, flt):
