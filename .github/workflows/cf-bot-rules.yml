@@ -109,7 +109,10 @@ jobs:
                   # also the live fetchers an assistant uses to read a page
                   # while answering (ai_user), AI search crawlers and agents
                   cur = (call("GET", f"/zones/{zid}/bot_management", tok).get("result") or {})
-                  body = {"ai_bots_protection": "disabled", "ai_search": "disabled", "ai_user": "disabled"}
+                  # read-and-cite yes, training no (owner, 1 Nov 2026): ai_training
+                  # "block" turns away crawlers that only collect training data
+                  body = {"ai_bots_protection": "disabled", "ai_search": "disabled", "ai_user": "disabled",
+                          "ai_training": "block"}
                   if isinstance(cur.get("ai_agents"), dict):
                       body["ai_agents"] = {a: "disabled" for a in cur["ai_agents"]}
                   r = call("PUT", f"/zones/{zid}/bot_management", tok, body)
@@ -118,7 +121,7 @@ jobs:
                       body["ai_agents"] = {a: "allow" for a in cur["ai_agents"]}
                       r = call("PUT", f"/zones/{zid}/bot_management", tok, body)
                   if r.get("success"):
-                      out.append(f"AI crawlers, live fetchers and agents: allowed (with {k})"); break
+                      out.append(f"AI search crawlers, live fetchers and agents: allowed; AI training: blocked (with {k})"); break
                   out.append(f"  AI settings with {k}: {err(r)}")
               for k, tok in toks:
                   r = call("GET", f"/zones/{zid}/bot_management", tok)
