@@ -134,6 +134,32 @@ jobs:
                                          f"enabled={rr.get('enabled')} | {rr.get('expression')[:160]}")
                       break
                   out.append(f"  custom rules with {k}: {err(ep)}")
+              # Read-only: the addresses crawlers got 404 for in the last day
+              # (Bing reports a rising "4xx" count but not which pages).
+              import datetime as _dt
+              since = (_dt.datetime.utcnow() - _dt.timedelta(hours=23)).strftime("%Y-%m-%dT%H:%M:%SZ")
+              gq = {"query": """query($z:String!,$s:Time!){viewer{zones(filter:{zoneTag:$z}){
+                     httpRequestsAdaptiveGroups(limit:60, orderBy:[count_DESC],
+                       filter:{datetime_gt:$s, edgeResponseStatus_geq:400, edgeResponseStatus_lt:500}){
+                       count dimensions{clientRequestPath edgeResponseStatus userAgent}}}}}""",
+                    "variables": {"z": zid, "s": since}}
+              for k, tok in toks:
+                  r = call("POST", "/graphql", tok, gq)
+                  rows = (((r.get("data") or {}).get("viewer") or {}).get("zones") or [{}])[0].get("httpRequestsAdaptiveGroups") if r.get("data") else None
+                  if rows is not None:
+                      import re as _re
+                      agg = {}
+                      for x in rows:
+                          d = x["dimensions"]; ua = d.get("userAgent") or ""
+                          who = next((b for b in ("bingbot", "Googlebot", "GPTBot", "OAI-SearchBot", "ClaudeBot",
+                                                  "PerplexityBot", "Applebot", "YandexBot") if b.lower() in ua.lower()), "other")
+                          key = (d["clientRequestPath"], d["edgeResponseStatus"], who)
+                          agg[key] = agg.get(key, 0) + x["count"]
+                      out.append(f"4xx in the last 23h (with {k}), most frequent first:")
+                      for (pth, st, who), n in sorted(agg.items(), key=lambda kv: -kv[1])[:45]:
+                          out.append(f"  {n:4d}  {st}  {who:13s} {pth}")
+                      break
+                  out.append(f"  4xx list with {k}: {(r.get('errors') or [{}])[0].get('message', '')[:160]}")
               s = call("GET", f"/zones/{zid}/settings/browser_check", toks[0][1])
               out.append("Browser Integrity Check (site-wide) now: " + str((s.get("result") or {}).get("value", "unknown")))
           t = "\n".join(out)
