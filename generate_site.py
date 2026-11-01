@@ -25,6 +25,13 @@ import requests
 from supabase import create_client
 
 SITE_URL = "https://mygoldrates.com"
+# The site's own Instagram account: linked on every page and named as the
+# same organisation in the structured data (sameAs), so search engines and AI
+# assistants tie the two together.
+INSTAGRAM_URL = "https://www.instagram.com/mygoldrates/"
+ORG_LD = ('<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", '
+          '"name": "MyGoldRates.com", "url": "https://mygoldrates.com", "logo": "https://mygoldrates.com/icon-512.png", '
+          f'"sameAs": ["{INSTAGRAM_URL}"]}}</script>')
 CUSTOM_DOMAIN = "mygoldrates.com"
 CONTACT_EMAIL = "contact@mygoldrates.com"
 # General formula: Unknown Rate = (Known Rate / Known Karat) x Unknown Karat.
@@ -377,6 +384,7 @@ def site_links_html():
                   for p in states)
         + '<h3>About</h3>'
         f'<a href="{SITE_URL}/about">About us</a>'
+        f'<a href="{INSTAGRAM_URL}" rel="me noopener" target="_blank">Instagram @mygoldrates</a>'
         f'<a href="{SITE_URL}/methodology">How we collect rates</a>'
         f'<a href="{SITE_URL}/contact">Contact</a>'
         f'<a href="{SITE_URL}/privacy">Privacy Policy</a>'
@@ -406,6 +414,8 @@ def nd_header_html():
 
 def nd_footer_html(year):
     return ('<footer class="nd-foot">' + site_links_html()
+            + f'<p><a href="{INSTAGRAM_URL}" rel="me noopener" target="_blank">Follow @mygoldrates on Instagram</a> '
+            '&middot; daily rates, best deals and offers</p>'
             + f'<p>&copy; {year} MyGoldRates &middot; Rates are indicative, '
             'updated daily &middot; Not investment advice</p></footer>')
 
@@ -2046,6 +2056,7 @@ def main():
         {"@context": "https://schema.org", "@type": "Organization",
          "name": "MyGoldRates.com", "alternateName": "GoldRates",
          "url": SITE_URL, "logo": f"{SITE_URL}/icon-512.png",
+         "sameAs": [INSTAGRAM_URL],
          "image": f"{SITE_URL}/og.png",
          "description": "India's gold rate comparison platform - compare today's "
                         "24K, 22K and 18K gold rates across leading jewellers, "
@@ -2720,6 +2731,9 @@ def main():
   design. Always confirm the billed rate with the jeweller before purchase.
   GoldRates is not affiliated with any jeweller and does not provide investment
   advice.</p>
+  <h2>Follow us</h2>
+  <p>We post today's rates, the best deal by jewel and the day's offers on
+  Instagram: <a href="{INSTAGRAM_URL}" rel="me noopener" target="_blank">@mygoldrates</a>.</p>
   <p>Questions? <a href="{SITE_URL}/contact">Get in touch</a>.</p>""")
 
     write_page(
@@ -2934,7 +2948,7 @@ def main():
         with open(path, "w", encoding="utf-8") as fp:
             fp.write(CONTENT_TEMPLATE.substitute(
                 title=title, desc=desc, canonical=f"{SITE_URL}/{slug}",
-                body=body, extra_js=extra_js, jsonld_block=jsonld_block,
+                body=body, extra_js=extra_js, jsonld_block=ORG_LD + jsonld_block,
                 robots=robots, **common))
 
     rate24 = round(median24, 2)
@@ -4263,10 +4277,10 @@ b.addEventListener('click',function(){
         try:
             import compare_pages
             _cp = compare_pages.pages(_kb, med, display_date, now_ist.strftime("%Y-%m-%d"), SITE_URL, inr)
-            for _s, _t, _d, _b, _ld in _cp:
+            for _s, _t, _d, _b, _cld in _cp:            # not _ld: the city pages read that name
                 _crumb = (crumbs(("Compare jewellers", None)) if _s == compare_pages.HUB else
                           crumbs(("Compare jewellers", f"{SITE_URL}/{compare_pages.HUB}"), (_t.split(" Gold Rate")[0], None)))
-                render_content(_s, _t, _d, _crumb + _b, jsonld_block=compare_pages.jsonld(_ld))
+                render_content(_s, _t, _d, _crumb + _b, jsonld_block=compare_pages.jsonld(_cld))
                 extra_urls.append((_s, "daily", "0.7"))
             print(f"compare pages: {len(_cp)} written")
         except Exception as e:
@@ -5387,6 +5401,7 @@ Senco head-to-head with making charges and a 10 g ring bill): {SITE_URL}/compare
 - Daily email alerts: {SITE_URL}/inquiry
 - About: {SITE_URL}/about | Methodology: {SITE_URL}/methodology | \
 Contact: {SITE_URL}/contact
+- Instagram (official, daily rates, best deals and offers): {INSTAGRAM_URL} (@mygoldrates)
 
 ## Gold rate by city and state
 {chr(10).join(f"- {p}: {SITE_URL}/gold-rate-today-in-{loc_slug(p)}" for p in sorted(INDEXED_PLACES))}
@@ -5507,6 +5522,7 @@ an approximate bill at any jeweller (gold + making after offer + GST).
 - Jewellers Digest: a daily gold market outlook (direction for the week, month and quarter, expected \
 range, key levels), free until Dhanteras (6 Nov 2026), then Rs 499/month. {SITE_URL}/jewellers-digest
 - Calculators: {SITE_URL}/calculators  Daily email alerts: {SITE_URL}/inquiry
+- Official Instagram: {INSTAGRAM_URL} (@mygoldrates) - daily rate cards, best deals, offers
 
 ## About the data
 Each jeweller's rate is the one it publishes on its own website that day; every karat is worked out
