@@ -116,6 +116,8 @@
   function norm(q) {
     return (' ' + q.toLowerCase() + ' ')
       .replace(/[‘’']/g, '')
+      // initials as jewellers write them: "D.P. Jewellers", "P.C. Chandra" -> "dp", "pc"
+      .replace(/\b([a-z])\.(?=[a-z]\b)/g, '$1').replace(/\b([a-z]{1,2})\.(?=\s|$)/g, '$1')
       .replace(/\b(24|22|18|14)\s*(?:k|kt|ct|carat|karat|caret)\b/g, ' $1k ')
       .replace(/\b999\b/g, ' 24k ').replace(/\b916\b/g, ' 22k ').replace(/\b750\b/g, ' 18k ')
       .replace(/[?!,;:()]/g, ' ').replace(/\s+/g, ' ');
