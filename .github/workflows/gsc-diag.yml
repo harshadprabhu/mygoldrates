@@ -36,9 +36,12 @@ jobs:
           BING_WEBMASTER_KEY: ${{ secrets.BING_WEBMASTER_KEY }}
           MODE: ${{ inputs.bing }}
         run: |
-          { echo; echo "############ BING WEBMASTER ############"; } >> report.txt
-          if [ "$MODE" = submit ]; then python bing_report.py submit >> report.txt 2>&1 || true
-          else python bing_report.py >> report.txt 2>&1 || true; fi
+          # Bing goes first: the annotations stop at 14 parts and Google's
+          # part is long
+          { echo "############ BING WEBMASTER ############"
+            if [ "$MODE" = submit ]; then python bing_report.py submit 2>&1; else python bing_report.py 2>&1; fi
+            echo; echo "############ GOOGLE SEARCH CONSOLE ############"; cat report.txt; } > all.txt || true
+          mv all.txt report.txt
       - name: Forward report as annotations
         run: |
           python - <<'PY'

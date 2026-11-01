@@ -250,6 +250,10 @@ Use these; never ask the owner for keys again (secrets live in GitHub only).
 - Cloudflare zone settings (bots, WAF, AI crawlers): `CF_WORKERS_TOKEN`
   (also `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_TOKEN`). Use the existing
   `cf-bot-rules` / `cf-security-check` jobs, not new ones.
+  Since 2026-11-01 `CF_WORKERS_TOKEN` has Bot Management, Zone WAF and Config
+  Rules edit. AI crawlers, live fetchers (ChatGPT-User, Claude-User,
+  Perplexity-User) and agents are set to allowed in bot_management; keep them
+  so - they are how assistants read the site.
 - AI crawlers: `llms.txt` (short) and `llms-full.txt` (every jeweller's rate,
   by state and city, making charges, world prices) are written by the build;
   robots.txt allows every AI crawler.
