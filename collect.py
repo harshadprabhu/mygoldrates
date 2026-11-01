@@ -49,6 +49,9 @@ FAST_TIMEOUT, FULL_TIMEOUT = 8, 20
 BRAND_BUDGET = 60
 POLITE_DELAY = 1.5
 OUTLIER_TOLERANCE = 0.04
+# Far enough off the market that no reading, however self-consistent its
+# karats, can be right: quarantined even when the basis is "confirmed".
+GROSS_OUTLIER = 0.20
 RATIO_TOLERANCE = 0.015
 MIN_FOR_MEDIAN = 5
 
@@ -613,7 +616,10 @@ def extract_rate_cards(text):
         out.setdefault(m.group(2) + "K", []).append(_f(m.group(1)))
     for m in _CARD_KT_RE.finditer(text):
         out.setdefault(m.group(1) + "K", []).append(_f(m.group(2)))
-    out = {k: [v for v in vs if v and 1000 < v < 50000] for k, vs in out.items()}
+    # a card's figure must be a plausible gold rate for its karat (its 24K
+    # equivalent inside the usual per-gram band): Abharan's site carries a
+    # hidden, years-old card ("22 KT Rs. 4735") that read as today's rate
+    out = {k: [v for v in vs if v and GRAM_MIN <= v * 24 / int(k[:2]) <= GRAM_MAX] for k, vs in out.items()}
     out = {k: vs for k, vs in out.items() if vs}
     return out if len(out) >= 2 else {}      # a real rate card shows several karats
 
@@ -1615,7 +1621,7 @@ def main():
         for r in saved:
             drift = abs(r["canonical_24k_pre_gst"] - median) / median
             patch = {"drift_from_median": round(drift, 4)}
-            if drift > OUTLIER_TOLERANCE and not r["basis_confirmed"]:
+            if drift > GROSS_OUTLIER or (drift > OUTLIER_TOLERANCE and not r["basis_confirmed"]):
                 patch["status"] = "quarantined"
                 patch["basis_note"] = r["basis_note"] + f" | {drift*100:.1f}% off median"
                 print(f"   quarantined brand {r['brand_id']}: {drift*100:.1f}% off")
