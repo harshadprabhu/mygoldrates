@@ -94,7 +94,13 @@ def test_city_pages_do_not_repeat_the_national_faq_or_its_markup():
         d = json.loads(blk)
         items = d if isinstance(d, list) else d.get("@graph", [d])
         types += [x.get("@type") for x in items]
-    assert "Dataset" not in types and "BreadcrumbList" in types
+    # the homepage's national Dataset stays off city pages; a Dataset about
+    # this place (its own name in it) is the city's own, dated rate table
+    assert "BreadcrumbList" in types
+    for blk in re.findall(r'<script type="application/ld\+json">(.*?)</script>', h, re.S):
+        for x in json.loads(blk):
+            if x.get("@type") == "Dataset":
+                assert "Pune" in x["name"] and x["url"].endswith("/gold-rate-today-in-pune"), x["name"]
     faq = next(x for blk in re.findall(r'<script type="application/ld\+json">(.*?)</script>', h, re.S)
                for x in json.loads(blk) if x.get("@type") == "FAQPage")
     for q in faq["mainEntity"]:
@@ -178,7 +184,7 @@ def test_city_page_structured_data_describes_the_city_not_the_homepage():
     page = next(x for x in items if x["@type"] == "WebPage")
     assert page["url"].endswith("/gold-rate-today-in-chennai")
     assert {x["@type"] for x in items} == {"WebSite", "Organization", "WebPage",
-                                          "BreadcrumbList", "FAQPage"}
+                                          "BreadcrumbList", "Dataset", "FAQPage"}
 
 
 def test_city_section_text_is_coloured_for_the_dark_design():
