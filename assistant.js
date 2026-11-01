@@ -749,6 +749,7 @@
     '.sn-mic{position:relative;width:46px;height:46px;flex:none;border-radius:50%;border:1px solid rgba(240,208,128,.4);background:rgba(231,191,90,.1);color:#f0d080;cursor:pointer;display:flex;align-items:center;justify-content:center}.sn-mic svg{width:21px;height:21px}' +
     '.sn-ml{position:absolute;right:-5px;bottom:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#e7bf5a;color:#1a1405;font:700 10px/17px system-ui,sans-serif;text-align:center;pointer-events:none}' +
     '.sn-g{display:inline-block;padding:7px 14px;border-radius:999px;border:1px solid rgba(240,208,128,.45);color:#f0d080;text-decoration:none;font-weight:600}' +
+    '.sn-convo .sn-mic:not(.on){border-color:#e5484d;color:#ff8a8d;box-shadow:0 0 0 3px rgba(229,72,77,.25)}' +
     '.sn-mic.on{background:#e5484d;border-color:#e5484d;color:#fff;animation:snMic 1.2s infinite}@keyframes snMic{0%{box-shadow:0 0 0 0 rgba(229,72,77,.6)}70%{box-shadow:0 0 0 12px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}' +
     '.sn-orow .sn-nm b{display:block;font-size:13.5px}.sn-orow small{display:block;color:#cfc4ad;font-size:12px;line-height:1.45;margin-top:2px}' +
     '.sn-fb .sn-say{margin-left:auto}.sn-fab .sn-fmic{width:26px;height:26px;margin:0 -6px 0 -2px;border-radius:50%;background:rgba(26,20,5,.12);display:flex;align-items:center;justify-content:center}.sn-fab .sn-fmic svg{width:15px;height:15px}' +
@@ -757,6 +758,12 @@
 
   var panel, body, chipBox, input, mic, spk, lmenu, voiceQ = false;
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition, rec = null, listening = false;
+  // Conversation mode: a tap on the mic starts it; after each spoken answer
+  // Sona listens again by herself, like a voice assistant, until the visitor
+  // taps the mic, closes Sona, says stop / bas / thanks, or says nothing.
+  var convo = false;
+  function endConvo() { convo = false; if (panel) panel.classList.remove('sn-convo'); }
+  function resume() { if (convo && opened && !listening) setTimeout(function () { if (convo && opened && !listening) listen(); }, 350); }
   var TTS = window.speechSynthesis, ttsOn = false;      // read every reply aloud; a spoken question is always answered aloud
   try { ttsOn = localStorage.getItem('sona_tts') === '1'; } catch (_) {}
   var ICON = {
@@ -784,7 +791,13 @@
     mic = $('#sonaMic', panel); spk = $('#sonaSpk', panel); lmenu = $('#sonaLm', panel);
     $('#sonaClose', panel).onclick = close;
     $('form', panel).onsubmit = function (e) { e.preventDefault(); ask(input.value); };
-    if (mic) mic.onclick = listen;
+    if (mic) mic.onclick = function () {
+      // a tap while Sona talks: stop her and listen; a tap while listening
+      // in a conversation: end it
+      if (convo && listening) { endConvo(); listen(); return; }
+      if (TTS && TTS.speaking) { hush(); convo = true; panel.classList.add('sn-convo'); listen(); return; }
+      convo = true; panel.classList.add('sn-convo'); listen();
+    };
     if (spk) spk.onclick = function () {
       ttsOn = !ttsOn; try { localStorage.setItem('sona_tts', ttsOn ? '1' : '0'); } catch (_) {}
       if (!ttsOn) hush();
@@ -882,21 +895,22 @@
       vs.filter(function (v) { return lg(v) === c || lg(v).indexOf(c + '-') === 0; })[0] || null;
   }
   var toldNoVoice = {};
-  function speak(text, lang, m) {
-    if (!TTS || !text) return;
+  function speak(text, lang, m, after) {
+    after = after || function () {};
+    if (!TTS || !text) { after(); return; }
     lang = lang || 'en';
     var go = function () {
       var v = voiceFor(lang);
       if (!v && lang !== 'en') {
         if (!toldNoVoice[lang]) { toldNoVoice[lang] = 1; RL = lang; note(t('no_voice', { l: langName(lang) })); }
-        return;
+        after(); return;
       }
       try { TTS.cancel(); } catch (_) {}
       var u = new SpeechSynthesisUtterance(String(text).replace(/₹/g, ''));
       if (v) u.voice = v;
       u.lang = v ? v.lang : bcp(lang); u.rate = 1; u.pitch = 1.05;
       u.onstart = function () { talking(true); if (m) m.classList.add('sona-talk'); };
-      u.onend = u.onerror = function () { talking(false); if (m) m.classList.remove('sona-talk'); };
+      u.onend = u.onerror = function () { talking(false); if (m) m.classList.remove('sona-talk'); after(); };
       TTS.speak(u);
     };
     if ((TTS.getVoices() || []).length) go();
@@ -928,7 +942,12 @@
       if (done) return; done = true;
       clearTimeout(quiet); clearTimeout(cap);
       if (rec === me) setListening(false);
-      if (heard.trim()) { voiceQ = true; ask(heard); }
+      var said = heard.trim();
+      if (!said) { if (convo) { endConvo(); note(t('cv_end')); } return; }
+      if (convo && /^(stop|bas|band karo|बस|रुको|थांबा|bye|goodbye|thanks|thank you|ok thanks|धन्यवाद|शुक्रिया)[.!]*$/i.test(said)) {
+        endConvo(); bubble(esc(said), true); note(t('cv_end')); return;
+      }
+      voiceQ = true; ask(heard);
     }
     function stop(ms) {
       clearTimeout(quiet);
@@ -953,15 +972,15 @@
         setTimeout(function () { listen('hi-IN'); micUsed = want; }, 50);
         return;
       }
-      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') note(t('mic_denied'));
-      else if (e.error === 'no-speech') note(t('mic_none'));
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { var was = convo; endConvo(); if (!was) note(t('mic_denied')); else note(t('cv_end')); }
+      else if (e.error === 'no-speech' && !convo) note(t('mic_none'));
     };
     rec.onend = finish;
     try {
       rec.start(); setListening(true); track('voice');
       stop(8000);                                 // nothing said at all
       cap = setTimeout(function () { stop(0); }, 20000);
-    } catch (_) { setListening(false); }
+    } catch (_) { setListening(false); endConvo(); }
   }
   // FAQ answers are written in English; where the browser can translate on
   // the device (free, nothing sent anywhere), Sona answers in the reply
@@ -1082,7 +1101,7 @@
           rpc('log_bot_question', { p_q: (tag ? '[' + tag + '] ' : '') + redact(q), p_intent: a.intent, p_answered: ok, p_page: location.pathname, p_sid: window.GR_SID || '' })
             .then(function (id) { if (id) $('.sn-fb', m).setAttribute('data-id', id); });
           track(ok ? 'answered' : 'unanswered');
-          if (spoken || ttsOn) speak(a.say, m._sl, m);
+          if (spoken || ttsOn) speak(a.say, m._sl, m, spoken ? resume : null);
           if (ok) setTimeout(function () { alertCard(a.intent, q); }, 900);
         }, 350 + Math.min(600, a.html.length / 6));
       });
@@ -1118,7 +1137,7 @@
     if (q) ask(q);
   }
   function close() {
-    opened = false; document.documentElement.classList.remove('sona-open');
+    opened = false; endConvo(); document.documentElement.classList.remove('sona-open');
     hush(); if (listening && rec) try { rec.stop(); } catch (_) {}
   }
   window.GR_ASK = open;
