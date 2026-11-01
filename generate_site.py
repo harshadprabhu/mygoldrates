@@ -353,6 +353,7 @@ def site_links_html():
         f'<a href="{SITE_URL}/gold-rate-around-the-world">Gold rate around the world</a>'
         f'<a href="{SITE_URL}/gold-rate-today-in-dubai">Gold rate in Dubai</a>'
         f'<a href="{SITE_URL}/gold-rate-by-jeweller">Gold rate by jeweller</a>'
+        f'<a href="{SITE_URL}/compare-jewellers-gold-rate">Compare jewellers</a>'
         f'<a href="{SITE_URL}/list-your-jewellery">List your jewellery</a>'
         f'<a href="{SITE_URL}/gold-rate-history">Gold rate history</a>'
         f'<a href="{SITE_URL}/news">Gold news</a>'
@@ -2607,7 +2608,19 @@ def main():
                      {"@type": "ListItem", "position": 1, "name": "Home",
                       "item": f"{SITE_URL}/"},
                      {"@type": "ListItem", "position": 2,
-                      "name": f"Gold Rate Today in {nm}", "item": url}]}]
+                      "name": f"Gold Rate Today in {nm}", "item": url}]},
+                # the rates on this page as a dated, citable dataset
+                {"@context": "https://schema.org", "@type": "Dataset",
+                 "name": f"Gold rates in {nm} today: 24K, 22K and 18K by jeweller",
+                 "description": f"Today's per-gram gold rates (pre-GST, INR) from {n_live} jewellers "
+                                f"serving {nm}, cheapest first, read from each jeweller's website.",
+                 "url": url, "dateModified": updated_iso, "isAccessibleForFree": True,
+                 "spatialCoverage": {"@type": "Place", "name": f"{nm}, India"},
+                 "variableMeasured": ["24K gold rate per gram", "22K gold rate per gram", "18K gold rate per gram"],
+                 "distribution": [{"@type": "DataDownload", "encodingFormat": "application/json",
+                                   "contentUrl": f"{SITE_URL}/rates.json"}],
+                 "creator": {"@type": "Organization", "name": "MyGoldRates.com", "url": SITE_URL},
+                 "license": f"{SITE_URL}/terms"}]
             qa = city_faq(nm)
             if qa:
                 ld.append({"@context": "https://schema.org", "@type": "FAQPage",
@@ -4246,6 +4259,18 @@ b.addEventListener('click',function(){
             intl=({"usd_g": round(gold_usd / OZ_TO_G, 4), "fx": fetch_fx_rates()} if gold_usd else None))
         print(f"assistant: knowledge file {assistant_kb.write(_kb) // 1024} KB, "
               f"{len(_kb['brands'])} jewellers, {len(_kb['learned'])} learned answers")
+        # jeweller-vs-jeweller pages and the comparison hub, from the same figures
+        try:
+            import compare_pages
+            _cp = compare_pages.pages(_kb, med, display_date, now_ist.strftime("%Y-%m-%d"), SITE_URL, inr)
+            for _s, _t, _d, _b, _ld in _cp:
+                _crumb = (crumbs(("Compare jewellers", None)) if _s == compare_pages.HUB else
+                          crumbs(("Compare jewellers", f"{SITE_URL}/{compare_pages.HUB}"), (_t.split(" Gold Rate")[0], None)))
+                render_content(_s, _t, _d, _crumb + _b, jsonld_block=compare_pages.jsonld(_ld))
+                extra_urls.append((_s, "daily", "0.7"))
+            print(f"compare pages: {len(_cp)} written")
+        except Exception as e:
+            print("compare pages: skipped -", type(e).__name__, str(e)[:160])
     except Exception as e:
         print("assistant: knowledge file skipped -", type(e).__name__, str(e)[:160])
 
@@ -5352,6 +5377,8 @@ charges): {SITE_URL}/gold-rate-by-jeweller
 {SITE_URL}/learn/making-charges-explained
 - Gold news: {SITE_URL}/news
 - Machine-readable JSON feed of today's rates: {SITE_URL}/rates.json
+- Compare jewellers (every jeweller ranked today; Tanishq vs Kalyan, Malabar, Joyalukkas, CaratLane, \
+Senco head-to-head with making charges and a 10 g ring bill): {SITE_URL}/compare-jewellers-gold-rate
 - Full data brief (every jeweller's rate today, by state and city, making charges, world prices): \
 {SITE_URL}/llms-full.txt
 - Gold rate around the world (Dubai, Saudi Arabia, USA, Russia, Kazakhstan, Cambodia, in INR): \
