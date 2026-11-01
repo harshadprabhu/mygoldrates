@@ -264,6 +264,20 @@ Use these; never ask the owner for keys again (secrets live in GitHub only).
   data; there is no llms-full.txt and rates.json has no per-jeweller list.
   Do not add bulk feeds for crawlers - visits are the revenue.
 
+## Subscribers: alerts and buying intent (owner-approved 2026-11-01)
+- Sona offers a 22K price-drop alert after price/deal answers, once a session,
+  never to a subscriber (`alertCard` in assistant.js): upsert_subscriber
+  (signup_method 'sona') -> set_price_alert (source 'sona') -> save_intent
+  (what they asked about + the consent line) -> two taps: buying for / when.
+- Both signup popups ask the same two optional questions after subscribing.
+- `sql/subscriber_intent.sql`: inquiries.buy_for / buy_when / interest /
+  intent_at / consent_at / consent_text and save_intent(). Never share a
+  subscriber with a jeweller without separate consent (privacy page says so).
+- Weekly funnel (visitors -> Sona -> new subs -> alerts -> intent) is at the
+  end of `traffic_sources.py` (traffic-sources job): counts only.
+- Not built yet, waiting on the owner: WhatsApp alerts (cost) and
+  "get this price from the jeweller" leads (charging jewellers).
+
 ## Gold market today (`gold_brief.py`)
 - Runs in every site build (so several times a day). Reads international gold
   (XAU), USD/INR, the jeweller board median, global gold headlines (Google News

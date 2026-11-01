@@ -1,5 +1,6 @@
 """Where visitors come from, day by day: Google, Bing, other search,
-social, other sites, or direct. Read-only.
+social, other sites, or direct - and the weekly funnel from visitor to
+subscriber with buying intent. Read-only.
 
 Reads page_views with the service key and prints a plain-text table. The
 workflow forwards it as job annotations rather than committing it,
@@ -173,6 +174,65 @@ def main():
             hosts[urlparse(x["referrer"]).hostname] += 1
     for hst, n in hosts.most_common(15):
         print(f"{n:5}  {hst}")
+
+    funnel(url, h, rows)
+
+
+def _all(url, h, table, select, flt):
+    """Every row of a table (paged), or None if a column is not there yet."""
+    out, off = [], 0
+    while True:
+        r = requests.get(f"{url}/rest/v1/{table}", params={"select": select, **flt},
+                         headers={**h, "Range": f"{off}-{off + 999}"}, timeout=60)
+        if r.status_code >= 400:
+            return None
+        b = r.json(); out += b
+        if len(b) < 1000:
+            return out
+        off += 1000
+
+
+def funnel(url, h, rows):
+    """Weekly: visitors -> asked Sona -> new subscribers (and where) ->
+    price alerts -> buying intent given. Counts only - no addresses, no
+    names: this report is forwarded as public job annotations."""
+    since = (date.today() - timedelta(days=56)).isoformat()
+    wk = lambda d: (date.fromisoformat(str(d)[:10]) - timedelta(days=date.fromisoformat(str(d)[:10]).weekday())).isoformat()
+    vis, sona = defaultdict(set), defaultdict(set)
+    for x in rows:
+        if x["day"] >= since:
+            vis[wk(x["day"])].add(x.get("session_id"))
+    q = _all(url, h, "bot_questions", "day,session_id", {"day": f"gte.{since}"}) or []
+    for x in q:
+        sona[wk(x["day"])].add(x.get("session_id"))
+    subs = _all(url, h, "inquiries", "created_at,signup_method,buy_for,buy_when,intent_at",
+                {"created_at": f"gte.{since}"})
+    intent_cols = subs is not None
+    if subs is None:                                   # before subscriber_intent.sql
+        subs = _all(url, h, "inquiries", "created_at,signup_method", {"created_at": f"gte.{since}"}) or []
+    new, how, intent = Counter(), defaultdict(Counter), Counter()
+    for x in subs:
+        w = wk(x["created_at"]); new[w] += 1; how[w][x.get("signup_method") or "?"] += 1
+        if x.get("buy_for") or x.get("buy_when"):
+            intent[w] += 1
+    al = _all(url, h, "price_alerts", "created_at,source", {"created_at": f"gte.{since}"}) or []
+    alerts, from_sona = Counter(), Counter()
+    for x in al:
+        alerts[wk(x["created_at"])] += 1
+        if (x.get("source") or "") == "sona":
+            from_sona[wk(x["created_at"])] += 1
+    print("\n== WEEKLY FUNNEL (week starting): visitors -> asked Sona -> new subscribers -> alerts -> intent ==")
+    print(f"{'week':10} {'visitors':>8} {'sona':>6} {'new subs':>8} {'alerts':>7} {'via sona':>8} {'intent':>7}  how they signed up")
+    for w in sorted(set(vis) | set(new) | set(alerts)):
+        print(f"{w:10} {len(vis[w]):8} {len(sona[w]):6} {new[w]:8} {alerts[w]:7} {from_sona[w]:8} "
+              f"{(intent[w] if intent_cols else '-'):>7}  " + ", ".join(f"{k} {v}" for k, v in how[w].most_common()))
+    if intent_cols:
+        tot_for = Counter(x.get("buy_for") for x in subs if x.get("buy_for"))
+        tot_when = Counter(x.get("buy_when") for x in subs if x.get("buy_when"))
+        print("buying for (8 weeks): " + (", ".join(f"{k} {v}" for k, v in tot_for.most_common()) or "-"))
+        print("buying when (8 weeks): " + (", ".join(f"{k} {v}" for k, v in tot_when.most_common()) or "-"))
+    else:
+        print("intent columns not there yet - run sql/subscriber_intent.sql")
 
 
 if __name__ == "__main__":

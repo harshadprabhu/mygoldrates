@@ -729,7 +729,7 @@
     '.sn-card{background:rgba(0,0,0,.22);border:1px solid rgba(240,208,128,.12);border-radius:12px;padding:9px 10px;margin:0 0 8px}.sn-card q{display:block;font-style:italic;color:#cfc4ad;font-size:12.5px;margin:3px 0}.sn-card p{font-size:12.5px;color:#d9cfba}' +
     '.sn-spark{width:100%;height:48px;margin:2px 0 8px}' +
     '.sn-cta{width:100%;border:0;border-radius:12px;padding:11px;cursor:pointer;font-weight:800;color:#1a1405;background:linear-gradient(135deg,#f6d77d,#d4a63c 55%,#b98a24)}' +
-    '.sn-fb{display:flex;gap:6px;margin-top:6px}.sn-fb button{border:1px solid rgba(240,208,128,.2);background:none;color:#a99f8b;border-radius:999px;padding:2px 9px;font-size:12px;cursor:pointer}.sn-fb button.on{background:rgba(231,191,90,.2);color:#f0d080}' +
+    '.sn-fb{display:flex;gap:6px;margin-top:6px}.sn-al p{margin:0 0 8px}.sn-alf{display:flex;gap:6px;margin:6px 0}.sn-alf input{flex:1;min-width:0;background:rgba(0,0,0,.3);border:1px solid rgba(240,208,128,.3);border-radius:10px;padding:9px 10px;color:#f4ede0;font-size:14px}.sn-alf button{border:0;border-radius:10px;padding:9px 14px;font-weight:700;background:linear-gradient(135deg,#f0d080,#d4a63c);color:#1a0a04;cursor:pointer}.sn-alm{color:#9fe0b8;font-size:13px;margin:4px 0 0}.sn-alc{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}.sn-alc .sn-chip.on{background:#d4a63c;color:#1a0a04}.sn-fb button{border:1px solid rgba(240,208,128,.2);background:none;color:#a99f8b;border-radius:999px;padding:2px 9px;font-size:12px;cursor:pointer}.sn-fb button.on{background:rgba(231,191,90,.2);color:#f0d080}' +
     '.sn-chips{display:flex;gap:7px;overflow-x:auto;padding:4px 14px 10px;scrollbar-width:none}.sn-chips::-webkit-scrollbar{display:none}' +
     '.sn-chip{flex:none;border:1px solid rgba(240,208,128,.3);background:rgba(231,191,90,.08);color:#f0d080;border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}.sn-chip:hover{background:rgba(231,191,90,.18)}' +
     '.sn-in{display:flex;gap:8px;padding:10px 12px calc(12px + env(safe-area-inset-bottom));border-top:1px solid rgba(240,208,128,.12)}' +
@@ -977,6 +977,82 @@
     } catch (_) { return Promise.resolve(null); }
   }
 
+  // ------------------------------------------- price alerts and intent
+  // After an answer about prices or deals, a visitor who has not subscribed
+  // is offered a price-drop alert, once a session. Then two optional taps:
+  // what they are buying for, and when. All of it goes to the visitor's own
+  // subscriber row through the site's functions (upsert_subscriber,
+  // set_price_alert, save_intent); the consent line says what they agree to.
+  var ALERT_FOR = { rate: 1, rate_city: 1, rate_brand: 1, cheapest: 1, price: 1, best_offer: 1, brand_deal: 1,
+                    making: 1, offers: 1, compare: 1, trend: 1 };
+  var alertShown = false;
+  function subscribed() { try { return localStorage.getItem('gr_sub') === '1'; } catch (_) { return false; } }
+  function low22() {
+    var v = KB.brands.filter(function (b) { return b.nat && b.r24; }).map(function (b) { return b.r24 * 22 / 24; });
+    return v.length ? Math.min.apply(null, v) : null;
+  }
+  function ctxOf(q) {
+    var tx = norm(q), b = brandsIn(tx)[0], c = cityIn(tx) || (home && KB.cities.filter(function (x) { return x.n === home; })[0]);
+    var o = {}, k = karatIn(tx), ct = catIn(tx);
+    if (b) o.brand = b.s; if (c) o.city = c.n; if (k) o.karat = k; if (ct) o.cat = ct;
+    return o;
+  }
+  function alertCard(intent, q) {
+    if (alertShown || !ALERT_FOR[intent] || subscribed() || !SB || !KEY) return null;
+    var lo = low22(); if (!lo) return null;
+    alertShown = true;
+    var target = Math.floor(lo * 0.99 / 50) * 50, ctx = ctxOf(q);
+    var rs = function (n) { return '₹' + Math.round(n).toLocaleString('en-IN'); };
+    var m = bubble('<div class="sn-al"><p>' + t('al_h', { k: '22K', p: rs(target), n: rs(lo) }) + '</p>' +
+      '<form class="sn-alf"><input type="email" required autocomplete="email" placeholder="' + esc(t('al_ph')) + '" aria-label="' + esc(t('al_ph')) + '">' +
+      '<button type="submit">' + esc(t('al_btn')) + '</button></form>' +
+      '<p class="sn-dim">' + t('al_consent') + ' <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>' +
+      '<p class="sn-alm" role="status"></p></div>');
+    var f = $('.sn-alf', m), msg = $('.sn-alm', m);
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var em = $('input', f).value.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { msg.textContent = t('al_bad'); return; }
+      $('button', f).disabled = true; msg.textContent = '';
+      var c = ctx.city && KB.cities.filter(function (x) { return x.n === ctx.city; })[0];
+      var sub = { email: em, city: c ? c.n : null, signup_method: 'sona', offers_optin: true };
+      // the site's own subscriber save (referrals and all) when the page has it
+      (window.GR_SAVE ? Promise.resolve(window.GR_SAVE(sub)).catch(function () { return null; })
+                      : rpc('upsert_subscriber', { payload: sub }))
+        // set_price_alert answers 'ok' only for a saved subscriber: the check that both worked
+        .then(function () { return rpc('set_price_alert', { p_email: em, p_target: target, p_karat: '22K', p_source: 'sona' }); })
+        .then(function (r) { if (r !== 'ok') throw new Error(String(r));
+                             return rpc('save_intent', { p_email: em, p_interest: ctx, p_consent: t('al_consent') }); })
+        .then(function () {
+          try { localStorage.setItem('gr_sub', '1'); localStorage.setItem('gr_user', JSON.stringify({ email: em })); } catch (_) {}
+          track('alert_set');
+          f.remove(); msg.textContent = t('al_ok', { k: '22K', p: rs(target) });
+          intentAsk(em);
+        })
+        .catch(function () { $('button', f).disabled = false; msg.textContent = t('al_err'); });
+    });
+    return m;
+  }
+  function intentAsk(em) {
+    var step = function (title, opts, key, next) {
+      var m = bubble('<p>' + t(title) + '</p><div class="sn-alc">' + opts.map(function (o) {
+        return '<button type="button" class="sn-chip" data-v="' + o[0] + '">' + esc(t(o[1])) + '</button>';
+      }).join('') + '</div>');
+      $('.sn-alc', m).addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        var arg = { p_email: em }; arg[key] = b.getAttribute('data-v');
+        [].forEach.call($('.sn-alc', m).querySelectorAll('button'), function (x) { x.disabled = true; x.classList.toggle('on', x === b); });
+        rpc('save_intent', arg).then(function () { track('intent_' + key.slice(2)); }).catch(function () {});
+        next();
+      });
+    };
+    step('iq_for', [['wedding', 'iq_wed'], ['festival', 'iq_fest'], ['investment', 'iq_inv'], ['gift', 'iq_gift'], ['self', 'iq_self']], 'p_buy_for', function () {
+      step('iq_when', [['this_month', 'iq_m'], ['3_months', 'iq_3m'], ['tracking', 'iq_track']], 'p_buy_when', function () {
+        bubble('<p>' + t('iq_thanks') + '</p>');
+      });
+    });
+  }
+
   function ask(q, label) {
     q = String(q || '').trim(); if (!q) return;
     var spoken = voiceQ; voiceQ = false;
@@ -1007,6 +1083,7 @@
             .then(function (id) { if (id) $('.sn-fb', m).setAttribute('data-id', id); });
           track(ok ? 'answered' : 'unanswered');
           if (spoken || ttsOn) speak(a.say, m._sl, m);
+          if (ok) setTimeout(function () { alertCard(a.intent, q); }, 900);
         }, 350 + Math.min(600, a.html.length / 6));
       });
     }).catch(function () { typing.remove(); talking(false); RL = LANG; bubble('<p>' + t('nodata') + '</p>'); });

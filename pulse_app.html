@@ -503,6 +503,9 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 .sp-done .sp-big{font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:800;color:var(--text);margin:4px 0}
 .sp-done .sp-sub{font-size:13px;color:var(--text2,#cfc6b4);line-height:1.5;margin:0 0 14px}
 .sp-opt{text-align:left;background:rgba(255,255,255,.04);border:1px solid rgba(240,208,128,.18);border-radius:12px;padding:12px}
+.sp-iq{margin-bottom:10px}.sp-iqc{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.sp-iqc button{border:1px solid rgba(240,208,128,.35);background:transparent;color:#f0d080;border-radius:999px;padding:6px 11px;font-size:12.5px;font-weight:600;cursor:pointer}
+.sp-iqc button.on{background:#d4a63c;color:#1a0a04}
 .sp-opt-t{font-size:13px;font-weight:700;color:var(--text)}.sp-opt-t span{font-weight:400;color:var(--text3)}
 .sp-opt-d{font-size:11.5px;color:var(--text3);margin:2px 0 8px;line-height:1.4}
 .sp-opt .al-inp{margin-bottom:8px}
@@ -1089,6 +1092,13 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
       <div class="sp-tick">&#10003;</div>
       <div class="sp-big">You&rsquo;re in!</div>
       <p class="sp-sub" id="spDoneTxt">Your first email arrives tomorrow morning.</p>
+      <!-- two optional taps: what they are buying for and when (save_intent) -->
+      <div class="sp-opt sp-iq">
+        <div class="sp-opt-t">Buying gold for? <span>(optional)</span></div>
+        <div class="sp-iqc" data-k="p_buy_for"><button type="button" data-v="wedding">Wedding</button><button type="button" data-v="festival">Festival</button><button type="button" data-v="investment">Investment</button><button type="button" data-v="gift">Gift</button><button type="button" data-v="self">Myself</button></div>
+        <div class="sp-opt-t" style="margin-top:10px">When?</div>
+        <div class="sp-iqc" data-k="p_buy_when"><button type="button" data-v="this_month">This month</button><button type="button" data-v="3_months">In 3 months</button><button type="button" data-v="tracking">Just tracking</button></div>
+      </div>
       <div class="sp-opt">
         <div class="sp-opt-t">Add your mobile number <span>(optional)</span></div>
         <div class="sp-opt-d">For rate alerts by SMS or WhatsApp when we launch them. We never call or share it.</div>
@@ -3577,6 +3587,17 @@ function handleCredentialResponse(resp){
     });
     var dc=document.getElementById('spDoneClose');
     if(dc)dc.addEventListener('click',function(){closeSubPop(true)});
+    // buying for / when: saved to the subscriber's row as they tap
+    [].forEach.call(document.querySelectorAll('.sp-iqc'),function(g){
+      g.addEventListener('click',function(e){
+        var b=e.target.closest('button');if(!b||!spDoneEmail)return;
+        [].forEach.call(g.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b);});
+        var base=(window.GR_SB_URL||SUPABASE_URL||'').replace(/\/$/,''),key=window.GR_SB_KEY||SUPABASE_ANON_KEY||'';
+        var a={p_email:spDoneEmail};a[g.getAttribute('data-k')]=b.getAttribute('data-v');
+        if(base&&key)fetch(base+'/rest/v1/rpc/save_intent',{method:'POST',headers:{'Content-Type':'application/json',apikey:key,Authorization:'Bearer '+key},body:JSON.stringify(a)}).catch(function(){});
+        try{if(window.GR_TRACK)window.GR_TRACK('click_events',{page:location.pathname,target:'popup:intent_'+g.getAttribute('data-k').slice(2),session_id:window.GR_SID||''});}catch(_){}
+      });
+    });
   }
 
   // Show policy, shared with every other page through /alerts-pop.js and
