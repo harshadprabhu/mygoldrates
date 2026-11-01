@@ -19,7 +19,7 @@ import requests
 API = "https://ssl.bing.com/webmaster/api.svc/json/"
 SITE = "https://mygoldrates.com/"
 KEY_PAGES = [SITE] + [SITE + p for p in (
-    "llms-full.txt", "gold-rate-by-jeweller", "making-charges-comparison", "gold-rate-around-the-world",
+    "compare-jewellers-gold-rate", "gold-rate-by-jeweller", "making-charges-comparison", "gold-rate-around-the-world",
     "gold-rate-today-in-dubai", "gold-offers-today", "gold-rate-near-me", "calculators", "news",
     "jewellers-digest", "gold-rate-today-in-mumbai", "gold-rate-today-in-delhi", "gold-rate-today-in-chennai",
     "gold-rate-today-in-bengaluru", "gold-rate-today-in-pune", "gold-rate-today-in-hyderabad",

@@ -251,12 +251,18 @@ Use these; never ask the owner for keys again (secrets live in GitHub only).
   (also `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_TOKEN`). Use the existing
   `cf-bot-rules` / `cf-security-check` jobs, not new ones.
   Since 2026-11-01 `CF_WORKERS_TOKEN` has Bot Management, Zone WAF and Config
-  Rules edit. AI crawlers, live fetchers (ChatGPT-User, Claude-User,
-  Perplexity-User) and agents are set to allowed in bot_management; keep them
-  so - they are how assistants read the site.
-- AI crawlers: `llms.txt` (short) and `llms-full.txt` (every jeweller's rate,
-  by state and city, making charges, world prices) are written by the build;
-  robots.txt allows every AI crawler.
+  Rules edit. AI search crawlers, live fetchers (ChatGPT-User, Claude-User,
+  Perplexity-User) and agents are allowed in bot_management (they are how
+  assistants read and cite the site); AI training is blocked.
+- AI crawlers (owner's decision, 1 Nov 2026): assistants may READ pages and
+  cite with a link; they get the headline only. robots.txt allows search
+  crawlers and answer-time fetchers (OAI-SearchBot, ChatGPT-User,
+  Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User...), blocks
+  AI training crawlers (GPTBot, ClaudeBot, Google-Extended, CCBot...), and keeps
+  /assistant.json and /rates.json off-limits. Cloudflare: ai_training=block.
+  `llms.txt` carries headline rates and links, never the jeweller-by-jeweller
+  data; there is no llms-full.txt and rates.json has no per-jeweller list.
+  Do not add bulk feeds for crawlers - visits are the revenue.
 
 ## Gold market today (`gold_brief.py`)
 - Runs in every site build (so several times a day). Reads international gold
