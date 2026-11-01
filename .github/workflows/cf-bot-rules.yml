@@ -102,6 +102,28 @@ jobs:
                   out.append(f"  Bot Fight Mode with {k}: {err(r)}")
               if not done:
                   out.append("Bot Fight Mode: NOT changed")
+              # AI assistants' crawlers (owner-approved 2026-11-01): Cloudflare
+              # was answering PerplexityBot with 403. Turn its "block AI bots"
+              # off, and list any custom rule that names an AI crawler.
+              for k, tok in toks:
+                  r = call("PUT", f"/zones/{zid}/bot_management", tok, {"ai_bots_protection": "disabled"})
+                  if r.get("success"):
+                      out.append(f"Block AI bots: OFF (with {k})"); break
+                  out.append(f"  Block AI bots with {k}: {err(r)}")
+              for k, tok in toks:
+                  r = call("GET", f"/zones/{zid}/bot_management", tok)
+                  if r.get("success"):
+                      out.append("bot_management now: " + json.dumps(r["result"])[:400]); break
+              for k, tok in toks:
+                  ep = call("GET", f"/zones/{zid}/rulesets/phases/http_request_firewall_custom/entrypoint", tok)
+                  if ep.get("success"):
+                      for rr in ep["result"].get("rules") or []:
+                          ex = (rr.get("expression") or "").lower()
+                          if any(w in ex for w in ("perplexity", "gptbot", "claudebot", "bytespider", "ai_bot", "verified_bot_category", "user_agent")):
+                              out.append(f"custom rule: {rr.get('description')} | {rr.get('action')} | "
+                                         f"enabled={rr.get('enabled')} | {rr.get('expression')[:160]}")
+                      break
+                  out.append(f"  custom rules with {k}: {err(ep)}")
               s = call("GET", f"/zones/{zid}/settings/browser_check", toks[0][1])
               out.append("Browser Integrity Check (site-wide) now: " + str((s.get("result") or {}).get("value", "unknown")))
           t = "\n".join(out)
