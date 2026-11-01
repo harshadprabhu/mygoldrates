@@ -13,6 +13,7 @@ charge we have not measured is said to be missing, never invented.
 """
 import html
 import json
+import re
 from itertools import combinations
 
 # The national chains people most often compare, by the knowledge file's slug,
@@ -59,6 +60,8 @@ def pages(kb, med, display_date, date_iso, site_url, inr):
     for (sa, ua), (sb, ub) in combinations(majors, 2):
         A, B = by[sa], by[sb]
         na, nb = A["n"], B["n"]
+        # "Malabar Gold vs Senco Gold Gold Rate" -> "Malabar vs Senco Gold Rate" in headings
+        ta, tb = (re.sub(r"\s+Gold$", "", x) for x in (na, nb))
         a22, b22 = A["r24"] * 22 / 24, B["r24"] * 22 / 24
         lo, hi = (A, B) if a22 <= b22 else (B, A)
         d22 = abs(a22 - b22)
@@ -110,11 +113,11 @@ def pages(kb, med, display_date, date_iso, site_url, inr):
                ("How is the final bill worked out?",
                 "Gold value (rate x weight) + making charge (a % of the gold value, less any offer) + 3% GST on both, "
                 "plus a small hallmarking fee. Confirm the exact figure with the jeweller.")]
-        title = f"{na} vs {nb} Gold Rate Today ({short}): Which Is Cheaper?"
+        title = f"{ta} vs {tb} Gold Rate Today ({short}): Which Is Cheaper?"
         desc = (f"{na} vs {nb} today: 22K {inr(a22)} vs {inr(b22)} per gram. "
                 + (f"{lo['n']} is {inr(d22)}/g cheaper. " if d22 >= 0.5 else "Same rate. ")
                 + "Making charges, offers and a 10 g ring bill compared.")
-        body = (f"<h1>{e(na)} vs {e(nb)} Gold Rate Today</h1>"
+        body = (f"<h1>{e(ta)} vs {e(tb)} Gold Rate Today</h1>"
                 f"<p class=\"updated-on\">{display_date} - rates read from each jeweller's own website, before GST.</p>"
                 f"<p><b>{e(verdict)}</b> {e(ring_line)}</p>" + table
                 + "<p class=\"calc-note\">Making charges are medians of plain 22K pieces from each jeweller's published price "
