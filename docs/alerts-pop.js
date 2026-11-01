@@ -71,6 +71,9 @@
     '#grPop .no{display:block;margin:10px auto 0;background:none;border:0;color:inherit;opacity:.6;font-size:12px;cursor:pointer;padding:6px 8px}'+
     '#grPop .tk{width:48px;height:48px;margin:0 auto 6px;border-radius:50%;background:linear-gradient(135deg,#f6d77d,#b98a24);color:#1a1405;font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center}'+
     '#grPop .op{text-align:left;background:rgba(255,255,255,.04);border:1px solid rgba(240,208,128,.18);border-radius:12px;padding:12px}'+
+    '#grPop .iq{margin-bottom:10px}#grPop .iqc{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}'+
+    '#grPop .iqc button{border:1px solid rgba(240,208,128,.35);background:transparent;color:#f0d080;border-radius:999px;padding:6px 11px;font-size:12.5px;font-weight:600;cursor:pointer}'+
+    '#grPop .iqc button.on{background:#d4a63c;color:#1a0a04}'+
     '#grPop .op .ot{font-size:13px;font-weight:700}#grPop .op .ot span{font-weight:400;opacity:.6}#grPop .op .od{font-size:11.5px;opacity:.6;margin:2px 0 8px}'+
     '@media(max-width:760px){#grPop{align-items:flex-end;padding:0;background:rgba(0,0,0,.4);backdrop-filter:none;-webkit-backdrop-filter:none}'+
     '#grPop .b{max-width:none;max-height:78vh;border-radius:20px 20px 0 0;border-bottom:0;animation:grUp .32s ease}}'+
@@ -117,6 +120,13 @@
       '<button class="no" id="spSureNo" type="button">No thanks, close</button></div>'+
       '<div class="gpd" hidden><div class="tk">&#10003;</div><div class="bg">You’re in!</div>'+
       '<p class="sb" id="grPopDone">Your first email arrives tomorrow morning.</p>'+
+      // two optional taps: what they are buying for and when (save_intent)
+      '<div class="op iq"><div class="ot">Buying gold for? <span>(optional)</span></div>'+
+      '<div class="iqc" data-k="p_buy_for"><button type="button" data-v="wedding">Wedding</button><button type="button" data-v="festival">Festival</button>'+
+      '<button type="button" data-v="investment">Investment</button><button type="button" data-v="gift">Gift</button><button type="button" data-v="self">Myself</button></div>'+
+      '<div class="ot" style="margin-top:10px">When?</div>'+
+      '<div class="iqc" data-k="p_buy_when"><button type="button" data-v="this_month">This month</button><button type="button" data-v="3_months">In 3 months</button>'+
+      '<button type="button" data-v="tracking">Just tracking</button></div></div>'+
       '<div class="op"><div class="ot">Add your mobile number <span>(optional)</span></div>'+
       '<div class="od">For rate alerts by SMS or WhatsApp when we launch them. We never call or share it.</div>'+
       '<input id="spPhone" type="tel" placeholder="+91 mobile number" inputmode="tel" autocomplete="tel" maxlength="18">'+
@@ -131,6 +141,11 @@
     $q('#spSureNo').onclick=close;
     $q('#spDoneClose').onclick=remove;
     $q('#spPhoneSave').onclick=savePhone;
+    [].forEach.call(el.querySelectorAll('.iqc'),function(g){g.onclick=function(e){
+      var b=e.target.closest('button');if(!b||!doneEmail)return;
+      [].forEach.call(g.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b);});
+      var a={p_email:doneEmail};a[g.getAttribute('data-k')]=b.getAttribute('data-v');
+      rpc('save_intent',a).catch(function(){});ev('intent_'+g.getAttribute('data-k').slice(2));};});
     document.addEventListener('keydown',function(e){if(e.key==='Escape'&&el.parentNode)tryClose()});
     $q('#alBtnP').onclick=submit;
     google_();
