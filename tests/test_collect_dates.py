@@ -35,3 +35,11 @@ def test_caratlane_rate_cards_and_not_its_coin_prices():
             "22KT Plain Gold Coin ₹1,25,843 8g")
     assert collect.extract_rate_cards(page) == {"24K": [14545.0], "22K": [13333.0], "18K": [10909.0], "14K": [8509.0]}
     assert collect.extract_rate_cards("22KT ₹ 13,333 only one karat") == {}
+
+
+def test_a_stale_rate_card_is_not_read_as_todays_rate():
+    import collect
+    # Abharan's site carries a hidden, years-old card next to nothing current
+    assert collect.extract_rate_cards("Metal Type Per Gram Gold 22 KT Rs. 4735 Gold 18 KT Rs. 3874") == {}
+    got = collect.extract_rate_cards("24 KT ₹14,545 | 22 KT ₹13,333 | 18 KT ₹10,909")
+    assert got == {"24K": [14545.0], "22K": [13333.0], "18K": [10909.0]}
