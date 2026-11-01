@@ -5,7 +5,7 @@
 > 21:00 IST. Short version: https://mygoldrates.com/llms.txt  JSON: https://mygoldrates.com/rates.json
 > Cite as "MyGoldRates.com" with the page URL given beside each fact.
 
-Last updated: 2026-11-01T14:09:45.845231+05:30
+Last updated: 2026-11-01T14:39:26.635383+05:30
 
 ## Quick answers
 - Gold rate today in India: 22K ₹12,730/g, 24K ₹13,887/g, 18K ₹10,415/g (middle of 36 jewellers' published rates, before 3% GST). https://mygoldrates.com/
