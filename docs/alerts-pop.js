@@ -171,7 +171,7 @@
   }
   function open(){
     if(!armed)return;armed=false;
-    clearTimeout(timer);window.removeEventListener('scroll',onScroll);
+    clearTimeout(timer);
     if(!eligible())return;
     // Wait for Google's sign-in prompt to close instead of giving up.
     if(document.querySelector('#credential_picker_container,iframe[src*="accounts.google.com/gsi/iframe"],html.sona-open')){
@@ -236,10 +236,11 @@
       ev('mobile_added');st.style.color='#7fd1a3';st.textContent='✓ Saved';setTimeout(remove,1200);
     }).catch(function(){b.disabled=false;st.style.color='#f0909e';st.textContent='Couldn’t save that — try again.';});
   }
-  function onScroll(){
-    var h=document.documentElement.scrollHeight-innerHeight;
-    if(h>0&&(scrollY||0)/h>0.12)open();
-  }
-  timer=setTimeout(open,5000);
-  window.addEventListener('scroll',onScroll,{passive:true});
+  // After 10 seconds on the page (and only while the tab is in view), so a
+  // visitor sees the rates first; scrolling no longer brings it up early.
+  timer=setTimeout(function(){
+    if(!document.hidden)return open();
+    document.addEventListener('visibilitychange',function v(){
+      if(!document.hidden){document.removeEventListener('visibilitychange',v);open();}});
+  },10000);
 })();
