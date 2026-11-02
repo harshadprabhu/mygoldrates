@@ -77,7 +77,7 @@ SONA = {
            ("दस ग्राम 22 कैरेट चेन की कीमत", "price", "10 ग्राम"),
            ("तनिष्क या कल्याण", "compare", None),
            ("मेकिंग चार्ज सबसे कम कहाँ है", "making", None),
-           ("आज का सबसे अच्छा ऑफ़र", "offers", None),
+           ("आज का सबसे अच्छा ऑफ़र", "ask_city", None),     # offers differ by city: asks first
            ("चांदी का भाव", "silver", None)],
     "mr": [("पुण्यात आज सोन्याचा दर किती आहे", "rate_city", "Pune")],
     "gu": [("અમદાવાદમાં આજે સોનાનો ભાવ", "rate_city", "Ahmedabad"), ("સૌથી સસ્તું સોનું", "cheapest", None)],
@@ -175,16 +175,49 @@ def test_voice_is_the_browsers_own_and_the_bundle_ships_all_three_files():
     assert b.index("root.SONA_STR") < b.index("root.SONA_LANG") < b.index("Sona - the MyGoldRates")
 
 
+def _serves(kb, city):
+    c = next(x for x in kb["cities"] if x["n"] == city)
+    return lambda b: b.get("nat") or b["s"] in (c.get("loc") or [])
+
+
 def test_offers_answer_lists_every_jeweller_with_an_offer_and_singles_out_none():
     kb = json.load(open("docs/assistant.json", encoding="utf-8"))
-    names = sorted(b["n"] for b in kb["brands"] if b.get("off"))
-    r = _sona([{"lang": "hi", "q": "मुझे सब ज्वेलर्स का ऑफर बताइए"}])[0]
+    here = _serves(kb, "Mumbai")
+    names = sorted(b["n"] for b in kb["brands"] if b.get("off") and here(b))
+    got = _sona([{"lang": "hi", "q": "मुझे सब ज्वेलर्स का ऑफर बताइए"}, {"q": "Mumbai", "chip": True}])
+    assert got[0]["intent"] == "ask_city"                   # offers differ by city: which one?
+    r = got[1]
     assert r["intent"] == "offers"
     shown = [n for n in names if n.replace("&", "&amp;") in r["html"]]
     assert shown == names                                   # every one, none left out
     pos = [r["html"].index(n.replace("&", "&amp;")) for n in names]
     assert pos == sorted(pos)                               # A to Z, not by who has the offer
     assert "<em>" not in r["html"]                          # no badge on one jeweller
+
+
+def test_offers_are_only_from_jewellers_in_the_visitors_city(tmp_path):
+    """An offer from a jeweller with no store in the visitor's city is no use
+    to them (a Bhubaneswar-only chain's offer shown to someone in Mumbai)."""
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    mum = next(c for c in kb["cities"] if c["n"] == "Mumbai")
+    far = next(c for c in kb["cities"] if c["n"] == "Bhubaneswar")
+    local = {"s": "zz-odisha", "n": "Zz Odisha Gold", "r24": 13000.0, "nat": False, "st": ["Odisha"],
+             "u": "/x", "d": "x.in", "mk": {"Ring": 1.0}, "mo": {"f": 100.0, "u": 100.0},
+             "off": [{"h": "Zero making", "t": "t", "m": "", "u": "https://x.in"}]}
+    kb["brands"].append(local)
+    far["loc"] = (far.get("loc") or []) + ["zz-odisha"]
+    p = tmp_path / "kb.json"
+    p.write_text(json.dumps(kb), encoding="utf-8")
+    r = _sona([{"lang": "en", "q": "I am in Mumbai"},
+               {"lang": "en", "q": "offers today"},
+               {"lang": "en", "q": "best offer on a ring"},
+               {"lang": "en", "q": "best offer on a ring in Bhubaneswar"},
+               {"lang": "en", "q": "offers in Bhubaneswar"}], kb=str(p))
+    assert r[1]["intent"] == "offers" and "Zz Odisha" not in r[1]["html"] and "Mumbai" in r[1]["html"]
+    assert r[2]["intent"] == "best_offer" and "Zz Odisha" not in r[2]["html"]
+    assert r[3]["intent"] == "best_offer" and "Zz Odisha" in r[3]["say"]      # cheapest there
+    assert r[4]["intent"] == "offers" and "Zz Odisha" in r[4]["html"]
+    assert mum["n"] == "Mumbai"
 
 
 def test_language_is_automatic_and_the_mic_follows_the_visitor():
@@ -305,7 +338,8 @@ def test_shops_sona_does_not_track_get_an_honest_answer_and_a_google_button():
 
 def test_best_offer_asks_which_piece_then_ranks_jewellers_after_making_offers(tmp_path):
     kb = json.load(open("docs/assistant.json", encoding="utf-8"))
-    mk = [b for b in kb["brands"] if (b.get("mk") or {}).get("Ring") is not None]
+    here = _serves(kb, "Mumbai")
+    mk = [b for b in kb["brands"] if (b.get("mk") or {}).get("Ring") is not None and here(b)]
     assert len(mk) >= 3
     dear = max(mk, key=lambda b: b["mk"]["Ring"])
     for b in kb["brands"]:
@@ -315,15 +349,17 @@ def test_best_offer_asks_which_piece_then_ranks_jewellers_after_making_offers(tm
     p.write_text(json.dumps(kb), encoding="utf-8")
     r = _sona([{"lang": "en", "q": "best offer today"},
                {"q": "Ring"},
+               {"q": "Mumbai", "chip": True},
                {"lang": "en", "q": "sabse best offer kaunsa hai"},
                {"lang": "hi", "q": "best offer bangle", "chip": True},
                {"lang": "en", "q": "Tanishq offers"}], kb=str(p))
     assert r[0]["intent"] == "ask_cat" and len(r[0]["chips"]) == 4
-    assert r[1]["intent"] == "best_offer" and dear["n"] in r[1]["say"]
-    assert "(−100%)" in r[1]["html"] and "tentative" in r[1]["html"]
-    assert r[2]["intent"] == "ask_cat"
-    assert r[3]["intent"] in ("best_offer",) and r[3]["lang"] == "hi"
-    assert r[4]["intent"] == "offers"                 # one jeweller's offers stay as they were
+    assert r[1]["intent"] == "ask_city"               # which city? offers differ by city
+    assert r[2]["intent"] == "best_offer" and dear["n"] in r[2]["say"]
+    assert "(−100%)" in r[2]["html"] and "tentative" in r[2]["html"] and "Mumbai" in r[2]["html"]
+    assert r[3]["intent"] == "ask_cat"
+    assert r[4]["intent"] in ("best_offer",) and r[4]["lang"] == "hi"   # the city is remembered
+    assert r[5]["intent"] == "offers"                 # one jeweller's offers stay as they were
 
 
 def test_making_offer_ranks_only_flat_offers_on_gold_jewellery():
@@ -361,7 +397,8 @@ def test_best_deal_at_one_jeweller_is_an_approximate_bill(tmp_path):
                {"lang": "hi", "q": "तनिष्क पर बेस्ट डील अंगूठी"},
                {"lang": "en", "q": f"best deal ring at {nomk['n']}"},
                {"lang": "en", "q": "tanishq offers"},
-               {"lang": "en", "q": "best offer on a ring"}], kb=str(p))
+               {"lang": "en", "q": "best offer on a ring"},
+               {"q": "Mumbai", "chip": True}], kb=str(p))
     assert r[0]["intent"] == "ask_cat" and len(r[0]["chips"]) == 4
     gold = b["r24"] * 22 / 24 * 10
     total = round(gold + gold * 0.20 * 0.90 + (gold + gold * 0.20 * 0.90) * 0.03)
@@ -370,7 +407,8 @@ def test_best_deal_at_one_jeweller_is_an_approximate_bill(tmp_path):
     assert r[2]["intent"] == "brand_deal" and r[2]["lang"] == "hi" and "अनुमानित" in r[2]["html"]
     assert r[3]["intent"] == "brand_deal" and "typical" in r[3]["html"]
     assert r[4]["intent"] == "offers"                                  # a jeweller's offers stay as they were
-    assert r[5]["intent"] == "best_offer" and "Approximate bill for" in r[5]["html"]   # the breakup for #1
+    assert r[5]["intent"] == "ask_city"
+    assert r[6]["intent"] == "best_offer" and "Approximate bill for" in r[6]["html"]   # the breakup for #1
 
 
 def test_gold_around_the_world(tmp_path):
