@@ -797,6 +797,12 @@ REGION_MAP = {
     "navratan-jewellers": ["Madhya Pradesh"],
     # added 2026-10-31: 14 stores in MP, Rajasthan and Gujarat (based in Ratlam)
     "dp-jewellers": ["Madhya Pradesh", "Rajasthan", "Gujarat"],
+    # 2026-11-02: were shown as national; their stores are regional (owner
+    # saw GRT offered in Mumbai, where it has no store)
+    "grt": ["Tamil Nadu", "Andhra Pradesh", "Telangana", "Karnataka", "Puducherry"],
+    "josalukkas": ["Kerala", "Tamil Nadu", "Karnataka", "Andhra Pradesh", "Telangana"],
+    "bhima": ["Kerala", "Tamil Nadu", "Karnataka", "Andhra Pradesh", "Telangana"],
+    "png": ["Maharashtra", "Goa"],
 }
 
 
@@ -4451,6 +4457,7 @@ document.getElementById('mkGo').addEventListener('click',function(){
             "khimji": "east",
             "rushabh": "west", "swarn-jewellers": "north", "navratan-jewellers": "west",
             "dp-jewellers": "west",
+            "grt": "south", "josalukkas": "south", "bhima": "south", "png": "west",
         }
         pulse_brands = []
         for _r in sorted(live, key=lambda x: x["canonical_24k_pre_gst"]):

@@ -264,8 +264,17 @@ def test_region_restricted_brands_are_not_national():
 
 
 def test_national_brands_are_visible_by_default():
-    for slug in ("tanishq", "senco", "caratlane", "kalyan", "grt", "indriya"):
+    for slug in ("tanishq", "senco", "caratlane", "kalyan", "malabar", "indriya"):
         assert _nat_flag(slug), f"{slug} is national and must show by default"
+
+
+def test_south_chains_are_not_shown_as_national():
+    """GRT, Jos Alukkas and Bhima have no Mumbai stores (owner, 2 Nov 2026):
+    shown as national, they turned up in Mumbai's offers."""
+    import generate_site
+    for slug in ("grt", "josalukkas", "bhima"):
+        assert not _nat_flag(slug), slug
+        assert "Maharashtra" not in generate_site.REGION_MAP[slug], slug
 
 
 def test_region_map_is_not_empty():
