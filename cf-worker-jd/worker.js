@@ -260,6 +260,10 @@ async function requireEntitled(env, request) {
 }
 
 export default {
+  // Cron (wrangler.toml): keep a fresh copy of the jewellers' rate lines.
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(snapshotPages(env));
+  },
   async fetch(request, env) {
     const c = cors(request);
     const wrap = (res) => {
@@ -284,7 +288,7 @@ export default {
         case 'GET /jd/issue':     return wrap(await handleIssue(request, env));
         case 'POST /sub/confirm': return wrap(await handleSubConfirm(request, env));
         case 'POST /sub/google':  return wrap(await handleSubGoogle(request, env));
-        case 'GET /page/manubhai': return wrap(await handlePage('manubhai'));
+        case 'GET /page/manubhai': return wrap(await handlePage('manubhai', env));
         default:                   return wrap(json({ error: 'not found' }, 404));
       }
     } catch (e) {
@@ -956,20 +960,61 @@ async function handleSubGoogle(request, env) {
 }
 
 // ─── jeweller rate pages ────────────────────────────────────────────────
-// Some jewellers' sites refuse the rate collector's GitHub Actions address.
-// This fetches ONE fixed page per jeweller (no URL parameter, so it cannot
-// be pointed anywhere else) and hands the HTML to collect.py, which reads
-// the rate and checks the page's date as usual.
+// Some jewellers' sites refuse the rate collector's GitHub Actions address,
+// and a Worker fetch made on GitHub's behalf is refused too (the site sees
+// who asked). So the Worker also fetches the page on its OWN schedule and
+// keeps just the rate lines in storage (jd-reports/pages/<slug>.html).
+// GET /page/<slug> serves the live page when it can, else that snapshot;
+// collect.py reads either and checks the page's date as usual, so an old
+// snapshot is refused, never published. One fixed URL per slug, no URL
+// parameter: this cannot be pointed anywhere else.
 const RATE_PAGES = { manubhai: 'https://manubhai.in/' };
+const PAGE_HEADERS = {
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                + '(KHTML, like Gecko) Chrome/126.0 Safari/537.36',
+  accept: 'text/html', 'accept-language': 'en-IN,en;q=0.9',
+};
+const htmlResp = (html, status, from) => new Response(html, { status,
+  headers: { 'content-type': 'text/html; charset=utf-8', 'x-page-source': from } });
 
-async function handlePage(slug) {
-  const r = await fetch(RATE_PAGES[slug], {
-    headers: { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-                             + '(KHTML, like Gecko) Chrome/126.0 Safari/537.36',
-               accept: 'text/html', 'accept-language': 'en-IN,en;q=0.9' },
-    redirect: 'follow',
-  });
-  const html = await r.text();
-  return new Response(html, { status: r.ok ? 200 : 502,
-    headers: { 'content-type': 'text/html; charset=utf-8', 'x-upstream-status': String(r.status) } });
+// Just the lines that carry a rate and its date, as a tiny HTML page.
+function rateLines(html) {
+  const text = html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
+                   .replace(/<[^>]+>/g, '\n').replace(/&#8377;|&#x20b9;/gi, '\u20b9')
+                   .replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ');
+  const lines = [...new Set(text.split('\n').map((l) => l.replace(/\s+/g, ' ').trim())
+    .filter((l) => /gold rate as on/i.test(l) && /\d/.test(l) && l.length < 200))];
+  if (!lines.length) return null;
+  return '<html><body>' + lines.map((l) => '<p>' + l.replace(/[<>&]/g, '') + '</p>').join('')
+         + '</body></html>';
+}
+
+const storagePath = (env, slug) =>
+  `${env.SUPABASE_URL}/storage/v1/object/jd-reports/pages/${slug}.html`;
+const storageAuth = (env) => ({ apikey: env.SUPABASE_SERVICE_KEY,
+                                Authorization: `Bearer ${env.SUPABASE_SERVICE_KEY}` });
+
+async function snapshotPages(env) {
+  for (const [slug, url] of Object.entries(RATE_PAGES)) {
+    try {
+      const r = await fetch(url, { headers: PAGE_HEADERS, redirect: 'follow' });
+      const body = r.ok ? rateLines(await r.text()) : null;
+      if (!body) { console.error(`snapshot ${slug}: status ${r.status}, no rate lines`); continue; }
+      const up = await fetch(storagePath(env, slug), { method: 'POST',
+        headers: { ...storageAuth(env), 'content-type': 'text/html', 'x-upsert': 'true' },
+        body });
+      if (!up.ok) console.error(`snapshot ${slug}: store failed ${up.status}`);
+    } catch (e) { console.error(`snapshot ${slug}:`, e && e.message); }
+  }
+}
+
+async function handlePage(slug, env) {
+  const r = await fetch(RATE_PAGES[slug], { headers: PAGE_HEADERS, redirect: 'follow' });
+  if (r.ok) return htmlResp(await r.text(), 200, 'live');
+  if (env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY) {
+    const s = await fetch(storagePath(env, slug).replace('/object/', '/object/authenticated/'),
+                          { headers: storageAuth(env) });
+    if (s.ok) return htmlResp(await s.text(), 200, `snapshot (live ${r.status})`);
+  }
+  return htmlResp('', 502, `none (live ${r.status})`);
 }
