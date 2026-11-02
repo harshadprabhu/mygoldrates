@@ -190,8 +190,7 @@ def main():
             open(args.preview + ".txt", "w", encoding="utf-8").write(text)
         print(f"promo: preview written to {args.preview}; nothing sent")
         return
-    subs = sb.table("inquiries").select("name, email, unsub_token").execute().data
-    subs = [s for s in subs if s.get("email") and s.get("unsub_token")]
+    subs = [s for s in SA.subscribers(sb, "name, email, unsub_token") if SA.mailable(s)]
 
     def build(s):
         first = (s.get("name") or "there").strip().split(" ")[0] or "there"

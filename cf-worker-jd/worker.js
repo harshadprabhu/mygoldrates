@@ -35,6 +35,8 @@
  *                         without it a repriced plan can charge silently.
  *   JD_SESSION_SECRET     signs session tokens and keys the login-code HMAC
  *   BREVO_API_KEY, ALERTS_FROM   send the sign-in code email
+ *   GOOGLE_CLIENT_ID      the site's Google sign-in client; a Google token
+ *                         for any other client is not accepted as proof
  *
  * NOTHING here is edge-cached. Caching an entitlement decision or a signed
  * URL would serve one jeweller's access to the next caller.
@@ -280,6 +282,8 @@ export default {
         case 'GET /jd/report':    return wrap(await handleReport(request, env));
         case 'GET /jd/rates':     return wrap(await handleRates(request, env, url));
         case 'GET /jd/issue':     return wrap(await handleIssue(request, env));
+        case 'POST /sub/confirm': return wrap(await handleSubConfirm(request, env));
+        case 'POST /sub/google':  return wrap(await handleSubGoogle(request, env));
         default:                   return wrap(json({ error: 'not found' }, 404));
       }
     } catch (e) {
@@ -793,30 +797,18 @@ async function handleLoginStart(request, env) {
     return json({ error: 'sign-in is not available right now' }, 503);
   }
 
-  const raw = (env.ALERTS_FROM || 'MyGoldRates <alerts@mygoldrates.com>').trim();
-  const sm = raw.match(/^(.*)<([^>]+)>$/);
-  const sender = sm ? { name: sm[1].trim() || 'MyGoldRates', email: sm[2].trim() }
-                    : { name: 'MyGoldRates', email: raw };
-  const r = await fetch('https://api.brevo.com/v3/smtp/email', {
-    method: 'POST',
-    headers: { 'api-key': env.BREVO_API_KEY, 'content-type': 'application/json',
-               accept: 'application/json' },
-    body: JSON.stringify({
-      sender,
-      to: [{ email }],
-      subject: `${code} is your Jewellers Digest sign-in code`,
-      textContent: `Your Jewellers Digest sign-in code is ${code}.\n\n`
-        + `It expires in ${CODE_TTL_MIN} minutes. If you did not ask for it, `
-        + 'ignore this email - nobody can sign in without the code.\n\n'
-        + 'MyGoldRates.com',
-      htmlContent: '<div style="font-family:Arial,sans-serif;font-size:15px;'
-        + 'color:#222"><p>Your Jewellers Digest sign-in code is</p>'
-        + `<p style="font-size:30px;font-weight:700;letter-spacing:6px">${code}</p>`
-        + `<p>It expires in ${CODE_TTL_MIN} minutes. If you did not ask for it, `
-        + 'ignore this email &mdash; nobody can sign in without the code.</p>'
-        + '<p style="color:#777">MyGoldRates.com</p></div>',
-    }),
-  });
+  const r = await sendMail(env, email,
+    `${code} is your Jewellers Digest sign-in code`,
+    `Your Jewellers Digest sign-in code is ${code}.\n\n`
+      + `It expires in ${CODE_TTL_MIN} minutes. If you did not ask for it, `
+      + 'ignore this email - nobody can sign in without the code.\n\n'
+      + 'MyGoldRates.com',
+    '<div style="font-family:Arial,sans-serif;font-size:15px;'
+      + 'color:#222"><p>Your Jewellers Digest sign-in code is</p>'
+      + `<p style="font-size:30px;font-weight:700;letter-spacing:6px">${code}</p>`
+      + `<p>It expires in ${CODE_TTL_MIN} minutes. If you did not ask for it, `
+      + 'ignore this email &mdash; nobody can sign in without the code.</p>'
+      + '<p style="color:#777">MyGoldRates.com</p></div>');
   if (!r.ok) {
     console.error('login: brevo send failed', r.status);
     return json({ error: 'could not send the code - try again shortly' }, 502);
@@ -861,4 +853,103 @@ async function handleLoginVerify(request, env) {
     entitlement: access(env, await entitlementFor(env, account.id)),
     expires_in_days: SESSION_DAYS,
   });
+}
+
+// ─── mail ───────────────────────────────────────────────────────────────
+function sendMail(env, to, subject, text, html) {
+  const raw = (env.ALERTS_FROM || 'MyGoldRates <alerts@mygoldrates.com>').trim();
+  const sm = raw.match(/^(.*)<([^>]+)>$/);
+  const sender = sm ? { name: sm[1].trim() || 'MyGoldRates', email: sm[2].trim() }
+                    : { name: 'MyGoldRates', email: raw };
+  return fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': env.BREVO_API_KEY, 'content-type': 'application/json',
+               accept: 'application/json' },
+    body: JSON.stringify({ sender, to: [{ email: to }], subject,
+                           textContent: text, htmlContent: html }),
+  });
+}
+
+// ─── subscriber email confirmation ──────────────────────────────────────
+// A typed-in address gets one "confirm your email" message and no other
+// mail until its link is clicked (sql/confirm_email.sql). The database
+// trigger and the daily-mail job call /sub/confirm; the page calls
+// /sub/google with Google's signed token after a Google sign-in.
+//
+// /sub/confirm needs no secret: it can only mail an address already in the
+// subscriber list, only while unconfirmed, and confirm_request() allows one
+// message per address per 24 hours. Its answer is the same either way, so it
+// tells a caller nothing about who is subscribed.
+const SITE = 'https://mygoldrates.com';
+
+async function sendConfirmation(env, email) {
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_KEY || !env.BREVO_API_KEY) {
+    console.error('confirm: not configured');
+    return false;
+  }
+  const r = await sb(env, 'rpc/confirm_request', {
+    method: 'POST', body: JSON.stringify({ p_email: email }) });
+  const row = r.ok && Array.isArray(r.body) ? r.body[0] : null;
+  if (!row || !row.token) return false;          // confirmed, unknown, or sent today
+  const link = `${SITE}/confirm?t=${encodeURIComponent(row.token)}`;
+  const first = String(row.name || '').trim().split(/\s+/)[0].replace(/[<>&"]/g, '');
+  const hi = first ? `Hi ${first},` : 'Hi,';
+  const m = await sendMail(env, email, 'Confirm your email for MyGoldRates gold-rate alerts',
+    `${hi}\n\nSomeone (hopefully you) signed this address up for gold-rate `
+      + `alerts on MyGoldRates.com. Confirm it here:\n\n${link}\n\n`
+      + 'If it was not you, ignore this email. Without the click this address '
+      + 'gets nothing more from us.\n\nMyGoldRates.com',
+    '<div style="font-family:Arial,sans-serif;font-size:15px;color:#222;max-width:520px">'
+      + `<p>${hi}</p><p>Someone (hopefully you) signed this address up for `
+      + 'gold-rate alerts on MyGoldRates.com.</p>'
+      + `<p style="margin:24px 0"><a href="${link}" style="background:#C9A227;color:#1a1a1a;`
+      + 'padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700">'
+      + 'Confirm my email</a></p>'
+      + '<p style="color:#555">If it was not you, ignore this email. Without the '
+      + 'click this address gets nothing more from us.</p>'
+      + '<p style="color:#777">MyGoldRates.com</p></div>');
+  if (!m.ok) console.error('confirm: brevo send failed', m.status);
+  return m.ok;
+}
+
+async function handleSubConfirm(request, env) {
+  let b;
+  try { b = await request.json(); } catch { return json({ error: 'bad JSON' }, 400); }
+  const email = String(b.email || '').trim().toLowerCase();
+  if (!EMAIL_RE.test(email)) return json({ error: 'valid email required' }, 400);
+  await sendConfirmation(env, email);
+  return json({ ok: true });
+}
+
+// Google's tokeninfo endpoint checks the signature and expiry; we check the
+// token was issued to OUR client and that Google vouches for the address.
+async function googleEmail(env, credential) {
+  if (!credential || !env.GOOGLE_CLIENT_ID) return null;
+  const r = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token='
+                        + encodeURIComponent(credential));
+  if (!r.ok) return null;
+  const t = await r.json();
+  if (t.aud !== env.GOOGLE_CLIENT_ID) return null;
+  if (!['accounts.google.com', 'https://accounts.google.com'].includes(t.iss)) return null;
+  if (String(t.email_verified) !== 'true' || !t.email) return null;
+  return String(t.email).toLowerCase();
+}
+
+async function handleSubGoogle(request, env) {
+  let b;
+  try { b = await request.json(); } catch { return json({ error: 'bad JSON' }, 400); }
+  const credential = String(b.credential || '');
+  const email = await googleEmail(env, credential);
+  if (email) {
+    for (let i = 0; i < 2; i++) {          // the row may land a moment later
+      const r = await sb(env, 'rpc/confirm_google', {
+        method: 'POST', body: JSON.stringify({ p_email: email }) });
+      if (r.ok && r.body === 'ok') return json({ ok: true, confirmed: true });
+      if (i === 0) await new Promise((res) => setTimeout(res, 1500));
+    }
+  }
+  // Token not usable: fall back to the emailed link for the claimed address.
+  const claimed = String(b.email || '').trim().toLowerCase();
+  if (EMAIL_RE.test(claimed)) await sendConfirmation(env, claimed);
+  return json({ ok: true, confirmed: false });
 }

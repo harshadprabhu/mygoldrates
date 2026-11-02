@@ -368,3 +368,16 @@ Recently added brands: Kisna (Shopify pagination), Indriya ('value per gm' extra
 - **GitHub scheduled workflow delays**: GitHub delays scheduled runs 30–120 min on private repos. The Cloudflare Worker is the reliable trigger; the GitHub crons in `rates.yml` are a fallback.
 - **Google sign-in**: FedCM (`renderButton`) is unreliable across browsers — the site uses OAuth popup via `initTokenClient` instead. The token client must be pre-warmed on page load (not lazily inside a timeout) to stay within the browser's user-gesture window for popups.
 - **`unsub_token` type**: The column is `uuid` in Supabase, not `text`. Never cast `gen_random_uuid()` to text in SQL migrations.
+
+## Email confirmation (double opt-in, owner-approved 2026-11-02)
+- `sql/confirm_email.sql`: inquiries.confirmed_at / confirm_sent_at /
+  confirm_token; confirm_subscriber(token) for the /confirm page (anon);
+  confirm_request(email) and confirm_google(email) for the Worker only
+  (service_role); a pg_net trigger on inquiries that asks the JD Worker to
+  mail the confirmation for any unconfirmed non-Google row.
+- `cf-worker-jd` POST /sub/confirm {email} (one mail per address per 24 h,
+  same answer for everyone) and POST /sub/google {credential, email} (Google
+  tokeninfo, aud must equal GOOGLE_CLIENT_ID; falls back to the mailed link).
+- send_alerts.py / promo_email.py mail only `mailable()` rows (confirmed);
+  `request_confirmations()` is the backstop for rows the trigger missed.
+- Never trust `google_email_verified` from the browser: it is self-reported.

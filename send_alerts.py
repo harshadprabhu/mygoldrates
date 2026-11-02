@@ -27,6 +27,54 @@ PURITY_FRACTION = {"24K": 0.999, "22K": 0.916, "18K": 0.750, "14K": 0.583}
 IST = timezone(timedelta(hours=5, minutes=30))
 
 
+
+JD_API = os.environ.get("JD_API_BASE", "https://mygoldrates-jd-api.harshads-priority.workers.dev")
+
+
+def subscribers(sb, cols):
+    """Subscriber rows with `cols`, plus confirmed_at when the column exists.
+
+    Without sql/confirm_email.sql the column is missing; every row then counts
+    as confirmed, which is how mail went out before confirmation existed.
+    """
+    try:
+        return sb.table("inquiries").select(cols + ", confirmed_at").execute().data
+    except Exception:
+        return sb.table("inquiries").select(cols).execute().data
+
+
+def mailable(s):
+    """Has an address, is still subscribed, and confirmed it (or predates confirmation)."""
+    return bool(s and s.get("email") and s.get("unsub_token")
+                and ("confirmed_at" not in s or s.get("confirmed_at")))
+
+
+def request_confirmations(sb, limit=50):
+    """Backstop for the database trigger: any unconfirmed address that never
+    got its confirmation email (trigger missed, Google token never arrived)
+    is handed to the Worker, which sends it. Never raises."""
+    now = datetime.now(timezone.utc)
+    try:
+        rows = sb.table("inquiries").select("email").is_("confirmed_at", "null") \
+                 .is_("confirm_sent_at", "null") \
+                 .lt("created_at", (now - timedelta(minutes=10)).isoformat()) \
+                 .gt("created_at", (now - timedelta(days=7)).isoformat()) \
+                 .limit(limit).execute().data
+    except Exception as e:
+        print(f"confirmations: skipped ({type(e).__name__})")
+        return 0
+    n = 0
+    for r in rows:
+        if not r.get("email"):
+            continue
+        try:
+            requests.post(f"{JD_API}/sub/confirm", json={"email": r["email"]}, timeout=15)
+            n += 1
+        except Exception:
+            pass
+    print(f"confirmations: requested {n}")
+    return n
+
 def inr(v):
     """Indian-style grouping: 1,23,456."""
     n = int(round(v))
@@ -155,8 +203,8 @@ def send_referral_notices(sb, key, from_name, from_email):
         return 0
     if not refs:
         return 0
-    subs = {(s.get("email") or "").lower(): s for s in sb.table("inquiries")
-            .select("name, email, unsub_token").execute().data}
+    subs = {(s.get("email") or "").lower(): s
+            for s in subscribers(sb, "name, email, unsub_token")}
     codes = {r["email"].lower(): r["code"] for r in
              sb.table("referral_codes").select("email, code").execute().data}
     allrefs = sb.table("referrals").select("referrer_email").execute().data
@@ -164,7 +212,7 @@ def send_referral_notices(sb, key, from_name, from_email):
     for r in refs:
         who = subs.get(r["referrer_email"].lower())
         friend = subs.get(r["referred_email"].lower())
-        if not who or not friend or not who.get("unsub_token"):
+        if not friend or not mailable(who):
             continue
         first = (who.get("name") or "there").strip().split(" ")[0] or "there"
         label = friend_label(friend.get("name"), friend.get("email"))
@@ -375,16 +423,16 @@ def send_price_alerts(sb, key, from_name, from_email, base, date):
     lowest = min(base, key=lambda r: r["canonical_24k_pre_gst"])
     low = ladder(lowest["canonical_24k_pre_gst"])
     brand = lowest["brands"]["name"]
-    subs = {(s.get("email") or "").lower(): s for s in sb.table("inquiries")
-            .select("name, email, unsub_token").execute().data}
+    subs = {(s.get("email") or "").lower(): s
+            for s in subscribers(sb, "name, email, unsub_token")}
     sent = 0
     for a in alerts:
         rate = low.get(a["karat"])
         if rate is None or rate > float(a["target"]):
             continue
         s = subs.get(a["email"].lower())
-        if not s or not s.get("unsub_token"):
-            continue                      # unsubscribed since: say nothing
+        if not mailable(s):
+            continue                      # unsubscribed or unconfirmed: say nothing
         first = (s.get("name") or "there").strip().split(" ")[0] or "there"
         unsub = f"{SITE_URL}/unsubscribe.html?t={s['unsub_token']}"
         try:
@@ -452,16 +500,16 @@ def main():
 
     # Price-drop alerts first: they are time-sensitive and independent of
     # whether anyone is due today's digest.
+    request_confirmations(sb)
     send_price_alerts(sb, key, from_name, from_email, base, date)
     send_referral_notices(sb, key, from_name, from_email)
 
     try:
-        subs = sb.table("inquiries") \
-                 .select("id, name, email, unsub_token, last_emailed").execute().data
+        subs = subscribers(sb, "id, name, email, unsub_token, last_emailed")
     except Exception as e:
         print(f"alerts: cannot read subscribers (run the emailer SQL?): {e}")
         return
-    pending = [s for s in subs if s.get("email") and s.get("unsub_token")
+    pending = [s for s in subs if mailable(s)
                and (not s.get("last_emailed") or s["last_emailed"] < today)]
     if not pending:
         print("alerts: nobody to email today")

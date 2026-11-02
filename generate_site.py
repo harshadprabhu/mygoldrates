@@ -2535,6 +2535,7 @@ def main():
     # loses its content or its schema.org anchor.
     inquiry = INQUIRY_TEMPLATE.substitute(**common)
     unsub = UNSUB_TEMPLATE.substitute(**common)
+    confirm = CONFIRM_TEMPLATE.substitute(**common)
 
     os.makedirs("docs", exist_ok=True)
     build_og_image()
@@ -2690,6 +2691,8 @@ def main():
         f.write(inquiry)
     with open("docs/unsubscribe.html", "w", encoding="utf-8") as f:
         f.write(unsub)
+    with open("docs/confirm.html", "w", encoding="utf-8") as f:
+        f.write(confirm)
 
     # ---- static content pages (About / Contact / Privacy) ----
     def write_page(slug, title, desc, heading, body):
@@ -5916,7 +5919,7 @@ GATE_CSS = """
 # if closed, again after 7 days, at most 3 times; never after subscribing.
 # On phones it is a bottom sheet that leaves the top of the page visible.
 ALERTS_POP_JS = r"""(function(){
-  var SKIP=/^\/(inquiry|unsubscribe|list-your-jewellery|jd-today|jewellers-digest|analytics|404)(\.html)?\/?$/;
+  var SKIP=/^\/(inquiry|unsubscribe|confirm|list-your-jewellery|jd-today|jewellers-digest|analytics|404)(\.html)?\/?$/;
   if(SKIP.test(location.pathname))return;
   // The homepage and city pages carry their own popup; never show two.
   if(document.getElementById('subPop'))return;
@@ -6096,6 +6099,8 @@ ALERTS_POP_JS = r"""(function(){
     save({email:p.email,name:p.name||'',picture_url:p.picture||'',locale:p.locale||'',
           google_id:p.sub||'',google_email_verified:!!p.email_verified,signup_method:'google'})
       .then(function(){s('gr_sub','1');
+        /* Google's signed token confirms the address (cf-worker-jd /sub/google) */
+        fetch('https://mygoldrates-jd-api.harshads-priority.workers.dev/sub/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:resp.credential,email:p.email})}).catch(function(){});
         try{localStorage.setItem('gr_user',JSON.stringify({email:p.email,name:p.name||null}));}catch(_){}
         ev('popup_google_ok');return price(p.email);})
       .then(function(t){done(p.email,t);})
@@ -6138,9 +6143,12 @@ ALERTS_POP_JS = r"""(function(){
       .then(function(res){if(res==='ok'){ev('price_alert_ok');return t;}return 0;})
       .catch(function(){return 0;});
   }
-  function done(email,t){
+  function done(email,t,typed){
     doneEmail=email;
-    $q('#grPopDone').innerHTML='Your first email arrives tomorrow morning'+
+    /* a typed-in address must confirm first (sql/confirm_email.sql) */
+    $q('#grPopDone').innerHTML=(typed?'<b>One step left:</b> open the email we just sent to '+
+      String(email).replace(/[<>&"]/g,'')+' and tap <b>Confirm my email</b>. Then your first email arrives the next morning':
+      'Your first email arrives tomorrow morning')+
       (t?', and we’ll email you the day 22K drops to <b>'+inr(t)+'/g</b> or lower.':'.');
     show('done');
   }
@@ -6150,7 +6158,7 @@ ALERTS_POP_JS = r"""(function(){
     b.disabled=true;b.textContent='Subscribing…';msg('');
     save({email:e,country:'India',signup_method:'popup'}).then(function(){
       s('gr_sub','1');ev('popup_email_ok');return price(e);
-    }).then(function(t){b.disabled=false;b.textContent='Send me tomorrow’s rates — free';done(e,t);})
+    }).then(function(t){b.disabled=false;b.textContent='Send me tomorrow’s rates — free';done(e,t,true);})
     .catch(function(){b.disabled=false;b.textContent='Send me tomorrow’s rates — free';
       msg('Couldn’t save that — please try again in a moment.')});
   }
@@ -6510,7 +6518,10 @@ GATE_JS = r"""
   }
 
   function onGoogleCred(resp){          // One Tap JWT credential
-    applyGoogleUser(resp&&resp.credential?decode(resp.credential):null);
+    var u=resp&&resp.credential?decode(resp.credential):null;
+    applyGoogleUser(u);
+    /* after the subscriber row is saved: Google's token confirms the address */
+    if(u&&u.email)setTimeout(function(){fetch('https://mygoldrates-jd-api.harshads-priority.workers.dev/sub/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:resp.credential,email:u.email})}).catch(function(){});},2000);
   }
 
   var gbtn=document.getElementById('gate-gbtn');
@@ -6849,8 +6860,9 @@ $nd_header
     by email. You can opt out any time.</span></label>
   <button class="btn btn-gold" type="submit" id="f-btn">Subscribe to daily rates</button>
   </div>
-  <div class="msg msg-ok" id="m-ok">You're in - the next morning's rates will
-  land in your inbox. You can reply to any email to unsubscribe.</div>
+  <div class="msg msg-ok" id="m-ok">Almost done - open the email we just sent
+  and tap "Confirm my email". The next morning's rates follow. Every email has
+  a one-click unsubscribe.</div>
   <div class="msg msg-err" id="m-err">Something went wrong - please check the
   highlighted fields and try again.</div>
   <p class="privacy">Your details are used only to send the daily gold-rate
@@ -7078,6 +7090,65 @@ $nd_footer
 <script src="$site_url/alerts-pop.js?v=$sig_ver" defer></script>
 <script src="$site_url/assistant.js?v=$sig_ver" defer></script>
 $extra_js
+</body>
+</html>
+""")
+
+
+# The link in the "confirm your email" message (sql/confirm_email.sql).
+CONFIRM_TEMPLATE = Template("""<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Confirm your email - GoldRates</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
+<link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+$nd_fonts
+<style>
+$base_css
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:34px;max-width:520px;margin:26px 0;text-align:center}
+.card h1{font-size:26px;margin:0 0 10px}
+.card p{color:var(--ink-2);font-size:15px;margin:8px 0}
+$nd_css
+</style>
+</head>
+<body>
+$nd_header
+<div class="wrap">
+<div class="card">
+  <h1 id="h">Confirming your email&hellip;</h1>
+  <p id="msg">One moment.</p>
+  <p style="margin-top:16px"><a class="btn" href="$site_url/">See today&rsquo;s gold rates</a></p>
+</div>
+</div>
+$nd_footer
+<script>
+(function(){
+  var URL_="$supabase_url", KEY="$anon_key";
+  var h=document.getElementById('h'), msg=document.getElementById('msg');
+  function show(a,b){h.textContent=a;msg.textContent=b;}
+  var t=new URLSearchParams(location.search).get('t')||'';
+  if(!/^[0-9a-f-]{36}$$/i.test(t)){show('This link looks broken','Please open the link from the email again.');return;}
+  if(!KEY){show('Not available right now','Please try the link again in a little while.');return;}
+  fetch(URL_+'/rest/v1/rpc/confirm_subscriber',{method:'POST',
+    headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
+    body:JSON.stringify({p_token:t})})
+  .then(function(r){return r.ok?r.json():null;})
+  .then(function(v){
+    if(v==='ok'){
+      try{localStorage.setItem('gr_sub','1');}catch(_){}
+      show('Email confirmed','You will now get gold-rate updates and any price-drop alert you set. Every email has a one-click unsubscribe.');
+    } else show('This link has expired or was already replaced','Sign up again on the site and we will send a fresh link.');
+  })
+  .catch(function(){show('Something went wrong','Please open the link from the email again.');});
+})();
+</script>
 </body>
 </html>
 """)
