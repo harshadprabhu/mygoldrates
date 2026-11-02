@@ -9,6 +9,11 @@ compatibility_date = "2024-11-01"
 # time-bound: an entitlement decision or a signed report URL served from a
 # shared cache would hand one jeweller's access to the next caller.
 
+# Every 15 min, 08:30-22:15 IST: snapshot the rate lines of jewellers whose
+# sites refuse the collector (worker.js RATE_PAGES / snapshotPages).
+[triggers]
+crons = ["*/15 3-16 * * *"]
+
 [observability]
 enabled = true
 
