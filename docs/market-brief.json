@@ -326,7 +326,7 @@
   "2026-11-02": {
    "date": "2026-11-02",
    "paragraphs": [
-    "International gold is at $3,900 an ounce (+0.60% since 01 Nov), the rupee at ₹95.08 to the dollar (weaker by 0.03%), and the Indian jeweller board median at ₹13,946/g for 24K (+0.42%). In rupee terms the move came mostly from the world gold price (+0.60% gold, +0.03% USD/INR).",
+    "International gold is at $3,928 an ounce (+1.33% since 01 Nov), the rupee at ₹95.08 to the dollar (weaker by 0.03%), and the Indian jeweller board median at ₹13,946/g for 24K (+0.42%). In rupee terms the move came mostly from the world gold price (+1.33% gold, +0.03% USD/INR).",
     "What the world's gold news is about today: US interest rates (1 headline), Geopolitics and safe-haven buying (1 headline), Indian demand (1 headline), Records and profit-taking (1 headline).",
     "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMilgFBVV95cUxONDRKZlJySGt5dFN1MlhQRzhIeDFLeEtYa1owOW9mYXVjWE53blNoMnRuV1dfOVFlVENxYXFNemcwcG9SQ2JodGthWDEzMzNIOElFTDJXd25wN3R3TkFlcDU3dmZPWndQNEJnRGVVdzJXaVh2djUwNXh4Vm41Q3J5R0dJQ0Y0clRCMFgtVFpNTWtqcG1fbkHSAZYBQVVfeXFMTjQ0SmZSckhreXRTdTJYUEc4SHgxS3hLWGtaMDlvZmF1Y1hOd25TaDJ0bldXXzlRZVRDcWFxTXpnMHBvUkNiaHRrYVgxMzMzSDhJRUwyV3ducDd0d05BZXA1N3ZmT1p3UDRCZ0RlVXcyV2lYdnY1MDV4eFZuNUNyeUdHSUNGNHJUQjBYLVRaTU1ranBtX25B?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold rises on softer oil; Markets parse Fed signals</a> (CNBC).",
     "<strong>Geopolitics and safe-haven buying.</strong> Uncertainty sends investors to gold as a store of value. In the news: <a href=\"https://news.google.com/rss/articles/CBMinAFBVV95cUxQeU1VOHlYd2ZqeWRUT0lDcTVfci1zamZqTVFPLThtZ1ZvWFRjNE1jeTllZUpocE1ZMEpkeFJQc3BZWWlEVVNRZHNXYXFsN3YzWUVtWmpDMlYzWW9uYzBNcHlKNDZ3cWNveXAxa1ZIODk4TVNrRmdpcUNVQjJqWnNoZE5FZU1xdjFzNndxclU5NHp0R1FwcFVCQzFjVWQ?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Is a liquidity crisis behind the sharp plunge in gold prices? A similar scenario unfolded in 2008, followed by a 250% surge over the next three years.</a> (富途牛牛).",
@@ -336,10 +336,10 @@
    ],
    "snap": {
     "board24": 13945.68,
-    "gold_usd": 3899.600098,
+    "gold_usd": 3927.899902,
     "usdinr": 95.082494
    },
-   "summary": "gold +0.6%, news led by us interest rates",
+   "summary": "gold +1.3%, news led by us interest rates",
    "themes": {
     "india_demand": 1,
     "momentum": 1,
