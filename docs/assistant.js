@@ -3048,7 +3048,8 @@
     try { input.focus(); } catch (_) {}
   }
   function endConvo() { convo = false; if (panel) panel.classList.remove('sn-convo'); }
-  function resume() { if (convo && opened && !listening) setTimeout(function () { if (convo && opened && !listening) { autoListen = true; listen(); } }, 350); }
+  // after her own voice an iPhone needs a moment before the mic hears again
+  function resume() { if (convo && opened && !listening) setTimeout(function () { if (convo && opened && !listening) { autoListen = true; listen(); } }, IOS ? 1000 : 350); }
   var TTS = window.speechSynthesis, ttsOn = false;      // read every reply aloud; a spoken question is always answered aloud
   try { ttsOn = localStorage.getItem('sona_tts') === '1'; } catch (_) {}
   var ICON = {
@@ -3219,8 +3220,13 @@
     if (listening && !fallback) { try { rec.stop(); } catch (_) {} var r0 = rec; setTimeout(function () { if (rec === r0 && listening) { try { r0.abort(); } catch (_) {} if (r0.onend) r0.onend(); } }, 1200); return; }
     hush();
     micUsed = micLang();
-    rec = new SR(); rec.lang = fallback || bcp(micUsed); rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
-    var heard = '', done = false, quiet = null, cap = null, me = rec;
+    // iPhone Safari gives microphone audio reliably only to the first
+    // recogniser a page makes - later new ones hear silence - so on iPhone
+    // the same one is started again for every turn. A session number keeps
+    // an earlier turn's timers from stopping this one.
+    if (!(IOS && rec && !fallback)) rec = new SR();
+    rec.lang = fallback || bcp(micUsed); rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
+    var heard = '', done = false, quiet = null, cap = null, me = rec, sess = (me._sess = (me._sess || 0) + 1);
     me._auto = autoListen; autoListen = false;
     // iPhone Safari does not stop by itself when the visitor stops talking
     // (Android does): stop after a short silence, or if nothing is said, or
@@ -3231,7 +3237,8 @@
       if (rec === me) setListening(false);
       var said = heard.trim();
       if (!said) {
-        if (IOS && !me._auto && !heardOnce) { kbDictate('mic_ios_kb'); return; }
+        track('mic_empty' + (IOS ? '_ios' : '') + (me._auto ? '_auto' : '') + '_' + Math.min(sess, 5));
+        if (IOS && !me._auto) { kbDictate('mic_ios_kb'); return; }
         if (convo) { endConvo(); note(t('cv_end')); }
         return;
       }
@@ -3244,8 +3251,9 @@
     function stop(ms) {
       clearTimeout(quiet);
       quiet = setTimeout(function () {
+        if (done || me._sess !== sess) return;
         try { me.stop(); } catch (_) {}
-        setTimeout(function () { try { me.abort(); } catch (_) {} finish(); }, 1200);
+        setTimeout(function () { if (!done && me._sess === sess) { try { me.abort(); } catch (_) {} } finish(); }, 1200);
       }, ms);
     }
     rec.onresult = function (e) {
