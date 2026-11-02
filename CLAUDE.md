@@ -381,3 +381,14 @@ Recently added brands: Kisna (Shopify pagination), Indriya ('value per gm' extra
 - send_alerts.py / promo_email.py mail only `mailable()` rows (confirmed);
   `request_confirmations()` is the backstop for rows the trigger missed.
 - Never trust `google_email_verified` from the browser: it is self-reported.
+
+## Running SQL (owner's request 2026-11-02: don't hand SQL to the owner)
+- Use the `db-run` workflow: commit the file under `sql/`, then
+  `gh api -X POST repos/harshadprabhu/mygoldrates/actions/workflows/db-run.yml/dispatches -f ref=main -f inputs[file]=sql/<file>.sql`;
+  the result is in the job's "db-run exit" annotation. Show the owner any
+  data-changing SQL before running it.
+- It needs a GitHub secret `SUPABASE_ACCESS_TOKEN` (Supabase personal access
+  token) or `SUPABASE_DB_URL` (session pooler connection string). As of
+  2026-11-02 neither is set ("secrets present: none of the expected names"),
+  so SQL still goes to the owner until one is added. Test with
+  `sql/inspect_db.sql` (read-only).
