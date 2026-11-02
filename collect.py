@@ -75,6 +75,12 @@ PURITY_FRACTION = {"24K": 24 / 24, "22K": 22 / 24, "18K": 18 / 24, "14K": 14 / 2
 # DB schema change is needed.
 NEEDS_PROXY = set()
 
+# Jewellers whose site refuses GitHub Actions' address: their one rate page
+# is fetched by the JD Worker (cf-worker-jd GET /page/<slug>, a fixed URL per
+# slug) and read here as usual, date check included.
+JD_API = os.environ.get("JD_API_BASE", "https://mygoldrates-jd-api.harshads-priority.workers.dev")
+RELAY_PAGES = {"manubhai": "https://manubhai.in/"}
+
 # Browser actions Zyte runs before returning HTML, per slug (CaratLane reads
 # from its digital-gold page and needs no interaction; other slugs absent
 # from this dict get none). Malabar is a React SPA (#spa-root) whose rate
@@ -1307,6 +1313,16 @@ def collect_brand(b, session):
             ok, why = ordering_sane(found)
             if ok:
                 return (b.get("rate_url") or "graphql"), found, counts, "api/graphql", "ok"
+
+    if slug in RELAY_PAGES:
+        try:
+            r = session.get(f"{JD_API}/page/{slug}", timeout=FULL_TIMEOUT)
+            if r.status_code == 200:
+                found, counts, how, note = try_html(r.text)
+                if found:
+                    return RELAY_PAGES[slug], found, counts, f"relay/{how}", note
+        except requests.RequestException:
+            pass
 
     if slug == "dp-jewellers":
         hit = _fetch_dp_rates(session)
