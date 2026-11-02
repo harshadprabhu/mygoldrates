@@ -284,6 +284,7 @@ export default {
         case 'GET /jd/issue':     return wrap(await handleIssue(request, env));
         case 'POST /sub/confirm': return wrap(await handleSubConfirm(request, env));
         case 'POST /sub/google':  return wrap(await handleSubGoogle(request, env));
+        case 'GET /page/manubhai': return wrap(await handlePage('manubhai'));
         default:                   return wrap(json({ error: 'not found' }, 404));
       }
     } catch (e) {
@@ -952,4 +953,23 @@ async function handleSubGoogle(request, env) {
   const claimed = String(b.email || '').trim().toLowerCase();
   if (EMAIL_RE.test(claimed)) await sendConfirmation(env, claimed);
   return json({ ok: true, confirmed: false });
+}
+
+// ─── jeweller rate pages ────────────────────────────────────────────────
+// Some jewellers' sites refuse the rate collector's GitHub Actions address.
+// This fetches ONE fixed page per jeweller (no URL parameter, so it cannot
+// be pointed anywhere else) and hands the HTML to collect.py, which reads
+// the rate and checks the page's date as usual.
+const RATE_PAGES = { manubhai: 'https://manubhai.in/' };
+
+async function handlePage(slug) {
+  const r = await fetch(RATE_PAGES[slug], {
+    headers: { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                             + '(KHTML, like Gecko) Chrome/126.0 Safari/537.36',
+               accept: 'text/html', 'accept-language': 'en-IN,en;q=0.9' },
+    redirect: 'follow',
+  });
+  const html = await r.text();
+  return new Response(html, { status: r.ok ? 200 : 502,
+    headers: { 'content-type': 'text/html; charset=utf-8', 'x-upstream-status': String(r.status) } });
 }
