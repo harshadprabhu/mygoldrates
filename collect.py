@@ -54,6 +54,13 @@ OUTLIER_TOLERANCE = 0.04
 GROSS_OUTLIER = 0.20
 RATIO_TOLERANCE = 0.015
 MIN_FOR_MEDIAN = 5
+# A jeweller's site can stop updating while still serving a rate (Waman Hari
+# Pethe's price config sat at the 31 Oct value for days). A rate unchanged for
+# FROZEN_DAYS days while the market median moved more than FROZEN_MOVE is
+# quarantined: it is that site's old rate, not today's.
+FROZEN_DAYS = 2
+FROZEN_MOVE = 0.0075
+FROZEN_SAME = 0.0005
 
 # General formula: Unknown Rate = (Known Rate / Known Karat) x Unknown Karat.
 # 24K uses 1.0 — canonical_24k_pre_gst IS the per-gram 24K price. Dividing the
@@ -1478,6 +1485,44 @@ def from_submission(sb, b):
     return b["rate_url"], found, {k: 1 for k in found}, "submitted", "ok"
 
 
+def frozen_note(today, value, today_median, own, medians,
+                days=FROZEN_DAYS, move=FROZEN_MOVE, same=FROZEN_SAME):
+    """A note if a brand's rate is stuck while the market moved, else None.
+
+    today: date; value: today's canonical 24K; own: {date: canonical} for the
+    brand's earlier days; medians: {date: market median} for earlier days.
+    """
+    back = [today - timedelta(days=i) for i in range(1, days + 1)]
+    if any(d not in own or abs(own[d] - value) / value > same for d in back):
+        return None
+    base = medians.get(back[-1])
+    if not base or not today_median:
+        return None
+    moved = abs(today_median - base) / base
+    if moved <= move:
+        return None
+    return (f"STALE: unchanged since {back[-1].isoformat()} while the market "
+            f"moved {moved*100:.1f}%")
+
+
+def history_since(sb, today, days=FROZEN_DAYS):
+    """-> ({brand_id: {date: canonical}}, {date: median}) for the days before today."""
+    start = (today - timedelta(days=days)).isoformat()
+    rows = sb.table("rates").select("brand_id, rate_date, canonical_24k_pre_gst, method, status") \
+             .gte("rate_date", start).lt("rate_date", today.isoformat()).execute().data
+    own, by_day = {}, {}
+    for r in rows:
+        v = r.get("canonical_24k_pre_gst")
+        if not v or r.get("method") == PLACEHOLDER_METHOD:
+            continue
+        d = datetime.fromisoformat(r["rate_date"]).date()
+        own.setdefault(r["brand_id"], {})[d] = v
+        if r.get("status") == "published":
+            by_day.setdefault(d, []).append(v)
+    medians = {d: statistics.median(v) for d, v in by_day.items() if len(v) >= MIN_FOR_MEDIAN}
+    return own, medians
+
+
 def main():
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
     session = requests.Session()
@@ -1618,13 +1663,25 @@ def main():
 
     # Outlier check on this run's live saves (needs enough live data to trust).
     if saved and len(live_vals) >= MIN_FOR_MEDIAN:
+        today_d = datetime.fromisoformat(today).date()
+        try:
+            own_hist, past_medians = history_since(sb, today_d)
+        except Exception as e:      # the freshness check must never stop a run
+            print(f"   history read failed, freshness check skipped: {e}")
+            own_hist, past_medians = {}, {}
         for r in saved:
             drift = abs(r["canonical_24k_pre_gst"] - median) / median
             patch = {"drift_from_median": round(drift, 4)}
+            stuck = frozen_note(today_d, r["canonical_24k_pre_gst"], median,
+                                own_hist.get(r["brand_id"], {}), past_medians)
             if drift > GROSS_OUTLIER or (drift > OUTLIER_TOLERANCE and not r["basis_confirmed"]):
                 patch["status"] = "quarantined"
                 patch["basis_note"] = r["basis_note"] + f" | {drift*100:.1f}% off median"
                 print(f"   quarantined brand {r['brand_id']}: {drift*100:.1f}% off")
+            elif stuck:
+                patch["status"] = "quarantined"
+                patch["basis_note"] = r["basis_note"] + " | " + stuck
+                print(f"   quarantined brand {r['brand_id']}: {stuck}")
             sb.table("rates").update(patch) \
               .eq("brand_id", r["brand_id"]).eq("rate_date", today).execute()
 
