@@ -111,6 +111,9 @@
     more: 'Read more →', guide_h: 'This guide covers it: <b>{t}</b> — {d}', guide_link: 'Read the guide →',
     en_only: 'This answer is in English for now:', translated: 'Translated on your device',
     ask_city: 'Which city are you in?',
+    in_city: "Only jewellers with stores in {c}.",
+    ask_city_off: "Offers differ from city to city. Which city are you in?",
+    off_city_none: "None of the jewellers with stores in {c} has an offer on its website today.",
     ch_loc: 'Use my location', loc_wait: 'Finding your nearest city…',
     loc_fail: 'I couldn\'t get your location. Type your city, or pick one:', ch_chcity: 'Change city',
     silver: 'I cover gold for now — jewellers’ 22K, 24K and 18K rates. Silver is on its way.',
@@ -253,6 +256,9 @@
     more: 'और पढ़ें →', guide_h: 'यह गाइड इसी बारे में है: <b>{t}</b> — {d}', guide_link: 'गाइड पढ़ें →',
     en_only: 'यह जवाब अभी अंग्रेज़ी में है:', translated: 'आपके डिवाइस पर अनुवाद किया गया',
     ask_city: 'आप किस शहर में हैं?',
+    in_city: "सिर्फ़ {c} में स्टोर वाले ज्वैलर्स.",
+    ask_city_off: "ऑफ़र हर शहर में अलग होते हैं. आप किस शहर में हैं?",
+    off_city_none: "{c} में स्टोर वाले किसी ज्वैलर की वेबसाइट पर आज कोई ऑफ़र नहीं है.",
     ch_loc: 'मेरी लोकेशन से', loc_wait: 'आपका नज़दीकी शहर ढूँढ रही हूँ…',
     loc_fail: 'लोकेशन नहीं मिली। अपने शहर का नाम लिखिए या चुनिए:', ch_chcity: 'शहर बदलें',
     silver: 'अभी मैं सिर्फ़ सोने की जानकारी देती हूँ — ज्वैलर्स के 22K, 24K और 18K भाव। चाँदी जल्द आ रही है।',
@@ -395,6 +401,9 @@
     more: 'अधिक वाचा →', guide_h: 'हे मार्गदर्शक याबद्दलच आहे: <b>{t}</b> — {d}', guide_link: 'मार्गदर्शक वाचा →',
     en_only: 'हे उत्तर सध्या इंग्रजीत आहे:', translated: 'तुमच्या डिव्हाइसवर भाषांतर केले',
     ask_city: 'तुम्ही कोणत्या शहरात आहात?',
+    in_city: "फक्त {c} मध्ये दुकान असलेले ज्वेलर्स.",
+    ask_city_off: "ऑफर प्रत्येक शहरात वेगळे असतात. तुम्ही कोणत्या शहरात आहात?",
+    off_city_none: "{c} मध्ये दुकान असलेल्या कोणत्याही ज्वेलरच्या वेबसाइटवर आज ऑफर नाही.",
     ch_loc: 'माझे लोकेशन वापरा', loc_wait: 'तुमचे जवळचे शहर शोधत आहे…',
     loc_fail: 'लोकेशन मिळाले नाही. तुमच्या शहराचे नाव लिहा किंवा निवडा:', ch_chcity: 'शहर बदला',
     silver: 'सध्या मी फक्त सोन्याची माहिती देते — ज्वेलर्सचे 22K, 24K आणि 18K दर. चांदी लवकरच येत आहे.',
@@ -537,6 +546,9 @@
     more: 'વધુ વાંચો →', guide_h: 'આ માર્ગદર્શિકા આ વિશે જ છે: <b>{t}</b> — {d}', guide_link: 'માર્ગદર્શિકા વાંચો →',
     en_only: 'આ જવાબ હાલ અંગ્રેજીમાં છે:', translated: 'તમારા ડિવાઇસ પર અનુવાદ કર્યો',
     ask_city: 'તમે કયા શહેરમાં છો?',
+    in_city: "ફક્ત {c}માં સ્ટોર ધરાવતા જ્વેલર્સ.",
+    ask_city_off: "ઑફર દરેક શહેરમાં અલગ હોય છે. તમે કયા શહેરમાં છો?",
+    off_city_none: "{c}માં સ્ટોર ધરાવતા કોઈ જ્વેલરની વેબસાઇટ પર આજે ઑફર નથી.",
     ch_loc: 'મારું લોકેશન વાપરો', loc_wait: 'તમારું નજીકનું શહેર શોધી રહી છું…',
     loc_fail: 'લોકેશન ન મળ્યું. તમારા શહેરનું નામ લખો અથવા પસંદ કરો:', ch_chcity: 'શહેર બદલો',
     silver: 'હાલ હું ફક્ત સોનાની માહિતી આપું છું — જ્વેલર્સના 22K, 24K અને 18K ભાવ. ચાંદી જલદી આવે છે.',
@@ -679,6 +691,9 @@
     more: 'ਹੋਰ ਪੜ੍ਹੋ →', guide_h: 'ਇਹ ਗਾਈਡ ਇਸੇ ਬਾਰੇ ਹੈ: <b>{t}</b> — {d}', guide_link: 'ਗਾਈਡ ਪੜ੍ਹੋ →',
     en_only: 'ਇਹ ਜਵਾਬ ਅਜੇ ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ ਹੈ:', translated: 'ਤੁਹਾਡੇ ਡਿਵਾਈਸ ’ਤੇ ਅਨੁਵਾਦ ਕੀਤਾ',
     ask_city: 'ਤੁਸੀਂ ਕਿਹੜੇ ਸ਼ਹਿਰ ਵਿੱਚ ਹੋ?',
+    in_city: "ਸਿਰਫ਼ {c} ਵਿੱਚ ਸਟੋਰ ਵਾਲੇ ਜਵੈਲਰ.",
+    ask_city_off: "ਆਫ਼ਰ ਹਰ ਸ਼ਹਿਰ ਵਿੱਚ ਵੱਖਰੇ ਹੁੰਦੇ ਹਨ. ਤੁਸੀਂ ਕਿਸ ਸ਼ਹਿਰ ਵਿੱਚ ਹੋ?",
+    off_city_none: "{c} ਵਿੱਚ ਸਟੋਰ ਵਾਲੇ ਕਿਸੇ ਜਵੈਲਰ ਦੀ ਵੈੱਬਸਾਈਟ 'ਤੇ ਅੱਜ ਕੋਈ ਆਫ਼ਰ ਨਹੀਂ ਹੈ.",
     ch_loc: 'ਮੇਰੀ ਲੋਕੇਸ਼ਨ ਵਰਤੋ', loc_wait: 'ਤੁਹਾਡਾ ਨੇੜਲਾ ਸ਼ਹਿਰ ਲੱਭ ਰਹੀ ਹਾਂ…',
     loc_fail: 'ਲੋਕੇਸ਼ਨ ਨਹੀਂ ਮਿਲੀ। ਆਪਣੇ ਸ਼ਹਿਰ ਦਾ ਨਾਮ ਲਿਖੋ ਜਾਂ ਚੁਣੋ:', ch_chcity: 'ਸ਼ਹਿਰ ਬਦਲੋ',
     silver: 'ਅਜੇ ਮੈਂ ਸਿਰਫ਼ ਸੋਨੇ ਦੀ ਜਾਣਕਾਰੀ ਦਿੰਦੀ ਹਾਂ — ਜਿਊਲਰਾਂ ਦੇ 22K, 24K ਅਤੇ 18K ਭਾਅ। ਚਾਂਦੀ ਜਲਦੀ ਆ ਰਹੀ ਹੈ।',
@@ -821,6 +836,9 @@
     more: 'আরও পড়ুন →', guide_h: 'এই গাইডে এটাই আছে: <b>{t}</b> — {d}', guide_link: 'গাইড পড়ুন →',
     en_only: 'এই উত্তরটি আপাতত ইংরেজিতে:', translated: 'আপনার ডিভাইসে অনুবাদ করা',
     ask_city: 'আপনি কোন শহরে আছেন?',
+    in_city: "শুধু {c}-এ দোকান থাকা জুয়েলাররা।",
+    ask_city_off: "অফার শহর অনুযায়ী আলাদা হয়। আপনি কোন শহরে আছেন?",
+    off_city_none: "{c}-এ দোকান থাকা কোনো জুয়েলারের ওয়েবসাইটে আজ কোনো অফার নেই।",
     ch_loc: 'আমার লোকেশন ব্যবহার করুন', loc_wait: 'আপনার কাছের শহর খুঁজছি…',
     loc_fail: 'লোকেশন পাওয়া গেল না। আপনার শহরের নাম লিখুন বা বেছে নিন:', ch_chcity: 'শহর বদলান',
     silver: 'আপাতত আমি শুধু সোনার তথ্য দিই — জুয়েলারদের 22K, 24K আর 18K দাম। রুপো শিগগিরই আসছে।',
@@ -963,6 +981,9 @@
     more: 'ಇನ್ನಷ್ಟು ಓದಿ →', guide_h: 'ಈ ಮಾರ್ಗದರ್ಶಿ ಇದರ ಬಗ್ಗೆಯೇ: <b>{t}</b> — {d}', guide_link: 'ಮಾರ್ಗದರ್ಶಿ ಓದಿ →',
     en_only: 'ಈ ಉತ್ತರ ಸದ್ಯಕ್ಕೆ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿದೆ:', translated: 'ನಿಮ್ಮ ಸಾಧನದಲ್ಲೇ ಅನುವಾದಿಸಲಾಗಿದೆ',
     ask_city: 'ನೀವು ಯಾವ ನಗರದಲ್ಲಿದ್ದೀರಿ?',
+    in_city: "{c}ನಲ್ಲಿ ಮಳಿಗೆ ಇರುವ ಜ್ಯುವೆಲರ್‌ಗಳು ಮಾತ್ರ.",
+    ask_city_off: "ಆಫರ್‌ಗಳು ನಗರದಿಂದ ನಗರಕ್ಕೆ ಬೇರೆ. ನೀವು ಯಾವ ನಗರದಲ್ಲಿದ್ದೀರಿ?",
+    off_city_none: "{c}ನಲ್ಲಿ ಮಳಿಗೆ ಇರುವ ಯಾವ ಜ್ಯುವೆಲರ್‌ನ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲೂ ಇಂದು ಆಫರ್ ಇಲ್ಲ.",
     ch_loc: 'ನನ್ನ ಸ್ಥಳ ಬಳಸಿ', loc_wait: 'ನಿಮ್ಮ ಹತ್ತಿರದ ನಗರವನ್ನು ಹುಡುಕುತ್ತಿದ್ದೇನೆ…',
     loc_fail: 'ಸ್ಥಳ ಸಿಗಲಿಲ್ಲ. ನಿಮ್ಮ ನಗರದ ಹೆಸರು ಬರೆಯಿರಿ ಅಥವಾ ಆಯ್ಕೆಮಾಡಿ:', ch_chcity: 'ನಗರ ಬದಲಿಸಿ',
     silver: 'ಸದ್ಯಕ್ಕೆ ನಾನು ಚಿನ್ನದ ಮಾಹಿತಿ ಮಾತ್ರ ನೀಡುತ್ತೇನೆ — ಜ್ಯುವೆಲ್ಲರ್ಸ್‌ನ 22K, 24K ಮತ್ತು 18K ದರಗಳು. ಬೆಳ್ಳಿ ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿದೆ.',
@@ -1105,6 +1126,9 @@
     more: 'மேலும் படிக்க →', guide_h: 'இந்த வழிகாட்டி இதைப் பற்றியது: <b>{t}</b> — {d}', guide_link: 'வழிகாட்டியைப் படிக்க →',
     en_only: 'இந்தப் பதில் இப்போதைக்கு ஆங்கிலத்தில்:', translated: 'உங்கள் சாதனத்திலேயே மொழிபெயர்க்கப்பட்டது',
     ask_city: 'நீங்கள் எந்த நகரில் இருக்கிறீர்கள்?',
+    in_city: "{c}-இல் கடை உள்ள நகைக்கடைகள் மட்டும்.",
+    ask_city_off: "ஆஃபர்கள் நகரத்துக்கு நகரம் மாறும். நீங்கள் எந்த நகரத்தில் இருக்கிறீர்கள்?",
+    off_city_none: "{c}-இல் கடை உள்ள எந்த நகைக்கடையின் இணையதளத்திலும் இன்று ஆஃபர் இல்லை.",
     ch_loc: 'என் இருப்பிடம்', loc_wait: 'உங்கள் அருகிலுள்ள நகரத்தைத் தேடுகிறேன்…',
     loc_fail: 'இருப்பிடம் கிடைக்கவில்லை. உங்கள் நகரத்தின் பெயரை எழுதுங்கள் அல்லது தேர்ந்தெடுங்கள்:', ch_chcity: 'நகரத்தை மாற்று',
     silver: 'இப்போதைக்கு நான் தங்கம் பற்றி மட்டும் சொல்கிறேன் — நகைக்கடைகளின் 22K, 24K, 18K விலைகள். வெள்ளி விரைவில் வருகிறது.',
@@ -1247,6 +1271,9 @@
     more: 'ఇంకా చదవండి →', guide_h: 'ఈ గైడ్ దీని గురించే: <b>{t}</b> — {d}', guide_link: 'గైడ్ చదవండి →',
     en_only: 'ఈ సమాధానం ప్రస్తుతానికి ఇంగ్లీష్‌లో ఉంది:', translated: 'మీ పరికరంలోనే అనువదించబడింది',
     ask_city: 'మీరు ఏ నగరంలో ఉన్నారు?',
+    in_city: "{c}లో స్టోర్ ఉన్న జ్యువెలర్లు మాత్రమే.",
+    ask_city_off: "ఆఫర్లు నగరాన్ని బట్టి మారుతాయి. మీరు ఏ నగరంలో ఉన్నారు?",
+    off_city_none: "{c}లో స్టోర్ ఉన్న ఏ జ్యువెలర్ వెబ్‌సైట్‌లోనూ ఈరోజు ఆఫర్ లేదు.",
     ch_loc: 'నా లొకేషన్ వాడండి', loc_wait: 'మీ దగ్గరి నగరాన్ని వెతుకుతున్నాను…',
     loc_fail: 'లొకేషన్ దొరకలేదు. మీ నగరం పేరు రాయండి లేదా ఎంచుకోండి:', ch_chcity: 'నగరం మార్చండి',
     silver: 'ప్రస్తుతానికి నేను బంగారం గురించి మాత్రమే చెబుతాను — జ్యువెలర్ల 22K, 24K, 18K ధరలు. వెండి త్వరలో వస్తుంది.',
@@ -1389,6 +1416,9 @@
     more: 'കൂടുതൽ വായിക്കൂ →', guide_h: 'ഈ ഗൈഡ് ഇതിനെക്കുറിച്ചാണ്: <b>{t}</b> — {d}', guide_link: 'ഗൈഡ് വായിക്കൂ →',
     en_only: 'ഈ ഉത്തരം ഇപ്പോൾ ഇംഗ്ലീഷിലാണ്:', translated: 'നിങ്ങളുടെ ഉപകരണത്തിൽ തന്നെ വിവർത്തനം ചെയ്തത്',
     ask_city: 'നിങ്ങൾ ഏത് നഗരത്തിലാണ്?',
+    in_city: "{c}-ൽ സ്റ്റോറുള്ള ജ്വല്ലറികൾ മാത്രം.",
+    ask_city_off: "ഓഫറുകൾ ഓരോ നഗരത്തിലും വ്യത്യസ്തമാണ്. നിങ്ങൾ ഏത് നഗരത്തിലാണ്?",
+    off_city_none: "{c}-ൽ സ്റ്റോറുള്ള ഒരു ജ്വല്ലറിയുടെ വെബ്സൈറ്റിലും ഇന്ന് ഓഫർ ഇല്ല.",
     ch_loc: 'എന്റെ ലൊക്കേഷൻ', loc_wait: 'നിങ്ങളുടെ അടുത്തുള്ള നഗരം തിരയുന്നു…',
     loc_fail: 'ലൊക്കേഷൻ കിട്ടിയില്ല. നിങ്ങളുടെ നഗരത്തിന്റെ പേര് എഴുതുക അല്ലെങ്കിൽ തിരഞ്ഞെടുക്കുക:', ch_chcity: 'നഗരം മാറ്റുക',
     silver: 'ഇപ്പോൾ ഞാൻ സ്വർണത്തെക്കുറിച്ച് മാത്രമേ പറയൂ — ജ്വല്ലറികളുടെ 22K, 24K, 18K വിലകൾ. വെള്ളി ഉടൻ വരുന്നു.',
@@ -1531,6 +1561,9 @@
     more: 'مزید پڑھیں ←', guide_h: 'یہ گائیڈ اسی بارے میں ہے: <b>{t}</b> — {d}', guide_link: 'گائیڈ پڑھیں ←',
     en_only: 'یہ جواب ابھی انگریزی میں ہے:', translated: 'آپ کے ڈیوائس پر ترجمہ کیا گیا',
     ask_city: 'آپ کس شہر میں ہیں؟',
+    in_city: "صرف {c} میں اسٹور والے جیولرز۔",
+    ask_city_off: "آفرز ہر شہر میں الگ ہوتی ہیں۔ آپ کس شہر میں ہیں؟",
+    off_city_none: "{c} میں اسٹور والے کسی جیولر کی ویب سائٹ پر آج کوئی آفر نہیں ہے۔",
     ch_loc: 'میری لوکیشن سے', loc_wait: 'آپ کا قریبی شہر ڈھونڈ رہی ہوں…',
     loc_fail: 'لوکیشن نہیں ملی۔ اپنے شہر کا نام لکھیے یا چنیے:', ch_chcity: 'شہر بدلیں',
     silver: 'ابھی میں صرف سونے کی معلومات دیتی ہوں — جیولرز کے 22K، 24K اور 18K بھاؤ۔ چاندی جلد آ رہی ہے۔',
@@ -1673,6 +1706,9 @@
     more: 'অধিক পঢ়ক →', guide_h: 'এই গাইডত এই বিষয়ে আছে: <b>{t}</b> — {d}', guide_link: 'গাইড পঢ়ক →',
     en_only: 'এই উত্তৰ এতিয়া ইংৰাজীত:', translated: 'আপোনাৰ ডিভাইচত অনুবাদ কৰা হৈছে',
     ask_city: 'আপুনি কোন চহৰত আছে?',
+    in_city: "কেৱল {c}ত দোকান থকা জুৱেলাৰসকল।",
+    ask_city_off: "অফাৰ চহৰ অনুসৰি বেলেগ হয়। আপুনি কোন চহৰত আছে?",
+    off_city_none: "{c}ত দোকান থকা কোনো জুৱেলাৰৰ ৱেবছাইটত আজি কোনো অফাৰ নাই।",
     ch_loc: 'মোৰ লোকেচন ব্যৱহাৰ কৰক', loc_wait: 'আপোনাৰ ওচৰৰ চহৰ বিচাৰি আছোঁ…',
     loc_fail: 'লোকেচন পোৱা নগ’ল। আপোনাৰ চহৰৰ নাম লিখক বা বাছক:', ch_chcity: 'চহৰ সলনি কৰক',
     silver: 'এতিয়া মই কেৱল সোণৰ কথা কওঁ — জুৱেলাৰৰ 22K, 24K আৰু 18K দৰ। ৰূপ সোনকালে আহিব।',
@@ -1815,6 +1851,9 @@
     more: 'ଅଧିକ ପଢ଼ନ୍ତୁ →', guide_h: 'ଏହି ଗାଇଡ ଏହା ବିଷୟରେ: <b>{t}</b> — {d}', guide_link: 'ଗାଇଡ ପଢ଼ନ୍ତୁ →',
     en_only: 'ଏହି ଉତ୍ତର ଏବେ ଇଂରାଜୀରେ:', translated: 'ଆପଣଙ୍କ ଡିଭାଇସରେ ଅନୁବାଦ ହୋଇଛି',
     ask_city: 'ଆପଣ କେଉଁ ସହରରେ ଅଛନ୍ତି?',
+    in_city: "କେବଳ {c}ରେ ଷ୍ଟୋର ଥିବା ଜୁଏଲର୍।",
+    ask_city_off: "ଅଫର ସହର ଅନୁସାରେ ଅଲଗା। ଆପଣ କେଉଁ ସହରରେ ଅଛନ୍ତି?",
+    off_city_none: "{c}ରେ ଷ୍ଟୋର ଥିବା କୌଣସି ଜୁଏଲରଙ୍କ ୱେବସାଇଟରେ ଆଜି ଅଫର ନାହିଁ।",
     ch_loc: 'ମୋ ଲୋକେସନ ବ୍ୟବହାର କରନ୍ତୁ', loc_wait: 'ଆପଣଙ୍କ ନିକଟତମ ସହର ଖୋଜୁଛି…',
     loc_fail: 'ଲୋକେସନ ମିଳିଲା ନାହିଁ। ଆପଣଙ୍କ ସହରର ନାମ ଲେଖନ୍ତୁ ବା ବାଛନ୍ତୁ:', ch_chcity: 'ସହର ବଦଳାନ୍ତୁ',
     silver: 'ଏବେ ମୁଁ କେବଳ ସୁନା ବିଷୟରେ କହେ — ଜୁଏଲର୍ସଙ୍କ 22K, 24K ଓ 18K ଦର। ରୁପା ଶୀଘ୍ର ଆସୁଛି।',
@@ -2311,7 +2350,7 @@
   if (!TEST && /^\/(analytics|unsubscribe|404)(\.html)?\/?$/.test(location.pathname)) return;
 
   var SB = (window.GR_SB_URL || '').replace(/\/$/, ''), KEY = window.GR_SB_KEY || '';
-  var KB = null, kbWait = null, opened = false, home = null, wantHome = false, wantOffer = false;
+  var KB = null, kbWait = null, opened = false, home = null, wantHome = false, wantOffer = false, pendOffer = null;
   // "My city" is the visitor's own city: one they said they live in, picked
   // when Sona asked, or the nearest to the phone's location (worked out on
   // the device, only when they tap for it). Never just the last city asked
@@ -2464,6 +2503,16 @@
     var loc = (c && c.loc) || [];
     return KB.brands.filter(function (b) { return b.nat || loc.indexOf(b.s) > -1; });
   }
+  // Offers are only worth showing where the visitor can buy: the city they
+  // named, else their saved city. null: not known yet - ask first.
+  function homeCity() { return home ? KB.cities.filter(function (x) { return x.n === home; })[0] || null : null; }
+  function servesCity(c) { var ids = cityBrands(c).map(function (b) { return b.s; }); return function (b) { return ids.indexOf(b.s) > -1; }; }
+  function cityNote(c) {
+    return '<p class="sn-dim">' + t('in_city', { c: esc(c.n) }) + '</p>';
+  }
+  function cityChip(c) { return c.n === home ? [{ l: t('ch_chcity'), q: '#city' }] : []; }
+  // Ask for the city, then answer the offer question for it.
+  function askCityFor(fn) { pendOffer = fn; return askCity('ask_city_off'); }
   function table(rows, k) {
     return '<div class="sn-list">' + rows.map(function (b, i) {
       return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + (b.u ? link(b.u, esc(b.n)) : esc(b.n)) + (b.nat ? '' : ' <em>local</em>') + '</span><span class="sn-v">' + inr(rate(b, k)) + '<small>/g</small></span></div>';
@@ -2594,7 +2643,7 @@
       say: rows.length ? t('say_mk', { c: catName(c), b: rows[0].n, p: pct(rows[0].mk[c]) }) : '',
       chips: chips(['afteroff', 'bestoff', 'whatmk']) };
   }
-  function aOffers(bs) {
+  function aOffers(bs, city) {
     if (bs.length) {
       var b = bs[0];
       // the making-charge offer seen on the jeweller's own products (Tanishq)
@@ -2609,35 +2658,41 @@
     // Every jeweller with an offer today, A to Z, each with its own offers:
     // no jeweller is singled out. The ring price after offers is one line,
     // because only an offer on every design can be priced into it.
-    var withOff = KB.brands.filter(function (b) { return b.off && b.off.length; })
+    if (!city) return askCityFor(function (c) { return aOffers([], c); });
+    var here = servesCity(city);
+    var withOff = KB.brands.filter(function (b) { return b.off && b.off.length && here(b); })
       .sort(function (a, b) { return a.n.localeCompare(b.n); });
-    var ring = (KB.ring || [])[0];
-    var h = '<p>' + t('off_all_h', { n: withOff.length }) + '</p><div class="sn-list">' + withOff.map(function (b) {
+    if (!withOff.length) return { intent: 'offers', html: '<p>' + t('off_city_none', { c: esc(city.n) }) + '</p><p>' + link('/gold-offers-today', t('off_see')) + '</p>',
+      say: t('off_city_none', { c: city.n }), chips: chips(['goodmk', 'cheap22']).concat(cityChip(city)) };
+    var ring = (KB.ring || []).filter(here)[0];
+    var h = '<p>' + t('off_all_h', { n: withOff.length }) + '</p>' + cityNote(city) + '<div class="sn-list">' + withOff.map(function (b) {
       return '<div class="sn-row sn-orow"><span class="sn-nm"><b>' + esc(b.n) + '</b>' +
         b.off.slice(0, 3).map(function (o) { return '<small>' + esc(o.h) + '</small>'; }).join('') + '</span></div>';
     }).join('') + '</div>' +
       (ring ? '<p class="sn-dim">' + t('off_ring', { b: esc(ring.n), p: inr(ring.a) }) + '</p>' : '') +
       '<p>' + link('/gold-offers-today', t('off_every')) + '</p>';
     return { intent: 'offers', html: h, say: ring ? t('say_off_all', { n: withOff.length, b: ring.n, p: sInr(ring.a) }) : '',
-      chips: chips(['goodmk', 'mkcmp', 'cheap22']) };
+      chips: chips(['goodmk', 'mkcmp', 'cheap22']).concat(cityChip(city)) };
   }
   // "best offer on a ring": every jeweller with a measured making charge for
   // that piece, priced for 10 g of 22K (or the weight asked) after its flat
   // making-charge offer today; an "up to" offer (some designs only) is shown
   // as the best case beside it, never ranked on.
   var BO_CATS = ['Ring', 'Earrings', 'Bangle', 'Mangalsutra'];
-  function aBestOffer(c, w) {
+  function aBestOffer(c, w, city) {
     w = w || { g: 10, n: '10', u: 'g' };
-    var rows = KB.brands.filter(function (b) { return b.mk && b.mk[c] != null && rate(b, '22K'); }).map(function (b) {
+    if (!city) return askCityFor(function (x) { return aBestOffer(c, w, x); });
+    var here = servesCity(city);
+    var rows = KB.brands.filter(function (b) { return b.mk && b.mk[c] != null && rate(b, '22K') && here(b); }).map(function (b) {
       var gold = rate(b, '22K') * w.g, mk = b.mk[c], mo = b.mo || {}, f = mo.f || 0, u = mo.u || 0;
       var after = mk * (1 - f / 100);
       return { b: b, mk: mk, f: f, u: u, after: after, tot: (gold + gold * after / 100) * 1.03,
         best: u > f ? (gold + gold * mk * (1 - u / 100) / 100) * 1.03 : null };
     }).sort(function (a, b) { return a.tot - b.tot; });
     var others = BO_CATS.filter(function (x) { return x !== c; }).map(function (x) { return { l: catName(x), q: 'best offer ' + x.toLowerCase() }; });
-    if (rows.length < 2) return { intent: 'best_offer', html: '<p>' + t('bo_none', { c: esc(catName(c)) }) + ' ' + link('/gold-offers-today', t('off_see')) + '</p>',
-      say: t('bo_none', { c: catName(c) }), chips: others };
-    var h = '<p>' + t('bo_h', { w: esc(wLabel(w)), c: esc(catName(c)) }) + '</p><div class="sn-list">' + rows.slice(0, 8).map(function (r, i) {
+    if (rows.length < 1) return { intent: 'best_offer', html: '<p>' + t('bo_none', { c: esc(catName(c)) }) + '</p>' + cityNote(city) + '<p>' + link('/gold-offers-today', t('off_see')) + '</p>',
+      say: t('bo_none', { c: catName(c) }), chips: others.concat(cityChip(city)) };
+    var h = '<p>' + t('bo_h', { w: esc(wLabel(w)), c: esc(catName(c)) }) + '</p>' + cityNote(city) + '<div class="sn-list">' + rows.slice(0, 8).map(function (r, i) {
       var mk = pct(r.mk) + (r.f ? ' → ' + pct(r.after) + ' (−' + pct(r.f) + ')' : r.u ? '' : ' · ' + t('bo_noff'));
       var up = r.best != null ? '<small>(' + t('bo_upto') + ' −' + pct(r.u) + '* → ' + inr(r.best) + ')</small>' : '';
       return '<div class="sn-row sn-orow"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm"><b>' + esc(r.b.n) + '</b><small>' + mk + '</small>' + up +
@@ -2646,7 +2701,7 @@
     var top = bill(rows[0].b, c, w);                 // the breakup for #1
     if (top) h += '<p>' + t('bo_bill_h', { w: esc(wLabel(w)), c: esc(catName(c)), b: esc(rows[0].b.n) }) + '</p>' + top.html;
     h += '<p>' + link('/making-charges-comparison', t('mk_every')) + ' · ' + link('/gold-offers-today', t('off_see')) + '</p>';
-    return { intent: 'best_offer', html: h, say: t('say_bo', { w: wLabel(w), c: catName(c), b: rows[0].b.n, p: sInr(rows[0].tot) }), chips: others };
+    return { intent: 'best_offer', html: h, say: t('say_bo', { w: wLabel(w), c: catName(c), b: rows[0].b.n, p: sInr(rows[0].tot) }), chips: others.concat(cityChip(city)) };
   }
   // Gold around the world: spot per gram in the country's currency (from the
   // knowledge file's "intl"), the karat or unit people there buy in, the rupee
@@ -2805,8 +2860,12 @@
     var mine = /\b(my city|near me|nearby|mere sheher|mere shahar|my area)\b/.test(tx);
     if (c && (wantHome || mine || /\b(i am in|i'm in|im in|i live in|i stay in)\b/.test(tx))) setHome(c);
     wantHome = false;
+    // the city asked for an offer question: answer that question for it
+    var pend = pendOffer; pendOffer = null;
+    if (pend && c) return pend(c);
+    var oc = c || homeCity();               // offers: the named city, else the saved one
     var offerAsk = wantOffer; wantOffer = false;
-    if (offerAsk && ct && ct !== 'Coin') return aBestOffer(ct, w);
+    if (offerAsk && ct && ct !== 'Coin') return aBestOffer(ct, w, oc);
     if (mine && !c) {
       c = home && KB.cities.filter(function (x) { return x.n === home; })[0];
       if (!c) return askCity('ask_city');
@@ -2856,11 +2915,11 @@
     if (bs.length === 1 && (has(tx, W.offer) || /\b(bill|breakup|break up|final price|total cost|total price)\b/.test(tx)) &&
         /\b(best|deal|deals|bill|breakup|break up|calculate|final|total|kitna|kitne|kitni)\b/.test(tx)) return aBrandDeal(bs[0], ct, w);
     // "best offer", "best offer on bangles", "which jeweller is cheapest after offers on a ring": the calculator
-    if (has(tx, W.offer) && !bs.length && !c && (ct ? ct !== 'Coin' : /\b(best|cheapest|lowest|calculate|which|kaunsa|konsa|kaunsi|sabse)\b/.test(tx)))
-      return ct ? aBestOffer(ct, w) : askOfferCat();
+    if (has(tx, W.offer) && !bs.length && (ct ? ct !== 'Coin' : /\b(best|cheapest|lowest|calculate|which|kaunsa|konsa|kaunsi|sabse)\b/.test(tx)))
+      return ct ? aBestOffer(ct, w, oc) : askOfferCat();
     var strong = aSearch(tx);                // a question the FAQ answers word for word
     if (strong && strong.score >= 1.0 && !w && !bs.length && !c) return strong;
-    if (has(tx, W.offer) || /\bafter offers?\b/.test(tx)) return aOffers(bs);
+    if (has(tx, W.offer) || /\bafter offers?\b/.test(tx)) return aOffers(bs, oc);
     if (has(tx, W.making) && !w) return aMaking(bs, ct);
     if (w) return aPrice(w, k, bs, ct);
     if (has(tx, W.trend) && !bs.length) return aTrend(k);
