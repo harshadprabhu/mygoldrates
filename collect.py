@@ -1316,13 +1316,19 @@ def collect_brand(b, session):
 
     if slug in RELAY_PAGES:
         try:
-            r = session.get(f"{JD_API}/page/{slug}", timeout=FULL_TIMEOUT)
+            # gzip only: the session advertises br, which requests cannot
+            # decode without the brotli package, so the HTML came back as bytes.
+            r = session.get(f"{JD_API}/page/{slug}", timeout=FULL_TIMEOUT,
+                            headers={"Accept-Encoding": "gzip, deflate"})
             if r.status_code == 200:
                 found, counts, how, note = try_html(r.text)
                 if found:
                     return RELAY_PAGES[slug], found, counts, f"relay/{how}", note
-        except requests.RequestException:
-            pass
+                tried.append("relay:" + note)
+            else:
+                tried.append(f"relay:{r.status_code}/{r.headers.get('x-upstream-status')}")
+        except requests.RequestException as e:
+            tried.append(f"relay:{type(e).__name__}")
 
     if slug == "dp-jewellers":
         hit = _fetch_dp_rates(session)
