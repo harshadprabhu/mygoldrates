@@ -2,38 +2,38 @@
   "source": "MyGoldRates.com",
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
-  "date": "2026-11-01",
-  "last_updated": "2026-11-01T15:39:51.586200+05:30",
+  "date": "2026-11-02",
+  "last_updated": "2026-11-02T12:08:59.791063+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 13887.27,
-    "22k": 12730.0,
-    "18k": 10415.45
+    "24k": 13936.36,
+    "22k": 12775.0,
+    "18k": 10452.27
   },
   "lowest_24k": {
-    "jeweller": "Reliance Jewels",
-    "rate_per_gram_inr": 13868.0
+    "jeweller": "Bhima Jewels",
+    "rate_per_gram_inr": 13887.27
   },
-  "ibja_reference_24k_999_per_gram_inr": 14005.0,
-  "akgsma_south_india_22k_per_gram_inr": 12730.0,
+  "ibja_reference_24k_999_per_gram_inr": 13777.0,
+  "akgsma_south_india_22k_per_gram_inr": 12775.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 138419.0,
-      "change_pct": -0.05
+      "price_per_10g_inr": 138860.0,
+      "change_pct": 0.27
     },
     {
       "contract": "GOLDM",
       "expiry": "05NOV2026",
-      "price_per_10g_inr": 137019.0,
-      "change_pct": -2.8
+      "price_per_10g_inr": 137298.0,
+      "change_pct": 0.21
     }
   ],
   "full_comparison": "https://mygoldrates.com/compare-jewellers-gold-rate",
-  "jeweller_count": 36,
+  "jeweller_count": 37,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",

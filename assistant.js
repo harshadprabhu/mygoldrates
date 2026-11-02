@@ -761,9 +761,19 @@
   // Conversation mode: a tap on the mic starts it; after each spoken answer
   // Sona listens again by herself, like a voice assistant, until the visitor
   // taps the mic, closes Sona, says stop / bas / thanks, or says nothing.
-  var convo = false;
+  var convo = false, autoListen = false;
+  // iPhone: only Safari lets a page use speech recognition, and it needs
+  // Settings > Siri / Dictation on. Inside Instagram, WhatsApp or Facebook it
+  // does not work at all. Every iPhone can still speak through the keyboard's
+  // own mic, so that is the fallback.
+  var IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var INAPP = /Instagram|FBAN|FBAV|FB_IAB|WhatsApp|Snapchat|Line\//i.test(navigator.userAgent);
+  function kbDictate(key) {
+    endConvo(); note(t(key));
+    try { input.focus(); } catch (_) {}
+  }
   function endConvo() { convo = false; if (panel) panel.classList.remove('sn-convo'); }
-  function resume() { if (convo && opened && !listening) setTimeout(function () { if (convo && opened && !listening) listen(); }, 350); }
+  function resume() { if (convo && opened && !listening) setTimeout(function () { if (convo && opened && !listening) { autoListen = true; listen(); } }, 350); }
   var TTS = window.speechSynthesis, ttsOn = false;      // read every reply aloud; a spoken question is always answered aloud
   try { ttsOn = localStorage.getItem('sona_tts') === '1'; } catch (_) {}
   var ICON = {
@@ -796,6 +806,7 @@
       // in a conversation: end it
       if (convo && listening) { endConvo(); listen(); return; }
       if (TTS && TTS.speaking) { hush(); convo = true; panel.classList.add('sn-convo'); listen(); return; }
+      if (IOS && INAPP) { track('mic_inapp'); kbDictate('mic_inapp'); return; }
       convo = true; panel.classList.add('sn-convo'); listen();
     };
     if (spk) spk.onclick = function () {
@@ -927,7 +938,7 @@
     RL = LANG; input.placeholder = on ? t('ui_listen') : t('ui_ph');
   }
   // The language the mic is listening for (for the fallback below).
-  var micUsed = '';
+  var micUsed = '', heardOnce = false;
   function listen(fallback) {
     if (!SR) return;
     if (listening && !fallback) { try { rec.stop(); } catch (_) {} var r0 = rec; setTimeout(function () { if (rec === r0 && listening) { try { r0.abort(); } catch (_) {} if (r0.onend) r0.onend(); } }, 1200); return; }
@@ -935,6 +946,7 @@
     micUsed = micLang();
     rec = new SR(); rec.lang = fallback || bcp(micUsed); rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
     var heard = '', done = false, quiet = null, cap = null, me = rec;
+    me._auto = autoListen; autoListen = false;
     // iPhone Safari does not stop by itself when the visitor stops talking
     // (Android does): stop after a short silence, or if nothing is said, or
     // after a hard limit - and finish even if Safari never sends "end".
@@ -943,7 +955,12 @@
       clearTimeout(quiet); clearTimeout(cap);
       if (rec === me) setListening(false);
       var said = heard.trim();
-      if (!said) { if (convo) { endConvo(); note(t('cv_end')); } return; }
+      if (!said) {
+        if (IOS && !me._auto && !heardOnce) { kbDictate('mic_ios_kb'); return; }
+        if (convo) { endConvo(); note(t('cv_end')); }
+        return;
+      }
+      heardOnce = true;
       if (convo && /^(stop|bas|band karo|बस|रुको|थांबा|bye|goodbye|thanks|thank you|ok thanks|धन्यवाद|शुक्रिया)[.!]*$/i.test(said)) {
         endConvo(); bubble(esc(said), true); note(t('cv_end')); return;
       }
@@ -972,7 +989,18 @@
         setTimeout(function () { listen('hi-IN'); micUsed = want; }, 50);
         return;
       }
-      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { var was = convo; endConvo(); if (!was) note(t('mic_denied')); else note(t('cv_end')); }
+      var auto = me._auto;
+      track('mic_err_' + (e.error || 'x') + (IOS ? '_ios' : ''));
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        done = true; clearTimeout(quiet); clearTimeout(cap); setListening(false);
+        if (auto) { endConvo(); note(t('cv_end')); }        // the phone wants a tap to listen again
+        else if (IOS) kbDictate('mic_ios_denied');
+        else { endConvo(); note(t('mic_denied')); }
+      }
+      else if (e.error === 'audio-capture' || e.error === 'network') {
+        done = true; clearTimeout(quiet); clearTimeout(cap); setListening(false);
+        if (IOS) kbDictate('mic_ios_kb'); else { endConvo(); note(t('mic_none')); }
+      }
       else if (e.error === 'no-speech' && !convo) note(t('mic_none'));
     };
     rec.onend = finish;
