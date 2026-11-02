@@ -6678,8 +6678,17 @@ GATE_JS = r"""
     window.addEventListener('scroll',check,{passive:true});
   }
 
-  /* ---- auto One Tap on page load ---- */
-  (function autoOneTap(){
+  /* ---- One Tap, after 10 s with the tab in view (not on arrival) ----
+     The owner asked that no sign-in prompt appears the moment a page loads;
+     same wait as the signup popup in /alerts-pop.js. */
+  function afterVisible(ms,fn){
+    setTimeout(function(){
+      if(!document.hidden)return fn();
+      document.addEventListener('visibilitychange',function v(){
+        if(!document.hidden){document.removeEventListener('visibilitychange',v);fn();}});
+    },ms);
+  }
+  afterVisible(10000,function autoOneTap(){
     if(!GCID||isAuthed()){maybeShowSubscribePopup();return;}
     var tries=0;
     (function tryG(){
@@ -6699,7 +6708,7 @@ GATE_JS = r"""
       else if(tries++<40){setTimeout(tryG,150);}
       else{maybeShowSubscribePopup();}   // GSI never loaded at all - still offer it
     })();
-  })();
+  });
 
   /* ---- FEATURE GATE: intercept gated elements ---- */
   function guard(el,originalHandler){
