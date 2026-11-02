@@ -1081,7 +1081,7 @@
         .then(function () {
           try { localStorage.setItem('gr_sub', '1'); localStorage.setItem('gr_user', JSON.stringify({ email: em })); } catch (_) {}
           track('alert_set');
-          f.remove(); msg.textContent = t('al_ok', { k: '22K', p: rs(target) });
+          f.remove(); msg.textContent = t('al_ok', { k: '22K', p: rs(target) }) + ' ' + t('al_cf');
           intentAsk(em);
         })
         .catch(function () { $('button', f).disabled = false; msg.textContent = t('al_err'); });

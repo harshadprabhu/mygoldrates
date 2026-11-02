@@ -54,11 +54,12 @@ jobs:
           RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
           RAZORPAY_WEBHOOK_SECRET: ${{ secrets.RAZORPAY_WEBHOOK_SECRET }}
           RAZORPAY_PLAN_ID: ${{ secrets.RAZORPAY_PLAN_ID }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
         run: |
           set -eu
           for name in SUPABASE_URL SUPABASE_SERVICE_KEY BREVO_API_KEY ALERTS_FROM \
                       RAZORPAY_KEY_ID RAZORPAY_KEY_SECRET RAZORPAY_WEBHOOK_SECRET \
-                      RAZORPAY_PLAN_ID; do
+                      RAZORPAY_PLAN_ID GOOGLE_CLIENT_ID; do
             val=$(printenv "$name" || true)
             if [ -n "$val" ]; then
               printf '%s' "$val" | npx --yes wrangler@3 secret put "$name" >/dev/null

@@ -224,7 +224,7 @@ def test_there_is_no_old_design_fallback():
     which is how an old page reaches production unnoticed."""
     src = _read("generate_site.py")
     assert "TEMPLATE = Template(" not in src.replace("PAGE_TEMPLATE", "").replace(
-        "CONTENT_TEMPLATE", "").replace("INQUIRY_TEMPLATE", "").replace("UNSUB_TEMPLATE", "")
+        "CONTENT_TEMPLATE", "").replace("INQUIRY_TEMPLATE", "").replace("UNSUB_TEMPLATE", "").replace("CONFIRM_TEMPLATE", "")
     assert "write_classic_city_pages" not in src
     assert "refusing to build the" in src and "without the new design" in src
     assert "NAV = f" not in src
