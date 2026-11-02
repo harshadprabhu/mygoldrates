@@ -341,6 +341,7 @@
    "summary": "gold +0.6%, news led by us interest rates",
    "themes": {
     "india_demand": 2,
+    "momentum": 1,
     "rates": 3
    }
   }

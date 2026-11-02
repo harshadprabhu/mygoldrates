@@ -720,7 +720,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   },true);
 })();
 </script>
-<script src="/assistant.js?v=baa313f4" defer></script>
+<script src="/assistant.js?v=15ed8d8d" defer></script>
 <script>(function(){
   function ago(s){
     if(s<60)return "just now";
@@ -1566,6 +1566,8 @@ function handleCredentialResponse(resp){
         google_email_verified:!!payload.email_verified,
         signup_method:'google'
       }).then(function(){
+        // Google's signed token confirms the address (cf-worker-jd /sub/google)
+        fetch('https://mygoldrates-jd-api.harshads-priority.workers.dev/sub/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:resp.credential,email:payload.email})}).catch(function(){});
         // Recorded. Let the popup confirm it (and set a price alert if the
         // sign-in came from the popup's own Google button).
         if(window.GR_ASK_PHONE)window.GR_ASK_PHONE(payload.name||'',payload.email);
@@ -3390,7 +3392,7 @@ function handleCredentialResponse(resp){
         btn.textContent='Subscribed ✓';
         ev(suf==='S'?'section_ok':'inline_ok');
         if(st){st.style.color='var(--mint)';
-               st.textContent='✓ Subscribed — your first email arrives tomorrow morning.'}
+               st.textContent='✓ Almost done — open the email we just sent and tap “Confirm my email”. Your first rates email follows the next morning.'}
       }).catch(function(err){
         console.warn('subscribe failed',err);
         btn.disabled=false;btn.textContent=idle;
@@ -3487,10 +3489,14 @@ function handleCredentialResponse(resp){
       .then(function(res){if(res==='ok'){ev('price_alert_ok');return t;}return 0;})
       .catch(function(){return 0;});
   }
-  function showDone(email,target){
+  function showDone(email,target,typed){
     spDoneEmail=email||'';
     var t=document.getElementById('spDoneTxt');
-    if(t)t.innerHTML='Your first email arrives tomorrow morning'+
+    // A typed-in address must confirm first (sql/confirm_email.sql)
+    var pre=typed?'<b>One step left:</b> open the email we just sent to '+
+      String(email).replace(/[<>&"]/g,'')+' and tap <b>Confirm my email</b>. Then your first email arrives the next morning':
+      'Your first email arrives tomorrow morning';
+    if(t)t.innerHTML=pre+
       (target?', and we&rsquo;ll email you the day 22K drops to <b>'+inr(target)+'/g</b> or lower.':'.');
     showStep('done');
     subPop.classList.add('open');
@@ -3584,7 +3590,7 @@ function handleCredentialResponse(resp){
       if(spSt)spSt.textContent='';
       saveSubscriber({email:e,city:PAGE_CITY||'',country:'India',signup_method:'popup'})
         .then(function(){ev('popup_email_ok');return setPriceAlert(e);})
-        .then(function(t){spBtn.disabled=false;spBtn.textContent=idle;showDone(e,t);})
+        .then(function(t){spBtn.disabled=false;spBtn.textContent=idle;showDone(e,t,true);})
         .catch(function(err){
           console.warn('subscribe failed',err);
           spBtn.disabled=false;spBtn.textContent=idle;

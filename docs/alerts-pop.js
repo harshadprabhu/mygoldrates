@@ -1,5 +1,5 @@
 (function(){
-  var SKIP=/^\/(inquiry|unsubscribe|list-your-jewellery|jd-today|jewellers-digest|analytics|404)(\.html)?\/?$/;
+  var SKIP=/^\/(inquiry|unsubscribe|confirm|list-your-jewellery|jd-today|jewellers-digest|analytics|404)(\.html)?\/?$/;
   if(SKIP.test(location.pathname))return;
   // The homepage and city pages carry their own popup; never show two.
   if(document.getElementById('subPop'))return;
@@ -179,6 +179,8 @@
     save({email:p.email,name:p.name||'',picture_url:p.picture||'',locale:p.locale||'',
           google_id:p.sub||'',google_email_verified:!!p.email_verified,signup_method:'google'})
       .then(function(){s('gr_sub','1');
+        /* Google's signed token confirms the address (cf-worker-jd /sub/google) */
+        fetch('https://mygoldrates-jd-api.harshads-priority.workers.dev/sub/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:resp.credential,email:p.email})}).catch(function(){});
         try{localStorage.setItem('gr_user',JSON.stringify({email:p.email,name:p.name||null}));}catch(_){}
         ev('popup_google_ok');return price(p.email);})
       .then(function(t){done(p.email,t);})
@@ -221,9 +223,12 @@
       .then(function(res){if(res==='ok'){ev('price_alert_ok');return t;}return 0;})
       .catch(function(){return 0;});
   }
-  function done(email,t){
+  function done(email,t,typed){
     doneEmail=email;
-    $q('#grPopDone').innerHTML='Your first email arrives tomorrow morning'+
+    /* a typed-in address must confirm first (sql/confirm_email.sql) */
+    $q('#grPopDone').innerHTML=(typed?'<b>One step left:</b> open the email we just sent to '+
+      String(email).replace(/[<>&"]/g,'')+' and tap <b>Confirm my email</b>. Then your first email arrives the next morning':
+      'Your first email arrives tomorrow morning')+
       (t?', and we’ll email you the day 22K drops to <b>'+inr(t)+'/g</b> or lower.':'.');
     show('done');
   }
@@ -233,7 +238,7 @@
     b.disabled=true;b.textContent='Subscribing…';msg('');
     save({email:e,country:'India',signup_method:'popup'}).then(function(){
       s('gr_sub','1');ev('popup_email_ok');return price(e);
-    }).then(function(t){b.disabled=false;b.textContent='Send me tomorrow’s rates — free';done(e,t);})
+    }).then(function(t){b.disabled=false;b.textContent='Send me tomorrow’s rates — free';done(e,t,true);})
     .catch(function(){b.disabled=false;b.textContent='Send me tomorrow’s rates — free';
       msg('Couldn’t save that — please try again in a moment.')});
   }
