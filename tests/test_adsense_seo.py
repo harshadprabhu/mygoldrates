@@ -262,3 +262,11 @@ def test_pages_dev_copies_are_noindex_and_the_real_domain_is_not():
     first = block.index('"/*\\n"')
     generic = block[first:block.index('"https://mygoldrates.com/*\\n"')]
     assert "X-Robots-Tag" not in generic
+
+
+def test_homepage_template_declares_a_search_sized_icon():
+    """Google Search shows a site icon only at a multiple of 48 px; with just
+    a 32 px icon the homepage and every city page showed a grey globe."""
+    head = _read("pulse_app.html").split("</head>")[0]
+    assert 'href="/favicon.ico" sizes="48x48"' in head
+    assert 'sizes="96x96" href="/icon-96.png"' in head
