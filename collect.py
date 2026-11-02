@@ -1159,7 +1159,7 @@ def fetch_via_proxy_waterfall(url, session, actions=None, wait_selector=None):
 # than a day before today (IST) is refused: such a page is not kept up daily
 # (Swarn showed a two-day-old rate on 20 Oct 2026), and an old rate must not
 # pass for today's.
-DATED_PAGES = {"swarn-jewellers", "rushabh", "navratan-jewellers"}
+DATED_PAGES = {"swarn-jewellers", "rushabh", "navratan-jewellers", "manubhai"}
 _current_slug = None        # set by collect_brand (brands are read one at a time)
 _MONTHS = {m: i for i, m in enumerate(["jan", "feb", "mar", "apr", "may", "jun", "jul",
                                          "aug", "sep", "oct", "nov", "dec"], 1)}
