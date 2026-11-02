@@ -1,8 +1,8 @@
 {
- "generated_at": "2026-10-26T09:02:16.464381+00:00",
- "candidates": 62,
+ "generated_at": "2026-11-02T10:44:58.818682+00:00",
+ "candidates": 66,
  "verified": 3,
- "promoted_inactive": 3,
+ "promoted_inactive": 0,
  "states_covered": [
   "Haryana",
   "Kerala",
@@ -539,19 +539,19 @@
    "city": "Pune",
    "name": "Kothari Jewellers",
    "domain": "www.kotharijewellers.com",
-   "verdict": "no-rate",
-   "note": "responded but no purity-labelled rate found",
+   "verdict": "dead",
+   "note": "nothing resolved on any path",
    "tried": [
-    "/: no values",
-    "/in/pan-india/en/live-gold-rate.html: 404",
-    "/gold-rate-today/: 404",
-    "/gold-rate-today: 404",
-    "/gold-rate: 404",
-    "/goldrate: 404",
-    "/goldprice: 404",
-    "/gold-rate.html: 404"
+    "/: robots",
+    "/in/pan-india/en/live-gold-rate.html: robots",
+    "/gold-rate-today/: robots",
+    "/gold-rate-today: robots",
+    "/gold-rate: robots",
+    "/goldrate: robots",
+    "/goldprice: robots",
+    "/gold-rate.html: robots"
    ],
-   "may_work_with_render": true
+   "may_work_with_render": false
   },
   {
    "state": "Gujarat",
@@ -713,14 +713,14 @@
    "verdict": "dead",
    "note": "nothing resolved on any path",
    "tried": [
-    "/: soft-404",
-    "/in/pan-india/en/live-gold-rate.html: soft-404",
-    "/gold-rate-today/: soft-404",
-    "/gold-rate-today: soft-404",
-    "/gold-rate: soft-404",
-    "/goldrate: soft-404",
-    "/goldprice: soft-404",
-    "/gold-rate.html: soft-404"
+    "/: SSLError",
+    "/in/pan-india/en/live-gold-rate.html: SSLError",
+    "/gold-rate-today/: SSLError",
+    "/gold-rate-today: SSLError",
+    "/gold-rate: SSLError",
+    "/goldrate: SSLError",
+    "/goldprice: SSLError",
+    "/gold-rate.html: SSLError"
    ],
    "may_work_with_render": false
   },
@@ -729,17 +729,17 @@
    "city": "Margao",
    "name": "Damodar Jewellers",
    "domain": "www.damodarjewellers.com",
-   "verdict": "no-rate",
-   "note": "responded but no purity-labelled rate found",
+   "verdict": "blocked",
+   "note": "blocked or unreachable on every path tried",
    "tried": [
-    "/: no values",
-    "/in/pan-india/en/live-gold-rate.html: 404",
-    "/gold-rate-today/: 404",
-    "/gold-rate-today: 404",
-    "/gold-rate: 404",
-    "/goldrate: 404",
-    "/goldprice: 404",
-    "/gold-rate.html: 404"
+    "/: blocked 503",
+    "/in/pan-india/en/live-gold-rate.html: blocked 503",
+    "/gold-rate-today/: blocked 503",
+    "/gold-rate-today: blocked 503",
+    "/gold-rate: blocked 503",
+    "/goldrate: blocked 503",
+    "/goldprice: blocked 503",
+    "/gold-rate.html: blocked 503"
    ],
    "may_work_with_render": true
   },
@@ -866,13 +866,13 @@
    "note": "responded but no purity-labelled rate found",
    "tried": [
     "/: no values",
-    "/in/pan-india/en/live-gold-rate.html: SSLError",
+    "/in/pan-india/en/live-gold-rate.html: no values",
     "/gold-rate-today/: no values",
-    "/gold-rate-today: SSLError",
+    "/gold-rate-today: no values",
     "/gold-rate: no values",
     "/goldrate: no values",
     "/goldprice: no values",
-    "/gold-rate.html: SSLError"
+    "/gold-rate.html: no values"
    ],
    "may_work_with_render": true
   },
@@ -919,10 +919,10 @@
    "city": "Kolkata",
    "name": "Sankar Jewellers",
    "domain": "www.sankarjewellers.com",
-   "verdict": "no-rate",
-   "note": "responded but no purity-labelled rate found",
+   "verdict": "dead",
+   "note": "nothing resolved on any path",
    "tried": [
-    "/: no values",
+    "/: 522",
     "/in/pan-india/en/live-gold-rate.html: soft-404",
     "/gold-rate-today/: soft-404",
     "/gold-rate-today: soft-404",
@@ -931,7 +931,7 @@
     "/goldprice: soft-404",
     "/gold-rate.html: soft-404"
    ],
-   "may_work_with_render": true
+   "may_work_with_render": false
   },
   {
    "state": "West Bengal",
@@ -957,19 +957,19 @@
    "city": "Bhubaneswar",
    "name": "Lalchand Jewellers",
    "domain": "www.lalchandjewellers.com",
-   "verdict": "blocked",
-   "note": "blocked or unreachable on every path tried",
+   "verdict": "dead",
+   "note": "nothing resolved on any path",
    "tried": [
-    "/: no values",
-    "/in/pan-india/en/live-gold-rate.html: 404",
-    "/gold-rate-today/: 404",
-    "/gold-rate-today: 404",
-    "/gold-rate: 404",
-    "/goldrate: 404",
-    "/goldprice: 404",
-    "/gold-rate.html: 404"
+    "/: SSLError",
+    "/in/pan-india/en/live-gold-rate.html: SSLError",
+    "/gold-rate-today/: SSLError",
+    "/gold-rate-today: SSLError",
+    "/gold-rate: SSLError",
+    "/goldrate: SSLError",
+    "/goldprice: SSLError",
+    "/gold-rate.html: SSLError"
    ],
-   "may_work_with_render": true
+   "may_work_with_render": false
   },
   {
    "state": "Delhi",
@@ -1079,7 +1079,7 @@
     "/gold-rate-today/: 404",
     "/gold-rate-today: 404",
     "/gold-rate: 404",
-    "/goldrate: 404",
+    "/goldrate: timeout",
     "/goldprice: 404",
     "/gold-rate.html: 404"
    ],
@@ -1095,7 +1095,7 @@
    "purities": [
     "22K"
    ],
-   "canonical_24k": 14574.55,
+   "canonical_24k": 14247.27,
    "slug": "swarn-jewellers",
    "verdict": "verified",
    "note": "read 1 purity/purities via karatunit"
@@ -1173,6 +1173,82 @@
     "/goldrate: blocked 403",
     "/goldprice: blocked 403",
     "/gold-rate.html: blocked 403"
+   ],
+   "may_work_with_render": true
+  },
+  {
+   "state": "Gujarat",
+   "city": "Ahmedabad",
+   "name": "Kantilal Chhotalal",
+   "domain": "www.kantilalchhotalal.com",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
+   "tried": [
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: 404",
+    "/gold-rate-today/: 404",
+    "/gold-rate-today: 404",
+    "/gold-rate: 404",
+    "/goldrate: 404",
+    "/goldprice: 404",
+    "/gold-rate.html: 404"
+   ],
+   "may_work_with_render": true
+  },
+  {
+   "state": "Punjab",
+   "city": "Jalandhar",
+   "name": "Maliram Jewellers",
+   "domain": "maliramjewellers.com",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
+   "tried": [
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: 404",
+    "/gold-rate-today/: 404",
+    "/gold-rate-today: 404",
+    "/gold-rate: 404",
+    "/goldrate: 404",
+    "/goldprice: 404",
+    "/gold-rate.html: 404"
+   ],
+   "may_work_with_render": true
+  },
+  {
+   "state": "Punjab",
+   "city": "Ludhiana",
+   "name": "New Punjab Jewellers",
+   "domain": "www.newpunjabjewellers.com",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
+   "tried": [
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: 404",
+    "/gold-rate-today/: 404",
+    "/gold-rate-today: 404",
+    "/gold-rate: 404",
+    "/goldrate: 404",
+    "/goldprice: 404",
+    "/gold-rate.html: 404"
+   ],
+   "may_work_with_render": true
+  },
+  {
+   "state": "Rajasthan",
+   "city": "Jaipur",
+   "name": "Raniwala 1881",
+   "domain": "www.raniwala1881.com",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
+   "tried": [
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: 404",
+    "/gold-rate-today/: 404",
+    "/gold-rate-today: 404",
+    "/gold-rate: 404",
+    "/goldrate: 404",
+    "/goldprice: 404",
+    "/gold-rate.html: 404"
    ],
    "may_work_with_render": true
   }
