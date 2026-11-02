@@ -8,6 +8,9 @@
   var S = {};
 
   S.en = {
+    mic_inapp: "Voice doesn’t work inside Instagram, WhatsApp or Facebook on iPhone. Open mygoldrates.com in Safari to talk to me — or tap the box and use the 🎤 on your keyboard.",
+    mic_ios_denied: "Your iPhone didn’t let me use the microphone. Turn on Settings › General › Keyboard › Enable Dictation, and allow the microphone for this site in Safari. Meanwhile, tap the box and use the 🎤 on your keyboard.",
+    mic_ios_kb: "I couldn’t hear you. On iPhone you can also tap the box and speak with the 🎤 on your keyboard, then tap send.",
     cv_end: "Conversation ended — tap the mic to talk again.",
     al_h: "Want me to tell you when {k} drops below {p}/g? The lowest today is {n}/g.",
     al_ph: "Your email",
@@ -146,6 +149,9 @@
   };
 
   S.hi = {
+    mic_inapp: "iPhone पर Instagram, WhatsApp या Facebook के अंदर आवाज़ काम नहीं करती। मुझसे बात करने के लिए mygoldrates.com को Safari में खोलें — या बॉक्स पर टैप करके कीबोर्ड का 🎤 इस्तेमाल करें।",
+    mic_ios_denied: "आपके iPhone ने माइक्रोफ़ोन की अनुमति नहीं दी। Settings › General › Keyboard › Enable Dictation चालू करें और Safari में इस साइट के लिए माइक्रोफ़ोन की अनुमति दें। तब तक बॉक्स पर टैप करके कीबोर्ड का 🎤 इस्तेमाल करें।",
+    mic_ios_kb: "मैं आपको सुन नहीं पाई। iPhone पर आप बॉक्स पर टैप करके कीबोर्ड के 🎤 से भी बोल सकते हैं, फिर भेजें दबाएँ।",
     cv_end: "बातचीत ख़त्म — फिर से बात करने के लिए माइक दबाएँ।",
     al_h: "क्या मैं आपको बताऊँ जब {k} {p}/ग्राम से नीचे आए? आज सबसे कम {n}/ग्राम है।",
     al_ph: "आपका ईमेल",
@@ -284,6 +290,9 @@
   };
 
   S.mr = {
+    mic_inapp: "iPhone वर Instagram, WhatsApp किंवा Facebook मध्ये आवाज चालत नाही. माझ्याशी बोलण्यासाठी mygoldrates.com Safari मध्ये उघडा — किंवा बॉक्सवर टॅप करून कीबोर्डचा 🎤 वापरा.",
+    mic_ios_denied: "तुमच्या iPhone ने मायक्रोफोनची परवानगी दिली नाही. Settings › General › Keyboard › Enable Dictation चालू करा आणि Safari मध्ये या साइटसाठी मायक्रोफोनला परवानगी द्या. तोपर्यंत बॉक्सवर टॅप करून कीबोर्डचा 🎤 वापरा.",
+    mic_ios_kb: "मला तुमचं ऐकू आलं नाही. iPhone वर बॉक्सवर टॅप करून कीबोर्डच्या 🎤 ने बोलू शकता, मग पाठवा दाबा.",
     cv_end: "संवाद संपला — पुन्हा बोलण्यासाठी माइक दाबा.",
     al_h: "{k} {p}/ग्रॅमच्या खाली आल्यावर मी तुम्हाला कळवू का? आज सर्वात कमी {n}/ग्रॅम आहे.",
     al_ph: "तुमचा ईमेल",
@@ -422,6 +431,9 @@
   };
 
   S.gu = {
+    mic_inapp: "iPhone પર Instagram, WhatsApp કે Facebook ની અંદર અવાજ કામ કરતો નથી. મારી સાથે વાત કરવા mygoldrates.com Safari માં ખોલો — અથવા બોક્સ પર ટેપ કરી કીબોર્ડનો 🎤 વાપરો.",
+    mic_ios_denied: "તમારા iPhone એ માઇક્રોફોનની મંજૂરી ન આપી. Settings › General › Keyboard › Enable Dictation ચાલુ કરો અને Safari માં આ સાઇટ માટે માઇક્રોફોનને મંજૂરી આપો. ત્યાં સુધી બોક્સ પર ટેપ કરી કીબોર્ડનો 🎤 વાપરો.",
+    mic_ios_kb: "હું તમને સાંભળી શકી નહીં. iPhone પર બોક્સ પર ટેપ કરી કીબોર્ડના 🎤 થી પણ બોલી શકો, પછી મોકલો દબાવો.",
     cv_end: "વાતચીત પૂરી — ફરી વાત કરવા માઇક દબાવો.",
     al_h: "{k} {p}/ગ્રામથી નીચે આવે ત્યારે હું તમને જણાવું? આજે સૌથી ઓછો {n}/ગ્રામ છે.",
     al_ph: "તમારો ઈમેલ",
@@ -560,6 +572,9 @@
   };
 
   S.pa = {
+    mic_inapp: "iPhone ਉੱਤੇ Instagram, WhatsApp ਜਾਂ Facebook ਦੇ ਅੰਦਰ ਆਵਾਜ਼ ਕੰਮ ਨਹੀਂ ਕਰਦੀ। ਮੇਰੇ ਨਾਲ ਗੱਲ ਕਰਨ ਲਈ mygoldrates.com ਨੂੰ Safari ਵਿੱਚ ਖੋਲ੍ਹੋ — ਜਾਂ ਬਾਕਸ ਉੱਤੇ ਟੈਪ ਕਰਕੇ ਕੀਬੋਰਡ ਦਾ 🎤 ਵਰਤੋ।",
+    mic_ios_denied: "ਤੁਹਾਡੇ iPhone ਨੇ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੱਤੀ। Settings › General › Keyboard › Enable Dictation ਚਾਲੂ ਕਰੋ ਅਤੇ Safari ਵਿੱਚ ਇਸ ਸਾਈਟ ਲਈ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ। ਉਦੋਂ ਤੱਕ ਬਾਕਸ ਉੱਤੇ ਟੈਪ ਕਰਕੇ ਕੀਬੋਰਡ ਦਾ 🎤 ਵਰਤੋ।",
+    mic_ios_kb: "ਮੈਂ ਤੁਹਾਨੂੰ ਸੁਣ ਨਹੀਂ ਸਕੀ। iPhone ਉੱਤੇ ਬਾਕਸ ਉੱਤੇ ਟੈਪ ਕਰਕੇ ਕੀਬੋਰਡ ਦੇ 🎤 ਨਾਲ ਵੀ ਬੋਲ ਸਕਦੇ ਹੋ, ਫਿਰ ਭੇਜੋ ਦਬਾਓ।",
     cv_end: "ਗੱਲਬਾਤ ਖ਼ਤਮ — ਮੁੜ ਗੱਲ ਕਰਨ ਲਈ ਮਾਈਕ ਦਬਾਓ।",
     al_h: "ਜਦੋਂ {k} {p}/ਗ੍ਰਾਮ ਤੋਂ ਹੇਠਾਂ ਆਵੇ, ਕੀ ਮੈਂ ਤੁਹਾਨੂੰ ਦੱਸਾਂ? ਅੱਜ ਸਭ ਤੋਂ ਘੱਟ {n}/ਗ੍ਰਾਮ ਹੈ।",
     al_ph: "ਤੁਹਾਡਾ ਈਮੇਲ",
@@ -698,6 +713,9 @@
   };
 
   S.bn = {
+    mic_inapp: "iPhone-এ Instagram, WhatsApp বা Facebook-এর ভেতরে ভয়েস কাজ করে না। আমার সঙ্গে কথা বলতে mygoldrates.com Safari-তে খুলুন — অথবা বক্সে ট্যাপ করে কীবোর্ডের 🎤 ব্যবহার করুন।",
+    mic_ios_denied: "আপনার iPhone মাইক্রোফোনের অনুমতি দেয়নি। Settings › General › Keyboard › Enable Dictation চালু করুন এবং Safari-তে এই সাইটের জন্য মাইক্রোফোনের অনুমতি দিন। ততক্ষণ বক্সে ট্যাপ করে কীবোর্ডের 🎤 ব্যবহার করুন।",
+    mic_ios_kb: "আমি আপনার কথা শুনতে পাইনি। iPhone-এ বক্সে ট্যাপ করে কীবোর্ডের 🎤 দিয়েও বলতে পারেন, তারপর পাঠান চাপুন।",
     cv_end: "কথোপকথন শেষ — আবার কথা বলতে মাইক চাপুন।",
     al_h: "{k} যখন {p}/গ্রামের নিচে নামবে, আমি কি আপনাকে জানাব? আজ সবচেয়ে কম {n}/গ্রাম।",
     al_ph: "আপনার ইমেল",
@@ -836,6 +854,9 @@
   };
 
   S.kn = {
+    mic_inapp: "iPhone ನಲ್ಲಿ Instagram, WhatsApp ಅಥವಾ Facebook ಒಳಗೆ ಧ್ವನಿ ಕೆಲಸ ಮಾಡುವುದಿಲ್ಲ. ನನ್ನೊಂದಿಗೆ ಮಾತನಾಡಲು mygoldrates.com ಅನ್ನು Safari ಯಲ್ಲಿ ತೆರೆಯಿರಿ — ಅಥವಾ ಬಾಕ್ಸ್ ಟ್ಯಾಪ್ ಮಾಡಿ ಕೀಬೋರ್ಡ್‌ನ 🎤 ಬಳಸಿ.",
+    mic_ios_denied: "ನಿಮ್ಮ iPhone ಮೈಕ್ರೊಫೋನ್ ಬಳಸಲು ಅನುಮತಿಸಲಿಲ್ಲ. Settings › General › Keyboard › Enable Dictation ಆನ್ ಮಾಡಿ ಮತ್ತು Safari ಯಲ್ಲಿ ಈ ಸೈಟ್‌ಗೆ ಮೈಕ್ರೊಫೋನ್ ಅನುಮತಿಸಿ. ಅಲ್ಲಿಯವರೆಗೆ ಬಾಕ್ಸ್ ಟ್ಯಾಪ್ ಮಾಡಿ ಕೀಬೋರ್ಡ್‌ನ 🎤 ಬಳಸಿ.",
+    mic_ios_kb: "ನನಗೆ ನಿಮ್ಮ ಮಾತು ಕೇಳಿಸಲಿಲ್ಲ. iPhone ನಲ್ಲಿ ಬಾಕ್ಸ್ ಟ್ಯಾಪ್ ಮಾಡಿ ಕೀಬೋರ್ಡ್‌ನ 🎤 ಮೂಲಕವೂ ಮಾತನಾಡಬಹುದು, ನಂತರ ಕಳುಹಿಸಿ ಒತ್ತಿ.",
     cv_end: "ಸಂಭಾಷಣೆ ಮುಗಿಯಿತು — ಮತ್ತೆ ಮಾತನಾಡಲು ಮೈಕ್ ಒತ್ತಿ.",
     al_h: "{k} {p}/ಗ್ರಾಂಗಿಂತ ಕಡಿಮೆಯಾದಾಗ ನಿಮಗೆ ತಿಳಿಸಲೇ? ಇಂದು ಅತಿ ಕಡಿಮೆ {n}/ಗ್ರಾಂ.",
     al_ph: "ನಿಮ್ಮ ಇಮೇಲ್",
@@ -974,6 +995,9 @@
   };
 
   S.ta = {
+    mic_inapp: "iPhone-இல் Instagram, WhatsApp அல்லது Facebook-க்குள் குரல் வேலை செய்யாது. என்னுடன் பேச mygoldrates.com-ஐ Safari-இல் திறக்கவும் — அல்லது பெட்டியைத் தொட்டு விசைப்பலகையின் 🎤-ஐப் பயன்படுத்தவும்.",
+    mic_ios_denied: "உங்கள் iPhone மைக்ரோஃபோனை அனுமதிக்கவில்லை. Settings › General › Keyboard › Enable Dictation-ஐ இயக்கி, Safari-இல் இந்தத் தளத்துக்கு மைக்ரோஃபோனை அனுமதிக்கவும். அதுவரை பெட்டியைத் தொட்டு விசைப்பலகையின் 🎤-ஐப் பயன்படுத்தவும்.",
+    mic_ios_kb: "உங்கள் குரல் கேட்கவில்லை. iPhone-இல் பெட்டியைத் தொட்டு விசைப்பலகையின் 🎤 மூலமும் பேசலாம், பிறகு அனுப்பு அழுத்தவும்.",
     cv_end: "உரையாடல் முடிந்தது — மீண்டும் பேச மைக்கை அழுத்தவும்.",
     al_h: "{k} {p}/கிராமுக்குக் கீழே இறங்கும்போது உங்களுக்குத் தெரிவிக்கட்டுமா? இன்று குறைந்தது {n}/கிராம்.",
     al_ph: "உங்கள் மின்னஞ்சல்",
@@ -1112,6 +1136,9 @@
   };
 
   S.te = {
+    mic_inapp: "iPhone లో Instagram, WhatsApp లేదా Facebook లోపల వాయిస్ పని చేయదు. నాతో మాట్లాడటానికి mygoldrates.com ను Safari లో తెరవండి — లేదా బాక్స్ నొక్కి కీబోర్డ్ 🎤 వాడండి.",
+    mic_ios_denied: "మీ iPhone మైక్రోఫోన్‌కు అనుమతి ఇవ్వలేదు. Settings › General › Keyboard › Enable Dictation ఆన్ చేసి, Safari లో ఈ సైట్‌కు మైక్రోఫోన్ అనుమతించండి. అప్పటివరకు బాక్స్ నొక్కి కీబోర్డ్ 🎤 వాడండి.",
+    mic_ios_kb: "మీ మాట వినబడలేదు. iPhone లో బాక్స్ నొక్కి కీబోర్డ్ 🎤 తో కూడా మాట్లాడవచ్చు, తర్వాత పంపు నొక్కండి.",
     cv_end: "సంభాషణ ముగిసింది — మళ్లీ మాట్లాడటానికి మైక్ నొక్కండి.",
     al_h: "{k} {p}/గ్రాము కంటే తగ్గినప్పుడు మీకు చెప్పనా? ఈరోజు అతి తక్కువ {n}/గ్రాము.",
     al_ph: "మీ ఇమెయిల్",
@@ -1250,6 +1277,9 @@
   };
 
   S.ml = {
+    mic_inapp: "iPhone-ൽ Instagram, WhatsApp, Facebook എന്നിവയ്ക്കുള്ളിൽ ശബ്ദം പ്രവർത്തിക്കില്ല. എന്നോട് സംസാരിക്കാൻ mygoldrates.com Safari-യിൽ തുറക്കുക — അല്ലെങ്കിൽ ബോക്സിൽ തൊട്ട് കീബോർഡിലെ 🎤 ഉപയോഗിക്കുക.",
+    mic_ios_denied: "നിങ്ങളുടെ iPhone മൈക്രോഫോൺ അനുവദിച്ചില്ല. Settings › General › Keyboard › Enable Dictation ഓണാക്കി Safari-യിൽ ഈ സൈറ്റിന് മൈക്രോഫോൺ അനുവദിക്കുക. അതുവരെ ബോക്സിൽ തൊട്ട് കീബോർഡിലെ 🎤 ഉപയോഗിക്കുക.",
+    mic_ios_kb: "എനിക്ക് നിങ്ങളെ കേൾക്കാനായില്ല. iPhone-ൽ ബോക്സിൽ തൊട്ട് കീബോർഡിലെ 🎤 വഴിയും സംസാരിക്കാം, പിന്നെ അയയ്ക്കുക അമർത്തുക.",
     cv_end: "സംഭാഷണം അവസാനിച്ചു — വീണ്ടും സംസാരിക്കാൻ മൈക്ക് അമർത്തുക.",
     al_h: "{k} {p}/ഗ്രാമിൽ താഴെ എത്തുമ്പോൾ ഞാൻ അറിയിക്കട്ടെ? ഇന്ന് ഏറ്റവും കുറവ് {n}/ഗ്രാം.",
     al_ph: "നിങ്ങളുടെ ഇമെയിൽ",
@@ -1388,6 +1418,9 @@
   };
 
   S.ur = {
+    mic_inapp: "iPhone پر Instagram، WhatsApp یا Facebook کے اندر آواز کام نہیں کرتی۔ مجھ سے بات کرنے کے لیے mygoldrates.com کو Safari میں کھولیں — یا باکس پر ٹیپ کر کے کی بورڈ کا 🎤 استعمال کریں۔",
+    mic_ios_denied: "آپ کے iPhone نے مائیکروفون کی اجازت نہیں دی۔ Settings › General › Keyboard › Enable Dictation آن کریں اور Safari میں اس سائٹ کے لیے مائیکروفون کی اجازت دیں۔ تب تک باکس پر ٹیپ کر کے کی بورڈ کا 🎤 استعمال کریں۔",
+    mic_ios_kb: "میں آپ کو سن نہیں سکی۔ iPhone پر باکس پر ٹیپ کر کے کی بورڈ کے 🎤 سے بھی بول سکتے ہیں، پھر بھیجیں دبائیں۔",
     cv_end: "گفتگو ختم — دوبارہ بات کرنے کے لیے مائیک دبائیں۔",
     al_h: "جب {k} {p}/گرام سے نیچے آئے تو کیا میں آپ کو بتاؤں؟ آج سب سے کم {n}/گرام ہے۔",
     al_ph: "آپ کی ای میل",
@@ -1526,6 +1559,9 @@
   };
 
   S.as = {
+    mic_inapp: "iPhone-ত Instagram, WhatsApp বা Facebook-ৰ ভিতৰত কণ্ঠ কাম নকৰে। মোৰ সৈতে কথা পাতিবলৈ mygoldrates.com Safari-ত খোলক — নহয় বাকচত টিপি কীবৰ্ডৰ 🎤 ব্যৱহাৰ কৰক।",
+    mic_ios_denied: "আপোনাৰ iPhone-এ মাইক্ৰ’ফোনৰ অনুমতি নিদিলে। Settings › General › Keyboard › Enable Dictation অন কৰক আৰু Safari-ত এই ছাইটৰ বাবে মাইক্ৰ’ফোনৰ অনুমতি দিয়ক। তেতিয়ালৈ বাকচত টিপি কীবৰ্ডৰ 🎤 ব্যৱহাৰ কৰক।",
+    mic_ios_kb: "মই আপোনাৰ কথা শুনা নাপালোঁ। iPhone-ত বাকচত টিপি কীবৰ্ডৰ 🎤 ৰেও ক’ব পাৰে, তাৰ পিছত পঠিয়াওক টিপক।",
     cv_end: "কথা-বতৰা শেষ — আকৌ কথা ক’বলৈ মাইক টিপক।",
     al_h: "{k} {p}/গ্ৰামৰ তললৈ নামিলে মই আপোনাক জনাম নেকি? আজি আটাইতকৈ কম {n}/গ্ৰাম।",
     al_ph: "আপোনাৰ ইমেইল",
@@ -1664,6 +1700,9 @@
   };
 
   S.or = {
+    mic_inapp: "iPhone ରେ Instagram, WhatsApp କିମ୍ବା Facebook ଭିତରେ ସ୍ୱର କାମ କରେ ନାହିଁ। ମୋ ସହ କଥା ହେବାକୁ mygoldrates.com Safari ରେ ଖୋଲନ୍ତୁ — କିମ୍ବା ବକ୍ସରେ ଟ୍ୟାପ୍ କରି କୀବୋର୍ଡର 🎤 ବ୍ୟବହାର କରନ୍ତୁ।",
+    mic_ios_denied: "ଆପଣଙ୍କ iPhone ମାଇକ୍ରୋଫୋନ୍ ଅନୁମତି ଦେଲା ନାହିଁ। Settings › General › Keyboard › Enable Dictation ଚାଲୁ କରନ୍ତୁ ଏବଂ Safari ରେ ଏହି ସାଇଟ୍ ପାଇଁ ମାଇକ୍ରୋଫୋନ୍ ଅନୁମତି ଦିଅନ୍ତୁ। ସେପର୍ଯ୍ୟନ୍ତ ବକ୍ସରେ ଟ୍ୟାପ୍ କରି କୀବୋର୍ଡର 🎤 ବ୍ୟବହାର କରନ୍ତୁ।",
+    mic_ios_kb: "ମୁଁ ଆପଣଙ୍କ କଥା ଶୁଣିପାରିଲି ନାହିଁ। iPhone ରେ ବକ୍ସରେ ଟ୍ୟାପ୍ କରି କୀବୋର୍ଡର 🎤 ରେ ମଧ୍ୟ କହିପାରିବେ, ତାପରେ ପଠାନ୍ତୁ ଦବାନ୍ତୁ।",
     cv_end: "କଥାବାର୍ତ୍ତା ଶେଷ — ପୁଣି କଥା ହେବାକୁ ମାଇକ୍ ଦବାନ୍ତୁ।",
     al_h: "{k} {p}/ଗ୍ରାମ ତଳକୁ ଆସିଲେ ମୁଁ ଆପଣଙ୍କୁ ଜଣାଇବି କି? ଆଜି ସବୁଠାରୁ କମ୍ {n}/ଗ୍ରାମ।",
     al_ph: "ଆପଣଙ୍କ ଇମେଲ୍",
@@ -2997,9 +3036,19 @@
   // Conversation mode: a tap on the mic starts it; after each spoken answer
   // Sona listens again by herself, like a voice assistant, until the visitor
   // taps the mic, closes Sona, says stop / bas / thanks, or says nothing.
-  var convo = false;
+  var convo = false, autoListen = false;
+  // iPhone: only Safari lets a page use speech recognition, and it needs
+  // Settings > Siri / Dictation on. Inside Instagram, WhatsApp or Facebook it
+  // does not work at all. Every iPhone can still speak through the keyboard's
+  // own mic, so that is the fallback.
+  var IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var INAPP = /Instagram|FBAN|FBAV|FB_IAB|WhatsApp|Snapchat|Line\//i.test(navigator.userAgent);
+  function kbDictate(key) {
+    endConvo(); note(t(key));
+    try { input.focus(); } catch (_) {}
+  }
   function endConvo() { convo = false; if (panel) panel.classList.remove('sn-convo'); }
-  function resume() { if (convo && opened && !listening) setTimeout(function () { if (convo && opened && !listening) listen(); }, 350); }
+  function resume() { if (convo && opened && !listening) setTimeout(function () { if (convo && opened && !listening) { autoListen = true; listen(); } }, 350); }
   var TTS = window.speechSynthesis, ttsOn = false;      // read every reply aloud; a spoken question is always answered aloud
   try { ttsOn = localStorage.getItem('sona_tts') === '1'; } catch (_) {}
   var ICON = {
@@ -3032,6 +3081,7 @@
       // in a conversation: end it
       if (convo && listening) { endConvo(); listen(); return; }
       if (TTS && TTS.speaking) { hush(); convo = true; panel.classList.add('sn-convo'); listen(); return; }
+      if (IOS && INAPP) { track('mic_inapp'); kbDictate('mic_inapp'); return; }
       convo = true; panel.classList.add('sn-convo'); listen();
     };
     if (spk) spk.onclick = function () {
@@ -3163,7 +3213,7 @@
     RL = LANG; input.placeholder = on ? t('ui_listen') : t('ui_ph');
   }
   // The language the mic is listening for (for the fallback below).
-  var micUsed = '';
+  var micUsed = '', heardOnce = false;
   function listen(fallback) {
     if (!SR) return;
     if (listening && !fallback) { try { rec.stop(); } catch (_) {} var r0 = rec; setTimeout(function () { if (rec === r0 && listening) { try { r0.abort(); } catch (_) {} if (r0.onend) r0.onend(); } }, 1200); return; }
@@ -3171,6 +3221,7 @@
     micUsed = micLang();
     rec = new SR(); rec.lang = fallback || bcp(micUsed); rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
     var heard = '', done = false, quiet = null, cap = null, me = rec;
+    me._auto = autoListen; autoListen = false;
     // iPhone Safari does not stop by itself when the visitor stops talking
     // (Android does): stop after a short silence, or if nothing is said, or
     // after a hard limit - and finish even if Safari never sends "end".
@@ -3179,7 +3230,12 @@
       clearTimeout(quiet); clearTimeout(cap);
       if (rec === me) setListening(false);
       var said = heard.trim();
-      if (!said) { if (convo) { endConvo(); note(t('cv_end')); } return; }
+      if (!said) {
+        if (IOS && !me._auto && !heardOnce) { kbDictate('mic_ios_kb'); return; }
+        if (convo) { endConvo(); note(t('cv_end')); }
+        return;
+      }
+      heardOnce = true;
       if (convo && /^(stop|bas|band karo|बस|रुको|थांबा|bye|goodbye|thanks|thank you|ok thanks|धन्यवाद|शुक्रिया)[.!]*$/i.test(said)) {
         endConvo(); bubble(esc(said), true); note(t('cv_end')); return;
       }
@@ -3208,7 +3264,18 @@
         setTimeout(function () { listen('hi-IN'); micUsed = want; }, 50);
         return;
       }
-      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { var was = convo; endConvo(); if (!was) note(t('mic_denied')); else note(t('cv_end')); }
+      var auto = me._auto;
+      track('mic_err_' + (e.error || 'x') + (IOS ? '_ios' : ''));
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        done = true; clearTimeout(quiet); clearTimeout(cap); setListening(false);
+        if (auto) { endConvo(); note(t('cv_end')); }        // the phone wants a tap to listen again
+        else if (IOS) kbDictate('mic_ios_denied');
+        else { endConvo(); note(t('mic_denied')); }
+      }
+      else if (e.error === 'audio-capture' || e.error === 'network') {
+        done = true; clearTimeout(quiet); clearTimeout(cap); setListening(false);
+        if (IOS) kbDictate('mic_ios_kb'); else { endConvo(); note(t('mic_none')); }
+      }
       else if (e.error === 'no-speech' && !convo) note(t('mic_none'));
     };
     rec.onend = finish;
