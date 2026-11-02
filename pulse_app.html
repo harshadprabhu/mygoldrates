@@ -722,7 +722,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 <div id="g_id_onload"
      data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
      data-callback="handleCredentialResponse"
-     data-auto_prompt="true"
+     data-auto_prompt="false"
      data-cancel_on_tap_outside="false"
      data-context="signin"></div>
 
@@ -3636,30 +3636,23 @@ function handleCredentialResponse(resp){
   // The original fired as soon as One Tap concluded, which on a cold load
   // means a dialog over a half-painted page; these two signals both mean
   // "this person is actually reading" and cost nothing if neither fires.
-  (function armSubPop(){
-    if(!subPop)return;
-    var armed=true;
-    function fire(){ if(!armed)return; armed=false; cleanup(); maybeOpenSubPop(); }
-    function onScroll(){
-      var el=document.getElementById('sections')||document.documentElement;
-      var top=el.scrollTop||window.scrollY||0;
-      var h=(el.scrollHeight||0)-(el.clientHeight||window.innerHeight||0);
-      if(h>0&&top/h>0.12)fire();
+  // Nothing pops up on arrival: after 10 s with the tab in view (as on every
+  // other page, /alerts-pop.js), ONE prompt - our signup popup, which carries
+  // its own "Continue with Google" button; Google's One Tap only when the
+  // popup is not due (closed this session, shown 3 times, or 7-day gap) and
+  // the visitor is not subscribed. data-auto_prompt is false above, so Google
+  // no longer shows its prompt the moment the page loads.
+  (function armFirstPrompt(){
+    function go(){
+      if(subPopEligible()){maybeOpenSubPop();return;}
+      if(lsGet(SP_SUB)==='1')return;
+      if(window.google&&google.accounts&&google.accounts.id){try{google.accounts.id.prompt();}catch(_){}}
     }
-    // 5 s, or as soon as they start scrolling: long enough to see the rate
-    // they searched for, early enough that most visitors are still here
-    // (the old 30 s and 35%-scroll lost nearly everyone arriving from
-    // search, who read the rate and leave).
-    var t=setTimeout(fire,5000);
-    function cleanup(){
-      clearTimeout(t);
-      window.removeEventListener('scroll',onScroll,true);
-      var sc=document.getElementById('sections');
-      if(sc)sc.removeEventListener('scroll',onScroll);
-    }
-    window.addEventListener('scroll',onScroll,true);
-    var sc=document.getElementById('sections');
-    if(sc)sc.addEventListener('scroll',onScroll);
+    setTimeout(function(){
+      if(!document.hidden)return go();
+      document.addEventListener('visibilitychange',function v(){
+        if(!document.hidden){document.removeEventListener('visibilitychange',v);go();}});
+    },10000);
   })();
 
 
