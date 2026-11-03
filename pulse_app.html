@@ -3050,7 +3050,22 @@ function handleCredentialResponse(resp){
   function fetchMcData(){
     var cached=loadMcCache();
     if(cached){MC_DATA=cached;renderMcBrandPicker();renderMcTable();return}
-    fetch('https://mygoldrates.com/making-charges.json').then(function(r){return r.json()}).then(function(json){
+    // Relative URL (same host, www or not), one retry past the browser's
+    // cache, and a drawing fault kept apart from a loading fault: an iPhone
+    // Safari visitor saw "Couldn't load" while every other browser drew the
+    // table (3 Nov 2026). The reason is sent to analytics as mc_err:<what>.
+    function mcFail(stage,err){
+      var why=String((err&&(err.message||err))||'unknown').slice(0,90);
+      console.warn('making-charges '+stage,err);
+      try{if(window.GR_TRACK)window.GR_TRACK('click_events',{page:location.pathname,target:'mc_err:'+stage+':'+why,session_id:window.GR_SID||''});}catch(_){}
+    }
+    function getMc(opts){
+      return fetch('/making-charges.json',opts||{}).then(function(r){
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        return r.text();
+      }).then(function(t){return JSON.parse(t)});
+    }
+    getMc().catch(function(e1){mcFail('fetch1',e1);return getMc({cache:'no-store'})}).then(function(json){
       var map={};
       (json.brands||[]).forEach(function(b){
         map[b.brand]={};
@@ -3058,10 +3073,10 @@ function handleCredentialResponse(resp){
       });
       MC_DATA=map;
       try{localStorage.setItem(MC_CACHE_KEY,JSON.stringify({ts:Date.now(),data:map}))}catch(e){}
-      renderMcBrandPicker();
-      renderMcTable();
+      try{renderMcBrandPicker();}catch(e){mcFail('picker',e)}
+      try{renderMcTable();}catch(e){mcFail('table',e)}
     }).catch(function(err){
-      console.warn('making-charges fetch failed',err);
+      mcFail('fetch2',err);
       SCOPES.forEach(function(suf){var n=$('mcNote',suf);if(n)n.textContent="Couldn't load making-charge data right now — check back shortly."});
     });
   }
