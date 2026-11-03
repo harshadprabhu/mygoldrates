@@ -2007,8 +2007,7 @@ function handleCredentialResponse(resp){
   }
   function saveSbTrendCache(data){try{localStorage.setItem(SB_TREND_CACHE_KEY,JSON.stringify({ts:Date.now(),data:data}))}catch(e){}}
   function initSupabaseTrend(){
-    var cached=loadSbTrendCache();
-    if(cached){sbTrendData=cached;renderTrend();return}
+    // always fresh: rates change every 30 minutes (owner: latest data only)
     fetchSupabaseTrend().then(function(data){
       sbTrendData=data;
       if(data.length)saveSbTrendCache(data);
@@ -2251,7 +2250,7 @@ function handleCredentialResponse(resp){
       applyLive(usdOz,usdinr,silverUsdOz,res.prevs);
       if(res.fx)LIVE.fx=res.fx;if(res.cbr)LIVE.cbr=res.cbr;
       LIVE.ts=Date.now();LIVE.ok=true;LIVE.source='live';
-      try{localStorage.setItem('mgr_live_cache',JSON.stringify({usdOz:usdOz,usdinr:usdinr,silverUsdOz:silverUsdOz}))}catch(e){}
+      try{localStorage.setItem('mgr_live_cache',JSON.stringify({usdOz:usdOz,usdinr:usdinr,silverUsdOz:silverUsdOz,ts:Date.now()}))}catch(e){}
       recordHistoryPoint(LIVE.ibja24);
       icRecordTick(LIVE.goldUsdOz);
       renderAll();paintMarket();paintWorld();paintLiveChip(currentDotState());paintLiveStrip();renderTrend();
@@ -2261,7 +2260,8 @@ function handleCredentialResponse(resp){
       if(!LIVE.ok){
         var cached=null;
         try{cached=JSON.parse(localStorage.getItem('mgr_live_cache')||'null')}catch(e){}
-        if(cached&&cached.usdOz){applyLive(cached.usdOz,cached.usdinr,cached.silverUsdOz);LIVE.source='cached';LIVE.ts=Date.now()}
+        // a saved price only while it is recent (15 min), shown with its own time
+        if(cached&&cached.usdOz&&cached.ts&&Date.now()-cached.ts<900000){applyLive(cached.usdOz,cached.usdinr,cached.silverUsdOz);LIVE.source='cached';LIVE.ts=cached.ts}
         else{LIVE.source='static'}
         renderAll();paintMarket();
       }
@@ -2614,7 +2614,7 @@ function handleCredentialResponse(resp){
   // publishers), so the page no longer fetches or filters RSS itself.
   var NEWS_BUILD = __NEWS_JSON__;
   var NEWS_CACHE_KEY='mgr_news_cache_v1';
-  var NEWS_TTL_MS=30*60*1000;
+  var NEWS_TTL_MS=10*60*1000;
   var NEWS_MAX=8;
 
   function renderNews(items){
@@ -2961,6 +2961,7 @@ function handleCredentialResponse(resp){
   var mcKarat='22K';
   var mcWeights={Bangle:10,Ring:5,Earrings:4,Mangalsutra:12};
   var MC_CACHE_KEY='mgr_mc_cache';
+  try{localStorage.removeItem(MC_CACHE_KEY)}catch(e){}   // old copies: never shown
 
   function findBrandRate(name,karat){
     var b=BRANDS.filter(function(x){return x.n===name})[0];
@@ -3064,32 +3065,10 @@ function handleCredentialResponse(resp){
       try{renderMcTable();}catch(e){mcFail('table',e)}
       return;
     }
-    var cached=loadMcCache();
-    if(cached){MC_DATA=cached;renderMcBrandPicker();renderMcTable();return}
-    // Relative URL (same host, www or not), one retry past the browser's
-    // cache, and a drawing fault kept apart from a loading fault: an iPhone
-    // Safari visitor saw "Couldn't load" while every other browser drew the
-    // table (3 Nov 2026). The reason is sent to analytics as mc_err:<what>.
-    function getMc(opts){
-      return fetch('/making-charges.json',opts||{}).then(function(r){
-        if(!r.ok)throw new Error('HTTP '+r.status);
-        return r.text();
-      }).then(function(t){return JSON.parse(t)});
-    }
-    getMc().catch(function(e1){mcFail('fetch1',e1);return getMc({cache:'no-store'})}).then(function(json){
-      var map={};
-      (json.brands||[]).forEach(function(b){
-        map[b.brand]={};
-        (b.categories||[]).forEach(function(c){map[b.brand][c.category]=c.making_pct_median});
-      });
-      MC_DATA=map;
-      try{localStorage.setItem(MC_CACHE_KEY,JSON.stringify({ts:Date.now(),data:map}))}catch(e){}
-      try{renderMcBrandPicker();}catch(e){mcFail('picker',e)}
-      try{renderMcTable();}catch(e){mcFail('table',e)}
-    }).catch(function(err){
-      mcFail('fetch2',err);
-      SCOPES.forEach(function(suf){var n=$('mcNote',suf);if(n)n.textContent="Couldn't load making-charge data right now — check back shortly."});
-    });
+    // Latest only (owner, 3 Nov 2026): no browser copy and no fallback to an
+    // old file - without the build's figures the tab says so.
+    mcFail('missing','no inline data');
+    SCOPES.forEach(function(suf){var n=$('mcNote',suf);if(n)n.textContent="Making-charge figures are being updated — check back shortly."});
   }
   function renderMcTable(){
     if(!MC_DATA)return;

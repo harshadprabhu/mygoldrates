@@ -281,3 +281,15 @@ def test_homepage_making_charges_are_inline_not_a_missing_file():
     assert "if(MC_INLINE){" in src
     gen = _read("generate_site.py")
     assert '"null/*MC_INLINE*/"' in gen and "making_pct_median" in gen
+
+
+def test_only_the_latest_data_is_ever_shown():
+    """Owner, 3 Nov 2026: no old data anywhere. No browser copy of making
+    charges, no stale spot price passed off as live, no hour-old trend."""
+    src = _read("pulse_app.html")
+    assert "loadMcCache();" not in src and "fetch('/making-charges.json'" not in src
+    assert "LIVE.ts=Date.now()}" not in src and "Date.now()-cached.ts<900000" in src
+    assert "var cached=loadSbTrendCache();" not in src
+    gen = _read("generate_site.py")
+    assert "/making-charges.json    /making-charges-comparison    301" in gen
+    assert "/offers.json    /gold-offers-today    301" in gen
