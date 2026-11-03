@@ -472,41 +472,59 @@
     var m = Math.floor(all.length / 2);
     return all.length % 2 ? all[m] : (all[m - 1] + all[m]) / 2;   // the true median
   }
-  function coinBill(b, w, typ) {
+  // kk: the coin's karat. A 24K coin is priced at the jeweller's own 24K rate
+  // and the gold it bills per gram (coin gold factor); a 22K coin at its 22K
+  // rate - never a 24K rate on a 22K coin (owner, 3 Nov 2026).
+  function coinBill(b, w, typ, kk) {
+    kk = kk === '22K' ? '22K' : '24K';
     var mkp = b.mk && b.mk.Coin != null ? b.mk.Coin : typ, est = !(b.mk && b.mk.Coin != null);
-    var r24 = b.a24 || rate(b, '24K');          // the jeweller's own 24K rate when it publishes one
-    var gw = w.g * (b.cf || 1);                 // gold it bills: purity, billed weight (coin gold factor)
-    var gold = r24 * gw, mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03;
-    return { b: b, r24: r24, gw: gw, gold: gold, mkp: mkp, mk: mk, gst: gst, tot: gold + mk + gst, est: est };
+    var rk = kk === '24K' ? (b.a24 || rate(b, '24K')) : rate(b, '22K');
+    var gw = w.g * (kk === '24K' ? (b.cf || 1) : 1);
+    var gold = rk * gw, mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03;
+    return { b: b, kk: kk, rk: rk, gw: gw, gold: gold, mkp: mkp, mk: mk, gst: gst, tot: gold + mk + gst, est: est,
+             pur: kk === '22K' ? '91.6%' : b.cp === '995' ? '99.5%' : b.cp === '999' ? '99.9%' : '99.5–99.9%' };
   }
-  function aCoin(w, bs, city) {
+  function mkCell(r) { return r.mkp != null ? inr(r.mk) + '<small>' + (r.est ? '~' : '') + pct(r.mkp) + '</small>' : '—'; }
+  function aCoin(w, bs, city, k) {
     w = w || { g: 10, n: '10', u: 'g' };
-    var typ = coinMk(), more = '<p>' + link('/gold-coin-price-today', t('coin_more')) + '</p>';
-    var wc = ['1', '5', '10'].map(function (n) { return { l: n + ' g', q: n + ' gram gold coin price' }; });
-    if (bs.length) {                          // one jeweller's coin bill
-      var r = coinBill(bs[0], w, typ);
-      var h = '<p>' + t('price_h', { w: esc(wLabel(w)), k: '24K', who: esc(r.b.n) }) + '</p><div class="sn-bill">' +
-        '<div><span>' + t('price_gold', { g: Math.round(r.gw * 1000) / 1000, p: inr(r.r24) }) + '</span><b>' + inr(r.gold) + '</b></div>' +
-        (r.mkp != null ? '<div><span>' + t('price_mk', { p: pct(r.mkp), c: r.est ? t('price_typ') : esc(catName('Coin')) }) + '</span><b>' + inr(r.mk) + '</b></div>' : '') +
-        '<div><span>GST 3%</span><b>' + inr(r.gst) + '</b></div><div class="sn-tot"><span>' + t('price_total') + '</span><b>' + inr(r.tot) + '</b></div></div>' +
+    var kk = k === '22K' ? '22K' : '24K', typ = coinMk();
+    var more = '<p>' + link('/gold-coin-price-today', t('coin_more')) + '</p>';
+    var wc = ['1', '5', '10'].map(function (n) { return { l: n + ' g', q: n + ' gram ' + kk + ' gold coin price' }; })
+      .concat([{ l: kk === '24K' ? '22K' : '24K', q: wLabel(w) + ' ' + (kk === '24K' ? '22K' : '24K') + ' gold coin price' }]);
+    if (bs.length) {                          // one jeweller: a receipt
+      var r = coinBill(bs[0], w, typ, kk);
+      var line = function (l, v) { return '<tr><td>' + l + '</td><td>' + v + '</td></tr>'; };
+      var h = '<p><b>' + esc(r.b.n) + '</b> · ' + esc(wLabel(w)) + ' ' + kk + ' ' + esc(catName('Coin')) + '</p>' +
+        '<table class="sn-rcpt">' +
+        line(t('coin_pur'), kk + ' · ' + r.pur) +
+        line(t('coin_rate', { k: kk }), inr(r.rk) + '/g') +
+        line(t('th_gold') + ' <small>' + (Math.round(r.gw * 1000) / 1000) + ' g × ' + inr(r.rk) + '</small>', inr(r.gold)) +
+        line(t('th_mk') + ' <small>' + (r.mkp != null ? (r.est ? '~' : '') + pct(r.mkp) : '—') + '</small>', r.mkp != null ? inr(r.mk) : '—') +
+        line('GST <small>3%</small>', inr(r.gst)) +
+        '<tr class="tot"><td>' + t('price_total') + '</td><td>' + inr(r.tot) + '</td></tr></table>' +
         (r.est && r.mkp != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(r.mkp) }) + '</p>' : '') +
         (r.mkp == null ? '<p class="sn-dim">' + t('coin_nomk') + '</p>' : '') + more + src();
-      return { intent: 'coin', html: h, say: t('say_price', { w: wLabel(w), k: sK('24K'), b: r.b.n, p: sInr(r.tot) }), chips: wc };
+      return { intent: 'coin', html: h, say: t('say_price', { w: wLabel(w), k: sK(kk), b: r.b.n, p: sInr(r.tot) }), chips: wc };
     }
-    if (!city) return askCityFor(function (c) { return aCoin(w, [], c); });
+    if (!city) return askCityFor(function (c) { return aCoin(w, [], c, kk); });
     var here = servesCity(city);
-    var rows = KB.brands.filter(function (b) { return here(b) && (b.a24 || rate(b, '24K')); }).map(function (b) { return coinBill(b, w, typ); })
-      .sort(function (a, z) { return a.tot - z.tot; });
+    var rows = KB.brands.filter(function (b) { return here(b) && (b.a24 || rate(b, '24K')); })
+      .map(function (b) { return coinBill(b, w, typ, kk); }).sort(function (a, z) { return a.tot - z.tot; });
     if (!rows.length) return { intent: 'coin', html: '<p>' + t('off_city_none', { c: esc(city.n) }) + '</p>' + more, say: '', chips: wc };
-    var anyEst = rows.slice(0, 8).some(function (r) { return r.est; });
-    var h2 = '<p>' + t('coin_h', { w: esc(wLabel(w)) }) + '</p>' + cityNote(city) + '<div class="sn-list">' + rows.slice(0, 8).map(function (r, i) {
-      // every row: gold, making and GST, each as an amount and a % (owner, 3 Nov 2026)
-      var brk = r.mkp != null
-        ? t('coin_row', { g: inr(r.gold), m: inr(r.mk), mp: (r.est ? '~' : '') + pct(r.mkp), t: inr(r.gst) })
-        : t('coin_row', { g: inr(r.gold), m: '—', mp: '—', t: inr(r.gst) });
-      return '<div class="sn-row sn-orow"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm"><b>' + esc(r.b.n) + '</b>' +
-        '<small>' + inr(r.r24) + '/g × ' + esc(wLabel(w)) + '</small><small>' + brk + '</small></span><span class="sn-v">' + inr(r.tot) + '</span></div>';
-    }).join('') + '</div>' + (anyEst && typ != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(typ) }) + '</p>' : '') +
+    var top = rows.slice(0, 8), anyEst = top.some(function (r) { return r.est; });
+    var pur = kk === '22K' ? '91.6%' : '99.5–99.9%';
+    var h2 = '<p>' + t('coin_tbl_h', { w: esc(wLabel(w)), k: kk, p: pur }) + '</p>' + cityNote(city) +
+      '<div class="sn-tblw"><table class="sn-ctbl"><thead><tr><th>' + t('th_jw') + ' · ' + t('th_gold') + '</th><th>' + t('th_mk') +
+      '</th><th>GST</th><th>' + t('price_total') + '</th></tr></thead><tbody>' +
+      top.map(function (r, i) {
+        // gold under the name: rate x grams billed = amount; purity when known
+        var known = r.kk === '22K' || r.b.cp;
+        return '<tr' + (i === 0 ? ' class="best"' : '') + '><td><b>' + (i + 1) + '. ' + esc(r.b.n) + '</b>' +
+          '<small>' + inr(r.rk) + '/g × ' + (Math.round(r.gw * 1000) / 1000) + ' g' + (known && r.kk === '24K' ? ' · ' + r.pur : '') + '</small>' +
+          '<small>' + t('th_gold') + ' ' + inr(r.gold) + '</small></td>' +
+          '<td>' + mkCell(r) + '</td><td>' + inr(r.gst) + '<small>3%</small></td><td class="t">' + inr(r.tot) + '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      (anyEst && typ != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(typ) }) + '</p>' : '') +
       (typ == null ? '<p class="sn-dim">' + t('coin_nomk') + '</p>' : '') + more;
     return { intent: 'coin', html: h2, say: t('say_coin', { w: wLabel(w), b: rows[0].b.n, p: sInr(rows[0].tot) }),
       chips: wc.concat(cityChip(city)) };
@@ -623,7 +641,7 @@
     if (/\b(accurate|correct|reliable|authentic|source|sources|come from|how do you get|where do you get|how do you collect)\b/.test(tx) &&
         /\b(rates?|prices?|data|figures)\b/.test(tx) && !bs.length && !c) return faqQ('Where do these rates come from?');
     // "gold coin price", "10 gram coin", "tanishq coin": 24K coins with their own making
-    if (ct === 'Coin' && bs.length < 2 && !has(tx, ['silver'])) return aCoin(w, bs, oc);
+    if (ct === 'Coin' && bs.length < 2 && !has(tx, ['silver'])) return aCoin(w, bs, oc, k);
     if (bs.length >= 2) return aCompare(bs, k);
     var across = has(tx, ['compare', 'comparison', 'compared', 'difference', 'differ', 'gap', 'vs', 'versus', 'across', 'other', 'all']);
     if (has(tx, W.making) && (has(tx, W.cheap) || across) && !w) return aMaking(bs, ct);    // "lowest making charge", "compare making charges": the ranking
@@ -765,6 +783,19 @@
     '@media(prefers-reduced-motion:reduce){.sona-svg *{animation:none!important}}' +
     '.sn-m.bot{gap:8px;align-items:flex-end}.sn-mav{width:30px;height:30px;flex:none;margin-bottom:2px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4))}' +
     '.sn-ban .sn-banav{width:26px;height:26px;flex:none}' +
+    '.sn-tblw{overflow-x:auto;margin:8px 0;border:1px solid rgba(240,208,128,.22);border-radius:12px}' +
+    '.sn-ctbl{width:100%;border-collapse:collapse;font-size:11.5px;font-variant-numeric:tabular-nums}' +
+    '.sn-ctbl th{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#a99f8b;text-align:right;padding:7px 6px;border-bottom:1px solid rgba(240,208,128,.18);background:rgba(240,208,128,.06)}' +
+    '.sn-ctbl th:first-child,.sn-ctbl td:first-child{text-align:left}' +
+    '.sn-ctbl td{padding:7px 5px;text-align:right;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.06);white-space:nowrap}' +
+    '.sn-ctbl td:first-child{white-space:normal;width:42%}.sn-ctbl td:last-child,.sn-ctbl th:last-child{padding-right:9px}' +
+    '.sn-ctbl small,.sn-rcpt small{display:block;font-size:10.5px;color:#a99f8b;font-weight:400}' +
+    '.sn-ctbl td.t{font-weight:800;color:#f0d080}.sn-ctbl tr.best td{background:rgba(47,209,139,.08)}' +
+    '.sn-ctbl tr:last-child td{border-bottom:0}' +
+    '.sn-rcpt{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px;font-variant-numeric:tabular-nums;border:1px dashed rgba(240,208,128,.35);border-radius:10px}' +
+    '.sn-rcpt td{padding:7px 10px;border-bottom:1px dashed rgba(255,255,255,.08)}.sn-rcpt td:last-child{text-align:right;white-space:nowrap}' +
+    '.sn-rcpt small{display:inline;margin-left:4px}' +
+    '.sn-rcpt tr.tot td{font-weight:800;font-size:14.5px;color:#f0d080;border-bottom:0;border-top:1px solid rgba(240,208,128,.35)}' +
     'html.sona-open .sn-fab{display:none}@media(max-width:560px){html.sona-open,html.sona-open body{overflow:hidden}}' +
     '.sn-ad{position:relative;overflow:hidden;border-radius:18px;padding:18px;margin:14px 12px;color:#f3eadb;background:radial-gradient(120% 90% at 100% 0%,rgba(231,191,90,.28),transparent 60%),linear-gradient(160deg,#1c160c,#0f0c08);border:1px solid rgba(240,208,128,.3);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}' +
     '.sn-ad .sn-adk{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.12em;color:#1a1405;background:linear-gradient(135deg,#f6d77d,#d4a63c);border-radius:999px;padding:3px 9px}' +
