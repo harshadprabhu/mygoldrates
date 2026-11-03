@@ -66,6 +66,24 @@
    "a": "You can check D.P. Jewellers' daily rates, offers, and making charges right here on our D.P. Jewellers page.",
    "u": "/dp-jewellers-gold-rate-today",
    "d": "2026-10-31"
+  },
+  {
+   "q": "Where can I find Manubhai Jewellers rates?",
+   "a": "You can check Manubhai Jewellers' daily gold rates, making charges and offers on their dedicated page.",
+   "u": "/manubhai-jewellers-gold-rate-today",
+   "d": "2026-11-03"
+  },
+  {
+   "q": "Where can I check today's best gold offers?",
+   "a": "You can view the latest offers and discounts from top jewellers on our offers page to find the best deal.",
+   "u": "/gold-offers-today",
+   "d": "2026-11-03"
+  },
+  {
+   "q": "Where can I check gold coin prices?",
+   "a": "You can find today's gold coin prices and compare rates across different jewellers on our gold coin price page.",
+   "u": "/gold-coin-price-today",
+   "d": "2026-11-03"
   }
  ]
 }
