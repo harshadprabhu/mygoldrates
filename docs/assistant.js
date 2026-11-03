@@ -111,6 +111,10 @@
     more: 'Read more →', guide_h: 'This guide covers it: <b>{t}</b> — {d}', guide_link: 'Read the guide →',
     en_only: 'This answer is in English for now:', translated: 'Translated on your device',
     ask_city: 'Which city are you in?',
+    coin_h: "Price of a <b>{w}</b> 24K gold coin today, coin making charge and 3% GST included:",
+    coin_note: "~ = this jeweller's coin making charge isn't on its website, so the typical coin charge ({p}) is used.",
+    say_coin: "A {w} 24K gold coin is cheapest at {b} today, about {p} with GST.",
+    coin_more: "Every jeweller's coin prices",
     in_city: "Only jewellers with stores in {c}.",
     ask_city_off: "Offers differ from city to city. Which city are you in?",
     off_city_none: "None of the jewellers with stores in {c} has an offer on its website today.",
@@ -256,6 +260,10 @@
     more: 'और पढ़ें →', guide_h: 'यह गाइड इसी बारे में है: <b>{t}</b> — {d}', guide_link: 'गाइड पढ़ें →',
     en_only: 'यह जवाब अभी अंग्रेज़ी में है:', translated: 'आपके डिवाइस पर अनुवाद किया गया',
     ask_city: 'आप किस शहर में हैं?',
+    coin_h: "आज <b>{w}</b> 24K सोने के सिक्के की क़ीमत, सिक्के का मेकिंग चार्ज और 3% GST मिलाकर:",
+    coin_note: "~ = इस ज्वैलर का सिक्के का मेकिंग चार्ज उसकी वेबसाइट पर नहीं है, इसलिए आम चार्ज ({p}) लिया गया है।",
+    say_coin: "आज {w} का 24K सोने का सिक्का {b} पर सबसे सस्ता है, GST के साथ लगभग {p}।",
+    coin_more: "सभी ज्वैलर्स के सिक्कों की क़ीमत",
     in_city: "सिर्फ़ {c} में स्टोर वाले ज्वैलर्स.",
     ask_city_off: "ऑफ़र हर शहर में अलग होते हैं. आप किस शहर में हैं?",
     off_city_none: "{c} में स्टोर वाले किसी ज्वैलर की वेबसाइट पर आज कोई ऑफ़र नहीं है.",
@@ -401,6 +409,10 @@
     more: 'अधिक वाचा →', guide_h: 'हे मार्गदर्शक याबद्दलच आहे: <b>{t}</b> — {d}', guide_link: 'मार्गदर्शक वाचा →',
     en_only: 'हे उत्तर सध्या इंग्रजीत आहे:', translated: 'तुमच्या डिव्हाइसवर भाषांतर केले',
     ask_city: 'तुम्ही कोणत्या शहरात आहात?',
+    coin_h: "आज <b>{w}</b> 24K सोन्याच्या नाण्याची किंमत, नाण्याची मजुरी आणि 3% GST धरून:",
+    coin_note: "~ = या ज्वेलरची नाण्याची मजुरी वेबसाइटवर नाही, म्हणून साधारण मजुरी ({p}) धरली आहे.",
+    say_coin: "आज {w} चे 24K सोन्याचे नाणे {b} येथे सर्वात स्वस्त आहे, GST सह सुमारे {p}.",
+    coin_more: "सर्व ज्वेलर्सच्या नाण्यांच्या किमती",
     in_city: "फक्त {c} मध्ये दुकान असलेले ज्वेलर्स.",
     ask_city_off: "ऑफर प्रत्येक शहरात वेगळे असतात. तुम्ही कोणत्या शहरात आहात?",
     off_city_none: "{c} मध्ये दुकान असलेल्या कोणत्याही ज्वेलरच्या वेबसाइटवर आज ऑफर नाही.",
@@ -546,6 +558,10 @@
     more: 'વધુ વાંચો →', guide_h: 'આ માર્ગદર્શિકા આ વિશે જ છે: <b>{t}</b> — {d}', guide_link: 'માર્ગદર્શિકા વાંચો →',
     en_only: 'આ જવાબ હાલ અંગ્રેજીમાં છે:', translated: 'તમારા ડિવાઇસ પર અનુવાદ કર્યો',
     ask_city: 'તમે કયા શહેરમાં છો?',
+    coin_h: "આજે <b>{w}</b> 24K સોનાના સિક્કાની કિંમત, સિક્કાની ઘડામણ અને 3% GST સાથે:",
+    coin_note: "~ = આ જ્વેલરની સિક્કાની ઘડામણ તેની વેબસાઇટ પર નથી, તેથી સામાન્ય ઘડામણ ({p}) લીધી છે.",
+    say_coin: "આજે {w}નો 24K સોનાનો સિક્કો {b} પર સૌથી સસ્તો છે, GST સાથે આશરે {p}.",
+    coin_more: "બધા જ્વેલર્સના સિક્કાની કિંમતો",
     in_city: "ફક્ત {c}માં સ્ટોર ધરાવતા જ્વેલર્સ.",
     ask_city_off: "ઑફર દરેક શહેરમાં અલગ હોય છે. તમે કયા શહેરમાં છો?",
     off_city_none: "{c}માં સ્ટોર ધરાવતા કોઈ જ્વેલરની વેબસાઇટ પર આજે ઑફર નથી.",
@@ -691,6 +707,10 @@
     more: 'ਹੋਰ ਪੜ੍ਹੋ →', guide_h: 'ਇਹ ਗਾਈਡ ਇਸੇ ਬਾਰੇ ਹੈ: <b>{t}</b> — {d}', guide_link: 'ਗਾਈਡ ਪੜ੍ਹੋ →',
     en_only: 'ਇਹ ਜਵਾਬ ਅਜੇ ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ ਹੈ:', translated: 'ਤੁਹਾਡੇ ਡਿਵਾਈਸ ’ਤੇ ਅਨੁਵਾਦ ਕੀਤਾ',
     ask_city: 'ਤੁਸੀਂ ਕਿਹੜੇ ਸ਼ਹਿਰ ਵਿੱਚ ਹੋ?',
+    coin_h: "ਅੱਜ <b>{w}</b> 24K ਸੋਨੇ ਦੇ ਸਿੱਕੇ ਦੀ ਕੀਮਤ, ਸਿੱਕੇ ਦਾ ਮੇਕਿੰਗ ਚਾਰਜ ਅਤੇ 3% GST ਸਮੇਤ:",
+    coin_note: "~ = ਇਸ ਜਵੈਲਰ ਦਾ ਸਿੱਕੇ ਦਾ ਮੇਕਿੰਗ ਚਾਰਜ ਵੈੱਬਸਾਈਟ ’ਤੇ ਨਹੀਂ, ਇਸ ਲਈ ਆਮ ਚਾਰਜ ({p}) ਲਿਆ ਗਿਆ ਹੈ।",
+    say_coin: "ਅੱਜ {w} ਦਾ 24K ਸੋਨੇ ਦਾ ਸਿੱਕਾ {b} ’ਤੇ ਸਭ ਤੋਂ ਸਸਤਾ ਹੈ, GST ਸਮੇਤ ਲਗਭਗ {p}।",
+    coin_more: "ਸਾਰੇ ਜਵੈਲਰਾਂ ਦੇ ਸਿੱਕਿਆਂ ਦੀਆਂ ਕੀਮਤਾਂ",
     in_city: "ਸਿਰਫ਼ {c} ਵਿੱਚ ਸਟੋਰ ਵਾਲੇ ਜਵੈਲਰ.",
     ask_city_off: "ਆਫ਼ਰ ਹਰ ਸ਼ਹਿਰ ਵਿੱਚ ਵੱਖਰੇ ਹੁੰਦੇ ਹਨ. ਤੁਸੀਂ ਕਿਸ ਸ਼ਹਿਰ ਵਿੱਚ ਹੋ?",
     off_city_none: "{c} ਵਿੱਚ ਸਟੋਰ ਵਾਲੇ ਕਿਸੇ ਜਵੈਲਰ ਦੀ ਵੈੱਬਸਾਈਟ 'ਤੇ ਅੱਜ ਕੋਈ ਆਫ਼ਰ ਨਹੀਂ ਹੈ.",
@@ -836,6 +856,10 @@
     more: 'আরও পড়ুন →', guide_h: 'এই গাইডে এটাই আছে: <b>{t}</b> — {d}', guide_link: 'গাইড পড়ুন →',
     en_only: 'এই উত্তরটি আপাতত ইংরেজিতে:', translated: 'আপনার ডিভাইসে অনুবাদ করা',
     ask_city: 'আপনি কোন শহরে আছেন?',
+    coin_h: "আজ <b>{w}</b> 24K সোনার কয়েনের দাম, কয়েনের মেকিং চার্জ ও 3% GST সহ:",
+    coin_note: "~ = এই জুয়েলারের কয়েনের মেকিং চার্জ ওয়েবসাইটে নেই, তাই সাধারণ চার্জ ({p}) ধরা হয়েছে।",
+    say_coin: "আজ {w} 24K সোনার কয়েন সবচেয়ে সস্তা {b}-এ, GST সহ প্রায় {p}।",
+    coin_more: "সব জুয়েলারের কয়েনের দাম",
     in_city: "শুধু {c}-এ দোকান থাকা জুয়েলাররা।",
     ask_city_off: "অফার শহর অনুযায়ী আলাদা হয়। আপনি কোন শহরে আছেন?",
     off_city_none: "{c}-এ দোকান থাকা কোনো জুয়েলারের ওয়েবসাইটে আজ কোনো অফার নেই।",
@@ -981,6 +1005,10 @@
     more: 'ಇನ್ನಷ್ಟು ಓದಿ →', guide_h: 'ಈ ಮಾರ್ಗದರ್ಶಿ ಇದರ ಬಗ್ಗೆಯೇ: <b>{t}</b> — {d}', guide_link: 'ಮಾರ್ಗದರ್ಶಿ ಓದಿ →',
     en_only: 'ಈ ಉತ್ತರ ಸದ್ಯಕ್ಕೆ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿದೆ:', translated: 'ನಿಮ್ಮ ಸಾಧನದಲ್ಲೇ ಅನುವಾದಿಸಲಾಗಿದೆ',
     ask_city: 'ನೀವು ಯಾವ ನಗರದಲ್ಲಿದ್ದೀರಿ?',
+    coin_h: "ಇಂದು <b>{w}</b> 24K ಚಿನ್ನದ ನಾಣ್ಯದ ಬೆಲೆ, ನಾಣ್ಯದ ತಯಾರಿಕಾ ಶುಲ್ಕ ಮತ್ತು 3% GST ಸೇರಿ:",
+    coin_note: "~ = ಈ ಜ್ಯುವೆಲರ್‌ನ ನಾಣ್ಯದ ತಯಾರಿಕಾ ಶುಲ್ಕ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ ಇಲ್ಲ, ಆದ್ದರಿಂದ ಸಾಮಾನ್ಯ ಶುಲ್ಕ ({p}) ಬಳಸಲಾಗಿದೆ.",
+    say_coin: "ಇಂದು {w} 24K ಚಿನ್ನದ ನಾಣ್ಯ {b}ನಲ್ಲಿ ಅತಿ ಅಗ್ಗ, GST ಸೇರಿ ಸುಮಾರು {p}.",
+    coin_more: "ಎಲ್ಲಾ ಜ್ಯುವೆಲರ್‌ಗಳ ನಾಣ್ಯದ ಬೆಲೆಗಳು",
     in_city: "{c}ನಲ್ಲಿ ಮಳಿಗೆ ಇರುವ ಜ್ಯುವೆಲರ್‌ಗಳು ಮಾತ್ರ.",
     ask_city_off: "ಆಫರ್‌ಗಳು ನಗರದಿಂದ ನಗರಕ್ಕೆ ಬೇರೆ. ನೀವು ಯಾವ ನಗರದಲ್ಲಿದ್ದೀರಿ?",
     off_city_none: "{c}ನಲ್ಲಿ ಮಳಿಗೆ ಇರುವ ಯಾವ ಜ್ಯುವೆಲರ್‌ನ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲೂ ಇಂದು ಆಫರ್ ಇಲ್ಲ.",
@@ -1126,6 +1154,10 @@
     more: 'மேலும் படிக்க →', guide_h: 'இந்த வழிகாட்டி இதைப் பற்றியது: <b>{t}</b> — {d}', guide_link: 'வழிகாட்டியைப் படிக்க →',
     en_only: 'இந்தப் பதில் இப்போதைக்கு ஆங்கிலத்தில்:', translated: 'உங்கள் சாதனத்திலேயே மொழிபெயர்க்கப்பட்டது',
     ask_city: 'நீங்கள் எந்த நகரில் இருக்கிறீர்கள்?',
+    coin_h: "இன்று <b>{w}</b> 24K தங்க நாணயத்தின் விலை, நாணயச் செய்கூலி மற்றும் 3% GST உட்பட:",
+    coin_note: "~ = இந்த நகைக்கடையின் நாணயச் செய்கூலி இணையதளத்தில் இல்லை, எனவே வழக்கமான கூலி ({p}) எடுக்கப்பட்டது.",
+    say_coin: "இன்று {w} 24K தங்க நாணயம் {b}-இல் மிகக் குறைவு, GST உட்பட சுமார் {p}.",
+    coin_more: "எல்லா நகைக்கடைகளின் நாணய விலைகள்",
     in_city: "{c}-இல் கடை உள்ள நகைக்கடைகள் மட்டும்.",
     ask_city_off: "ஆஃபர்கள் நகரத்துக்கு நகரம் மாறும். நீங்கள் எந்த நகரத்தில் இருக்கிறீர்கள்?",
     off_city_none: "{c}-இல் கடை உள்ள எந்த நகைக்கடையின் இணையதளத்திலும் இன்று ஆஃபர் இல்லை.",
@@ -1271,6 +1303,10 @@
     more: 'ఇంకా చదవండి →', guide_h: 'ఈ గైడ్ దీని గురించే: <b>{t}</b> — {d}', guide_link: 'గైడ్ చదవండి →',
     en_only: 'ఈ సమాధానం ప్రస్తుతానికి ఇంగ్లీష్‌లో ఉంది:', translated: 'మీ పరికరంలోనే అనువదించబడింది',
     ask_city: 'మీరు ఏ నగరంలో ఉన్నారు?',
+    coin_h: "ఈరోజు <b>{w}</b> 24K బంగారు నాణెం ధర, నాణెం తయారీ ఛార్జీ మరియు 3% GST కలిపి:",
+    coin_note: "~ = ఈ జ్యువెలర్ నాణెం తయారీ ఛార్జీ వెబ్‌సైట్‌లో లేదు, కాబట్టి సాధారణ ఛార్జీ ({p}) తీసుకున్నాం.",
+    say_coin: "ఈరోజు {w} 24K బంగారు నాణెం {b}లో చౌక, GSTతో సుమారు {p}.",
+    coin_more: "అన్ని జ్యువెలర్ల నాణెం ధరలు",
     in_city: "{c}లో స్టోర్ ఉన్న జ్యువెలర్లు మాత్రమే.",
     ask_city_off: "ఆఫర్లు నగరాన్ని బట్టి మారుతాయి. మీరు ఏ నగరంలో ఉన్నారు?",
     off_city_none: "{c}లో స్టోర్ ఉన్న ఏ జ్యువెలర్ వెబ్‌సైట్‌లోనూ ఈరోజు ఆఫర్ లేదు.",
@@ -1416,6 +1452,10 @@
     more: 'കൂടുതൽ വായിക്കൂ →', guide_h: 'ഈ ഗൈഡ് ഇതിനെക്കുറിച്ചാണ്: <b>{t}</b> — {d}', guide_link: 'ഗൈഡ് വായിക്കൂ →',
     en_only: 'ഈ ഉത്തരം ഇപ്പോൾ ഇംഗ്ലീഷിലാണ്:', translated: 'നിങ്ങളുടെ ഉപകരണത്തിൽ തന്നെ വിവർത്തനം ചെയ്തത്',
     ask_city: 'നിങ്ങൾ ഏത് നഗരത്തിലാണ്?',
+    coin_h: "ഇന്ന് <b>{w}</b> 24K സ്വർണ്ണ നാണയത്തിന്റെ വില, നാണയത്തിന്റെ പണിക്കൂലിയും 3% GSTയും ചേർത്ത്:",
+    coin_note: "~ = ഈ ജ്വല്ലറിയുടെ നാണയ പണിക്കൂലി വെബ്സൈറ്റിൽ ഇല്ല, അതിനാൽ സാധാരണ കൂലി ({p}) എടുത്തു.",
+    say_coin: "ഇന്ന് {w} 24K സ്വർണ്ണ നാണയം {b}-ൽ ഏറ്റവും കുറവ്, GST ഉൾപ്പെടെ ഏകദേശം {p}.",
+    coin_more: "എല്ലാ ജ്വല്ലറികളുടെയും നാണയ വിലകൾ",
     in_city: "{c}-ൽ സ്റ്റോറുള്ള ജ്വല്ലറികൾ മാത്രം.",
     ask_city_off: "ഓഫറുകൾ ഓരോ നഗരത്തിലും വ്യത്യസ്തമാണ്. നിങ്ങൾ ഏത് നഗരത്തിലാണ്?",
     off_city_none: "{c}-ൽ സ്റ്റോറുള്ള ഒരു ജ്വല്ലറിയുടെ വെബ്സൈറ്റിലും ഇന്ന് ഓഫർ ഇല്ല.",
@@ -1561,6 +1601,10 @@
     more: 'مزید پڑھیں ←', guide_h: 'یہ گائیڈ اسی بارے میں ہے: <b>{t}</b> — {d}', guide_link: 'گائیڈ پڑھیں ←',
     en_only: 'یہ جواب ابھی انگریزی میں ہے:', translated: 'آپ کے ڈیوائس پر ترجمہ کیا گیا',
     ask_city: 'آپ کس شہر میں ہیں؟',
+    coin_h: "آج <b>{w}</b> 24K سونے کے سکے کی قیمت، سکے کا میکنگ چارج اور 3% GST شامل:",
+    coin_note: "~ = اس جیولر کا سکے کا میکنگ چارج ویب سائٹ پر نہیں، اس لیے عام چارج ({p}) لیا گیا ہے۔",
+    say_coin: "آج {w} کا 24K سونے کا سکہ {b} پر سب سے سستا ہے، GST سمیت تقریباً {p}۔",
+    coin_more: "تمام جیولرز کے سکوں کی قیمتیں",
     in_city: "صرف {c} میں اسٹور والے جیولرز۔",
     ask_city_off: "آفرز ہر شہر میں الگ ہوتی ہیں۔ آپ کس شہر میں ہیں؟",
     off_city_none: "{c} میں اسٹور والے کسی جیولر کی ویب سائٹ پر آج کوئی آفر نہیں ہے۔",
@@ -1706,6 +1750,10 @@
     more: 'অধিক পঢ়ক →', guide_h: 'এই গাইডত এই বিষয়ে আছে: <b>{t}</b> — {d}', guide_link: 'গাইড পঢ়ক →',
     en_only: 'এই উত্তৰ এতিয়া ইংৰাজীত:', translated: 'আপোনাৰ ডিভাইচত অনুবাদ কৰা হৈছে',
     ask_city: 'আপুনি কোন চহৰত আছে?',
+    coin_h: "আজি <b>{w}</b> 24K সোণৰ মুদ্ৰাৰ দাম, মুদ্ৰাৰ মেকিং চাৰ্জ আৰু 3% GST সহ:",
+    coin_note: "~ = এই জুৱেলাৰৰ মুদ্ৰাৰ মেকিং চাৰ্জ ৱেবছাইটত নাই, সেয়ে সাধাৰণ চাৰ্জ ({p}) লোৱা হৈছে।",
+    say_coin: "আজি {w} 24K সোণৰ মুদ্ৰা {b}ত আটাইতকৈ সস্তা, GST সহ প্ৰায় {p}।",
+    coin_more: "সকলো জুৱেলাৰৰ মুদ্ৰাৰ দাম",
     in_city: "কেৱল {c}ত দোকান থকা জুৱেলাৰসকল।",
     ask_city_off: "অফাৰ চহৰ অনুসৰি বেলেগ হয়। আপুনি কোন চহৰত আছে?",
     off_city_none: "{c}ত দোকান থকা কোনো জুৱেলাৰৰ ৱেবছাইটত আজি কোনো অফাৰ নাই।",
@@ -1851,6 +1899,10 @@
     more: 'ଅଧିକ ପଢ଼ନ୍ତୁ →', guide_h: 'ଏହି ଗାଇଡ ଏହା ବିଷୟରେ: <b>{t}</b> — {d}', guide_link: 'ଗାଇଡ ପଢ଼ନ୍ତୁ →',
     en_only: 'ଏହି ଉତ୍ତର ଏବେ ଇଂରାଜୀରେ:', translated: 'ଆପଣଙ୍କ ଡିଭାଇସରେ ଅନୁବାଦ ହୋଇଛି',
     ask_city: 'ଆପଣ କେଉଁ ସହରରେ ଅଛନ୍ତି?',
+    coin_h: "ଆଜି <b>{w}</b> 24K ସୁନା ମୁଦ୍ରାର ଦାମ, ମୁଦ୍ରାର ମେକିଂ ଚାର୍ଜ ଓ 3% GST ସହ:",
+    coin_note: "~ = ଏହି ଜୁଏଲରଙ୍କ ମୁଦ୍ରା ମେକିଂ ଚାର୍ଜ ୱେବସାଇଟରେ ନାହିଁ, ତେଣୁ ସାଧାରଣ ଚାର୍ଜ ({p}) ନିଆଯାଇଛି।",
+    say_coin: "ଆଜି {w} 24K ସୁନା ମୁଦ୍ରା {b}ରେ ସବୁଠୁ ଶସ୍ତା, GST ସହ ପ୍ରାୟ {p}।",
+    coin_more: "ସମସ୍ତ ଜୁଏଲରଙ୍କ ମୁଦ୍ରା ଦାମ",
     in_city: "କେବଳ {c}ରେ ଷ୍ଟୋର ଥିବା ଜୁଏଲର୍।",
     ask_city_off: "ଅଫର ସହର ଅନୁସାରେ ଅଲଗା। ଆପଣ କେଉଁ ସହରରେ ଅଛନ୍ତି?",
     off_city_none: "{c}ରେ ଷ୍ଟୋର ଥିବା କୌଣସି ଜୁଏଲରଙ୍କ ୱେବସାଇଟରେ ଆଜି ଅଫର ନାହିଁ।",
@@ -2790,6 +2842,44 @@
     return { intent: 'ask_cat', html: '<p>' + t('bo_ask') + '</p>', say: t('bo_ask'),
       chips: BO_CATS.map(function (c) { return { l: catName(c), q: 'best offer ' + c.toLowerCase() }; }) };
   }
+  // 24K gold coins (owner, 3 Nov 2026): the jeweller's own 24K rate, its
+  // coin making charge (measured on its own coins; else the typical coin
+  // charge across jewellers, marked ~), 3% GST. Never jewellery's making %.
+  function coinMk() {
+    var all = KB.brands.filter(function (x) { return x.mk && x.mk.Coin != null; }).map(function (x) { return x.mk.Coin; }).sort(function (a, z) { return a - z; });
+    return all.length ? all[Math.floor(all.length / 2)] : null;
+  }
+  function coinBill(b, w, typ) {
+    var mkp = b.mk && b.mk.Coin != null ? b.mk.Coin : typ, est = !(b.mk && b.mk.Coin != null);
+    var gold = rate(b, '24K') * w.g, mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03;
+    return { b: b, gold: gold, mkp: mkp, mk: mk, gst: gst, tot: gold + mk + gst, est: est };
+  }
+  function aCoin(w, bs, city) {
+    w = w || { g: 10, n: '10', u: 'g' };
+    var typ = coinMk(), more = '<p>' + link('/gold-coin-price-today', t('coin_more')) + '</p>';
+    var wc = ['1', '5', '10'].map(function (n) { return { l: n + ' g', q: n + ' gram gold coin price' }; });
+    if (bs.length) {                          // one jeweller's coin bill
+      var r = coinBill(bs[0], w, typ);
+      var h = '<p>' + t('price_h', { w: esc(wLabel(w)), k: '24K', who: esc(r.b.n) }) + '</p><div class="sn-bill">' +
+        '<div><span>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(rate(r.b, '24K')) }) + '</span><b>' + inr(r.gold) + '</b></div>' +
+        (r.mkp != null ? '<div><span>' + t('price_mk', { p: pct(r.mkp), c: r.est ? t('price_typ') : esc(catName('Coin')) }) + '</span><b>' + inr(r.mk) + '</b></div>' : '') +
+        '<div><span>GST 3%</span><b>' + inr(r.gst) + '</b></div><div class="sn-tot"><span>' + t('price_total') + '</span><b>' + inr(r.tot) + '</b></div></div>' +
+        (r.est && r.mkp != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(r.mkp) }) + '</p>' : '') + more + src();
+      return { intent: 'coin', html: h, say: t('say_price', { w: wLabel(w), k: sK('24K'), b: r.b.n, p: sInr(r.tot) }), chips: wc };
+    }
+    if (!city) return askCityFor(function (c) { return aCoin(w, [], c); });
+    var here = servesCity(city);
+    var rows = KB.brands.filter(function (b) { return here(b) && rate(b, '24K'); }).map(function (b) { return coinBill(b, w, typ); })
+      .sort(function (a, z) { return a.tot - z.tot; });
+    if (!rows.length) return { intent: 'coin', html: '<p>' + t('off_city_none', { c: esc(city.n) }) + '</p>' + more, say: '', chips: wc };
+    var anyEst = rows.slice(0, 8).some(function (r) { return r.est; });
+    var h2 = '<p>' + t('coin_h', { w: esc(wLabel(w)) }) + '</p>' + cityNote(city) + '<div class="sn-list">' + rows.slice(0, 8).map(function (r, i) {
+      return '<div class="sn-row sn-orow"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm"><b>' + esc(r.b.n) + '</b><small>' +
+        (r.mkp != null ? (r.est ? '~' : '') + pct(r.mkp) + ' · ' : '') + inr(rate(r.b, '24K')) + '/g</small></span><span class="sn-v">' + inr(r.tot) + '</span></div>';
+    }).join('') + '</div>' + (anyEst && typ != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(typ) }) + '</p>' : '') + more;
+    return { intent: 'coin', html: h2, say: t('say_coin', { w: wLabel(w), b: rows[0].b.n, p: sInr(rows[0].tot) }),
+      chips: wc.concat(cityChip(city)) };
+  }
   function aPrice(w, k, bs, ct) {
     k = k || (ct === 'Coin' ? '24K' : '22K');
     var b = bs[0] || ranked(natBrands())[0], who = bs[0] ? esc(b.n) : t('price_who', { b: esc(b.n) });
@@ -2901,6 +2991,8 @@
     // "are your rates accurate", "how do you get the rates"
     if (/\b(accurate|correct|reliable|authentic|source|sources|come from|how do you get|where do you get|how do you collect)\b/.test(tx) &&
         /\b(rates?|prices?|data|figures)\b/.test(tx) && !bs.length && !c) return faqQ('Where do these rates come from?');
+    // "gold coin price", "10 gram coin", "tanishq coin": 24K coins with their own making
+    if (ct === 'Coin' && bs.length < 2 && !has(tx, ['silver'])) return aCoin(w, bs, oc);
     if (bs.length >= 2) return aCompare(bs, k);
     var across = has(tx, ['compare', 'comparison', 'compared', 'difference', 'differ', 'gap', 'vs', 'versus', 'across', 'other', 'all']);
     if (has(tx, W.making) && (has(tx, W.cheap) || across) && !w) return aMaking(bs, ct);    // "lowest making charge", "compare making charges": the ranking
@@ -3385,7 +3477,7 @@
   // what they are buying for, and when. All of it goes to the visitor's own
   // subscriber row through the site's functions (upsert_subscriber,
   // set_price_alert, save_intent); the consent line says what they agree to.
-  var ALERT_FOR = { rate: 1, rate_city: 1, rate_brand: 1, cheapest: 1, price: 1, best_offer: 1, brand_deal: 1,
+  var ALERT_FOR = { rate: 1, coin: 1, rate_city: 1, rate_brand: 1, cheapest: 1, price: 1, best_offer: 1, brand_deal: 1,
                     making: 1, offers: 1, compare: 1, trend: 1 };
   var alertShown = false;
   function subscribed() { try { return localStorage.getItem('gr_sub') === '1'; } catch (_) { return false; } }
