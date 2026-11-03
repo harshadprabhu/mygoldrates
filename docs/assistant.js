@@ -111,6 +111,7 @@
     more: 'Read more →', guide_h: 'This guide covers it: <b>{t}</b> — {d}', guide_link: 'Read the guide →',
     en_only: 'This answer is in English for now:', translated: 'Translated on your device',
     ask_city: 'Which city are you in?',
+    th_off: "Offer",
     coin_tbl_h: "<b>{w}</b> {k} gold coin, {p} pure — cheapest first:",
     th_jw: "Jeweller",
     th_gold: "Gold",
@@ -268,6 +269,7 @@
     more: 'और पढ़ें →', guide_h: 'यह गाइड इसी बारे में है: <b>{t}</b> — {d}', guide_link: 'गाइड पढ़ें →',
     en_only: 'यह जवाब अभी अंग्रेज़ी में है:', translated: 'आपके डिवाइस पर अनुवाद किया गया',
     ask_city: 'आप किस शहर में हैं?',
+    th_off: "ऑफ़र",
     coin_tbl_h: "<b>{w}</b> {k} सोने का सिक्का, {p} शुद्ध — सबसे सस्ता पहले:",
     th_jw: "ज्वैलर",
     th_gold: "सोना",
@@ -425,6 +427,7 @@
     more: 'अधिक वाचा →', guide_h: 'हे मार्गदर्शक याबद्दलच आहे: <b>{t}</b> — {d}', guide_link: 'मार्गदर्शक वाचा →',
     en_only: 'हे उत्तर सध्या इंग्रजीत आहे:', translated: 'तुमच्या डिव्हाइसवर भाषांतर केले',
     ask_city: 'तुम्ही कोणत्या शहरात आहात?',
+    th_off: "ऑफर",
     coin_tbl_h: "<b>{w}</b> {k} सोन्याचे नाणे, {p} शुद्ध — सर्वात स्वस्त आधी:",
     th_jw: "ज्वेलर",
     th_gold: "सोने",
@@ -582,6 +585,7 @@
     more: 'વધુ વાંચો →', guide_h: 'આ માર્ગદર્શિકા આ વિશે જ છે: <b>{t}</b> — {d}', guide_link: 'માર્ગદર્શિકા વાંચો →',
     en_only: 'આ જવાબ હાલ અંગ્રેજીમાં છે:', translated: 'તમારા ડિવાઇસ પર અનુવાદ કર્યો',
     ask_city: 'તમે કયા શહેરમાં છો?',
+    th_off: "ઑફર",
     coin_tbl_h: "<b>{w}</b> {k} સોનાનો સિક્કો, {p} શુદ્ધ — સૌથી સસ્તો પહેલા:",
     th_jw: "જ્વેલર",
     th_gold: "સોનું",
@@ -739,6 +743,7 @@
     more: 'ਹੋਰ ਪੜ੍ਹੋ →', guide_h: 'ਇਹ ਗਾਈਡ ਇਸੇ ਬਾਰੇ ਹੈ: <b>{t}</b> — {d}', guide_link: 'ਗਾਈਡ ਪੜ੍ਹੋ →',
     en_only: 'ਇਹ ਜਵਾਬ ਅਜੇ ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ ਹੈ:', translated: 'ਤੁਹਾਡੇ ਡਿਵਾਈਸ ’ਤੇ ਅਨੁਵਾਦ ਕੀਤਾ',
     ask_city: 'ਤੁਸੀਂ ਕਿਹੜੇ ਸ਼ਹਿਰ ਵਿੱਚ ਹੋ?',
+    th_off: "ਆਫ਼ਰ",
     coin_tbl_h: "<b>{w}</b> {k} ਸੋਨੇ ਦਾ ਸਿੱਕਾ, {p} ਸ਼ੁੱਧ — ਸਭ ਤੋਂ ਸਸਤਾ ਪਹਿਲਾਂ:",
     th_jw: "ਜਵੈਲਰ",
     th_gold: "ਸੋਨਾ",
@@ -896,6 +901,7 @@
     more: 'আরও পড়ুন →', guide_h: 'এই গাইডে এটাই আছে: <b>{t}</b> — {d}', guide_link: 'গাইড পড়ুন →',
     en_only: 'এই উত্তরটি আপাতত ইংরেজিতে:', translated: 'আপনার ডিভাইসে অনুবাদ করা',
     ask_city: 'আপনি কোন শহরে আছেন?',
+    th_off: "অফার",
     coin_tbl_h: "<b>{w}</b> {k} সোনার কয়েন, {p} খাঁটি — সবচেয়ে সস্তা আগে:",
     th_jw: "জুয়েলার",
     th_gold: "সোনা",
@@ -1053,6 +1059,7 @@
     more: 'ಇನ್ನಷ್ಟು ಓದಿ →', guide_h: 'ಈ ಮಾರ್ಗದರ್ಶಿ ಇದರ ಬಗ್ಗೆಯೇ: <b>{t}</b> — {d}', guide_link: 'ಮಾರ್ಗದರ್ಶಿ ಓದಿ →',
     en_only: 'ಈ ಉತ್ತರ ಸದ್ಯಕ್ಕೆ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿದೆ:', translated: 'ನಿಮ್ಮ ಸಾಧನದಲ್ಲೇ ಅನುವಾದಿಸಲಾಗಿದೆ',
     ask_city: 'ನೀವು ಯಾವ ನಗರದಲ್ಲಿದ್ದೀರಿ?',
+    th_off: "ಆಫರ್",
     coin_tbl_h: "<b>{w}</b> {k} ಚಿನ್ನದ ನಾಣ್ಯ, {p} ಶುದ್ಧ — ಅಗ್ಗದದ್ದು ಮೊದಲು:",
     th_jw: "ಜ್ಯುವೆಲರ್",
     th_gold: "ಚಿನ್ನ",
@@ -1210,6 +1217,7 @@
     more: 'மேலும் படிக்க →', guide_h: 'இந்த வழிகாட்டி இதைப் பற்றியது: <b>{t}</b> — {d}', guide_link: 'வழிகாட்டியைப் படிக்க →',
     en_only: 'இந்தப் பதில் இப்போதைக்கு ஆங்கிலத்தில்:', translated: 'உங்கள் சாதனத்திலேயே மொழிபெயர்க்கப்பட்டது',
     ask_city: 'நீங்கள் எந்த நகரில் இருக்கிறீர்கள்?',
+    th_off: "ஆஃபர்",
     coin_tbl_h: "<b>{w}</b> {k} தங்க நாணயம், {p} தூய்மை — மலிவானது முதலில்:",
     th_jw: "நகைக்கடை",
     th_gold: "தங்கம்",
@@ -1367,6 +1375,7 @@
     more: 'ఇంకా చదవండి →', guide_h: 'ఈ గైడ్ దీని గురించే: <b>{t}</b> — {d}', guide_link: 'గైడ్ చదవండి →',
     en_only: 'ఈ సమాధానం ప్రస్తుతానికి ఇంగ్లీష్‌లో ఉంది:', translated: 'మీ పరికరంలోనే అనువదించబడింది',
     ask_city: 'మీరు ఏ నగరంలో ఉన్నారు?',
+    th_off: "ఆఫర్",
     coin_tbl_h: "<b>{w}</b> {k} బంగారు నాణెం, {p} స్వచ్ఛత — చౌకైనది ముందు:",
     th_jw: "జ్యువెలర్",
     th_gold: "బంగారం",
@@ -1524,6 +1533,7 @@
     more: 'കൂടുതൽ വായിക്കൂ →', guide_h: 'ഈ ഗൈഡ് ഇതിനെക്കുറിച്ചാണ്: <b>{t}</b> — {d}', guide_link: 'ഗൈഡ് വായിക്കൂ →',
     en_only: 'ഈ ഉത്തരം ഇപ്പോൾ ഇംഗ്ലീഷിലാണ്:', translated: 'നിങ്ങളുടെ ഉപകരണത്തിൽ തന്നെ വിവർത്തനം ചെയ്തത്',
     ask_city: 'നിങ്ങൾ ഏത് നഗരത്തിലാണ്?',
+    th_off: "ഓഫർ",
     coin_tbl_h: "<b>{w}</b> {k} സ്വർണ്ണ നാണയം, {p} ശുദ്ധി — വിലകുറഞ്ഞത് ആദ്യം:",
     th_jw: "ജ്വല്ലറി",
     th_gold: "സ്വർണ്ണം",
@@ -1681,6 +1691,7 @@
     more: 'مزید پڑھیں ←', guide_h: 'یہ گائیڈ اسی بارے میں ہے: <b>{t}</b> — {d}', guide_link: 'گائیڈ پڑھیں ←',
     en_only: 'یہ جواب ابھی انگریزی میں ہے:', translated: 'آپ کے ڈیوائس پر ترجمہ کیا گیا',
     ask_city: 'آپ کس شہر میں ہیں؟',
+    th_off: "آفر",
     coin_tbl_h: "<b>{w}</b> {k} سونے کا سکہ، {p} خالص — سب سے سستا پہلے:",
     th_jw: "جیولر",
     th_gold: "سونا",
@@ -1838,6 +1849,7 @@
     more: 'অধিক পঢ়ক →', guide_h: 'এই গাইডত এই বিষয়ে আছে: <b>{t}</b> — {d}', guide_link: 'গাইড পঢ়ক →',
     en_only: 'এই উত্তৰ এতিয়া ইংৰাজীত:', translated: 'আপোনাৰ ডিভাইচত অনুবাদ কৰা হৈছে',
     ask_city: 'আপুনি কোন চহৰত আছে?',
+    th_off: "অফাৰ",
     coin_tbl_h: "<b>{w}</b> {k} সোণৰ মুদ্ৰা, {p} বিশুদ্ধ — আটাইতকৈ সস্তা আগতে:",
     th_jw: "জুৱেলাৰ",
     th_gold: "সোণ",
@@ -1995,6 +2007,7 @@
     more: 'ଅଧିକ ପଢ଼ନ୍ତୁ →', guide_h: 'ଏହି ଗାଇଡ ଏହା ବିଷୟରେ: <b>{t}</b> — {d}', guide_link: 'ଗାଇଡ ପଢ଼ନ୍ତୁ →',
     en_only: 'ଏହି ଉତ୍ତର ଏବେ ଇଂରାଜୀରେ:', translated: 'ଆପଣଙ୍କ ଡିଭାଇସରେ ଅନୁବାଦ ହୋଇଛି',
     ask_city: 'ଆପଣ କେଉଁ ସହରରେ ଅଛନ୍ତି?',
+    th_off: "ଅଫର",
     coin_tbl_h: "<b>{w}</b> {k} ସୁନା ମୁଦ୍ରା, {p} ଶୁଦ୍ଧ — ସବୁଠୁ ଶସ୍ତା ଆଗରେ:",
     th_jw: "ଜୁଏଲର୍",
     th_gold: "ସୁନା",
@@ -2669,10 +2682,23 @@
   function cityChip(c) { return c.n === home ? [{ l: t('ch_chcity'), q: '#city' }] : []; }
   // Ask for the city, then answer the offer question for it.
   function askCityFor(fn) { pendOffer = fn; return askCity('ask_city_off'); }
+  // A compact table (owner, 3 Nov 2026: answers as tables, not plain text).
+  // head: column titles; rows: [cells], first cell left-aligned; hi: index
+  // of a column to highlight; the first row is marked as the best.
+  function grid(head, rows, hi, noBest) {
+    return '<div class="sn-tblw"><table class="sn-ctbl"><thead><tr>' + head.map(function (h, i) {
+      return '<th' + (i === hi ? ' class="hk"' : '') + '>' + h + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      rows.map(function (r, j) {
+        return '<tr' + (j === 0 && !noBest ? ' class="best"' : '') + '>' + r.map(function (c, i) {
+          return '<td' + (i === hi ? ' class="hk"' : i === r.length - 1 && hi == null ? ' class="t"' : '') + '>' + c + '</td>'; }).join('') + '</tr>';
+      }).join('') + '</tbody></table></div>';
+  }
   function table(rows, k) {
-    return '<div class="sn-list">' + rows.map(function (b, i) {
-      return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + (b.u ? link(b.u, esc(b.n)) : esc(b.n)) + (b.nat ? '' : ' <em>local</em>') + '</span><span class="sn-v">' + inr(rate(b, k)) + '<small>/g</small></span></div>';
-    }).join('') + '</div>';
+    var ks = ['24K', '22K', '18K'];
+    return grid([t('th_jw')].concat(ks.map(function (x) { return x + '<small>/g</small>'; })), rows.map(function (b, i) {
+      return ['<b>' + (i + 1) + '. ' + (b.u ? link(b.u, esc(b.n)) : esc(b.n)) + '</b>' + (b.nat ? '' : '<small>local</small>')]
+        .concat(ks.map(function (x) { return inr(rate(b, x)); }));
+    }), 1 + ks.indexOf(k || '22K'));
   }
   function tiles(m, k) {
     return '<div class="sn-tiles">' + ['24K', '22K', '18K'].map(function (x) {
@@ -2764,12 +2790,16 @@
   }
   function aCompare(bs, k) {
     k = k || '22K';
-    var h = '<p>' + t('cmp_h', { k: k }) + '</p><div class="sn-cmp">' + bs.slice(0, 3).map(function (b) {
-      return '<div><div class="sn-cn">' + esc(b.n) + '</div><b>' + inr(rate(b, k)) + '<small>/g</small></b>' +
-        '<span>' + t('cmp_10', { p: inr(rate(b, k) * 10) }) + '</span>' +
-        (b.mk ? '<span>' + t('cmp_mk', { p: pct(b.mk.Ring || b.mk[Object.keys(b.mk)[0]]) }) + '</span>' : '<span class="sn-dim">' + t('cmp_nomk') + '</span>') +
-        (b.off && b.off.length ? '<span class="sn-off">' + esc(b.off[0].h) + '</span>' : '') + '</div>';
-    }).join('') + '</div>';
+    var cb = bs.slice(0, 3);
+    var rowsC = ['24K', '22K', '18K'].map(function (x) {
+      return ['<b>' + x + '</b><small>/g</small>'].concat(cb.map(function (b) { return inr(rate(b, x)); })); });
+    rowsC.push(['<b>10 g ' + k + '</b>'].concat(cb.map(function (b) { return inr(rate(b, k) * 10); })));
+    rowsC.push(['<b>' + t('th_mk') + '</b><small>' + esc(catName('Ring')) + '</small>'].concat(cb.map(function (b) {
+      var m = b.mk && (b.mk.Ring != null ? b.mk.Ring : null); return m != null ? pct(m) : '—'; })));
+    if (cb.some(function (b) { return b.off && b.off.length; }))
+      rowsC.push(['<b>' + t('th_off') + '</b>'].concat(cb.map(function (b) {
+        return b.off && b.off.length ? '<small style="white-space:normal">' + esc(b.off[0].h) + '</small>' : '—'; })));
+    var h = '<p>' + t('cmp_h', { k: k }) + '</p>' + grid([''].concat(cb.map(function (b) { return esc(b.n); })), rowsC, null, true);
     var s = bs.slice(0, 3).sort(function (a, b) { return a.r24 - b.r24; });
     var gap = (rate(s[s.length - 1], k) - rate(s[0], k)) * 10;
     h += '<p>' + t('cmp_win', { b: esc(s[0].n), k: k, p: inr(gap) }) + '</p>';
@@ -2783,8 +2813,8 @@
       if (!b.mk) return { intent: 'making', html: '<p>' + t('mk_none', { b: esc(b.n), list: withMk.map(function (x) { return esc(x.n); }).join(', ') }) + '</p><p>' + link('/making-charges-comparison', t('mk_link')) + '</p>',
         say: t('say_mk_none', { b: b.n }) };
       var c1 = ct && b.mk[ct] != null ? ct : (b.mk.Ring != null ? 'Ring' : Object.keys(b.mk)[0]);
-      return { intent: 'making', html: '<p>' + t('mk_brand_h', { b: esc(b.n) }) + '</p><div class="sn-list">' +
-        Object.keys(b.mk).map(function (c) { return '<div class="sn-row"><span class="sn-nm">' + esc(catName(c)) + '</span><span class="sn-v">' + pct(b.mk[c]) + '</span></div>'; }).join('') + '</div>' +
+      return { intent: 'making', html: '<p>' + t('mk_brand_h', { b: esc(b.n) }) + '</p>' +
+        grid(['', t('th_mk')], Object.keys(b.mk).map(function (c) { return ['<b>' + esc(catName(c)) + '</b>', pct(b.mk[c])]; }), null, true) +
         (b.mo && b.mo.u ? '<p>' + t('off_mo', { p: pct(b.mo.u) }) + '</p>' : '') +
         '<p class="sn-dim">' + t('mk_note') + '</p><p>' + link('/making-charges-comparison', t('mk_all')) + '</p>',
         say: t('say_mk_brand', { b: b.n, c: catName(c1), p: pct(b.mk[c1]) }),
@@ -2793,8 +2823,8 @@
     var c = ct && ct !== 'Coin' ? ct : 'Ring', miss = null;      // miss: asked for, not measured
     var rows = withMk.filter(function (b) { return b.mk[c] != null; }).sort(function (a, b) { return a.mk[c] - b.mk[c]; });
     if (!rows.length) { miss = c; c = 'Ring'; rows = withMk.filter(function (b) { return b.mk.Ring != null; }).sort(function (a, b) { return a.mk.Ring - b.mk.Ring; }); }
-    return { intent: 'making', html: '<p>' + (miss ? t('mk_nocat', { c: esc(catName(miss)), r: esc(catName(c)) }) : t('mk_h', { c: esc(catName(c)) })) + '</p><div class="sn-list">' +
-      rows.slice(0, 6).map(function (b, i) { return '<div class="sn-row"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm">' + esc(b.n) + '</span><span class="sn-v">' + pct(b.mk[c]) + '</span></div>'; }).join('') + '</div>' +
+    return { intent: 'making', html: '<p>' + (miss ? t('mk_nocat', { c: esc(catName(miss)), r: esc(catName(c)) }) : t('mk_h', { c: esc(catName(c)) })) + '</p>' +
+      grid([t('th_jw'), t('th_mk')], rows.slice(0, 6).map(function (b, i) { return ['<b>' + (i + 1) + '. ' + esc(b.n) + '</b>', pct(b.mk[c])]; })) +
       '<p>' + link('/making-charges-comparison', t('mk_every')) + '</p>',
       say: rows.length ? t('say_mk', { c: catName(c), b: rows[0].n, p: pct(rows[0].mk[c]) }) : '',
       chips: chips(['afteroff', 'bestoff', 'whatmk']) };
@@ -2848,12 +2878,12 @@
     var others = BO_CATS.filter(function (x) { return x !== c; }).map(function (x) { return { l: catName(x), q: 'best offer ' + x.toLowerCase() }; });
     if (rows.length < 1) return { intent: 'best_offer', html: '<p>' + t('bo_none', { c: esc(catName(c)) }) + '</p>' + cityNote(city) + '<p>' + link('/gold-offers-today', t('off_see')) + '</p>',
       say: t('bo_none', { c: catName(c) }), chips: others.concat(cityChip(city)) };
-    var h = '<p>' + t('bo_h', { w: esc(wLabel(w)), c: esc(catName(c)) }) + '</p>' + cityNote(city) + '<div class="sn-list">' + rows.slice(0, 8).map(function (r, i) {
-      var mk = pct(r.mk) + (r.f ? ' → ' + pct(r.after) + ' (−' + pct(r.f) + ')' : r.u ? '' : ' · ' + t('bo_noff'));
-      var up = r.best != null ? '<small>(' + t('bo_upto') + ' −' + pct(r.u) + '* → ' + inr(r.best) + ')</small>' : '';
-      return '<div class="sn-row sn-orow"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm"><b>' + esc(r.b.n) + '</b><small>' + mk + '</small>' + up +
-        '</span><span class="sn-v">' + inr(r.tot) + '</span></div>';
-    }).join('') + '</div><p class="sn-dim">' + t('bo_note') + '</p>';
+    var h = '<p>' + t('bo_h', { w: esc(wLabel(w)), c: esc(catName(c)) }) + '</p>' + cityNote(city) +
+      grid([t('th_jw'), t('th_mk'), t('price_total')], rows.slice(0, 8).map(function (r, i) {
+        var mk = r.f ? pct(r.after) + '<small>' + pct(r.mk) + ' −' + pct(r.f) + '</small>' : pct(r.mk) + (r.u ? '' : '<small>' + t('bo_noff') + '</small>');
+        var up = r.best != null ? '<small>' + t('bo_upto') + ' −' + pct(r.u) + '* → ' + inr(r.best) + '</small>' : '';
+        return ['<b>' + (i + 1) + '. ' + esc(r.b.n) + '</b>' + up, mk, inr(r.tot)];
+      })) + '<p class="sn-dim">' + t('bo_note') + '</p>';
     var top = bill(rows[0].b, c, w);                 // the breakup for #1
     if (top) h += '<p>' + t('bo_bill_h', { w: esc(wLabel(w)), c: esc(catName(c)), b: esc(rows[0].b.n) }) + '</p>' + top.html;
     h += '<p>' + link('/making-charges-comparison', t('mk_every')) + ' · ' + link('/gold-offers-today', t('off_see')) + '</p>';
@@ -2965,7 +2995,11 @@
     var gw = w.g * (kk === '24K' ? (b.cf || 1) : 1);
     var gold = rk * gw, mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03;
     return { b: b, kk: kk, rk: rk, gw: gw, gold: gold, mkp: mkp, mk: mk, gst: gst, tot: gold + mk + gst, est: est,
-             pur: kk === '22K' ? '91.6%' : b.cp === '995' ? '99.5%' : b.cp === '999' ? '99.9%' : '99.5–99.9%' };
+             pur: kk === '22K' ? '91.6%' : b.cp ? purPct(b.cp) : '99.5–99.9%' };
+  }
+  // '995' -> 99.5%, '999' -> 99.9%, '999.9' -> 99.99%, '995/999.9' -> both
+  function purPct(cp) {
+    return String(cp).split('/').map(function (x) { return x === '999.9' ? '99.99%' : x === '995' ? '99.5%' : '99.9%'; }).join(' / ');
   }
   function mkCell(r) { return r.mkp != null ? inr(r.mk) + '<small>' + (r.est ? '~' : '') + pct(r.mkp) + '</small>' : '—'; }
   function aCoin(w, bs, city, k) {
@@ -3274,6 +3308,7 @@
     '.sn-ctbl td:first-child{white-space:normal;width:42%}.sn-ctbl td:last-child,.sn-ctbl th:last-child{padding-right:9px}' +
     '.sn-ctbl small,.sn-rcpt small{display:block;font-size:10.5px;color:#a99f8b;font-weight:400}' +
     '.sn-ctbl td.t{font-weight:800;color:#f0d080}.sn-ctbl tr.best td{background:rgba(47,209,139,.08)}' +
+    '.sn-ctbl th.hk{color:#f0d080}.sn-ctbl td.hk{font-weight:800;color:#f0d080}.sn-ctbl td a{color:inherit}' +
     '.sn-ctbl tr:last-child td{border-bottom:0}' +
     '.sn-rcpt{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px;font-variant-numeric:tabular-nums;border:1px dashed rgba(240,208,128,.35);border-radius:10px}' +
     '.sn-rcpt td{padding:7px 10px;border-bottom:1px dashed rgba(255,255,255,.08)}.sn-rcpt td:last-child{text-align:right;white-space:nowrap}' +
@@ -3309,7 +3344,7 @@
     '.sn-v .up{color:#5ad59a}.sn-v .dn{color:#f08f8f}.sn-dim{color:#a99f8b;font-size:12.5px}.sn-src{font-size:10.5px;color:#7f7663;margin-top:6px}' +
     '.sn-cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:6px;margin:4px 0 10px}.sn-cmp>div{background:rgba(0,0,0,.25);border:1px solid rgba(240,208,128,.12);border-radius:12px;padding:9px}' +
     '.sn-cmp .sn-cn{font-size:12px;color:#a99f8b;margin-bottom:2px}.sn-cmp b{display:block;font-size:16px}.sn-cmp span{display:block;font-size:11.5px;color:#cfc4ad;margin-top:2px}.sn-cmp .sn-off{color:#5ad59a}' +
-    '.sn-bill{background:rgba(0,0,0,.22);border:1px solid rgba(240,208,128,.12);border-radius:12px;padding:6px 10px;margin:4px 0 10px}.sn-bill div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:13px}.sn-bill span{color:#cfc4ad}.sn-bill .sn-tot{border-top:1px dashed rgba(240,208,128,.3);margin-top:3px;padding-top:8px;font-size:15px}.sn-bill .sn-tot b{color:#f0d080}' +
+    '.sn-bill{background:rgba(0,0,0,.22);border:1px dashed rgba(240,208,128,.35);border-radius:10px;padding:2px 10px;margin:4px 0 10px;font-variant-numeric:tabular-nums}.sn-bill div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:13px;border-bottom:1px dashed rgba(255,255,255,.08)}.sn-bill div:last-child{border-bottom:0}.sn-bill b{white-space:nowrap}.sn-bill span{color:#cfc4ad}.sn-bill .sn-tot{border-top:1px dashed rgba(240,208,128,.3);margin-top:3px;padding-top:8px;font-size:15px}.sn-bill .sn-tot b{color:#f0d080}' +
     '.sn-card{background:rgba(0,0,0,.22);border:1px solid rgba(240,208,128,.12);border-radius:12px;padding:9px 10px;margin:0 0 8px}.sn-card q{display:block;font-style:italic;color:#cfc4ad;font-size:12.5px;margin:3px 0}.sn-card p{font-size:12.5px;color:#d9cfba}' +
     '.sn-spark{width:100%;height:48px;margin:2px 0 8px}' +
     '.sn-cta{width:100%;border:0;border-radius:12px;padding:11px;cursor:pointer;font-weight:800;color:#1a1405;background:linear-gradient(135deg,#f6d77d,#d4a63c 55%,#b98a24)}' +
