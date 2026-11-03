@@ -181,7 +181,8 @@ DISCOVER = [
      "max_pages": 1,
      "coin_re": r'((?:https://www\.bluestone\.com)?/gold\+coins/[a-z0-9-]+~\d+\.html)',
      "listings": {
-        "Coin": "https://www.bluestone.com/jewellery/coins.html",
+        "Coin": ["https://www.bluestone.com/jewellery/coins.html",
+                 "https://www.bluestone.com/search?search_query=gold+coin"],
         "Ring": ["https://www.bluestone.com/jewellery/rings.html",
                  "https://www.bluestone.com/jewellery/plain+gold-rings.html",
                  "https://www.bluestone.com/jewellery/only+metal-rings.html"],
@@ -581,9 +582,11 @@ def collect_urls(sess, d):
     # sitemap the whole time.
     require_path = d.get("require_path")
     for u in discover_urls(sess, d.get("sitemaps") or []):
-        if require_path and require_path not in u:
-            continue
         c = categorize(u)
+        # require_path picks a brand's jewellery pages; its coins can live
+        # elsewhere (Jos Alukkas: /gold-coin/...), so coins are not held to it
+        if require_path and require_path not in u and c != "Coin":
+            continue
         if c:
             add(c, u)
 
@@ -739,6 +742,8 @@ def fetch_batch(sess, engine, brand, items, workers=None):
             extra = follow(sess, u, html)
             html = html + "\n<!--breakup-->" + extra if extra else html
         res = engine.extract(html, brand=brand) if html else None
+        if cat == "Coin" and html and not (res and res.ok):
+            res = coin_from_price(html, u, OWN24.get(brand)) or res   # no breakup: from the price
         if cat == "Coin" and res is not None and html:
             pu = page_purity(html, u)               # the coin's own stated fineness
             if pu:
@@ -776,6 +781,34 @@ def page_purity(html, url=""):
     return c.most_common(1)[0][0]
 
 
+OWN24 = {}          # jeweller name -> its own 24K rate today (filled in main())
+
+
+def coin_from_price(html, url, rate24):
+    """A coin page with no readable breakup but a price (Reliance: 'Price :
+    14877.0', 1 gram, 24 k(99.5)): the making % worked out from the price,
+    which Indian shops quote with GST, and the jeweller's own 24K rate.
+    None when the price, weight or rate is missing or the result is not a
+    plausible 24K coin (coin_price_making.making_pct)."""
+    from mc_engine import ExtractionResult
+    from coin_price_making import making_pct, weight_g
+    if not rate24:
+        return None
+    m = (re.search(r'property="og:price:amount"\s+content="([\d.,]+)"', html)
+         or re.search(r'itemprop="price"\s+content="([\d.,]+)"', html)
+         or re.search(r'"@type"\s*:\s*"Offer"[^}]{0,300}?"price"\s*:\s*"?([\d.,]+)', html))
+    price = float(m.group(1).replace(",", "")) if m else None
+    t = re.search(r'property="og:title"\s+content="([^"]+)"', html)
+    g = weight_g(url.rsplit("/", 2)[-2] if url.endswith("/") else url.rsplit("/", 1)[-1]) \
+        or weight_g(t.group(1) if t else "")
+    excl = bool(re.search(r"exclusive of (?:all )?tax|\+\s*gst extra|plus gst", html, re.I))
+    pct = making_pct(price, g, rate24, incl_gst=not excl)
+    if pct is None:
+        return None
+    return ExtractionResult(strategy="coin_price", making_pct=pct, confidence=0.6,
+                            fields={"price": price, "grams": g, "from_price": 1.0})
+
+
 def coin_gold_factor(items, rate24):
     """How much gold a jeweller bills on its coins per gram of nominal weight,
     against its own 24K rate: gold value / (weight in the coin's name x rate),
@@ -788,7 +821,10 @@ def coin_gold_factor(items, rate24):
     from coin_price_making import weight_g
     fs = []
     for it in items:
-        gv = (it.get("fields") or {}).get("gold_value")
+        f0 = it.get("fields") or {}
+        if f0.get("from_price"):
+            continue                         # worked out from the price: no gold value of its own
+        gv = f0.get("gold_value")
         g = weight_g(it.get("url", "").rsplit("/", 1)[-1].replace("+", " "))
         if gv and g:
             f = gv / (g * rate24)
@@ -909,6 +945,7 @@ def main():
     sess.mount("https://", adapter)
     sess.mount("http://", adapter)
     engine = Engine.load(PROFILE_PATH)
+    OWN24.update(own_rate24())        # for coins whose page shows only a price
     agg = {}          # (brand, cat) -> [pct,...]
     detail = {}       # (brand, cat) -> [{url, pct, conf, fields}, ...]
 
