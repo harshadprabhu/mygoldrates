@@ -452,3 +452,17 @@ def test_coin_prices_use_coin_making_and_the_24k_rate(tmp_path):
     unmeasured = [x for x in kb["brands"] if here(x) and x.get("r24") and x["s"] not in (a["s"], b2["s"], c3["s"])]
     if unmeasured:
         assert "~4.0%" in r[1]["html"] or "~4%" in r[1]["html"]           # typical: median of 2, 4, 6
+
+
+def test_coins_use_the_jewellers_own_24k_rate(tmp_path):
+    """PN Gadgil's own 24K (13,846) is ~1% under its 22K x 24/22 (13,981);
+    a coin priced from the latter came out Rs 144 dear (owner, 3 Nov 2026)."""
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    b = next(x for x in kb["brands"] if x.get("nat") and x.get("r24"))
+    b["mk"] = dict(b.get("mk") or {}, Coin=3.0)
+    b["a24"] = round(b["r24"] * 0.99, 2)
+    p = tmp_path / "kb.json"
+    p.write_text(json.dumps(kb), encoding="utf-8")
+    r = _sona([{"lang": "en", "q": f"{b['n']} 1 gram gold coin price"}], kb=str(p))[0]
+    want = round(b["a24"] * 1.03 * 1.03)
+    assert r["intent"] == "coin" and f"{want:,}"[-3:] in r["html"]

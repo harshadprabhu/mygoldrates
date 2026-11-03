@@ -101,13 +101,17 @@ READERS = {"Joyalukkas": read_joyalukkas, "C Krishniah Chetty": read_ckc}
 # ---------------------------------------------------------------- run
 def todays_rate24(sb):
     """{jeweller name: 24K pre-GST rate} from the latest published rates."""
-    rows = (sb.table("rates").select("rate_date, canonical_24k_pre_gst, brands(name)")
+    rows = (sb.table("rates").select("rate_date, canonical_24k_pre_gst, brands(name, slug)")
             .eq("status", "published").order("rate_date", desc=True).limit(400).execute().data)
+    import private_store
+    own = private_store.cache_get("rate24_actual") or {}    # the jeweller's own 24K (collect.py)
     out = {}
     for r in rows:
-        n = (r.get("brands") or {}).get("name")
+        b = r.get("brands") or {}
+        n = b.get("name")
         if n and n not in out:
-            out[n] = float(r["canonical_24k_pre_gst"])
+            mine = (own.get("rates") or {}).get(b.get("slug")) if own.get("date") == r.get("rate_date") else None
+            out[n] = float(mine or r["canonical_24k_pre_gst"])
     return out
 
 
