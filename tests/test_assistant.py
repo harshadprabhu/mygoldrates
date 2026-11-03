@@ -466,3 +466,16 @@ def test_coins_use_the_jewellers_own_24k_rate(tmp_path):
     r = _sona([{"lang": "en", "q": f"{b['n']} 1 gram gold coin price"}], kb=str(p))[0]
     want = round(b["a24"] * 1.03 * 1.03)
     assert r["intent"] == "coin" and f"{want:,}"[-3:] in r["html"]
+
+
+def test_coin_bill_shows_the_gold_actually_billed(tmp_path):
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    b = next(x for x in kb["brands"] if x.get("nat") and x.get("r24"))
+    b["mk"] = dict(b.get("mk") or {}, Coin=2.0)
+    b["cf"] = 1.028
+    b.pop("a24", None)
+    p = tmp_path / "kb.json"
+    p.write_text(json.dumps(kb), encoding="utf-8")
+    r = _sona([{"lang": "en", "q": f"{b['n']} 1 gram gold coin price"}], kb=str(p))[0]
+    assert "1.028 g" in r["html"]
+    assert f"{round(b['r24'] * 1.028 * 1.02 * 1.03):,}"[-3:] in r["html"]

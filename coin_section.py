@@ -28,9 +28,12 @@ def coin_rows(mc, rate24):
         if not c or c.get("making_pct_median") is None or not r:
             continue
         pct = float(c["making_pct_median"])
-        per_g = r * (1 + pct / 100) * (1 + GST)
+        # gold billed per gram of the coin's weight against the 24K rate
+        # (purity, a billed weight above the nominal - collect_charges.py)
+        gf = float(c.get("gold_factor") or 1.0)
+        per_g = r * gf * (1 + pct / 100) * (1 + GST)
         rows.append({"brand": b["brand"], "pct": pct, "n": c.get("items", 0),
-                     "from_price": c.get("source") == "price",
+                     "from_price": c.get("source") == "price", "gf": gf,
                      "rate": r, "per_g": per_g,
                      "prices": {g: round(per_g * g) for g in WEIGHTS},
                      "premium": per_g / r - 1})
@@ -69,12 +72,17 @@ def coin_html(rows, updated, site):
         '<div class="tbl-wrap"><table class="jt"><tr><th>Jeweller</th><th>Making on coins</th>'
         + "".join(f"<th>{g} g coin</th>" for g in WEIGHTS)
         + "<th>Per gram, all-in</th></tr>" + trs + "</table></div>"
+        + "".join(f"<p>{e(r['brand'])} bills {r['gf']:.3f} g of gold at its 24K rate per gram of coin "
+                  f"({'more' if r['gf'] > 1 else 'less'} than the weight in the name - "
+                  f"{'billed weight' if r['gf'] > 1 else 'purity'}); its prices include that.</p>"
+                  for r in rows if abs(r.get("gf", 1) - 1) >= 0.003)
         + ("<p>* Worked out from the coin's listed price and the jeweller's 24K rate (the page shows "
            "no breakup); being watched day by day.</p>" if any(r.get("from_price") for r in rows) else "")
         + f"<p><b>Lowest today:</b> {e(best['brand'])}, {_inr(best['prices'][10])} for a 10 g coin "
         f"({best['pct']:.1f}% making, GST included).</p>"
         "<h2>How the coin price is worked out</h2>"
-        "<p>Coin price = weight &times; the jeweller's 24K rate &times; (1 + making %) &times; 1.03 (GST). "
+        "<p>Coin price = weight &times; the jeweller's own 24K rate &times; the gold it bills per gram of coin "
+        "&times; (1 + making %) &times; 1.03 (GST). "
         "The making % is the median over the 24K coins listed on the jeweller's own website. Coin designs "
         "and packaging vary, so confirm the final price with the jeweller.</p>"
         "<h2>Questions</h2>"

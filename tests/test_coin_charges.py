@@ -69,3 +69,23 @@ def test_worked_out_coin_rows_never_replace_a_measured_one():
     assert out["CKC"]["Coin"]["making_pct_median"] == 7.2 and out["CKC"]["Ring"]["making_pct_median"] == 19.5
     old = cp.update_history(hist, "2027-02-01", {})
     assert "2026-11-03" not in old                                    # 60 days kept
+
+
+def test_coin_gold_factor_from_breakups():
+    # PN Gadgil: 995 coin billed at its 24K rate -> 1.0; Khazana: '1 gram' billed 1.028 g
+    png = [{"url": "https://www.pngjewellers.com/products/1-gram-24-kt-995-png-gold-coin", "fields": {"gold_value": 13846.0}}]
+    assert cc.coin_gold_factor(png, 13846.0) == 1.0
+    kz = [{"url": "https://www.khazanajewellery.com/classic-george-1-gram-24kt-gold-coin-1GCOIN24KTG1.html",
+           "fields": {"gold_value": 14356.02}},
+          {"url": "https://x/5-gram-24kt-gold-coin", "fields": {"gold_value": 71780.0}},
+          {"url": "https://x/2-gram-24kt-gold-coin", "fields": {"gold_value": 9000.0}}]     # misread: dropped
+    assert cc.coin_gold_factor(kz, 13964.0) == 1.0281
+    assert cc.coin_gold_factor(kz, None) is None
+
+
+def test_coin_page_prices_include_the_gold_factor():
+    import coin_section as cs
+    mc = {"brands": [{"brand": "K", "categories": [{"category": "Coin", "making_pct_median": 2.0, "gold_factor": 1.028}]}]}
+    r = cs.coin_rows(mc, {"K": 13964.0})[0]
+    assert r["prices"][1] == round(13964 * 1.028 * 1.02 * 1.03)
+    assert "1.028 g of gold" in cs.coin_html([r], "2026-11-03", "https://mygoldrates.com")
