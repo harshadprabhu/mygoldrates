@@ -1226,7 +1226,14 @@
         if (e.target.closest('.bx')) { b.remove(); try { localStorage.setItem('sona_ban2', '1'); } catch (_) {} return; }
         open(); track('banner');
       };
-      document.body.insertBefore(b, document.body.firstChild);
+      // On phones the page is one screen tall (.app, 100dvh) with the menu at
+      // its foot: a banner placed above it pushed that menu off the screen
+      // until the banner was closed. Inside .app it takes room from the
+      // scrolling content instead. (.app is hidden on desktop: body there.)
+      var app = document.querySelector('.app');
+      var inApp = app && getComputedStyle(app).display !== 'none';
+      if (inApp) { b.style.flexShrink = '0'; app.insertBefore(b, app.firstChild); }
+      else document.body.insertBefore(b, document.body.firstChild);
     }
     if (/[?&]ask=1\b/.test(location.search) || location.hash === '#ask') setTimeout(function () { open(); }, 400);
     // Feature cards carry an empty .sn-adav: Sona herself goes there.

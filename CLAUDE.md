@@ -392,3 +392,9 @@ Recently added brands: Kisna (Shopify pagination), Indriya ('value per gm' extra
   2026-11-02 neither is set ("secrets present: none of the expected names"),
   so SQL still goes to the owner until one is added. Test with
   `sql/inspect_db.sql` (read-only).
+
+## Cloudflare DNS (2026-11-03)
+- None of CF_WORKERS_TOKEN / CLOUDFLARE_ZONE_TOKEN / CLOUDFLARE_API_TOKEN can
+  read or edit DNS ("Authentication error"). cf-bot-rules adds Brevo
+  (include:spf.brevo.com) to the SPF record once a token has Zone > DNS > Edit;
+  until then the SPF change is the owner's, in the dashboard.
