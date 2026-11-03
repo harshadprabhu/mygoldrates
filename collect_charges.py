@@ -1031,8 +1031,10 @@ def main():
         coins = {b["brand"]: [c for c in b["categories"] if c["category"] == "Coin"] for b in out}
         merged = []
         for b in old.get("brands") or []:
-            cats = [c for c in b.get("categories") or [] if c.get("category") != "Coin"]
-            cats += coins.pop(b["brand"], [])
+            new = coins.pop(b["brand"], [])
+            # a jeweller not re-read this time keeps its last coin figure
+            cats = [c for c in b.get("categories") or [] if c.get("category") != "Coin" or not new]
+            cats += new
             merged.append(dict(b, categories=sorted(cats, key=lambda x: x["category"])))
         merged += [{"brand": n, "categories": c} for n, c in coins.items() if c]
         payload = dict(old, brands=sorted(merged, key=lambda x: x["brand"]),
