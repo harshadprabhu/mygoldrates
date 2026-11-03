@@ -30,6 +30,7 @@ def coin_rows(mc, rate24):
         pct = float(c["making_pct_median"])
         per_g = r * (1 + pct / 100) * (1 + GST)
         rows.append({"brand": b["brand"], "pct": pct, "n": c.get("items", 0),
+                     "from_price": c.get("source") == "price",
                      "rate": r, "per_g": per_g,
                      "prices": {g: round(per_g * g) for g in WEIGHTS},
                      "premium": per_g / r - 1})
@@ -56,7 +57,7 @@ def coin_html(rows, updated, site):
     e = _html.escape
     best = rows[0]
     trs = "".join(
-        f"<tr><td>{e(r['brand'])}</td><td>{r['pct']:.1f}%</td>"
+        f"<tr><td>{e(r['brand'])}</td><td>{r['pct']:.1f}%{' *' if r.get('from_price') else ''}</td>"
         + "".join(f"<td>{_inr(r['prices'][g])}</td>" for g in WEIGHTS)
         + f"<td>{_inr(r['per_g'])}</td></tr>" for r in rows)
     return (
@@ -68,6 +69,8 @@ def coin_html(rows, updated, site):
         '<div class="tbl-wrap"><table class="jt"><tr><th>Jeweller</th><th>Making on coins</th>'
         + "".join(f"<th>{g} g coin</th>" for g in WEIGHTS)
         + "<th>Per gram, all-in</th></tr>" + trs + "</table></div>"
+        + ("<p>* Worked out from the coin's listed price and the jeweller's 24K rate (the page shows "
+           "no breakup); being watched day by day.</p>" if any(r.get("from_price") for r in rows) else "")
         f"<p><b>Lowest today:</b> {e(best['brand'])}, {_inr(best['prices'][10])} for a 10 g coin "
         f"({best['pct']:.1f}% making, GST included).</p>"
         "<h2>How the coin price is worked out</h2>"

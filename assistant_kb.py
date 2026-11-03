@@ -314,7 +314,7 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
         rows[b["slug"]] = {"s": b["slug"], "n": b["name"],
                            "r24": round(r["canonical_24k_pre_gst"], 2)}
     off_by = {b["slug"]: b for b in (offers or {}).get("brands", [])}
-    mk_by, mko_by = {}, {}
+    mk_by, mko_by, mk_name = {}, {}, {}
     for b in (making or {}).get("brands", []):
         ex = [e.get("url", "") for c in b.get("categories", []) for e in c.get("examples", [])]
         host = ""
@@ -322,6 +322,7 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
             host = ex[0].split("/")[2].replace("www.", "")
         mk_by[host] = {c["category"]: c["making_pct_median"] for c in b.get("categories", [])
                        if c.get("making_pct_median") is not None}
+        mk_name[b.get("brand", "")] = mk_by[host]
         if b.get("offer"):                     # read from the products themselves (Tanishq)
             mko_by[host] = b["offer"]
     brands = []
@@ -340,6 +341,8 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
             rec["d"] = ob["domain"]           # for the jeweller's logo (its site's favicon) on posts
         if dom and mk_by.get(dom):
             rec["mk"] = mk_by[dom]
+        elif mk_name.get(b["n"]):              # no offers entry: match by name (coins, 3 Nov 2026)
+            rec["mk"] = mk_name[b["n"]]
         # Making-charge offers, for "best offer on a bangle": f = a flat
         # discount on all gold jewellery (used for the ranking), u = the best
         # "up to" / selected-designs discount (shown only as a best case).
