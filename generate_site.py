@@ -3322,7 +3322,7 @@ def main():
                                       "n": c.get("items", 0),
                                       "conf": c.get("confidence", ""),
                                       "src": c.get("source", "")}
-                      for c in b["categories"]}
+                      for c in b["categories"] if c["category"] != "Coin"}   # coins: own page
             if cats_d:
                 dash[nm] = {"rates": rate_by_brand[nm], "mc": cats_d}
         dash_cats = sorted({c for v in dash.values() for c in v["mc"]})
@@ -3367,6 +3367,9 @@ def main():
                       for b in _mc_rows)
             + "</table></div>"
             + "".join(f"<p><b>Lowest on {_a(c)}:</b> {_html.escape(v[1])}, {v[0]:.1f}%.</p>" for c, v in _low.items())
+            + (f'<p><b>Buying a coin?</b> <a href="{SITE_URL}/gold-coin-price-today">24K gold coin prices by jeweller</a>, '
+               "with each jeweller's own (much lower) coin making charge.</p>"
+               if any(c["category"] == "Coin" for b in mc["brands"] for c in b["categories"]) else "")
             + "<h2>Questions</h2>"
             "<h3>What are making charges on gold jewellery?</h3><p>The jeweller's fee for crafting the piece, "
             "charged on top of the gold value, usually as a % of it. 3% GST applies to gold and making together.</p>"
@@ -3401,6 +3404,32 @@ def main():
             crumbs(("Making Charges", None)) + mc_body + mc_table,
             extra_js=mc_js, jsonld_block=mc_ld)
         extra_urls.append(("making-charges-comparison", "monthly", "0.6"))
+
+        # ---- 24K gold coin prices (owner, 3 Nov 2026): coin_section.py ----
+        try:
+            import coin_section as _cs
+            _rate24 = {r["brands"]["name"]: r["canonical_24k_pre_gst"] for r in live}
+            _coins = _cs.coin_rows(mc, _rate24)
+            if _coins:
+                _upd = mc.get("coins_updated") or mc.get("updated", "")
+                _cld = ('<script type="application/ld+json">' + json.dumps([
+                    {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+                        {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                        for q, a in _cs.coin_faq(_coins)]}], ensure_ascii=False) + "</script>")
+                render_content(
+                    "gold-coin-price-today",
+                    f"24K Gold Coin Price Today ({now_ist.strftime('%-d %b')}): 1g, 5g, 10g by Jeweller | MyGoldRates",
+                    f"24K gold coin price today at {len(_coins)} jewellers - 1 g, 5 g and 10 g, with each "
+                    "jeweller's own coin making charge and 3% GST. Lowest: "
+                    f"{_coins[0]['brand']}.",
+                    crumbs(("Gold Coin Price", None)) + _cs.coin_html(_coins, _upd, SITE_URL),
+                    jsonld_block=_cld)
+                extra_urls.append(("gold-coin-price-today", "daily", "0.7"))
+                print(f"gold coins: {len(_coins)} jewellers")
+            else:
+                print("gold coins: no coin readings yet - page not built")
+        except Exception as _e:              # never take the site down
+            print(f"gold coins: SKIPPED ({type(_e).__name__}: {_e})")
 
         # ---- Dhanteras 2026 report: the citable version of the above ----
         # Same `dash` join as the calculator, so the two never disagree; the
