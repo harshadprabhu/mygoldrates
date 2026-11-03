@@ -71,7 +71,7 @@ def coin_html(rows, updated, site):
         + "<th>Per gram, all-in</th></tr>" + trs + "</table></div>"
         + ("<p>* Worked out from the coin's listed price and the jeweller's 24K rate (the page shows "
            "no breakup); being watched day by day.</p>" if any(r.get("from_price") for r in rows) else "")
-        f"<p><b>Lowest today:</b> {e(best['brand'])}, {_inr(best['prices'][10])} for a 10 g coin "
+        + f"<p><b>Lowest today:</b> {e(best['brand'])}, {_inr(best['prices'][10])} for a 10 g coin "
         f"({best['pct']:.1f}% making, GST included).</p>"
         "<h2>How the coin price is worked out</h2>"
         "<p>Coin price = weight &times; the jeweller's 24K rate &times; (1 + making %) &times; 1.03 (GST). "
