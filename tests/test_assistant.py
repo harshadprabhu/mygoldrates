@@ -422,3 +422,33 @@ def test_gold_around_the_world(tmp_path):
     assert r[1]["intent"] == "intl" and r[1]["lang"] == "hi"
     assert r[2]["intent"] == "intl" and "21K" in r[2]["html"]
     assert r[3]["intent"] != "intl"                         # customs questions keep their own answer
+
+
+def test_coin_prices_use_coin_making_and_the_24k_rate(tmp_path):
+    """Owner, 3 Nov 2026: coin prices in Sona from the gold rates - the
+    jeweller's 24K rate, its coin making charge (else the typical coin charge,
+    marked ~), 3% GST. Never jewellery's making %."""
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    here = _serves(kb, "Mumbai")
+    nat = [b for b in kb["brands"] if b.get("nat") and b.get("r24")]
+    a, b2, c3 = nat[0], nat[1], nat[2]
+    for x in kb["brands"]:
+        x.setdefault("mk", {}).pop("Coin", None)
+    a["mk"] = dict(a.get("mk") or {}, Coin=2.0, Ring=30.0)
+    b2["mk"] = dict(b2.get("mk") or {}, Coin=6.0)
+    c3["mk"] = dict(c3.get("mk") or {}, Coin=4.0)
+    p = tmp_path / "kb.json"
+    p.write_text(json.dumps(kb), encoding="utf-8")
+    r = _sona([{"lang": "en", "q": "gold coin price"},
+               {"q": "Mumbai", "chip": True},
+               {"lang": "en", "q": f"{a['n']} 10 gram gold coin price"},
+               {"lang": "hi", "q": "5 gram sone ka sikka coin price"}], kb=str(p))
+    assert r[0]["intent"] == "ask_city"
+    assert r[1]["intent"] == "coin" and "Mumbai" in r[1]["html"]
+    tot = a["r24"] * 10 * 1.02 * 1.03
+    assert r[2]["intent"] == "coin" and f"{round(tot):,}"[-3:] in r[2]["html"]
+    assert "30" not in r[2]["html"].split("Total")[0].split("Making")[-1][:12]   # never the ring %
+    assert r[3]["intent"] == "coin" and r[3]["lang"] == "hi"
+    unmeasured = [x for x in kb["brands"] if here(x) and x.get("r24") and x["s"] not in (a["s"], b2["s"], c3["s"])]
+    if unmeasured:
+        assert "~4.0%" in r[1]["html"] or "~4%" in r[1]["html"]           # typical: median of 2, 4, 6

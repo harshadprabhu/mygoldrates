@@ -463,6 +463,44 @@
     return { intent: 'ask_cat', html: '<p>' + t('bo_ask') + '</p>', say: t('bo_ask'),
       chips: BO_CATS.map(function (c) { return { l: catName(c), q: 'best offer ' + c.toLowerCase() }; }) };
   }
+  // 24K gold coins (owner, 3 Nov 2026): the jeweller's own 24K rate, its
+  // coin making charge (measured on its own coins; else the typical coin
+  // charge across jewellers, marked ~), 3% GST. Never jewellery's making %.
+  function coinMk() {
+    var all = KB.brands.filter(function (x) { return x.mk && x.mk.Coin != null; }).map(function (x) { return x.mk.Coin; }).sort(function (a, z) { return a - z; });
+    return all.length ? all[Math.floor(all.length / 2)] : null;
+  }
+  function coinBill(b, w, typ) {
+    var mkp = b.mk && b.mk.Coin != null ? b.mk.Coin : typ, est = !(b.mk && b.mk.Coin != null);
+    var gold = rate(b, '24K') * w.g, mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03;
+    return { b: b, gold: gold, mkp: mkp, mk: mk, gst: gst, tot: gold + mk + gst, est: est };
+  }
+  function aCoin(w, bs, city) {
+    w = w || { g: 10, n: '10', u: 'g' };
+    var typ = coinMk(), more = '<p>' + link('/gold-coin-price-today', t('coin_more')) + '</p>';
+    var wc = ['1', '5', '10'].map(function (n) { return { l: n + ' g', q: n + ' gram gold coin price' }; });
+    if (bs.length) {                          // one jeweller's coin bill
+      var r = coinBill(bs[0], w, typ);
+      var h = '<p>' + t('price_h', { w: esc(wLabel(w)), k: '24K', who: esc(r.b.n) }) + '</p><div class="sn-bill">' +
+        '<div><span>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(rate(r.b, '24K')) }) + '</span><b>' + inr(r.gold) + '</b></div>' +
+        (r.mkp != null ? '<div><span>' + t('price_mk', { p: pct(r.mkp), c: r.est ? t('price_typ') : esc(catName('Coin')) }) + '</span><b>' + inr(r.mk) + '</b></div>' : '') +
+        '<div><span>GST 3%</span><b>' + inr(r.gst) + '</b></div><div class="sn-tot"><span>' + t('price_total') + '</span><b>' + inr(r.tot) + '</b></div></div>' +
+        (r.est && r.mkp != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(r.mkp) }) + '</p>' : '') + more + src();
+      return { intent: 'coin', html: h, say: t('say_price', { w: wLabel(w), k: sK('24K'), b: r.b.n, p: sInr(r.tot) }), chips: wc };
+    }
+    if (!city) return askCityFor(function (c) { return aCoin(w, [], c); });
+    var here = servesCity(city);
+    var rows = KB.brands.filter(function (b) { return here(b) && rate(b, '24K'); }).map(function (b) { return coinBill(b, w, typ); })
+      .sort(function (a, z) { return a.tot - z.tot; });
+    if (!rows.length) return { intent: 'coin', html: '<p>' + t('off_city_none', { c: esc(city.n) }) + '</p>' + more, say: '', chips: wc };
+    var anyEst = rows.slice(0, 8).some(function (r) { return r.est; });
+    var h2 = '<p>' + t('coin_h', { w: esc(wLabel(w)) }) + '</p>' + cityNote(city) + '<div class="sn-list">' + rows.slice(0, 8).map(function (r, i) {
+      return '<div class="sn-row sn-orow"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm"><b>' + esc(r.b.n) + '</b><small>' +
+        (r.mkp != null ? (r.est ? '~' : '') + pct(r.mkp) + ' · ' : '') + inr(rate(r.b, '24K')) + '/g</small></span><span class="sn-v">' + inr(r.tot) + '</span></div>';
+    }).join('') + '</div>' + (anyEst && typ != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(typ) }) + '</p>' : '') + more;
+    return { intent: 'coin', html: h2, say: t('say_coin', { w: wLabel(w), b: rows[0].b.n, p: sInr(rows[0].tot) }),
+      chips: wc.concat(cityChip(city)) };
+  }
   function aPrice(w, k, bs, ct) {
     k = k || (ct === 'Coin' ? '24K' : '22K');
     var b = bs[0] || ranked(natBrands())[0], who = bs[0] ? esc(b.n) : t('price_who', { b: esc(b.n) });
@@ -574,6 +612,8 @@
     // "are your rates accurate", "how do you get the rates"
     if (/\b(accurate|correct|reliable|authentic|source|sources|come from|how do you get|where do you get|how do you collect)\b/.test(tx) &&
         /\b(rates?|prices?|data|figures)\b/.test(tx) && !bs.length && !c) return faqQ('Where do these rates come from?');
+    // "gold coin price", "10 gram coin", "tanishq coin": 24K coins with their own making
+    if (ct === 'Coin' && bs.length < 2 && !has(tx, ['silver'])) return aCoin(w, bs, oc);
     if (bs.length >= 2) return aCompare(bs, k);
     var across = has(tx, ['compare', 'comparison', 'compared', 'difference', 'differ', 'gap', 'vs', 'versus', 'across', 'other', 'all']);
     if (has(tx, W.making) && (has(tx, W.cheap) || across) && !w) return aMaking(bs, ct);    // "lowest making charge", "compare making charges": the ranking
@@ -1058,7 +1098,7 @@
   // what they are buying for, and when. All of it goes to the visitor's own
   // subscriber row through the site's functions (upsert_subscriber,
   // set_price_alert, save_intent); the consent line says what they agree to.
-  var ALERT_FOR = { rate: 1, rate_city: 1, rate_brand: 1, cheapest: 1, price: 1, best_offer: 1, brand_deal: 1,
+  var ALERT_FOR = { rate: 1, coin: 1, rate_city: 1, rate_brand: 1, cheapest: 1, price: 1, best_offer: 1, brand_deal: 1,
                     making: 1, offers: 1, compare: 1, trend: 1 };
   var alertShown = false;
   function subscribed() { try { return localStorage.getItem('gr_sub') === '1'; } catch (_) { return false; } }
