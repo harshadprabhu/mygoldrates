@@ -102,7 +102,9 @@ jobs:
             # Fetch latest remote state
             git fetch origin main
             # Rebase onto latest main; on conflict, accept our (CI-generated) version
-            git rebase -X ours origin/main || {
+            # in a rebase, "theirs" is the commit being replayed = this fresh build
+            # ("ours" kept the OLDER files from main on any conflict - 3 Nov 2026)
+            git rebase -X theirs origin/main || {
               git rebase --abort
               # Fallback: hard reset to origin/main and re-apply our docs
               git reset --soft origin/main
