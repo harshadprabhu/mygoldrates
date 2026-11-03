@@ -468,7 +468,9 @@
   // charge across jewellers, marked ~), 3% GST. Never jewellery's making %.
   function coinMk() {
     var all = KB.brands.filter(function (x) { return x.mk && x.mk.Coin != null; }).map(function (x) { return x.mk.Coin; }).sort(function (a, z) { return a - z; });
-    return all.length ? all[Math.floor(all.length / 2)] : null;
+    if (!all.length) return null;
+    var m = Math.floor(all.length / 2);
+    return all.length % 2 ? all[m] : (all[m - 1] + all[m]) / 2;   // the true median
   }
   function coinBill(b, w, typ) {
     var mkp = b.mk && b.mk.Coin != null ? b.mk.Coin : typ, est = !(b.mk && b.mk.Coin != null);
@@ -485,7 +487,8 @@
         '<div><span>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(rate(r.b, '24K')) }) + '</span><b>' + inr(r.gold) + '</b></div>' +
         (r.mkp != null ? '<div><span>' + t('price_mk', { p: pct(r.mkp), c: r.est ? t('price_typ') : esc(catName('Coin')) }) + '</span><b>' + inr(r.mk) + '</b></div>' : '') +
         '<div><span>GST 3%</span><b>' + inr(r.gst) + '</b></div><div class="sn-tot"><span>' + t('price_total') + '</span><b>' + inr(r.tot) + '</b></div></div>' +
-        (r.est && r.mkp != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(r.mkp) }) + '</p>' : '') + more + src();
+        (r.est && r.mkp != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(r.mkp) }) + '</p>' : '') +
+        (r.mkp == null ? '<p class="sn-dim">' + t('coin_nomk') + '</p>' : '') + more + src();
       return { intent: 'coin', html: h, say: t('say_price', { w: wLabel(w), k: sK('24K'), b: r.b.n, p: sInr(r.tot) }), chips: wc };
     }
     if (!city) return askCityFor(function (c) { return aCoin(w, [], c); });
@@ -495,9 +498,14 @@
     if (!rows.length) return { intent: 'coin', html: '<p>' + t('off_city_none', { c: esc(city.n) }) + '</p>' + more, say: '', chips: wc };
     var anyEst = rows.slice(0, 8).some(function (r) { return r.est; });
     var h2 = '<p>' + t('coin_h', { w: esc(wLabel(w)) }) + '</p>' + cityNote(city) + '<div class="sn-list">' + rows.slice(0, 8).map(function (r, i) {
-      return '<div class="sn-row sn-orow"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm"><b>' + esc(r.b.n) + '</b><small>' +
-        (r.mkp != null ? (r.est ? '~' : '') + pct(r.mkp) + ' · ' : '') + inr(rate(r.b, '24K')) + '/g</small></span><span class="sn-v">' + inr(r.tot) + '</span></div>';
-    }).join('') + '</div>' + (anyEst && typ != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(typ) }) + '</p>' : '') + more;
+      // every row: gold, making and GST, each as an amount and a % (owner, 3 Nov 2026)
+      var brk = r.mkp != null
+        ? t('coin_row', { g: inr(r.gold), m: inr(r.mk), mp: (r.est ? '~' : '') + pct(r.mkp), t: inr(r.gst) })
+        : t('coin_row', { g: inr(r.gold), m: '—', mp: '—', t: inr(r.gst) });
+      return '<div class="sn-row sn-orow"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm"><b>' + esc(r.b.n) + '</b>' +
+        '<small>' + inr(rate(r.b, '24K')) + '/g × ' + esc(wLabel(w)) + '</small><small>' + brk + '</small></span><span class="sn-v">' + inr(r.tot) + '</span></div>';
+    }).join('') + '</div>' + (anyEst && typ != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(typ) }) + '</p>' : '') +
+      (typ == null ? '<p class="sn-dim">' + t('coin_nomk') + '</p>' : '') + more;
     return { intent: 'coin', html: h2, say: t('say_coin', { w: wLabel(w), b: rows[0].b.n, p: sInr(rows[0].tot) }),
       chips: wc.concat(cityChip(city)) };
   }
