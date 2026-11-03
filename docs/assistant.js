@@ -111,6 +111,12 @@
     more: 'Read more →', guide_h: 'This guide covers it: <b>{t}</b> — {d}', guide_link: 'Read the guide →',
     en_only: 'This answer is in English for now:', translated: 'Translated on your device',
     ask_city: 'Which city are you in?',
+    coin_tbl_h: "<b>{w}</b> {k} gold coin, {p} pure — cheapest first:",
+    th_jw: "Jeweller",
+    th_gold: "Gold",
+    th_mk: "Making",
+    coin_pur: "Purity",
+    coin_rate: "{k} rate",
     coin_row: "Gold {g} · Making {m} ({mp}) · GST {t} (3%)",
     coin_nomk: "Making charge not on file yet: gold + 3% GST only",
     coin_h: "Price of a <b>{w}</b> 24K gold coin today, coin making charge and 3% GST included:",
@@ -262,6 +268,12 @@
     more: 'और पढ़ें →', guide_h: 'यह गाइड इसी बारे में है: <b>{t}</b> — {d}', guide_link: 'गाइड पढ़ें →',
     en_only: 'यह जवाब अभी अंग्रेज़ी में है:', translated: 'आपके डिवाइस पर अनुवाद किया गया',
     ask_city: 'आप किस शहर में हैं?',
+    coin_tbl_h: "<b>{w}</b> {k} सोने का सिक्का, {p} शुद्ध — सबसे सस्ता पहले:",
+    th_jw: "ज्वैलर",
+    th_gold: "सोना",
+    th_mk: "मेकिंग",
+    coin_pur: "शुद्धता",
+    coin_rate: "{k} भाव",
     coin_row: "सोना {g} · मेकिंग {m} ({mp}) · GST {t} (3%)",
     coin_nomk: "मेकिंग चार्ज अभी उपलब्ध नहीं: सिर्फ़ सोना + 3% GST",
     coin_h: "आज <b>{w}</b> 24K सोने के सिक्के की क़ीमत, सिक्के का मेकिंग चार्ज और 3% GST मिलाकर:",
@@ -413,6 +425,12 @@
     more: 'अधिक वाचा →', guide_h: 'हे मार्गदर्शक याबद्दलच आहे: <b>{t}</b> — {d}', guide_link: 'मार्गदर्शक वाचा →',
     en_only: 'हे उत्तर सध्या इंग्रजीत आहे:', translated: 'तुमच्या डिव्हाइसवर भाषांतर केले',
     ask_city: 'तुम्ही कोणत्या शहरात आहात?',
+    coin_tbl_h: "<b>{w}</b> {k} सोन्याचे नाणे, {p} शुद्ध — सर्वात स्वस्त आधी:",
+    th_jw: "ज्वेलर",
+    th_gold: "सोने",
+    th_mk: "मजुरी",
+    coin_pur: "शुद्धता",
+    coin_rate: "{k} दर",
     coin_row: "सोने {g} · मजुरी {m} ({mp}) · GST {t} (3%)",
     coin_nomk: "मजुरी अजून उपलब्ध नाही: फक्त सोने + 3% GST",
     coin_h: "आज <b>{w}</b> 24K सोन्याच्या नाण्याची किंमत, नाण्याची मजुरी आणि 3% GST धरून:",
@@ -564,6 +582,12 @@
     more: 'વધુ વાંચો →', guide_h: 'આ માર્ગદર્શિકા આ વિશે જ છે: <b>{t}</b> — {d}', guide_link: 'માર્ગદર્શિકા વાંચો →',
     en_only: 'આ જવાબ હાલ અંગ્રેજીમાં છે:', translated: 'તમારા ડિવાઇસ પર અનુવાદ કર્યો',
     ask_city: 'તમે કયા શહેરમાં છો?',
+    coin_tbl_h: "<b>{w}</b> {k} સોનાનો સિક્કો, {p} શુદ્ધ — સૌથી સસ્તો પહેલા:",
+    th_jw: "જ્વેલર",
+    th_gold: "સોનું",
+    th_mk: "ઘડામણ",
+    coin_pur: "શુદ્ધતા",
+    coin_rate: "{k} ભાવ",
     coin_row: "સોનું {g} · ઘડામણ {m} ({mp}) · GST {t} (3%)",
     coin_nomk: "ઘડામણ હજી ઉપલબ્ધ નથી: ફક્ત સોનું + 3% GST",
     coin_h: "આજે <b>{w}</b> 24K સોનાના સિક્કાની કિંમત, સિક્કાની ઘડામણ અને 3% GST સાથે:",
@@ -715,6 +739,12 @@
     more: 'ਹੋਰ ਪੜ੍ਹੋ →', guide_h: 'ਇਹ ਗਾਈਡ ਇਸੇ ਬਾਰੇ ਹੈ: <b>{t}</b> — {d}', guide_link: 'ਗਾਈਡ ਪੜ੍ਹੋ →',
     en_only: 'ਇਹ ਜਵਾਬ ਅਜੇ ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ ਹੈ:', translated: 'ਤੁਹਾਡੇ ਡਿਵਾਈਸ ’ਤੇ ਅਨੁਵਾਦ ਕੀਤਾ',
     ask_city: 'ਤੁਸੀਂ ਕਿਹੜੇ ਸ਼ਹਿਰ ਵਿੱਚ ਹੋ?',
+    coin_tbl_h: "<b>{w}</b> {k} ਸੋਨੇ ਦਾ ਸਿੱਕਾ, {p} ਸ਼ੁੱਧ — ਸਭ ਤੋਂ ਸਸਤਾ ਪਹਿਲਾਂ:",
+    th_jw: "ਜਵੈਲਰ",
+    th_gold: "ਸੋਨਾ",
+    th_mk: "ਮੇਕਿੰਗ",
+    coin_pur: "ਸ਼ੁੱਧਤਾ",
+    coin_rate: "{k} ਰੇਟ",
     coin_row: "ਸੋਨਾ {g} · ਮੇਕਿੰਗ {m} ({mp}) · GST {t} (3%)",
     coin_nomk: "ਮੇਕਿੰਗ ਚਾਰਜ ਹਾਲੇ ਉਪਲਬਧ ਨਹੀਂ: ਸਿਰਫ਼ ਸੋਨਾ + 3% GST",
     coin_h: "ਅੱਜ <b>{w}</b> 24K ਸੋਨੇ ਦੇ ਸਿੱਕੇ ਦੀ ਕੀਮਤ, ਸਿੱਕੇ ਦਾ ਮੇਕਿੰਗ ਚਾਰਜ ਅਤੇ 3% GST ਸਮੇਤ:",
@@ -866,6 +896,12 @@
     more: 'আরও পড়ুন →', guide_h: 'এই গাইডে এটাই আছে: <b>{t}</b> — {d}', guide_link: 'গাইড পড়ুন →',
     en_only: 'এই উত্তরটি আপাতত ইংরেজিতে:', translated: 'আপনার ডিভাইসে অনুবাদ করা',
     ask_city: 'আপনি কোন শহরে আছেন?',
+    coin_tbl_h: "<b>{w}</b> {k} সোনার কয়েন, {p} খাঁটি — সবচেয়ে সস্তা আগে:",
+    th_jw: "জুয়েলার",
+    th_gold: "সোনা",
+    th_mk: "মেকিং",
+    coin_pur: "বিশুদ্ধতা",
+    coin_rate: "{k} দর",
     coin_row: "সোনা {g} · মেকিং {m} ({mp}) · GST {t} (3%)",
     coin_nomk: "মেকিং চার্জ এখনও নেই: শুধু সোনা + 3% GST",
     coin_h: "আজ <b>{w}</b> 24K সোনার কয়েনের দাম, কয়েনের মেকিং চার্জ ও 3% GST সহ:",
@@ -1017,6 +1053,12 @@
     more: 'ಇನ್ನಷ್ಟು ಓದಿ →', guide_h: 'ಈ ಮಾರ್ಗದರ್ಶಿ ಇದರ ಬಗ್ಗೆಯೇ: <b>{t}</b> — {d}', guide_link: 'ಮಾರ್ಗದರ್ಶಿ ಓದಿ →',
     en_only: 'ಈ ಉತ್ತರ ಸದ್ಯಕ್ಕೆ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿದೆ:', translated: 'ನಿಮ್ಮ ಸಾಧನದಲ್ಲೇ ಅನುವಾದಿಸಲಾಗಿದೆ',
     ask_city: 'ನೀವು ಯಾವ ನಗರದಲ್ಲಿದ್ದೀರಿ?',
+    coin_tbl_h: "<b>{w}</b> {k} ಚಿನ್ನದ ನಾಣ್ಯ, {p} ಶುದ್ಧ — ಅಗ್ಗದದ್ದು ಮೊದಲು:",
+    th_jw: "ಜ್ಯುವೆಲರ್",
+    th_gold: "ಚಿನ್ನ",
+    th_mk: "ತಯಾರಿಕೆ",
+    coin_pur: "ಶುದ್ಧತೆ",
+    coin_rate: "{k} ದರ",
     coin_row: "ಚಿನ್ನ {g} · ತಯಾರಿಕೆ {m} ({mp}) · GST {t} (3%)",
     coin_nomk: "ತಯಾರಿಕಾ ಶುಲ್ಕ ಇನ್ನೂ ಲಭ್ಯವಿಲ್ಲ: ಚಿನ್ನ + 3% GST ಮಾತ್ರ",
     coin_h: "ಇಂದು <b>{w}</b> 24K ಚಿನ್ನದ ನಾಣ್ಯದ ಬೆಲೆ, ನಾಣ್ಯದ ತಯಾರಿಕಾ ಶುಲ್ಕ ಮತ್ತು 3% GST ಸೇರಿ:",
@@ -1168,6 +1210,12 @@
     more: 'மேலும் படிக்க →', guide_h: 'இந்த வழிகாட்டி இதைப் பற்றியது: <b>{t}</b> — {d}', guide_link: 'வழிகாட்டியைப் படிக்க →',
     en_only: 'இந்தப் பதில் இப்போதைக்கு ஆங்கிலத்தில்:', translated: 'உங்கள் சாதனத்திலேயே மொழிபெயர்க்கப்பட்டது',
     ask_city: 'நீங்கள் எந்த நகரில் இருக்கிறீர்கள்?',
+    coin_tbl_h: "<b>{w}</b> {k} தங்க நாணயம், {p} தூய்மை — மலிவானது முதலில்:",
+    th_jw: "நகைக்கடை",
+    th_gold: "தங்கம்",
+    th_mk: "செய்கூலி",
+    coin_pur: "தூய்மை",
+    coin_rate: "{k} விலை",
     coin_row: "தங்கம் {g} · செய்கூலி {m} ({mp}) · GST {t} (3%)",
     coin_nomk: "செய்கூலி இன்னும் கிடைக்கவில்லை: தங்கம் + 3% GST மட்டும்",
     coin_h: "இன்று <b>{w}</b> 24K தங்க நாணயத்தின் விலை, நாணயச் செய்கூலி மற்றும் 3% GST உட்பட:",
@@ -1319,6 +1367,12 @@
     more: 'ఇంకా చదవండి →', guide_h: 'ఈ గైడ్ దీని గురించే: <b>{t}</b> — {d}', guide_link: 'గైడ్ చదవండి →',
     en_only: 'ఈ సమాధానం ప్రస్తుతానికి ఇంగ్లీష్‌లో ఉంది:', translated: 'మీ పరికరంలోనే అనువదించబడింది',
     ask_city: 'మీరు ఏ నగరంలో ఉన్నారు?',
+    coin_tbl_h: "<b>{w}</b> {k} బంగారు నాణెం, {p} స్వచ్ఛత — చౌకైనది ముందు:",
+    th_jw: "జ్యువెలర్",
+    th_gold: "బంగారం",
+    th_mk: "తయారీ",
+    coin_pur: "స్వచ్ఛత",
+    coin_rate: "{k} ధర",
     coin_row: "బంగారం {g} · తయారీ {m} ({mp}) · GST {t} (3%)",
     coin_nomk: "తయారీ ఛార్జీ ఇంకా అందుబాటులో లేదు: బంగారం + 3% GST మాత్రమే",
     coin_h: "ఈరోజు <b>{w}</b> 24K బంగారు నాణెం ధర, నాణెం తయారీ ఛార్జీ మరియు 3% GST కలిపి:",
@@ -1470,6 +1524,12 @@
     more: 'കൂടുതൽ വായിക്കൂ →', guide_h: 'ഈ ഗൈഡ് ഇതിനെക്കുറിച്ചാണ്: <b>{t}</b> — {d}', guide_link: 'ഗൈഡ് വായിക്കൂ →',
     en_only: 'ഈ ഉത്തരം ഇപ്പോൾ ഇംഗ്ലീഷിലാണ്:', translated: 'നിങ്ങളുടെ ഉപകരണത്തിൽ തന്നെ വിവർത്തനം ചെയ്തത്',
     ask_city: 'നിങ്ങൾ ഏത് നഗരത്തിലാണ്?',
+    coin_tbl_h: "<b>{w}</b> {k} സ്വർണ്ണ നാണയം, {p} ശുദ്ധി — വിലകുറഞ്ഞത് ആദ്യം:",
+    th_jw: "ജ്വല്ലറി",
+    th_gold: "സ്വർണ്ണം",
+    th_mk: "പണിക്കൂലി",
+    coin_pur: "ശുദ്ധി",
+    coin_rate: "{k} നിരക്ക്",
     coin_row: "സ്വർണ്ണം {g} · പണിക്കൂലി {m} ({mp}) · GST {t} (3%)",
     coin_nomk: "പണിക്കൂലി ഇതുവരെ ലഭ്യമല്ല: സ്വർണ്ണം + 3% GST മാത്രം",
     coin_h: "ഇന്ന് <b>{w}</b> 24K സ്വർണ്ണ നാണയത്തിന്റെ വില, നാണയത്തിന്റെ പണിക്കൂലിയും 3% GSTയും ചേർത്ത്:",
@@ -1621,6 +1681,12 @@
     more: 'مزید پڑھیں ←', guide_h: 'یہ گائیڈ اسی بارے میں ہے: <b>{t}</b> — {d}', guide_link: 'گائیڈ پڑھیں ←',
     en_only: 'یہ جواب ابھی انگریزی میں ہے:', translated: 'آپ کے ڈیوائس پر ترجمہ کیا گیا',
     ask_city: 'آپ کس شہر میں ہیں؟',
+    coin_tbl_h: "<b>{w}</b> {k} سونے کا سکہ، {p} خالص — سب سے سستا پہلے:",
+    th_jw: "جیولر",
+    th_gold: "سونا",
+    th_mk: "میکنگ",
+    coin_pur: "خالصیت",
+    coin_rate: "{k} ریٹ",
     coin_row: "سونا {g} · میکنگ {m} ({mp}) · GST {t} (3%)",
     coin_nomk: "میکنگ چارج ابھی دستیاب نہیں: صرف سونا + 3% GST",
     coin_h: "آج <b>{w}</b> 24K سونے کے سکے کی قیمت، سکے کا میکنگ چارج اور 3% GST شامل:",
@@ -1772,6 +1838,12 @@
     more: 'অধিক পঢ়ক →', guide_h: 'এই গাইডত এই বিষয়ে আছে: <b>{t}</b> — {d}', guide_link: 'গাইড পঢ়ক →',
     en_only: 'এই উত্তৰ এতিয়া ইংৰাজীত:', translated: 'আপোনাৰ ডিভাইচত অনুবাদ কৰা হৈছে',
     ask_city: 'আপুনি কোন চহৰত আছে?',
+    coin_tbl_h: "<b>{w}</b> {k} সোণৰ মুদ্ৰা, {p} বিশুদ্ধ — আটাইতকৈ সস্তা আগতে:",
+    th_jw: "জুৱেলাৰ",
+    th_gold: "সোণ",
+    th_mk: "মেকিং",
+    coin_pur: "বিশুদ্ধতা",
+    coin_rate: "{k} দৰ",
     coin_row: "সোণ {g} · মেকিং {m} ({mp}) · GST {t} (3%)",
     coin_nomk: "মেকিং চাৰ্জ এতিয়াও উপলব্ধ নহয়: কেৱল সোণ + 3% GST",
     coin_h: "আজি <b>{w}</b> 24K সোণৰ মুদ্ৰাৰ দাম, মুদ্ৰাৰ মেকিং চাৰ্জ আৰু 3% GST সহ:",
@@ -1923,6 +1995,12 @@
     more: 'ଅଧିକ ପଢ଼ନ୍ତୁ →', guide_h: 'ଏହି ଗାଇଡ ଏହା ବିଷୟରେ: <b>{t}</b> — {d}', guide_link: 'ଗାଇଡ ପଢ଼ନ୍ତୁ →',
     en_only: 'ଏହି ଉତ୍ତର ଏବେ ଇଂରାଜୀରେ:', translated: 'ଆପଣଙ୍କ ଡିଭାଇସରେ ଅନୁବାଦ ହୋଇଛି',
     ask_city: 'ଆପଣ କେଉଁ ସହରରେ ଅଛନ୍ତି?',
+    coin_tbl_h: "<b>{w}</b> {k} ସୁନା ମୁଦ୍ରା, {p} ଶୁଦ୍ଧ — ସବୁଠୁ ଶସ୍ତା ଆଗରେ:",
+    th_jw: "ଜୁଏଲର୍",
+    th_gold: "ସୁନା",
+    th_mk: "ମେକିଂ",
+    coin_pur: "ଶୁଦ୍ଧତା",
+    coin_rate: "{k} ଦର",
     coin_row: "ସୁନା {g} · ମେକିଂ {m} ({mp}) · GST {t} (3%)",
     coin_nomk: "ମେକିଂ ଚାର୍ଜ ଏପର୍ଯ୍ୟନ୍ତ ଉପଲବ୍ଧ ନାହିଁ: କେବଳ ସୁନା + 3% GST",
     coin_h: "ଆଜି <b>{w}</b> 24K ସୁନା ମୁଦ୍ରାର ଦାମ, ମୁଦ୍ରାର ମେକିଂ ଚାର୍ଜ ଓ 3% GST ସହ:",
@@ -2877,40 +2955,59 @@
     var m = Math.floor(all.length / 2);
     return all.length % 2 ? all[m] : (all[m - 1] + all[m]) / 2;   // the true median
   }
-  function coinBill(b, w, typ) {
+  // kk: the coin's karat. A 24K coin is priced at the jeweller's own 24K rate
+  // and the gold it bills per gram (coin gold factor); a 22K coin at its 22K
+  // rate - never a 24K rate on a 22K coin (owner, 3 Nov 2026).
+  function coinBill(b, w, typ, kk) {
+    kk = kk === '22K' ? '22K' : '24K';
     var mkp = b.mk && b.mk.Coin != null ? b.mk.Coin : typ, est = !(b.mk && b.mk.Coin != null);
-    var r24 = b.a24 || rate(b, '24K');          // the jeweller's own 24K rate when it publishes one
-    var gold = r24 * w.g, mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03;
-    return { b: b, r24: r24, gold: gold, mkp: mkp, mk: mk, gst: gst, tot: gold + mk + gst, est: est };
+    var rk = kk === '24K' ? (b.a24 || rate(b, '24K')) : rate(b, '22K');
+    var gw = w.g * (kk === '24K' ? (b.cf || 1) : 1);
+    var gold = rk * gw, mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03;
+    return { b: b, kk: kk, rk: rk, gw: gw, gold: gold, mkp: mkp, mk: mk, gst: gst, tot: gold + mk + gst, est: est,
+             pur: kk === '22K' ? '91.6%' : b.cp === '995' ? '99.5%' : b.cp === '999' ? '99.9%' : '99.5–99.9%' };
   }
-  function aCoin(w, bs, city) {
+  function mkCell(r) { return r.mkp != null ? inr(r.mk) + '<small>' + (r.est ? '~' : '') + pct(r.mkp) + '</small>' : '—'; }
+  function aCoin(w, bs, city, k) {
     w = w || { g: 10, n: '10', u: 'g' };
-    var typ = coinMk(), more = '<p>' + link('/gold-coin-price-today', t('coin_more')) + '</p>';
-    var wc = ['1', '5', '10'].map(function (n) { return { l: n + ' g', q: n + ' gram gold coin price' }; });
-    if (bs.length) {                          // one jeweller's coin bill
-      var r = coinBill(bs[0], w, typ);
-      var h = '<p>' + t('price_h', { w: esc(wLabel(w)), k: '24K', who: esc(r.b.n) }) + '</p><div class="sn-bill">' +
-        '<div><span>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(r.r24) }) + '</span><b>' + inr(r.gold) + '</b></div>' +
-        (r.mkp != null ? '<div><span>' + t('price_mk', { p: pct(r.mkp), c: r.est ? t('price_typ') : esc(catName('Coin')) }) + '</span><b>' + inr(r.mk) + '</b></div>' : '') +
-        '<div><span>GST 3%</span><b>' + inr(r.gst) + '</b></div><div class="sn-tot"><span>' + t('price_total') + '</span><b>' + inr(r.tot) + '</b></div></div>' +
+    var kk = k === '22K' ? '22K' : '24K', typ = coinMk();
+    var more = '<p>' + link('/gold-coin-price-today', t('coin_more')) + '</p>';
+    var wc = ['1', '5', '10'].map(function (n) { return { l: n + ' g', q: n + ' gram ' + kk + ' gold coin price' }; })
+      .concat([{ l: kk === '24K' ? '22K' : '24K', q: wLabel(w) + ' ' + (kk === '24K' ? '22K' : '24K') + ' gold coin price' }]);
+    if (bs.length) {                          // one jeweller: a receipt
+      var r = coinBill(bs[0], w, typ, kk);
+      var line = function (l, v) { return '<tr><td>' + l + '</td><td>' + v + '</td></tr>'; };
+      var h = '<p><b>' + esc(r.b.n) + '</b> · ' + esc(wLabel(w)) + ' ' + kk + ' ' + esc(catName('Coin')) + '</p>' +
+        '<table class="sn-rcpt">' +
+        line(t('coin_pur'), kk + ' · ' + r.pur) +
+        line(t('coin_rate', { k: kk }), inr(r.rk) + '/g') +
+        line(t('th_gold') + ' <small>' + (Math.round(r.gw * 1000) / 1000) + ' g × ' + inr(r.rk) + '</small>', inr(r.gold)) +
+        line(t('th_mk') + ' <small>' + (r.mkp != null ? (r.est ? '~' : '') + pct(r.mkp) : '—') + '</small>', r.mkp != null ? inr(r.mk) : '—') +
+        line('GST <small>3%</small>', inr(r.gst)) +
+        '<tr class="tot"><td>' + t('price_total') + '</td><td>' + inr(r.tot) + '</td></tr></table>' +
         (r.est && r.mkp != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(r.mkp) }) + '</p>' : '') +
         (r.mkp == null ? '<p class="sn-dim">' + t('coin_nomk') + '</p>' : '') + more + src();
-      return { intent: 'coin', html: h, say: t('say_price', { w: wLabel(w), k: sK('24K'), b: r.b.n, p: sInr(r.tot) }), chips: wc };
+      return { intent: 'coin', html: h, say: t('say_price', { w: wLabel(w), k: sK(kk), b: r.b.n, p: sInr(r.tot) }), chips: wc };
     }
-    if (!city) return askCityFor(function (c) { return aCoin(w, [], c); });
+    if (!city) return askCityFor(function (c) { return aCoin(w, [], c, kk); });
     var here = servesCity(city);
-    var rows = KB.brands.filter(function (b) { return here(b) && (b.a24 || rate(b, '24K')); }).map(function (b) { return coinBill(b, w, typ); })
-      .sort(function (a, z) { return a.tot - z.tot; });
+    var rows = KB.brands.filter(function (b) { return here(b) && (b.a24 || rate(b, '24K')); })
+      .map(function (b) { return coinBill(b, w, typ, kk); }).sort(function (a, z) { return a.tot - z.tot; });
     if (!rows.length) return { intent: 'coin', html: '<p>' + t('off_city_none', { c: esc(city.n) }) + '</p>' + more, say: '', chips: wc };
-    var anyEst = rows.slice(0, 8).some(function (r) { return r.est; });
-    var h2 = '<p>' + t('coin_h', { w: esc(wLabel(w)) }) + '</p>' + cityNote(city) + '<div class="sn-list">' + rows.slice(0, 8).map(function (r, i) {
-      // every row: gold, making and GST, each as an amount and a % (owner, 3 Nov 2026)
-      var brk = r.mkp != null
-        ? t('coin_row', { g: inr(r.gold), m: inr(r.mk), mp: (r.est ? '~' : '') + pct(r.mkp), t: inr(r.gst) })
-        : t('coin_row', { g: inr(r.gold), m: '—', mp: '—', t: inr(r.gst) });
-      return '<div class="sn-row sn-orow"><span class="sn-rk">' + (i + 1) + '</span><span class="sn-nm"><b>' + esc(r.b.n) + '</b>' +
-        '<small>' + inr(r.r24) + '/g × ' + esc(wLabel(w)) + '</small><small>' + brk + '</small></span><span class="sn-v">' + inr(r.tot) + '</span></div>';
-    }).join('') + '</div>' + (anyEst && typ != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(typ) }) + '</p>' : '') +
+    var top = rows.slice(0, 8), anyEst = top.some(function (r) { return r.est; });
+    var pur = kk === '22K' ? '91.6%' : '99.5–99.9%';
+    var h2 = '<p>' + t('coin_tbl_h', { w: esc(wLabel(w)), k: kk, p: pur }) + '</p>' + cityNote(city) +
+      '<div class="sn-tblw"><table class="sn-ctbl"><thead><tr><th>' + t('th_jw') + ' · ' + t('th_gold') + '</th><th>' + t('th_mk') +
+      '</th><th>GST</th><th>' + t('price_total') + '</th></tr></thead><tbody>' +
+      top.map(function (r, i) {
+        // gold under the name: rate x grams billed = amount; purity when known
+        var known = r.kk === '22K' || r.b.cp;
+        return '<tr' + (i === 0 ? ' class="best"' : '') + '><td><b>' + (i + 1) + '. ' + esc(r.b.n) + '</b>' +
+          '<small>' + inr(r.rk) + '/g × ' + (Math.round(r.gw * 1000) / 1000) + ' g' + (known && r.kk === '24K' ? ' · ' + r.pur : '') + '</small>' +
+          '<small>' + t('th_gold') + ' ' + inr(r.gold) + '</small></td>' +
+          '<td>' + mkCell(r) + '</td><td>' + inr(r.gst) + '<small>3%</small></td><td class="t">' + inr(r.tot) + '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      (anyEst && typ != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(typ) }) + '</p>' : '') +
       (typ == null ? '<p class="sn-dim">' + t('coin_nomk') + '</p>' : '') + more;
     return { intent: 'coin', html: h2, say: t('say_coin', { w: wLabel(w), b: rows[0].b.n, p: sInr(rows[0].tot) }),
       chips: wc.concat(cityChip(city)) };
@@ -3027,7 +3124,7 @@
     if (/\b(accurate|correct|reliable|authentic|source|sources|come from|how do you get|where do you get|how do you collect)\b/.test(tx) &&
         /\b(rates?|prices?|data|figures)\b/.test(tx) && !bs.length && !c) return faqQ('Where do these rates come from?');
     // "gold coin price", "10 gram coin", "tanishq coin": 24K coins with their own making
-    if (ct === 'Coin' && bs.length < 2 && !has(tx, ['silver'])) return aCoin(w, bs, oc);
+    if (ct === 'Coin' && bs.length < 2 && !has(tx, ['silver'])) return aCoin(w, bs, oc, k);
     if (bs.length >= 2) return aCompare(bs, k);
     var across = has(tx, ['compare', 'comparison', 'compared', 'difference', 'differ', 'gap', 'vs', 'versus', 'across', 'other', 'all']);
     if (has(tx, W.making) && (has(tx, W.cheap) || across) && !w) return aMaking(bs, ct);    // "lowest making charge", "compare making charges": the ranking
@@ -3169,6 +3266,19 @@
     '@media(prefers-reduced-motion:reduce){.sona-svg *{animation:none!important}}' +
     '.sn-m.bot{gap:8px;align-items:flex-end}.sn-mav{width:30px;height:30px;flex:none;margin-bottom:2px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4))}' +
     '.sn-ban .sn-banav{width:26px;height:26px;flex:none}' +
+    '.sn-tblw{overflow-x:auto;margin:8px 0;border:1px solid rgba(240,208,128,.22);border-radius:12px}' +
+    '.sn-ctbl{width:100%;border-collapse:collapse;font-size:11.5px;font-variant-numeric:tabular-nums}' +
+    '.sn-ctbl th{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#a99f8b;text-align:right;padding:7px 6px;border-bottom:1px solid rgba(240,208,128,.18);background:rgba(240,208,128,.06)}' +
+    '.sn-ctbl th:first-child,.sn-ctbl td:first-child{text-align:left}' +
+    '.sn-ctbl td{padding:7px 5px;text-align:right;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.06);white-space:nowrap}' +
+    '.sn-ctbl td:first-child{white-space:normal;width:42%}.sn-ctbl td:last-child,.sn-ctbl th:last-child{padding-right:9px}' +
+    '.sn-ctbl small,.sn-rcpt small{display:block;font-size:10.5px;color:#a99f8b;font-weight:400}' +
+    '.sn-ctbl td.t{font-weight:800;color:#f0d080}.sn-ctbl tr.best td{background:rgba(47,209,139,.08)}' +
+    '.sn-ctbl tr:last-child td{border-bottom:0}' +
+    '.sn-rcpt{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px;font-variant-numeric:tabular-nums;border:1px dashed rgba(240,208,128,.35);border-radius:10px}' +
+    '.sn-rcpt td{padding:7px 10px;border-bottom:1px dashed rgba(255,255,255,.08)}.sn-rcpt td:last-child{text-align:right;white-space:nowrap}' +
+    '.sn-rcpt small{display:inline;margin-left:4px}' +
+    '.sn-rcpt tr.tot td{font-weight:800;font-size:14.5px;color:#f0d080;border-bottom:0;border-top:1px solid rgba(240,208,128,.35)}' +
     'html.sona-open .sn-fab{display:none}@media(max-width:560px){html.sona-open,html.sona-open body{overflow:hidden}}' +
     '.sn-ad{position:relative;overflow:hidden;border-radius:18px;padding:18px;margin:14px 12px;color:#f3eadb;background:radial-gradient(120% 90% at 100% 0%,rgba(231,191,90,.28),transparent 60%),linear-gradient(160deg,#1c160c,#0f0c08);border:1px solid rgba(240,208,128,.3);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}' +
     '.sn-ad .sn-adk{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.12em;color:#1a1405;background:linear-gradient(135deg,#f6d77d,#d4a63c);border-radius:999px;padding:3px 9px}' +
