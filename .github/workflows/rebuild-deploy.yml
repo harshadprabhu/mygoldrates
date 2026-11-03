@@ -3,6 +3,12 @@ name: rebuild-deploy
 on:
   workflow_dispatch:   # manual: regenerate docs/ from current code + latest DB rates, no collect
 
+# Same queue as fetch-rates (rates.yml): two site builds never run at once,
+# so one cannot publish over the other's fresher files.
+concurrency:
+  group: fetch-rates
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -57,7 +63,9 @@ jobs:
           else
             git commit -m "Rebuild site (no collect)"
             git fetch origin main
-            git rebase -X ours origin/main || {
+            # in a rebase, "theirs" is the commit being replayed = this fresh build
+            # ("ours" kept the OLDER files from main on any conflict - 3 Nov 2026)
+            git rebase -X theirs origin/main || {
               git rebase --abort
               git reset --soft origin/main
               git add docs
