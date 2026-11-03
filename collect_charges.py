@@ -93,7 +93,8 @@ def sample_size(pool_size):
 
 # slug keyword -> category. v1 categories only (Bangles, Rings, Earrings,
 # Mangalsutra) - user explicitly deferred Chain, Necklace, Bracelet, Pendant,
-# Coin to v2. Order matters (earring must come before ring).
+# Coin to v2. Order matters (earring must come before ring). 24K gold coins
+# (owner, 3 Nov 2026) are recognised in categorize() itself, not here.
 CAT_RULES = [
     ("mangalsutra", "Mangalsutra"),
     ("earring", "Earrings"), ("jhumk", "Earrings"), ("stud", "Earrings"),
@@ -424,6 +425,14 @@ def fetch(sess, url, allow_proxy=True, timeout=25, min_len=500, proxy_timeout=60
 # Materials whose "metal value" is not gold - a making % against them would
 # not be comparable, so drop them at the URL stage.
 _NON_GOLD_RE = re.compile(r"\b(silver|platinum|titanium|steel)\b", re.I)
+# A coin's address must name 24K: "24kt", "24-karat", "24 k", "999", "995".
+_COIN_24K_RE = re.compile(r"(?<!\d)24[\s_-]*(?:k|kt|ct|carat|karat)\b|(?<!\d)99[59](?!\d)", re.I)
+# A coin's making charge is a few percent; far above that the page was not a
+# plain 24K coin (a pendant, a gift set, a misread) and is left out.
+COIN_MAX_PCT = 20.0
+# COIN_ONLY=1: read just the coins and keep everything else as it was (the
+# workflow's probe=coins), so coins can be refreshed without a full run.
+COIN_ONLY = os.environ.get("COIN_ONLY") == "1"
 
 # Studded/diamond pieces discount the making charge against the stone's own
 # markup, so their making-% is not representative of a plain gold item (see
@@ -459,6 +468,10 @@ def categorize(url):
     s = url.lower()
     if _NON_GOLD_RE.search(s) or _STUDDED_RE.search(s):
         return None
+    # 24K gold coins only, never 22K or silver; a coin ring/pendant/chain is
+    # jewellery and falls through to the rules below
+    if "coin" in s and not re.search(r"ring|pendant|chain|necklace|bangle|bracelet|mangalsutra|anklet", s):
+        return "Coin" if _COIN_24K_RE.search(s) else None
     for kw, cat in CAT_RULES:
         if kw in s:
             return cat
@@ -723,6 +736,8 @@ def record_results(agg, detail, brand, results):
     for cat, u, res, src in results:
         if src and src not in ("direct", "all-proxies-failed"):
             proxy_hits += 1
+        if res and res.ok and cat == "Coin" and not (0 <= res.making_pct <= COIN_MAX_PCT):
+            continue                     # not a plain 24K coin
         if res and res.ok:
             hits += 1
             agg.setdefault((brand, cat), []).append(res.making_pct)
@@ -807,6 +822,11 @@ def main():
                   f"cats {[(c, len(v)) for (b, c), v in agg.items() if b == brand]}")
             continue
         buckets = collect_urls(sess, d)
+        if COIN_ONLY:
+            buckets = {c: u for c, u in buckets.items() if c == "Coin"}
+            if not buckets:
+                print(f"{brand}: no 24K coin pages found")
+                continue
         # Interleave categories round-robin instead of one full category
         # block at a time, so a brand's largest category doesn't consume
         # the whole probe (and a disproportionate share of the run) before
@@ -853,7 +873,7 @@ def main():
     # Tanishq: blocked to plain requests, read through the proxies from its
     # own product data (tanishq_charges.py), with its making-charge offer
     brand_offer = {}
-    if os.environ.get("TANISHQ", "1") != "0":
+    if os.environ.get("TANISHQ", "1") != "0" and not COIN_ONLY:
         import tanishq_charges as tq
         try:
             res, off = tq.collect(sess)
@@ -871,7 +891,7 @@ def main():
     # Jewellers with prices and gold weights but no breakup: the making
     # charge worked out from the price (price_making.py), source "price"
     from_price = set()
-    if os.environ.get("FROM_PRICE", "1") != "0":
+    if os.environ.get("FROM_PRICE", "1") != "0" and not COIN_ONLY:
         import price_making as pm
         try:
             res = pm.collect(sess)
@@ -933,6 +953,19 @@ def main():
         "brands": out,
     }
     import private_store
+    if COIN_ONLY:
+        # keep every jeweller's jewellery figures; replace only the coin rows
+        old = private_store.pull_making() or {}
+        coins = {b["brand"]: [c for c in b["categories"] if c["category"] == "Coin"] for b in out}
+        merged = []
+        for b in old.get("brands") or []:
+            cats = [c for c in b.get("categories") or [] if c.get("category") != "Coin"]
+            cats += coins.pop(b["brand"], [])
+            merged.append(dict(b, categories=sorted(cats, key=lambda x: x["category"])))
+        merged += [{"brand": n, "categories": c} for n, c in coins.items() if c]
+        payload = dict(old, brands=sorted(merged, key=lambda x: x["brand"]),
+                       coins_updated=datetime.now(IST).isoformat())
+        payload.setdefault("note", "Making charge as % of gold value.")
     os.makedirs(private_store.DIR, exist_ok=True)
     with open(private_store.MC, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
