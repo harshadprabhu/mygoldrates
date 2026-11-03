@@ -22,7 +22,7 @@ import random
 import re
 from concurrent.futures import ThreadPoolExecutor
 
-from collect_charges import _STUDDED_RE, categorize, fetch
+from collect_charges import _STUDDED_RE, _SUB_GRAM_RE, categorize, fetch
 
 BRAND = "Tanishq"
 BASE = "https://www.tanishq.co.in"
@@ -30,6 +30,7 @@ SITEMAPS = [BASE + "/sitemap_%d.xml" % i for i in range(3)]
 VARIATION = BASE + "/on/demandware.store/Sites-Tanishq-Site/en_IN/Product-Variation?pid={pid}&quantity=1"
 PROD_RE = re.compile(r"/product/[^?#<]*-([0-9a-z]{10,})\.html", re.I)
 # karats other than 22 and coloured gold, named in the product's own address
+_COIN_JEWEL = re.compile(r"ring|pendant|chain|necklace|bangle|bracelet|mangalsutra|anklet", re.I)
 _OTHER_KT = re.compile(r"\b(9|14|18|24) ?(kt|k|karat|carat)\b|\brose gold\b|\bwhite gold\b|\bplatinum\b", re.I)
 PER_CAT = 15          # plain 22K pieces read per category
 TRIES_PER_CAT = 40    # product data requests per category at most (each one costs a proxy credit)
@@ -65,16 +66,17 @@ def variant_url(txt):
     return u if u.startswith("http") else BASE + u
 
 
-def parse(txt):
+def parse(txt, coin=False):
     """One product's data -> {pct, karat, gold, making, offer} or None when
-    it is not plain 22K gold or the breakup is missing."""
+    it is not plain 22K gold (coin=True: a 24K gold coin) or the breakup is
+    missing."""
     t = htmllib.unescape(txt or "")
     gold, total = _num(t, "GDV"), _num(t, "UTP")
     making = (_num(t, "WTV") or 0) + (_num(t, "F2") or 0)
     karat, metal = _str(t, "karatage"), _str(t, "metal")
     stone, diamond = _num(t, "stoneWeight") or 0, _num(t, "diamondWeight") or 0
     group = _str(t, "pricingGroupType").upper()
-    if not gold or not making or karat != "22" or metal.lower() != "gold":
+    if not gold or not making or karat != ("24" if coin else "22") or metal.lower() != "gold":
         return None
     if stone or diamond or "STUDDED" in group:
         return None
@@ -84,7 +86,7 @@ def parse(txt):
     if not total or abs(parts + tax - total) > total * 0.02:
         return None
     pct = round(making / gold * 100, 2)
-    if not 2 <= pct <= 60:
+    if not (0.5 <= pct <= 20 if coin else 2 <= pct <= 60):
         return None
     # the offer the page shows: dtt names it, dtp is its % ("15% off on
     # making charges"), vpg a rupee amount off per gram
@@ -130,6 +132,12 @@ def product_urls(sess):
     cats = {}
     for u in sorted(urls):
         name = u.replace("-", " ")
+        # 24K coins (owner, 3 Nov 2026): the karat is checked in the product
+        # data (parse(coin=True)), so a coin needs no "24kt" in its address
+        if ("/product/" in u and "coin" in name and not _COIN_JEWEL.search(name)
+                and not re.search(r"silver|platinum", name, re.I) and not _SUB_GRAM_RE.search(u)):
+            cats.setdefault("Coin", []).append(u)
+            continue
         if "/product/" not in u or _STUDDED_RE.search(name) or _OTHER_KT.search(name):
             continue
         pid = PROD_RE.search(u)
@@ -145,17 +153,18 @@ def _says_22(u):
     return bool(re.search(r"\b22 ?(kt|k|karat|carat)\b", u.replace("-", " "), re.I))
 
 
-def _read(sess, url):
+def _read(sess, url, coin=False):
     m = PROD_RE.search(url)
     if not m:
         return url, None, "no pid"
     txt, how = fetch(sess, VARIATION.format(pid=m.group(1)), min_len=200)
-    r = parse(txt) if txt else None
-    if txt and not r and '"productType": "master"' in txt and '"karatage": "22"' in txt:
+    r = parse(txt, coin) if txt else None
+    kt = '"karatage": "24"' if coin else '"karatage": "22"'
+    if txt and not r and '"productType": "master"' in txt and kt in txt:
         v = variant_url(txt)                   # sizes carry the price, the master does not
         if v:
             txt, how = fetch(sess, v, min_len=200)
-            r = parse(txt) if txt else None
+            r = parse(txt, coin) if txt else None
     if DEBUG:
         print("   ", url.rsplit("/", 1)[1], how, r, why_not(txt))
         if txt and not r and "master" in txt:
@@ -163,13 +172,15 @@ def _read(sess, url):
     return url, r, how
 
 
-def collect(sess, per_cat=PER_CAT, tries=TRIES_PER_CAT, seed=None):
+def collect(sess, per_cat=PER_CAT, tries=TRIES_PER_CAT, seed=None, only=None):
     """-> (results, offers): results [(category, url, pct)], offers
     {category: {"seen": n, "pct": [..], "per_gram": [..]}} over the plain
     22K pieces read."""
     rnd = random.Random(seed)
     results, offers = [], {}
     for cat, urls in product_urls(sess).items():
+        if only and cat not in only:
+            continue
         rnd.shuffle(urls)
         urls.sort(key=lambda u: not _says_22(u))        # "22kt" in the name first
         got, i = [], 0
@@ -177,7 +188,7 @@ def collect(sess, per_cat=PER_CAT, tries=TRIES_PER_CAT, seed=None):
             while len(got) < per_cat and i < min(tries, len(urls)):
                 batch = urls[i:min(i + WORKERS * 2, tries, len(urls))]
                 i += len(batch)
-                for u, r, how in ex.map(lambda u: _read(sess, u), batch):
+                for u, r, how in ex.map(lambda u: _read(sess, u, cat == "Coin"), batch):
                     if r:
                         got.append((u, r))
         o = offers.setdefault(cat, {"seen": 0, "pct": [], "per_gram": []})
@@ -188,7 +199,8 @@ def collect(sess, per_cat=PER_CAT, tries=TRIES_PER_CAT, seed=None):
                 o["pct"].append(r["offer"]["pct"])
             elif r["offer"]:
                 o["per_gram"].append(r["offer"]["per_gram"])
-        print(f"  {BRAND} {cat}: {len(urls)} candidates, {i} read, {len(got[:per_cat])} plain 22K")
+        print(f"  {BRAND} {cat}: {len(urls)} candidates, {i} read, {len(got[:per_cat])} "
+              + ("24K coins" if cat == "Coin" else "plain 22K"))
     return results, offers
 
 

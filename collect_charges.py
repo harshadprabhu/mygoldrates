@@ -144,7 +144,9 @@ DISCOVER = [
     # fine at the default concurrency the same day - it can't reliably
     # sustain that many simultaneous connections.
     {"brand": "CaratLane", "product_re": _CL_PROD, "fetch_workers": 3,
-     "listings": {"Bangle": _CL + "bangles.html",
+     "coin_re": r'(https://www\.caratlane\.com/gold-coins/[a-z0-9-]+\.html)',
+     "listings": {"Coin": "https://www.caratlane.com/gold-coins.html",
+                  "Bangle": _CL + "bangles.html",
                   "Ring": _CL + "rings.html",
                   "Earrings": _CL + "earrings.html",
                   "Mangalsutra": _CL + "mangalsutra.html"}},
@@ -177,7 +179,9 @@ DISCOVER = [
     # sustain that many simultaneous connections.
     {"brand": "BlueStone", "product_re": _BS_PROD, "fetch_workers": 3,
      "max_pages": 1,
+     "coin_re": r'((?:https://www\.bluestone\.com)?/gold\+coins/[a-z0-9-]+~\d+\.html)',
      "listings": {
+        "Coin": "https://www.bluestone.com/jewellery/coins.html",
         "Ring": ["https://www.bluestone.com/jewellery/rings.html",
                  "https://www.bluestone.com/jewellery/plain+gold-rings.html",
                  "https://www.bluestone.com/jewellery/only+metal-rings.html"],
@@ -249,7 +253,8 @@ DISCOVER = [
     {"brand": "PN Gadgil",
      "sitemaps": ["https://www.pngjewellers.com/sitemap.xml"]},
     {"brand": "Candere", "product_re": _CD_PROD, "pagination": "p",
-     "listings": {"Bangle": "https://www.candere.com/catalogsearch/result/?q=bangle",
+     "listings": {"Coin": "https://www.candere.com/catalogsearch/result/?q=gold+coin",
+                  "Bangle": "https://www.candere.com/catalogsearch/result/?q=bangle",
                   "Ring": "https://www.candere.com/catalogsearch/result/?q=ring",
                   "Earrings": "https://www.candere.com/catalogsearch/result/?q=earrings",
                   "Mangalsutra": "https://www.candere.com/catalogsearch/result/?q=mangalsutra"}},
@@ -268,7 +273,9 @@ DISCOVER = [
     # with /jewellery/gold-jewellery/gold-rings.html's) - unioning them is
     # the only way to get past ~12 items/category from this brand.
     {"brand": "GRT Jewellers", "product_re": _GRT_PROD,
-     "listings": {"Ring": ["https://www.grtjewels.com/jewellery/gold-jewellery/gold-rings.html",
+     "coin_re": r'href="(/gold-silver-coins-bars/[a-z0-9-]+\.html)"',
+     "listings": {"Coin": "https://www.grtjewels.com/catalogsearch/result/?q=gold+coin",
+                  "Ring": ["https://www.grtjewels.com/jewellery/gold-jewellery/gold-rings.html",
                            "https://www.grtjewels.com/all-jewellery/ring.html"],
                   "Earrings": ["https://www.grtjewels.com/jewellery/gold-jewellery/gold-earrings.html",
                               "https://www.grtjewels.com/all-jewellery/earrings.html"],
@@ -430,6 +437,7 @@ _COIN_24K_RE = re.compile(r"(?<!\d)24[\s_-]*(?:k|kt|ct|carat|karat)\b|(?<!\d)99[
 # A coin's making charge is a few percent; far above that the page was not a
 # plain 24K coin (a pendant, a gift set, a misread) and is left out.
 COIN_MAX_PCT = 20.0
+_SUB_GRAM_RE = re.compile(r"milligram|\d\s*mg\b|(?<![\d.])0[-.]\d+[-\s]*(?:g|gm|gms|gram|grams)\b", re.I)
 # COIN_ONLY=1: read just the coins and keep everything else as it was (the
 # workflow's probe=coins), so coins can be refreshed without a full run.
 COIN_ONLY = os.environ.get("COIN_ONLY") == "1"
@@ -471,6 +479,8 @@ def categorize(url):
     # 24K gold coins only, never 22K or silver; a coin ring/pendant/chain is
     # jewellery and falls through to the rules below
     if "coin" in s and not re.search(r"ring|pendant|chain|necklace|bangle|bracelet|mangalsutra|anklet", s):
+        if _SUB_GRAM_RE.search(s):      # 50 mg-0.5 g coins: making % not comparable
+            return None
         return "Coin" if _COIN_24K_RE.search(s) else None
     for kw, cat in CAT_RULES:
         if kw in s:
@@ -632,7 +642,10 @@ def collect_urls(sess, d):
                 if not html:
                     break
                 raw_matches = 0
-                for m in re.finditer(prod_re, html) if prod_re else []:
+                pat = d.get("coin_re", prod_re) if cat == "Coin" else prod_re
+                if cat == "Coin":                       # links inside page JSON
+                    html = html.replace("\\u002F", "/")
+                for m in re.finditer(pat, html) if pat else []:
                     raw_matches += 1
                     cand = m.group(0) if not m.groups() else m.group(1)
                     if not cand.startswith("http"):
@@ -873,10 +886,10 @@ def main():
     # Tanishq: blocked to plain requests, read through the proxies from its
     # own product data (tanishq_charges.py), with its making-charge offer
     brand_offer = {}
-    if os.environ.get("TANISHQ", "1") != "0" and not COIN_ONLY:
+    if os.environ.get("TANISHQ", "1") != "0":
         import tanishq_charges as tq
         try:
-            res, off = tq.collect(sess)
+            res, off = tq.collect(sess, only=("Coin",) if COIN_ONLY else None)
         except Exception as e:
             res, off = [], {}
             print(f"{tq.BRAND}: failed ({type(e).__name__}: {e})")

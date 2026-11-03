@@ -70,3 +70,17 @@ def test_offers_read_tanishq_through_the_proxies_and_others_stay_blocked(monkeyp
     assert len(seen) <= offers.PROXY_PAGES
     other = offers.read_via_proxy(None, {"pages": [], "offers": [], "status": "ok"}, "https://www.joyalukkas.in/")
     assert other["status"].startswith("not readable")
+
+
+# a 24K coin: gold 70,000, making 4,200 (6%), GST 2,226 -> total 76,426
+COIN = ('{"product": {"karatage": "24", "metal": "Gold", "diamondWeight": 0, "stoneWeight": 0, '
+        '"pricingGroupType": "PLAINGOLD", "priceInfo": {"GDV": "70000", "WTV": "4200", "AF1": "0", "F2": "0", '
+        '"UTP": "76426", "TXV": "2226"}}}')
+
+
+def test_a_24k_coin_is_read_only_as_a_coin():
+    assert tq.parse(COIN, coin=True)["pct"] == 6.0
+    assert tq.parse(COIN) is None                                     # not 22K jewellery
+    assert tq.parse(PLAIN, coin=True) is None                         # 22K is not a 24K coin
+    big = COIN.replace('"WTV": "4200"', '"WTV": "21000"').replace('"UTP": "76426"', '"UTP": "93730"').replace('"TXV": "2226"', '"TXV": "2730"')
+    assert tq.parse(big, coin=True) is None                           # 30%: not a plain coin
