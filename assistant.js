@@ -205,9 +205,12 @@
     }), 1 + ks.indexOf(k || '22K'));
   }
   function tiles(m, k) {
-    return '<div class="sn-tiles">' + ['24K', '22K', '18K'].map(function (x) {
-      return '<div' + (x === k ? ' class="on"' : '') + '><b>' + inr(m[x]) + '</b><span>' + x + ' /g</span></div>';
-    }).join('') + '</div>';
+    k = k || '22K';
+    return '<div class="sn-tblw"><table class="sn-ctbl"><thead><tr><th></th><th>1 g</th><th>10 g</th></tr></thead><tbody>' +
+      ['24K', '22K', '18K'].map(function (x) {
+        return '<tr' + (x === k ? ' class="best"' : '') + '><td><b>' + x + '</b></td><td' + (x === k ? ' class="t"' : '') + '>' +
+          inr(m[x]) + '</td><td>' + inr(m[x] * 10) + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
   }
 
   // Shops and banks whose prices Sona does not track ("999 rate on Amazon"):
@@ -340,9 +343,11 @@
       var mo = b.mo && b.mo.u && !b.mo.f ? '<p>' + t('off_mo', { p: pct(b.mo.u) }) + '</p>' : '';
       if (!b.off || !b.off.length) return { intent: 'offers', html: (mo || '<p>' + t('off_none', { b: esc(b.n) }) + '</p>') + '<p>' + link('/gold-offers-today', t('off_see')) + '</p>',
         say: mo ? t('off_mo', { p: pct(b.mo.u) }).replace(/<[^>]+>/g, '') : t('say_off_none', { b: b.n }) };
-      return { intent: 'offers', html: '<p>' + t('off_brand_h', { b: esc(b.n) }) + '</p>' + b.off.map(function (o) {
-        return '<div class="sn-card"><b>' + esc(o.h) + '</b><q>' + esc(o.t) + '</q><p>' + o.m + '</p><a href="' + esc(o.u) + '" target="_blank" rel="nofollow noopener">' + t('off_page') + '</a></div>';
-      }).join('') + mo + '<p>' + link('/gold-offers-today', t('off_all')) + '</p>',
+      return { intent: 'offers', html: '<p>' + t('off_brand_h', { b: esc(b.n) }) + '</p>' +
+        '<div class="sn-tblw"><table class="sn-ctbl sn-wrap"><thead><tr><th>' + t('th_off') + '</th></tr></thead><tbody>' + b.off.map(function (o) {
+          return '<tr><td><b>' + esc(o.h) + '</b><small>“' + esc(o.t) + '”</small><small>' + o.m + '</small>' +
+            '<small><a href="' + esc(o.u) + '" target="_blank" rel="nofollow noopener">' + t('off_page') + '</a></small></td></tr>';
+        }).join('') + '</tbody></table></div>' + mo + '<p>' + link('/gold-offers-today', t('off_all')) + '</p>',
         say: t('say_off_brand', { b: b.n, n: b.off.length }), chips: chips(['afteroff', 'cheap22']) };
     }
     // Every jeweller with an offer today, A to Z, each with its own offers:
@@ -355,10 +360,11 @@
     if (!withOff.length) return { intent: 'offers', html: '<p>' + t('off_city_none', { c: esc(city.n) }) + '</p><p>' + link('/gold-offers-today', t('off_see')) + '</p>',
       say: t('off_city_none', { c: city.n }), chips: chips(['goodmk', 'cheap22']).concat(cityChip(city)) };
     var ring = (KB.ring || []).filter(here)[0];
-    var h = '<p>' + t('off_all_h', { n: withOff.length }) + '</p>' + cityNote(city) + '<div class="sn-list">' + withOff.map(function (b) {
-      return '<div class="sn-row sn-orow"><span class="sn-nm"><b>' + esc(b.n) + '</b>' +
-        b.off.slice(0, 3).map(function (o) { return '<small>' + esc(o.h) + '</small>'; }).join('') + '</span></div>';
-    }).join('') + '</div>' +
+    var h = '<p>' + t('off_all_h', { n: withOff.length }) + '</p>' + cityNote(city) +
+      '<div class="sn-tblw"><table class="sn-ctbl sn-wrap"><thead><tr><th>' + t('th_jw') + '</th><th>' + t('th_off') + '</th></tr></thead><tbody>' +
+      withOff.map(function (b) {
+        return '<tr><td><b>' + esc(b.n) + '</b></td><td>' + b.off.slice(0, 3).map(function (o) { return esc(o.h); }).join('<br>') + '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
       (ring ? '<p class="sn-dim">' + t('off_ring', { b: esc(ring.n), p: inr(ring.a) }) + '</p>' : '') +
       '<p>' + link('/gold-offers-today', t('off_every')) + '</p>';
     return { intent: 'offers', html: h, say: ring ? t('say_off_all', { n: withOff.length, b: ring.n, p: sInr(ring.a) }) : '',
@@ -421,11 +427,11 @@
     if (!I || !w) return null;
     var fx = w.c === 'USD' ? 1 : I.fx[w.c], inrFx = I.fx.INR;
     if (!(fx > 0)) return null;
-    var g = I.usd_g * fx, rows = '<div class="sn-row"><span class="sn-nm">24K</span><span class="sn-v">' + money(w.s, g) + '/g</span></div>';
-    if (w.k) rows += '<div class="sn-row"><span class="sn-nm">' + w.k + '</span><span class="sn-v">' + money(w.s, g * w.f) + '/g</span></div>';
-    if (w.oz) rows += '<div class="sn-row"><span class="sn-nm">24K, troy oz</span><span class="sn-v">' + money('$', I.usd_g * 31.1034768) + '</span></div>';
-    if (w.chi) rows += '<div class="sn-row"><span class="sn-nm">24K, chi (3.75 g)</span><span class="sn-v">' + money('$', I.usd_g * 3.75) + '</span></div>';
-    var h = '<p>' + t('intl_h', { c: esc(w.n) }) + '</p><div class="sn-list">' + rows + '</div>';
+    var g = I.usd_g * fx, rows = '<tr><td><b>24K</b></td><td class="t">' + money(w.s, g) + '/g</td></tr>';
+    if (w.k) rows += '<tr><td><b>' + w.k + '</b></td><td>' + money(w.s, g * w.f) + '/g</td></tr>';
+    if (w.oz) rows += '<tr><td><b>24K, troy oz</b></td><td>' + money('$', I.usd_g * 31.1034768) + '</td></tr>';
+    if (w.chi) rows += '<tr><td><b>24K, chi (3.75 g)</b></td><td>' + money('$', I.usd_g * 3.75) + '</td></tr>';
+    var h = '<p>' + t('intl_h', { c: esc(w.n) }) + '</p><div class="sn-tblw"><table class="sn-ctbl"><tbody>' + rows + '</tbody></table></div>';
     if (inrFx > 0) {
       var inr10 = I.usd_g * inrFx * 10, ind10 = KB.med['24K'] * 10, x = Math.round(Math.abs(ind10 / inr10 - 1) * 100);
       h += '<p>' + t('intl_inr', { p: inr(inr10) }) + '</p>' +
@@ -448,13 +454,13 @@
     var mo = b.mo || {}, f = typ ? 0 : (mo.f || 0), u = typ ? 0 : (mo.u || 0);
     var mkAmt = gold * mk / 100, off = mkAmt * f / 100, after = mkAmt - off, gst = (gold + after) * 0.03, tot = gold + after + gst;
     var best = u > f ? (gold + mkAmt * (1 - u / 100)) * 1.03 : null;
-    var h = '<div class="sn-bill">' +
-      '<div><span>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(r22) }) + '</span><b>' + inr(gold) + '</b></div>' +
-      '<div><span>' + (typ ? t('bo_mk_typ', { p: pct(mk) }) : t('bo_mk', { p: pct(mk) })) + '</span><b>' + inr(mkAmt) + '</b></div>' +
-      (f ? '<div><span>' + t('bo_off', { p: pct(f) }) + '</span><b>−' + inr(off) + '</b></div>' +
-           '<div><span>' + t('bo_mk_after') + '</span><b>' + inr(after) + '</b></div>' : '') +
-      '<div><span>GST 3%</span><b>' + inr(gst) + '</b></div>' +
-      '<div class="sn-tot"><span>' + t('price_total') + '</span><b>≈ ' + inr(tot) + '</b></div></div>' +
+    var h = '<table class="sn-rcpt">' +
+      '<tr><td>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(r22) }) + '</td><td>' + inr(gold) + '</td></tr>' +
+      '<tr><td>' + (typ ? t('bo_mk_typ', { p: pct(mk) }) : t('bo_mk', { p: pct(mk) })) + '</td><td>' + inr(mkAmt) + '</td></tr>' +
+      (f ? '<tr><td>' + t('bo_off', { p: pct(f) }) + '</td><td>−' + inr(off) + '</td></tr>' +
+           '<tr><td>' + t('bo_mk_after') + '</td><td>' + inr(after) + '</td></tr>' : '') +
+      '<tr><td>GST 3%</td><td>' + inr(gst) + '</td></tr>' +
+      '<tr class="tot"><td>' + t('price_total') + '</td><td>≈ ' + inr(tot) + '</td></tr></table>' +
       (!f && u ? '<p class="sn-dim">' + t('bo_off_upto', { p: pct(u) }) + '</p>' : '') +
       (!f && !u && !typ ? '<p class="sn-dim">' + t('bo_off_none') + '</p>' : '') +
       (best ? '<p>' + t('bo_best_case', { p: inr(best) }) + '</p>' : '') +
@@ -557,10 +563,10 @@
     var mkp = b.mk ? (ct && b.mk[ct] != null ? b.mk[ct] : (b.mk.Ring != null ? b.mk.Ring : null)) : null;
     if (ct === 'Coin' || (k === '24K' && !ct)) mkp = null;   // 24K: coins and bars
     var mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03, tot = gold + mk + gst;
-    var h = '<p>' + t('price_h', { w: esc(wLabel(w)), k: k, who: who }) + '</p><div class="sn-bill">' +
-      '<div><span>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(rate(b, k)) }) + '</span><b>' + inr(gold) + '</b></div>' +
-      (mkp != null ? '<div><span>' + t('price_mk', { p: pct(mkp), c: ct && b.mk[ct] != null ? esc(catName(ct)) : t('price_typ') }) + '</span><b>' + inr(mk) + '</b></div>' : '') +
-      '<div><span>GST 3%</span><b>' + inr(gst) + '</b></div><div class="sn-tot"><span>' + t('price_total') + '</span><b>' + inr(tot) + '</b></div></div>' +
+    var h = '<p>' + t('price_h', { w: esc(wLabel(w)), k: k, who: who }) + '</p><table class="sn-rcpt">' +
+      '<tr><td>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(rate(b, k)) }) + '</td><td>' + inr(gold) + '</td></tr>' +
+      (mkp != null ? '<tr><td>' + t('price_mk', { p: pct(mkp), c: ct && b.mk[ct] != null ? esc(catName(ct)) : t('price_typ') }) + '</td><td>' + inr(mk) + '</td></tr>' : '') +
+      '<tr><td>GST 3%</td><td>' + inr(gst) + '</td></tr><tr class="tot"><td>' + t('price_total') + '</td><td>' + inr(tot) + '</td></tr></table>' +
       (mkp == null && ct !== 'Coin' && k !== '24K' ? '<p class="sn-dim">' + t('price_nomk') + '</p>' : '') + src();
     return { intent: 'price', html: h, say: t('say_price', { w: wLabel(w), k: sK(k), b: b.n, p: sInr(tot) }),
       chips: chips(['another', 'afteroff', 'cheap22']) };
@@ -577,9 +583,9 @@
       pts.map(function (v, i) { return (i * 240 / Math.max(1, pts.length - 1)).toFixed(1) + ',' + (44 - (mx === mn ? 20 : (v - mn) / (mx - mn) * 40)).toFixed(1); }).join(' ') + '"/></svg>';
     var d1 = last - back(1);
     return { intent: 'trend', html: '<p>' + t('trend_h', { k: k, p: inr(last) }) + '</p>' + sv +
-      '<div class="sn-list"><div class="sn-row"><span class="sn-nm">' + t('vs1') + '</span><span class="sn-v">' + chg(back(1)) + '</span></div>' +
-      '<div class="sn-row"><span class="sn-nm">' + t('vs7') + '</span><span class="sn-v">' + chg(back(7)) + '</span></div>' +
-      '<div class="sn-row"><span class="sn-nm">' + t('vs30') + '</span><span class="sn-v">' + chg(back(30)) + '</span></div></div>' +
+      '<div class="sn-tblw"><table class="sn-ctbl"><tbody>' +
+      [['vs1', 1], ['vs7', 7], ['vs30', 30]].map(function (x) { return '<tr><td><b>' + t(x[0]) + '</b></td><td>' + chg(back(x[1])) + '</td></tr>'; }).join('') +
+      '</tbody></table></div>' +
       '<p class="sn-dim">' + t('trend_note') + ' ' + link('/gold-rate-history', t('full_hist')) + '</p>',
       say: t(Math.abs(d1) < 1 ? 'say_trend_same' : d1 > 0 ? 'say_trend_up' : 'say_trend_dn', { k: sK(k), p: sInr(last), q: sInr(Math.abs(d1)) }),
       chips: chips(['alert', 'cheap22', 'goodtime']) };
@@ -812,6 +818,7 @@
     '.sn-ctbl td:first-child{white-space:normal;width:42%}.sn-ctbl td:last-child,.sn-ctbl th:last-child{padding-right:9px}' +
     '.sn-ctbl small,.sn-rcpt small{display:block;font-size:10.5px;color:#a99f8b;font-weight:400}' +
     '.sn-ctbl td.t{font-weight:800;color:#f0d080}.sn-ctbl tr.best td{background:rgba(47,209,139,.08)}' +
+    '.sn-wrap td,.sn-wrap th{white-space:normal;text-align:left}.sn-wrap small{white-space:normal}.sn-ctbl small a{color:#f0d080}' +
     '.sn-ctbl th.hk{color:#f0d080}.sn-ctbl td.hk{font-weight:800;color:#f0d080}.sn-ctbl td a{color:inherit}' +
     '.sn-ctbl tr:last-child td{border-bottom:0}' +
     '.sn-rcpt{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px;font-variant-numeric:tabular-nums;border:1px dashed rgba(240,208,128,.35);border-radius:10px}' +
