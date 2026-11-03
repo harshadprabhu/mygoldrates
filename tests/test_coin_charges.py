@@ -89,3 +89,14 @@ def test_coin_page_prices_include_the_gold_factor():
     r = cs.coin_rows(mc, {"K": 13964.0})[0]
     assert r["prices"][1] == round(13964 * 1.028 * 1.02 * 1.03)
     assert "1.028 g of gold" in cs.coin_html([r], "2026-11-03", "https://mygoldrates.com")
+
+
+def test_coin_purity_is_read_from_the_page():
+    # CaratLane's breakup data names it; PN Gadgil's title; WHP's spec
+    assert cc.page_purity('{"price_breakup":{"gold":[{"title":"995 Kt Yellow Gold"}]}}') == "995"
+    assert cc.page_purity("<h1>1 Gram 24 KT (995) PNG Gold Coin</h1>") == "995"
+    assert cc.page_purity("<li>Purity: 24KT 999</li>") == "999"
+    assert cc.page_purity("<p>99.99% pure 24K gold</p>") == "999.9"
+    assert cc.page_purity("<p>Pay 999 easy EMIs</p>", "https://x/coin") is None   # a bare number
+    mixed = [{"fields": {"purity": "995"}}] * 6 + [{"fields": {"purity": "999.9"}}] * 2
+    assert cc.coin_purity(mixed) == "995/999.9"                                     # Senco

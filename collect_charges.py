@@ -739,8 +739,41 @@ def fetch_batch(sess, engine, brand, items, workers=None):
             extra = follow(sess, u, html)
             html = html + "\n<!--breakup-->" + extra if extra else html
         res = engine.extract(html, brand=brand) if html else None
+        if cat == "Coin" and res is not None and html:
+            pu = page_purity(html, u)               # the coin's own stated fineness
+            if pu:
+                res.fields["purity"] = pu
         out.append((cat, u, res, src))
     return out
+
+
+# A coin page's stated fineness: "24KT (995)", "995 Kt Yellow Gold" (CaratLane's
+# breakup), "24kt-999", "99.99%". Owner, 3 Nov 2026: checked on the pages -
+# PN Gadgil and CaratLane 995; WHP, Candere, Khazana, NAC 999; Senco mixed.
+_PUR_RE = re.compile(r"(?<![\d.])(999\.9|9999|99\.99|999|99\.9|995|99\.5)(?![\d])\s*(?:%|k\b|kt\b|\)|\s*purity|\s*fine)?", re.I)
+_PUR_CTX = re.compile(r"(?:24\s*k[t]?|carat|karat|purity|fineness|pure|gold)[^<>{}]{0,40}$", re.I)
+
+
+def page_purity(html, url=""):
+    """'995', '999' or '999.9' from the coin page (title, specs, breakup), else
+    from its address; None when the page states none."""
+    import collections
+    t = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", html or "", flags=re.S)
+    t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", t))
+    # the breakup data inside scripts too (CaratLane: "title":"995 Kt Yellow Gold")
+    t += " " + " ".join(re.findall(r'"title"\s*:\s*"(9{2}[59](?:\.9)? ?k[t]?[^"]{0,30})"', html or "", re.I))
+    c = collections.Counter()
+    for m in _PUR_RE.finditer(t):
+        tail = (m.group(0) or "").lower()
+        ctx = t[max(0, m.start() - 45):m.start()]
+        if not (_PUR_CTX.search(ctx) or re.search(r"%|k|\)|purity|fine", tail[len(m.group(1)):])):
+            continue                              # a bare number elsewhere on the page
+        v = m.group(1)
+        c["999.9" if v in ("999.9", "9999", "99.99") else "995" if v in ("995", "99.5") else "999"] += 1
+    if not c:
+        m = re.search(r"(?<!\d)(99[59])(?!\d)", url)
+        return m.group(1) if m else None
+    return c.most_common(1)[0][0]
 
 
 def coin_gold_factor(items, rate24):
@@ -769,12 +802,18 @@ def coin_gold_factor(items, rate24):
 
 
 def coin_purity(items):
-    """'995' or '999': the fineness most of a jeweller's 24K coins state in
-    their addresses (PN Gadgil, C Krishniah Chetty: 995), or None."""
+    """The fineness a jeweller's 24K coins state on their own pages: '995',
+    '999', '999.9', or two joined when its coins differ ('995/999.9' - Senco);
+    None when none says."""
     import collections
-    c = collections.Counter(m.group(1) for it in items
-                            for m in [re.search(r"(?<!\d)(99[59])(?!\d)", it.get("url", ""))] if m)
-    return c.most_common(1)[0][0] if c else None
+    c = collections.Counter(p for it in items
+                            for p in [(it.get("fields") or {}).get("purity")
+                                      or (lambda m: m.group(1) if m else None)(re.search(r"(?<!\d)(99[59])(?!\d)", it.get("url", "")))]
+                            if p)
+    if not c:
+        return None
+    top = [p for p, n in c.most_common() if n >= max(2, sum(c.values()) * 0.2)] or [c.most_common(1)[0][0]]
+    return "/".join(sorted(top)[:2])
 
 
 def own_rate24():
