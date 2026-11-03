@@ -768,6 +768,15 @@ def coin_gold_factor(items, rate24):
     return round(fs[m] if len(fs) % 2 else (fs[m - 1] + fs[m]) / 2, 4)
 
 
+def coin_purity(items):
+    """'995' or '999': the fineness most of a jeweller's 24K coins state in
+    their addresses (PN Gadgil, C Krishniah Chetty: 995), or None."""
+    import collections
+    c = collections.Counter(m.group(1) for it in items
+                            for m in [re.search(r"(?<!\d)(99[59])(?!\d)", it.get("url", ""))] if m)
+    return c.most_common(1)[0][0] if c else None
+
+
 def own_rate24():
     """{jeweller name: its own 24K pre-GST rate today} (collect.py keeps the
     published one; else the base rate). Empty without Supabase."""
@@ -994,6 +1003,9 @@ def main():
             gf = coin_gold_factor(detail.get((brand, cat), []), rate24.get(brand))
             if gf:
                 row["gold_factor"] = gf
+            pu = coin_purity(detail.get((brand, cat), []))
+            if pu:
+                row["purity"] = pu
         # a couple of real examples power the dashboard's "based on ..." text
         ex = sorted(detail.get((brand, cat), []),
                     key=lambda x: -x["confidence"])[:3]

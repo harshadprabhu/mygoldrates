@@ -479,3 +479,23 @@ def test_coin_bill_shows_the_gold_actually_billed(tmp_path):
     r = _sona([{"lang": "en", "q": f"{b['n']} 1 gram gold coin price"}], kb=str(p))[0]
     assert "1.028 g" in r["html"]
     assert f"{round(b['r24'] * 1.028 * 1.02 * 1.03):,}"[-3:] in r["html"]
+
+
+def test_a_22k_coin_is_priced_at_the_22k_rate_with_its_purity(tmp_path):
+    """Owner, 3 Nov 2026: show the purity, and that purity's rate - never a
+    24K rate on a 22K coin; the reply is a bill-style table."""
+    kb = json.load(open("docs/assistant.json", encoding="utf-8"))
+    b = next(x for x in kb["brands"] if x.get("nat") and x.get("r24"))
+    b["mk"] = dict(b.get("mk") or {}, Coin=2.0)
+    b["a24"], b["cf"], b["cp"] = round(b["r24"] * 0.99, 2), 1.028, "995"
+    p = tmp_path / "kb.json"
+    p.write_text(json.dumps(kb), encoding="utf-8")
+    r = _sona([{"lang": "en", "q": f"{b['n']} 10 gram 22 carat gold coin price"},
+               {"lang": "en", "q": f"{b['n']} 10 gram 24k gold coin price"},
+               {"lang": "en", "q": "I am in Mumbai"},
+               {"lang": "en", "q": "5 gram gold coin price"}], kb=str(p))
+    r22 = b["r24"] * 22 / 24
+    assert "91.6%" in r[0]["html"] and "10 g ×" in r[0]["html"]               # 22K: no gold factor
+    assert f"{round(r22 * 10 * 1.02 * 1.03):,}"[-3:] in r[0]["html"]
+    assert "99.5%" in r[1]["html"] and "10.28 g" in r[1]["html"]             # its 995 coins, billed 1.028x
+    assert 'class="sn-ctbl"' in r[3]["html"] and "99.5–99.9%" in r[3]["html"]
