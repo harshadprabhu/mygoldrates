@@ -3047,18 +3047,29 @@ function handleCredentialResponse(resp){
     });
   });
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMcBrandMenus()});
+  // The build puts the making-charge medians here (generate_site.py). Since
+  // 28 Oct 2026 the collected data lives in Supabase, not in the published
+  // site, so /making-charges.json answered 404 (the "Couldn't load" an iPhone
+  // visitor saw on 3 Nov). The fetch below stays only as a fallback.
+  var MC_INLINE=null/*MC_INLINE*/;
+  function mcFail(stage,err){
+    var why=String((err&&(err.message||err))||'unknown').slice(0,90);
+    console.warn('making-charges '+stage,err);
+    try{if(window.GR_TRACK)window.GR_TRACK('click_events',{page:location.pathname,target:'mc_err:'+stage+':'+why,session_id:window.GR_SID||''});}catch(_){}
+  }
   function fetchMcData(){
+    if(MC_INLINE){
+      MC_DATA=MC_INLINE;
+      try{renderMcBrandPicker();}catch(e){mcFail('picker',e)}
+      try{renderMcTable();}catch(e){mcFail('table',e)}
+      return;
+    }
     var cached=loadMcCache();
     if(cached){MC_DATA=cached;renderMcBrandPicker();renderMcTable();return}
     // Relative URL (same host, www or not), one retry past the browser's
     // cache, and a drawing fault kept apart from a loading fault: an iPhone
     // Safari visitor saw "Couldn't load" while every other browser drew the
     // table (3 Nov 2026). The reason is sent to analytics as mc_err:<what>.
-    function mcFail(stage,err){
-      var why=String((err&&(err.message||err))||'unknown').slice(0,90);
-      console.warn('making-charges '+stage,err);
-      try{if(window.GR_TRACK)window.GR_TRACK('click_events',{page:location.pathname,target:'mc_err:'+stage+':'+why,session_id:window.GR_SID||''});}catch(_){}
-    }
     function getMc(opts){
       return fetch('/making-charges.json',opts||{}).then(function(r){
         if(!r.ok)throw new Error('HTTP '+r.status);
