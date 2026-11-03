@@ -743,6 +743,44 @@ def fetch_batch(sess, engine, brand, items, workers=None):
     return out
 
 
+def coin_gold_factor(items, rate24):
+    """How much gold a jeweller bills on its coins per gram of nominal weight,
+    against its own 24K rate: gold value / (weight in the coin's name x rate),
+    median over its coins. 1.0 = exactly the 24K rate on the nominal weight;
+    PN Gadgil's 995 coins at its 24K rate read 1.0; Khazana's '1 gram' coin
+    bills 1.028 g (1.028). Readings outside 0.97-1.06 are misreads and left
+    out; None without a rate or a usable reading."""
+    if not rate24:
+        return None
+    from coin_price_making import weight_g
+    fs = []
+    for it in items:
+        gv = (it.get("fields") or {}).get("gold_value")
+        g = weight_g(it.get("url", "").rsplit("/", 1)[-1].replace("+", " "))
+        if gv and g:
+            f = gv / (g * rate24)
+            if 0.97 <= f <= 1.06:
+                fs.append(f)
+    if not fs:
+        return None
+    fs.sort()
+    m = len(fs) // 2
+    return round(fs[m] if len(fs) % 2 else (fs[m - 1] + fs[m]) / 2, 4)
+
+
+def own_rate24():
+    """{jeweller name: its own 24K pre-GST rate today} (collect.py keeps the
+    published one; else the base rate). Empty without Supabase."""
+    try:
+        import private_store
+        from coin_price_making import todays_rate24
+        sb = private_store.client()
+        return todays_rate24(sb) if sb else {}
+    except Exception as e:
+        print(f"coin gold factor: no rates ({type(e).__name__})")
+        return {}
+
+
 def record_results(agg, detail, brand, results):
     """Fold a fetch_batch() result list into agg/detail. Returns (hits, proxy_hits)."""
     hits = proxy_hits = 0
@@ -929,6 +967,7 @@ def main():
             agg.setdefault((p["brand"], p["cat"]), []).append(res.making_pct)
             print(f"{p['brand']} {p['cat']}: {res.making_pct}%")
 
+    rate24 = own_rate24()             # each jeweller's own 24K today, for the coin gold factor
     brands = {}
     for (brand, cat), pcts in agg.items():
         if not pcts:
@@ -951,6 +990,10 @@ def main():
             row["drift_vs_last"] = s.get("drift_vs_last")
         if (brand, cat) in from_price:
             row["source"] = "price"
+        if cat == "Coin":
+            gf = coin_gold_factor(detail.get((brand, cat), []), rate24.get(brand))
+            if gf:
+                row["gold_factor"] = gf
         # a couple of real examples power the dashboard's "based on ..." text
         ex = sorted(detail.get((brand, cat), []),
                     key=lambda x: -x["confidence"])[:3]

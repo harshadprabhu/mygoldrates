@@ -318,7 +318,7 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
         if a24 and abs(a24 / r["canonical_24k_pre_gst"] - 1) > 0.0005:
             rows[b["slug"]]["a24"] = round(a24, 2)    # its own 24K rate, for coins
     off_by = {b["slug"]: b for b in (offers or {}).get("brands", [])}
-    mk_by, mko_by, mk_name = {}, {}, {}
+    mk_by, mko_by, mk_name, cf_by = {}, {}, {}, {}
     for b in (making or {}).get("brands", []):
         ex = [e.get("url", "") for c in b.get("categories", []) for e in c.get("examples", [])]
         host = ""
@@ -327,6 +327,10 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
         mk_by[host] = {c["category"]: c["making_pct_median"] for c in b.get("categories", [])
                        if c.get("making_pct_median") is not None}
         mk_name[b.get("brand", "")] = mk_by[host]
+        _cf = next((c.get("gold_factor") for c in b.get("categories", [])
+                    if c.get("category") == "Coin" and c.get("gold_factor")), None)
+        if _cf:
+            cf_by[host] = cf_by[b.get("brand", "")] = _cf
         if b.get("offer"):                     # read from the products themselves (Tanishq)
             mko_by[host] = b["offer"]
     brands = []
@@ -347,6 +351,9 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
             rec["mk"] = mk_by[dom]
         elif mk_name.get(b["n"]):              # no offers entry: match by name (coins, 3 Nov 2026)
             rec["mk"] = mk_name[b["n"]]
+        _cf = cf_by.get(dom) or cf_by.get(b["n"])
+        if _cf and abs(_cf - 1) >= 0.001:
+            rec["cf"] = _cf                       # gold billed per gram of coin (coin gold factor)
         # Making-charge offers, for "best offer on a bangle": f = a flat
         # discount on all gold jewellery (used for the ranking), u = the best
         # "up to" / selected-designs discount (shown only as a best case).

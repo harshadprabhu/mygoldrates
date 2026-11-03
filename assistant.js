@@ -475,8 +475,9 @@
   function coinBill(b, w, typ) {
     var mkp = b.mk && b.mk.Coin != null ? b.mk.Coin : typ, est = !(b.mk && b.mk.Coin != null);
     var r24 = b.a24 || rate(b, '24K');          // the jeweller's own 24K rate when it publishes one
-    var gold = r24 * w.g, mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03;
-    return { b: b, r24: r24, gold: gold, mkp: mkp, mk: mk, gst: gst, tot: gold + mk + gst, est: est };
+    var gw = w.g * (b.cf || 1);                 // gold it bills: purity, billed weight (coin gold factor)
+    var gold = r24 * gw, mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03;
+    return { b: b, r24: r24, gw: gw, gold: gold, mkp: mkp, mk: mk, gst: gst, tot: gold + mk + gst, est: est };
   }
   function aCoin(w, bs, city) {
     w = w || { g: 10, n: '10', u: 'g' };
@@ -485,7 +486,7 @@
     if (bs.length) {                          // one jeweller's coin bill
       var r = coinBill(bs[0], w, typ);
       var h = '<p>' + t('price_h', { w: esc(wLabel(w)), k: '24K', who: esc(r.b.n) }) + '</p><div class="sn-bill">' +
-        '<div><span>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(r.r24) }) + '</span><b>' + inr(r.gold) + '</b></div>' +
+        '<div><span>' + t('price_gold', { g: Math.round(r.gw * 1000) / 1000, p: inr(r.r24) }) + '</span><b>' + inr(r.gold) + '</b></div>' +
         (r.mkp != null ? '<div><span>' + t('price_mk', { p: pct(r.mkp), c: r.est ? t('price_typ') : esc(catName('Coin')) }) + '</span><b>' + inr(r.mk) + '</b></div>' : '') +
         '<div><span>GST 3%</span><b>' + inr(r.gst) + '</b></div><div class="sn-tot"><span>' + t('price_total') + '</span><b>' + inr(r.tot) + '</b></div></div>' +
         (r.est && r.mkp != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(r.mkp) }) + '</p>' : '') +
