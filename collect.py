@@ -54,6 +54,7 @@ OUTLIER_TOLERANCE = 0.04
 GROSS_OUTLIER = 0.20
 RATIO_TOLERANCE = 0.015
 MIN_FOR_MEDIAN = 5
+RATE24_KEY = "rate24_actual"      # private_store.collector_cache: {date, rates{slug: 24K}}
 # A jeweller's site can stop updating while still serving a rate (Waman Hari
 # Pethe's price config sat at the 31 Oct value for days). A rate unchanged for
 # FROZEN_DAYS days while the market median moved more than FROZEN_MOVE is
@@ -1602,6 +1603,7 @@ def main():
     real_ids = {r["brand_id"] for r in existing
                 if r.get("method") != PLACEHOLDER_METHOD}
     pending = brands
+    actual24 = {}         # slug -> the jeweller's own 24K pre-GST rate today
     print(f"{len(brands)} active brands - {len(real_ids)} already have a live "
           f"rate today; refreshing all for intraday revisions\n")
     saved = []
@@ -1631,6 +1633,16 @@ def main():
         canonical = found[purity] / PURITY_FRACTION[purity]
         if b.get("includes_gst"):
             canonical /= 1.03
+        # The jeweller's OWN 24K rate, kept apart from the 22K-based base rate
+        # (owner, 3 Nov 2026): PN Gadgil's 24K is about 1% under 22K x 24/22,
+        # so a coin priced from the base rate came out Rs 144 dear. Only a
+        # figure within 3% of the base is believed (a misread is not).
+        if "24K" in found and purity != "24K":
+            a24 = found["24K"] / (1.03 if b.get("includes_gst") else 1)
+            if abs(a24 / canonical - 1) <= 0.03:
+                actual24[b["slug"]] = round(a24, 2)
+        elif purity == "24K":
+            actual24[b["slug"]] = round(canonical, 2)
 
         ladder = derive_ladder(round(canonical, 2))
         row = {
@@ -1661,6 +1673,17 @@ def main():
             print(f"save failed: {e}")
 
         time.sleep(POLITE_DELAY)
+
+    if actual24:
+        try:
+            import private_store
+            prev = private_store.cache_get(RATE24_KEY) or {}
+            keep = prev.get("rates", {}) if prev.get("date") == today else {}
+            keep.update(actual24)
+            private_store.cache_put(RATE24_KEY, {"date": today, "rates": keep})
+            print(f"own 24K rates kept for {len(keep)} jewellers")
+        except Exception as e:                       # never stops a run
+            print(f"own 24K rates: not saved ({type(e).__name__})")
 
     # Median over LIVE rates only (already-stored real + newly saved), so the
     # outlier check and placeholder estimate are anchored on real data.

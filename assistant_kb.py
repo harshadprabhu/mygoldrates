@@ -304,7 +304,8 @@ def _making_offer(offers):
 
 def build(*, live, med, trend, locations, place_state, region_map, brand_home,
           loc_slug, jeweller_pages, making, offers, ring_rows, offer_meaning,
-          offer_headline, guides, display_date, updated_iso, site_url, coords=None, intl=None):
+          offer_headline, guides, display_date, updated_iso, site_url, coords=None, intl=None,
+          own24=None):
     """Everything the assistant knows today, as a compact dict."""
     rows = {}
     for r in live:
@@ -313,6 +314,9 @@ def build(*, live, med, trend, locations, place_state, region_map, brand_home,
             continue
         rows[b["slug"]] = {"s": b["slug"], "n": b["name"],
                            "r24": round(r["canonical_24k_pre_gst"], 2)}
+        a24 = (own24 or {}).get(b["slug"])
+        if a24 and abs(a24 / r["canonical_24k_pre_gst"] - 1) > 0.0005:
+            rows[b["slug"]]["a24"] = round(a24, 2)    # its own 24K rate, for coins
     off_by = {b["slug"]: b for b in (offers or {}).get("brands", [])}
     mk_by, mko_by, mk_name = {}, {}, {}
     for b in (making or {}).get("brands", []):

@@ -834,6 +834,10 @@ def main():
             print(f"{brand}: opened {len(results)} in a browser, {hits} read, "
                   f"cats {[(c, len(v)) for (b, c), v in agg.items() if b == brand]}")
             continue
+        if COIN_ONLY:                   # read only the coin listings, not the jewellery ones
+            if d.get("listings") and "Coin" not in d["listings"] and not d.get("sitemaps"):
+                print(f"{brand}: no coin listing"); continue
+            d = dict(d, listings={k: v for k, v in (d.get("listings") or {}).items() if k == "Coin"})
         buckets = collect_urls(sess, d)
         if COIN_ONLY:
             buckets = {c: u for c, u in buckets.items() if c == "Coin"}

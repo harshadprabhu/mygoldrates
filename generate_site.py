@@ -1837,6 +1837,15 @@ def _articles(rate_str, med, inr):
 def main():
     # jewellers' making charges and offers: from Supabase (private), not git
     private_store.pull()
+    # Each jeweller's own published 24K rate today (collect.py), for coins:
+    # the base rate is worked out from 22K, and a jeweller's 24K is not
+    # always 22K x 24/22 (PN Gadgil's is about 1% lower).
+    _own24 = private_store.cache_get("rate24_actual") or {}
+    def own24(r):
+        slug = (r.get("brands") or {}).get("slug")
+        if _own24.get("date") == r.get("rate_date") and slug in (_own24.get("rates") or {}):
+            return float(_own24["rates"][slug])
+        return float(r["canonical_24k_pre_gst"])
     sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
     anon_key = os.environ.get("SUPABASE_ANON_KEY", "")
     supabase_url = os.environ["SUPABASE_URL"]
@@ -3408,7 +3417,7 @@ def main():
         # ---- 24K gold coin prices (owner, 3 Nov 2026): coin_section.py ----
         try:
             import coin_section as _cs
-            _rate24 = {r["brands"]["name"]: r["canonical_24k_pre_gst"] for r in live}
+            _rate24 = {r["brands"]["name"]: own24(r) for r in live}
             _coins = _cs.coin_rows(mc, _rate24)
             if _coins:
                 _upd = mc.get("coins_updated") or mc.get("updated", "")
@@ -4309,6 +4318,7 @@ b.addEventListener('click',function(){
             live=live, med=med, trend=trend, locations=LOCATIONS, coords=CITY_COORDS,
             place_state=PLACE_STATE, region_map=REGION_MAP, brand_home=BRAND_HOME,
             loc_slug=loc_slug, jeweller_pages=jeweller_pages, making=_kb_mc,
+            own24={(r["brands"] or {}).get("slug"): own24(r) for r in live},
             offers=_kb_off, ring_rows=_OP.ring_prices(_kb_off, _kb_mc, _kb_r22),
             offer_meaning=_OP.meaning, offer_headline=_OP.headline,
             guides=[(h1, f"/learn/{slug}", desc)
