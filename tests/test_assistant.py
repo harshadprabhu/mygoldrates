@@ -450,8 +450,9 @@ def test_coin_prices_use_coin_making_and_the_24k_rate(tmp_path):
     assert "30" not in r[2]["html"].split("Total")[0].split("Making")[-1][:12]   # never the ring %
     assert r[3]["intent"] == "coin" and r[3]["lang"] == "hi"
     unmeasured = [x for x in kb["brands"] if here(x) and x.get("r24") and x["s"] not in (a["s"], b2["s"], c3["s"])]
-    if unmeasured:
-        assert "~4.0%" in r[1]["html"] or "~4%" in r[1]["html"]           # typical: median of 2, 4, 6
+    if unmeasured:                      # owner: no placeholder - named, not priced
+        assert "~4" not in r[1]["html"] and "No coin price on their website" in r[1]["html"]
+        assert unmeasured[0]["n"].replace("&", "&amp;") in r[1]["html"].split("No coin price")[1]
 
 
 def test_coins_use_the_jewellers_own_24k_rate(tmp_path):

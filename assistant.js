@@ -519,7 +519,7 @@
     var wc = ['1', '5', '10'].map(function (n) { return { l: n + ' g', q: n + ' gram ' + kk + ' gold coin price' }; })
       .concat([{ l: kk === '24K' ? '22K' : '24K', q: wLabel(w) + ' ' + (kk === '24K' ? '22K' : '24K') + ' gold coin price' }]);
     if (bs.length) {                          // one jeweller: a receipt
-      var r = coinBill(bs[0], w, typ, kk);
+      var r = coinBill(bs[0], w, null, kk);          // its own coin charge only
       var line = function (l, v) { return '<tr><td>' + l + '</td><td>' + v + '</td></tr>'; };
       var h = '<p><b>' + esc(r.b.n) + '</b> · ' + esc(wLabel(w)) + ' ' + kk + ' ' + esc(catName('Coin')) + '</p>' +
         '<table class="sn-rcpt">' +
@@ -535,8 +535,12 @@
     }
     if (!city) return askCityFor(function (c) { return aCoin(w, [], c, kk); });
     var here = servesCity(city);
-    var rows = KB.brands.filter(function (b) { return here(b) && (b.a24 || rate(b, '24K')); })
+    // only jewellers with their OWN coin making charge (owner, 3 Nov 2026:
+    // no placeholder); the others are named, not priced
+    var local = KB.brands.filter(function (b) { return here(b) && (b.a24 || rate(b, '24K')); });
+    var rows = local.filter(function (b) { return b.mk && b.mk.Coin != null; })
       .map(function (b) { return coinBill(b, w, typ, kk); }).sort(function (a, z) { return a.tot - z.tot; });
+    var none = local.filter(function (b) { return !(b.mk && b.mk.Coin != null); }).map(function (b) { return esc(b.n); });
     if (!rows.length) return { intent: 'coin', html: '<p>' + t('off_city_none', { c: esc(city.n) }) + '</p>' + more, say: '', chips: wc };
     var top = rows.slice(0, 8), anyEst = top.some(function (r) { return r.est; });
     var pur = kk === '22K' ? '91.6%' : '99.5–99.9%';
@@ -551,8 +555,7 @@
           '<small>' + t('th_gold') + ' ' + inr(r.gold) + '</small></td>' +
           '<td>' + mkCell(r) + '</td><td>' + inr(r.gst) + '<small>3%</small></td><td class="t">' + inr(r.tot) + '</td></tr>';
       }).join('') + '</tbody></table></div>' +
-      (anyEst && typ != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(typ) }) + '</p>' : '') +
-      (typ == null ? '<p class="sn-dim">' + t('coin_nomk') + '</p>' : '') + more;
+      (none.length ? '<p class="sn-dim">' + t('coin_none', { l: none.join(', ') }) + '</p>' : '') + more;
     return { intent: 'coin', html: h2, say: t('say_coin', { w: wLabel(w), b: rows[0].b.n, p: sInr(rows[0].tot) }),
       chips: wc.concat(cityChip(city)) };
   }

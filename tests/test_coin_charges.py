@@ -100,3 +100,13 @@ def test_coin_purity_is_read_from_the_page():
     assert cc.page_purity("<p>Pay 999 easy EMIs</p>", "https://x/coin") is None   # a bare number
     mixed = [{"fields": {"purity": "995"}}] * 6 + [{"fields": {"purity": "999.9"}}] * 2
     assert cc.coin_purity(mixed) == "995/999.9"                                     # Senco
+
+
+def test_coin_making_from_the_price_when_no_breakup():
+    # Reliance's 1 g coin: Price : 14877.0 (with GST), 24 k(99.5); its 24K rate 13,944
+    html = ('<meta property="og:title" content="24 Karat Yellow Finish 1 Gram Floral Gold Coin" />'
+            '<meta property="og:price:amount" content="14877.0" />')
+    r = cc.coin_from_price(html, "https://www.reliancejewels.com/coins/24-karat-yellow-finish-1-gram-floral-gold-coin-570688/", 13944.0)
+    assert r.ok and r.making_pct == 3.58 and r.fields["from_price"] == 1.0
+    assert cc.coin_from_price(html, "https://x/coin", None) is None                  # no rate: nothing
+    assert cc.coin_gold_factor([{"url": "https://x/1-gram-24kt-coin", "fields": r.fields}], 13944.0) is None
