@@ -270,3 +270,14 @@ def test_homepage_template_declares_a_search_sized_icon():
     head = _read("pulse_app.html").split("</head>")[0]
     assert 'href="/favicon.ico" sizes="48x48"' in head
     assert 'sizes="96x96" href="/icon-96.png"' in head
+
+
+def test_homepage_making_charges_are_inline_not_a_missing_file():
+    """/making-charges.json left the published site on 28 Oct (the data is in
+    Supabase), so the Making Charges tab said "Couldn't load" (3 Nov). The
+    build writes the medians into the page instead."""
+    src = _read("pulse_app.html")
+    assert "var MC_INLINE=null/*MC_INLINE*/;" in src
+    assert "if(MC_INLINE){" in src
+    gen = _read("generate_site.py")
+    assert '"null/*MC_INLINE*/"' in gen and "making_pct_median" in gen

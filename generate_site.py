@@ -4652,6 +4652,26 @@ document.getElementById('mkGo').addEventListener('click',function(){
         # navigation from the homepage. On phones the desktop layout and its
         # footer are display:none, and Google indexes the phone version, so
         # the same block goes at the foot of the default phone view too.
+        # Making charges for the homepage's tab, inline: the collected file is
+        # private (Supabase) since 28 Oct, so the page's fetch got a 404.
+        # Only the per-jeweller, per-category medians the page shows.
+        try:
+            with open(private_store.MC, encoding="utf-8") as _f:
+                _mcj = json.load(_f)
+            _mc_inline = {b["brand"]: {c["category"]: c["making_pct_median"]
+                                       for c in b.get("categories") or []
+                                       if c.get("making_pct_median") is not None}
+                          for b in _mcj.get("brands") or []}
+            _mc_inline = {k: v for k, v in _mc_inline.items() if v}
+        except (OSError, ValueError, KeyError, TypeError) as _e:
+            print(f"homepage making charges: none inline ({type(_e).__name__})")
+            _mc_inline = {}
+        if "null/*MC_INLINE*/" not in pulse_html:
+            raise RuntimeError("pulse_app.html: MC_INLINE placeholder missing")
+        if _mc_inline:
+            pulse_html = pulse_html.replace(
+                "null/*MC_INLINE*/",
+                json.dumps(_mc_inline, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"), 1)
         _site_links = site_links_html()
         for _mark in ("<!--SITE_LINKS_APP-->", "<!--SITE_LINKS_SITE-->"):
             if _mark not in pulse_html:

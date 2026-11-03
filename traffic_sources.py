@@ -177,6 +177,7 @@ def main():
 
     funnel(url, h, rows)
     popup_audit(url, h)
+    client_errors(url, h)
 
 
 def popup_audit(url, h, days=14):
@@ -233,6 +234,18 @@ def popup_audit(url, h, days=14):
     tg_after = Counter(x["target"] for x in ce if x.get("session_id") in shown and x.get("target") and
                        ts(x) >= shown[x["session_id"]])
     print("what was clicked after the popup: " + ", ".join(f"{k} {v}" for k, v in tg_after.most_common(15)))
+
+
+def client_errors(url, h, days=3):
+    """Errors pages report about themselves (click_events target "mc_err:..."
+    from the Making Charges loader), newest first. Counts and messages only."""
+    since = (date.today() - timedelta(days=days)).isoformat()
+    ce = _all(url, h, "click_events", "created_at,target,page", {"day": f"gte.{since}", "target": "like.mc_err*"}) or []
+    print(f"\n== CLIENT ERRORS, last {days} days ({len(ce)}) ==")
+    for t, n in Counter(x["target"] for x in ce).most_common(20):
+        print(f"  {n:4d}  {t}")
+    for x in sorted(ce, key=lambda x: x["created_at"], reverse=True)[:10]:
+        print(f"  {x['created_at'][:19]}  {x.get('page')}  {x['target']}")
 
 
 def _all(url, h, table, select, flt):
