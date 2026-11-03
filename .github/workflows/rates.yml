@@ -67,6 +67,17 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: python pin_health.py
 
+      # Once a day (the morning run that sends the digest): coin making
+      # charges worked out from coin prices and our 24K rates, recorded by
+      # day so they can be watched (coin_price_making.py). Never blocks.
+      - name: Coin making from coin prices (daily)
+        if: ${{ !cancelled() && github.event.inputs.alerts == 'true' }}
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python coin_price_making.py
+
       - name: Build site
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

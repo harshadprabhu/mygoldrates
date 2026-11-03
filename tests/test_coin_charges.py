@@ -42,3 +42,30 @@ def test_coin_price_is_own_rate_plus_coin_making_plus_gst():
     body = cs.coin_html(rows, "2026-11-03T10:00:00+05:30", "https://mygoldrates.com")
     assert "₹1,47,084" in body and "10 g coin" in body and "2026-11-03" in body
     assert cs.coin_html([], "", "") == ""
+
+
+def test_coin_making_back_calculated_from_price():
+    import coin_price_making as cp
+    # 5 g at 14,000 = 70,000 gold; price 75,705 incl. GST -> 73,500 before -> 5%
+    assert cp.making_pct(75705, 5, 14000) == 5.0
+    assert cp.making_pct(73500, 5, 14000, incl_gst=False) == 5.0
+    assert cp.making_pct(26895, 2, 13963.64) is None        # below gold value at 24K: a 22K coin
+    assert cp.making_pct(7000, 0.5, 14000) is None          # under 1 g
+    assert cp.making_pct(99000, 5, 14000) is None           # 37%: not a plain coin
+    assert cp.weight_g("2 Gram  St.Mary Gold Coin") == 2 and cp.weight_g("gold-coin-5-gm-24kt") == 5
+
+
+def test_worked_out_coin_rows_never_replace_a_measured_one():
+    import coin_price_making as cp
+    hist = cp.update_history({}, "2026-11-03", {
+        "CKC": [{"url": "https://ckc/a", "g": 5, "price": 1, "pct": 5.5}, {"url": "https://ckc/b", "g": 5, "price": 1, "pct": 8.9}],
+        "Tanishq": [{"url": "https://t/a", "g": 1, "price": 1, "pct": 9.0}]})
+    rows = cp.coin_rows_from_history(hist, "2026-11-03")
+    assert rows["CKC"]["making_pct_median"] == 7.2 and rows["CKC"]["source"] == "price"
+    mc = {"brands": [{"brand": "Tanishq", "categories": [{"category": "Coin", "making_pct_median": 6.0}]},
+                     {"brand": "CKC", "categories": [{"category": "Ring", "making_pct_median": 19.5}]}]}
+    out = {b["brand"]: {c["category"]: c for c in b["categories"]} for b in cp.merge_into_making(mc, rows)["brands"]}
+    assert out["Tanishq"]["Coin"]["making_pct_median"] == 6.0          # measured: kept
+    assert out["CKC"]["Coin"]["making_pct_median"] == 7.2 and out["CKC"]["Ring"]["making_pct_median"] == 19.5
+    old = cp.update_history(hist, "2027-02-01", {})
+    assert "2026-11-03" not in old                                    # 60 days kept
