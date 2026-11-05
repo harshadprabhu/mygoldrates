@@ -9,6 +9,9 @@ name: gsc-diag
 on:
   workflow_dispatch:
     inputs:
+      gsc:
+        description: "Search Console part: report (gsc_diag.py), inspect (key pages), or resubmit (remove + re-add sitemaps, then inspect; gsc_fix.py)"
+        default: "report"
       bing:
         description: "Bing Webmaster part (bing_report.py): report, submit (report + send key pages), links (backlinks only), or off"
         default: "report"
@@ -29,7 +32,13 @@ jobs:
       - name: Run
         env:
           GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
-        run: python gsc_diag.py > report.txt 2>&1 || true
+          GSC_MODE: ${{ inputs.gsc }}
+        run: |
+          case "$GSC_MODE" in
+            resubmit) python gsc_fix.py resubmit > report.txt 2>&1 || true ;;
+            inspect)  python gsc_fix.py > report.txt 2>&1 || true ;;
+            *)        python gsc_diag.py > report.txt 2>&1 || true ;;
+          esac
       - name: Bing
         if: inputs.bing != 'off'
         env:

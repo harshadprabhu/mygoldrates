@@ -25,7 +25,11 @@ KEY_PAGES = [SITE] + [SITE + p for p in (
     "jewellers-digest", "gold-rate-today-in-mumbai", "gold-rate-today-in-delhi", "gold-rate-today-in-chennai",
     "gold-rate-today-in-bengaluru", "gold-rate-today-in-pune", "gold-rate-today-in-hyderabad",
     "gold-rate-today-in-kolkata", "gold-rate-today-in-ahmedabad", "tanishq-gold-rate-today",
-    "kalyan-jewellers-gold-rate-today", "malabar-gold-rate-today")]
+    "kalyan-jewellers-gold-rate-today", "malabar-gold-rate-today",
+    # 2026-11-06: new pages
+    "gold-price-gap-report", "gold-rate-widget", "gold-coin-price-today", "gold-rate-today-in-thrissur",
+    "hi/gold-rate-today", "ta/gold-rate-today", "te/gold-rate-today", "kn/gold-rate-today",
+    "ml/gold-rate-today", "mr/gold-rate-today")]
 
 
 def call(method, key, params=None, body=None):
