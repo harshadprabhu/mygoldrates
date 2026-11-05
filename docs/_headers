@@ -1,5 +1,5 @@
 /*
-  Last-Modified: Thu, 05 Nov 2026 19:41:22 GMT
+  Last-Modified: Thu, 05 Nov 2026 19:51:58 GMT
   Cache-Control: public, max-age=300, s-maxage=600, must-revalidate
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
@@ -14,31 +14,35 @@ https://:version.:project.pages.dev/*
   X-Robots-Tag: noindex
 
 /*.html
-  Last-Modified: Thu, 05 Nov 2026 19:41:22 GMT
+  Last-Modified: Thu, 05 Nov 2026 19:51:58 GMT
   Cache-Control: public, max-age=300, s-maxage=600, must-revalidate
 
 /sitemap.xml
-  Last-Modified: Thu, 05 Nov 2026 19:41:22 GMT
+  Last-Modified: Thu, 05 Nov 2026 19:51:58 GMT
   Cache-Control: public, max-age=0, must-revalidate
 
 /sitemap_main.xml
-  Last-Modified: Thu, 05 Nov 2026 19:41:22 GMT
+  Last-Modified: Thu, 05 Nov 2026 19:51:58 GMT
   Cache-Control: public, max-age=0, must-revalidate
 
 /sitemap_cities.xml
-  Last-Modified: Thu, 05 Nov 2026 19:41:22 GMT
+  Last-Modified: Thu, 05 Nov 2026 19:51:58 GMT
   Cache-Control: public, max-age=0, must-revalidate
 
 /sitemap_daily.xml
-  Last-Modified: Thu, 05 Nov 2026 19:41:22 GMT
+  Last-Modified: Thu, 05 Nov 2026 19:51:58 GMT
   Cache-Control: public, max-age=0, must-revalidate
 
 /sitemap_news.xml
-  Last-Modified: Thu, 05 Nov 2026 19:41:22 GMT
+  Last-Modified: Thu, 05 Nov 2026 19:51:58 GMT
   Cache-Control: public, max-age=0, must-revalidate
 
+/widget-data.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=600, must-revalidate
+
 /rates.json
-  Last-Modified: Thu, 05 Nov 2026 19:41:22 GMT
+  Last-Modified: Thu, 05 Nov 2026 19:51:58 GMT
   Cache-Control: public, max-age=60, must-revalidate
 
 /robots.txt

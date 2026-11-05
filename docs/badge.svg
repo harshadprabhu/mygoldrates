@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="56" viewBox="0 0 220 56" role="img" aria-label="Gold rate listed daily on MyGoldRates">
+<rect x="0.5" y="0.5" width="219" height="55" rx="10" fill="#16130d" stroke="#c9a23c"/>
+<circle cx="28" cy="28" r="15" fill="#d4af37"/><path d="M20 33l5-7 4 4 7-10" fill="none" stroke="#16130d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="52" y="24" font-family="Georgia,serif" font-size="15" font-weight="700" fill="#f3e3a6">Gold rate listed</text>
+<text x="52" y="42" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="11.5" fill="#cbbf9f">daily on MyGoldRates.com</text>
+</svg>

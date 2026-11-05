@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import private_store
 import lang_pages
+import outreach_pages
 import glob
 import hashlib
 import html as _html
@@ -362,6 +363,8 @@ def site_links_html():
         f'<a href="{SITE_URL}/compare-jewellers-gold-rate">Compare jewellers</a>'
         f'<a href="{SITE_URL}/list-your-jewellery">List your jewellery</a>'
         f'<a href="{SITE_URL}/gold-rate-history">Gold rate history</a>'
+        f'<a href="{SITE_URL}/gold-price-gap-report">Gold price gap report</a>'
+        f'<a href="{SITE_URL}/gold-rate-widget">Free gold rate widget</a>'
         f'<a href="{SITE_URL}/news">Gold news</a>'
         f'<a href="{SITE_URL}/jewellers-digest">Jewellers Digest</a>'
         f'<a href="{SITE_URL}/inquiry">Daily rate alerts</a>'
@@ -2209,7 +2212,7 @@ def main():
         _off = 0
         while True:
             _b = sb.table("rates") \
-                .select("rate_date, canonical_24k_pre_gst, status, brands(slug)") \
+                .select("rate_date, canonical_24k_pre_gst, status, brands(slug, name)") \
                 .eq("status", "published").order("rate_date") \
                 .range(_off, _off + 999).execute().data
             hist_rows += _b
@@ -3971,6 +3974,54 @@ def main():
         except Exception as e:                  # one language never stops the build
             print(f"language page {_code}: SKIPPED ({type(e).__name__}: {e})")
 
+    # ---- pages other sites can link to (outreach_pages.py) ----
+    try:
+        _gap = outreach_pages.gap_report(hist_rows, set(REGION_MAP), inr, now_ist.date())
+        if _gap:
+            _gt, _gd, _gb, _gl = _gap
+            render_content("gold-price-gap-report", _gt + " | MyGoldRates", _gd,
+                           crumbs(("Gold Price Gap Report", None)) + _gb, jsonld_block=_gl)
+            extra_urls.append(("gold-price-gap-report", "daily", "0.8"))
+        else:
+            print("gap report: not enough days of readings yet")
+    except Exception as e:
+        print(f"gap report: SKIPPED ({type(e).__name__}: {e})")
+    try:
+        _wsorted = sorted(live, key=lambda r: r["canonical_24k_pre_gst"])
+        _wplaces = {}
+        for _pn in LOCATIONS:
+            _st = PLACE_STATE.get(_pn)
+            if not _st:
+                continue
+            _here = [r for r in _wsorted if (r["brands"] or {}).get("slug") not in REGION_MAP
+                     or _st in REGION_MAP.get(r["brands"]["slug"], [])]
+            _wplaces[loc_slug(_pn)] = {"name": _pn, "top": [
+                {"name": r["brands"]["name"], "r22": round(r["canonical_24k_pre_gst"] * PURITY_FRACTION["22K"])}
+                for r in _here[:5]]}
+        _wd = outreach_pages.widget_data(
+            display_date=display_date, r24=med["24K"], r22=med["22K"],
+            chg22=((nat_trend[-1][1] - nat_trend[-2][1]) * PURITY_FRACTION["22K"]
+                   if len(nat_trend) >= 2 else 0),
+            national_rows=[(r["brands"]["name"], r["canonical_24k_pre_gst"]) for r in _wsorted
+                           if (r["brands"] or {}).get("slug") not in REGION_MAP],
+            places=_wplaces)
+        with open("docs/widget-data.json", "w", encoding="utf-8") as _f:
+            json.dump(_wd, _f, ensure_ascii=False, separators=(",", ":"))
+        with open("docs/widget.js", "w", encoding="utf-8") as _f:
+            _f.write(outreach_pages.WIDGET_JS)
+        with open("docs/badge.svg", "w", encoding="utf-8") as _f:
+            _f.write(outreach_pages.BADGE_SVG)
+        _wc = [(loc_slug(p), p) for p in LOCATIONS if PLACE_STATE.get(p) and PLACE_STATE.get(p) != p]
+        render_content(
+            "gold-rate-widget", "Free Gold Rate Widget for Your Website | MyGoldRates",
+            "Add today's 24K and 22K gold rate, the change since yesterday and the cheapest jewellers "
+            "to your website. Free, updates daily, one line of code, for all India or your city.",
+            crumbs(("Gold Rate Widget", None)) + outreach_pages.widget_page_body(SITE_URL, _wc),
+            extra_js="<script>" + outreach_pages.WIDGET_PAGE_JS.replace("__SITE__", SITE_URL) + "</script>")
+        extra_urls.append(("gold-rate-widget", "monthly", "0.6"))
+    except Exception as e:
+        print(f"widget: SKIPPED ({type(e).__name__}: {e})")
+
     # today's dated articles, featured at the top of /news
     daily_cards = "".join(
         f'<a class="newscard" href="{SITE_URL}/{slug}">'
@@ -4558,6 +4609,19 @@ b.addEventListener('click',function(){
 
 
     _write_jeweller_pages()
+    # the badge listed jewellers can show on their own sites (outreach_pages.py)
+    try:
+        _bj = [(r["brands"]["name"], jeweller_pages[r["brands"]["slug"]]) for r in live
+               if (r["brands"] or {}).get("slug") in jeweller_pages]
+        if _bj:
+            render_content(
+                "jeweller-badge", "Badge for Jewellers Listed on MyGoldRates",
+                "Jewellers whose gold rate we list daily can show it on their website with this "
+                "badge, linking to their rate and how it compares.",
+                crumbs(("Jeweller Badge", None)) + outreach_pages.badge_page_body(SITE_URL, _bj))
+            extra_urls.append(("jeweller-badge", "monthly", "0.4"))
+    except Exception as e:
+        print(f"badge page: SKIPPED ({type(e).__name__}: {e})")
 
     # ---- Sona, the jewellery assistant: its knowledge file ----
     # docs/assistant.json, everything the assistant (assistant.js) answers
@@ -5572,6 +5636,10 @@ document.getElementById('mkGo').addEventListener('click',function(){
             "/sitemap_news.xml\n"
             f"  Last-Modified: {headers_lm}\n"
             "  Cache-Control: public, max-age=0, must-revalidate\n"
+            "\n"
+            "/widget-data.json\n"
+            "  Access-Control-Allow-Origin: *\n"
+            "  Cache-Control: public, max-age=600, must-revalidate\n"
             "\n"
             "/rates.json\n"
             f"  Last-Modified: {headers_lm}\n"
