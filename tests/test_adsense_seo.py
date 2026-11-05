@@ -145,8 +145,10 @@ def test_daily_reports_do_not_reuse_the_city_page_title():
     search."""
     src = _read("generate_site.py")
     i = src.index("    def gen_daily(place, place_slug):")
-    body = src[i:i + 4000]
-    assert "Daily Report" in body
+    body = src[i:i + 9000]
+    # the dated report names the date and the chains compared, which no
+    # city page title does
+    assert 'f"Gold Rate Today {now_ist.strftime(\'%-d %B %Y\')}: "' in body
     assert 'f"Gold Rate Today {where_in} ({display_date})' not in body
 
 

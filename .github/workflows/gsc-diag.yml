@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       bing:
-        description: "Bing Webmaster part (bing_report.py): report, submit (report + send key pages), or off"
+        description: "Bing Webmaster part (bing_report.py): report, submit (report + send key pages), links (backlinks only), or off"
         default: "report"
 
 permissions:
@@ -39,7 +39,9 @@ jobs:
           # Bing goes first: the annotations stop at 14 parts and Google's
           # part is long
           { echo "############ BING WEBMASTER ############"
-            if [ "$MODE" = submit ]; then python bing_report.py submit 2>&1; else python bing_report.py 2>&1; fi
+            if [ "$MODE" = submit ]; then python bing_report.py submit 2>&1;
+            elif [ "$MODE" = links ]; then python bing_report.py links 2>&1;
+            else python bing_report.py 2>&1; fi
             echo; echo "############ GOOGLE SEARCH CONSOLE ############"; cat report.txt; } > all.txt || true
           mv all.txt report.txt
       - name: Forward report as annotations

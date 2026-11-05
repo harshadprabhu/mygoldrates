@@ -6,6 +6,7 @@ sends the key pages to Bing (within its daily allowance).
 
     python bing_report.py            # report
     python bing_report.py submit     # report, then submit KEY_PAGES
+    python bing_report.py links      # only the sites and pages linking here
 
 Needs BING_WEBMASTER_KEY. The key goes in the query string, so no request URL
 is ever printed: errors are reported by method name only.
@@ -50,10 +51,53 @@ def date(v):
     return datetime.fromtimestamp(int(m.group()) / 1000, timezone.utc).strftime("%Y-%m-%d") if m else str(v)
 
 
+def links(key, site):
+    """Backlinks Bing has found: our pages with the most links to them, and
+    for those, the linking pages and their anchor text, grouped by site."""
+    from urllib.parse import urlparse
+    p = {"siteUrl": site}
+    cs, e = call("GetCrawlStats", key, p)
+    print("== INBOUND LINKS OVER TIME (Bing crawl stats) ==" + (" " + e if e else ""))
+    for d in (cs or [])[-30::5]:
+        print(f"  {date(d.get('Date'))}  inLinks={d.get('InLinks')}")
+    counts, page = [], 0
+    while page < 10:
+        lc, e = call("GetLinkCounts", key, {**p, "page": page})
+        if e:
+            print("  " + e); break
+        counts += (lc or {}).get("Links") or []
+        if page + 1 >= ((lc or {}).get("TotalPages") or 1):
+            break
+        page += 1
+    counts.sort(key=lambda x: -(x.get("Count") or 0))
+    print(f"\n== OUR PAGES BY LINKS TO THEM == {len(counts)} pages, "
+          f"{sum(x.get('Count') or 0 for x in counts)} links")
+    for x in counts[:25]:
+        print(f"  {x.get('Count'):>5}  {x.get('Url')}")
+    domains = {}
+    for x in counts[:15]:
+        lk, e = call("GetUrlLinks", key, {**p, "link": x.get("Url"), "page": 0})
+        if e:
+            print("  " + e); continue
+        for d in (lk or {}).get("Details") or []:
+            host = urlparse(d.get("Url") or "").netloc.lower().removeprefix("www.")
+            dd = domains.setdefault(host, {"n": 0, "anchors": set(), "to": set(), "ex": d.get("Url")})
+            dd["n"] += 1
+            dd["anchors"].add((d.get("AnchorText") or "").strip()[:40])
+            dd["to"].add(urlparse(x.get("Url") or "").path or "/")
+    print(f"\n== SITES LINKING HERE == {len(domains)} referring domains (sampled)")
+    for h, dd in sorted(domains.items(), key=lambda kv: -kv[1]["n"])[:40]:
+        print(f"  {dd['n']:>4}  {h}  -> {', '.join(sorted(dd['to']))[:60]} | "
+              f"anchors: {'; '.join(a for a in sorted(dd['anchors']) if a)[:80]} | e.g. {str(dd['ex'])[:90]}")
+
+
 def main():
     key = os.environ.get("BING_WEBMASTER_KEY", "").strip()
     if not key:
         print("BING_WEBMASTER_KEY is not set"); return 1
+    if sys.argv[1:2] == ["links"]:
+        links(key, SITE)
+        return 0
     sites, e = call("GetUserSites", key)
     print("== BING SITES ==")
     for s in sites or []:
