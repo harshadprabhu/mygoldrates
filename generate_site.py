@@ -3867,10 +3867,10 @@ def main():
             + f'</td><td>{inr(ladder(r["canonical_24k_pre_gst"])["24K"])}</td>'
             f'<td>{inr(ladder(r["canonical_24k_pre_gst"])["22K"])}</td>{mv(r)}</tr>'
             for r in rows)
-        big = [n for n in ("Tanishq", "Kalyan Jewellers", "Malabar Gold & Diamonds", "Joyalukkas",
-                           "Senco Gold & Diamonds", "PN Gadgil Jewellers")
-               if any(r["brands"]["name"] == n for r in live)][:4]
-        big_short = [n.replace(" Gold & Diamonds", "").replace(" Jewellers", "") for n in big]
+        # the chains people name in searches, as short names; matched on the
+        # start of the name ("Malabar Gold" / "Malabar Gold & Diamonds")
+        big_short = [n for n in ("Tanishq", "Kalyan", "Malabar", "Joyalukkas", "Senco", "PN Gadgil")
+                     if any(r["brands"]["name"].startswith(n) for r in live)][:4]
         rises = sum(1 for r in live if prev_rows.get(r["brands"].get("slug"))
                     and r["canonical_24k_pre_gst"] - prev_rows[r["brands"]["slug"]] >= 1)
         falls = sum(1 for r in live if prev_rows.get(r["brands"].get("slug"))
