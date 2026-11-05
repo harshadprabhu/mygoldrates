@@ -398,3 +398,15 @@ Recently added brands: Kisna (Shopify pagination), Indriya ('value per gm' extra
   read or edit DNS ("Authentication error"). cf-bot-rules adds Brevo
   (include:spf.brevo.com) to the SPF record once a token has Zone > DNS > Edit;
   until then the SPF change is the owner's, in the dashboard.
+
+## Search engines and Cloudflare (2026-11-06)
+- Never set Cloudflare's `ai_training` to "block" (or "Block AI bots"):
+  Cloudflare classes Googlebot and Bingbot as search + training crawlers and
+  returns 403 to them. That kept Google out from 1 Nov 2026 (URL Inspection:
+  homepage 403). AI training is refused in robots.txt instead.
+- Check Google's view with `gsc-diag` (inputs: gsc=inspect | resubmit |
+  report, bing=report | submit | links | off). `resubmit` removes and re-adds
+  all five sitemaps. "Request indexing" has no API; it is a Search Console
+  click for the owner.
+- `cf-bot-rules` mode=diagnose lists every Cloudflare rule and setting and
+  test-fetches the site, read-only.
