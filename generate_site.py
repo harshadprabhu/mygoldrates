@@ -10,6 +10,7 @@ anon key (insert-only table behind RLS); no privileged keys are shipped.
 from __future__ import annotations
 
 import private_store
+import lang_pages
 import glob
 import hashlib
 import html as _html
@@ -47,20 +48,18 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 
 def inr(v, dec=0):
     """Indian-style grouping: 1,23,456."""
-    s = f"{v:,.{dec}f}"
-    parts = s.split(",")
-    if len(parts) <= 2:
-        return "₹" + s
-    head, tail = parts[0], parts[-1]
-    mid = "".join(parts[1:-1])
-    digits = head + mid
-    groups = []
-    while len(digits) > 2:
-        groups.insert(0, digits[-2:])
-        digits = digits[:-2]
-    if digits:
-        groups.insert(0, digits)
-    return "₹" + ",".join(groups) + "," + tail
+    s = f"{abs(v):.{dec}f}"
+    whole, _, frac = s.partition(".")
+    if len(whole) > 3:
+        head, tail = whole[:-3], whole[-3:]
+        groups = []
+        while len(head) > 2:
+            groups.insert(0, head[-2:])
+            head = head[:-2]
+        if head:
+            groups.insert(0, head)
+        whole = ",".join(groups) + "," + tail
+    return ("-" if v < 0 and float(s) != 0 else "") + "₹" + whole + ("." + frac if frac else "")
 
 
 def _draw_mark(d, s, ox, oy, gold):
@@ -379,9 +378,15 @@ def site_links_html():
         f'<a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs 24K gold</a>'
         f'<a href="{SITE_URL}/learn/gold-hallmarking">Gold hallmarking &amp; HUID</a>'
         f'<a href="{SITE_URL}/learn/how-gold-rates-are-set">How gold rates are set</a>'
+        + '<h3>Gold rate by city</h3>'
+        + "".join(f'<a href="{SITE_URL}/gold-rate-today-in-{loc_slug(p)}">{p}</a>'
+                  for p in LOCATIONS if p in INDEXED_PLACES and PLACE_STATE.get(p) != p)
         + '<h3>Gold rate by state</h3>'
         + "".join(f'<a href="{SITE_URL}/gold-rate-today-in-{loc_slug(p)}">{p}</a>'
                   for p in states)
+        + '<h3>Gold rate in your language</h3>'
+        + "".join(f'<a href="{SITE_URL}/{c}/{lang_pages.SLUG}" hreflang="{hl}">{n}</a>'
+                  for c, hl, n, _w in lang_pages.LANGS)
         + '<h3>About</h3>'
         f'<a href="{SITE_URL}/about">About us</a>'
         f'<a href="{INSTAGRAM_URL}" rel="me noopener" target="_blank">Instagram @mygoldrates</a>'
@@ -731,6 +736,82 @@ CITY_ENRICHMENT_DATA = {
         "seasons": "Dhanteras and Diwali, Akshaya Tritiya, and the winter wedding season.",
         "tip": "With many showrooms close together, compare two or three quotes for the same design; the board rate barely differs, the making charge often does.",
     },
+    # 2026-11-06 (owner: more city pages, as goodreturns has): places with
+    # facts of their own - a chain founded there, a named gold market, a
+    # local tradition - so each page says something no other page does.
+    "Thrissur": {
+        "state": "Kerala",
+        "hubs": "the shopping streets around Swaraj Round, MG Road and High Road",
+        "regional_brands": ["Kalyan Jewellers", "Joyalukkas", "Jos Alukkas"],
+        "intro": "Thrissur is where three of India's largest jewellery chains began - Kalyan Jewellers, Joyalukkas and Jos Alukkas - and the town has long been a centre of Kerala's gold jewellery making. Showrooms ring Swaraj Round, around the Vadakkunnathan Temple grounds where the Thrissur Pooram festival is held.",
+        "seasons": "Onam, Vishu, Akshaya Tritiya and the wedding season, when Kerala brides wear heavy 22K sets.",
+        "tip": "The three chains founded here each publish their own rate; the table shows how far apart they are today. Compare with the AKGSMA rate, the benchmark most Kerala jewellers price from.",
+    },
+    "Kozhikode": {
+        "state": "Kerala",
+        "hubs": "SM Street (Mittai Theruvu), Palayam and Mavoor Road",
+        "regional_brands": ["Malabar Gold & Diamonds"],
+        "intro": "Kozhikode (Calicut) is the home of Malabar Gold & Diamonds, which opened its first showroom here in 1993 and is now one of the world's largest jewellery retailers. The old SM Street bazaar and the Palayam area carry the city's older jewellers.",
+        "seasons": "Onam, Vishu, Akshaya Tritiya, Eid and the wedding season.",
+        "tip": "Malabar quotes one rate across India; check it against the other chains in the table and the AKGSMA rate before buying.",
+    },
+    "Madurai": {
+        "state": "Tamil Nadu",
+        "hubs": "the old-town streets around the Meenakshi Amman Temple and Town Hall Road",
+        "regional_brands": ["Thangamayil Jewellery"],
+        "intro": "Madurai is the home of Thangamayil Jewellery, a listed chain with stores across Tamil Nadu. The city's jewellers cluster in the old town around the Meenakshi Amman Temple, and 22K temple jewellery is a large part of what is sold.",
+        "seasons": "Akshaya Tritiya, the Chithirai festival, Pongal and the Thai and Avani wedding months; buying is usually quiet in Aadi.",
+        "tip": "Tamil Nadu chains set their own rates; compare Thangamayil and the other regional chains in the table with the national ones.",
+    },
+    "Salem": {
+        "state": "Tamil Nadu",
+        "regional_brands": ["AVR Swarna Mahal"],
+        "intro": "Salem is the home of AVR Swarna Mahal Jewellers, a chain with showrooms across western Tamil Nadu. Buyers here can compare it with the other Tamil Nadu chains and the national jewellers below.",
+        "seasons": "Akshaya Tritiya, Pongal and the Thai and Avani wedding months.",
+        "tip": "AVR's rate is shown in the table when it publishes one; compare it with the national median before buying.",
+    },
+    "Tiruchirappalli": {
+        "state": "Tamil Nadu",
+        "hubs": "NSB Road and Big Bazaar Street below the Rockfort",
+        "intro": "Tiruchirappalli's main jewellery street is NSB Road, running below the Rockfort temple, with Big Bazaar Street beside it. Tamil Nadu's regional chains and the national jewellers both have large showrooms here.",
+        "seasons": "Akshaya Tritiya, Pongal and the Thai and Avani wedding months.",
+        "tip": "Tamil Nadu chains set their own rates; the table lists them with the national chains, cheapest 22K first.",
+    },
+    "Mysuru": {
+        "state": "Karnataka",
+        "hubs": "Sayyaji Rao Road and Devaraja Urs Road near the Devaraja Market",
+        "intro": "Mysuru's jewellers line Sayyaji Rao Road and the streets around the Devaraja Market, a short walk from the palace. Gold buying in the city rises sharply during Dasara, the festival the city is best known for.",
+        "seasons": "Dasara, Ugadi, Akshaya Tritiya and the wedding season.",
+        "tip": "Karnataka chains such as C Krishniah Chetty set their own rates; compare them with the national chains in the table.",
+    },
+    "Vijayawada": {
+        "state": "Andhra Pradesh",
+        "hubs": "Besant Road, MG Road and the One Town area",
+        "intro": "Vijayawada is one of Andhra Pradesh's largest gold markets, with showrooms along Besant Road and MG Road and older jewellers in One Town. Telugu weddings and festivals keep demand for 22K jewellery high through the year.",
+        "seasons": "Ugadi, Sankranti, Akshaya Tritiya, Dasara and the wedding season.",
+        "tip": "Andhra chains such as Vaibhav and Lalithaa publish their own rates; the table shows them beside the national chains.",
+    },
+    "Amritsar": {
+        "state": "Punjab",
+        "hubs": "Guru Bazaar near the Golden Temple, and Hall Bazaar",
+        "intro": "Amritsar's gold market is Guru Bazaar, a narrow lane of jewellers close to the Golden Temple that has traded gold for generations. Punjabi weddings, where gold is a central gift, drive much of the city's demand.",
+        "seasons": "the wedding season from October to February, Dhanteras, Diwali and Baisakhi.",
+        "tip": "Bazaar jewellers usually quote the day's local rate; compare it with the national chains' published rates below before agreeing a price.",
+    },
+    "Guwahati": {
+        "state": "Assam",
+        "hubs": "Fancy Bazaar, Pan Bazaar and Paltan Bazaar",
+        "intro": "Guwahati is the gold market of the North East, centred on Fancy Bazaar, the city's old wholesale district. Traditional Assamese jewellery such as the Jonbiri and Gamkharu is made in gold and gold-plated silver.",
+        "seasons": "Bohag Bihu, Durga Puja, Dhanteras and the wedding season.",
+        "tip": "Ask whether a traditional piece is solid gold or gold-plated silver, and check the BIS hallmark and HUID on gold.",
+    },
+    "Kolhapur": {
+        "state": "Maharashtra",
+        "hubs": "Gujri, the old gold market near the Mahalaxmi Temple",
+        "intro": "Kolhapur gave its name to the Kolhapuri Saaj, the traditional Maharashtrian necklace, and its old gold market, Gujri, sits close to the Mahalaxmi Temple. Maharashtra's regional chains also have showrooms in the city.",
+        "seasons": "Gudi Padwa, Akshaya Tritiya, Dussehra, Diwali Padwa and the wedding season.",
+        "tip": "A Kolhapuri Saaj has many small pieces, so its making charge can be high; ask for it in rupees, not only as a percentage.",
+    },
 }
 
 
@@ -758,6 +839,9 @@ INDEXED_PLACES = {
     # local buying tip) in CITY_ENRICHMENT_DATA, so back in the index.
     "Punjab", "Rajasthan", "Uttar Pradesh", "Madhya Pradesh", "Haryana",
     "West Bengal", "Thiruvananthapuram", "Hubli", "Rajkot", "Noida",
+    # 2026-11-06: local write-ups added above
+    "Thrissur", "Kozhikode", "Madurai", "Salem", "Tiruchirappalli", "Mysuru",
+    "Vijayawada", "Amritsar", "Guwahati", "Kolhapur",
 }
 
 
@@ -2125,7 +2209,7 @@ def main():
         _off = 0
         while True:
             _b = sb.table("rates") \
-                .select("rate_date, canonical_24k_pre_gst, status") \
+                .select("rate_date, canonical_24k_pre_gst, status, brands(slug)") \
                 .eq("status", "published").order("rate_date") \
                 .range(_off, _off + 999).execute().data
             hist_rows += _b
@@ -2141,6 +2225,17 @@ def main():
             by_day.setdefault(hr["rate_date"], []) \
                   .append(hr["canonical_24k_pre_gst"])
     trend = sorted((d, statistics.median(v)) for d, v in by_day.items())
+    # The same daily median on the same basis as today's headline rate
+    # (national chains only, see `base`), so "up Rs X since yesterday" and
+    # the last-10-days tables compare like with like.
+    _nat_day = {}
+    for hr in hist_rows:
+        if hr.get("canonical_24k_pre_gst") and \
+                ((hr.get("brands") or {}).get("slug") not in REGION_MAP):
+            _nat_day.setdefault(hr["rate_date"], []).append(hr["canonical_24k_pre_gst"])
+    nat_trend = sorted((d, statistics.median(v)) for d, v in _nat_day.items()) or list(trend)
+    _live_day = (live[0].get("rate_date") if live else None) or today
+    nat_trend = [x for x in nat_trend if x[0] < _live_day] + [(_live_day, median24)]
 
     if mcx:
         mcx_rows = ""
@@ -2363,6 +2458,76 @@ def main():
             "rupee. We refresh this page several times a day."))
         return qa
 
+    def rate_panel(nm):
+        """Today's rate in a place the way people search for it: one sentence
+        that answers the question, today's change, the weights people buy
+        (1 g, 8 g = one sovereign, 10 g, 100 g) and the last 10 days. Figures
+        are the median of the national chains (the same basis as the headline
+        rate) from our own daily readings."""
+        if len(nat_trend) < 2:
+            return ""
+        series = nat_trend[-11:]
+        cur, prev = series[-1][1], series[-2][1]
+        def chg(v, f=1.0):
+            d = round(v * f)
+            if d == 0:
+                return '<span class="rp-c">(0)</span>'
+            return (f'<span class="rp-c {"up" if d > 0 else "dn"}">'
+                    f'({"+" if d > 0 else "-"}{inr(abs(d))})</span>')
+        d22 = (cur - prev) * PURITY_FRACTION["22K"]
+        move = ("unchanged from" if abs(d22) < 1 else
+                f'{"up" if d22 > 0 else "down"} {inr(abs(d22))} per gram for 22K from')
+        lead = (f'<p class="rp-lead">The gold rate today in <strong>{_html.escape(nm)}</strong> '
+                f'({display_date}) is <strong>{inr(med["24K"])}</strong> per gram for 24 karat '
+                f'(99.9% pure), <strong>{inr(med["22K"])}</strong> for 22 karat (91.6%) and '
+                f'<strong>{inr(med["18K"])}</strong> for 18 karat (75%), before 3% GST - '
+                f'{move} the previous day. That is the median of the national jewellers we '
+                f'read each morning; each jeweller\'s own rate is in the table below.</p>')
+        ks = ("24K", "22K", "18K")
+        wrows = "".join(
+            f'<tr><td>{w} g{" (1 sovereign)" if w == 8 else ""}</td>'
+            + "".join(f'<td>{inr(round(cur * PURITY_FRACTION[k] * w))} '
+                      f'{chg((cur - prev) * w, PURITY_FRACTION[k])}</td>' for k in ks)
+            + '</tr>' for w in (1, 8, 10, 100))
+        hrows = ""
+        for i in range(len(series) - 1, 0, -1):
+            d_iso, v = series[i]
+            pv = series[i - 1][1]
+            dd = datetime.fromisoformat(d_iso).strftime("%-d %b %Y")
+            hrows += (f'<tr><td>{dd}</td>'
+                      + "".join(f'<td>{inr(round(v * PURITY_FRACTION[k]))} '
+                                f'{chg(v - pv, PURITY_FRACTION[k])}</td>' for k in ("24K", "22K"))
+                      + '</tr>')
+        n_days = len(series) - 1
+        hi = max(series, key=lambda x: x[1]); lo = min(series, key=lambda x: x[1])
+        span = (f'<p>Over these {n_days} days 24K was highest at {inr(hi[1])} on '
+                f'{datetime.fromisoformat(hi[0]).strftime("%-d %b")} and lowest at '
+                f'{inr(lo[1])} on {datetime.fromisoformat(lo[0]).strftime("%-d %b")}. '
+                f'Every day back to the start is on the '
+                f'<a href="{SITE_URL}/gold-rate-history">gold rate history</a> pages.</p>')
+        style = ('<style>.rate-panel .lb-wrap{overflow-x:auto;max-width:100%}'
+                 '.rate-panel h2{font-size:20px;margin:0 0 8px}'
+                 '.rate-panel h3{font-size:15px;margin:18px 0 8px}'
+                 '.rate-panel p{line-height:1.6;margin:0 0 10px;opacity:.9}'
+                 '.rate-panel .fine{font-size:12px;opacity:.6}'
+                 '.rate-panel .rp-c{font-size:11.5px;opacity:.75;white-space:nowrap}'
+                 '.rate-panel .rp-c.up{color:#3fae6b;opacity:1}'
+                 '.rate-panel .rp-c.dn{color:#e0645a;opacity:1}'
+                 '.rate-panel .rp-lead{font-size:15.5px}'
+                 '.rate-panel .rp-w .rp-c{display:block;margin-top:2px}</style>')
+        return style + (
+            f'<section class="seo rate-panel">'
+            f'<h2>Gold rate in {_html.escape(nm)} today</h2>{lead}'
+            f'<h3>Gold price in {_html.escape(nm)} by weight</h3>'
+            f'<div class="lb-wrap"><table class="local-tbl rp-w"><thead><tr><th>Weight</th>'
+            f'<th>24K</th><th>22K</th><th>18K</th></tr></thead><tbody>{wrows}</tbody></table></div>'
+            f'<p class="fine">Change from the previous day in brackets. Pre-GST; add 3% GST '
+            f'and the making charge for the bill.</p>'
+            f'<h3>Gold rate in {_html.escape(nm)} for the last {n_days} days (1 gram)</h3>'
+            f'<div class="lb-wrap"><table class="local-tbl"><thead><tr><th>Date</th>'
+            f'<th>24K</th><th>22K</th></tr></thead><tbody>{hrows}</tbody></table></div>'
+            f'{span}</section>')
+
     def local_intro(nm, dark=False):
         """Enriched, unique per-city body so city pages have genuine local value."""
         if nm == "India":
@@ -2381,7 +2546,7 @@ def main():
                         f'common questions</h2>{faq_html}</section>')
         custom_desc = data.get("intro", f"Gold rates in {nm} follow national board rates across major jewellers. Compare live 24K, 22K, and 18K per-gram prices pre-GST below.")
         
-        return board_html + (
+        return rate_panel(nm) + board_html + (
             f'<section class="seo"><h2>Gold Rate Today in {nm} - Market Overview & Shopping Hubs</h2>'
             f'<p>{custom_desc}</p>'
             f'<p>Today the live median gold rate in <strong>{nm}</strong> is '
@@ -2621,7 +2786,8 @@ def main():
                      'font-size:12.5px;font-weight:500;color:rgba(255,255,255,.62)">'
                      f'Live 24K, 22K &amp; 18K from {n_live} jewellers</span></h1>')
                     .replace("\\", "\\\\"), h)
-            h = sub(r"<h1>Gold Rate Today in India", "<h1>Gold Rate Today in " + esc(nm), h)
+            h = sub(r'<p class="hero-h">Gold Rate Today in India',
+                    '<p class="hero-h">Gold Rate Today in ' + esc(nm), h)
             # structured data: the homepage's blocks describe "/", replace them
             h = re.sub(r'<script type="application/ld\+json">.*?</script>\s*',
                        "", h, flags=re.S)
@@ -3658,7 +3824,7 @@ def main():
     # Each build writes today's dated pages; past ones persist in docs/ and are
     # picked up for the sitemap by globbing, so the archive grows every day.
     os.makedirs("docs/news/daily", exist_ok=True)
-    prev24 = trend[-2][1] if len(trend) >= 2 else median24
+    prev24 = nat_trend[-2][1] if len(nat_trend) >= 2 else median24
     dmove = median24 - prev24
     dpct = (dmove / prev24 * 100) if prev24 else 0
     darrow = ("rose" if dmove > 0.5 else
@@ -3669,53 +3835,107 @@ def main():
     today_daily = []          # (slug, place) generated this run
 
     def gen_daily(place, place_slug):
+        """Today's dated report, brand by brand: each jeweller's 24K and 22K
+        rate today and its change from the previous day. Searches name the
+        date and the big chains ("gold rate today 6 November 2026 Tanishq
+        Kalyan"), and this is the one page that answers both with each
+        chain's own published figure."""
         lad = ladder(median24)
-        where_in = f"in {place}"
         slug = f"news/daily/gold-rate-{place_slug}-{date_slug}"
-        local = ("" if place == "India" else
-                 f" National jewellery chains quote the same board rate in "
-                 f"{place} as across India, so these figures apply in {place} "
-                 f"today.")
-        citylink = ("" if place == "India" else
-                    f' or the <a href="{SITE_URL}/gold-rate-today-in-'
-                    f'{place_slug}">{place} gold rate page</a>')
+        _live_d = (live[0].get("rate_date") if live else None)
+        prev_rows = {}
+        _prev_d = max((d for d, _ in nat_trend if _live_d and d < _live_d), default=None)
+        if _prev_d:
+            try:
+                prev_rows = {(r["brands"] or {}).get("slug"): r["canonical_24k_pre_gst"]
+                             for r in load_rates(_prev_d)}
+            except Exception as e:
+                print("daily report: previous day not read:", e)
+        rows = sorted(live, key=lambda r: r["canonical_24k_pre_gst"])
+        def mv(r):
+            p = prev_rows.get((r["brands"] or {}).get("slug"))
+            if not p:
+                return '<td>-</td>'
+            d = (r["canonical_24k_pre_gst"] - p) * PURITY_FRACTION["22K"]
+            if abs(d) < 1:
+                return '<td>0</td>'
+            return (f'<td class="recap-move {"up" if d > 0 else "dn"}">'
+                    f'{"+" if d > 0 else "-"}{inr(abs(d))}</td>')
+        trs = "".join(
+            f'<tr><td>{_html.escape(r["brands"]["name"])}'
+            + (' <small>(regional)</small>' if (r["brands"] or {}).get("slug") in REGION_MAP else '')
+            + f'</td><td>{inr(ladder(r["canonical_24k_pre_gst"])["24K"])}</td>'
+            f'<td>{inr(ladder(r["canonical_24k_pre_gst"])["22K"])}</td>{mv(r)}</tr>'
+            for r in rows)
+        big = [n for n in ("Tanishq", "Kalyan Jewellers", "Malabar Gold & Diamonds", "Joyalukkas",
+                           "Senco Gold & Diamonds", "PN Gadgil Jewellers")
+               if any(r["brands"]["name"] == n for r in live)][:4]
+        big_short = [n.replace(" Gold & Diamonds", "").replace(" Jewellers", "") for n in big]
+        rises = sum(1 for r in live if prev_rows.get(r["brands"].get("slug"))
+                    and r["canonical_24k_pre_gst"] - prev_rows[r["brands"]["slug"]] >= 1)
+        falls = sum(1 for r in live if prev_rows.get(r["brands"].get("slug"))
+                    and r["canonical_24k_pre_gst"] - prev_rows[r["brands"]["slug"]] <= -1)
+        lo, hi = rows[0], rows[-1]
+        nat = [r for r in rows if (r["brands"] or {}).get("slug") not in REGION_MAP]
+        ten = nat_trend[-8:]
+        week = "".join(
+            f'<tr><td>{datetime.fromisoformat(d).strftime("%-d %b")}</td>'
+            f'<td>{inr(v)}</td><td>{inr(v * PURITY_FRACTION["22K"])}</td></tr>'
+            for d, v in reversed(ten))
         body = (
             crumbs(("News", f"{SITE_URL}/news"),
                    (f"Gold Rate {display_date}", None)) +
-            f"<h1>Gold Price {where_in} on {display_date}: Daily Report</h1>"
+            f"<h1>Gold Rate Today, {display_date}: "
+            + (", ".join(big_short) + " and " if big_short else "")
+            + f"{len(live) - len(big_short)} more jewellers compared</h1>"
             f'<p class="updated-on">Updated {display_time}, {display_date}</p>'
-            f"<p>The <strong>gold rate today {where_in}</strong> is "
-            f"<strong>{inr(lad['24K'])} per gram for 24 carat (999)</strong> "
-            f"and <strong>{inr(lad['22K'])} per gram for 22 carat (916)</strong>"
-            f", pre-GST - the median across {len(live)} of India's leading "
-            f"jewellers on {display_date}. The 24K rate <strong>{darrow}"
-            f'</strong> <span class="recap-move {dcls}">{dsign}'
-            f"{inr(abs(dmove))} ({dsign}{abs(dpct):.2f}%)</span> from the "
-            f"previous session.{local}</p>"
-            f"<h2>Today's gold rate {where_in} by purity</h2>"
-            f"<ul><li><strong>24K (999):</strong> {inr(lad['24K'])} / gram</li>"
-            f"<li><strong>22K (916):</strong> {inr(lad['22K'])} / gram</li>"
-            f"<li><strong>18K (750):</strong> {inr(lad['18K'])} / gram</li></ul>"
-            f"<p>All prices are per gram and pre-GST; add 3% GST for the billed "
-            f"amount, and remember making charges are extra. Compare every "
-            f'jeweller live on the <a href="{SITE_URL}/">gold rate today</a> '
-            f"page{citylink}.</p>"
-            f"<h2>What moved the gold rate</h2>"
-            f"<p>Daily gold prices in India track the international spot price, "
-            f"the rupee-dollar exchange rate, import duty and each jeweller's "
-            f'premium - see <a href="{SITE_URL}/learn/how-gold-rates-are-set">'
-            f"how gold rates are set</a> for the full breakdown. For a purity "
-            f'comparison read <a href="{SITE_URL}/learn/22k-vs-24k-gold">22K vs '
-            f"24K gold</a>.</p>")
+            f"<p>On <strong>{display_date}</strong> the median gold rate across "
+            f"{len(base)} national jewellers is <strong>{inr(lad['24K'])} per gram for 24K</strong> "
+            f"and <strong>{inr(lad['22K'])} for 22K</strong>, before 3% GST. The 24K median "
+            f"<strong>{darrow}</strong> "
+            f'<span class="recap-move {dcls}">{inr(abs(dmove))} ({abs(dpct):.2f}%)</span> '
+            f"from the previous day"
+            + (f"; {rises} jeweller{'s' if rises != 1 else ''} raised the rate and {falls} cut it"
+               if prev_rows else "")
+            + f". Lowest today: <strong>{_html.escape(lo['brands']['name'])}</strong> at "
+            f"{inr(ladder(lo['canonical_24k_pre_gst'])['22K'])} per gram for 22K; highest: "
+            f"{_html.escape(hi['brands']['name'])} at {inr(ladder(hi['canonical_24k_pre_gst'])['22K'])}.</p>"
+            f"<h2>Gold rate at every jeweller on {display_date}</h2>"
+            f'<div style="overflow-x:auto"><table><thead><tr><th>Jeweller</th><th>24K /g</th>'
+            f"<th>22K /g</th><th>22K change</th></tr></thead><tbody>{trs}</tbody></table></div>"
+            f"<p>Cheapest first. Each rate is the jeweller's own, read from its website on "
+            f"{display_date}, per gram and before 3% GST; making charges are extra. Regional chains "
+            f"only sell in their own states. Live figures through the day are on the "
+            f'<a href="{SITE_URL}/">gold rate today</a> page, and every chain has its own page on '
+            f'<a href="{SITE_URL}/gold-rate-by-jeweller">gold rate by jeweller</a>.</p>'
+            f"<h2>The last week</h2>"
+            f"<table><thead><tr><th>Date</th><th>24K median</th><th>22K median</th></tr></thead>"
+            f"<tbody>{week}</tbody></table>"
+            f'<p>Every day since we started is on the <a href="{SITE_URL}/gold-rate-history">'
+            f"gold rate history</a> pages. Why the rate moves: "
+            f'<a href="{SITE_URL}/learn/how-gold-rates-are-set">how gold rates are set</a>; '
+            f'what it costs to make jewellery at each chain: '
+            f'<a href="{SITE_URL}/making-charges-comparison">making charges compared</a>.</p>')
+        _jl = {"@context": "https://schema.org", "@type": "NewsArticle",
+               "headline": f"Gold Rate Today, {display_date}: jewellers compared",
+               "datePublished": now_ist.replace(hour=7, minute=0, second=0, microsecond=0).isoformat(),
+               "dateModified": now_ist.isoformat(),
+               "author": {"@type": "Organization", "name": "MyGoldRates", "url": SITE_URL},
+               "publisher": {"@type": "Organization", "name": "MyGoldRates",
+                             "logo": {"@type": "ImageObject", "url": f"{SITE_URL}/icon-96.png"}},
+               "image": f"{SITE_URL}/og.png",
+               "mainEntityOfPage": f"{SITE_URL}/{slug}"}
         render_content(
             slug,
-            f"Gold Price {where_in} on {display_date}: Daily Report | "
-            "MyGoldRates",
-            f"Gold rate today {where_in} on {display_date}: 24K "
-            f"{inr(lad['24K'])}/g, 22K {inr(lad['22K'])}/g, 18K "
-            f"{inr(lad['18K'])}/g (pre-GST). 24K {darrow} {dsign}"
-            f"{abs(dpct):.2f}% vs the previous session.",
-            body)
+            f"Gold Rate Today {now_ist.strftime('%-d %B %Y')}: "
+            + (", ".join(big_short) + " Compared" if big_short else "Jewellers Compared")
+            + " | MyGoldRates",
+            f"Gold rate today, {display_date}: 24K {inr(lad['24K'])}/g, 22K {inr(lad['22K'])}/g "
+            f"({dsign}{abs(dpct):.2f}%). Each of {len(live)} jewellers' own rate"
+            + (f" - {', '.join(big_short)} and more" if big_short else "")
+            + " - with the change from yesterday.",
+            body,
+            jsonld_block='<script type="application/ld+json">' + json.dumps(_jl) + "</script>")
         today_daily.append((slug, place))
 
     # One national page a day. The per-city copies (same figures, city
@@ -3723,13 +3943,56 @@ def main():
     # own page.
     gen_daily("India", "india")
 
+    # ---- today's gold rate in six Indian languages (lang_pages.py) ----
+    _lrows = [(r["brands"]["name"], r["canonical_24k_pre_gst"])
+              for r in sorted(live, key=lambda r: r["canonical_24k_pre_gst"])]
+    _lnat = [x for x, r in zip(_lrows, sorted(live, key=lambda r: r["canonical_24k_pre_gst"]))
+             if (r["brands"] or {}).get("slug") not in REGION_MAP]
+    for _code, _hl, _lname, _w in lang_pages.LANGS:
+        try:
+            _t, _dsc, _b, _faq = lang_pages.build(
+                _code, inr=inr, d=now_ist.strftime("%d/%m/%Y"), series=nat_trend,
+                rows=_lrows, national=_lnat, site=SITE_URL)
+            _lld = ('<script type="application/ld+json">' + json.dumps({
+                "@context": "https://schema.org", "@type": "FAQPage", "inLanguage": _hl,
+                "mainEntity": [{"@type": "Question", "name": q,
+                                "acceptedAnswer": {"@type": "Answer", "text": a}}
+                               for q, a in _faq]}, ensure_ascii=False) + "</script>")
+            _slug = f"{_code}/{lang_pages.SLUG}"
+            render_content(_slug, _t, _dsc, _b, jsonld_block=_lld)
+            _p = f"docs/{_slug}.html"
+            _h = open(_p, encoding="utf-8").read()
+            _h = _h.replace('<html lang="en-IN">', f'<html lang="{_hl}">', 1)
+            _h = _h.replace('content="en_IN"', f'content="{_hl.replace("-", "_")}"', 1)
+            _h = _h.replace("</head>", lang_pages.alternates(SITE_URL) + "\n</head>", 1)
+            with open(_p, "w", encoding="utf-8") as _f:
+                _f.write(_h)
+            extra_urls.append((_slug, "daily", "0.8"))
+        except Exception as e:                  # one language never stops the build
+            print(f"language page {_code}: SKIPPED ({type(e).__name__}: {e})")
+
     # today's dated articles, featured at the top of /news
     daily_cards = "".join(
         f'<a class="newscard" href="{SITE_URL}/{slug}">'
-        f'<div class="nt">Gold Rate Today {"in " + place if place != "India" else "in India"} - {display_date}</div>'
+        f'<div class="nt">Gold Rate Today, {display_date}: every jeweller compared</div>'
         f'<div class="nd">{display_date} &middot; 24K {inr(med["24K"])}/g</div>'
         f'</a>' for slug, place in today_daily)
 
+    # the earlier daily reports (kept DAILY_INDEX_DAYS days), newest first
+    _earlier = []
+    for _p in glob.glob("docs/news/daily/gold-rate-india-*.html"):
+        _st = os.path.basename(_p)[:-5]
+        try:
+            _dd = datetime.strptime(_st[len("gold-rate-india-"):], "%d-%b-%Y").date()
+        except ValueError:
+            continue
+        if _dd < now_ist.date() and _dd >= now_ist.date() - timedelta(days=30):
+            _earlier.append((_dd, _st))
+    if _earlier:
+        daily_cards += ('<h3>Earlier daily reports</h3><ul>' + "".join(
+            f'<li><a href="{SITE_URL}/news/daily/{_st}">Gold rate on '
+            f'{_dd.strftime("%-d %B %Y")}: every jeweller compared</a></li>'
+            for _dd, _st in sorted(_earlier, reverse=True)) + '</ul>')
     news_cards = hist_cards
     for slug, dt, disp, m24, move, pct in recaps[:20]:
         cls = "up" if move > 0.5 else ("dn" if move < -0.5 else "")
@@ -4599,7 +4862,7 @@ document.getElementById('mkGo').addEventListener('click',function(){
         _move = ""
         try:
             if len(trend) >= 2:
-                _d22 = (trend[-1][1] - trend[-2][1]) * PURITY_FRACTION["22K"]
+                _d22 = (nat_trend[-1][1] - nat_trend[-2][1]) * PURITY_FRACTION["22K"]
                 _move = (f" Gold rate down ₹{abs(_d22):,.0f}/g today." if _d22 <= -1 else
                          f" Gold rate up ₹{_d22:,.0f}/g today." if _d22 >= 1 else
                          " Unchanged from yesterday.")
@@ -4855,7 +5118,10 @@ document.getElementById('mkGo').addEventListener('click',function(){
         # Homepage now lives at docs/index.html - overwrites what TEMPLATE
         # used to write (that content is at docs/compare.html now).
         with open("docs/index.html", "w", encoding="utf-8") as f:
-            f.write(pulse_html)
+            # the language versions of this page (not on city pages, which
+            # are built from pulse_html and have no translations)
+            f.write(pulse_html.replace(
+                "</head>", lang_pages.alternates(SITE_URL) + "\n</head>", 1))
         print(f"homepage: wrote docs/index.html "
               f"({len(pulse_html):,} bytes, from pulse_app.html)")
         write_city_pages(pulse_html)
@@ -5030,7 +5296,9 @@ document.getElementById('mkGo').addEventListener('click',function(){
     # which can drag down how the whole site is perceived, not just these
     # pages. Window matches the 2-day Google News cutoff below plus a day
     # of buffer, not the longer recap window - these pages need it.
-    DAILY_INDEX_DAYS = 3
+    # 2026-11-06 (owner): 30 days. The report is now each jeweller's own
+    # rate and change that day, not a copy of another page.
+    DAILY_INDEX_DAYS = 30
     daily_index_cutoff = now_ist.date() - timedelta(days=DAILY_INDEX_DAYS)
     # ---- retire pages that left the site in the 2026-10-20 clean-up ----
     # Agreed with the owner. Retired pages are deleted and their addresses
