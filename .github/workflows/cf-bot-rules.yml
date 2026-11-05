@@ -11,6 +11,10 @@ name: cf-bot-rules
 
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "apply (the rules below) or diagnose (read-only: every rule, setting and a test fetch)"
+        default: "apply"
 
 permissions:
   contents: read
@@ -20,7 +24,87 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Diagnose (read-only)
+        if: inputs.mode == 'diagnose'
+        env:
+          CF_WORKERS_TOKEN: ${{ secrets.CF_WORKERS_TOKEN }}
+          CLOUDFLARE_ZONE_TOKEN: ${{ secrets.CLOUDFLARE_ZONE_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          # 6 Nov 2026: Google's URL Inspection shows the homepage refused
+          # with 403 on 5 Nov. List everything at Cloudflare that can refuse
+          # a request, and fetch the site as different clients.
+          import json, os, urllib.request
+          API = "https://api.cloudflare.com/client/v4"
+          out = []
+          def call(path, tok):
+              req = urllib.request.Request(API + path, headers={"Authorization": "Bearer " + tok})
+              try:
+                  return json.loads(urllib.request.urlopen(req, timeout=20).read())
+              except urllib.error.HTTPError as e:
+                  try: return json.loads(e.read())
+                  except Exception: return {"success": False, "errors": [{"message": str(e)}]}
+          toks = [(k, os.environ.get(k, "")) for k in ("CF_WORKERS_TOKEN", "CLOUDFLARE_ZONE_TOKEN", "CLOUDFLARE_API_TOKEN")]
+          toks = [(k, v) for k, v in toks if v]
+          zid = None
+          for k, tok in toks:
+              z = call("/zones?name=mygoldrates.com", tok)
+              if z.get("success") and z.get("result"):
+                  zid = z["result"][0]["id"]; out.append(f"zone plan: {z['result'][0].get('plan', {}).get('name')}"); break
+          def first(path):
+              for k, tok in toks:
+                  r = call(path, tok)
+                  if r.get("success"):
+                      return r.get("result"), k
+              return None, (r.get("errors") or [{}])[0].get("message", "")[:120]
+          if zid:
+              for s in ("security_level", "browser_check", "challenge_ttl", "bot_fight_mode", "waf",
+                        "always_use_https", "ssl", "security_header", "hotlink_protection"):
+                  res, k = first(f"/zones/{zid}/settings/{s}")
+                  out.append(f"setting {s}: {(res or {}).get('value') if res else 'unreadable (' + str(k) + ')'}")
+              res, k = first(f"/zones/{zid}/bot_management")
+              out.append("bot_management: " + (json.dumps(res)[:600] if res else str(k)))
+              rs, k = first(f"/zones/{zid}/rulesets")
+              out.append(f"rulesets ({k}):")
+              for r in rs or []:
+                  out.append(f"  [{r.get('phase')}] {r.get('name')} kind={r.get('kind')} id={r.get('id')}")
+                  if r.get("kind") == "zone":
+                      full, _ = first(f"/zones/{zid}/rulesets/{r['id']}")
+                      for rr in (full or {}).get("rules") or []:
+                          out.append(f"     - {rr.get('description')} | {rr.get('action')} | enabled={rr.get('enabled')} | "
+                                     f"{(rr.get('expression') or '')[:150]} | {json.dumps(rr.get('ratelimit') or rr.get('action_parameters') or {})[:200]}")
+              for ph in ("http_request_firewall_custom", "http_ratelimit", "http_request_firewall_managed",
+                         "http_config_settings", "http_request_sbfm", "http_request_dynamic_redirect"):
+                  ep, k = first(f"/zones/{zid}/rulesets/phases/{ph}/entrypoint")
+                  out.append(f"phase {ph}: " + (f"{len((ep or {}).get('rules') or [])} rules" if ep else str(k)))
+                  for rr in (ep or {}).get("rules") or []:
+                      out.append(f"     - {rr.get('description')} | {rr.get('action')} | enabled={rr.get('enabled')} | "
+                                 f"{(rr.get('expression') or '')[:150]} | {json.dumps(rr.get('ratelimit') or rr.get('action_parameters') or {})[:200]}")
+              ua, k = first(f"/zones/{zid}/firewall/ua_rules")
+              out.append(f"user-agent blocking rules: {len(ua) if ua is not None else k}")
+              ar, k = first(f"/zones/{zid}/firewall/access_rules/rules")
+              out.append(f"IP access rules: " + (", ".join(f"{x.get('mode')}:{(x.get('configuration') or {}).get('value')}" for x in ar)[:300] if ar else str(k or 'none')))
+          # what different clients get (the runner is not Google, so a
+          # Googlebot user agent here is an unverified claim)
+          for name, ua in (("browser", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"),
+                           ("googlebot-ua", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"),
+                           ("bingbot-ua", "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)"),
+                           ("no-ua", "")):
+              for path in ("/", "/sitemap.xml", "/gold-rate-today-in-bengaluru"):
+                  req = urllib.request.Request("https://mygoldrates.com" + path, headers={"User-Agent": ua} if ua else {})
+                  try:
+                      r = urllib.request.urlopen(req, timeout=20); st, h = r.status, r.headers
+                  except urllib.error.HTTPError as e:
+                      st, h = e.code, e.headers
+                  except Exception as e:
+                      st, h = type(e).__name__, {}
+                  out.append(f"fetch {name:12s} {path:32s} -> {st} cf-mitigated={h.get('cf-mitigated') if h else None} server={h.get('server') if h else None}")
+          t = "\n".join(out)
+          print("::notice title=cf-diagnose::" + t.replace("%", "%25").replace("\n", "%0A"))
+          PY
       - name: Apply
+        if: inputs.mode != 'diagnose'
         env:
           CF_WORKERS_TOKEN: ${{ secrets.CF_WORKERS_TOKEN }}
           CLOUDFLARE_ZONE_TOKEN: ${{ secrets.CLOUDFLARE_ZONE_TOKEN }}
@@ -109,10 +193,15 @@ jobs:
                   # also the live fetchers an assistant uses to read a page
                   # while answering (ai_user), AI search crawlers and agents
                   cur = (call("GET", f"/zones/{zid}/bot_management", tok).get("result") or {})
-                  # read-and-cite yes, training no (owner, 1 Nov 2026): ai_training
-                  # "block" turns away crawlers that only collect training data
+                  # read-and-cite yes, training no (owner, 1 Nov 2026). But
+                  # Cloudflare files Googlebot and Bingbot as "search + training"
+                  # crawlers, so ai_training "block" refused them too: Google's
+                  # URL Inspection showed the homepage 403 on 5 Nov, sitemaps
+                  # unread since early October. Training is refused in
+                  # robots.txt instead (GPTBot, CCBot, Google-Extended, ... and
+                  # Content-Signal ai-train=no), which leaves search alone.
                   body = {"ai_bots_protection": "disabled", "ai_search": "disabled", "ai_user": "disabled",
-                          "ai_training": "block"}
+                          "ai_training": "disabled"}
                   if isinstance(cur.get("ai_agents"), dict):
                       body["ai_agents"] = {a: "disabled" for a in cur["ai_agents"]}
                   r = call("PUT", f"/zones/{zid}/bot_management", tok, body)
@@ -121,7 +210,7 @@ jobs:
                       body["ai_agents"] = {a: "allow" for a in cur["ai_agents"]}
                       r = call("PUT", f"/zones/{zid}/bot_management", tok, body)
                   if r.get("success"):
-                      out.append(f"AI search crawlers, live fetchers and agents: allowed; AI training: blocked (with {k})"); break
+                      out.append(f"AI search crawlers, live fetchers and agents: allowed; AI training: not blocked at Cloudflare (robots.txt refuses it) (with {k})"); break
                   out.append(f"  AI settings with {k}: {err(r)}")
               for k, tok in toks:
                   r = call("GET", f"/zones/{zid}/bot_management", tok)
