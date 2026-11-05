@@ -293,3 +293,12 @@ def test_only_the_latest_data_is_ever_shown():
     gen = _read("generate_site.py")
     assert "/making-charges.json    /making-charges-comparison    301" in gen
     assert "/offers.json    /gold-offers-today    301" in gen
+
+
+def test_homepage_title_carries_the_date_and_the_searched_words():
+    """5 Nov 2026: the searches the site shows for are 'gold rate today india
+    2026', 'today gold rate', 'gold rate down today' - the title carries the
+    date and year, the description today's numbers and the day's move."""
+    gen = _read("generate_site.py")
+    assert 'home_title = f"Gold Rate Today in India ({_day}): 24K, 22K, 18K | MyGoldRates"' in gen
+    assert "Gold rate down ₹" in gen and "Today's gold rate in India, {_day}" in gen

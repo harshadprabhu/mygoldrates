@@ -4588,11 +4588,28 @@ document.getElementById('mkGo').addEventListener('click',function(){
         # Kept under ~70 and ~160 characters so Google shows them whole,
         # with the real jeweller count (the template said "14+").
         _nj = len(pulse_brands) or len(live)
-        home_title = (f"Gold Rate Today in India: 24K, 22K, 18K from {_nj} "
-                      "Jewellers | MyGoldRates")
-        home_desc = (f"Gold rate today in India: compare live 24K, 22K and 18K "
-                     f"per-gram prices from {_nj} jewellers, with MCX futures "
-                     "and the IBJA rate. Pre-GST, updated daily.")
+        # 5 Nov 2026 (owner: the best keywords). Searches the site is shown
+        # for (Bing, 90 days): "gold rate today india 2026", "today gold
+        # rate", "gold rate today", "gold rate down today", and dated
+        # headlines "gold rate today (5 Nov 2026): 24K, 22K, 18K prices".
+        # So: the date and year in the title, today's numbers, the day's
+        # move and the cheapest jeweller in the description.
+        _day = now_ist.strftime("%-d %b %Y")
+        home_title = f"Gold Rate Today in India ({_day}): 24K, 22K, 18K | MyGoldRates"
+        _move = ""
+        try:
+            if len(trend) >= 2:
+                _d22 = (trend[-1][1] - trend[-2][1]) * PURITY_FRACTION["22K"]
+                _move = (f" Gold rate down ₹{abs(_d22):,.0f}/g today." if _d22 <= -1 else
+                         f" Gold rate up ₹{_d22:,.0f}/g today." if _d22 >= 1 else
+                         " Unchanged from yesterday.")
+        except Exception:
+            _move = ""
+        _low_n = ((lowest.get("brands") or {}).get("name") or "") if isinstance(lowest, dict) else ""
+        home_desc = (f"Today's gold rate in India, {_day}: 24K {inr(med['24K'])}/g, "
+                     f"22K {inr(med['22K'])}/g.{_move}"
+                     + (f" Lowest: {_low_n}." if _low_n else "")
+                     + f" {_nj} jewellers compared, pre-GST.")
         home_canonical = f"{SITE_URL}/"
         home_url = f"{SITE_URL}/"
         replacements = [

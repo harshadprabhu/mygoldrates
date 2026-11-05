@@ -111,6 +111,7 @@
     more: 'Read more →', guide_h: 'This guide covers it: <b>{t}</b> — {d}', guide_link: 'Read the guide →',
     en_only: 'This answer is in English for now:', translated: 'Translated on your device',
     ask_city: 'Which city are you in?',
+    coin_none: "No coin price on their website (not priced here): {l}.",
     th_off: "Offer",
     coin_tbl_h: "<b>{w}</b> {k} gold coin, {p} pure — cheapest first:",
     th_jw: "Jeweller",
@@ -269,6 +270,7 @@
     more: 'और पढ़ें →', guide_h: 'यह गाइड इसी बारे में है: <b>{t}</b> — {d}', guide_link: 'गाइड पढ़ें →',
     en_only: 'यह जवाब अभी अंग्रेज़ी में है:', translated: 'आपके डिवाइस पर अनुवाद किया गया',
     ask_city: 'आप किस शहर में हैं?',
+    coin_none: "इनकी वेबसाइट पर सिक्के की क़ीमत नहीं है (यहाँ शामिल नहीं): {l}।",
     th_off: "ऑफ़र",
     coin_tbl_h: "<b>{w}</b> {k} सोने का सिक्का, {p} शुद्ध — सबसे सस्ता पहले:",
     th_jw: "ज्वैलर",
@@ -427,6 +429,7 @@
     more: 'अधिक वाचा →', guide_h: 'हे मार्गदर्शक याबद्दलच आहे: <b>{t}</b> — {d}', guide_link: 'मार्गदर्शक वाचा →',
     en_only: 'हे उत्तर सध्या इंग्रजीत आहे:', translated: 'तुमच्या डिव्हाइसवर भाषांतर केले',
     ask_city: 'तुम्ही कोणत्या शहरात आहात?',
+    coin_none: "यांच्या वेबसाइटवर नाण्याची किंमत नाही (येथे धरलेले नाही): {l}.",
     th_off: "ऑफर",
     coin_tbl_h: "<b>{w}</b> {k} सोन्याचे नाणे, {p} शुद्ध — सर्वात स्वस्त आधी:",
     th_jw: "ज्वेलर",
@@ -585,6 +588,7 @@
     more: 'વધુ વાંચો →', guide_h: 'આ માર્ગદર્શિકા આ વિશે જ છે: <b>{t}</b> — {d}', guide_link: 'માર્ગદર્શિકા વાંચો →',
     en_only: 'આ જવાબ હાલ અંગ્રેજીમાં છે:', translated: 'તમારા ડિવાઇસ પર અનુવાદ કર્યો',
     ask_city: 'તમે કયા શહેરમાં છો?',
+    coin_none: "આમની વેબસાઇટ પર સિક્કાની કિંમત નથી (અહીં ગણ્યા નથી): {l}.",
     th_off: "ઑફર",
     coin_tbl_h: "<b>{w}</b> {k} સોનાનો સિક્કો, {p} શુદ્ધ — સૌથી સસ્તો પહેલા:",
     th_jw: "જ્વેલર",
@@ -743,6 +747,7 @@
     more: 'ਹੋਰ ਪੜ੍ਹੋ →', guide_h: 'ਇਹ ਗਾਈਡ ਇਸੇ ਬਾਰੇ ਹੈ: <b>{t}</b> — {d}', guide_link: 'ਗਾਈਡ ਪੜ੍ਹੋ →',
     en_only: 'ਇਹ ਜਵਾਬ ਅਜੇ ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ ਹੈ:', translated: 'ਤੁਹਾਡੇ ਡਿਵਾਈਸ ’ਤੇ ਅਨੁਵਾਦ ਕੀਤਾ',
     ask_city: 'ਤੁਸੀਂ ਕਿਹੜੇ ਸ਼ਹਿਰ ਵਿੱਚ ਹੋ?',
+    coin_none: "ਇਨ੍ਹਾਂ ਦੀ ਵੈੱਬਸਾਈਟ ’ਤੇ ਸਿੱਕੇ ਦੀ ਕੀਮਤ ਨਹੀਂ (ਇੱਥੇ ਸ਼ਾਮਲ ਨਹੀਂ): {l}।",
     th_off: "ਆਫ਼ਰ",
     coin_tbl_h: "<b>{w}</b> {k} ਸੋਨੇ ਦਾ ਸਿੱਕਾ, {p} ਸ਼ੁੱਧ — ਸਭ ਤੋਂ ਸਸਤਾ ਪਹਿਲਾਂ:",
     th_jw: "ਜਵੈਲਰ",
@@ -901,6 +906,7 @@
     more: 'আরও পড়ুন →', guide_h: 'এই গাইডে এটাই আছে: <b>{t}</b> — {d}', guide_link: 'গাইড পড়ুন →',
     en_only: 'এই উত্তরটি আপাতত ইংরেজিতে:', translated: 'আপনার ডিভাইসে অনুবাদ করা',
     ask_city: 'আপনি কোন শহরে আছেন?',
+    coin_none: "এদের ওয়েবসাইটে কয়েনের দাম নেই (এখানে ধরা হয়নি): {l}।",
     th_off: "অফার",
     coin_tbl_h: "<b>{w}</b> {k} সোনার কয়েন, {p} খাঁটি — সবচেয়ে সস্তা আগে:",
     th_jw: "জুয়েলার",
@@ -1059,6 +1065,7 @@
     more: 'ಇನ್ನಷ್ಟು ಓದಿ →', guide_h: 'ಈ ಮಾರ್ಗದರ್ಶಿ ಇದರ ಬಗ್ಗೆಯೇ: <b>{t}</b> — {d}', guide_link: 'ಮಾರ್ಗದರ್ಶಿ ಓದಿ →',
     en_only: 'ಈ ಉತ್ತರ ಸದ್ಯಕ್ಕೆ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿದೆ:', translated: 'ನಿಮ್ಮ ಸಾಧನದಲ್ಲೇ ಅನುವಾದಿಸಲಾಗಿದೆ',
     ask_city: 'ನೀವು ಯಾವ ನಗರದಲ್ಲಿದ್ದೀರಿ?',
+    coin_none: "ಇವರ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ ನಾಣ್ಯದ ಬೆಲೆ ಇಲ್ಲ (ಇಲ್ಲಿ ಸೇರಿಸಿಲ್ಲ): {l}.",
     th_off: "ಆಫರ್",
     coin_tbl_h: "<b>{w}</b> {k} ಚಿನ್ನದ ನಾಣ್ಯ, {p} ಶುದ್ಧ — ಅಗ್ಗದದ್ದು ಮೊದಲು:",
     th_jw: "ಜ್ಯುವೆಲರ್",
@@ -1217,6 +1224,7 @@
     more: 'மேலும் படிக்க →', guide_h: 'இந்த வழிகாட்டி இதைப் பற்றியது: <b>{t}</b> — {d}', guide_link: 'வழிகாட்டியைப் படிக்க →',
     en_only: 'இந்தப் பதில் இப்போதைக்கு ஆங்கிலத்தில்:', translated: 'உங்கள் சாதனத்திலேயே மொழிபெயர்க்கப்பட்டது',
     ask_city: 'நீங்கள் எந்த நகரில் இருக்கிறீர்கள்?',
+    coin_none: "இவர்களின் இணையதளத்தில் நாணய விலை இல்லை (இங்கே சேர்க்கவில்லை): {l}.",
     th_off: "ஆஃபர்",
     coin_tbl_h: "<b>{w}</b> {k} தங்க நாணயம், {p} தூய்மை — மலிவானது முதலில்:",
     th_jw: "நகைக்கடை",
@@ -1375,6 +1383,7 @@
     more: 'ఇంకా చదవండి →', guide_h: 'ఈ గైడ్ దీని గురించే: <b>{t}</b> — {d}', guide_link: 'గైడ్ చదవండి →',
     en_only: 'ఈ సమాధానం ప్రస్తుతానికి ఇంగ్లీష్‌లో ఉంది:', translated: 'మీ పరికరంలోనే అనువదించబడింది',
     ask_city: 'మీరు ఏ నగరంలో ఉన్నారు?',
+    coin_none: "వీరి వెబ్‌సైట్‌లో నాణెం ధర లేదు (ఇక్కడ చేర్చలేదు): {l}.",
     th_off: "ఆఫర్",
     coin_tbl_h: "<b>{w}</b> {k} బంగారు నాణెం, {p} స్వచ్ఛత — చౌకైనది ముందు:",
     th_jw: "జ్యువెలర్",
@@ -1533,6 +1542,7 @@
     more: 'കൂടുതൽ വായിക്കൂ →', guide_h: 'ഈ ഗൈഡ് ഇതിനെക്കുറിച്ചാണ്: <b>{t}</b> — {d}', guide_link: 'ഗൈഡ് വായിക്കൂ →',
     en_only: 'ഈ ഉത്തരം ഇപ്പോൾ ഇംഗ്ലീഷിലാണ്:', translated: 'നിങ്ങളുടെ ഉപകരണത്തിൽ തന്നെ വിവർത്തനം ചെയ്തത്',
     ask_city: 'നിങ്ങൾ ഏത് നഗരത്തിലാണ്?',
+    coin_none: "ഇവരുടെ വെബ്സൈറ്റിൽ നാണയ വിലയില്ല (ഇവിടെ ചേർത്തിട്ടില്ല): {l}.",
     th_off: "ഓഫർ",
     coin_tbl_h: "<b>{w}</b> {k} സ്വർണ്ണ നാണയം, {p} ശുദ്ധി — വിലകുറഞ്ഞത് ആദ്യം:",
     th_jw: "ജ്വല്ലറി",
@@ -1691,6 +1701,7 @@
     more: 'مزید پڑھیں ←', guide_h: 'یہ گائیڈ اسی بارے میں ہے: <b>{t}</b> — {d}', guide_link: 'گائیڈ پڑھیں ←',
     en_only: 'یہ جواب ابھی انگریزی میں ہے:', translated: 'آپ کے ڈیوائس پر ترجمہ کیا گیا',
     ask_city: 'آپ کس شہر میں ہیں؟',
+    coin_none: "ان کی ویب سائٹ پر سکے کی قیمت نہیں (یہاں شامل نہیں): {l}۔",
     th_off: "آفر",
     coin_tbl_h: "<b>{w}</b> {k} سونے کا سکہ، {p} خالص — سب سے سستا پہلے:",
     th_jw: "جیولر",
@@ -1849,6 +1860,7 @@
     more: 'অধিক পঢ়ক →', guide_h: 'এই গাইডত এই বিষয়ে আছে: <b>{t}</b> — {d}', guide_link: 'গাইড পঢ়ক →',
     en_only: 'এই উত্তৰ এতিয়া ইংৰাজীত:', translated: 'আপোনাৰ ডিভাইচত অনুবাদ কৰা হৈছে',
     ask_city: 'আপুনি কোন চহৰত আছে?',
+    coin_none: "এওঁলোকৰ ৱেবছাইটত মুদ্ৰাৰ দাম নাই (ইয়াত ধৰা হোৱা নাই): {l}।",
     th_off: "অফাৰ",
     coin_tbl_h: "<b>{w}</b> {k} সোণৰ মুদ্ৰা, {p} বিশুদ্ধ — আটাইতকৈ সস্তা আগতে:",
     th_jw: "জুৱেলাৰ",
@@ -2007,6 +2019,7 @@
     more: 'ଅଧିକ ପଢ଼ନ୍ତୁ →', guide_h: 'ଏହି ଗାଇଡ ଏହା ବିଷୟରେ: <b>{t}</b> — {d}', guide_link: 'ଗାଇଡ ପଢ଼ନ୍ତୁ →',
     en_only: 'ଏହି ଉତ୍ତର ଏବେ ଇଂରାଜୀରେ:', translated: 'ଆପଣଙ୍କ ଡିଭାଇସରେ ଅନୁବାଦ ହୋଇଛି',
     ask_city: 'ଆପଣ କେଉଁ ସହରରେ ଅଛନ୍ତି?',
+    coin_none: "ଏମାନଙ୍କ ୱେବସାଇଟରେ ମୁଦ୍ରା ଦାମ ନାହିଁ (ଏଠାରେ ଧରାଯାଇନାହିଁ): {l}।",
     th_off: "ଅଫର",
     coin_tbl_h: "<b>{w}</b> {k} ସୁନା ମୁଦ୍ରା, {p} ଶୁଦ୍ଧ — ସବୁଠୁ ଶସ୍ତା ଆଗରେ:",
     th_jw: "ଜୁଏଲର୍",
@@ -3015,7 +3028,7 @@
     var wc = ['1', '5', '10'].map(function (n) { return { l: n + ' g', q: n + ' gram ' + kk + ' gold coin price' }; })
       .concat([{ l: kk === '24K' ? '22K' : '24K', q: wLabel(w) + ' ' + (kk === '24K' ? '22K' : '24K') + ' gold coin price' }]);
     if (bs.length) {                          // one jeweller: a receipt
-      var r = coinBill(bs[0], w, typ, kk);
+      var r = coinBill(bs[0], w, null, kk);          // its own coin charge only
       var line = function (l, v) { return '<tr><td>' + l + '</td><td>' + v + '</td></tr>'; };
       var h = '<p><b>' + esc(r.b.n) + '</b> · ' + esc(wLabel(w)) + ' ' + kk + ' ' + esc(catName('Coin')) + '</p>' +
         '<table class="sn-rcpt">' +
@@ -3031,8 +3044,12 @@
     }
     if (!city) return askCityFor(function (c) { return aCoin(w, [], c, kk); });
     var here = servesCity(city);
-    var rows = KB.brands.filter(function (b) { return here(b) && (b.a24 || rate(b, '24K')); })
+    // only jewellers with their OWN coin making charge (owner, 3 Nov 2026:
+    // no placeholder); the others are named, not priced
+    var local = KB.brands.filter(function (b) { return here(b) && (b.a24 || rate(b, '24K')); });
+    var rows = local.filter(function (b) { return b.mk && b.mk.Coin != null; })
       .map(function (b) { return coinBill(b, w, typ, kk); }).sort(function (a, z) { return a.tot - z.tot; });
+    var none = local.filter(function (b) { return !(b.mk && b.mk.Coin != null); }).map(function (b) { return esc(b.n); });
     if (!rows.length) return { intent: 'coin', html: '<p>' + t('off_city_none', { c: esc(city.n) }) + '</p>' + more, say: '', chips: wc };
     var top = rows.slice(0, 8), anyEst = top.some(function (r) { return r.est; });
     var pur = kk === '22K' ? '91.6%' : '99.5–99.9%';
@@ -3047,8 +3064,7 @@
           '<small>' + t('th_gold') + ' ' + inr(r.gold) + '</small></td>' +
           '<td>' + mkCell(r) + '</td><td>' + inr(r.gst) + '<small>3%</small></td><td class="t">' + inr(r.tot) + '</td></tr>';
       }).join('') + '</tbody></table></div>' +
-      (anyEst && typ != null ? '<p class="sn-dim">' + t('coin_note', { p: pct(typ) }) + '</p>' : '') +
-      (typ == null ? '<p class="sn-dim">' + t('coin_nomk') + '</p>' : '') + more;
+      (none.length ? '<p class="sn-dim">' + t('coin_none', { l: none.join(', ') }) + '</p>' : '') + more;
     return { intent: 'coin', html: h2, say: t('say_coin', { w: wLabel(w), b: rows[0].b.n, p: sInr(rows[0].tot) }),
       chips: wc.concat(cityChip(city)) };
   }
