@@ -500,3 +500,34 @@ def test_a_22k_coin_is_priced_at_the_22k_rate_with_its_purity(tmp_path):
     assert f"{round(r22 * 10 * 1.02 * 1.03):,}"[-3:] in r[0]["html"]
     assert "99.5%" in r[1]["html"] and "10.28 g" in r[1]["html"]             # its 995 coins, billed 1.028x
     assert 'class="sn-ctbl"' in r[3]["html"] and "99.5–99.9%" in r[3]["html"]
+
+
+# ─── several weights, and "they" after a jeweller (owner, 6 Nov 2026) ────
+
+def test_several_weights_get_one_table_and_word_numbers_count():
+    r = _sona([{"lang": "en", "q": "Usually how mich they will take for one gram, 8 grams, 10grams"}])[0]
+    assert r["intent"] == "price"
+    for w in ("1 g", "8 g", "10 g"):
+        assert f"<b>{w}</b>" in r["html"], w
+    hi = _sona([{"lang": "hi", "q": "ek gram aur das gram sone ki keemat"}])[0]
+    assert hi["intent"] == "price" and "<b>1 ग्राम</b>" in hi["html"] and "<b>10 ग्राम</b>" in hi["html"]
+
+
+def test_they_means_the_jeweller_just_asked_about():
+    got = _sona([{"lang": "en", "q": "making charges at tanishq"},
+                 {"q": "Usually how much will they take for 1 gram, 8 grams, 10 grams"}])
+    assert got[1]["intent"] == "price" and "at Tanishq today" in got[1]["html"]
+    # the making % is named for the piece it was measured on, never "typical"
+    assert ", ring)" in got[1]["html"] and "typical" not in got[1]["html"]
+
+
+def test_a_new_piece_question_forgets_the_old_jeweller():
+    got = _sona([{"lang": "en", "q": "tanishq gold rate"}, {"q": "gold coin price"},
+                 {"q": "how much is it for 1 g and 10 g"}])
+    assert got[2]["intent"] == "coin" and "Tanishq" not in got[2]["html"]
+    assert "<b>1 g</b>" in got[2]["html"] and "<b>10 g</b>" in got[2]["html"]
+
+
+def test_it_without_a_price_question_is_not_tied_to_the_last_jeweller():
+    got = _sona([{"lang": "en", "q": "tanishq gold rate"}, {"q": "is it a good time to buy gold"}])
+    assert got[1]["intent"] == "faq"

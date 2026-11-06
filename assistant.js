@@ -136,7 +136,27 @@
     return null;
   }
   function karatIn(t) { var m = t.match(/\b(24|22|18|14)k\b/); return m ? m[1] + 'K' : null; }
+  // "one gram", "ek gram", "aath gram": the number as digits, so the
+  // weight is read the same way however it is written
+  var NUMW = { one: 1, ek: 1, two: 2, do: 2, three: 3, teen: 3, four: 4, char: 4, chaar: 4, five: 5, paanch: 5, panch: 5,
+    eight: 8, aath: 8, ath: 8, ten: 10, das: 10, dus: 10, twenty: 20, bees: 20, fifty: 50, pachas: 50, hundred: 100, sau: 100 };
+  function numWords(t) {
+    return t.replace(/\b(one|ek|two|do|three|teen|four|char|chaar|five|paanch|panch|eight|aath|ath|ten|das|dus|twenty|bees|fifty|pachas|hundred|sau)\s*(?=(?:g|gm|gms|gram|grams|gr|tola|tolas|tole|sovereign|sovereigns|pavan|pavun|pawan)\b)/g,
+      function (_, w) { return NUMW[w] + ' '; });
+  }
+  // every weight asked for, in order: "1 gram, 8 grams, 10grams" -> three
+  function weightsIn(t) {
+    t = numWords(t);
+    var out = [], seen = {}, re = /(\d+(?:\.\d+)?)\s*(g|gm|gms|gram|grams|gr|tola|tolas|tole|sovereign|sovereigns|pavan|pavun|pawan)\b/g, m;
+    while ((m = re.exec(t))) {
+      var u = /^(tola|tolas|tole)$/.test(m[2]) ? 'tola' : /^(sovereign|sovereigns|pavan|pavun|pawan)$/.test(m[2]) ? 'sov' : 'g';
+      var g = +m[1] * (u === 'tola' ? 11.664 : u === 'sov' ? 8 : 1);
+      if (!seen[g] && g > 0) { seen[g] = 1; out.push({ g: g, n: m[1], u: u }); }
+    }
+    return out;
+  }
   function weightIn(t) {
+    t = numWords(t);
     var m = t.match(/(\d+(?:\.\d+)?)\s*(?:g|gm|gms|gram|grams|gr)\b/); if (m) return { g: +m[1], n: m[1], u: 'g' };
     m = t.match(/(\d+(?:\.\d+)?)\s*(?:tola|tolas|tole)\b/); if (m) return { g: +m[1] * 11.664, n: m[1], u: 'tola' };
     m = t.match(/\b(?:a|one|1)\s*tola\b/); if (m) return { g: 11.664, n: '1', u: 'tola' };
@@ -559,16 +579,79 @@
     return { intent: 'coin', html: h2, say: t('say_coin', { w: wLabel(w), b: rows[0].b.n, p: sInr(rows[0].tot) }),
       chips: wc.concat(cityChip(city)) };
   }
+  // the making % a price uses: the piece asked about at this jeweller,
+  // else its ring charge, named as such (never called "typical")
+  function priceMk(b, ct) {
+    if (!b.mk) return null;
+    if (ct && b.mk[ct] != null) return { p: b.mk[ct], c: catName(ct) };
+    if (b.mk.Ring != null) return { p: b.mk.Ring, c: catName('Ring') };
+    return null;
+  }
+  // "1 gram, 8 grams, 10 grams": one table, a row per weight
+  // no jeweller named: the cheapest national one, among those whose charge
+  // for this piece is measured when a piece is asked about
+  function priceB(bs, ct) {
+    if (bs[0]) return bs[0];
+    var nat = ranked(natBrands());
+    if (ct && ct !== 'Coin') {
+      var m = nat.filter(function (b) { return b.mk && b.mk[ct] != null; })[0];
+      if (m) return m;
+    }
+    return nat[0];
+  }
+  function aPriceMulti(ws, k, bs, ct) {
+    k = k || '22K';
+    var b = priceB(bs, ct), who = bs[0] || b !== ranked(natBrands())[0] ? esc(b.n) : t('price_who', { b: esc(b.n) });
+    var r = rate(b, k), m = k === '24K' && !ct ? null : priceMk(b, ct);
+    var rows = ws.map(function (w) {
+      var gold = r * w.g, mk = m ? gold * m.p / 100 : 0, gst = (gold + mk) * 0.03;
+      return { w: w, gold: gold, mk: mk, gst: gst, tot: gold + mk + gst };
+    });
+    var h = '<p>' + t('price_h', { w: esc(ws.map(wLabel).join(', ')), k: k, who: who }) + '</p>' +
+      '<div class="sn-tblw"><table class="sn-ctbl"><thead><tr><th></th><th>' + t('th_gold') + '</th>' +
+      (m ? '<th>' + t('th_mk') + '</th>' : '') + '<th>GST</th><th>' + t('price_total') + '</th></tr></thead><tbody>' +
+      rows.map(function (x) {
+        return '<tr><td><b>' + esc(wLabel(x.w)) + '</b></td><td>' + inr(x.gold) + '</td>' +
+          (m ? '<td>' + inr(x.mk) + '</td>' : '') + '<td>' + inr(x.gst) + '</td><td class="t">' + inr(x.tot) + '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<p class="sn-dim">' + t('price_gold', { g: 1, p: inr(r) }) + (m ? ' · ' + t('price_mk', { p: pct(m.p), c: esc(m.c) }) : '') + ' · GST 3%</p>' +
+      (!m && k !== '24K' ? '<p class="sn-dim">' + t('price_nomk') + '</p>' : '') + src();
+    return { intent: 'price', html: h, say: t('say_price', { w: wLabel(rows[0].w), k: sK(k), b: b.n, p: sInr(rows[0].tot) }),
+      chips: chips(['another', 'afteroff', 'cheap22']) };
+  }
+  // one jeweller's 24K coins at several weights
+  function aCoinMulti(ws, b, k) {
+    var kk = k === '22K' ? '22K' : '24K', pick = !b;
+    if (!b) {                    // the national jeweller whose coin costs least, with its own coin charge
+      b = natBrands().filter(function (x) { return x.mk && x.mk.Coin != null && (x.a24 || rate(x, '24K')); })
+        .map(function (x) { return coinBill(x, { g: 1 }, null, kk); }).sort(function (a, z) { return a.tot - z.tot; }).map(function (r) { return r.b; })[0];
+      if (!b) return null;
+    }
+    var rows = ws.map(function (w) { return coinBill(b, w, null, kk); });
+    var h = '<p>' + (pick ? t('price_who', { b: '<b>' + esc(b.n) + '</b>' }) : '<b>' + esc(b.n) + '</b>') +
+      ' · ' + kk + ' ' + esc(catName('Coin')) + ' · ' + rows[0].pur + '</p>' +
+      '<div class="sn-tblw"><table class="sn-ctbl"><thead><tr><th></th><th>' + t('th_gold') + '</th><th>' + t('th_mk') +
+      '</th><th>GST</th><th>' + t('price_total') + '</th></tr></thead><tbody>' +
+      rows.map(function (r, i) {
+        return '<tr><td><b>' + esc(wLabel(ws[i])) + '</b></td><td>' + inr(r.gold) + '</td><td>' + mkCell(r) + '</td><td>' +
+          inr(r.gst) + '</td><td class="t">' + inr(r.tot) + '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<p class="sn-dim">' + t('coin_rate', { k: kk }) + ': ' + inr(rows[0].rk) + '/g</p>' +
+      (rows[0].mkp == null ? '<p class="sn-dim">' + t('coin_nomk') + '</p>' : '') +
+      '<p>' + link('/gold-coin-price-today', t('coin_more')) + '</p>' + src();
+    return { intent: 'coin', html: h, say: t('say_price', { w: wLabel(ws[0]), k: sK(kk), b: b.n, p: sInr(rows[0].tot) }),
+      chips: chips(['cheap22', 'bestoff']) };
+  }
   function aPrice(w, k, bs, ct) {
     k = k || (ct === 'Coin' ? '24K' : '22K');
-    var b = bs[0] || ranked(natBrands())[0], who = bs[0] ? esc(b.n) : t('price_who', { b: esc(b.n) });
+    var b = priceB(bs, ct), who = bs[0] || b !== ranked(natBrands())[0] ? esc(b.n) : t('price_who', { b: esc(b.n) });
     var gold = rate(b, k) * w.g;
-    var mkp = b.mk ? (ct && b.mk[ct] != null ? b.mk[ct] : (b.mk.Ring != null ? b.mk.Ring : null)) : null;
+    var pm = priceMk(b, ct), mkp = pm ? pm.p : null;
     if (ct === 'Coin' || (k === '24K' && !ct)) mkp = null;   // 24K: coins and bars
     var mk = mkp != null ? gold * mkp / 100 : 0, gst = (gold + mk) * 0.03, tot = gold + mk + gst;
     var h = '<p>' + t('price_h', { w: esc(wLabel(w)), k: k, who: who }) + '</p><table class="sn-rcpt">' +
       '<tr><td>' + t('price_gold', { g: Math.round(w.g * 1000) / 1000, p: inr(rate(b, k)) }) + '</td><td>' + inr(gold) + '</td></tr>' +
-      (mkp != null ? '<tr><td>' + t('price_mk', { p: pct(mkp), c: ct && b.mk[ct] != null ? esc(catName(ct)) : t('price_typ') }) + '</td><td>' + inr(mk) + '</td></tr>' : '') +
+      (mkp != null ? '<tr><td>' + t('price_mk', { p: pct(mkp), c: esc(pm.c) }) + '</td><td>' + inr(mk) + '</td></tr>' : '') +
       '<tr><td>GST 3%</td><td>' + inr(gst) + '</td></tr><tr class="tot"><td>' + t('price_total') + '</td><td>' + inr(tot) + '</td></tr></table>' +
       (mkp == null && ct !== 'Coin' && k !== '24K' ? '<p class="sn-dim">' + t('price_nomk') + '</p>' : '') + src();
     return { intent: 'price', html: h, say: t('say_price', { w: wLabel(w), k: sK(k), b: b.n, p: sInr(tot) }),
@@ -624,8 +707,18 @@
     return null;
   }
 
+  // The jeweller and piece the conversation is about, so "how much will
+  // they take for 8 grams" after "making charges at Tanishq" is about Tanishq.
+  var memo = { bs: [], ct: null };
   function answer(q) {
     var tx = norm(q), k = karatIn(tx), bs = brandsIn(tx), c = cityIn(tx), w = weightIn(tx), ct = catIn(tx);
+    var ws = weightsIn(tx);
+    if (!bs.length && (memo.bs.length || memo.ct) && (ws.length || has(tx, W.making) || has(tx, W.rate) || has(tx, W.offer)) &&
+        /\b(they|them|their|theirs|there|it|its|same|that jeweller|that shop|unka|unki|unke|uska|uski|unhone|wahan|waha|tyancha|tyanchi|tyanche)\b/.test(tx)) {
+      bs = memo.bs.slice(0, 1); ct = ct || memo.ct;
+    }
+    if (bs.length) memo = { bs: bs, ct: ct };
+    else if (ct) memo = { bs: [], ct: ct };       // a new piece for all jewellers
     var mine = /\b(my city|near me|nearby|mere sheher|mere shahar|my area)\b/.test(tx);
     if (c && (wantHome || mine || /\b(i am in|i'm in|im in|i live in|i stay in)\b/.test(tx))) setHome(c);
     wantHome = false;
@@ -671,6 +764,7 @@
     if (/\b(accurate|correct|reliable|authentic|source|sources|come from|how do you get|where do you get|how do you collect)\b/.test(tx) &&
         /\b(rates?|prices?|data|figures)\b/.test(tx) && !bs.length && !c) return faqQ('Where do these rates come from?');
     // "gold coin price", "10 gram coin", "tanishq coin": 24K coins with their own making
+    if (ct === 'Coin' && bs.length < 2 && ws.length > 1 && !has(tx, ['silver'])) return aCoinMulti(ws, bs[0], k);
     if (ct === 'Coin' && bs.length < 2 && !has(tx, ['silver'])) return aCoin(w, bs, oc, k);
     if (bs.length >= 2) return aCompare(bs, k);
     var across = has(tx, ['compare', 'comparison', 'compared', 'difference', 'differ', 'gap', 'vs', 'versus', 'across', 'other', 'all']);
@@ -692,6 +786,7 @@
     if (strong && strong.score >= 1.0 && !w && !bs.length && !c) return strong;
     if (has(tx, W.offer) || /\bafter offers?\b/.test(tx)) return aOffers(bs, oc);
     if (has(tx, W.making) && !w) return aMaking(bs, ct);
+    if (ws.length > 1) return ct === 'Coin' ? aCoinMulti(ws, bs[0], k) : aPriceMulti(ws, k, bs, ct);
     if (w) return aPrice(w, k, bs, ct);
     if (has(tx, W.trend) && !bs.length) return aTrend(k);
     var search = aSearch(tx);
