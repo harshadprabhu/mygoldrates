@@ -5,14 +5,14 @@
 > jewellers, with the IBJA bullion reference and MCX gold futures, updated
 > every day. All rates are per gram in Indian Rupees (INR), pre-GST.
 
-## Today's gold rate in India (06 November 2026)
+## Today's gold rate in India (07 November 2026)
 - 24K (999) median: ₹14,377 per gram (pre-GST)
 - 22K (916) median: ₹13,179 per gram (pre-GST)
 - 18K (750) median: ₹10,783 per gram (pre-GST)
 - Lowest 24K today: ₹14,327 per gram at Reliance Jewels
 - IBJA 24K (999) reference: ₹14,145 per gram (pre-GST)
-- MCX gold futures (04DEC2026): ₹1,42,208 per 10g (995), -1.31%
-- Last updated: 2026-11-06T23:03:36.782748+05:30
+- MCX gold futures (04DEC2026): ₹1,42,364 per 10g (995), -1.20%
+- Last updated: 2026-11-07T03:58:56.742051+05:30
 
 ## Key pages
 - Home: today's gold rate in India, live 24K/22K/18K per-gram rates from 37 jewellers lowest-first, with a GST toggle, MCX futures, the IBJA reference, spot gold and silver and this week's economic calendar: https://mygoldrates.com/
