@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-11-06",
-  "last_updated": "2026-11-06T09:43:36.093433+05:30",
+  "last_updated": "2026-11-06T10:12:56.112740+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -13,27 +13,27 @@
     "18k": 10951.36
   },
   "lowest_24k": {
-    "jeweller": "Kalyan Jewellers",
-    "rate_per_gram_inr": 14440.91
+    "jeweller": "Malabar Gold",
+    "rate_per_gram_inr": 14334.55
   },
   "ibja_reference_24k_999_per_gram_inr": 14413.0,
-  "akgsma_south_india_22k_per_gram_inr": 13385.0,
+  "akgsma_south_india_22k_per_gram_inr": 13150.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 141947.0,
-      "change_pct": -1.49
+      "price_per_10g_inr": 142109.0,
+      "change_pct": -1.38
     },
     {
       "contract": "GOLDM",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 141920.0,
-      "change_pct": -1.48
+      "price_per_10g_inr": 142075.0,
+      "change_pct": -1.37
     }
   ],
   "full_comparison": "https://mygoldrates.com/compare-jewellers-gold-rate",
-  "jeweller_count": 36,
+  "jeweller_count": 35,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",

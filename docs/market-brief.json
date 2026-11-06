@@ -425,7 +425,7 @@
   "2026-11-06": {
    "date": "2026-11-06",
    "paragraphs": [
-    "International gold is at $4,041 an ounce (-1.16% since 05 Nov), the rupee at ₹94.54 to the dollar (stronger by 0.09%), and the Indian jeweller board median at ₹14,602/g for 24K (+0.00%). In rupee terms the move came mostly from the world gold price (-1.16% gold, -0.09% USD/INR).",
+    "International gold is at $4,046 an ounce (-1.05% since 05 Nov), the rupee at ₹94.54 to the dollar (stronger by 0.09%), and the Indian jeweller board median at ₹14,602/g for 24K (+0.00%). In rupee terms the move came mostly from the world gold price (-1.05% gold, -0.09% USD/INR).",
     "What the world's gold news is about today: Indian demand (10 headlines), Records and profit-taking (9 headlines), The US dollar (5 headlines), US interest rates (4 headlines).",
     "<strong>Indian demand.</strong> Festival and wedding buying, and import costs, move local premiums and the price on the jeweller board. In the news: <a href=\"https://news.google.com/rss/articles/CBMiuAFBVV95cUxPMUdpMkExbThRLVVLTEhrRl9GNTAzaGU5d2prRkVqYW5BakV4UlQwb1dFaGFHQnJRNjE2SUNKaVBjVlpvbkRMZ2JXRGlMTTJ6VTlTWGZ5Q09IVloyZG1QSjRKaFNwWHNWdm55cXpRWS13U0o3azdSQWYtYjBvb2k4NnhFUFZzYXBfMlBicFozVFBvTWJaNWpySmJCbkFLX3c0dDI5N01VLVRIbk0tNHZKejk3eWZZV3BY?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Jewellers expect fall in gold prices to boost Dhantera sales</a> (TradingView); <a href=\"https://news.google.com/rss/articles/CBMitgFBVV95cUxOWkl2TTFMU3NUT0FRNHVNNEo4QnZwbmwwTDBhMWdEYUV3R01zSWt4UmhzVnB2RjNobHpnSlNrc1JwWDRubDJNeGw2YmtER25VVzZvWk4wVEJ6LVk4b2Z0Y2d2amFiQm1ueXFHUVc4S1FJemJmQXdOMnN6TTRac2ZfbFpFb3VqNVJWWllGNkVPQVJ5bjdscjl1OXRlVnBRNUtvSmFCcHptdE1lWjNlc3VoU1p6dFhqUdIBugFBVV95cUxQVUMzMmU0SW53NG5BaXRTa2lZNThwMGxnaDVkcEFPQWMxUGYyTHFMbUNVaWR1b2ctS3M1X2syT0kyRk56b2pvbG1zZWtEeElCSlRFZGl2V0V2TVZLQ0xNWDc5Rms2RWF4Tjl6UXVUT2lJUWNXOFduTjBEVktwdW5wTHVPYjFONDVRT3hsX2hSTXVWWk5tRHlYSHRMaUNGN3ZLTWxRU2c1NW01bG5CU2Z5NjJoNXR4X1VmV3c?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold prices decline ahead of wedding season; buyers may find opportunity</a> (The Tribune).",
     "<strong>Records and profit-taking.</strong> Big moves feed on themselves for a while, and sharp rallies attract profit-taking. In the news: <a href=\"https://news.google.com/rss/articles/CBMiwwFBVV95cUxOTnI0QklSODR0U05pcVVsYV9FLUV5ejR3NFAwNmYtSHBhZG1uNVBOS2NMSG5Qc3k0ODFSTVByUFBhYUNLMmYwSDVweEdlbzZYZTg5bldGS2pCR3RCWEhsR3RrUmNtRU5rRnF5bVhQTS1pc2dGZE5FRkR4UTVfVFY0R091dllNU25xZzdEVW5TZnJPV09TOVJQbGNKSEkybUEwcnZiVERVZDZmR1Q2S3RDcHppTV8xeWQxR3FpMGxsWTJwMlk?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Surges Back Above $4,000 – Is This the Start of a Much Bigger Rally?</a> (FXEmpire); <a href=\"https://news.google.com/rss/articles/CBMidkFVX3lxTE16QVkyN01HYmN4cm5uYllIczJHOHA2MmJ0TDA2VHFOUmszMWdUZEQ1bU9ualAzS2Z0dWFFYnU4QTdPeG9nWFdsc1gzTWN1MmVjalZlWUxqeHdHXzZFOFdJRkNVakxIUWZyY1YwWE82RjdfMEtCOXc?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Prices Surge as Democrats Sweep U.S. Midterm Elections, Reclaiming $4,100 an Ounce</a> (BigGo Finance).",
@@ -435,10 +435,10 @@
    ],
    "snap": {
     "board24": 14601.82,
-    "gold_usd": 4041.100098,
+    "gold_usd": 4045.600098,
     "usdinr": 94.537031
    },
-   "summary": "gold -1.2%, news led by indian demand",
+   "summary": "gold -1.0%, news led by indian demand",
    "themes": {
     "dollar": 5,
     "india_demand": 10,
