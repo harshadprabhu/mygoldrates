@@ -3,14 +3,14 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-11-07",
-  "last_updated": "2026-11-07T14:10:33.719276+05:30",
+  "last_updated": "2026-11-07T14:40:43.275457+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
   "median_rate_per_gram_inr": {
-    "24k": 14356.36,
-    "22k": 13160.0,
-    "18k": 10767.27
+    "24k": 14366.78,
+    "22k": 13169.55,
+    "18k": 10775.09
   },
   "lowest_24k": {
     "jeweller": "Reliance Jewels",
@@ -33,7 +33,7 @@
     }
   ],
   "full_comparison": "https://mygoldrates.com/compare-jewellers-gold-rate",
-  "jeweller_count": 35,
+  "jeweller_count": 36,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
