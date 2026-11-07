@@ -465,6 +465,7 @@
    },
    "summary": "gold +0.2%, news led by indian demand",
    "themes": {
+    "central_banks": 1,
     "india_demand": 9,
     "inflation": 3,
     "investment": 1,
