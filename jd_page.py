@@ -69,7 +69,7 @@ def build(price=P):
 <html lang="en-IN"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Jewellers Digest &mdash; daily gold rate analysis for jewellers | MyGoldRates</title>
+<title>Jewellers Digest &mdash; daily gold rate analysis for jewellers</title>
 <meta name="description" content="A daily analysis of India's jeweller gold board:
  11-sheet workbook, outlook by week, month and quarter, and support and resistance.
  &#8377;{price.OFFER_INR} a month, launch offer.">

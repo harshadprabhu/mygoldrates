@@ -114,6 +114,8 @@ def pages(kb, med, display_date, date_iso, site_url, inr):
                 "Gold value (rate x weight) + making charge (a % of the gold value, less any offer) + 3% GST on both, "
                 "plus a small hallmarking fee. Confirm the exact figure with the jeweller.")]
         title = f"{ta} vs {tb} Gold Rate Today ({short}): Which Is Cheaper?"
+        if len(title) > 70:                    # what search results show (SEO audit, 9 Nov 2026)
+            title = f"{ta} vs {tb} Gold Rate Today ({short})"
         desc = (f"{na} vs {nb} today: 22K {inr(a22)} vs {inr(b22)} per gram. "
                 + (f"{lo['n']} is {inr(d22)}/g cheaper. " if d22 >= 0.5 else "Same rate. ")
                 + "Making charges, offers and a 10 g ring bill compared.")

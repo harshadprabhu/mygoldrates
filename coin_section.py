@@ -65,7 +65,7 @@ def coin_html(rows, updated, site):
         + f"<td>{_inr(r['per_g'])}</td></tr>" for r in rows)
     return (
         '<section class="site-section"><div class="site-container">'
-        f"<h2>24K gold coin price by jeweller</h2>"
+        f"<h1>24K Gold Coin Price Today by Jeweller</h1>"
         "<p>What a 24K (999) gold coin costs at each jeweller today: its own 24K rate, plus the making "
         "charge measured on its own 24K coins, plus 3% GST. Coin making charges are a few percent, far "
         f"below jewellery's. Making charges measured {e(updated[:10])}; rates are today's.</p>"
