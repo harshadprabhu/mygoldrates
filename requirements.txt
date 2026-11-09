@@ -7,3 +7,4 @@ brotli
 pillow
 openpyxl
 anthropic
+pywebpush

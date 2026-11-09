@@ -2771,6 +2771,13 @@ def main():
     with open("docs/alerts-pop.js", "w", encoding="utf-8") as f:
         f.write(alerts_pop_js)
     # Sona, the assistant: one static file, loaded deferred on every page.
+    # install-as-app and the morning notification (pwa.py, push_send.py)
+    try:
+        import pwa as _pwa
+        import push_send as _ps
+        _pwa.write("docs", _ps.vapid_public_key())
+    except Exception as _e:                 # never take the site down
+        print(f"pwa: SKIPPED ({type(_e).__name__}: {_e})")
     with open("docs/assistant.js", "w", encoding="utf-8") as f:
         f.write(_assist_src)
 
@@ -7263,6 +7270,7 @@ INQUIRY_TEMPLATE = Template("""<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
+<link rel="manifest" href="$site_url/manifest.webmanifest">
 <meta name="robots" content="index,follow">
 $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -7455,6 +7463,7 @@ PAGE_TEMPLATE = Template("""<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
+<link rel="manifest" href="$site_url/manifest.webmanifest">
 $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -7490,6 +7499,7 @@ $nd_footer
 <script src="signup.js?v=$sig_ver" defer></script>
 <script src="$site_url/alerts-pop.js?v=$sig_ver" defer></script>
 <script src="$site_url/assistant.js?v=$sig_ver" defer></script>
+<script src="$site_url/pwa.js" defer></script>
 </body>
 </html>
 """)
@@ -7522,6 +7532,7 @@ CONTENT_TEMPLATE = Template("""<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
+<link rel="manifest" href="$site_url/manifest.webmanifest">
 $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -7592,6 +7603,7 @@ $nd_footer
 <script src="$site_url/signup.js?v=$sig_ver" defer></script>
 <script src="$site_url/alerts-pop.js?v=$sig_ver" defer></script>
 <script src="$site_url/assistant.js?v=$sig_ver" defer></script>
+<script src="$site_url/pwa.js" defer></script>
 $extra_js
 </body>
 </html>
@@ -7609,6 +7621,7 @@ CONFIRM_TEMPLATE = Template("""<!DOCTYPE html>
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
+<link rel="manifest" href="$site_url/manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 $nd_fonts
@@ -7670,6 +7683,7 @@ UNSUB_TEMPLATE = Template("""<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
+<link rel="manifest" href="$site_url/manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 $nd_fonts

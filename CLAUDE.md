@@ -410,3 +410,13 @@ Recently added brands: Kisna (Shopify pagination), Indriya ('value per gm' extra
   click for the owner.
 - `cf-bot-rules` mode=diagnose lists every Cloudflare rule and setting and
   test-fetches the site, read-only.
+
+## App install and morning notifications (2026-11-09)
+- `pwa.py` writes `manifest.webmanifest`, `sw.js` (no caching - latest data
+  only) and `pwa.js` (the "Get today's gold rate every morning" button in
+  `<div class="mgr-push">`, install prompt, iPhone Add-to-Home-Screen tip).
+- Subscriptions: JD Worker `POST /push/subscribe|unsubscribe` -> private
+  Storage files `jd-reports/push/<hash>.json`. No table, no SQL.
+- `push_send.py` sends the morning message in rates.yml (alerts=true), signs
+  with the VAPID key in collector_cache `webpush_vapid` (made once by the
+  build; never in git), removes 404/410 subscriptions.

@@ -701,6 +701,9 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
   .site-calc-body{grid-template-columns:1fr}
 }
 </style>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MyGoldRates">
 </head>
 <body>
 
@@ -799,6 +802,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
       <button class="al-btn" id="alBtn" type="button">Send it to me</button>
     </div>
     <div id="alStatus" style="font-size:11px;color:var(--mint);margin-top:8px;min-height:14px"></div>
+    <div class="mgr-push" style="margin-top:6px"></div>
   </div>
   <div id="gsiSlot" style="margin:16px 12px 0"></div>
   <!--SITE_LINKS_APP-->
@@ -1485,6 +1489,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
         <button class="al-btn al-btn-full" id="alBtnS">Subscribe</button>
       </div>
       <div id="alStatusS" style="font-size:12px;color:var(--mint);margin-top:14px;min-height:16px"></div>
+      <div class="mgr-push" style="margin-top:10px"></div>
       <div id="gsiSlotS"></div>
     </div>
   </section>
@@ -3181,6 +3186,7 @@ function handleCredentialResponse(resp){
   }
   function setNear(on,reg){
     nearMe=on;nearRegion=reg||nearRegion;
+    try{if(on&&nearCity)localStorage.setItem('mgr_city',nearCity)}catch(e){}   // the morning notification's city (pwa.js)
     paintNearBtns(false);
     selectedBrand=null;
     renderAll();
@@ -3824,5 +3830,6 @@ function handleCredentialResponse(resp){
   loadHits();
 })();
 </script>
+<script src="/pwa.js" defer></script>
 </body>
 </html>

@@ -290,6 +290,8 @@ export default {
         case 'POST /sub/google':  return wrap(await handleSubGoogle(request, env));
         case 'GET /page/manubhai': return wrap(await handlePage('manubhai', env));
         case 'GET /geo':          return wrap(handleGeo(request));
+        case 'POST /push/subscribe':   return wrap(await handlePush(request, env, true));
+        case 'POST /push/unsubscribe': return wrap(await handlePush(request, env, false));
         default:                   return wrap(json({ error: 'not found' }, 404));
       }
     } catch (e) {
@@ -318,6 +320,47 @@ function handleGeo(request) {
     lat: num(cf.latitude),
     lon: num(cf.longitude),
   });
+}
+
+// ─── POST /push/subscribe, /push/unsubscribe ─────────────────────────────
+// The morning gold-rate notification (pwa.js on the site, push_send.py
+// sends). A browser's Web Push subscription - the push service's address
+// for that browser and its two encryption keys - is kept as a private file
+// in Storage, jd-reports/push/<sha256 of the address>.json, with the city
+// the visitor is in, if known. Only the site's pages may call this, and
+// only real push services' addresses are accepted.
+const PUSH_HOSTS = /(^|\.)(fcm\.googleapis\.com|push\.services\.mozilla\.com|push\.apple\.com|notify\.windows\.com|push\.api\.chromium\.org)$/;
+export function pushCheck(body) {
+  const sub = body && body.sub, ep = (sub && sub.endpoint) || (body && body.endpoint);
+  let u;
+  try { u = new URL(ep); } catch (_) { return null; }
+  if (u.protocol !== 'https:' || !PUSH_HOSTS.test(u.hostname) || ep.length > 1000) return null;
+  return ep;
+}
+async function handlePush(request, env, add) {
+  const o = request.headers.get('Origin');
+  if (!o || !(ALLOWED_ORIGINS.includes(o) || PREVIEW_ORIGIN.test(o))) return json({ error: 'forbidden' }, 403);
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_KEY) return json({ error: 'not configured' }, 503);
+  let body;
+  try { body = await request.json(); } catch (_) { return json({ error: 'bad json' }, 400); }
+  const ep = pushCheck(body);
+  if (!ep) return json({ error: 'bad subscription' }, 400);
+  const h = [...new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(ep)))]
+    .map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 40);
+  const path = `${env.SUPABASE_URL}/storage/v1/object/jd-reports/push/${h}.json`;
+  if (!add) {
+    const r = await fetch(path, { method: 'DELETE', headers: storageAuth(env) });
+    return json({ ok: r.ok || r.status === 404 });
+  }
+  const k = body.sub.keys || {};
+  const okKey = (x, n) => typeof x === 'string' && /^[A-Za-z0-9_-]+=*$/.test(x) && x.length <= n;
+  if (!okKey(k.p256dh, 200) || !okKey(k.auth, 60)) return json({ error: 'bad keys' }, 400);
+  const city = String(body.city || '').replace(/[^\p{L} .'-]/gu, '').slice(0, 60);
+  const r = await fetch(path, { method: 'POST',
+    headers: { ...storageAuth(env), 'content-type': 'application/json', 'x-upsert': 'true' },
+    body: JSON.stringify({ endpoint: ep, keys: { p256dh: k.p256dh, auth: k.auth }, city, ts: new Date().toISOString() }) });
+  if (!r.ok) { console.error('push subscribe: store failed', r.status); return json({ error: 'not saved' }, 502); }
+  return json({ ok: true });
 }
 
 // ─── POST /jd/signup ────────────────────────────────────────────────────
