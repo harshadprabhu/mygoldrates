@@ -120,12 +120,14 @@ WIDGET_PAGE_JS = """
 var S='__SITE__';
 function code(){var c=document.getElementById('wcity'),t=document.getElementById('wtheme');
  var cs=c.value, cn=cs?c.options[c.selectedIndex].text:'';
- var href=cs?S+'/gold-rate-today-in-'+cs:S+'/';
- var attrs=(cs?' data-city="'+cs+'"':'')+(t.value==='dark'?' data-theme="dark"':'');
+ var href=S+'/'+(cs?['gold-rate-today','in',cs].join('-'):'');
  var txt=cs?'Gold rate in '+cn+': MyGoldRates':'Gold rates by MyGoldRates';
- var div='<div class="mygoldrates-widget"'+attrs+'><a href="'+href+'">'+txt+'</a></div>';
- document.getElementById('wcode').value=div+'\\n<script src="'+S+'/widget.js" async><\\/script>';
- var p=document.getElementById('wprev');p.innerHTML=div;
+ // built as elements, not as markup text, so crawlers find no half-made address here
+ var box=document.createElement('div');box.className='mygoldrates-widget';
+ if(cs)box.setAttribute('data-city',cs);if(t.value==='dark')box.setAttribute('data-theme','dark');
+ var a=document.createElement('a');a.setAttribute('href',href);a.textContent=txt;box.appendChild(a);
+ document.getElementById('wcode').value=box.outerHTML+'\\n<script src="'+S+'/widget.js" async><\\/script>';
+ var p=document.getElementById('wprev');p.innerHTML='';p.appendChild(box);
  var s=document.createElement('script');s.src=S+'/widget.js?'+Date.now();document.body.appendChild(s);}
 document.getElementById('wcity').onchange=code;document.getElementById('wtheme').onchange=code;
 document.getElementById('wcopy').onclick=function(){var t=document.getElementById('wcode');t.select();
@@ -218,7 +220,7 @@ def gap_report(hist_rows, regional_slugs, inr, today, days=30):
     key = (f"Across {len(rows)} national jewellery chains from {span}, the gap between the cheapest "
            f"and the dearest 22K gold rate on the same day was typically {inr(med_spread)} per gram, "
            f"or {inr(med_spread * 10 * 1.03)} on 10 grams with GST - before any making charge.")
-    title = f"Gold Price Gap Report, {month}: How Much Jewellers' Gold Rates Differ"
+    title = f"Gold Price Gap Report, {month}: How Much Jewellers' Rates Differ"
     desc = (f"{month}: the same day's 22K gold rate differed by a typical {inr(med_spread)}/g "
             f"({inr(med_spread * 10 * 1.03)} on 10 g) between India's jewellery chains. "
             f"{names[cheap[0]]} was cheapest on average, {names[dear[0]]} dearest.")
@@ -253,8 +255,10 @@ def gap_report(hist_rows, regional_slugs, inr, today, days=30):
         "<h2>Using these figures</h2>"
         "<p>Journalists and researchers are welcome to quote these figures. Please credit "
         '<a href="https://mygoldrates.com/gold-price-gap-report">MyGoldRates.com</a> with a link. '
-        'For a specific date range, a chain or a city, write to <a href="mailto:contact@mygoldrates.com">'
-        "contact@mygoldrates.com</a>; the daily figures are also in "
+        # email_off: Cloudflare would turn the address into a /cdn-cgi/ link
+        # that answers 404 to crawlers
+        'For a specific date range, a chain or a city, write to <!--email_off--><a href="mailto:contact@mygoldrates.com">'
+        "contact@mygoldrates.com</a><!--/email_off-->; the daily figures are also in "
         '<a href="https://mygoldrates.com/rates.json">rates.json</a>.</p>')
     ld = ('<script type="application/ld+json">' + json.dumps({
         "@context": "https://schema.org", "@type": "Dataset",

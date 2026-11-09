@@ -148,7 +148,7 @@ def test_daily_reports_do_not_reuse_the_city_page_title():
     body = src[i:i + 9000]
     # the dated report names the date and the chains compared, which no
     # city page title does
-    assert 'f"Gold Rate Today {now_ist.strftime(\'%-d %B %Y\')}: "' in body
+    assert 'f"Gold Rate Today {now_ist.strftime(\'%-d %b %Y\')}: "' in body
     assert 'f"Gold Rate Today {where_in} ({display_date})' not in body
 
 

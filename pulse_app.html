@@ -1790,12 +1790,12 @@ function handleCredentialResponse(resp){
     });
   })();
   var WORLD=[
-    {f:'🇦🇪',n:'UAE (Dubai)',u:'dubai',c:'AED',s:'AED ',k:[['22K',22/24,'g']],note:'Dubai sets board rates daily · <a href="/gold-rate-today-in-dubai">Dubai vs India &rarr;</a>'},
-    {f:'🇸🇦',n:'Saudi Arabia',u:'saudi-arabia',c:'SAR',s:'SAR ',k:[['21K',21/24,'g']],note:'21K is the usual jewellery gold'},
-    {f:'🇺🇸',n:'USA',u:'usa',c:'USD',s:'$',k:[['24K',1,'oz']],note:'Spot is the US reference'},
-    {f:'🇰🇭',n:'Cambodia',u:'cambodia',c:'KHR',s:'៛',k:[['24K',1,'chi']],note:'Gold is bought by the chi (3.75 g), often in US dollars'},
-    {f:'🇰🇿',n:'Kazakhstan',u:'kazakhstan',c:'KZT',s:'₸',k:[['585 (14K)',0.585,'g']],note:''},
-    {f:'🇷🇺',n:'Russia',u:'russia',c:'RUB',s:'₽',k:[['585 (14K)',0.585,'g']],note:''},
+    {f:'🇦🇪',n:'UAE (Dubai)',u:'/gold-rate-today-in-dubai',c:'AED',s:'AED ',k:[['22K',22/24,'g']],note:'Dubai sets board rates daily · <a href="/gold-rate-today-in-dubai">Dubai vs India &rarr;</a>'},
+    {f:'🇸🇦',n:'Saudi Arabia',u:'/gold-rate-today-in-saudi-arabia',c:'SAR',s:'SAR ',k:[['21K',21/24,'g']],note:'21K is the usual jewellery gold'},
+    {f:'🇺🇸',n:'USA',u:'/gold-rate-today-in-usa',c:'USD',s:'$',k:[['24K',1,'oz']],note:'Spot is the US reference'},
+    {f:'🇰🇭',n:'Cambodia',u:'/gold-rate-today-in-cambodia',c:'KHR',s:'៛',k:[['24K',1,'chi']],note:'Gold is bought by the chi (3.75 g), often in US dollars'},
+    {f:'🇰🇿',n:'Kazakhstan',u:'/gold-rate-today-in-kazakhstan',c:'KZT',s:'₸',k:[['585 (14K)',0.585,'g']],note:''},
+    {f:'🇷🇺',n:'Russia',u:'/gold-rate-today-in-russia',c:'RUB',s:'₽',k:[['585 (14K)',0.585,'g']],note:''},
   ];
   function wnum(v,dec){return v.toLocaleString('en-US',{maximumFractionDigits:dec,minimumFractionDigits:dec});}
   function paintWorld(){
@@ -1822,7 +1822,7 @@ function handleCredentialResponse(resp){
       });
       var note=w.note;
       if(w.c==='RUB'&&LIVE.cbr&&LIVE.cbr.rub_g)note='Bank of Russia official: ₽'+wnum(LIVE.cbr.rub_g,0)+'/g ('+LIVE.cbr.date+')';
-      rows+='<tr><td>'+w.f+' <a href="/gold-rate-today-in-'+w.u+'"><b>'+w.n+'</b></a><small>'+w.c+'</small></td><td><b>'+w.s+wnum(g,dec)+'</b></td><td>'+inrCell+'</td><td>'+pop+(note?'<small>'+note+'</small>':'')+'</td></tr>';
+      rows+='<tr><td>'+w.f+' <a href="'+w.u+'"><b>'+w.n+'</b></a><small>'+w.c+'</small></td><td><b>'+w.s+wnum(g,dec)+'</b></td><td>'+inrCell+'</td><td>'+pop+(note?'<small>'+note+'</small>':'')+'</td></tr>';
     });
     if(rows)bodies.forEach(function(b){b.innerHTML=rows;});
   }

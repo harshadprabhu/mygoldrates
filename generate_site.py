@@ -47,6 +47,37 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/126.0 Safari/537.36")
 
 
+def is_city(p):
+    """A city, not a state: Delhi and Chandigarh are filed as their own
+    "state" in PLACE_STATE but are cities people search for."""
+    return PLACE_STATE.get(p) != p or p in ("Delhi", "Chandigarh")
+
+
+# Search results show about 60-70 characters of a title and ~160 of a
+# description; longer ones are cut mid-word (SEO audit, 9 Nov 2026).
+TITLE_MAX, DESC_MAX = 70, 160
+
+
+def fit_title(t):
+    """Drop the " | MyGoldRates" ending when it would push a title past
+    TITLE_MAX; the page's own words matter more than the brand there."""
+    sfx = " | MyGoldRates"
+    if len(t) > TITLE_MAX and t.endswith(sfx):
+        t = t[:-len(sfx)]
+    return t
+
+
+def fit_desc(d):
+    """A description cut at a sentence (or word) end within DESC_MAX."""
+    if len(d) <= DESC_MAX:
+        return d
+    cut = d[:DESC_MAX]
+    i = cut.rfind(". ")
+    if i >= 90:
+        return cut[:i + 1]
+    return cut[:cut.rfind(" ")].rstrip(",;:-") + "…"
+
+
 def inr(v, dec=0):
     """Indian-style grouping: 1,23,456."""
     s = f"{abs(v):.{dec}f}"
@@ -365,6 +396,7 @@ def site_links_html():
         f'<a href="{SITE_URL}/gold-rate-history">Gold rate history</a>'
         f'<a href="{SITE_URL}/gold-price-gap-report">Gold price gap report</a>'
         f'<a href="{SITE_URL}/gold-rate-widget">Free gold rate widget</a>'
+        f'<a href="{SITE_URL}/jeweller-badge">Badge for listed jewellers</a>'
         f'<a href="{SITE_URL}/news">Gold news</a>'
         f'<a href="{SITE_URL}/jewellers-digest">Jewellers Digest</a>'
         f'<a href="{SITE_URL}/inquiry">Daily rate alerts</a>'
@@ -383,10 +415,12 @@ def site_links_html():
         f'<a href="{SITE_URL}/learn/how-gold-rates-are-set">How gold rates are set</a>'
         + '<h3>Gold rate by city</h3>'
         + "".join(f'<a href="{SITE_URL}/gold-rate-today-in-{loc_slug(p)}">{p}</a>'
-                  for p in LOCATIONS if p in INDEXED_PLACES and PLACE_STATE.get(p) != p)
+                  for p in LOCATIONS if p in INDEXED_PLACES and is_city(p))
+        # indexed states only: a link to a noindexed page spends crawl on a
+        # page search engines are told to drop (SEO audit, 9 Nov 2026)
         + '<h3>Gold rate by state</h3>'
         + "".join(f'<a href="{SITE_URL}/gold-rate-today-in-{loc_slug(p)}">{p}</a>'
-                  for p in states)
+                  for p in states if p in INDEXED_PLACES)
         + '<h3>Gold rate in your language</h3>'
         + "".join(f'<a href="{SITE_URL}/{c}/{lang_pages.SLUG}" hreflang="{hl}">{n}</a>'
                   for c, hl, n, _w in lang_pages.LANGS)
@@ -2760,6 +2794,7 @@ def main():
                     f"{inr(med['22K'])}/g (pre-GST) on {display_date}. Compare "
                     f"{n_live} jewellers' live rates and the chains that "
                     f"serve {PLACE_STATE.get(nm) or nm}.")
+            title, desc = fit_title(title), fit_desc(desc)
             h = home_html
             def sub(pattern, repl, h, count=1, flags=0):
                 out, n = re.subn(pattern, repl, h, count=count, flags=flags)
@@ -3136,6 +3171,7 @@ def main():
 
     def render_content(slug, title, desc, body, extra_js="", jsonld_block="",
                         robots="index, follow, max-image-preview:large"):
+        title, desc = fit_title(title), fit_desc(desc)
         path = f"docs/{slug}.html"
         d = os.path.dirname(path)
         if d and d != "docs":
@@ -3930,8 +3966,8 @@ def main():
                "mainEntityOfPage": f"{SITE_URL}/{slug}"}
         render_content(
             slug,
-            f"Gold Rate Today {now_ist.strftime('%-d %B %Y')}: "
-            + (", ".join(big_short) + " Compared" if big_short else "Jewellers Compared")
+            f"Gold Rate Today {now_ist.strftime('%-d %b %Y')}: "
+            + (", ".join(big_short) if big_short else "Every Jeweller Compared")
             + " | MyGoldRates",
             f"Gold rate today, {display_date}: 24K {inr(lad['24K'])}/g, 22K {inr(lad['22K'])}/g "
             f"({dsign}{abs(dpct):.2f}%). Each of {len(live)} jewellers' own rate"
@@ -4011,7 +4047,7 @@ def main():
             _f.write(outreach_pages.WIDGET_JS)
         with open("docs/badge.svg", "w", encoding="utf-8") as _f:
             _f.write(outreach_pages.BADGE_SVG)
-        _wc = [(loc_slug(p), p) for p in LOCATIONS if PLACE_STATE.get(p) and PLACE_STATE.get(p) != p]
+        _wc = [(loc_slug(p), p) for p in LOCATIONS if PLACE_STATE.get(p) and is_city(p)]
         render_content(
             "gold-rate-widget", "Free Gold Rate Widget for Your Website | MyGoldRates",
             "Add today's 24K and 22K gold rate, the change since yesterday and the cheapest jewellers "
@@ -4897,6 +4933,14 @@ document.getElementById('mkGo').addEventListener('click',function(){
                                  lambda m: m.group(1) + _html.escape(_lo["n"]) + " &middot; 24K &middot; today's lowest" + m.group(2),
                                  pulse_html)
         _near = [[a, o, PLACE_STATE.get(c) or c, c] for c, (a, o) in CITY_COORDS.items()]
+        # "Gold Rate by City": the indexed cities, not a hand-kept list that
+        # linked noindexed pages and missed indexed ones (SEO audit, 9 Nov 2026)
+        _cl = "".join(f'<a href="/gold-rate-today-in-{loc_slug(p)}">{p}</a>'
+                      for p in LOCATIONS if p in INDEXED_PLACES and is_city(p))
+        pulse_html, _ncl = _re.subn(r'(<div class="city-links">)[^<]*(?:<a [^>]*>[^<]*</a>)*\s*(</div>)',
+                                    lambda m: m.group(1) + _cl + m.group(2), pulse_html)
+        if _ncl != 2:
+            print(f"homepage: city lists replaced {_ncl} of 2")
         pulse_html, _n2 = _re.subn(r"var NEAR_CITIES=\[\];",
                                    lambda m: "var NEAR_CITIES=" + json.dumps(_near, ensure_ascii=False) + ";",
                                    pulse_html, count=1)

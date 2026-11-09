@@ -240,11 +240,13 @@ def build(dash, hist, mc_date, rates_date, display_date, site_url, inr, today=No
     when = (f"Dhanteras falls on Friday, 6 November 2026 - {days_left} days from "
             f"today." if days_left > 0 else
             "Dhanteras fell on Friday, 6 November 2026.")
-    title = ("Dhanteras 2026 Gold Report: What the Same Jewellery Costs at Each "
-             "Jeweller | MyGoldRates")
+    # within what search results show (SEO audit, 9 Nov 2026)
+    title = "Dhanteras 2026 Gold Report: Same Jewellery, Each Jeweller's Price"
     desc = (facts[0] if facts else
             "Making charges, gold rate and GST compared across jewellers for "
-            "Dhanteras 2026.")[:300]
+            "Dhanteras 2026.")
+    if len(desc) > 160:
+        desc = desc[:160].rsplit(" ", 1)[0].rstrip(",;:-") + "\u2026"
 
     sections = []
     for cat in sorted(cats, key=lambda k: -cats[k]["gap"]):
