@@ -5444,6 +5444,26 @@ document.getElementById('mkGo').addEventListener('click',function(){
             continue
         kept_meta.append((pth, dd, ttl))
     daily_meta = kept_meta
+    # past daily reports are written once; bring their title and
+    # description within what search results show (SEO audit, 9 Nov 2026)
+    for pth, _dd, _t in daily_meta:
+        _fp = f"docs/{pth}.html"
+        try:
+            with open(_fp, encoding="utf-8") as f:
+                _h = f.read()
+        except OSError:
+            continue
+        def _short(s):                     # the current format: "9 Nov 2026", no "Compared"
+            s = re.sub(r"\b(January|February|March|April|May|June|July|August|September|October|November|December)\b",
+                       lambda m: m.group(1)[:3], s)
+            return fit_title(s.replace(" Compared | MyGoldRates", " | MyGoldRates"))
+        _h2 = re.sub(r"<title>([^<]*)</title>",
+                     lambda m: "<title>" + _html.escape(_short(_html.unescape(m.group(1))), quote=False) + "</title>", _h, count=1)
+        _h2 = re.sub(r'(<meta name="description" content=")([^"]*)(")',
+                     lambda m: m.group(1) + _html.escape(fit_desc(_html.unescape(m.group(2)))) + m.group(3), _h2, count=1)
+        if _h2 != _h:
+            with open(_fp, "w", encoding="utf-8") as f:
+                f.write(_h2)
     for fp in glob.glob("docs/news/recap/*.html"):
         stem = os.path.basename(fp)[:-5]
         try:
