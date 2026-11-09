@@ -502,7 +502,7 @@
   "2026-11-09": {
    "date": "2026-11-09",
    "paragraphs": [
-    "International gold is at $4,120 an ounce (+1.18% since 08 Nov), the rupee at ₹94.05 to the dollar (stronger by 0.07%), and the Indian jeweller board median at ₹14,461/g for 24K (+0.56%). In rupee terms the move came mostly from the world gold price (+1.18% gold, -0.07% USD/INR).",
+    "International gold is at $4,121 an ounce (+1.20% since 08 Nov), the rupee at ₹94.05 to the dollar (stronger by 0.07%), and the Indian jeweller board median at ₹14,461/g for 24K (+0.56%). In rupee terms the move came mostly from the world gold price (+1.20% gold, -0.07% USD/INR).",
     "What the world's gold news is about today: Inflation (4 headlines), US interest rates (3 headlines), Indian demand (3 headlines), Records and profit-taking (2 headlines).",
     "<strong>Inflation.</strong> Gold is held as an inflation hedge, though hot inflation can also mean higher rates, which cuts the other way. In the news: <a href=\"https://news.google.com/rss/articles/CBMirwFBVV95cUxOVzM1d1FnaUExV3hMcURpa3VURXg0V3AzOWEzMUJULUN1ajJ1MlRGd1dIY3FtUDA4Y1JXWjZZdkpVODVBSEFkRmFHd04wdDQxZUhWdVljYl9uOGRrSmFudXlvS25HSVdJTmVJVUdxa0VjY1VWS1czbGZmR1NzdWZEZ0VKaDNFQWgwOEgzSDAweE9RZzhNS00tOW1jYzd3dHBwYzdmZ0xhV1lab2UxRVJV?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Prices Jump To US$4,112.90 As Softer Oil Eases Inflation Fears</a> (BusinessToday Malaysia); <a href=\"https://news.google.com/rss/articles/CBMiyAFBVV95cUxQUUo1MjVyWHg2M0E4a2xpaUhHNFh5NTlUdEdCeHdnLV9mZlhoU2ZZTTRKazAwbzZyTVJwSEd4QWpaSHY4S1pWUzhpT3ozcVhGMEJ3Vi1MZ1BVQm9YOVRRazRHeHlJT2V4eEM5VWI2VktFc3lxbXl6OVBmTEpfNWxwSV9scklpcGpwTWN6czA1NlB1X0JIdFp0REtWS0JNSFVUVDA5dFJFVkhRMVZPOXB5ZG5JRlVjQ05faXBOa0ZwMGRHUnBOWWRpNA?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: XAU/USD Return Above $4,000 Points Higher but Faces FED and CPI Test</a> (FXLeaders).",
     "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMivwFBVV95cUxPRFVMNmstWDBuX3U3X05yMTFmVE1XY0Z6RVNYaXBNc0pmQWpXZDB2YmdKVGZaWDR3Ry05YzJoYmRiRzZya1FTbW1BZDRjYl9nNVRUOEVTTks3cElnaC12QmZRWHYwdThCYXdHZmM2SXIzSjFoRnJYZk92a0w0am52VGItamlnZDh0MldaaC1KLWtQdXViNlM3RHJ4TjM4Uk9lOXNlZ1lSa1daR1RFdWNoMWhPbDhnMnFSX3hqbjlyaw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: Easing Energy Pressures Meet Persistent Fed Tightening Risk</a> (FXLeaders); <a href=\"https://news.google.com/rss/articles/CBMiyAFBVV95cUxQUUo1MjVyWHg2M0E4a2xpaUhHNFh5NTlUdEdCeHdnLV9mZlhoU2ZZTTRKazAwbzZyTVJwSEd4QWpaSHY4S1pWUzhpT3ozcVhGMEJ3Vi1MZ1BVQm9YOVRRazRHeHlJT2V4eEM5VWI2VktFc3lxbXl6OVBmTEpfNWxwSV9scklpcGpwTWN6czA1NlB1X0JIdFp0REtWS0JNSFVUVDA5dFJFVkhRMVZPOXB5ZG5JRlVjQ05faXBOa0ZwMGRHUnBOWWRpNA?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: XAU/USD Return Above $4,000 Points Higher but Faces FED and CPI Test</a> (FXLeaders).",
@@ -512,7 +512,7 @@
    ],
    "snap": {
     "board24": 14461.0,
-    "gold_usd": 4120.200195,
+    "gold_usd": 4121.0,
     "usdinr": 94.047485
    },
    "summary": "gold +1.2%, news led by inflation",
