@@ -30,7 +30,9 @@ KEY_PAGES = ["/", "/gold-rate-today-in-mumbai", "/gold-rate-today-in-chennai",
              "/tanishq-gold-rate-today", "/kalyan-jewellers-gold-rate-today",
              "/making-charges-comparison", "/gold-coin-price-today",
              "/gold-price-gap-report", "/gold-rate-widget", "/hi/gold-rate-today",
-             "/ta/gold-rate-today", "/gold-rate-history", "/gold-rate-by-jeweller"]
+             "/ta/gold-rate-today", "/gold-rate-history", "/gold-rate-by-jeweller",
+             "/te/gold-rate-today", "/ml/gold-rate-today", "/news", "/news/daily/gold-rate-india-9-nov-2026",
+             "/gold-rate-today-in-pune", "/gold-rate-today-in-madurai"]
 
 
 def service():

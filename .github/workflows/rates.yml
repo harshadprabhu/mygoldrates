@@ -164,3 +164,14 @@ jobs:
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           ALERTS_FROM: ${{ secrets.ALERTS_FROM }}
         run: python send_alerts.py
+
+      # The morning gold rate as a phone/browser notification to everyone who
+      # turned it on (push_send.py), same morning signal as the email.
+      - name: Send morning notifications
+        if: >
+          !cancelled() && github.event.inputs.alerts == 'true'
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python push_send.py
