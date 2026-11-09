@@ -5469,7 +5469,13 @@ document.getElementById('mkGo').addEventListener('click',function(){
         # the live spot anchor and the headline strip
         r'|data-rates-epoch="\d+"'
         r'|IBJA_ANCHOR_SPOT=Number\("[\d.]+"\)'
-        r"|var NEWS_BUILD\s*=\s*\[.*?\];", re.S)
+        r"|var NEWS_BUILD\s*=\s*\[.*?\];"
+        # 9 Nov 2026: About, Privacy, Terms and the calculators still "changed"
+        # every build: the script version tag (?v=, new whenever any script
+        # changes) and the count of jewellers that published today ("for 37
+        # major jewellers" one run, 36 the next)
+        r"|\?v=[0-9a-f]{6,}"
+        r"|\b\d{1,3}(?=\s+(?:(?:major|national|leading|Indian)\s+)?jewell?ers\b)", re.S)
 
     def _lm(loc, fallback=None):
         path = "docs/index.html" if loc == "" else f"docs/{loc}.html"
