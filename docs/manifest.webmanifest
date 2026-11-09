@@ -1,0 +1,29 @@
+{
+ "name": "MyGoldRates - Gold Rate Today",
+ "short_name": "MyGoldRates",
+ "description": "Today's gold rate at every jeweller, compared. Making charges, offers and daily alerts.",
+ "start_url": "/?src=app",
+ "scope": "/",
+ "display": "standalone",
+ "background_color": "#0b0a08",
+ "theme_color": "#1a1208",
+ "lang": "en-IN",
+ "categories": [
+  "finance",
+  "shopping"
+ ],
+ "icons": [
+  {
+   "src": "/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  }
+ ]
+}
