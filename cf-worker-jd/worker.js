@@ -289,6 +289,7 @@ export default {
         case 'POST /sub/confirm': return wrap(await handleSubConfirm(request, env));
         case 'POST /sub/google':  return wrap(await handleSubGoogle(request, env));
         case 'GET /page/manubhai': return wrap(await handlePage('manubhai', env));
+        case 'GET /geo':          return wrap(handleGeo(request));
         default:                   return wrap(json({ error: 'not found' }, 404));
       }
     } catch (e) {
@@ -299,6 +300,25 @@ export default {
     }
   },
 };
+
+// ─── GET /geo ───────────────────────────────────────────────────────────
+// The visitor's approximate place from their IP address, as Cloudflare
+// already works it out for every request (request.cf): city, state,
+// country and that place's coordinates. Used when the browser's own
+// location is refused or unavailable, so "stores near me" can still pick
+// the visitor's state. Nothing is stored or logged; the IP address itself
+// is never returned. Only the site's own pages can read it (CORS).
+function handleGeo(request) {
+  const cf = request.cf || {};
+  const num = (v) => (v === undefined || v === null || v === '' || isNaN(+v) ? null : +v);
+  return json({
+    country: cf.country || null,
+    region: cf.region || null,
+    city: cf.city || null,
+    lat: num(cf.latitude),
+    lon: num(cf.longitude),
+  });
+}
 
 // ─── POST /jd/signup ────────────────────────────────────────────────────
 // Creates (or reuses) the account, then a Razorpay subscription, and returns
