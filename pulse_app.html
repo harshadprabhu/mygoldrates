@@ -3176,7 +3176,7 @@ function handleCredentialResponse(resp){
       var btn=$('nearBtn',suf);if(!btn)return;
       btn.classList.toggle('active',nearMe);
       var nReg=BRANDS.filter(function(b){return (b.st||[]).indexOf(nearRegion)>-1}).length;
-      btn.innerHTML=pinSvg+(locating?'Locating…':nearMe?((nReg?'Showing '+nReg+' jeweller'+(nReg===1?'':'s')+' near you · ':'No regional jewellers tracked near you yet · ')+(nearCity||nearRegion)+' (tap to hide)'):'Include stores near me');
+      btn.innerHTML=pinSvg+(locating?'Locating…':nearMe?((nReg?'Showing '+nReg+' jeweller'+(nReg===1?'':'s')+' near you · ':'No regional jewellers tracked near you yet · ')+(nearCity||nearRegion)+(nearSrc==='ip'?' (approx.)':'')+' (tap to hide)'):'Include stores near me');
     });
   }
   function setNear(on,reg){
@@ -3185,19 +3185,65 @@ function handleCredentialResponse(resp){
     selectedBrand=null;
     renderAll();
   }
+  // The visitor's approximate area from their IP address (owner, 9 Nov
+  // 2026): Cloudflare already knows the city and state of every request;
+  // the Worker's /geo hands this page just that (nothing is stored, the IP
+  // itself is never returned). State-level is what regional jewellers need,
+  // and it works without asking, so the board opens with the visitor's
+  // regional stores. The device's own location, when given, replaces it.
+  var nearSrc=null,ipGeo=null;
+  var GEO_URL='https://mygoldrates-jd-api.harshads-priority.workers.dev/geo';
+  function ipNear(cb){
+    if(ipGeo!==null){cb(ipGeo);return}
+    var ac=(typeof AbortController!=='undefined')?new AbortController():null;
+    var tm=ac?setTimeout(function(){ac.abort()},4000):null;
+    fetch(GEO_URL,ac?{signal:ac.signal}:{}).then(function(r){return r.json()}).then(function(g){
+      if(tm)clearTimeout(tm);
+      if(!g||g.country!=='IN'||g.lat==null){ipGeo=false;cb(false);return}
+      // the state Cloudflare names when it is one we cover, else the state
+      // of the nearest city we cover
+      var states={};NEAR_CITIES.forEach(function(c){states[c[2]]=1});
+      var reg=nearestRegion(g.lat,g.lon);
+      if(g.region&&states[g.region])reg=g.region;
+      if(g.city)nearCity=g.city;
+      ipGeo={region:reg,city:nearCity};cb(ipGeo);
+    }).catch(function(){if(tm)clearTimeout(tm);ipGeo=false;cb(false)});
+  }
+  function nearOff(){try{return localStorage.getItem('near_off')==='1'}catch(e){return false}}
+  function setNearOff(v){try{if(v)localStorage.setItem('near_off','1');else localStorage.removeItem('near_off')}catch(e){}}
+  // a refusal is not the only way the device's location fails: say which
+  var GEO_ERR={1:'Location is blocked for this site in your browser settings.',
+    2:'Your device could not find its location (Location Services may be off for this browser).',
+    3:'Finding your location took too long.'};
   function onNearClick(){
-    if(nearMe){setNear(false);return}
+    if(nearMe){setNear(false);setNearOff(true);return}
+    setNearOff(false);
     if(nearRegion){setNear(true);return}
-    if(!navigator.geolocation){alert('Geolocation not available');return}
+    var useIp=function(why){
+      ipNear(function(g){
+        if(g&&g.region){nearSrc='ip';nearCity=g.city;setNear(true,g.region);return}
+        paintNearBtns(false);
+        alert((why?why+' ':'')+'We could not work out your area either - pick your city from "Gold rate by city" below.');
+      });
+    };
+    if(!navigator.geolocation){useIp('');return}
     paintNearBtns(true);
     navigator.geolocation.getCurrentPosition(function(p){
+      nearSrc='gps';
       setNear(true,nearestRegion(p.coords.latitude,p.coords.longitude));
-    },function(){
-      paintNearBtns(false);
-      alert('Location permission denied');
-    },{timeout:6000});
+    },function(err){
+      useIp(GEO_ERR[err&&err.code]||'');
+    },{timeout:15000,maximumAge:600000,enableHighAccuracy:false});
   }
   SCOPES.forEach(function(suf){var b=$('nearBtn',suf);if(b)b.addEventListener('click',onNearClick)});
+  // without asking: the visitor's state from their network, unless they
+  // turned "near me" off before. Homepage only: a city page is about its
+  // own place, not the visitor's.
+  if(!nearOff()&&/^\/(index(\.html)?)?$/.test(location.pathname)){
+    ipNear(function(g){
+      if(g&&g.region&&!nearMe){nearSrc='ip';nearCity=g.city;setNear(true,g.region)}
+    });
+  }
 
   // ─── GST toggle (both scopes, shared state) ───
   function onGstClick(){
@@ -3699,11 +3745,17 @@ function handleCredentialResponse(resp){
             var st=$('alStatus',suf);
             if(st){st.style.color='var(--rose)';st.textContent="Couldn't look up your address — enter city/PIN manually."}
           });
-      },function(){
-        btn.classList.remove('busy');btn.innerHTML=idleHtml;
-        var st=$('alStatus',suf);
-        if(st){st.style.color='var(--rose)';st.textContent='Location permission denied.'}
-      },{timeout:8000});
+      },function(err){
+        // the device could not say: fill the city from the network instead
+        ipNear(function(g){
+          btn.classList.remove('busy');btn.innerHTML=idleHtml;
+          var st=$('alStatus',suf),cityEl=$('alCity',suf);
+          if(g&&g.city&&cityEl){
+            cityEl.value=g.city;
+            if(st){st.style.color='var(--mint)';st.textContent='📍 Approximate city from your network - please check it.'}
+          }else if(st){st.style.color='var(--rose)';st.textContent=(GEO_ERR[err&&err.code]||"Couldn't find your location.")+' Enter city/PIN manually.'}
+        });
+      },{timeout:15000,maximumAge:600000});
     });
   }
   wireLocate('');wireLocate('S');

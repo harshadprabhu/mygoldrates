@@ -78,7 +78,7 @@ def test_retired_pages_are_gone_and_redirect_to_real_pages():
 def test_only_national_daily_pages_remain_and_no_recaps():
     daily = os.listdir(f"{DOCS}/news/daily")
     assert daily and all(f.startswith("gold-rate-india-") for f in daily)
-    assert len(daily) <= 5
+    assert len(daily) <= 32          # kept 30 days since 6 Nov 2026 (DAILY_INDEX_DAYS)
     assert not os.path.isdir(f"{DOCS}/news/recap") or not os.listdir(f"{DOCS}/news/recap")
 
 
