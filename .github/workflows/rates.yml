@@ -78,6 +78,17 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python coin_price_making.py
 
+      # Manubhai's making charges by category, from the readings the JD
+      # Worker takes of its product pages (manubhai_making.py). Every run:
+      # it only reads the cache, and the readings fill in through the day.
+      - name: Manubhai making from product prices
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python manubhai_making.py
+
       - name: Build site
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

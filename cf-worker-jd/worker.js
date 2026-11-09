@@ -262,7 +262,7 @@ async function requireEntitled(env, request) {
 export default {
   // Cron (wrangler.toml): keep a fresh copy of the jewellers' rate lines.
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(snapshotPages(env));
+    ctx.waitUntil(snapshotPages(env).then(() => mbMaking(env)));
   },
   async fetch(request, env) {
     const c = cors(request);
@@ -1038,3 +1038,92 @@ async function handlePage(slug, env) {
   }
   return htmlResp('', 502, `none (live ${r.status})`);
 }
+
+// ─── Manubhai making charges (owner, 9 Nov 2026) ───────────────────────
+// Manubhai's product pages show each piece's price (taxes included), its
+// net and gross weight, purity, and the shop's own gold rate - but no
+// making charge. With those, for a plain gold piece:
+//   making % = price / 1.03 / (net weight x that purity's rate) - 1
+// Its site refuses requests from GitHub, so the readings are taken here, on
+// the schedule, a few dozen pages a run (a Worker invocation may make 50
+// requests): the gold categories are listed once a day from its open shop
+// feed, then worked through. Readings are kept 30 days in collector_cache
+// "manubhai_making"; manubhai_making.py turns them into the making-charges
+// data. Pieces with diamonds, other stones, or no price of their own
+// ("made to order") are skipped.
+export const MB_CATS = {
+  'gold-rings': 'Ring', 'gold-chain': 'Chain', 'gold-bangles': 'Bangle', 'gold-bracelet': 'Bracelet',
+  'gold-earrings': 'Earrings', 'gold-mangalsutra': 'Mangalsutra', 'gold-necklace-set': 'Necklace',
+  'gold-pendant': 'Pendant',
+};
+const MB_KEY = 'manubhai_making', MB_PER_RUN = 20, MB_KEEP_DAYS = 30;   // light: free Workers get little CPU
+
+// One product page -> {pur, dia, net, gross, price, rate, pct} or {skip}
+export function mbParse(html, cat) {
+  const rates = {};
+  for (const m of html.matchAll(/\b(22|18|14)KT - (?:&#8377;|&#x20b9;|₹)\s*([\d,]+) Per Gram/gi)) {
+    rates[m[1]] = +m[2].replace(/,/g, '');
+  }
+  const tb = html.match(/class="price-breakup-table"[\s\S]*?<tbody>([\s\S]*?)<\/tbody>/i);
+  if (!tb) return { skip: 'no breakup' };
+  const cells = [...tb[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)]
+    .map((m) => m[1].replace(/<[^>]+>/g, '').replace(/&#8377;|&#x20b9;/gi, '').replace(/\s+/g, ' ').trim());
+  if (cells.length < 5) return { skip: 'short breakup' };
+  const [purS, dia, netS, grossS, priceS] = cells;
+  const pur = (purS.match(/(\d+)KT/i) || [])[1], net = parseFloat(netS), gross = parseFloat(grossS);
+  const price = /\d/.test(priceS) ? +priceS.replace(/[^\d.]/g, '') : null;
+  if (!price) return { skip: 'no price' };                  // made to order
+  if (dia !== '-') return { skip: 'diamonds' };
+  if (!pur || !net || !rates[pur]) return { skip: 'no rate' };
+  // stones add weight (and value); a mangalsutra's black beads are allowed
+  if (gross - net > (cat === 'Mangalsutra' ? 0.1 * net : 0.001)) return { skip: 'stones' };
+  const pct = Math.round((price / 1.03 / (net * rates[pur]) * 100 - 100) * 10) / 10;
+  return { pur, net, price, rate: rates[pur], pct };
+}
+
+async function mbState(env, value) {
+  const url = `${env.SUPABASE_URL}/rest/v1/collector_cache`;
+  const h = { ...storageAuth(env), 'content-type': 'application/json' };
+  if (value === undefined) {
+    const r = await fetch(`${url}?key=eq.${MB_KEY}&select=value`, { headers: h });
+    const rows = r.ok ? await r.json() : [];
+    return (rows[0] && rows[0].value) || {};
+  }
+  const r = await fetch(url, { method: 'POST', headers: { ...h, Prefer: 'resolution=merge-duplicates' },
+    body: JSON.stringify({ key: MB_KEY, value, updated_at: new Date().toISOString() }) });
+  if (!r.ok) console.error('manubhai making: save failed', r.status);
+}
+
+async function mbMaking(env) {
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_KEY) return;
+  try {
+    const today = new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10);   // IST
+    const st = await mbState(env);
+    st.readings = st.readings || {};
+    st.queue = st.queue || [];
+    if (!st.queue.length && st.listed !== today) {           // once a day: what is on sale
+      const lists = [];
+      for (const [slug, cat] of Object.entries(MB_CATS)) {
+        const r = await fetch(`https://manubhai.in/wp-json/wc/store/v1/products?per_page=100&category=${slug}&_fields=permalink`,
+                              { headers: { ...PAGE_HEADERS, accept: 'application/json' } });
+        if (!r.ok) { console.error(`manubhai list ${slug}: ${r.status}`); continue; }
+        lists.push((await r.json()).filter((p) => p.permalink).map((p) => [p.permalink, cat]));
+      }
+      // round-robin, so the first runs of the day reach every category
+      for (let i = 0; lists.some((l) => i < l.length); i++) for (const l of lists) if (l[i]) st.queue.push(l[i]);
+      st.listed = today;
+    }
+    for (const [u, cat] of st.queue.splice(0, MB_PER_RUN)) {
+      try {
+        const r = await fetch(u, { headers: PAGE_HEADERS, redirect: 'follow' });
+        if (!r.ok) continue;
+        const d = mbParse(await r.text(), cat);
+        if (d.pct !== undefined) st.readings[u] = { cat, d: today, ...d };
+      } catch (e) { /* one page never stops the rest */ }
+    }
+    const cut = new Date(Date.now() - MB_KEEP_DAYS * 864e5).toISOString().slice(0, 10);
+    for (const [u, r] of Object.entries(st.readings)) if (r.d < cut) delete st.readings[u];
+    await mbState(env, st);
+  } catch (e) { console.error('manubhai making:', e && e.message); }
+}
+
