@@ -502,7 +502,7 @@
   "2026-11-09": {
    "date": "2026-11-09",
    "paragraphs": [
-    "International gold is at $4,092 an ounce (+0.48% since 08 Nov), the rupee at ₹94.05 to the dollar (stronger by 0.07%), and the Indian jeweller board median at ₹14,460/g for 24K (+0.55%). In rupee terms the move came mostly from the world gold price (+0.48% gold, -0.07% USD/INR).",
+    "the rupee at ₹94.05 to the dollar (stronger by 0.07%), and the Indian jeweller board median at ₹14,460/g for 24K (+0.55%).",
     "What the world's gold news is about today: Inflation (5 headlines), US interest rates (4 headlines), The US dollar (2 headlines), Geopolitics and safe-haven buying (2 headlines).",
     "<strong>Inflation.</strong> Gold is held as an inflation hedge, though hot inflation can also mean higher rates, which cuts the other way. In the news: <a href=\"https://news.google.com/rss/articles/CBMi2wFBVV95cUxPc053cHNiTTd6N0VYamdSTHZFYmJBa0QzcTJEV1NBa2l0MkVJTDVVYnZnWlNFNnFWbF9kbGVsdkdHeXlFR2NRX3haNFpkUzBLcjBwdExIZXc1Q3p0bXJ0cU9aYWpzeXJnUW9FOHJKeDJWSlc5Y2RxQ3NkcjVCZl9HU2pGNndwRHpRaS1kRzUwcjdmaUZuUXE3SEJCYzBhUE9fN0dJc1U3aU14Zk84ejVlczJRTXpVN1ZJd0EzN2hJbF9OSFczVFlYbmpwajZmd3BNazMzVmVwRllCUG_SAeABQVVfeXFMUGwxaVZMbU41MWs5clNoUlVoNnZWU0FEeFF6UFYzS3c3NzBzZkpjd195a25jTnZuaC05YVhXaHVzV0dJWUFtN2ljR0VXeS1QQmtkbUNjS2p6eDkwcUlKdDdNRHI2YnhYRmNKa0ZDd1lOd19lVWd1eW9uOGVpdm5pREpWYXZkRnl2M0ZvM1hRcWt1YUhpWWxfYWZ3alFDYnFrMi1JbklpRjVrc1l0SEd0VjZRUHp0R0lnNnd5U0MxcmMyVE5jS1VMb3hzSXowT014cmpoSDVKanFGVTEya2NQRjU?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold, silver extend gains as softer oil prices ease inflation concerns</a> (Business Standard); <a href=\"https://news.google.com/rss/articles/CBMiyAFBVV95cUxQUUo1MjVyWHg2M0E4a2xpaUhHNFh5NTlUdEdCeHdnLV9mZlhoU2ZZTTRKazAwbzZyTVJwSEd4QWpaSHY4S1pWUzhpT3ozcVhGMEJ3Vi1MZ1BVQm9YOVRRazRHeHlJT2V4eEM5VWI2VktFc3lxbXl6OVBmTEpfNWxwSV9scklpcGpwTWN6czA1NlB1X0JIdFp0REtWS0JNSFVUVDA5dFJFVkhRMVZPOXB5ZG5JRlVjQ05faXBOa0ZwMGRHUnBOWWRpNA?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: XAU/USD Return Above $4,000 Points Higher but Faces FED and CPI Test</a> (FXLeaders).",
     "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMivwFBVV95cUxPRFVMNmstWDBuX3U3X05yMTFmVE1XY0Z6RVNYaXBNc0pmQWpXZDB2YmdKVGZaWDR3Ry05YzJoYmRiRzZya1FTbW1BZDRjYl9nNVRUOEVTTks3cElnaC12QmZRWHYwdThCYXdHZmM2SXIzSjFoRnJYZk92a0w0am52VGItamlnZDh0MldaaC1KLWtQdXViNlM3RHJ4TjM4Uk9lOXNlZ1lSa1daR1RFdWNoMWhPbDhnMnFSX3hqbjlyaw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: Easing Energy Pressures Meet Persistent Fed Tightening Risk</a> (FXLeaders); <a href=\"https://news.google.com/rss/articles/CBMiyAFBVV95cUxQUUo1MjVyWHg2M0E4a2xpaUhHNFh5NTlUdEdCeHdnLV9mZlhoU2ZZTTRKazAwbzZyTVJwSEd4QWpaSHY4S1pWUzhpT3ozcVhGMEJ3Vi1MZ1BVQm9YOVRRazRHeHlJT2V4eEM5VWI2VktFc3lxbXl6OVBmTEpfNWxwSV9scklpcGpwTWN6czA1NlB1X0JIdFp0REtWS0JNSFVUVDA5dFJFVkhRMVZPOXB5ZG5JRlVjQ05faXBOa0ZwMGRHUnBOWWRpNA?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: XAU/USD Return Above $4,000 Points Higher but Faces FED and CPI Test</a> (FXLeaders).",
@@ -512,10 +512,10 @@
    ],
    "snap": {
     "board24": 14460.0,
-    "gold_usd": 4091.699951,
+    "gold_usd": null,
     "usdinr": 94.047485
    },
-   "summary": "gold +0.5%, news led by inflation",
+   "summary": "news led by inflation",
    "themes": {
     "dollar": 2,
     "india_demand": 2,
