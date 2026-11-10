@@ -2,94 +2,16 @@
  "note": "Answers the owner approved from real visitor questions to Sona, the site assistant. Exported daily from the private database by bot_learn.py; only approved questions and answers are kept here, never the raw questions.",
  "answers": [
   {
-   "q": "What are the best gold offers today?",
-   "a": "You can check today's top jeweller offers and deals on our offers page.",
-   "u": "/gold-offers-today",
-   "d": "2026-10-27"
-  },
-  {
-   "q": "How do gold rates compare across different jewellers?",
-   "a": "We compare published rates from many jewellers every day so you can check and compare them side by side.",
-   "u": "/gold-rate-by-jeweller",
-   "d": "2026-10-27"
-  },
-  {
-   "q": "Which jeweller has the cheapest 22K gold rate today?",
-   "a": "You can check today's cheapest 22K gold rate across our listed jewellers on our market page.",
-   "u": "/gold-market-today",
-   "d": "2026-10-27"
-  },
-  {
-   "q": "How can I check prices after offers?",
-   "a": "You can view current jeweller offers and deals to see how they affect the final price on our offers page.",
-   "u": "/gold-offers-today",
-   "d": "2026-10-27"
-  },
-  {
-   "q": "Where can I compare making charges?",
-   "a": "You can compare making charges across different jewellers and designs on our making charges comparison page.",
-   "u": "/making-charges-comparison",
-   "d": "2026-10-27"
-  },
-  {
-   "q": "How do gold rates compare at other jewellers?",
-   "a": "You can browse daily rates from multiple jewellers side by side on our jeweller rates page.",
-   "u": "/gold-rate-by-jeweller",
-   "d": "2026-10-27"
-  },
-  {
-   "q": "What can you help me with on this site?",
-   "a": "I can help you compare daily gold rates, making charges, and offers from jewellers across different cities. You can also explore guides on gold purity and hallmarking, or calculate jewellery prices.",
-   "u": "/about",
-   "d": "2026-10-28"
-  },
-  {
-   "q": "Is a discount on making charges a good deal?",
-   "a": "A discount on making charges is only worth it if the remaining fee is lower than what other jewellers charge without offers. The discount applies only to crafting fees, never to the gold itself. Always compare the final price rather than the size of the discount.",
-   "u": "/gold-offers-today",
-   "d": "2026-10-28"
-  },
-  {
-   "q": "How is the price of gold jewellery calculated?",
-   "a": "The total price is calculated from the gold value for its weight and karat, plus making charges, any stone costs, and GST on the total amount. You can see the full price breakdown on our calculators page.",
-   "u": "/calculators",
-   "d": "2026-10-29"
-  },
-  {
-   "q": "Can you provide a price breakup?",
-   "a": "Yes! You can see the complete price breakup including gold value, making charges, and GST on our calculators page.",
-   "u": "/calculators",
-   "d": "2026-10-31"
-  },
-  {
-   "q": "Where can I find D.P. Jewellers rates?",
-   "a": "You can check D.P. Jewellers' daily rates, offers, and making charges right here on our D.P. Jewellers page.",
-   "u": "/dp-jewellers-gold-rate-today",
-   "d": "2026-10-31"
-  },
-  {
-   "q": "Where can I find Manubhai Jewellers rates?",
-   "a": "You can check Manubhai Jewellers' daily gold rates, making charges and offers on their dedicated page.",
+   "q": "What are the gold rates and details for Manubhai Jewellers?",
+   "a": "You can check today's gold rates, making charges and offers for Manubhai Jewellers on their dedicated page on our site.",
    "u": "/manubhai-jewellers-gold-rate-today",
-   "d": "2026-11-03"
+   "d": "2026-11-10"
   },
   {
-   "q": "Where can I check today's best gold offers?",
-   "a": "You can view the latest offers and discounts from top jewellers on our offers page to find the best deal.",
-   "u": "/gold-offers-today",
-   "d": "2026-11-03"
-  },
-  {
-   "q": "Where can I check gold coin prices?",
-   "a": "You can find today's gold coin prices and compare rates across different jewellers on our gold coin price page.",
-   "u": "/gold-coin-price-today",
-   "d": "2026-11-03"
-  },
-  {
-   "q": "Where can I find gold coin prices?",
-   "a": "You can check today's prices for 24K and 22K gold coins on our gold coin price page.",
-   "u": "/gold-coin-price-today",
-   "d": "2026-11-05"
+   "q": "What are the gold rates in Thane?",
+   "a": "Check our Mumbai city page for today's gold rates, published jeweller comparisons, and offers near Thane.",
+   "u": "/gold-rate-today-in-mumbai",
+   "d": "2026-11-10"
   }
  ]
 }

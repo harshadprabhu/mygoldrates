@@ -531,3 +531,15 @@ def test_a_new_piece_question_forgets_the_old_jeweller():
 def test_it_without_a_price_question_is_not_tied_to_the_last_jeweller():
     got = _sona([{"lang": "en", "q": "tanishq gold rate"}, {"q": "is it a good time to buy gold"}])
     assert got[1]["intent"] == "faq"
+
+
+def test_a_named_jeweller_gets_its_own_figures_not_the_rates_faq():
+    """"What are the gold rates and details for Manubhai Jewellers?" got the
+    FAQ on why jewellers' rates differ: "rates" + "jewellers" scored over
+    the bar before the jeweller was looked at (owner, 10 Nov 2026)."""
+    for q in ("What are the gold rates and details for Manubhai Jewellers?",
+              "What are the rates for Kalyan Jewellers", "gold rates for Manubhai Jewellers"):
+        r = _sona([{"lang": "en", "q": q}])[0]
+        assert r["intent"] == "rate_brand", (q, r["intent"])
+    # the FAQ still answers the general question
+    assert _sona([{"lang": "en", "q": "why do jewellers charge different gold rates"}])[0]["intent"] == "faq"
