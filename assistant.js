@@ -790,7 +790,10 @@
     if (w) return aPrice(w, k, bs, ct);
     if (has(tx, W.trend) && !bs.length) return aTrend(k);
     var search = aSearch(tx);
-    if (search && search.score > 0.9) return search;
+    // a named jeweller is answered with its own figures: "gold rates for
+    // Manubhai Jewellers" matched the FAQ on why jewellers' rates differ
+    // (owner, 10 Nov 2026)
+    if (search && search.score > 0.9 && !bs.length) return search;
     if (search && /\b(dubai|uae|abroad|singapore|overseas|foreign)\b/.test(tx)) return search;   // not "cheapest here"
     if (has(tx, W.cheap)) return aCheapest(k, c);
     if (bs.length) return aBrand(bs[0], k);
