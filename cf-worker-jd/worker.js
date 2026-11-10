@@ -289,7 +289,6 @@ export default {
         case 'POST /sub/confirm': return wrap(await handleSubConfirm(request, env));
         case 'POST /sub/google':  return wrap(await handleSubGoogle(request, env));
         case 'GET /page/manubhai': return wrap(await handlePage('manubhai', env));
-        case 'GET /page/lagubandhu': return wrap(await handlePage('lagubandhu', env));
         case 'GET /geo':          return wrap(handleGeo(request));
         case 'POST /push/subscribe':   return wrap(await handlePush(request, env, true));
         case 'POST /push/unsubscribe': return wrap(await handlePush(request, env, false));
@@ -1032,7 +1031,7 @@ async function handleSubGoogle(request, env) {
 // collect.py reads either and checks the page's date as usual, so an old
 // snapshot is refused, never published. One fixed URL per slug, no URL
 // parameter: this cannot be pointed anywhere else.
-const RATE_PAGES = { manubhai: 'https://manubhai.in/', lagubandhu: 'https://lagubandhu.in/' };
+const RATE_PAGES = { manubhai: 'https://manubhai.in/' };
 const PAGE_HEADERS = {
   'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
                 + '(KHTML, like Gecko) Chrome/126.0 Safari/537.36',
