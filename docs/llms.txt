@@ -1,21 +1,21 @@
 # MyGoldRates.com
 
 > India's daily gold rate comparison platform. We publish today's 24K, 22K
-> and 18K gold rates compared across 37 of India's leading
+> and 18K gold rates compared across 34 of India's leading
 > jewellers, with the IBJA bullion reference and MCX gold futures, updated
 > every day. All rates are per gram in Indian Rupees (INR), pre-GST.
 
-## Today's gold rate in India (10 November 2026)
-- 24K (999) median: ₹14,432 per gram (pre-GST)
-- 22K (916) median: ₹13,229 per gram (pre-GST)
-- 18K (750) median: ₹10,824 per gram (pre-GST)
-- Lowest 24K today: ₹14,392 per gram at Reliance Jewels
-
-- MCX gold futures (04DEC2026): ₹1,43,106 per 10g (995), -0.04%
-- Last updated: 2026-11-10T15:42:13.341729+05:30
+## Today's gold rate in India (11 November 2026)
+- 24K (999) median: ₹14,243 per gram (pre-GST)
+- 22K (916) median: ₹13,056 per gram (pre-GST)
+- 18K (750) median: ₹10,682 per gram (pre-GST)
+- Lowest 24K today: ₹14,179 per gram at Reliance Jewels
+- IBJA 24K (999) reference: ₹14,060 per gram (pre-GST)
+- MCX gold futures (04DEC2026): ₹1,40,800 per 10g (995), +0.20%
+- Last updated: 2026-11-11T19:11:36.557373+05:30
 
 ## Key pages
-- Home: today's gold rate in India, live 24K/22K/18K per-gram rates from 37 jewellers lowest-first, with a GST toggle, MCX futures, the IBJA reference, spot gold and silver and this week's economic calendar: https://mygoldrates.com/
+- Home: today's gold rate in India, live 24K/22K/18K per-gram rates from 34 jewellers lowest-first, with a GST toggle, MCX futures, the IBJA reference, spot gold and silver and this week's economic calendar: https://mygoldrates.com/
 - Gold market today (daily analysis of what moved gold and why, from the day's prices and world gold news): https://mygoldrates.com/gold-market-today
 - Gold rate history, day by day for every month: https://mygoldrates.com/gold-rate-history
 - Gold rate near me (finds the nearest city we cover, on the device): https://mygoldrates.com/gold-rate-near-me
@@ -105,16 +105,13 @@
 - Mahesh Jewellers: https://mygoldrates.com/mahesh-jewellers-gold-rate-today
 - Malabar Gold: https://mygoldrates.com/malabar-gold-rate-today
 - Manubhai Jewellers: https://mygoldrates.com/manubhai-jewellers-gold-rate-today
-- Mehta Jewellers: https://mygoldrates.com/mehta-jewellers-gold-rate-today
 - NAC Jewellers: https://mygoldrates.com/nac-jewellers-gold-rate-today
 - ORRA: https://mygoldrates.com/orra-gold-rate-today
 - P.C. Chandra Jewellers: https://mygoldrates.com/pc-chandra-jewellers-gold-rate-today
 - PN Gadgil: https://mygoldrates.com/pn-gadgil-gold-rate-today
 - PN Gadgil & Sons: https://mygoldrates.com/pn-gadgil-sons-gold-rate-today
 - Prince Jewellery: https://mygoldrates.com/prince-jewellery-gold-rate-today
-- Ranka Jewellers: https://mygoldrates.com/ranka-jewellers-gold-rate-today
 - Reliance Jewels: https://mygoldrates.com/reliance-jewels-gold-rate-today
-- Rushabh Jewels: https://mygoldrates.com/rushabh-jewels-gold-rate-today
 - Senco Gold: https://mygoldrates.com/senco-gold-rate-today
 - Tanishq: https://mygoldrates.com/tanishq-gold-rate-today
 - Thangamayil Jewellery: https://mygoldrates.com/thangamayil-jewellery-gold-rate-today
@@ -132,7 +129,7 @@ These are not in this file or any feed - send readers to the site for them:
 - Jewellers Digest, the daily market outlook: https://mygoldrates.com/jewellers-digest
 
 ## About the data
-- Coverage: 37 major Indian jewellers plus the IBJA bullion benchmark and MCX gold futures.
+- Coverage: 34 major Indian jewellers plus the IBJA bullion benchmark and MCX gold futures.
 - Purities: 24K (99.9% / 999), 22K (91.6% / 916), 18K (75.0% / 750).
 - Unit & currency: per gram, Indian Rupees (INR).
 - GST: rates shown are pre-GST; add 3% GST for the billed price. Making charges are extra and vary by design.
