@@ -40,8 +40,18 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          playwright install --with-deps chromium
+          pip install -r requirements.txt || { sleep 30; pip install -r requirements.txt; }
+          # A failed browser install must not stop the run (11 Nov 2026: a DNS
+          # outage on GitHub's runner failed fetch-rates twice). Retry, then
+          # Chromium without system packages (the runner has most), then go on:
+          # only the few pages that need a browser miss this run.
+          ok=""
+          for i in 1 2 3; do
+            if playwright install --with-deps chromium; then ok=1; break; fi
+            echo "browser install failed (try $i)"; sleep $((i * 20))
+          done
+          [ -n "$ok" ] || playwright install chromium \
+            || echo "::warning title=Browser not installed::pages that need a browser are skipped this run"
 
       - name: Probe local jeweller candidates
         env:
