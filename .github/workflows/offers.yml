@@ -29,17 +29,17 @@ jobs:
       - run: |
           sudo apt-get install -y -q tesseract-ocr
           pip install requests supabase playwright pytesseract pillow numpy
-          # A failed browser install must not stop the run (11 Nov 2026: a DNS
-          # outage on GitHub's runner failed fetch-rates twice). Retry, then
-          # Chromium without system packages (the runner has most), then go on:
-          # only the few pages that need a browser miss this run.
-          ok=""
-          for i in 1 2 3; do
-            if playwright install --with-deps chromium; then ok=1; break; fi
-            echo "browser install failed (try $i)"; sleep $((i * 20))
-          done
-          [ -n "$ok" ] || playwright install chromium \
-            || echo "::warning title=Browser not installed::pages that need a browser are skipped this run"
+          # The browser must never stop the run (11 Nov 2026: GitHub's runners could
+          # not reach Ubuntu's package servers for over an hour; each attempt at
+          # --with-deps took ~10 min and the job hit its time limit). The runner
+          # already has Chrome's libraries, so: Chromium alone (from Playwright's
+          # own servers), and Ubuntu's packages only if it will not start - each
+          # capped at 5 minutes. Pages that need a browser skip a run without one.
+          timeout 300 playwright install chromium || echo "browser download failed"
+          if ! timeout 60 python -c "from playwright.sync_api import sync_playwright as s; p = s().start(); p.chromium.launch().close(); p.stop()"; then
+            timeout 300 playwright install-deps chromium \
+              || echo "::warning title=Browser not ready::pages that need a browser are skipped this run"
+          fi
       - run: python offers.py
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
