@@ -1,0 +1,73 @@
+name: ad-maker
+
+# Pinky & Gappu video ads (ad_maker.py, brand/mascots.md). Run by hand:
+#   step=sheet     make the character reference images (once); they are
+#                  committed to brand/mascots/ so every ad uses the same two
+#   step=clips     generate the scenes of an ad (Gemini Omni)
+#   step=assemble  put together the last clips of that ad with the real site
+#                  screenshot, logo and end card
+#   step=all       sheet (if missing) + clips + assemble
+# Needs the GEMINI_API_KEY secret (a paid-tier Gemini API key). The finished
+# ad and its scenes are the run's artifact "ad-<name>".
+
+on:
+  workflow_dispatch:
+    inputs:
+      step:
+        description: "sheet, clips, assemble or all"
+        default: "all"
+      ad:
+        description: "the ad's spec in brand/ads/"
+        default: "goldrate-confusion"
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: ad-maker
+
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          pip install requests playwright || { sleep 30; pip install requests playwright; }
+          timeout 300 playwright install chromium || echo "browser download failed"
+          command -v ffmpeg || timeout 300 sudo apt-get install -y ffmpeg
+      - name: Earlier clips of this ad (for step=assemble)
+        if: inputs.step == 'assemble'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          id=$(gh api "repos/${{ github.repository }}/actions/workflows/ad-maker.yml/runs?status=success&per_page=20" \
+                --jq '.workflow_runs[].id' | while read r; do
+                  gh api "repos/${{ github.repository }}/actions/runs/$r/artifacts" \
+                    --jq ".artifacts[] | select(.name==\"ad-${{ inputs.ad }}\") | .workflow_run.id" ; done | head -1)
+          [ -n "$id" ] || { echo "::error::no earlier clips of ${{ inputs.ad }} - run step=clips first"; exit 1; }
+          gh run download "$id" -n "ad-${{ inputs.ad }}" -D "out/${{ inputs.ad }}"
+      - name: Make
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python ad_maker.py "${{ inputs.step }}" "brand/ads/${{ inputs.ad }}.json"
+      - name: Keep the reference images
+        if: inputs.step == 'sheet' || inputs.step == 'all'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add brand/mascots
+          git diff --cached --quiet || { git commit -m "Pinky & Gappu reference images"; git pull --rebase -X theirs origin main && git push; }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ad-${{ inputs.ad }}
+          path: |
+            out/${{ inputs.ad }}/*.mp4
+            out/${{ inputs.ad }}/*.json
+          retention-days: 30

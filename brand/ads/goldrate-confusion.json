@@ -1,0 +1,24 @@
+{
+  "title": "Gold rate ka confusion",
+  "aspect_ratio": "9:16",
+  "resolution": "720p",
+  "style": "Cute, chunky 3D animated characters, soft rounded shapes, family-film style, warm showroom lighting. Use the reference images: the woman is Pinky, the man is Gappu - keep their faces, hair and outfits exactly. Natural, expressive Hindi voices. No subtitles, no on-screen text, no logos, no watermarks.",
+  "scenes": [
+    {
+      "duration": "10s",
+      "prompt": "Setting: a bright, warm Indian jewellery showroom with glass counters full of gold necklaces. Gappu excitedly points at a gold necklace in the counter, checks his phone and grins: gold rates are falling. The jeweller, a polite older man with spectacles, quotes a high price. Gappu's eyes pop wide; he looks at his phone, then the jeweller, then his wallet, completely confused, exaggerated cartoon reactions. Gappu says in Hindi: \"अरे! सोने का भाव तो गिर रहा है... फिर ये इतना महंगा क्यों?\" Pinky gives him a knowing, playful look and says in Hindi: \"गप्पू, सिर्फ़ भाव देखना काफ़ी नहीं है!\" She takes out her smartphone and holds it towards Gappu, the screen a plain dark screen facing the camera; Gappu leans in, curious. Light comedy music. One continuous shot."
+    },
+    {
+      "duration": "10s",
+      "prompt": "Continue the same scene: same showroom, same positions, same characters and outfits. Pinky holds her smartphone towards Gappu; the screen stays a plain dark screen. Pinky says in Hindi: \"अलग-अलग ज्वेलर्स के गोल्ड रेट और मेकिंग चार्जेस compare करो!\" Gappu stares at the phone, his eyes sparkle, then he acts like a genius: adjusts imaginary glasses, puffs his chest and nods proudly, saying in Hindi: \"अरे वाह! अब होगी असली स्मार्ट शॉपिंग!\" Pinky laughs at his over-confidence."
+    },
+    {
+      "duration": "8s",
+      "prompt": "Continue the same scene. Gappu scrolls the phone, nods, then proudly picks up the gold necklace and presents it to Pinky with a little bow. Pinky smiles and kisses his cheek. Gappu blushes bright red and nearly topples over. Cute floating hearts and a funny romantic sound. Gappu says in Hindi: \"रेट compare किए... पैसे भी बचाए... अब बीवी भी खुश!\" Pinky giggles and hugs him."
+    }
+  ],
+  "phone_insert": {"after_scene": 1, "at": "4.5s", "seconds": 2.5, "image": "brand/assets/phone-screen.png"},
+  "end_card": {"image": "brand/assets/end-card.png", "seconds": 3,
+               "voiceover": "सोना खरीदने से पहले, रेट compare करें MyGoldRates.com पर!"},
+  "logo": "docs/icon-192.png"
+}
