@@ -329,7 +329,10 @@ function handleGeo(request) {
 // in Storage, jd-reports/push/<sha256 of the address>.json, with the city
 // the visitor is in, if known. Only the site's pages may call this, and
 // only real push services' addresses are accepted.
-const PUSH_HOSTS = /(^|\.)(fcm\.googleapis\.com|push\.services\.mozilla\.com|push\.apple\.com|notify\.windows\.com|push\.api\.chromium\.org)$/;
+// The push services' own domains. 13 Nov 2026: the list named single hosts
+// (fcm.googleapis.com, ...) and a phone's real subscription was refused;
+// browsers use other hosts of the same services.
+const PUSH_HOSTS = /(^|\.)(googleapis\.com|google\.com|mozilla\.com|mozaws\.net|apple\.com|windows\.com|microsoft\.com|chromium\.org)$/;
 export function pushCheck(body) {
   const sub = body && body.sub, ep = (sub && sub.endpoint) || (body && body.endpoint);
   let u;

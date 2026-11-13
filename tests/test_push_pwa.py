@@ -71,3 +71,33 @@ def test_worker_accepts_only_real_push_services():
     assert out[:3] == ["https://fcm.googleapis.com/fcm/send/x", "https://web.push.apple.com/QA",
                        "https://updates.push.services.mozilla.com/wpush/v2/x"]
     assert out[3:] == [None, None]
+
+
+def test_phone_push_hosts_of_the_same_services_are_accepted():
+    """13 Nov 2026: a real phone's subscription was refused by a list of
+    single hosts; the services' domains are accepted now, others are not."""
+    js = """import('./cf-worker-jd/worker.js').then(m => console.log(JSON.stringify([
+      m.pushCheck({sub: {endpoint: 'https://jmt17.google.com/fcm/send/x'}}),
+      m.pushCheck({sub: {endpoint: 'https://fcm.googleapis.com/wp/x'}}),
+      m.pushCheck({sub: {endpoint: 'https://google.com.evil.example/x'}})])))"""
+    out = json.loads(subprocess.run(["node", "--input-type=module", "-e", js], capture_output=True,
+                                    text=True, check=True).stdout)
+    assert out[0] and out[1] and out[2] is None
+
+
+def test_failures_are_recorded_with_their_reason_and_shown():
+    js = pwa.CLIENT_JS
+    assert "track('push_failed:' + why)" in js and "Could not turn on notifications" in js
+
+
+def test_get_app_button_and_steps_for_every_phone():
+    js = pwa.CLIENT_JS
+    assert "Get app" in js and "Add to Home Screen" in js and "Install app" in js
+    assert "tipOpen = true" in js                       # no browser prompt: show the steps
+    assert 'class="mgr-install"' in open("pulse_app.html", encoding="utf-8").read()
+
+
+def test_hiding_stores_near_me_lasts_one_visit():
+    app = open("pulse_app.html", encoding="utf-8").read()
+    assert "sessionStorage.getItem('near_off')" in app and "localStorage.removeItem('near_off')" in app
+    assert "localStorage.setItem('near_off'" not in app

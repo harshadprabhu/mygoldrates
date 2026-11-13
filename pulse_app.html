@@ -715,7 +715,8 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 <!-- Top bar -->
 <header class="topbar">
   <div class="logo" style="display:inline-flex;align-items:center;gap:8px"><svg class="brand-mark" width="26" height="26" style="flex:none" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grx-app" x1="4" y1="38" x2="36" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#B07E12"/><stop offset=".55" stop-color="#E3BF63"/><stop offset="1" stop-color="#F4E3A6"/></linearGradient></defs><rect x="4.5" y="21" width="9" height="15" rx="1.6" fill="url(#grx-app)"/><rect x="16.5" y="12" width="9" height="24" rx="1.6" fill="url(#grx-app)"/><path d="M5 25.5 17 17 25 21 34 8.5" stroke="url(#grx-app)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M27.5 7.5 35 6.5 34.5 14" stroke="url(#grx-app)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>My<span class="g">Gold</span>Rates</span></div>
-  <div class="top-right">
+  <div class="top-right" style="display:flex;align-items:center;gap:6px">
+    <div class="mgr-install"></div>
     <div class="live-chip" id="liveChip" title="Tap to refresh live gold rate"><div class="live-dot" id="liveDot"></div><span id="liveChipTxt">Connecting…</span></div>
   </div>
 </header>
@@ -3215,8 +3216,12 @@ function handleCredentialResponse(resp){
       ipGeo={region:reg,city:nearCity};cb(ipGeo);
     }).catch(function(){if(tm)clearTimeout(tm);ipGeo=false;cb(false)});
   }
-  function nearOff(){try{return localStorage.getItem('near_off')==='1'}catch(e){return false}}
-  function setNearOff(v){try{if(v)localStorage.setItem('near_off','1');else localStorage.removeItem('near_off')}catch(e){}}
+  // "hide" lasts for this visit only (owner, 13 Nov 2026: local + national
+  // is the default; one tap on hide used to switch it off for good, in the
+  // installed app too, which shares the browser's storage)
+  try{localStorage.removeItem('near_off')}catch(e){}
+  function nearOff(){try{return sessionStorage.getItem('near_off')==='1'}catch(e){return false}}
+  function setNearOff(v){try{if(v)sessionStorage.setItem('near_off','1');else sessionStorage.removeItem('near_off')}catch(e){}}
   // a refusal is not the only way the device's location fails: say which
   var GEO_ERR={1:'Location is blocked for this site in your browser settings.',
     2:'Your device could not find its location (Location Services may be off for this browser).',
