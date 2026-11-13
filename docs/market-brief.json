@@ -610,7 +610,7 @@
   "2026-11-13": {
    "date": "2026-11-13",
    "paragraphs": [
-    "International gold is at $3,894 an ounce (+0.74% since 12 Nov), the rupee at ₹94.09 to the dollar (weaker by 0.25%), and the Indian jeweller board median at ₹13,853/g for 24K (-1.13%). In rupee terms the move came mostly from the world gold price (+0.74% gold, +0.25% USD/INR).",
+    "International gold is at $3,893 an ounce (+0.71% since 12 Nov), the rupee at ₹94.09 to the dollar (weaker by 0.25%), and the Indian jeweller board median at ₹13,853/g for 24K (-1.13%). In rupee terms the move came mostly from the world gold price (+0.71% gold, +0.25% USD/INR).",
     "What the world's gold news is about today: Indian demand (4 headlines), Records and profit-taking (4 headlines), US interest rates (3 headlines), Inflation (3 headlines).",
     "<strong>Indian demand.</strong> Festival and wedding buying, and import costs, move local premiums and the price on the jeweller board. In the news: <a href=\"https://news.google.com/rss/articles/CBMivwFBVV95cUxPc3ZZYzBMZWlVekN3ZVpZREFXeklBbkQ1cDZJYkVOdW9wN0I4c1czSUVXZEk0MERfOGhEZlVCR2hKQmU3QXFwSnlUWk1FenEzWVpuWEUxcWhWZEY0MlhxVWpneEdveHp3V1ZCZzd6UFF3cHh4TFJONjR6YnF2ZHJvTlFISGV2QTl4SGJEdzdabk8wTDVuLUFnbGZmRnhyS25SZXRFbmRuWm9rVXdKQkFsaVhDYUFXTElOdzc0dncwdw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Jewellers&#x27; strong Q2 growth masks a continued drop in gold volumes</a> (TradingView); <a href=\"https://news.google.com/rss/articles/CBMi_AFBVV95cUxQWjNwM1EzNW9sZWlSbjIxSWlQb0lkd2FTeThUc1BxemhzMy1Jbmx5RTVTRkFxc0JwbmpraDIwS2NtUG5zNDFFSDA1OGYtQkgtbE5sY3V1c21JWUJMa1MxWGxDNkhqMVNqeHNnTWhDb2hnLW5za2M2WU5EeDJ1cFJkdy1rVlU4dUZ3SUxoYVEwS1lqeWJkSmJTblM2Sk9Xd1hhU0NSN01HcHFEYmxseUU3V0tVeXIxZUNXQzZ2LW1FRHB5bEFqUlo0bzJVSzlWN3FleGFXaE94OV9VMFkxZG1TeXJwNGFmclpnQVkyb0xLLVJFYVlmRTlhSTBUblc?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Prices Today, November 13, 2026: 24K Rate Falls ₹1,310 per 10 gm from Thursday; Kalyan Jewellers Slips 1.28%</a> (HDFC Sky).",
     "<strong>Records and profit-taking.</strong> Big moves feed on themselves for a while, and sharp rallies attract profit-taking. In the news: <a href=\"https://news.google.com/rss/articles/CBMingFBVV95cUxNNTRENmZzY2lCOFZlaTdSWjItU3VUQXFTMTBlZk1vRUJlcGFNLTQxb0lwM1dkYlMzd2lqSUluYkFVU3FZWVltWFBMZnl3c3BZdmcxSndPZm1KU0s1ZlBqaDYyQmwwcGZSaTNOX0U1YUJ4WUJOTzhUb2FhT2h6NWpqSE1tdTVYckNrR2tsN3diakU1emxRZ3FZUEtKSHNXUQ?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Prices Plunge as Fed Rate Hike Fears Intensify</a> (Yahoo Finance); <a href=\"https://news.google.com/rss/articles/CBMikAFBVV95cUxNUlVMVVdUeGRZUkFKTmhpX1Z0dktVazYxZWw4UFRYWkhRb2NVOHEwMlRFQU5ER2RyV2U1Ujl5M3BrZ3RfbVQtci12eW4yVXl5LTVYbW5HX1pmQ2todklGWThLTHBWUUpQUWZtWExQZ0NVRU52YlFQM0VNQkV3MmRUYU1rdTFBVFBHcFlJQ2ozYWrSAcwBQVVfeXFMT1p2ME8xOGZPcFBxLVlTQnlUZ0J0MjlpQktTWC0tVlY2M2JiUjNXRFRTbzc3b0pYdTN3bFFuWEUyT0N3NHJlQloxd1AxVlBEZHR3Z3dWWHlvTWcyemItS2pNUUpsMnRJeWdCRWdhaHgzVTRoSzZXNlRCdFh3b2xqdTdjRldCMHE2OTFVSkR4d0VCcmVWM2dHa205cHJGbmYyT2J3ODFvczVrV0pLcDliam1TSmdsOFVva3k5MzdMT19vc29aLW93SlBnaDRw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Today: Gold Falls 26% From Record High</a> (Coinpedia).",
@@ -620,12 +620,11 @@
    ],
    "snap": {
     "board24": 13853.18,
-    "gold_usd": 3893.870117,
+    "gold_usd": 3892.77002,
     "usdinr": 94.086126
    },
    "summary": "gold +0.7%, news led by indian demand",
    "themes": {
-    "dollar": 1,
     "india_demand": 4,
     "inflation": 3,
     "momentum": 4,
