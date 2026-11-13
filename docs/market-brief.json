@@ -610,7 +610,7 @@
   "2026-11-13": {
    "date": "2026-11-13",
    "paragraphs": [
-    "International gold is at $3,920 an ounce (+1.40% since 12 Nov), the rupee at ₹94.09 to the dollar (weaker by 0.25%), and the Indian jeweller board median at ₹14,012/g for 24K (+0.00%). In rupee terms the move came mostly from the world gold price (+1.40% gold, +0.25% USD/INR).",
+    "International gold is at $3,915 an ounce (+1.29% since 12 Nov), the rupee at ₹94.09 to the dollar (weaker by 0.25%), and the Indian jeweller board median at ₹14,012/g for 24K (+0.00%). In rupee terms the move came mostly from the world gold price (+1.29% gold, +0.25% USD/INR).",
     "What the world's gold news is about today: US interest rates (7 headlines), Records and profit-taking (6 headlines), Inflation (4 headlines), Geopolitics and safe-haven buying (3 headlines).",
     "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMimgFBVV95cUxONHNlTHE4ZEI3YmxnQXFOaEl5TnVLVGpGZGR5Rkp3cWdSTTdCbU5rS2lJbFJqOUZvRFE3bTNtZkk5cXVDeFNsai1fNUluckNqMVhXVXgtZzNKd2F1cW9weXdxQVN3VXBWQ3pJYzlvRDRlRXprUG1uM3ZUN3k0ZGdzRm42RTJSSkZxZEZPOThpWmwyR05wZm5RVkR3?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Fed Rate Hawks Crush Gold Price $150 to New 13-Month Low</a> (BullionVault); <a href=\"https://news.google.com/rss/articles/CBMirAFBVV95cUxPVE1SVG5wb1JONGVRMnAzd0FiNFNWdnFiaTRqcHdIWVZGQldYdnVVWEJ1ZlFoTXQwZDcyUjZqRkw2TFFjcllBdVVkMTNsZnlQbHBNRG1DdE1NVzZPXy0zZ2I2Zk5mMUJyRi1fWXluV0dBNmtLV2JMQ2xobFhrVUNFbi1MajNiSEVITXZYSTBzUVVVU3VQUXZXRjN1VnYya0lUQnp2ZDRGNXVfSnJl?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Crashes Below $3,900 as Fed Rate Hike Bets Overwhelm Safe-Haven Demand</a> (Coinpaper).",
     "<strong>Records and profit-taking.</strong> Big moves feed on themselves for a while, and sharp rallies attract profit-taking. In the news: <a href=\"https://news.google.com/rss/articles/CBMikAFBVV95cUxNUlVMVVdUeGRZUkFKTmhpX1Z0dktVazYxZWw4UFRYWkhRb2NVOHEwMlRFQU5ER2RyV2U1Ujl5M3BrZ3RfbVQtci12eW4yVXl5LTVYbW5HX1pmQ2todklGWThLTHBWUUpQUWZtWExQZ0NVRU52YlFQM0VNQkV3MmRUYU1rdTFBVFBHcFlJQ2ozYWrSAZYBQVVfeXFMTWUtazR6bUVuQS1GM3dLRVV3ZTRzQm9lQmdMUlB5OWhPNHJGY1JMc0R4cmNDbkFyQ2xQTTJjbnhiQVdCNTRfa19PeTJtZnZ2NFhhZkVGb1lia0F1ckFDYXpUaGQzaHprWDZEODJxTHFhd0pYVzg4V0YyQUdxT3M2enVReDAxY3pnLW1HZUlSMm42LU9sbnRn?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Today: Gold Falls 26% From Record High</a> (Coinpedia); <a href=\"https://news.google.com/rss/articles/CBMingFBVV95cUxNNTRENmZzY2lCOFZlaTdSWjItU3VUQXFTMTBlZk1vRUJlcGFNLTQxb0lwM1dkYlMzd2lqSUluYkFVU3FZWVltWFBMZnl3c3BZdmcxSndPZm1KU0s1ZlBqaDYyQmwwcGZSaTNOX0U1YUJ4WUJOTzhUb2FhT2h6NWpqSE1tdTVYckNrR2tsN3diakU1emxRZ3FZUEtKSHNXUQ?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Prices Plunge as Fed Rate Hike Fears Intensify</a> (Yahoo Finance).",
@@ -620,10 +620,10 @@
    ],
    "snap": {
     "board24": 14011.775,
-    "gold_usd": 3919.600098,
+    "gold_usd": 3915.0,
     "usdinr": 94.086126
    },
-   "summary": "gold +1.4%, news led by us interest rates",
+   "summary": "gold +1.3%, news led by us interest rates",
    "themes": {
     "dollar": 2,
     "india_demand": 1,
