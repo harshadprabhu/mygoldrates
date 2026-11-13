@@ -610,7 +610,7 @@
   "2026-11-13": {
    "date": "2026-11-13",
    "paragraphs": [
-    "International gold is at $3,904 an ounce (+0.99% since 12 Nov), the rupee at ₹94.09 to the dollar (weaker by 0.25%), and the Indian jeweller board median at ₹13,876/g for 24K (-0.97%). In rupee terms the move came mostly from the world gold price (+0.99% gold, +0.25% USD/INR).",
+    "International gold is at $3,904 an ounce (+1.01% since 12 Nov), the rupee at ₹94.09 to the dollar (weaker by 0.25%), and the Indian jeweller board median at ₹13,876/g for 24K (-0.97%). In rupee terms the move came mostly from the world gold price (+1.01% gold, +0.25% USD/INR).",
     "What the world's gold news is about today: Inflation (5 headlines), US interest rates (4 headlines), Geopolitics and safe-haven buying (3 headlines), Indian demand (3 headlines).",
     "<strong>Inflation.</strong> Gold is held as an inflation hedge, though hot inflation can also mean higher rates, which cuts the other way. In the news: <a href=\"https://news.google.com/rss/articles/CBMiswFBVV95cUxQbkh5Wjk0WTFTVktWMHU5cDFhX3FYS21UMi1HTkliOWs0aEo5Q0cxX2J5b2xEVkM1em9wdU5ud2tFcWF4MS02U19FeFV4NTRSWjJkM3R6NHJZYnNqZHQzSUpOMkpsVVFKREd0X0V2Skxfd0ZnNk1WandWdHpRV1VsUzdFcWtjSXlBamU4ZjZXUUI2RWZjWlRDWDFOcl8zeVVDcWZkZkRtNHl2c18yb0swN2lRaw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold price drops to over one-year low as fading Middle East peace hopes fan inflation fears</a> (Mining.com); <a href=\"https://news.google.com/rss/articles/CBMiuwFBVV95cUxOWWpPZnloMXIzaUF3cUtwdkZITzhuRnY5a1VjaV9uQzN4dl9TNDZPc1RCZktZSDlhMXNfUGNJSGxIbXUyNHNkd1hKVXBDamR6a25YbXQ5MlpockpWNVdwblRaSElPdVFIZmJRX251aEJKWWIwa205bkxfeGtNXzdtWllWTGk1TXkwOTBBRFhXN2JCWjJxVWR1MUhrQThFTU1UY1JrMElOX0QtY29XaDNzUjlLN21kS1puaU9N?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: XAU/USD Rebounds From $3,852 Ahead of PPI and Weekly Close</a> (FXLeaders).",
     "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMingFBVV95cUxNNTRENmZzY2lCOFZlaTdSWjItU3VUQXFTMTBlZk1vRUJlcGFNLTQxb0lwM1dkYlMzd2lqSUluYkFVU3FZWVltWFBMZnl3c3BZdmcxSndPZm1KU0s1ZlBqaDYyQmwwcGZSaTNOX0U1YUJ4WUJOTzhUb2FhT2h6NWpqSE1tdTVYckNrR2tsN3diakU1emxRZ3FZUEtKSHNXUQ?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Prices Plunge as Fed Rate Hike Fears Intensify</a> (Yahoo Finance); <a href=\"https://news.google.com/rss/articles/CBMimgFBVV95cUxONHNlTHE4ZEI3YmxnQXFOaEl5TnVLVGpGZGR5Rkp3cWdSTTdCbU5rS2lJbFJqOUZvRFE3bTNtZkk5cXVDeFNsai1fNUluckNqMVhXVXgtZzNKd2F1cW9weXdxQVN3VXBWQ3pJYzlvRDRlRXprUG1uM3ZUN3k0ZGdzRm42RTJSSkZxZEZPOThpWmwyR05wZm5RVkR3?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Fed Rate Hawks Crush Gold Price $150 to New 13-Month Low</a> (BullionVault).",
@@ -620,7 +620,7 @@
    ],
    "snap": {
     "board24": 13876.365,
-    "gold_usd": 3903.570068,
+    "gold_usd": 3904.419922,
     "usdinr": 94.086126
    },
    "summary": "gold +1.0%, news led by inflation",
