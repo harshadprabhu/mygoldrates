@@ -2395,7 +2395,9 @@ def main():
     # popup must reach browsers that cached the old file for a day.
     _assist_src = sona_bundle()
     assist_ver = hashlib.md5(_assist_src.encode()).hexdigest()[:8]
-    sig_ver = hashlib.md5((SIGNUP_JS + alerts_pop_js + assist_ver).encode()).hexdigest()[:8]
+    # pwa.js too (13 Nov 2026): installed apps kept a day-old copy
+    import pwa as _pwa_v
+    sig_ver = hashlib.md5((SIGNUP_JS + alerts_pop_js + assist_ver + _pwa_v.CLIENT_JS).encode()).hexdigest()[:8]
     gate_html = GATE_HTML if gclient else ""
     gate_js   = GATE_JS   if gclient else ""
     # Freshness signals for Google / social crawlers. updated_http is an
@@ -5230,6 +5232,7 @@ document.getElementById('mkGo').addEventListener('click',function(){
         # the board has more. Answer engines quote these lines, so they
         # must carry the real count. Flows into every city page too.
         pulse_html = re.sub(r"14\+(?=\s)", str(_nj), pulse_html)
+        pulse_html = pulse_html.replace('<script src="/pwa.js" defer>', f'<script src="/pwa.js?v={sig_ver}" defer>')
         # Homepage now lives at docs/index.html - overwrites what TEMPLATE
         # used to write (that content is at docs/compare.html now).
         with open("docs/index.html", "w", encoding="utf-8") as f:
@@ -7499,7 +7502,7 @@ $nd_footer
 <script src="signup.js?v=$sig_ver" defer></script>
 <script src="$site_url/alerts-pop.js?v=$sig_ver" defer></script>
 <script src="$site_url/assistant.js?v=$sig_ver" defer></script>
-<script src="$site_url/pwa.js" defer></script>
+<script src="$site_url/pwa.js?v=$sig_ver" defer></script>
 </body>
 </html>
 """)
@@ -7603,7 +7606,7 @@ $nd_footer
 <script src="$site_url/signup.js?v=$sig_ver" defer></script>
 <script src="$site_url/alerts-pop.js?v=$sig_ver" defer></script>
 <script src="$site_url/assistant.js?v=$sig_ver" defer></script>
-<script src="$site_url/pwa.js" defer></script>
+<script src="$site_url/pwa.js?v=$sig_ver" defer></script>
 $extra_js
 </body>
 </html>

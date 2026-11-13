@@ -56,7 +56,8 @@ def test_pages_carry_the_manifest_and_script():
     assert '<link rel="manifest" href="/manifest.webmanifest">' in app and '<script src="/pwa.js" defer>' in app
     assert app.count('class="mgr-push"') == 2
     gs = open("generate_site.py", encoding="utf-8").read()
-    assert gs.count('<script src="$site_url/pwa.js" defer></script>') >= 2
+    assert gs.count('<script src="$site_url/pwa.js?v=$sig_ver" defer></script>') >= 2
+    assert "pwa.js?v={sig_ver}" in gs                      # a new copy reaches installed apps at once
 
 
 def test_worker_accepts_only_real_push_services():
