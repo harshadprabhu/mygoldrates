@@ -177,7 +177,7 @@ def main():
 
     funnel(url, h, rows)
     popup_audit(url, h)
-    client_errors(url, h)
+    client_errors(url, h, days=10)
 
 
 def popup_audit(url, h, days=14):
@@ -245,6 +245,14 @@ def client_errors(url, h, days=3):
     for t, n in Counter(x["target"] for x in ce).most_common(20):
         print(f"  {n:4d}  {t}")
     for x in sorted(ce, key=lambda x: x["created_at"], reverse=True)[:10]:
+        print(f"  {x['created_at'][:19]}  {x.get('page')}  {x['target']}")
+    # the app and its notifications (pwa.js): installs, bell taps and why
+    # a subscription did not happen (refused, failed)
+    pw = _all(url, h, "click_events", "created_at,target,page", {"day": f"gte.{since}", "target": "like.pwa:*"}) or []
+    print(f"\n== APP / NOTIFICATION EVENTS, last {days} days ({len(pw)}) ==")
+    for t, n in Counter(x["target"] for x in pw).most_common(20):
+        print(f"  {n:4d}  {t}")
+    for x in sorted(pw, key=lambda x: x["created_at"], reverse=True)[:15]:
         print(f"  {x['created_at'][:19]}  {x.get('page')}  {x['target']}")
 
 
