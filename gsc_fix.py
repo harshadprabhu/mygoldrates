@@ -82,6 +82,24 @@ def main():
                 print(f"  submit {path}: {type(e).__name__}: {str(e)[:160]}")
         print("== SITEMAPS AFTER ==")
         list_sitemaps(svc, site)
+    # where the site stands for the searches that matter (owner, 14 Nov 2026)
+    import datetime as _dt
+    end = _dt.date.today() - _dt.timedelta(days=2)
+    start = end - _dt.timedelta(days=27)
+    print(f"== TARGET SEARCHES, {start}..{end} (Google) ==")
+    try:
+        rows = svc.searchanalytics().query(siteUrl=site, body={
+            "startDate": str(start), "endDate": str(end), "dimensions": ["query", "page"], "rowLimit": 2000,
+            "dimensionFilterGroups": [{"filters": [{"dimension": "query", "operator": "contains",
+                                                     "expression": "gold"}]}]}).execute().get("rows", [])
+        rows.sort(key=lambda r: -r["impressions"])
+        for r in rows[:30]:
+            q, pg = r["keys"]
+            print(f"  impr={r['impressions']:>5} clicks={r['clicks']:>3} pos={r['position']:5.1f} | {q} | {pg.replace(SITE_URL, '') or '/'}")
+        if not rows:
+            print("  (no gold searches with impressions yet)")
+    except Exception as e:
+        print(f"  search analytics: {type(e).__name__}: {str(e)[:150]}")
     print("== KEY PAGES (URL Inspection) ==")
     for p in KEY_PAGES:
         u = SITE_URL + p
