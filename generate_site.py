@@ -381,7 +381,7 @@ def site_links_html():
     states = [p for p in LOCATIONS if PLACE_STATE.get(p) == p]
     return (
         '<nav class="sl" aria-label="Site">'
-        f'<a href="{SITE_URL}/">Today&rsquo;s gold rates</a>'
+        f'<a href="{SITE_URL}/">Gold rate today</a>'
         f'<a href="{SITE_URL}/dhanteras-gold-report-2026">Dhanteras 2026 report</a>'
         f'<a href="{SITE_URL}/calculators">Gold calculators</a>'
         f'<a href="{SITE_URL}/making-charges-comparison">Making charges</a>'
@@ -2820,10 +2820,10 @@ def main():
             for prop in ('property="og:description"', 'name="twitter:description"'):
                 h = sub(r'(<meta ' + prop + r' content=")[^"]*', r"\g<1>" + esc(desc).replace("\\", "\\\\"), h)
             # headings
-            # On phones the homepage's h1 is screen-reader only. A visitor
-            # who searched for a place must see that place, so on city pages
-            # the heading is visible at the top of the price panel.
-            h = sub(r'<h1 class="sr-only">Gold Rate Today in India[^<]*</h1>',
+            # The heading is visible at the top of the price panel (the
+            # homepage's too, since 14 Nov 2026); a visitor who searched for a
+            # place sees that place.
+            h = sub(r'<h1 class="app-h1">Gold Rate Today in India<span class="app-h1s">[^<]*</span></h1>',
                     ('<h1 style="margin:2px 16px 6px;text-align:center;'
                      'font-family:\'Playfair Display\',Georgia,serif;'
                      'font-size:22px;font-weight:700;line-height:1.25;'
@@ -5108,6 +5108,27 @@ document.getElementById('mkGo').addEventListener('click',function(){
             pulse_html = pulse_html.replace(
                 "null/*MC_INLINE*/",
                 json.dumps(_mc_inline, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"), 1)
+        # "gold rate today" (owner, 14 Nov 2026): the homepage answers the
+        # search in plain text the way the city pages do - today's rate in one
+        # sentence, the weights people buy and the last 10 days - so Google
+        # has more than a live widget to rank. Built from our daily readings.
+        _hp = rate_panel("India")
+        if _hp:
+            _hp_css = ('<style>.home-rp{color:var(--text,#eee)}'
+                       '.home-rp .local-tbl{width:100%;border-collapse:collapse;font-size:14px}'
+                       '.home-rp .local-tbl th,.home-rp .local-tbl td{padding:8px 6px;'
+                       'border-bottom:1px solid rgba(255,255,255,.08);text-align:right;white-space:nowrap}'
+                       '.home-rp .local-tbl th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;'
+                       'opacity:.6;font-weight:500}'
+                       '.home-rp .local-tbl th:first-child,.home-rp .local-tbl td:first-child{text-align:left}'
+                       '.home-rp a{color:var(--gold,#d4af37)}</style>')
+            pulse_html = pulse_html.replace(
+                "<!--SITE_LINKS_APP-->",
+                f'{_hp_css}<div class="home-rp" style="margin:20px 12px 0">{_hp}</div><!--SITE_LINKS_APP-->', 1)
+            pulse_html = pulse_html.replace(
+                '<footer class="site-footer">',
+                f'<section class="home-rp" style="padding:40px 0 10px"><div class="site-container">'
+                f'{_hp}</div></section><footer class="site-footer">', 1)
         _site_links = site_links_html()
         for _mark in ("<!--SITE_LINKS_APP-->", "<!--SITE_LINKS_SITE-->"):
             if _mark not in pulse_html:
