@@ -21,7 +21,7 @@ def service():
     from googleapiclient.discovery import build
     info = json.loads(os.environ["GSC_SERVICE_ACCOUNT_JSON"])
     creds = service_account.Credentials.from_service_account_info(
-        info, scopes=["https://www.googleapis.com/auth/webmasters.readonly"])
+        info, scopes=["https://www.googleapis.com/auth/webmasters"])
     return build("searchconsole", "v1", credentials=creds, cache_discovery=False)
 
 
@@ -81,6 +81,20 @@ def main():
                 print(f" -- top {dim} ({tot} distinct) --")
                 for r in rows[:n]:
                     print(f"  i={r['impressions']:>5} c={r['clicks']:>3} pos={r['position']:5.1f} | {short(r['keys'][0])}")
+        # are the pages that carried the traffic still in Google's index?
+        a, b = windows[0][1], windows[0][2]
+        top = sorted(q(svc, site, a, b, ["page"], 1000), key=lambda r: -r["impressions"])[:25]
+        print("\n== BEST-WINDOW PAGES: INDEX STATUS NOW ==")
+        for r in top:
+            u = r["keys"][0]
+            try:
+                ix = svc.urlInspection().index().inspect(body={"inspectionUrl": u, "siteUrl": site}).execute()
+                ix = ix.get("inspectionResult", {}).get("indexStatusResult", {})
+                gc = ix.get("googleCanonical")
+                print(f"  {short(u)} | {ix.get('coverageState')} | crawled={str(ix.get('lastCrawlTime'))[:10]}"
+                      + (f" | google canonical={short(gc)}" if gc and gc != u else ""))
+            except Exception as e:
+                print(f"  {short(u)} | {type(e).__name__}: {str(e)[:100]}")
         print("\n== KEY SEARCHES BY MONTH (impressions, pos, top page) ==")
         for kq in KEY_Q:
             rows = q(svc, site, start, end, ["date", "page"], 25000,
