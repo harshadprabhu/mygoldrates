@@ -97,8 +97,12 @@ def main():
         a, b = windows[0][1], windows[0][2]
         top = sorted(q(svc, site, a, b, ["page"], 1000), key=lambda r: -r["impressions"])[:25]
         print("\n== BEST-WINDOW PAGES: INDEX STATUS NOW ==")
+        urls = []
         for r in top[:18]:
-            u = r["keys"][0]
+            urls.append(r["keys"][0])
+            if "://www." in r["keys"][0]:
+                urls.append(r["keys"][0].replace("://www.", "://"))   # the address we serve now
+        for u in urls:
             try:
                 ix = svc.urlInspection().index().inspect(body={"inspectionUrl": u, "siteUrl": site}).execute()
                 ix = ix.get("inspectionResult", {}).get("indexStatusResult", {})
