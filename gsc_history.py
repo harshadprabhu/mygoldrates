@@ -60,6 +60,18 @@ def main():
             d = dt.date.fromisoformat(r["keys"][0]); k = d - dt.timedelta(days=d.weekday())
             a = wk.setdefault(k, [0, 0, 0.0])
             a[0] += r["clicks"]; a[1] += r["impressions"]; a[2] += r["position"] * r["impressions"]
+        # which form of the address carried the impressions, by month
+        import re as _re
+        pr = q(svc, site, start, end, ["date", "page"], 25000)
+        form = collections.defaultdict(collections.Counter)
+        for r in pr:
+            u = r["keys"][1]
+            host = _re.match(r"https?://[^/]+", u).group(0)
+            kind = host + (" .html" if u.endswith(".html") else "") + (" ?query" if "?" in u else "")
+            form[r["keys"][0][:7]][kind] += r["impressions"]
+        print("== IMPRESSIONS BY ADDRESS FORM, BY MONTH ==")
+        for m in sorted(form):
+            print(f"  {m}: " + ", ".join(f"{k}={v}" for k, v in form[m].most_common()))
         print("== WEEKLY (week of, clicks, impressions, avg pos) ==")
         for k, (c, i, pw) in wk.items():
             print(f"  {k} c={c:>4} i={i:>6} pos={pw / i if i else 0:5.1f}")
@@ -85,13 +97,13 @@ def main():
         a, b = windows[0][1], windows[0][2]
         top = sorted(q(svc, site, a, b, ["page"], 1000), key=lambda r: -r["impressions"])[:25]
         print("\n== BEST-WINDOW PAGES: INDEX STATUS NOW ==")
-        for r in top:
+        for r in top[:18]:
             u = r["keys"][0]
             try:
                 ix = svc.urlInspection().index().inspect(body={"inspectionUrl": u, "siteUrl": site}).execute()
                 ix = ix.get("inspectionResult", {}).get("indexStatusResult", {})
                 gc = ix.get("googleCanonical")
-                print(f"  {short(u)} | {ix.get('coverageState')} | crawled={str(ix.get('lastCrawlTime'))[:10]}"
+                print(f"  {u} | {ix.get('coverageState')} | crawled={str(ix.get('lastCrawlTime'))[:10]}"
                       + (f" | google canonical={short(gc)}" if gc and gc != u else ""))
             except Exception as e:
                 print(f"  {short(u)} | {type(e).__name__}: {str(e)[:100]}")
