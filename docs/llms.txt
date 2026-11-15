@@ -5,14 +5,14 @@
 > jewellers, with the IBJA bullion reference and MCX gold futures, updated
 > every day. All rates are per gram in Indian Rupees (INR), pre-GST.
 
-## Today's gold rate in India (14 November 2026)
-- 24K (999) median: ₹13,776 per gram (pre-GST)
-- 22K (916) median: ₹12,628 per gram (pre-GST)
-- 18K (750) median: ₹10,332 per gram (pre-GST)
+## Today's gold rate in India (15 November 2026)
+- 24K (999) median: ₹13,762 per gram (pre-GST)
+- 22K (916) median: ₹12,615 per gram (pre-GST)
+- 18K (750) median: ₹10,321 per gram (pre-GST)
 - Lowest 24K today: ₹13,743 per gram at Reliance Jewels
 - IBJA 24K (999) reference: ₹13,581 per gram (pre-GST)
 - MCX gold futures (04DEC2026): ₹1,36,750 per 10g (995), +0.39%
-- Last updated: 2026-11-14T21:21:43.612166+05:30
+- Last updated: 2026-11-15T05:52:31.667231+05:30
 
 ## Key pages
 - Home: today's gold rate in India, live 24K/22K/18K per-gram rates from 36 jewellers lowest-first, with a GST toggle, MCX futures, the IBJA reference, spot gold and silver and this week's economic calendar: https://mygoldrates.com/
@@ -87,7 +87,6 @@
 - AVR Swarna Mahal: https://mygoldrates.com/avr-swarna-mahal-gold-rate-today
 - Abharan Jewellers: https://mygoldrates.com/abharan-jewellers-gold-rate-today
 - Bhima Jewels: https://mygoldrates.com/bhima-jewels-gold-rate-today
-- BlueStone: https://mygoldrates.com/bluestone-gold-rate-today
 - C Krishniah Chetty: https://mygoldrates.com/c-krishniah-chetty-gold-rate-today
 - Candere: https://mygoldrates.com/candere-gold-rate-today
 - CaratLane: https://mygoldrates.com/caratlane-gold-rate-today
@@ -102,6 +101,7 @@
 - Khazana Jewellery: https://mygoldrates.com/khazana-jewellery-gold-rate-today
 - Khimji Jewellers: https://mygoldrates.com/khimji-jewellers-gold-rate-today
 - Kisna: https://mygoldrates.com/kisna-gold-rate-today
+- Mahesh Jewellers: https://mygoldrates.com/mahesh-jewellers-gold-rate-today
 - Malabar Gold: https://mygoldrates.com/malabar-gold-rate-today
 - Manubhai Jewellers: https://mygoldrates.com/manubhai-jewellers-gold-rate-today
 - Mehta Jewellers: https://mygoldrates.com/mehta-jewellers-gold-rate-today
@@ -113,9 +113,9 @@
 - Prince Jewellery: https://mygoldrates.com/prince-jewellery-gold-rate-today
 - Ranka Jewellers: https://mygoldrates.com/ranka-jewellers-gold-rate-today
 - Reliance Jewels: https://mygoldrates.com/reliance-jewels-gold-rate-today
+- Rushabh Jewels: https://mygoldrates.com/rushabh-jewels-gold-rate-today
 - Senco Gold: https://mygoldrates.com/senco-gold-rate-today
 - Swarn Jewellers: https://mygoldrates.com/swarn-jewellers-gold-rate-today
-- Tanishq: https://mygoldrates.com/tanishq-gold-rate-today
 - Thangamayil Jewellery: https://mygoldrates.com/thangamayil-jewellery-gold-rate-today
 - Vaibhav Jewellers: https://mygoldrates.com/vaibhav-jewellers-gold-rate-today
 - Vummidi Bangaru: https://mygoldrates.com/vummidi-bangaru-gold-rate-today

@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       gsc:
-        description: "Search Console part: report (gsc_diag.py), inspect (key pages), or resubmit (remove + re-add sitemaps, then inspect; gsc_fix.py)"
+        description: "Search Console part: report (gsc_diag.py), inspect (key pages), or resubmit (remove + re-add sitemaps, then inspect; gsc_fix.py), or history (16 months, gsc_history.py)"
         default: "report"
       bing:
         description: "Bing Webmaster part (bing_report.py): report, submit (report + send key pages), links (backlinks only), or off"
@@ -37,6 +37,7 @@ jobs:
           case "$GSC_MODE" in
             resubmit) python gsc_fix.py resubmit > report.txt 2>&1 || true ;;
             inspect)  python gsc_fix.py > report.txt 2>&1 || true ;;
+            history)  python gsc_history.py > report.txt 2>&1 || true ;;
             *)        python gsc_diag.py > report.txt 2>&1 || true ;;
           esac
       - name: Bing
