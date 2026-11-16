@@ -842,6 +842,73 @@ CITY_ENRICHMENT_DATA = {
         "seasons": "Bohag Bihu, Durga Puja, Dhanteras and the wedding season.",
         "tip": "Ask whether a traditional piece is solid gold or gold-plated silver, and check the BIS hallmark and HUID on gold.",
     },
+    # 2026-11-16 (owner): pages Google still ranked after the 20 Oct
+    # clean-up (Search Console: Jharkhand ~#1 for "gold rate today",
+    # Jamshedpur ~#4, Assam ~#7; Allahabad and Mangaluru had hundreds of
+    # impressions in August) get their own local write-ups and return.
+    "Jharkhand": {
+        "state": "Jharkhand",
+        "hubs": "Main Road and Upper Bazar in Ranchi, Bistupur and Sakchi in Jamshedpur, and Bank More in Dhanbad",
+        "intro": "Jharkhand's gold buying is spread across its three big cities rather than one market: Ranchi, the capital, Jamshedpur, the steel city, and Dhanbad, the coal capital. Salaried and industrial families buy steadily through the year, with the biggest purchases for weddings and Dhanteras. National chains and long-established local jewellers sit side by side in each city's main market.",
+        "seasons": "Durga Puja, Dhanteras and Diwali, Akshaya Tritiya, and the wedding (lagan) season.",
+        "tip": "Rates differ little between Ranchi, Jamshedpur and Dhanbad at the national chains, so the making charge decides the price; ask for it in rupees for the piece you want.",
+    },
+    "Jamshedpur": {
+        "state": "Jharkhand",
+        "hubs": "Bistupur and Sakchi, the city's two main markets",
+        "intro": "Jamshedpur, India's first planned industrial city, buys gold through Bistupur and Sakchi, its two main shopping districts, where national chains and local jewellers trade close together. Steady salaried demand from the steel and automobile industries keeps gold buying active through the year, with peaks around Durga Puja and weddings.",
+        "seasons": "Durga Puja, Dhanteras and Diwali, and the wedding season.",
+        "tip": "Many families here buy gold coins and light jewellery as savings; for coins, compare the price per gram with the jewellery rate - coins often cost more per gram.",
+    },
+    "Allahabad": {
+        "state": "Uttar Pradesh",
+        "hubs": "Chowk, the old sarafa (bullion) market, and Civil Lines",
+        "intro": "Allahabad (officially Prayagraj since 2018) buys gold in Chowk, its old sarafa market of family jewellers, and in the showrooms of Civil Lines, where the national chains are. Wedding jewellery is the largest share of demand, and the city's role as a pilgrimage centre brings buyers from the surrounding districts.",
+        "seasons": "Dhanteras and Diwali, Akshaya Tritiya, and the wedding seasons from November to February and April to June.",
+        "tip": "Sarafa jewellers often quote a single all-in price; ask for the gold rate, weight, making charge and GST separately so you can compare it with the chains' rates here.",
+    },
+    "Mangaluru": {
+        "state": "Karnataka",
+        "hubs": "Hampankatta and the jewellery showrooms along K S Rao Road and Car Street",
+        "intro": "Mangaluru, on the coast of Karnataka, buys gold in the city centre around Hampankatta, where Kerala-based chains stand next to local jewellers. Many families have relatives working in the Gulf, so Dubai's gold price is a common comparison here, and coastal weddings call for heavy 22K jewellery.",
+        "seasons": "Akshaya Tritiya, Dhanteras and Diwali, and the wedding season.",
+        "tip": "If you are weighing gold bought in Dubai against buying here, compare like with like: Dubai prices exclude Indian customs duty and GST. See our Dubai gold rate page for today's figures.",
+    },
+    "Goa": {
+        "state": "Goa",
+        "hubs": "the markets of Panaji, Margao and Mapusa",
+        "intro": "Goa's gold buying is centred on its three market towns, Panaji, Margao and Mapusa, where traditional Goan jewellers and national chains trade. Weddings, both Hindu and Catholic, are the biggest occasion, and Chovoth (Ganesh Chaturthi) is a major family festival here.",
+        "seasons": "the wedding season, Chovoth (Ganesh Chaturthi), Dhanteras and Diwali, and Akshaya Tritiya.",
+        "tip": "Goa has no separate state gold price: the rates below are the same as elsewhere, so compare the making charge, which varies most between jewellers.",
+    },
+    "Erode": {
+        "state": "Tamil Nadu",
+        "hubs": "Brough Road and Nethaji Road in the town centre",
+        "intro": "Erode, the textile and turmeric trading town of western Tamil Nadu, buys gold along Brough Road and Nethaji Road, where Tamil Nadu's big regional chains and old family jewellers have showrooms. As elsewhere in the state, gold is often priced per sovereign (8 grams), and weddings drive most of the demand.",
+        "seasons": "Akshaya Tritiya, Aadi Perukku, Deepavali, and the wedding months, especially Thai (January-February).",
+        "tip": "A sovereign is 8 grams; multiply the 22K per-gram rate below by 8 to check a sovereign quote before making charges and GST.",
+    },
+    "Assam": {
+        "state": "Assam",
+        "hubs": "Fancy Bazaar in Guwahati, and the traditional jewellery workshops of Barpeta and Jorhat",
+        "intro": "Assam has its own jewellery tradition: pieces such as the Jonbiri, Gamkharu, Dugdugi and Keru, made in gold or gold-plated silver, many still crafted in Barpeta and Jorhat. Guwahati's Fancy Bazaar is the state's main gold market, and national chains have showrooms in the larger towns.",
+        "seasons": "Bohag Bihu in April, Durga Puja, Dhanteras and Diwali, and the wedding season.",
+        "tip": "Traditional Assamese pieces are often gold-plated silver; ask which it is, and for gold, check the BIS hallmark and the HUID number.",
+    },
+    "Bihar": {
+        "state": "Bihar",
+        "hubs": "Bakarganj, Patna's old sarafa market, and the showrooms of Boring Road and Fraser Road",
+        "intro": "Bihar's gold demand is led by weddings and by Dhanteras, one of the busiest gold-buying days of the year in the state. Patna's Bakarganj is the traditional sarafa market, while the national chains have showrooms in Patna and in cities such as Gaya, Bhagalpur and Muzaffarpur.",
+        "seasons": "Dhanteras and Diwali, Chhath, Akshaya Tritiya, and the lagan (wedding) season.",
+        "tip": "On Dhanteras, shops are crowded and quotes are rushed: check today's rate here and ask for the making charge in writing before you pay.",
+    },
+    "Dehradun": {
+        "state": "Uttarakhand",
+        "hubs": "Paltan Bazaar and Rajpur Road",
+        "intro": "Dehradun, the capital of Uttarakhand, buys gold in Paltan Bazaar, its old market, and along Rajpur Road, where the national chains are. Garhwali bridal jewellery, above all the large Tehri nath (nose ring) and the guloband (choker), keeps traditional gold work in demand alongside modern designs.",
+        "seasons": "the wedding season, Dhanteras and Diwali, and Akshaya Tritiya.",
+        "tip": "A traditional nath or guloband involves a lot of hand work, so its making charge can be much higher than on plain jewellery; compare it in rupees.",
+    },
     "Kolhapur": {
         "state": "Maharashtra",
         "hubs": "Gujri, the old gold market near the Mahalaxmi Temple",
@@ -879,6 +946,9 @@ INDEXED_PLACES = {
     # 2026-11-06: local write-ups added above
     "Thrissur", "Kozhikode", "Madurai", "Salem", "Tiruchirappalli", "Mysuru",
     "Vijayawada", "Amritsar", "Guwahati", "Kolhapur",
+    # 2026-11-16 (owner): still ranking in Google; local write-ups added
+    "Jharkhand", "Jamshedpur", "Allahabad", "Mangaluru", "Goa", "Erode",
+    "Assam", "Bihar", "Dehradun",
 }
 
 
@@ -2527,7 +2597,7 @@ def main():
             f'<tr><td>{w} g{" (1 sovereign)" if w == 8 else ""}</td>'
             + "".join(f'<td>{inr(round(cur * PURITY_FRACTION[k] * w))} '
                       f'{chg((cur - prev) * w, PURITY_FRACTION[k])}</td>' for k in ks)
-            + '</tr>' for w in (1, 8, 10, 100))
+            + '</tr>' for w in (1, 2, 3, 4, 5, 7, 8, 10, 100))
         hrows = ""
         for i in range(len(series) - 1, 0, -1):
             d_iso, v = series[i]
@@ -5437,7 +5507,9 @@ document.getElementById('mkGo').addEventListener('click',function(){
     # of buffer, not the longer recap window - these pages need it.
     # 2026-11-06 (owner): 30 days. The report is now each jeweller's own
     # rate and change that day, not a copy of another page.
-    DAILY_INDEX_DAYS = 30
+    # 2026-11-16 (owner): 90 days - in August the dated reports ranked ~#5
+    # for searches like "10 august 2026 gold rate".
+    DAILY_INDEX_DAYS = 90
     daily_index_cutoff = now_ist.date() - timedelta(days=DAILY_INDEX_DAYS)
     # ---- retire pages that left the site in the 2026-10-20 clean-up ----
     # Agreed with the owner. Retired pages are deleted and their addresses
@@ -7294,7 +7366,7 @@ INQUIRY_TEMPLATE = Template("""<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
-<link rel="manifest" href="$site_url/manifest.webmanifest">
+<link rel="manifest" href="$site_url/manifest.webmanifest"><script>window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__mgrBIP=e});</script>
 <meta name="robots" content="index,follow">
 $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -7487,7 +7559,7 @@ PAGE_TEMPLATE = Template("""<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
-<link rel="manifest" href="$site_url/manifest.webmanifest">
+<link rel="manifest" href="$site_url/manifest.webmanifest"><script>window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__mgrBIP=e});</script>
 $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -7556,7 +7628,7 @@ CONTENT_TEMPLATE = Template("""<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
-<link rel="manifest" href="$site_url/manifest.webmanifest">
+<link rel="manifest" href="$site_url/manifest.webmanifest"><script>window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__mgrBIP=e});</script>
 $ads_head
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -7645,7 +7717,7 @@ CONFIRM_TEMPLATE = Template("""<!DOCTYPE html>
 <link rel="icon" href="$site_url/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
-<link rel="manifest" href="$site_url/manifest.webmanifest">
+<link rel="manifest" href="$site_url/manifest.webmanifest"><script>window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__mgrBIP=e});</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 $nd_fonts
@@ -7707,7 +7779,7 @@ UNSUB_TEMPLATE = Template("""<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="48x48" href="$site_url/icon-48.png">
 <link rel="icon" type="image/svg+xml" href="$site_url/favicon.svg">
 <link rel="apple-touch-icon" href="$site_url/apple-touch-icon.png">
-<link rel="manifest" href="$site_url/manifest.webmanifest">
+<link rel="manifest" href="$site_url/manifest.webmanifest"><script>window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__mgrBIP=e});</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 $nd_fonts
