@@ -52,7 +52,6 @@ def _faq_ld(faq):
 
 def pages(kb, med, display_date, date_iso, site_url, inr):
     from datetime import date as _date
-    short = _date.fromisoformat(date_iso).strftime("%-d %b")          # "1 Nov", for titles
     by = {b["s"]: b for b in kb.get("brands", []) if b.get("r24")}
     majors = [(s, u) for s, u in MAJORS if s in by]
     e = html.escape
@@ -113,12 +112,13 @@ def pages(kb, med, display_date, date_iso, site_url, inr):
                ("How is the final bill worked out?",
                 "Gold value (rate x weight) + making charge (a % of the gold value, less any offer) + 3% GST on both, "
                 "plus a small hallmarking fee. Confirm the exact figure with the jeweller.")]
-        title = f"{ta} vs {tb} Gold Rate Today ({short}): Which Is Cheaper?"
+        # no date or figures in what search results show: Google's copy can
+        # be days old (owner, 16 Nov 2026); today's figures are on the page
+        title = f"{ta} vs {tb} Gold Rate Today: Which Is Cheaper?"
         if len(title) > 70:                    # what search results show (SEO audit, 9 Nov 2026)
-            title = f"{ta} vs {tb} Gold Rate Today ({short})"
-        desc = (f"{na} vs {nb} today: 22K {inr(a22)} vs {inr(b22)} per gram. "
-                + (f"{lo['n']} is {inr(d22)}/g cheaper. " if d22 >= 0.5 else "Same rate. ")
-                + "Making charges, offers and a 10 g ring bill compared.")
+            title = f"{ta} vs {tb} Gold Rate Today"
+        desc = (f"{na} vs {nb} gold rate today, updated every morning: 22K and 24K per gram side by side, "
+                "making charges, offers and a 10 g ring bill compared.")
         body = (f"<h1>{e(ta)} vs {e(tb)} Gold Rate Today</h1>"
                 f"<p class=\"updated-on\">{display_date} - rates read from each jeweller's own website, before GST.</p>"
                 f"<p><b>{e(verdict)}</b> {e(ring_line)}</p>" + table
@@ -157,7 +157,7 @@ def pages(kb, med, display_date, date_iso, site_url, inr):
            ("Is the cheapest rate the cheapest bill?",
             "Not always. The making charge (a % of the gold value) and its offer often decide the bill. "
             "Compare the full price for your piece; Sona on mygoldrates.com works it out for each jeweller.")]
-    hub_title = f"Compare Jewellers' Gold Rates Today ({short}): Tanishq, Kalyan, Malabar"
+    hub_title = "Compare Jewellers' Gold Rates Today: Tanishq, Kalyan, Malabar"
     hub_body = (f"<h1>Compare Jewellers' Gold Rates Today</h1><p class=\"updated-on\">{display_date} - "
                 f"{len(allb)} jewellers, 22K and 24K per gram before GST, cheapest first.</p>"
                 f"<p><b>{e(faq[0][1])}</b></p>"

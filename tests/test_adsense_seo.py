@@ -164,7 +164,7 @@ def test_city_pages_are_the_new_design_with_their_own_identity(slug, place):
     h = _read(f"{DOCS}/gold-rate-today-in-{slug}.html")
     assert 'id="v-rates"' in h, "not the new design"
     assert 'class="board-rates"' not in h, "still the old template"
-    assert f"<title>Gold Rate Today in {place} (" in h
+    assert f"<title>Gold Rate Today in {place}: " in h
     assert f'rel="canonical" href="https://mygoldrates.com/gold-rate-today-in-{slug}"' in h
     assert f'og:url" content="https://mygoldrates.com/gold-rate-today-in-{slug}"' in h
     # visible on phones, not screen-reader only
@@ -297,10 +297,11 @@ def test_only_the_latest_data_is_ever_shown():
     assert "/offers.json    /gold-offers-today    301" in gen
 
 
-def test_homepage_title_carries_the_date_and_the_searched_words():
-    """5 Nov 2026: the searches the site shows for are 'gold rate today india
-    2026', 'today gold rate', 'gold rate down today' - the title carries the
-    date and year, the description today's numbers and the day's move."""
+def test_homepage_title_is_never_stale():
+    """16 Nov 2026 (owner): Google showed a week-old dated title and figures.
+    The homepage title and description carry the searched words but no date
+    or rupee figure, so whatever copy Google shows stays true."""
     gen = _read("generate_site.py")
-    assert 'home_title = f"Gold Rate Today in India ({_day}): 24K, 22K, 18K | MyGoldRates"' in gen
-    assert "Gold rate down ₹" in gen and "Today's gold rate in India, {_day}" in gen
+    assert 'home_title = "Gold Rate Today in India: 24K, 22K, 18K Live Prices | MyGoldRates"' in gen
+    i = gen.index('home_desc = ("Today')
+    assert "{" not in gen[i:gen.index(")", i)]
