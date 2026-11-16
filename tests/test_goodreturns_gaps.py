@@ -38,7 +38,7 @@ def test_city_pages_lead_with_the_rate_panel():
     i = SRC.index("    def rate_panel(nm):")
     body = SRC[i:SRC.index("    def local_intro(", i)]
     for must in ("99.9% pure", "(1 sovereign)", "for the last {n_days} days",
-                 "for w in (1, 8, 10, 100)", "nat_trend[-11:]"):
+                 "for w in (1, 2, 3, 4, 5, 7, 8, 10, 100)", "nat_trend[-11:]"):
         assert must in body, must
     assert "return rate_panel(nm) + board_html" in SRC
 
@@ -57,7 +57,7 @@ def test_daily_report_is_brand_by_brand_and_kept_30_days():
     body = SRC[i:i + 9000]
     assert "load_rates(_prev_d)" in body           # yesterday, per jeweller
     assert '"@type": "NewsArticle"' in body
-    assert "DAILY_INDEX_DAYS = 30" in SRC
+    assert "DAILY_INDEX_DAYS = 90" in SRC
     assert "Earlier daily reports" in SRC
 
 

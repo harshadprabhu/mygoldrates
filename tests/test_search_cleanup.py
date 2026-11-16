@@ -27,7 +27,7 @@ def _const(name):
 
 def test_indexed_places_are_real_places():
     places, locs = _const("INDEXED_PLACES"), _const("LOCATIONS")
-    assert len(places) == 48
+    assert len(places) == 57
     assert places <= set(locs)
 
 
