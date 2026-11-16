@@ -11,8 +11,8 @@
 - 18K (750) median: ₹10,321 per gram (pre-GST)
 - Lowest 24K today: ₹13,743 per gram at Reliance Jewels
 - IBJA 24K (999) reference: ₹13,581 per gram (pre-GST)
-- MCX gold futures (04DEC2026): ₹1,35,743 per 10g (995), -0.70%
-- Last updated: 2026-11-16T09:40:34.970942+05:30
+- MCX gold futures (04DEC2026): ₹1,35,740 per 10g (995), -0.71%
+- Last updated: 2026-11-16T09:50:50.619039+05:30
 
 ## Key pages
 - Home: today's gold rate in India, live 24K/22K/18K per-gram rates from 37 jewellers lowest-first, with a GST toggle, MCX futures, the IBJA reference, spot gold and silver and this week's economic calendar: https://mygoldrates.com/
@@ -35,14 +35,20 @@
 
 ## Gold rate by city and state
 - Ahmedabad: https://mygoldrates.com/gold-rate-today-in-ahmedabad
+- Allahabad: https://mygoldrates.com/gold-rate-today-in-allahabad
 - Amritsar: https://mygoldrates.com/gold-rate-today-in-amritsar
 - Andhra Pradesh: https://mygoldrates.com/gold-rate-today-in-andhra-pradesh
+- Assam: https://mygoldrates.com/gold-rate-today-in-assam
 - Bengaluru: https://mygoldrates.com/gold-rate-today-in-bengaluru
 - Bhopal: https://mygoldrates.com/gold-rate-today-in-bhopal
+- Bihar: https://mygoldrates.com/gold-rate-today-in-bihar
 - Chandigarh: https://mygoldrates.com/gold-rate-today-in-chandigarh
 - Chennai: https://mygoldrates.com/gold-rate-today-in-chennai
 - Coimbatore: https://mygoldrates.com/gold-rate-today-in-coimbatore
+- Dehradun: https://mygoldrates.com/gold-rate-today-in-dehradun
 - Delhi: https://mygoldrates.com/gold-rate-today-in-delhi
+- Erode: https://mygoldrates.com/gold-rate-today-in-erode
+- Goa: https://mygoldrates.com/gold-rate-today-in-goa
 - Gujarat: https://mygoldrates.com/gold-rate-today-in-gujarat
 - Guwahati: https://mygoldrates.com/gold-rate-today-in-guwahati
 - Haryana: https://mygoldrates.com/gold-rate-today-in-haryana
@@ -50,6 +56,8 @@
 - Hyderabad: https://mygoldrates.com/gold-rate-today-in-hyderabad
 - Indore: https://mygoldrates.com/gold-rate-today-in-indore
 - Jaipur: https://mygoldrates.com/gold-rate-today-in-jaipur
+- Jamshedpur: https://mygoldrates.com/gold-rate-today-in-jamshedpur
+- Jharkhand: https://mygoldrates.com/gold-rate-today-in-jharkhand
 - Karnataka: https://mygoldrates.com/gold-rate-today-in-karnataka
 - Kerala: https://mygoldrates.com/gold-rate-today-in-kerala
 - Kochi: https://mygoldrates.com/gold-rate-today-in-kochi
@@ -60,6 +68,7 @@
 - Madhya Pradesh: https://mygoldrates.com/gold-rate-today-in-madhya-pradesh
 - Madurai: https://mygoldrates.com/gold-rate-today-in-madurai
 - Maharashtra: https://mygoldrates.com/gold-rate-today-in-maharashtra
+- Mangaluru: https://mygoldrates.com/gold-rate-today-in-mangaluru
 - Mumbai: https://mygoldrates.com/gold-rate-today-in-mumbai
 - Mysuru: https://mygoldrates.com/gold-rate-today-in-mysuru
 - Nagpur: https://mygoldrates.com/gold-rate-today-in-nagpur

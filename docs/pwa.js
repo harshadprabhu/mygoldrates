@@ -5,10 +5,14 @@
   var ios = /iPhone|iPad|iPod/.test(ua) || (nav.platform === 'MacIntel' && nav.maxTouchPoints > 1);
   var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || nav.standalone === true;
   var inApp = /Instagram|FBAN|FBAV|FB_IAB|WhatsApp|Line\/|Snapchat/.test(ua);
-  var installEvt = null, busy = false, lastErr = '', tipOpen = false;
+  // the head of every page catches Chrome's install offer before this file
+  // loads (it can fire first), so the button installs in one tap
+  var installEvt = window.__mgrBIP || null, busy = false, lastErr = '', tipOpen = false, installed = false, waiting = false;
+  if (nav.getInstalledRelatedApps && !standalone) nav.getInstalledRelatedApps().then(function (a) {
+    if (a && a.length) { installed = true; paint(); } }).catch(function () {});
   function track(n) { try { if (window.GR_TRACK) window.GR_TRACK('click_events', { page: location.pathname, target: 'pwa:' + n, session_id: window.GR_SID || '' }); } catch (_) {} }
-  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installEvt = e; paint(); });
-  window.addEventListener('appinstalled', function () { installEvt = null; track('app_installed'); paint(); });
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installEvt = e; installed = false; paint(); });
+  window.addEventListener('appinstalled', function () { installEvt = null; installed = true; tipOpen = false; track('app_installed'); paint(); });
   function pushOK() { return VAPID.length > 40 && 'serviceWorker' in nav && 'PushManager' in window && 'Notification' in window; }
   function key(s) {
     var p = '='.repeat((4 - s.length % 4) % 4), b = atob((s + p).replace(/-/g, '+').replace(/_/g, '/'));
@@ -64,6 +68,7 @@
   var PILL = 'display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:999px;border:1px solid rgba(212,175,55,.45);' +
              'background:rgba(212,175,55,.14);color:#f4e3a6;font:600 12px/1.2 system-ui,sans-serif;cursor:pointer;white-space:nowrap';
   function tip() {
+    if (installed) return 'MyGoldRates is <b>already installed</b> on this phone. Open it from your <b>home screen</b> or app drawer.';
     if (ios) return 'On iPhone: tap <b>Share</b> \u2b06\ufe0e at the bottom of Safari, then <b>Add to Home Screen</b>.';
     if (/Android/.test(ua)) return 'Tap the <b>\u22ee menu</b> (top right), then <b>Install app</b> or <b>Add to Home screen</b>.';
     return 'Click the <b>install icon</b> at the right end of the address bar, or the <b>\u22ee menu \u2192 Save and share \u2192 Install</b>.';
@@ -74,7 +79,8 @@
     state(function (st) {
       var h = '';
       if (standalone) { if (st === 'off') h = '<button type="button" data-a="on" style="' + PILL + '" aria-label="Morning gold rate notification">\ud83d\udd14 Alerts</button>'; }
-      else if (!inApp) h = '<button type="button" data-a="install" style="' + PILL + '">\ud83d\udcf2 Get app</button>';
+      else if (installed) h = '<button type="button" data-a="install" style="' + PILL + '">\u2705 App installed</button>';
+      else if (!inApp) h = '<button type="button" data-a="install" style="' + PILL + '">\ud83d\udcf2 ' + (waiting ? 'One moment\u2026' : installEvt ? 'Install app' : 'Get app') + '</button>';
       for (var i = 0; i < els.length; i++) els[i].innerHTML = h;
     });
     var t = document.getElementById('mgrTip');
@@ -82,7 +88,7 @@
       t = document.createElement('div'); t.id = 'mgrTip'; t.setAttribute('role', 'dialog');
       t.setAttribute('style', 'position:fixed;left:12px;right:12px;top:64px;z-index:99999;background:#1b160c;color:#f4e3a6;border:1px solid rgba(212,175,55,.5);' +
         'border-radius:14px;padding:14px 16px;font:14px/1.5 system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.6)');
-      t.innerHTML = '<b>\ud83d\udcf2 Install MyGoldRates</b><br>' + tip() + '<br><span style="opacity:.75;font-size:12.5px">It opens full screen, like an app, and can send you the gold rate every morning.</span>' +
+      t.innerHTML = '<b>\ud83d\udcf2 ' + (installed ? 'MyGoldRates app' : 'Install MyGoldRates') + '</b><br>' + tip() + '<br><span style="opacity:.75;font-size:12.5px">It opens full screen, like an app, and can send you the gold rate every morning.</span>' +
         '<button type="button" data-a="tipclose" style="display:block;margin-top:10px;background:none;border:0;color:#e8c766;text-decoration:underline;font:inherit;cursor:pointer">Got it</button>';
       document.body.appendChild(t);
     } else if (!tipOpen && t) t.remove();
@@ -108,6 +114,11 @@
       for (var i = 0; i < boxes.length; i++) boxes[i].innerHTML = h;
     });
   }
+  function prompt() {
+    var ev = installEvt; installEvt = null; window.__mgrBIP = null;
+    ev.prompt();
+    ev.userChoice.then(function (c) { track('install_' + ((c && c.outcome) || 'unknown')); paint(); }).catch(function () { paint(); });
+  }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('.mgr-push [data-a], .mgr-install [data-a], #mgrTip [data-a]');
     if (!b || busy) return;
@@ -116,8 +127,18 @@
     else if (a === 'tipclose') { tipOpen = false; paint(); }
     else if (a === 'install') {
       track('install_tap');
-      if (installEvt) { installEvt.prompt(); installEvt.userChoice.then(function () { installEvt = null; paint(); }); }
-      else { tipOpen = true; paint(); }      // the browser offers no prompt: show the steps
+      if (installEvt) { prompt(); return; }
+      if (installed || ios || waiting) { tipOpen = true; paint(); return; }
+      // Chrome may not have offered the install yet: wait a moment for it,
+      // then install directly; only if it never comes, show the steps
+      waiting = true; paint();
+      var n = 0, iv = setInterval(function () {
+        installEvt = installEvt || window.__mgrBIP || null;
+        if (installEvt || ++n > 12) {
+          clearInterval(iv); waiting = false;
+          if (installEvt) prompt(); else { track('install_no_prompt'); tipOpen = true; paint(); }
+        }
+      }, 250);
     }
   });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paint); else paint();

@@ -12,6 +12,13 @@
   "finance",
   "shopping"
  ],
+ "id": "/?src=app",
+ "related_applications": [
+  {
+   "platform": "webapp",
+   "url": "https://mygoldrates.com/manifest.webmanifest"
+  }
+ ],
  "icons": [
   {
    "src": "/icon-192.png",
