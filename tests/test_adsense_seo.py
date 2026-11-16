@@ -164,7 +164,7 @@ def test_city_pages_are_the_new_design_with_their_own_identity(slug, place):
     h = _read(f"{DOCS}/gold-rate-today-in-{slug}.html")
     assert 'id="v-rates"' in h, "not the new design"
     assert 'class="board-rates"' not in h, "still the old template"
-    assert f"<title>Gold Rate Today in {place} (" in h
+    assert f"<title>Gold Rate Today in {place}: " in h
     assert f'rel="canonical" href="https://mygoldrates.com/gold-rate-today-in-{slug}"' in h
     assert f'og:url" content="https://mygoldrates.com/gold-rate-today-in-{slug}"' in h
     # visible on phones, not screen-reader only

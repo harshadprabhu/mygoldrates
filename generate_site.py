@@ -3578,7 +3578,7 @@ def main():
             ], ensure_ascii=False) + "</script>")
             render_content(
                 "gold-rate-around-the-world",
-                f"Gold Rate Around the World Today ({now_ist.strftime('%-d %b')}): Dubai, Saudi, USA in INR",
+                "Gold Rate Around the World Today: Dubai, Saudi, USA in INR",
                 "International gold rates today: 24K per gram in Dubai, Saudi Arabia, USA, Russia, Kazakhstan, "
                 "Cambodia - in local currency and rupees, vs India.",
                 hbody, jsonld_block=hld)
@@ -3713,10 +3713,9 @@ def main():
                         for q, a in _cs.coin_faq(_coins)]}], ensure_ascii=False) + "</script>")
                 render_content(
                     "gold-coin-price-today",
-                    f"24K Gold Coin Price Today ({now_ist.strftime('%-d %b')}): 1g, 5g, 10g by Jeweller | MyGoldRates",
-                    f"24K gold coin price today at {len(_coins)} jewellers - 1 g, 5 g and 10 g, with each "
-                    "jeweller's own coin making charge and 3% GST. Lowest: "
-                    f"{_coins[0]['brand']}.",
+                    "24K Gold Coin Price Today: 1g, 5g, 10g by Jeweller | MyGoldRates",
+                    "24K gold coin price today at every major jeweller, updated every morning - 1 g, 5 g "
+                    "and 10 g, with each jeweller's own coin making charge and 3% GST.",
                     crumbs(("Gold Coin Price", None)) + _cs.coin_html(_coins, _upd, SITE_URL),
                     jsonld_block=_cld)
                 extra_urls.append(("gold-coin-price-today", "daily", "0.7"))
@@ -4295,10 +4294,9 @@ def main():
         }, ensure_ascii=False) + "</script>")
         render_content(
             "gold-market-today",
-            f"Gold Market Today ({display_date}): What Moved Gold and Why | MyGoldRates",
-            (f"What moved gold today: {_brief['summary']}. International price, "
-             "rupee, India's jeweller board and the world's gold news, "
-             "explained.")[:300],
+            "Gold Market Today: What Moved Gold and Why | MyGoldRates",
+            ("What moved gold today, updated every morning: the international price, "
+             "the rupee, India's jeweller board and the world's gold news, explained."),
             _body, jsonld_block=_bld)
         extra_urls.append(("gold-market-today", "hourly", "0.8"))
         print(f"brief: {_brief['summary']} | themes {_brief['themes']}")
@@ -4406,10 +4404,9 @@ b.addEventListener('click',function(){
                             for q, a in _faq]}], ensure_ascii=False) + "</script>")
         render_content(
             "gold-rate-near-me",
-            f"Gold Rate Near Me Today ({now_ist.strftime('%-d %b')}): 24K & 22K | MyGoldRates",
-            (f"Gold rate near me today: 24K {inr(med['24K'])}/g, 22K "
-             f"{inr(med['22K'])}/g. Find your nearest city and compare "
-             f"{len(live)} jewellers' live rates near you."),
+            "Gold Rate Near Me Today: 24K & 22K | MyGoldRates",
+            ("Gold rate near me today, updated every morning: find your nearest city "
+             "and compare the live 24K and 22K rates of the jewellers near you."),
             _body, extra_js=_js, jsonld_block=_nld)
         extra_urls.append(("gold-rate-near-me", "daily", "0.8"))
     except Exception as e:
@@ -4453,7 +4450,7 @@ b.addEventListener('click',function(){
                             for q, a in _ofaq]}], ensure_ascii=False) + "</script>")
         render_content(
             "gold-offers-today",
-            f"Gold Jewellery Offers Today ({now_ist.strftime('%-d %b')}): Making Charge "
+            "Gold Jewellery Offers Today: Making Charge "
             "Discounts Compared | MyGoldRates",
             ("Today's gold offers at Tanishq, Malabar, GRT and more: making-charge discounts, "
              "old-gold exchange, and a 10 g ring's real price after them."),
@@ -4713,8 +4710,8 @@ b.addEventListener('click',function(){
                 ensure_ascii=False) + "</script>")
             render_content(
                 "gold-rate-by-jeweller",
-                f"Gold Rate Today by Jeweller ({now_ist.strftime('%-d %b')}): {len(_hub_rows)} Compared | MyGoldRates",
-                (f"Gold rate today at {len(_hub_rows)} jewellers - Tanishq, Kalyan, Malabar, "
+                "Gold Rate Today by Jeweller: Every Major Jeweller Compared | MyGoldRates",
+                (f"Gold rate today at every major jeweller - Tanishq, Kalyan, Malabar, "
                  f"Joyalukkas, GRT and more - cheapest first, per gram before GST."),
                 _hub, jsonld_block=_hld)
             extra_urls.append(("gold-rate-by-jeweller", "daily", "0.8"))
