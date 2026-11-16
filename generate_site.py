@@ -2867,12 +2867,14 @@ def main():
         for nm in LOCATIONS:
             sl = loc_slug(nm)
             url = f"{SITE_URL}/gold-rate-today-in-{sl}"
-            title = (f"Gold Rate Today in {nm} ({now_ist.strftime('%-d %b')}): "
-                     f"24K, 22K, 18K | MyGoldRates")
-            desc = (f"Gold rate today in {nm}: 24K {inr(med['24K'])}/g, 22K "
-                    f"{inr(med['22K'])}/g (pre-GST) on {display_date}. Compare "
-                    f"{n_live} jewellers' live rates and the chains that "
-                    f"serve {PLACE_STATE.get(nm) or nm}.")
+            # No date or rupee figure in the title and description (owner,
+            # 16 Nov 2026): Google re-reads these pages only every few days
+            # and showed "(9 Nov)" and 9 Nov prices a week later. Wording that
+            # stays true is never stale; today's figures are on the page.
+            title = f"Gold Rate Today in {nm}: 24K, 22K, 18K Live Prices | MyGoldRates"
+            desc = (f"Today's gold rate in {nm}, updated every morning: 24K, 22K and "
+                    f"18K per gram at every major jeweller, side by side and pre-GST, "
+                    f"with the chains that serve {PLACE_STATE.get(nm) or nm}.")
             title, desc = fit_title(title), fit_desc(desc)
             h = home_html
             def sub(pattern, repl, h, count=1, flags=0):
@@ -3521,10 +3523,10 @@ def main():
             ], ensure_ascii=False) + "</script>")
             render_content(
                 f"gold-rate-today-in-{c['slug']}",
-                f"Gold Rate Today in {name} ({now_ist.strftime('%-d %b')}): "
+                f"Gold Rate Today in {name}: "
                 f"{', '.join(_short_k(k) for k, _ in c['karats'][:2])} in {c['cur']} and INR",
-                f"{name} gold rate today: 24K about {money(g)}/g, {c['karats'][1][0]} {money(g * c['karats'][1][1])}/g, "
-                f"{c['units'][-1][0].lower()} too - and the same gold in rupees ({inr(g_inr)}/g) against India's rate.",
+                f"{name} gold rate today, updated daily: 24K and {c['karats'][1][0]} per gram, "
+                f"{c['units'][-1][0].lower()} too - and the same gold in rupees against India's rate.",
                 body, jsonld_block=ld)
             extra_urls.append((f"gold-rate-today-in-{c['slug']}", "daily", "0.7"))
             _done.append((c, g, g_inr, gap, money, fx_txt))
@@ -4672,10 +4674,9 @@ b.addEventListener('click',function(){
                 _ready = _jdays.get(_sl, 0) >= 30
                 render_content(
                     _ps,
-                    f"{_nm} Gold Rate Today ({now_ist.strftime('%-d %b')}): 24K, 22K | MyGoldRates",
-                    (f"{_nm} gold rate today: 24K {inr(_lad['24K'])}/g, 22K {inr(_lad['22K'])}/g "
-                     + (f"(pre-GST), latest rate {_asof_disp}. 30-day history" if _asof else
-                        f"(pre-GST), number {_i} of {len(_ranked)} jewellers. 30-day history")
+                    f"{_nm} Gold Rate Today: 24K, 22K Price per Gram | MyGoldRates",
+                    (f"{_nm} gold rate today, updated every morning: 24K and 22K per gram "
+                     f"(pre-GST), how it compares with other jewellers, the 30-day history"
                      + (" and making charges." if _mc_html else ".")),
                     _body, jsonld_block=_ld,
                     robots=("index, follow, max-image-preview:large" if _ready else "noindex, follow"))
@@ -5042,24 +5043,12 @@ document.getElementById('mkGo').addEventListener('click',function(){
         # for (Bing, 90 days): "gold rate today india 2026", "today gold
         # rate", "gold rate today", "gold rate down today", and dated
         # headlines "gold rate today (5 Nov 2026): 24K, 22K, 18K prices".
-        # So: the date and year in the title, today's numbers, the day's
-        # move and the cheapest jeweller in the description.
-        _day = now_ist.strftime("%-d %b %Y")
-        home_title = f"Gold Rate Today in India ({_day}): 24K, 22K, 18K | MyGoldRates"
-        _move = ""
-        try:
-            if len(trend) >= 2:
-                _d22 = (nat_trend[-1][1] - nat_trend[-2][1]) * PURITY_FRACTION["22K"]
-                _move = (f" Gold rate down ₹{abs(_d22):,.0f}/g today." if _d22 <= -1 else
-                         f" Gold rate up ₹{_d22:,.0f}/g today." if _d22 >= 1 else
-                         " Unchanged from yesterday.")
-        except Exception:
-            _move = ""
-        _low_n = ((lowest.get("brands") or {}).get("name") or "") if isinstance(lowest, dict) else ""
-        home_desc = (f"Today's gold rate in India, {_day}: 24K {inr(med['24K'])}/g, "
-                     f"22K {inr(med['22K'])}/g.{_move}"
-                     + (f" Lowest: {_low_n}." if _low_n else "")
-                     + f" {_nj} jewellers compared, pre-GST.")
+        # 16 Nov 2026 (owner): no date or figures - Google showed a week-old
+        # copy; see the city pages above.
+        home_title = "Gold Rate Today in India: 24K, 22K, 18K Live Prices | MyGoldRates"
+        home_desc = ("Today's gold rate in India, updated every morning: live 24K, 22K and 18K "
+                     "per gram at every major jeweller, side by side and pre-GST. See who is "
+                     "cheapest today and how much the rate moved.")
         home_canonical = f"{SITE_URL}/"
         home_url = f"{SITE_URL}/"
         replacements = [
