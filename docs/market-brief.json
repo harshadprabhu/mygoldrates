@@ -710,18 +710,21 @@
   "2026-11-17": {
    "date": "2026-11-17",
    "paragraphs": [
-    "International gold is at $3,856 an ounce (-0.36% since 16 Nov), the rupee at ₹93.96 to the dollar (stronger by 0.47%), and the Indian jeweller board median at ₹13,680/g for 24K (-0.30%). In rupee terms the move came mostly from the rupee (-0.36% gold, -0.47% USD/INR).",
-    "No clear theme in today's gold headlines.",
+    "International gold is at $3,875 an ounce (+0.13% since 16 Nov), the rupee at ₹93.96 to the dollar (stronger by 0.47%), and the Indian jeweller board median at ₹13,680/g for 24K (-0.30%). In rupee terms the move came mostly from the rupee (+0.13% gold, -0.47% USD/INR).",
+    "What the world's gold news is about today: Inflation (1 headline).",
+    "<strong>Inflation.</strong> Gold is held as an inflation hedge, though hot inflation can also mean higher rates, which cuts the other way. In the news: <a href=\"https://news.google.com/rss/articles/CBMi6wJBVV95cUxObm1CaXhjRzFVN0tFVVljWURZem96bXo4MDJlVi1TNHU3WU1rWFhZb2ZqLW5hN2FkSTIzcE9qRVA1Wm14ZzdSaFZFWF9rVFNCNzJVNVpfMVBENkl1SGZ5bms0YlJvaFhBR2o2WlhjbmNlS0k0VktmYkxvQ0QtM3NzaUl5c1Z2OWNNX0o3YkRDUVB4ZFg5S1Z3S2hibHhiOHJWQzZUb2tzSE1FTS1vSk1XVjNaS0Vyc3B4VU9QRW5oWVpZdTBHZllMY1FPcjZYakxSaTU2NnFfd1JQcGtpcml3SW5hbG1KWVZNRk1oU2VEWDJmNllZYU52MEZVQ1JPR3BmUXNOWmxvcUctQVFCUVQ2ZTN1ekNXRGFSamRBaVU4VTJzLVFNOVp6bmplc3V2bEVLdWM5eDdBNWJPdnpERkRUMXN6VTJtdFhXd1RPSzZzT21SRk1TY2l3RHNJREdBa1pheXJUNDlhUHhORm_SAfACQVVfeXFMTi10ZVNUb0N4Y2tOeERWalV6OWFXTlpxUmt1U0l0ZlBnSWU3Zy1VX1g0Yy1fUE5lal96Q0t6RUlyWnV6d0c3WE9qdjZPakVubmVYNHdCamtVNy0zTkxxOGd4Yk9MVnFXU003WEliQS1GNjBYVkdLWk5kUUh1SjJIbnlfR056d2dwYVhJd3ljRjZxMWpxMFEzYmJhMGdwNV9aeWlIN0RPeWxoNVJTc1RKc0puc2Z2NHVqRUtlZTJWMGVocnBQS1pNa0d5SFJvYmhkLTI1VVhEQnNhd2pQb0s3VURmTHY5S1hWZDg0YlV2WThXTUZCUWFCZVpUMERLeEVjMDdLa2gwWkVrUUFuV3lWSWZSUU8yYkdtZ2ZIN1BKUFhoOXNLNmlYUkFJLU52UElkVi16UldNTmpDaERJWnhDS29ZNTBSdDZROUdzc3VQdTFXYy1ydnlBUUJCeXRJRzdtdGQ0VXBtcExZdFA2Z3I0TG4?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold prices drop 4.1% to Rs 1.36 lakh, silver slides nearly 5% to Rs 1.76 lakh on MCX; inflation data, Fe</a> (The Times of India).",
     "High-impact US data due this week: Fed Chairman Warsh Speaks, Core Retail Sales m/m, Retail Sales m/m, FOMC Meeting Minutes. Gold often moves sharply around these releases; which way is not knowable in advance.",
     "For buyers: the gap between the cheapest and dearest jeweller on our board is ₹437/g today, and making charges usually differ by more than a day's price move. Compare the <a href=\"https://mygoldrates.com/\">live rates</a> and the <a href=\"https://mygoldrates.com/making-charges-comparison\">making charges</a> before you buy."
    ],
    "snap": {
     "board24": 13680.0,
-    "gold_usd": 3855.800049,
+    "gold_usd": 3874.75,
     "usdinr": 93.959855
    },
-   "summary": "gold -0.4%",
-   "themes": {}
+   "summary": "gold +0.1%, news led by inflation",
+   "themes": {
+    "inflation": 1
+   }
   }
  }
 }
