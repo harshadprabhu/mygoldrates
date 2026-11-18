@@ -32,7 +32,13 @@ KEY_PAGES = ["/", "/gold-rate-today-in-mumbai", "/gold-rate-today-in-chennai",
              "/gold-price-gap-report", "/gold-rate-widget", "/hi/gold-rate-today",
              "/ta/gold-rate-today", "/gold-rate-history", "/gold-rate-by-jeweller",
              "/te/gold-rate-today", "/ml/gold-rate-today", "/news", "/news/daily/gold-rate-india-9-nov-2026",
-             "/gold-rate-today-in-pune", "/gold-rate-today-in-madurai"]
+             "/gold-rate-today-in-pune", "/gold-rate-today-in-madurai",
+             # re-indexed 16 Nov 2026 / blocked (403) in Oct-Nov
+             "/gold-rate-today-in-jharkhand", "/gold-rate-today-in-jamshedpur", "/gold-rate-today-in-assam",
+             "/gold-rate-today-in-allahabad", "/gold-rate-today-in-mangaluru", "/gold-rate-today-in-lucknow",
+             "/gold-rate-today-in-tamil-nadu", "/gold-rate-today-in-uttar-pradesh", "/gold-rate-today-in-hubli",
+             "/gold-rate-today-in-goa", "/gold-rate-today-in-erode", "/gold-rate-today-in-bihar",
+             "/gold-rate-today-in-dehradun"]
 
 
 def service():
