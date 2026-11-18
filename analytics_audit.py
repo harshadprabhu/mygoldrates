@@ -33,7 +33,42 @@ def fetch(table, cols, since, until):
         off += 1000
 
 
+def sona_feedback_check():
+    """The 'Rated answers, day by day' section (owner, 18 Nov 2026): call
+    bot_feedback_report as the dashboard does and compare with the raw
+    table. Counts and topics only - never the visitors' questions, since
+    this output is public."""
+    print("== SONA FEEDBACK (last 30 days) ==")
+    hi = date.today() + timedelta(days=1); lo = hi - timedelta(days=31)
+    r = requests.post(f"{URL}/rest/v1/rpc/bot_feedback_report",
+                      headers={"apikey": ANON, "Authorization": f"Bearer {ANON}", "Content-Type": "application/json"},
+                      json={"p_secret": TOKEN, "p_from": str(lo), "p_to": str(hi)}, timeout=60)
+    print("dashboard call: HTTP", r.status_code)
+    d = r.json() if r.ok else {}
+    if not isinstance(d, dict) or "error" in d or not r.ok:
+        print("  ", str(d or r.text)[:200]); return
+    rated = d.get("rated") or []
+    print(f"days listed={len(d.get('days') or [])} rated rows={len(rated)} "
+          f"with Sona's answer kept={sum(1 for x in rated if x.get('answer'))}")
+    raw = fetch("bot_questions", "id,day,helpful,answered,intent,page,rated_at,answer", lo, hi)
+    raw = [x for x in raw if not (x.get("page") or "").startswith("/__")]
+    rr = [x for x in raw if x.get("helpful") is not None]
+    print(f"RAW asked={len(raw)} rated={len(rr)} yes={sum(1 for x in rr if x['helpful'])} "
+          f"no={sum(1 for x in rr if x['helpful'] is False)} with answer={sum(1 for x in rr if x.get('answer'))} "
+          f"rated after the update={sum(1 for x in rr if x.get('rated_at'))}")
+    print("day         asked  yes  no   (dashboard yes/no)")
+    dd = {x["day"]: x for x in d.get("days") or []}
+    for k in sorted({x["day"] for x in raw})[-14:]:
+        a = [x for x in raw if x["day"] == k]
+        y = sum(1 for x in a if x.get("helpful")); n = sum(1 for x in a if x.get("helpful") is False)
+        print(f"{k}  {len(a):5} {y:4} {n:3}   ({dd.get(k, {}).get('yes')}/{dd.get(k, {}).get('no')})")
+    print("thumbs-down by topic:", Counter((x.get("intent") or "?") for x in rr if x["helpful"] is False).most_common(10))
+    print("thumbs-up by topic:  ", Counter((x.get("intent") or "?") for x in rr if x["helpful"]).most_common(10))
+    print("not answered by topic:", Counter((x.get("intent") or "?") for x in raw if not x.get("answered")).most_common(10))
+
+
 def main():
+    sona_feedback_check()
     # Which database functions the service key can call (names only), and
     # whether any of them can run arbitrary SQL. Read-only.
     r = requests.get(f"{URL}/rest/v1/", headers=H, timeout=60)

@@ -3577,7 +3577,17 @@
       if (f && !f.parentNode.getAttribute('data-done')) {
         f.classList.add('on'); f.parentNode.setAttribute('data-done', '1');
         var id = f.parentNode.getAttribute('data-id');
-        if (id) rpc('bot_feedback', { p_id: +id, p_sid: window.GR_SID || '', p_helpful: f.getAttribute('data-v') === '1' });
+        if (id) {
+          // keep the answer that was rated (owner reviews it daily); falls
+          // back to the older 3-argument call where the database has not
+          // been updated yet
+          var mm = f.closest('.sn-m'), body = { p_id: +id, p_sid: window.GR_SID || '', p_helpful: f.getAttribute('data-v') === '1' };
+          var ans = mm ? (mm.innerText || '').replace(/[\u{1F44D}\u{1F44E}]/gu, '').replace(/\s+/g, ' ').trim()
+            .replace(/[^\s@]+@[^\s@]+/g, '[email]').replace(/\+?\d[\d\s-]{6,}\d/g, '[number]').slice(0, 600) : '';
+          if (SB && KEY) fetch(SB + '/rest/v1/rpc/bot_feedback', { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY },
+            body: JSON.stringify(Object.assign({ p_answer: ans }, body)) })
+            .then(function (r) { if (!r.ok) rpc('bot_feedback', body); }).catch(function () { rpc('bot_feedback', body); });
+        }
       }
     });
     labels();

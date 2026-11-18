@@ -183,6 +183,10 @@ td.path .tx{color:var(--accent)}
       <div class="kpis small" id="botKpis"></div>
       <h3>What Sona couldn&rsquo;t answer (or got a thumbs-down)</h3>
       <div id="botUn"></div>
+      <h3>Rated answers, day by day</h3>
+      <div class="note">Every question a visitor rated &#128077; or &#128078;, with the answer Sona gave. Push what works; for a &#128078;, write the right answer with <b>Correct it</b>.</div>
+      <div class="seg" id="fbSeg" style="margin:8px 0"><button class="btn" data-fb="all">All</button> <button class="btn" data-fb="no">&#128078; Not helpful</button> <button class="btn" data-fb="yes">&#128077; Helpful</button></div>
+      <div id="botFb"></div>
       <h3>Your approved answers</h3>
       <div id="botAp"></div>
       <div class="note">An approved answer is saved to the site&rsquo;s git repository and Sona uses it from the next morning. Questions themselves stay private.</div>
@@ -684,6 +688,48 @@ td.path .tx{color:var(--accent)}
 
   // Sona: what people asked, what it could not answer, and the answers
   // the owner approves (bot_approve, gated by the same secret token).
+  // Rated answers by day (sql/bot_feedback_report.sql): what visitors
+  // marked helpful or not, with Sona's answer, and a box to correct it.
+  var FB=null,FB_V='all';
+  function loadFeedback(){
+    var box=$('botFb');box.innerHTML='<div class="msg">Loading\u2026</div>';
+    post('bot_feedback_report',{p_secret:TOKEN,p_from:ST.from,p_to:ST.to}).then(function(r){
+      if(!r.ok||!r.j||r.j.error){box.innerHTML='<div class="msg">'+(r.status===404?'Run sql/bot_feedback_report.sql in Supabase once to see this.':'Could not load ('+esc(String((r.j&&r.j.error)||r.status))+').')+'</div>';return;}
+      FB=r.j;renderFeedback();});
+  }
+  function renderFeedback(){
+    var box=$('botFb');if(!FB)return;
+    var rows=(FB.rated||[]).filter(function(x){return FB_V==='all'||(FB_V==='yes')===x.helpful;});
+    var segs=$('fbSeg').querySelectorAll('[data-fb]');
+    for(var k=0;k<segs.length;k++)segs[k].style.opacity=segs[k].getAttribute('data-fb')===FB_V?'1':'.55';
+    if(!rows.length){box.innerHTML='<div class="msg">No rated answers in this range.</div>';return;}
+    var days={},order=[];
+    (FB.days||[]).forEach(function(x){days[x.day]=x;});
+    rows.forEach(function(x){if(order.indexOf(x.day)<0)order.push(x.day);});
+    box.innerHTML=order.map(function(dy){
+      var dd=days[dy]||{},list=rows.filter(function(x){return x.day===dy;});
+      return '<div style="margin:14px 0 6px;font-weight:600">'+esc(dy)+' <span class="note" style="display:inline">&#128077; '+nfmt(dd.yes||0)+
+        ' &middot; &#128078; '+nfmt(dd.no||0)+' &middot; '+nfmt(dd.asked||0)+' asked</span></div>'+
+        '<table><tr><th>Time</th><th>Question</th><th>Sona answered</th><th></th></tr>'+list.map(function(x){
+          var i=(FB.rated||[]).indexOf(x);
+          return '<tr><td>'+esc(x.at||'')+'</td><td>'+(x.helpful?'&#128077; ':'&#128078; ')+esc(x.q)+
+            '<div class="note" style="display:block">'+esc(x.intent||'?')+(x.page?' &middot; '+esc(x.page):'')+(x.answered?'':' &middot; no answer')+'</div>'+
+            '<div class="ba" id="fb'+i+'" hidden style="margin-top:8px"><textarea rows="3" style="width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px" placeholder="The answer Sona should give"></textarea>'+
+            '<input placeholder="Optional link, e.g. /gold-offers-today" style="width:100%;margin-top:6px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px">'+
+            '<button class="btn" data-fbsave="'+i+'" style="margin-top:6px">Save answer</button> <span class="note" style="display:inline" id="fbs'+i+'"></span></div></td>'+
+            '<td style="max-width:420px;font-size:13px;opacity:.85">'+esc(x.answer||'(answer not kept - rated before 18 Nov)')+'</td>'+
+            '<td class="num"><button class="btn" data-fbfix="'+i+'">'+(x.helpful?'Edit':'Correct it')+'</button></td></tr>';}).join('')+'</table>';
+    }).join('');
+  }
+  $('fbSeg').onclick=function(e){var v=e.target.getAttribute('data-fb');if(v){FB_V=v;renderFeedback();}};
+  $('botFb').onclick=function(e){
+    var a=e.target.getAttribute('data-fbfix'),sv=e.target.getAttribute('data-fbsave');
+    if(a!=null){var f=$('fb'+a);f.hidden=!f.hidden;return;}
+    if(sv!=null){var box=$('fb'+sv),ta=box.querySelector('textarea'),u=box.querySelector('input'),st=$('fbs'+sv);
+      st.textContent='Saving\u2026';
+      post('bot_approve',{p_secret:TOKEN,p_q:FB.rated[+sv].q,p_a:ta.value,p_u:u.value}).then(function(r){
+        st.textContent=r.j==='ok'?'Saved \u2014 Sona uses it from tomorrow morning.':'Not saved: '+(r.j||r.status);});}
+  };
   function renderBot(d){
     var b=d.bot;
     if(b===undefined){$('botKpis').innerHTML='<div class="msg">Needs the updated sql/analytics_v2.sql.</div>';return;}
@@ -715,6 +761,7 @@ td.path .tx{color:var(--accent)}
       var id=e.target.getAttribute('data-unap');if(id==null)return;
       post('bot_unapprove',{p_secret:TOKEN,p_id:+id}).then(function(){load();});
     };
+    loadFeedback();
     var rf=d.referrals;
     if(rf){$('refKpis').innerHTML=tiles([['Friends joined',rf.joined],['Referrers emailed',rf.notified]]);
       plainTable($('refTop'),rf.top||[],[{h:'Referrer',k:'who'},{h:'Friends',k:'n',num:true}]);}
