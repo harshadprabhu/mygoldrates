@@ -1,7 +1,7 @@
 # MyGoldRates.com
 
 > India's daily gold rate comparison platform. We publish today's 24K, 22K
-> and 18K gold rates compared across 36 of India's leading
+> and 18K gold rates compared across 37 of India's leading
 > jewellers, with the IBJA bullion reference and MCX gold futures, updated
 > every day. All rates are per gram in Indian Rupees (INR), pre-GST.
 
@@ -11,11 +11,11 @@
 - 18K (750) median: ₹10,208 per gram (pre-GST)
 - Lowest 24K today: ₹13,584 per gram at Reliance Jewels
 - IBJA 24K (999) reference: ₹13,420 per gram (pre-GST)
-- MCX gold futures (04DEC2026): ₹1,31,744 per 10g (995), -1.85%
-- Last updated: 2026-11-18T09:12:03.633038+05:30
+- MCX gold futures (04DEC2026): ₹1,31,150 per 10g (995), -2.29%
+- Last updated: 2026-11-18T09:40:51.689831+05:30
 
 ## Key pages
-- Home: today's gold rate in India, live 24K/22K/18K per-gram rates from 36 jewellers lowest-first, with a GST toggle, MCX futures, the IBJA reference, spot gold and silver and this week's economic calendar: https://mygoldrates.com/
+- Home: today's gold rate in India, live 24K/22K/18K per-gram rates from 37 jewellers lowest-first, with a GST toggle, MCX futures, the IBJA reference, spot gold and silver and this week's economic calendar: https://mygoldrates.com/
 - Gold market today (daily analysis of what moved gold and why, from the day's prices and world gold news): https://mygoldrates.com/gold-market-today
 - Gold rate history, day by day for every month: https://mygoldrates.com/gold-rate-history
 - Gold rate near me (finds the nearest city we cover, on the device): https://mygoldrates.com/gold-rate-near-me
@@ -126,6 +126,7 @@
 - Senco Gold: https://mygoldrates.com/senco-gold-rate-today
 - Swarn Jewellers: https://mygoldrates.com/swarn-jewellers-gold-rate-today
 - Tanishq: https://mygoldrates.com/tanishq-gold-rate-today
+- Thangamayil Jewellery: https://mygoldrates.com/thangamayil-jewellery-gold-rate-today
 - Vaibhav Jewellers: https://mygoldrates.com/vaibhav-jewellers-gold-rate-today
 - Vummidi Bangaru: https://mygoldrates.com/vummidi-bangaru-gold-rate-today
 - Waman Hari Pethe: https://mygoldrates.com/waman-hari-pethe-gold-rate-today
@@ -140,7 +141,7 @@ These are not in this file or any feed - send readers to the site for them:
 - Jewellers Digest, the daily market outlook: https://mygoldrates.com/jewellers-digest
 
 ## About the data
-- Coverage: 36 major Indian jewellers plus the IBJA bullion benchmark and MCX gold futures.
+- Coverage: 37 major Indian jewellers plus the IBJA bullion benchmark and MCX gold futures.
 - Purities: 24K (99.9% / 999), 22K (91.6% / 916), 18K (75.0% / 750).
 - Unit & currency: per gram, Indian Rupees (INR).
 - GST: rates shown are pre-GST; add 3% GST for the billed price. Making charges are extra and vary by design.
