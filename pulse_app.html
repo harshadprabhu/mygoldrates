@@ -442,7 +442,8 @@ p.mc-disclaimer{font-size:10px;color:var(--text3);line-height:1.6;padding:10px 1
 #s-mc .mc-item{font-size:15px}
 #s-mc .mc-wt{width:56px;font-size:13px;padding:5px 8px}
 select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23D4A63C' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
-.qcr{display:flex;gap:8px;margin-bottom:10px}
+.qf{display:flex;flex-direction:column;gap:4px;min-width:0}.qf-g{flex:1}.qf .qci,.qf .qcs{width:100%;box-sizing:border-box}.qfl{font-size:11px;font-weight:600;letter-spacing:.2px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qcr{display:flex;gap:8px;margin-bottom:10px;align-items:flex-end}
 .qci{flex:1;background:rgba(70,52,24,0.28);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--glass-border);border-radius:9px;padding:9px 11px;color:var(--text);font-size:15px;font-family:inherit;outline:none;font-weight:500;transition:border-color .2s}
 .qci:focus{border-color:var(--gold)}
 .qci::placeholder{color:var(--text3)}
@@ -668,7 +669,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 .site-calc-card{background:var(--glass2);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:18px;padding:28px;max-width:760px;margin:0 auto}
 .site-calc-card .qc-tabs{max-width:460px;margin:0 auto 20px}
 .site-calc-body{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}
-.site-calc-body .qcr{flex-direction:column}
+.site-calc-body .qcr{flex-direction:column;align-items:stretch}
 .site-calc-body .qcres{padding:24px}
 .site-calc-body .qcres-v{font-size:34px}
 
@@ -940,36 +941,36 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 
     <!-- VALUE -->
     <div class="calc-panel" data-panel="value">
-      <div class="qcr"><input class="qci" id="cvGrams" type="number" inputmode="decimal" placeholder="Grams" value="10"><select class="qcs" id="cvPurity"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></div>
-      <div class="qcr"><select class="qci" id="cvBrand"></select></div>
+      <div class="qcr"><label class="qf qf-g"><span class="qfl">Weight (grams)</span><input class="qci" id="cvGrams" type="number" inputmode="decimal" placeholder="Grams" value="10"></label><label class="qf"><span class="qfl">Purity</span><select class="qcs" id="cvPurity"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></label></div>
+      <div class="qcr"><label class="qf qf-g"><span class="qfl">Jeweller (whose rate)</span><select class="qci" id="cvBrand"></select></label></div>
       <div class="qcres"><div class="qcres-v" id="cvRes">&#8377;1,39,440</div><div class="qcres-l">Metal value &middot; pre-GST &middot; no making</div></div>
     </div>
 
     <!-- BUDGET -->
     <div class="calc-panel" data-panel="budget" style="display:none">
-      <div class="qcr"><input class="qci" id="cbAmt" type="number" inputmode="decimal" placeholder="Budget (&#8377;)" value="100000"><select class="qcs" id="cbPurity"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></div>
-      <div class="qcr"><select class="qci" id="cbBrand"></select></div>
+      <div class="qcr"><label class="qf qf-g"><span class="qfl">Your budget (₹)</span><input class="qci" id="cbAmt" type="number" inputmode="decimal" placeholder="Budget (&#8377;)" value="100000"></label><label class="qf"><span class="qfl">Purity</span><select class="qcs" id="cbPurity"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></label></div>
+      <div class="qcr"><label class="qf qf-g"><span class="qfl">Jeweller (whose rate)</span><select class="qci" id="cbBrand"></select></label></div>
       <div class="qcres"><div class="qcres-v" id="cbRes">7.170 g</div><div class="qcres-l">Grams you can buy &middot; pre-GST</div></div>
     </div>
 
     <!-- GOLD LOAN -->
     <div class="calc-panel" data-panel="loan" style="display:none">
-      <div class="qcr"><input class="qci" id="clG" type="number" inputmode="decimal" placeholder="Grams of gold" value="20"><select class="qcs" id="clP"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></div>
-      <div class="qcr"><input class="qci" id="clLtv" type="number" inputmode="decimal" placeholder="LTV %" value="75"><input class="qcs" id="clRate" type="number" inputmode="decimal" placeholder="Interest %" value="9.5" style="min-width:82px"></div>
+      <div class="qcr"><label class="qf qf-g"><span class="qfl">Gold you pledge (grams)</span><input class="qci" id="clG" type="number" inputmode="decimal" placeholder="Grams of gold" value="20"></label><label class="qf"><span class="qfl">Purity</span><select class="qcs" id="clP"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></label></div>
+      <div class="qcr"><label class="qf qf-g"><span class="qfl">Loan-to-value (LTV %)</span><input class="qci" id="clLtv" type="number" inputmode="decimal" placeholder="LTV %" value="75"></label><label class="qf" style="min-width:82px"><span class="qfl">Interest (% a year)</span><input class="qcs" id="clRate" type="number" inputmode="decimal" placeholder="Interest %" value="9.5"></label></div>
       <div class="qcres"><div class="qcres-v" id="clLoan">&#8377;2,09,160</div><div class="qcres-l"><span id="clMonthly">EMI 12m: &#8377;18,347</span></div></div>
     </div>
 
     <!-- SIP -->
     <div class="calc-panel" data-panel="sip" style="display:none">
-      <div class="qcr"><input class="qci" id="csAmt" type="number" inputmode="decimal" placeholder="Monthly &#8377;" value="5000"><input class="qcs" id="csYrs" type="number" inputmode="decimal" placeholder="Years" value="5" style="min-width:72px"></div>
-      <div class="qcr"><input class="qci" id="csRet" type="number" inputmode="decimal" placeholder="Assumed return % p.a." value="10"></div>
+      <div class="qcr"><label class="qf qf-g"><span class="qfl">Monthly amount (₹)</span><input class="qci" id="csAmt" type="number" inputmode="decimal" placeholder="Monthly &#8377;" value="5000"></label><label class="qf" style="min-width:72px"><span class="qfl">Years</span><input class="qcs" id="csYrs" type="number" inputmode="decimal" placeholder="Years" value="5"></label></div>
+      <div class="qcr"><label class="qf qf-g"><span class="qfl">Expected return (% a year)</span><input class="qci" id="csRet" type="number" inputmode="decimal" placeholder="Assumed return % p.a." value="10"></label></div>
       <div class="qcres"><div class="qcres-v" id="csRes">&#8377;3,87,398</div><div class="qcres-l" id="csDet">Invested &#8377;3,00,000 &middot; Gain &#8377;87,398</div></div>
     </div>
 
     <!-- MAKING CHARGES -->
     <div class="calc-panel" data-panel="mc" style="display:none">
-      <div class="qcr"><input class="qci" id="cmG" type="number" inputmode="decimal" placeholder="Grams" value="10"><select class="qcs" id="cmP"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></div>
-      <div class="qcr"><select class="qci" id="cmBrand"></select><input class="qcs" id="cmPct" type="number" inputmode="decimal" placeholder="MC %" value="12" style="min-width:72px"></div>
+      <div class="qcr"><label class="qf qf-g"><span class="qfl">Weight (grams)</span><input class="qci" id="cmG" type="number" inputmode="decimal" placeholder="Grams" value="10"></label><label class="qf"><span class="qfl">Purity</span><select class="qcs" id="cmP"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></label></div>
+      <div class="qcr"><label class="qf qf-g"><span class="qfl">Jeweller</span><select class="qci" id="cmBrand"></select></label><label class="qf" style="min-width:72px"><span class="qfl">Making charge (%)</span><input class="qcs" id="cmPct" type="number" inputmode="decimal" placeholder="MC %" value="12"></label></div>
       <div class="qcres">
         <div class="qcres-v" id="cmTotal">&#8377;1,56,173</div>
         <div class="qcres-l" id="cmBreak">Metal &#8377;1,39,440 &middot; MC &#8377;16,733</div>
@@ -1007,7 +1008,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 
   <div class="mc-table-wrap">
     <table class="mc-table">
-      <thead><tr><th>Item</th><th class="num">Metal</th><th class="num">Making</th><th class="num">GST</th><th class="num">Total</th></tr></thead>
+      <thead><tr><th>Item &amp; weight (g)</th><th class="num">Metal</th><th class="num">Making</th><th class="num">GST</th><th class="num">Total</th></tr></thead>
       <tbody id="mcTableBody">
         <tr>
           <td><div class="mc-item">Bangle</div><div class="mc-wt-row"><input class="mc-wt" type="number" value="10" min="0.5" step="0.5" data-cat="Bangle">g</div></td>
@@ -1374,40 +1375,40 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 
         <div class="calc-panel site-calc-body" data-panel="value">
           <div>
-            <div class="qcr"><input class="qci" id="cvGramsS" type="number" inputmode="decimal" placeholder="Grams" value="10"><select class="qcs" id="cvPurityS"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></div>
-            <div class="qcr"><select class="qci" id="cvBrandS"></select></div>
+            <div class="qcr"><label class="qf qf-g"><span class="qfl">Weight (grams)</span><input class="qci" id="cvGramsS" type="number" inputmode="decimal" placeholder="Grams" value="10"></label><label class="qf"><span class="qfl">Purity</span><select class="qcs" id="cvPurityS"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></label></div>
+            <div class="qcr"><label class="qf qf-g"><span class="qfl">Jeweller (whose rate)</span><select class="qci" id="cvBrandS"></select></label></div>
           </div>
           <div class="qcres"><div class="qcres-v" id="cvResS">&#8377;1,39,440</div><div class="qcres-l">Metal value &middot; pre-GST &middot; no making</div></div>
         </div>
 
         <div class="calc-panel site-calc-body" data-panel="budget" style="display:none">
           <div>
-            <div class="qcr"><input class="qci" id="cbAmtS" type="number" inputmode="decimal" placeholder="Budget (&#8377;)" value="100000"><select class="qcs" id="cbPurityS"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></div>
-            <div class="qcr"><select class="qci" id="cbBrandS"></select></div>
+            <div class="qcr"><label class="qf qf-g"><span class="qfl">Your budget (₹)</span><input class="qci" id="cbAmtS" type="number" inputmode="decimal" placeholder="Budget (&#8377;)" value="100000"></label><label class="qf"><span class="qfl">Purity</span><select class="qcs" id="cbPurityS"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></label></div>
+            <div class="qcr"><label class="qf qf-g"><span class="qfl">Jeweller (whose rate)</span><select class="qci" id="cbBrandS"></select></label></div>
           </div>
           <div class="qcres"><div class="qcres-v" id="cbResS">7.170 g</div><div class="qcres-l">Grams you can buy &middot; pre-GST</div></div>
         </div>
 
         <div class="calc-panel site-calc-body" data-panel="loan" style="display:none">
           <div>
-            <div class="qcr"><input class="qci" id="clGS" type="number" inputmode="decimal" placeholder="Grams of gold" value="20"><select class="qcs" id="clPS"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></div>
-            <div class="qcr"><input class="qci" id="clLtvS" type="number" inputmode="decimal" placeholder="LTV %" value="75"><input class="qcs" id="clRateS" type="number" inputmode="decimal" placeholder="Interest %" value="9.5" style="min-width:82px"></div>
+            <div class="qcr"><label class="qf qf-g"><span class="qfl">Gold you pledge (grams)</span><input class="qci" id="clGS" type="number" inputmode="decimal" placeholder="Grams of gold" value="20"></label><label class="qf"><span class="qfl">Purity</span><select class="qcs" id="clPS"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></label></div>
+            <div class="qcr"><label class="qf qf-g"><span class="qfl">Loan-to-value (LTV %)</span><input class="qci" id="clLtvS" type="number" inputmode="decimal" placeholder="LTV %" value="75"></label><label class="qf" style="min-width:82px"><span class="qfl">Interest (% a year)</span><input class="qcs" id="clRateS" type="number" inputmode="decimal" placeholder="Interest %" value="9.5"></label></div>
           </div>
           <div class="qcres"><div class="qcres-v" id="clLoanS">&#8377;2,09,160</div><div class="qcres-l"><span id="clMonthlyS">EMI 12m: &#8377;18,347</span></div></div>
         </div>
 
         <div class="calc-panel site-calc-body" data-panel="sip" style="display:none">
           <div>
-            <div class="qcr"><input class="qci" id="csAmtS" type="number" inputmode="decimal" placeholder="Monthly &#8377;" value="5000"><input class="qcs" id="csYrsS" type="number" inputmode="decimal" placeholder="Years" value="5" style="min-width:72px"></div>
-            <div class="qcr"><input class="qci" id="csRetS" type="number" inputmode="decimal" placeholder="Assumed return % p.a." value="10"></div>
+            <div class="qcr"><label class="qf qf-g"><span class="qfl">Monthly amount (₹)</span><input class="qci" id="csAmtS" type="number" inputmode="decimal" placeholder="Monthly &#8377;" value="5000"></label><label class="qf" style="min-width:72px"><span class="qfl">Years</span><input class="qcs" id="csYrsS" type="number" inputmode="decimal" placeholder="Years" value="5"></label></div>
+            <div class="qcr"><label class="qf qf-g"><span class="qfl">Expected return (% a year)</span><input class="qci" id="csRetS" type="number" inputmode="decimal" placeholder="Assumed return % p.a." value="10"></label></div>
           </div>
           <div class="qcres"><div class="qcres-v" id="csResS">&#8377;3,87,398</div><div class="qcres-l" id="csDetS">Invested &#8377;3,00,000 &middot; Gain &#8377;87,398</div></div>
         </div>
 
         <div class="calc-panel site-calc-body" data-panel="mc" style="display:none">
           <div>
-            <div class="qcr"><input class="qci" id="cmGS" type="number" inputmode="decimal" placeholder="Grams" value="10"><select class="qcs" id="cmPS"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></div>
-            <div class="qcr"><select class="qci" id="cmBrandS"></select><input class="qcs" id="cmPctS" type="number" inputmode="decimal" placeholder="MC %" value="12" style="min-width:72px"></div>
+            <div class="qcr"><label class="qf qf-g"><span class="qfl">Weight (grams)</span><input class="qci" id="cmGS" type="number" inputmode="decimal" placeholder="Grams" value="10"></label><label class="qf"><span class="qfl">Purity</span><select class="qcs" id="cmPS"><option value="24K">24K</option><option value="22K" selected>22K</option><option value="18K">18K</option></select></label></div>
+            <div class="qcr"><label class="qf qf-g"><span class="qfl">Jeweller</span><select class="qci" id="cmBrandS"></select></label><label class="qf" style="min-width:72px"><span class="qfl">Making charge (%)</span><input class="qcs" id="cmPctS" type="number" inputmode="decimal" placeholder="MC %" value="12"></label></div>
           </div>
           <div class="qcres"><div class="qcres-v" id="cmTotalS">&#8377;1,56,173</div><div class="qcres-l" id="cmBreakS">Metal &#8377;1,39,440 &middot; MC &#8377;16,733</div></div>
         </div>
@@ -1438,7 +1439,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
       <div class="mc-callout" id="mcCalloutS"></div>
       <div class="mc-table-wrap">
         <table class="mc-table">
-          <thead><tr><th>Item</th><th class="num">Metal Value</th><th class="num">Making Charge</th><th class="num">GST (3%)</th><th class="num">Total Price</th></tr></thead>
+          <thead><tr><th>Item &amp; weight (g)</th><th class="num">Metal Value</th><th class="num">Making Charge</th><th class="num">GST (3%)</th><th class="num">Total Price</th></tr></thead>
           <tbody id="mcTableBodyS">
             <tr>
               <td><div class="mc-item">Bangle</div><div class="mc-wt-row"><input class="mc-wt" type="number" value="10" min="0.5" step="0.5" data-cat="Bangle">g</div></td>
