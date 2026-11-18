@@ -1,8 +1,8 @@
 {
- "generated_at": "2026-11-09T11:00:05.518251+00:00",
+ "generated_at": "2026-11-16T10:55:51.204326+00:00",
  "candidates": 66,
  "verified": 4,
- "promoted_inactive": 1,
+ "promoted_inactive": 0,
  "states_covered": [
   "Haryana",
   "Kerala",
@@ -469,7 +469,7 @@
    "purities": [
     "18K"
    ],
-   "canonical_24k": 24357.47,
+   "canonical_24k": 23745.2,
    "slug": "anjali-jewellers",
    "verdict": "verified",
    "note": "read 1 purity/purities via proximity"
@@ -527,7 +527,7 @@
     "/gold-rate: 404",
     "/goldrate: 404",
     "/goldprice: blocked 503",
-    "/gold-rate.html: 404"
+    "/gold-rate.html: blocked 503"
    ],
    "may_work_with_render": true
   },
@@ -726,17 +726,17 @@
    "city": "Margao",
    "name": "Damodar Jewellers",
    "domain": "www.damodarjewellers.com",
-   "verdict": "no-rate",
-   "note": "responded but no purity-labelled rate found",
+   "verdict": "blocked",
+   "note": "blocked or unreachable on every path tried",
    "tried": [
     "/: no values",
-    "/in/pan-india/en/live-gold-rate.html: 404",
-    "/gold-rate-today/: 404",
-    "/gold-rate-today: 404",
-    "/gold-rate: 404",
-    "/goldrate: 404",
-    "/goldprice: 404",
-    "/gold-rate.html: 404"
+    "/in/pan-india/en/live-gold-rate.html: blocked 503",
+    "/gold-rate-today/: blocked 503",
+    "/gold-rate-today: blocked 503",
+    "/gold-rate: blocked 503",
+    "/goldrate: blocked 503",
+    "/goldprice: blocked 503",
+    "/gold-rate.html: blocked 503"
    ],
    "may_work_with_render": true
   },
@@ -862,12 +862,12 @@
    "verdict": "no-rate",
    "note": "responded but no purity-labelled rate found",
    "tried": [
-    "/: no values",
+    "/: soft-404",
     "/in/pan-india/en/live-gold-rate.html: no values",
-    "/gold-rate-today/: no values",
+    "/gold-rate-today/: soft-404",
     "/gold-rate-today: no values",
-    "/gold-rate: SSLError",
-    "/goldrate: SSLError",
+    "/gold-rate: no values",
+    "/goldrate: soft-404",
     "/goldprice: no values",
     "/gold-rate.html: no values"
    ],
@@ -1092,7 +1092,7 @@
    "purities": [
     "22K"
    ],
-   "canonical_24k": 14661.82,
+   "canonical_24k": 14072.73,
    "slug": "swarn-jewellers",
    "verdict": "verified",
    "note": "read 1 purity/purities via karatunit"
@@ -1159,17 +1159,17 @@
    "city": "Nagpur",
    "name": "Rokde Jewellers",
    "domain": "www.rokdejewellers.com",
-   "verdict": "blocked",
-   "note": "bot-walled on every path tried",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
    "tried": [
-    "/: blocked 403",
-    "/in/pan-india/en/live-gold-rate.html: blocked 403",
-    "/gold-rate-today/: blocked 403",
-    "/gold-rate-today: blocked 403",
-    "/gold-rate: blocked 403",
-    "/goldrate: blocked 403",
-    "/goldprice: blocked 403",
-    "/gold-rate.html: blocked 403"
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: 404",
+    "/gold-rate-today/: 404",
+    "/gold-rate-today: 404",
+    "/gold-rate: 404",
+    "/goldrate: 404",
+    "/goldprice: 404",
+    "/gold-rate.html: 404"
    ],
    "may_work_with_render": true
   },
