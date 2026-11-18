@@ -5413,6 +5413,37 @@ document.getElementById('mkGo').addEventListener('click',function(){
 
     convert_legacy_pages()
 
+    # ---- AdSense: no ads where Google's policy forbids them (owner, 18 Nov 2026)
+    # The site uses Auto ads: any page that loads the script can get ads.
+    # AdSense flags ads on screens without publisher content (the 404 page,
+    # sign-up and contact forms) and on duplicated/low-value pages - the
+    # noindexed near-copy city and small-jeweller pages. Those pages keep
+    # working; they just don't load the ad script.
+    def strip_ads_where_not_allowed():
+        no_ads = {"docs/404.html", "docs/inquiry.html", "docs/contact.html",
+                  "docs/unsubscribe.html", "docs/analytics.html", "docs/offline.html",
+                  "docs/thank-you.html", "docs/list-your-jewellery.html"}
+        loader = re.compile(r'<script[^>]*pagead2\.googlesyndication\.com/pagead/js/adsbygoogle\.js[^>]*></script>\s*')
+        units = re.compile(r'<ins class="adsbygoogle".*?</ins>\s*(<script>\s*\(adsbygoogle[^<]*</script>)?', re.S)
+        n = 0
+        for root, _, files in os.walk("docs"):
+            for fn in files:
+                if not fn.endswith(".html"):
+                    continue
+                path = os.path.join(root, fn)
+                with open(path, encoding="utf-8") as fh:
+                    h = fh.read()
+                if "adsbygoogle" not in h:
+                    continue
+                if path in no_ads or re.search(r'<meta name="robots" content="noindex', h):
+                    h2 = units.sub("", loader.sub("", h))
+                    if h2 != h:
+                        with open(path, "w", encoding="utf-8") as fh:
+                            fh.write(h2)
+                        n += 1
+        print(f"adsense: ad script removed from {n} pages (forms, 404, noindexed pages)")
+    strip_ads_where_not_allowed()
+
     with open("docs/robots.txt", "w", encoding="utf-8") as f:
         # AI assistants may READ pages to answer a question and cite us with
         # a link (search crawlers and the fetchers they use while answering).
