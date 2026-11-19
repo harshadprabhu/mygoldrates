@@ -780,6 +780,30 @@
     "inflation": 1,
     "rates": 12
    }
+  },
+  "2026-11-20": {
+   "date": "2026-11-20",
+   "paragraphs": [
+    "International gold is at $3,611 an ounce (-2.18% since 19 Nov), the rupee at ₹93.51 to the dollar, and the Indian jeweller board median at ₹13,124/g for 24K (-0.05%). In rupee terms the move came mostly from the world gold price (-2.18% gold, +0.00% USD/INR).",
+    "What the world's gold news is about today: US interest rates (9 headlines), The US dollar (5 headlines), Indian demand (1 headline), The rupee (1 headline).",
+    "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMiuwFBVV95cUxPb21Fc1g4Vm1ScFJ0ZFRiU0N2Mnktb2tyVWFZMFZPVlFyNm9UanhzR09CXzdteUxJdFdDemgwbXJBSjktUzBObDEzZHJTT1lhTF9PT2Z6U0lnNkhhTUNnT1ozaWt4WmdIWENSXzhYdTVRVXBGc2dwMU1LR0duVy00czM0dHlmQkxfNVplZWo3ZmFoanAyVXktTFZPVGRuOGc4R0d1S1hjNk5wTDlHZzQycVlDUHRhNktLMGxJ?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold prices could fall another 5% to $3,500 as Fed tightening fears grow – Razaqzada</a> (Kitco); <a href=\"https://news.google.com/rss/articles/CBMiX0FVX3lxTE11NzllaXVoVklUY3hXdWNpNGZYNUh1Q2NsMVpPdGxGWDBHOEZJTEdmdlZ6V1JhY3hSbXVlN3ZIbDYyMEgwNk9ISldEdlFwbzRwZXZMN09rNjBsaFlCMlkw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Hits 14-Month Low as Fed Rate Hike Fears Strengthen US Dollar</a> (Investing News Network).",
+    "<strong>The US dollar.</strong> Gold is priced in dollars: a stronger dollar usually pushes it down, a weaker one lifts it. In the news: <a href=\"https://news.google.com/rss/articles/CBMiX0FVX3lxTE11NzllaXVoVklUY3hXdWNpNGZYNUh1Q2NsMVpPdGxGWDBHOEZJTEdmdlZ6V1JhY3hSbXVlN3ZIbDYyMEgwNk9ISldEdlFwbzRwZXZMN09rNjBsaFlCMlkw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Hits 14-Month Low as Fed Rate Hike Fears Strengthen US Dollar</a> (Investing News Network); <a href=\"https://news.google.com/rss/articles/CBMiqgFBVV95cUxPZ0RVRVVhd0g1djYyRGpzbTcyZXFtSXd3cTV1T0REekJaYm9FOTlzblJzU3hlMmsxSkF0UmtzZ1gwWVFiUzI3VXdGNzJLTndoZC1oVkpXSnRmZ0ZmNkEybVRFSnhIVzFCNnlTS2hQRGV2bnNGTHVsaUZ5RmllU0otWWcxV2wwejMwcXpTOWFxam1xb2dRMXMyQ1c0T0RkZy1SX09YR3lYdmxkQQ?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold hits 14-month low as strong dollar, rate bets weigh</a> (Reuters).",
+    "<strong>Indian demand.</strong> Festival and wedding buying, and import costs, move local premiums and the price on the jeweller board. In the news: <a href=\"https://news.google.com/rss/articles/CBMipgFBVV95cUxNMmJiWm5XZk40M0RveHhSX0hqOW0tclZuTXNjNHZwZExaMmRnYTB0TFFxaWNLY1NQVlRMUGk1OEFFbjFrOUpUS2d0aUtJUWl4SlFuM0ZET01nZDNGX3BYXzA1dkFOaVcwZHJ2SjNLcnlpRU1aakE2QnJpU3ZrWWpxa2NtbWNiTjkyc3h1SDRFMVJ4cDZVUXExeHVidDVLN21VMnRhbU9n?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">India gold market update: Gold demand gets festive boost | Post by Kavita Chacko | Insights</a> (World Gold Council).",
+    "High-impact US data due this week: Fed Chairman Warsh Speaks, Core Retail Sales m/m, Retail Sales m/m, FOMC Meeting Minutes. Gold often moves sharply around these releases; which way is not knowable in advance.",
+    "For buyers: the gap between the cheapest and dearest jeweller on our board is ₹466/g today, and making charges usually differ by more than a day's price move. Compare the <a href=\"https://mygoldrates.com/\">live rates</a> and the <a href=\"https://mygoldrates.com/making-charges-comparison\">making charges</a> before you buy."
+   ],
+   "snap": {
+    "board24": 13123.64,
+    "gold_usd": 3610.800049,
+    "usdinr": 93.513568
+   },
+   "summary": "gold -2.2%, news led by us interest rates",
+   "themes": {
+    "dollar": 5,
+    "india_demand": 1,
+    "rates": 9,
+    "rupee": 1
+   }
   }
  }
 }
