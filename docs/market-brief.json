@@ -760,8 +760,8 @@
   "2026-11-19": {
    "date": "2026-11-19",
    "paragraphs": [
-    "International gold is at $3,721 an ounce (-0.56% since 18 Nov), the rupee at ₹93.51 to the dollar, and the Indian jeweller board median at ₹13,130/g for 24K (-1.71%). In rupee terms the move came mostly from the world gold price (-0.56% gold, +0.00% USD/INR).",
-    "What the world's gold news is about today: US interest rates (9 headlines), The US dollar (4 headlines), Inflation (1 headline), Central bank buying (1 headline).",
+    "International gold is at $3,717 an ounce (-0.67% since 18 Nov), the rupee at ₹93.51 to the dollar, and the Indian jeweller board median at ₹13,130/g for 24K (-1.71%). In rupee terms the move came mostly from the world gold price (-0.67% gold, +0.00% USD/INR).",
+    "What the world's gold news is about today: US interest rates (9 headlines), The US dollar (5 headlines), Inflation (1 headline), Central bank buying (1 headline).",
     "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMiqgFBVV95cUxPZ0RVRVVhd0g1djYyRGpzbTcyZXFtSXd3cTV1T0REekJaYm9FOTlzblJzU3hlMmsxSkF0UmtzZ1gwWVFiUzI3VXdGNzJLTndoZC1oVkpXSnRmZ0ZmNkEybVRFSnhIVzFCNnlTS2hQRGV2bnNGTHVsaUZ5RmllU0otWWcxV2wwejMwcXpTOWFxam1xb2dRMXMyQ1c0T0RkZy1SX09YR3lYdmxkQQ?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold recoups from 14-month low, tighter Fed outlook caps gains</a> (Reuters); <a href=\"https://news.google.com/rss/articles/CBMiqgFBVV95cUxNTzJ3SW41M0FnMmVhbTNmV0xqR3dfYlZLMV9nM0FDNzMydGI3MFdLVmJWYnZLRFVyd2pWdGZucHl6SGdqdDZTekg4NmE0TVNHVGFIb09Zc1gxdHk3TjBicmdIYWhmQkZnUDVobWJvTk83U0pCSEdLbXBfTWMyUThHb2JwVjU5OFFOWHBxbk5NR01ReVdseDVhalB1cGYtWncyZFV4cVhPOUVIZw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold price drops to 14-month low as dollar, yields rise on hawkish Fed rhetoric</a> (Mining.com).",
     "<strong>The US dollar.</strong> Gold is priced in dollars: a stronger dollar usually pushes it down, a weaker one lifts it. In the news: <a href=\"https://news.google.com/rss/articles/CBMiuwFBVV95cUxPNEJQLTNlVE9IRG0yM1pnRkZuZHZNTFlEYWJURXBTVjdxZ2RkMGpMVEFCTC16aTJHeGZlWWRzUTE3YWs3ZEVxVjR2Zjl4eHB1WmNGWEd4ZTlmRTVISnp3RVQ0NlNkZEVaaVFzVlJWcGpobzh6STREcGlpb1dvZGpRNTJBN0t0LWJjOWFoN0lqRmZMay02bTBJQ3dvT3FfbU42NnlxaHBqN3VqLUo3aHJ2N2QzS20zclFfcnpv?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: Falling Stocks Fail to Lift Gold as Dollar Rises</a> (FXEmpire); <a href=\"https://news.google.com/rss/articles/CBMiqgFBVV95cUxNTzJ3SW41M0FnMmVhbTNmV0xqR3dfYlZLMV9nM0FDNzMydGI3MFdLVmJWYnZLRFVyd2pWdGZucHl6SGdqdDZTekg4NmE0TVNHVGFIb09Zc1gxdHk3TjBicmdIYWhmQkZnUDVobWJvTk83U0pCSEdLbXBfTWMyUThHb2JwVjU5OFFOWHBxbk5NR01ReVdseDVhalB1cGYtWncyZFV4cVhPOUVIZw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold price drops to 14-month low as dollar, yields rise on hawkish Fed rhetoric</a> (Mining.com).",
     "<strong>Inflation.</strong> Gold is held as an inflation hedge, though hot inflation can also mean higher rates, which cuts the other way. In the news: <a href=\"https://news.google.com/rss/articles/CBMiuwFBVV95cUxPNE43b3JrcGdsOTVjUndOSjM0NWdzWmQyQ3dibWNBM1h4NVA5N0FlTzBTWGFXMURsUTR5RzVqbktoRVJlM2IzZEd3NVMzV0xFWnlCYU1IVDB1bkcxTzVaYW1ZYzYtem9lQUdmaVF5U0dlcXRicW93c0F3TXJiWHBsbkQtT19kTTg0d3d4aTNIdGJqd3FBUXVQb1ZZNmNOTFNINmJjaDlzUUZKZWdMdWhDYWdLT0lCMDVGNnFz?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold prices remain under pressure as Fed minutes show central bank committed to cooling inflation</a> (Kitco).",
@@ -770,14 +770,13 @@
    ],
    "snap": {
     "board24": 13130.32,
-    "gold_usd": 3720.669922,
+    "gold_usd": 3716.75,
     "usdinr": 93.513568
    },
-   "summary": "gold -0.6%, news led by us interest rates",
+   "summary": "gold -0.7%, news led by us interest rates",
    "themes": {
     "central_banks": 1,
-    "dollar": 4,
-    "india_demand": 1,
+    "dollar": 5,
     "inflation": 1,
     "momentum": 1,
     "rates": 9
