@@ -77,12 +77,12 @@ def slide_fall(F, path, total):
     _save(img, path)
 
 
-def slide_chart(F, path, total):
+def slide_chart(F, path, total, n=2):
     from PIL import ImageDraw
     img, f = _canvas(), sp.fonts()
-    g = _frame(img, f, 2, total)
+    g = _frame(img, f, n, total)
     g.text((60, 180), "Off the peak", font=f("Serif-Black", 80), fill=GOLD)
-    g.text((62, 280), "24K per gram, 1 Aug to today", font=f("Medium", 30), fill=CREAM)
+    g.text((62, 280), f"24K per gram, {_d(F['hist'][0][0])} to today", font=f("Medium", 30), fill=CREAM)
     h = F["hist"]
     x0, x1, y0, y1 = 110, W - 90, 380, 1020
     lo, hi = min(v for _, v in h), max(v for _, v in h)
@@ -99,7 +99,9 @@ def slide_chart(F, path, total):
     for (x, y), lab, col, anc in ((pts[ip], f"Peak {sp.inr(F['pk'])}  {_d(F['pk_d'])}", CREAM, "ms"),
                                   (pts[-1], f"Today {sp.inr(F['now'])}", GREEN, "rs")):
         g.ellipse((x - 11, y - 11, x + 11, y + 11), fill=col, outline=INK, width=3)
-        g.text((x if anc == "ms" else x + 8, y - (22 if anc == "ms" else 70)), lab, font=f("Bold", 28), fill=col, anchor=anc)
+        tw = g.textlength(lab, font=f("Bold", 28))
+        lx = min(max(x, 60 + tw / 2), W - 60 - tw / 2) if anc == "ms" else x + 8
+        g.text((lx, y - (22 if anc == "ms" else 70)), lab, font=f("Bold", 28), fill=col, anchor=anc)
     g.text((x0, y1 + 24), _d(h[0][0]), font=f("Medium", 22), fill=MUTED)
     g.text((x1, y1 + 24), _d(h[-1][0]), font=f("Medium", 22), fill=MUTED, anchor="ra")
     g.text((60, y1 + 80), f"Down {F['off_pct']:.0f}% from the high: {sp.inr(F['off'])} less per gram of 24K.",
@@ -169,7 +171,115 @@ def caption(F, stances):
     )
 
 
+# ---- "why": why gold is falling, and what forecasters expect (owner, 19 Nov 2026)
+# The reasons and forecasts come from a spec file (brand/campaigns/<name>.json)
+# written from that day's news, each forecast with its source and date: our
+# posts never make their own prediction. Rupee figures for a forecast are
+# worked out from today's ratio between the jeweller board and the world price.
+OZ = 31.1035
+
+
+def _inr_per_g(usd_oz, W_):
+    return usd_oz / OZ * W_["usdinr"] * W_["board_ratio"]
+
+
+def slide_reasons(F, W_, path, total):
+    img, f = _canvas(), sp.fonts()
+    g = _frame(img, f, 2, total)
+    g.text((60, 180), "Why is gold", font=f("Serif-Black", 84), fill=CREAM)
+    g.text((60, 280), "falling?", font=f("Serif-Black", 104), fill=GOLD)
+    y = 440
+    for i, (head, sub) in enumerate(W_["reasons"], 1):
+        g.rounded_rectangle((60, y, W - 60, y + 178), 28, fill=(40, 29, 11), outline=(90, 70, 30), width=2)
+        g.ellipse((88, y + 30, 148, y + 90), fill=GOLD)
+        g.text((118, y + 60), str(i), font=f("Bold", 36), fill=INK, anchor="mm")
+        g.text((172, y + 30), head, font=f("Bold", 36), fill=GOLD)
+        yy = y + 84
+        for line in sub:
+            g.text((172, yy), line, font=f("Medium", 26), fill=CREAM); yy += 36
+        y += 196
+    g.text((60, y + 6), W_["source_line"], font=f("Medium", 21), fill=MUTED)
+    _save(img, path)
+
+
+def slide_outlook(F, W_, path, total):
+    img, f = _canvas(), sp.fonts()
+    g = _frame(img, f, total, total)
+    g.text((60, 180), "What next?", font=f("Serif-Black", 96), fill=GOLD)
+    g.text((62, 296), "What forecasters say - not our prediction", font=f("Medium", 30), fill=CREAM)
+    y = 370
+    m = W_["month"]
+    g.rounded_rectangle((60, y, W - 60, y + 250), 28, fill=(64, 46, 16), outline=GOLD, width=3)
+    g.text((100, y + 28), "NEXT MONTH", font=f("Bold", 30), fill=GOLD)
+    yy = y + 78
+    for line in m:
+        g.text((100, yy), line, font=f("Medium", 27), fill=CREAM); yy += 38
+    y += 280
+    g.text((60, y), "IN 2027  (world price · ≈ 24K in India)", font=f("Bold", 28), fill=GOLD)
+    y += 56
+    for who, usd, when in W_["year"]:
+        lo, hi = (usd, usd) if isinstance(usd, (int, float)) else usd
+        rs = sp.inr(round(_inr_per_g(lo, W_), -2)) + ("" if lo == hi else "–" + sp.inr(round(_inr_per_g(hi, W_), -2)))
+        us = f"${lo:,.0f}" + ("" if lo == hi else f"–{hi:,.0f}")
+        g.rounded_rectangle((60, y, W - 60, y + 74), 20, fill=(40, 29, 11), outline=(90, 70, 30), width=2)
+        g.text((90, y + 37), who, font=f("SemiBold", 28), fill=CREAM, anchor="lm")
+        g.text((90 + g.textlength(who, font=f("SemiBold", 28)) + 10, y + 39), when, font=f("Medium", 20), fill=MUTED, anchor="lm")
+        fz = 30 if lo == hi else 25
+        g.text((W - 90, y + 37), "≈" + rs + "/g", font=f("Bold", fz), fill=GREEN, anchor="rm")
+        rw = g.textlength("≈" + rs + "/g", font=f("Bold", fz))
+        g.text((W - 90 - rw - 24, y + 37), us, font=f("Bold", fz), fill=GOLD, anchor="rm")
+        y += 86
+    g.text((60, y + 6), f"Today: ${W_['spot']:,.0f}/oz · {sp.inr(F['now'])}/g. ₹ figures assume ₹{W_['usdinr']}/$ and today's import costs.",
+           font=f("Medium", 20), fill=MUTED)
+    _save(img, path)
+
+
+def caption_why(F, W_):
+    def usd(u):
+        return f"${u:,.0f}" if isinstance(u, (int, float)) else f"${u[0]:,.0f}\u2013{u[1]:,.0f}"
+    yr = "\n".join(f"\u2022 {who} ({when}): {usd(u)}/oz" for who, u, when in W_["year"])
+    rs = "\n".join(f"{i}. {h} - {' '.join(sub)}" for i, (h, sub) in enumerate(W_["reasons"], 1))
+    return (
+        f"Why is gold falling? 📉 24K is {sp.inr(F['now'])}/g today, down {sp.inr(abs(F['day']))} in a day and "
+        f"{F['off_pct']:.0f}% below the {_d(F['pk_d'])} peak. World gold is near a 14-month low.\n\n"
+        f"{rs}\n\n"
+        "📅 Next month: " + " ".join(W_["month"]) + "\n\n"
+        "🔮 In 2027, forecasters expect a recovery:\n" + yr + "\n\n"
+        "💡 For buyers: prices are well off the peak during the wedding season. Compare jewellers and their "
+        "making charges, and consider buying in parts.\n\n"
+        "👉 Today's rate at every jeweller, free: mygoldrates.com (link in bio)\n\n"
+        "Forecasts are third-party views, not our prediction and not investment advice; gold can move either way.\n\n"
+        "#goldrate #goldprice #goldnews #goldfalling #goldrateindia #weddingseason #gold #investing"
+    )
+
+
+def build_why(spec):
+    W_ = json.load(open(spec, encoding="utf-8"))
+    kb = json.load(open(sp.KB, encoding="utf-8"))
+    F = facts(kb)
+    W_["board_ratio"] = F["now"] / (W_["spot"] / OZ * W_["usdinr"])
+    stamp = datetime.now(sp.IST).strftime("%Y-%m-%d")
+    os.makedirs(sp.OUT, exist_ok=True)
+    files = []
+
+    def name(i):
+        files.append(f"campaign-{stamp}-{i}.jpg")
+        return os.path.join(sp.OUT, files[-1])
+    slide_fall(F, name(1), 4)
+    slide_reasons(F, W_, name(2), 4)
+    slide_chart(F, name(3), 4, n=3)
+    slide_outlook(F, W_, name(4), 4)
+    with open(os.path.join(sp.OUT, f"campaign-{stamp}.txt"), "w", encoding="utf-8") as fh:
+        fh.write(caption_why(F, W_))
+    with open(os.path.join(sp.OUT, f"campaign-{stamp}.json"), "w", encoding="utf-8") as fh:
+        json.dump({"slides": files}, fh)
+    print("campaign:", files)
+    return files
+
+
 def build(kind, stances_arg):
+    if kind == "why":
+        return build_why(stances_arg)
     assert kind == "dip", "only the 'dip' campaign exists"
     kb = json.load(open(sp.KB, encoding="utf-8"))
     F = facts(kb)
