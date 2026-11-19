@@ -1,4 +1,17 @@
 {
  "note": "Answers the owner approved from real visitor questions to Sona, the site assistant. Exported daily from the private database by bot_learn.py; only approved questions and answers are kept here, never the raw questions.",
- "answers": []
+ "answers": [
+  {
+   "q": "Where can I check gold rates and offers for wedding shopping?",
+   "a": "Planning for a wedding? Visit our offers page to see current deals from top jewellers, or check making charges on our comparison page.",
+   "u": "/gold-offers-today",
+   "d": "2026-11-19"
+  },
+  {
+   "q": "How can I track daily gold rates?",
+   "a": "You can track daily rates by visiting our site every morning or subscribing to our free daily email alerts.",
+   "u": "/inquiry",
+   "d": "2026-11-19"
+  }
+ ]
 }
