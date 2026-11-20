@@ -122,9 +122,36 @@ def main():
               f"5xx={d.get('Code5xx')} 4xx={d.get('Code4xx')}")
 
     ci, e = call("GetCrawlIssues", key, p)
-    print("\n== CRAWL ISSUES ==" + (" " + e if e else ""))
+    # Issues is a flags bitmask; decode it to words.
+    ISS = {1: "301", 2: "302", 4: "4xx", 8: "5xx", 16: "blocked-by-robots",
+           32: "malware", 64: "imported-error", 128: "dns-fail", 256: "timeout"}
+    def iss(n):
+        n = n or 0
+        return ", ".join(v for b, v in ISS.items() if n & b) or str(n)
+    cnt = {}
+    for i in ci or []:
+        cnt[iss(i.get("Issues"))] = cnt.get(iss(i.get("Issues")), 0) + 1
+    print("\n== CRAWL ISSUES ==" + (" " + e if e else "")
+          + " " + ("; ".join(f"{k}: {v}" for k, v in sorted(cnt.items(), key=lambda kv: -kv[1])) or "none"))
     for i in (ci or [])[:30]:
-        print(f"  {i.get('Url')}  issue={i.get('Issues')} http={i.get('HttpCode')}")
+        print(f"  {i.get('Url')}  [{iss(i.get('Issues'))}] http={i.get('HttpCode')}")
+
+    # On-page SEO errors Bing surfaces in its "SEO Reports" tab.
+    sr, e = call("GetSeoReports", key, p)
+    SEV = {0: "error", 1: "warning", 2: "notice"}
+    srt = sorted(sr or [], key=lambda r: (r.get("Severity") or 9, -(r.get("Count") or 0)))
+    print("\n== SEO ERRORS (Bing SEO Reports) ==" + (" " + e if e else "")
+          + ("" if srt else " none"))
+    for r in srt:
+        print(f"  [{SEV.get(r.get('Severity'), r.get('Severity'))}] x{r.get('Count')}  "
+              f"{r.get('Recommendation') or r.get('Issue')}")
+    for r in srt[:6]:
+        det, e2 = call("GetSeoReportFullDetails", key, {**p, "issue": r.get("Issue")})
+        pages = [d.get("Url") for d in (det or []) if d.get("Url")]
+        if pages:
+            print(f"    -> {r.get('Recommendation') or r.get('Issue')}: "
+                  + ", ".join((u.replace(site, "") or "/") for u in pages[:8])
+                  + (f" (+{len(pages) - 8} more)" if len(pages) > 8 else ""))
 
     rt, e = call("GetRankAndTrafficStats", key, p)
     print("\n== SEARCH TRAFFIC (recent days) ==" + (" " + e if e else ""))

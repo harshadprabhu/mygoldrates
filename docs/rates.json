@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-11-20",
-  "last_updated": "2026-11-20T11:30:02.201486+05:30",
+  "last_updated": "2026-11-20T15:09:57.182342+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -16,24 +16,24 @@
     "jeweller": "ORRA",
     "rate_per_gram_inr": 12489.91
   },
-  "ibja_reference_24k_999_per_gram_inr": 12953.0,
+  "ibja_reference_24k_999_per_gram_inr": 12358.0,
   "akgsma_south_india_22k_per_gram_inr": 11510.0,
   "mcx_gold_futures": [
     {
       "contract": "GOLD",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 122250.0,
-      "change_pct": -4.08
+      "price_per_10g_inr": 123152.0,
+      "change_pct": -3.37
     },
     {
       "contract": "GOLDM",
       "expiry": "04DEC2026",
-      "price_per_10g_inr": 122143.0,
-      "change_pct": -4.2
+      "price_per_10g_inr": 123200.0,
+      "change_pct": -3.37
     }
   ],
   "full_comparison": "https://mygoldrates.com/compare-jewellers-gold-rate",
-  "jeweller_count": 31,
+  "jeweller_count": 33,
   "city_pages": [
     "https://mygoldrates.com/gold-rate-today-in-mumbai",
     "https://mygoldrates.com/gold-rate-today-in-delhi",
