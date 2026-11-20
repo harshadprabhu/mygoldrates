@@ -277,7 +277,115 @@ def build_why(spec):
     return files
 
 
+# ---- "mcx": a market update centred on MCX + the international price
+# (owner, 20 Nov 2026). Every figure comes from a sourced spec file
+# (brand/campaigns/<name>.json), written from that day's news and our own
+# market brief; we never invent a level, a circuit or a forecast.
+def slide_mcx(M, path, total):
+    img, f = _canvas(), sp.fonts()
+    g = _frame(img, f, 1, total)
+    g.text((60, 180), "Gold", font=f("Serif-Black", 96), fill=CREAM)
+    g.text((60, 290), M["headline"], font=f("Serif-Black", 110), fill=GOLD)
+    y = 470
+    g.rounded_rectangle((60, y, W - 60, y + 300), 32, fill=(64, 46, 16), outline=GOLD, width=3)
+    g.text((100, y + 34), f"MCX gold · {M['mcx_label']}", font=f("SemiBold", 30), fill=MUTED)
+    g.text((100, y + 86), M["mcx"], font=f("Bold", 92), fill=CREAM)
+    g.text((W - 100, y + 132), M["mcx_move"], font=f("Bold", 42), fill=GREEN, anchor="rm")
+    g.text((100, y + 198), M["mcx_note"], font=f("Medium", 27), fill=GOLD)
+    g.line([(100, y + 236), (W - 100, y + 236)], fill=(120, 95, 40), width=1)
+    g.text((100, y + 250), f"World gold  {M['spot']}/oz", font=f("SemiBold", 30), fill=CREAM)
+    g.text((W - 100, y + 252), M["spot_tag"], font=f("Bold", 28), fill=GOLD, anchor="rm")
+    y += 330
+    g.text((60, y), M["sub"], font=f("Medium", 28), fill=CREAM)
+    g.text((60, y + 46), M["source_line"], font=f("Medium", 20), fill=MUTED)
+    _save(img, path)
+
+
+def slide_levels(M, path, total):
+    img, f = _canvas(), sp.fonts()
+    g = _frame(img, f, 3, total)
+    g.text((60, 180), "Levels & limits", font=f("Serif-Black", 76), fill=GOLD)
+    y = 320
+    for head, val, col in M["levels"]:
+        g.rounded_rectangle((60, y, W - 60, y + 108), 24, fill=(40, 29, 11), outline=(90, 70, 30), width=2)
+        g.text((96, y + 54), head, font=f("SemiBold", 30), fill=CREAM, anchor="lm")
+        g.text((W - 96, y + 54), val, font=f("Bold", 32), fill={"g": GREEN, "r": RED, "o": GOLD}[col], anchor="rm")
+        y += 124
+    y += 6
+    g.rounded_rectangle((60, y, W - 60, y + 150), 26, fill=(26, 40, 22), outline=GREEN, width=3)
+    g.text((96, y + 34), "Lower circuit today?", font=f("Bold", 32), fill=GREEN)
+    yy = y + 82
+    for line in M["circuit"]:
+        g.text((96, yy), line, font=f("Medium", 26), fill=CREAM); yy += 36
+    _save(img, path)
+
+
+def slide_analysis(M, path, total):
+    img, f = _canvas(), sp.fonts()
+    g = _frame(img, f, total, total)
+    g.text((60, 180), "Our view:", font=f("Serif-Black", 84), fill=GOLD)
+    g.text((62, 288), "the next 1 month", font=f("Serif-Black", 72), fill=CREAM)
+    y = 392
+    kh = 60 + len(M["month"]) * 36
+    g.rounded_rectangle((60, y, W - 60, y + kh), 26, fill=(64, 46, 16), outline=GOLD, width=3)
+    g.text((96, y + 22), "THE KEY EVENT", font=f("Bold", 28), fill=GOLD)
+    yy = y + 64
+    for line in M["month"]:
+        g.text((96, yy), line, font=f("Medium", 26), fill=CREAM); yy += 36
+    y += kh + 24
+    for head, sub in M["scenarios"]:
+        g.rounded_rectangle((60, y, W - 60, y + 112), 22, fill=(40, 29, 11), outline=(90, 70, 30), width=2)
+        g.text((96, y + 24), head, font=f("Bold", 30), fill=GOLD)
+        g.text((96, y + 66), sub, font=f("Medium", 24), fill=CREAM)
+        y += 126
+    for line in (M["view_source"] if isinstance(M["view_source"], list) else [M["view_source"]]):
+        g.text((60, y + 4), line, font=f("Medium", 20), fill=MUTED); y += 28
+    _save(img, path)
+
+
+def caption_mcx(M):
+    reasons = "\n".join(f"{i}. {h} - {' '.join(sub)}" for i, (h, sub) in enumerate(M["reasons"], 1))
+    return (
+        f"Gold {M['headline'].rstrip('.').lower()} \U0001F4C9 MCX gold is {M['mcx']} ({M['mcx_label']}) - {M['mcx_note']}. "
+        f"World gold is near {M['spot']}/oz, {M['spot_tag'].lower()}.\n\n"
+        "WHY IT'S FALLING:\n" + reasons + "\n\n"
+        "LEVELS: " + "; ".join(f"{h} {v}" for h, v, _ in M["levels"]) + ".\n"
+        + " ".join(M["circuit"]) + "\n\n"
+        "OUR VIEW - NEXT 1 MONTH: " + " ".join(M["month"]) + "\n"
+        + " ".join(f"{h}: {s}" for h, s in M["scenarios"]) + "\n\n"
+        "\U0001F48D Buyers: prices are well off the peak in the wedding season. Compare jewellers and making charges, "
+        "and consider buying in parts.\n\n"
+        "\U0001F449 Today's rate at every jeweller, free: mygoldrates.com (link in bio)\n\n"
+        "A market view, not investment advice; gold can move either way. Figures: MCX, our market brief and the "
+        "sources noted on the slides.\n\n"
+        "#goldrate #mcx #goldprice #goldnews #goldfalling #silver #goldrateindia #weddingseason #gold"
+    )
+
+
+def build_mcx(spec):
+    M = json.load(open(spec, encoding="utf-8"))
+    stamp = datetime.now(sp.IST).strftime("%Y-%m-%d")
+    os.makedirs(sp.OUT, exist_ok=True)
+    files = []
+
+    def name(i):
+        files.append(f"campaign-{stamp}-{i}.jpg")
+        return os.path.join(sp.OUT, files[-1])
+    slide_mcx(M, name(1), 4)
+    slide_reasons(None, M, name(2), 4)
+    slide_levels(M, name(3), 4)
+    slide_analysis(M, name(4), 4)
+    with open(os.path.join(sp.OUT, f"campaign-{stamp}.txt"), "w", encoding="utf-8") as fh:
+        fh.write(caption_mcx(M))
+    with open(os.path.join(sp.OUT, f"campaign-{stamp}.json"), "w", encoding="utf-8") as fh:
+        json.dump({"slides": files}, fh)
+    print("campaign:", files)
+    return files
+
+
 def build(kind, stances_arg):
+    if kind == "mcx":
+        return build_mcx(stances_arg)
     if kind == "why":
         return build_why(stances_arg)
     assert kind == "dip", "only the 'dip' campaign exists"

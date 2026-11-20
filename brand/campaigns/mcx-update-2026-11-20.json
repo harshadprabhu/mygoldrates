@@ -1,0 +1,88 @@
+{
+ "_sources": [
+  "Business Today, 20 Nov 2026: Gold-silver bloodbath; MCX gold falls below Rs 1.25 lakh/10g (~Rs 1,22,474), silver crashes ~6%; next downside Rs 1.22 lakh",
+  "Our market brief, 20 Nov 2026: international gold $3,523/oz (-4.55% day), rupee 93.37/$",
+  "CNBC, 18-19 Nov 2026: Gold drops to over one-year low on hawkish Fed signals and firm dollar; worst year since 2015",
+  "Discovery Alert / CME FedWatch, Nov 2026: markets price ~95% chance of a December Fed rate HIKE; Gov. Waller floated a 50bps hike",
+  "SMM/Kitco, Nov 2026: 10-year Treasury yield above 5%; dollar near 19-month high",
+  "Kitco/FXEmpire, 13-19 Nov 2026: support confluence $3,500-3,475; break could extend losses",
+  "Goldman Sachs, Nov 2026: cut end-2026 target to $4,150/oz from $4,650"
+ ],
+ "headline": "tumbles.",
+ "mcx_label": "20 Nov, per 10 g",
+ "mcx": "~Rs 1,22,500",
+ "mcx_move": "down ~3.9%",
+ "mcx_note": "Broke below the Rs 1.25 lakh support",
+ "spot": "$3,520",
+ "spot_tag": "14-month low",
+ "sub": "Silver fell too - MCX silver crashed about 6%, below Rs 1.50 lakh/kg.",
+ "source_line": "Sources: MCX via Business Today; our market brief (20 Nov 2026).",
+ "reasons": [
+  [
+   "Fed rate-HIKE bets",
+   [
+    "Markets price a ~95% chance of a US rate hike in",
+    "December; one governor floated 50 bps. Gold pays",
+    "no interest, so higher rates weigh on it."
+   ]
+  ],
+  [
+   "A 19-month-high dollar & 5% yields",
+   [
+    "The dollar is near a 19-month high and the",
+    "10-year US yield is above 5% - both pull",
+    "dollar-priced gold down."
+   ]
+  ],
+  [
+   "Worst year since 2015",
+   [
+    "Gold is ~33% below its early-2026 record and",
+    "having its worst year since 2015; profit-taking",
+    "and margin calls add to the selling."
+   ]
+  ]
+ ],
+ "levels": [
+  [
+   "Support that broke today",
+   "Rs 1.25 lakh / $3,650",
+   "r"
+  ],
+  [
+   "Next level being watched",
+   "Rs 1.22 lakh / $3,500-3,475",
+   "o"
+  ],
+  [
+   "Off the early-2026 record",
+   "~33%",
+   "r"
+  ]
+ ],
+ "circuit": [
+  "No. Gold did NOT hit a lower circuit - trading was",
+  "orderly. MCX applies staggered margins, not a single",
+  "price band, so a sharp fall does not freeze trade."
+ ],
+ "month": [
+  "The 10 Dec US Fed meeting decides the direction.",
+  "Markets expect a rate hike; the dot-plot and",
+  "Chair's tone matter more than the hike itself.",
+  "Watch FOMC minutes, US jobs and inflation first."
+ ],
+ "scenarios": [
+  [
+   "If the Fed stays hawkish",
+   "$3,500-3,475 (~Rs 1.22 lakh) is the support in focus; a break opens lower."
+  ],
+  [
+   "If the Fed softens its tone",
+   "a relief bounce is likely; central-bank buying is a longer-term floor."
+  ]
+ ],
+ "view_source": [
+  "Our reading of market signals, not a promise - not investment advice.",
+  "Goldman now sees $4,150/oz by end-2026; gold can move either way."
+ ]
+}
