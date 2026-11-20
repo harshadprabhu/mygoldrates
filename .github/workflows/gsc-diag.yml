@@ -1,20 +1,26 @@
 name: gsc-diag
 
-# Read-only Search Console diagnosis (gsc_diag.py), plus the same for Bing
-# Webmaster Tools (bing_report.py; `submit` also sends key pages to Bing). The report is forwarded
-# as job annotations instead of being committed, because this repository is
-# public and search queries are business data. Annotations are readable
-# from the run's check-run in the Actions UI and through the API.
+# Read-only SEO diagnosis forwarded as job annotations (this repo is public,
+# so search queries are not committed). Three parts in one job:
+#   - Search Console (gsc_diag.py / gsc_fix.py / gsc_history.py)
+#   - Bing Webmaster (bing_report.py; `submit` also sends key pages)
+#   - Backlinks (backlink.py): monitor the links we have earned, or generate
+#     outreach packets. Runs automatically every Monday (monitor only).
 
 on:
+  schedule:
+    - cron: "23 4 * * 1"   # Mondays ~09:53 IST: backlink monitor only
   workflow_dispatch:
     inputs:
       gsc:
-        description: "Search Console part: report (gsc_diag.py), inspect (key pages), or resubmit (remove + re-add sitemaps, then inspect; gsc_fix.py), or history (16 months, gsc_history.py)"
+        description: "Search Console: report, inspect, resubmit, history, or off"
         default: "report"
       bing:
-        description: "Bing Webmaster part (bing_report.py): report, submit (report + send key pages), links (backlinks only), or off"
+        description: "Bing Webmaster: report, submit, links, or off"
         default: "report"
+      backlinks:
+        description: "Backlinks (backlink.py): monitor, outreach, or off"
+        default: "off"
 
 permissions:
   contents: read
@@ -28,34 +34,45 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install google-auth google-api-python-client requests
-      - name: Run
+      - run: pip install google-auth google-api-python-client requests supabase
+      # On the weekly schedule, run ONLY the backlink monitor - Search Console
+      # and Bing have limited API quotas and are run on demand.
+      - name: Backlinks
+        if: github.event_name == 'schedule' || inputs.backlinks != 'off'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          MODE: ${{ inputs.backlinks || 'monitor' }}
+        run: |
+          M="$MODE"; [ "$M" = "off" ] && M="monitor"
+          { echo "############ BACKLINKS ############"
+            python backlink.py "$M" 2>&1; echo; } > report.txt || true
+      - name: Search Console
+        if: github.event_name != 'schedule' && inputs.gsc != 'off'
         env:
           GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
           GSC_MODE: ${{ inputs.gsc }}
         run: |
           case "$GSC_MODE" in
-            resubmit) python gsc_fix.py resubmit > report.txt 2>&1 || true ;;
-            inspect)  python gsc_fix.py > report.txt 2>&1 || true ;;
-            history)  python gsc_history.py > report.txt 2>&1 || true ;;
-            *)        python gsc_diag.py > report.txt 2>&1 || true ;;
+            resubmit) python gsc_fix.py resubmit > gsc.txt 2>&1 || true ;;
+            inspect)  python gsc_fix.py > gsc.txt 2>&1 || true ;;
+            history)  python gsc_history.py > gsc.txt 2>&1 || true ;;
+            *)        python gsc_diag.py > gsc.txt 2>&1 || true ;;
           esac
       - name: Bing
-        if: inputs.bing != 'off'
+        if: github.event_name != 'schedule' && inputs.bing != 'off'
         env:
           BING_WEBMASTER_KEY: ${{ secrets.BING_WEBMASTER_KEY }}
           MODE: ${{ inputs.bing }}
         run: |
-          # Bing goes first: the annotations stop at 14 parts and Google's
-          # part is long
           { echo "############ BING WEBMASTER ############"
             if [ "$MODE" = submit ]; then python bing_report.py submit 2>&1;
             elif [ "$MODE" = links ]; then python bing_report.py links 2>&1;
             else python bing_report.py 2>&1; fi
-            echo; echo "############ GOOGLE SEARCH CONSOLE ############"; cat report.txt; } > all.txt || true
-          mv all.txt report.txt
+            echo; } >> report.txt || true
       - name: Forward report as annotations
         run: |
+          [ -f gsc.txt ] && { echo "############ GOOGLE SEARCH CONSOLE ############"; cat gsc.txt; } >> report.txt
           python - <<'PY'
           t = open("report.txt", encoding="utf-8", errors="replace").read()
           chunks = [t[i:i+3500] for i in range(0, len(t), 3500)][:14]
