@@ -5023,6 +5023,17 @@ document.getElementById('mkGo').addEventListener('click',function(){
                                    pulse_html, count=1)
         if _n2 != 1:
             raise RuntimeError("pulse_app.html: NEAR_CITIES placeholder missing")
+        # A small live feed of the same board, so an open tab/app can poll it
+        # and refresh the jeweller table in place when the collector reruns -
+        # no manual browser reload (owner, 20 Nov 2026). Served fresh (see the
+        # /board.json entry in _headers).
+        _bl = [b for b in pulse_brands if b.get("rate")]
+        with open("docs/board.json", "w", encoding="utf-8") as _bf:
+            json.dump({"epoch": int(now_ist.timestamp()),
+                       "when": f"{display_date}, {display_time}",
+                       "lowest10g": round(min(b["rate"] for b in _bl) * 10) if _bl else 0,
+                       "gap": round(max(b["rate"] for b in _bl) - min(b["rate"] for b in _bl)) if _bl else 0,
+                       "brands": pulse_brands}, _bf, ensure_ascii=False)
         print(f"pulse: hydrated BRANDS with {len(pulse_brands)} live jewellers "
               f"({pulse_brands[0]['n']} lowest at "
               f"₹{pulse_brands[0]['rate']:,.2f}/g)")
@@ -5833,6 +5844,10 @@ document.getElementById('mkGo').addEventListener('click',function(){
             "\n"
             "/rates.json\n"
             f"  Last-Modified: {headers_lm}\n"
+            "  Cache-Control: public, max-age=60, must-revalidate\n"
+            "\n"
+            "/board.json\n"
+            "  Access-Control-Allow-Origin: *\n"
             "  Cache-Control: public, max-age=60, must-revalidate\n"
             "\n"
             "/robots.txt\n"
