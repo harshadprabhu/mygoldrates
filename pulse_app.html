@@ -3826,6 +3826,43 @@ function handleCredentialResponse(resp){
     if(!document.hidden){fetchLiveRates();fetchVendors();}
   });
   setInterval(function(){paintLiveChip(currentDotState());paintLiveStrip();},3000);
+
+  // The jeweller BOARD (each shop's own collected rate) is baked into the
+  // page at build time. When the collector reruns (every ~30 min) the newly
+  // deployed /board.json carries the fresh rates; poll it so an OPEN tab or
+  // the installed app updates the comparison table in place, with no manual
+  // browser refresh (owner, 20 Nov 2026). The live spot/MCX chip above
+  // already ticks on its own; this is for the per-jeweller rates.
+  var BOARD_EPOCH=(function(){var el=document.getElementById('ratesStamp');
+    return el?parseInt(el.getAttribute('data-rates-epoch')||'0',10):0;})();
+  function boardToast(){
+    var t=document.getElementById('boardToast');
+    if(!t){t=document.createElement('div');t.id='boardToast';
+      t.setAttribute('style','position:fixed;left:50%;bottom:84px;transform:translateX(-50%);z-index:99998;'
+        +'background:#1b160c;color:#f4e3a6;border:1px solid rgba(212,175,55,.5);border-radius:999px;'
+        +'padding:9px 18px;font:600 13px/1 system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.5);'
+        +'opacity:0;pointer-events:none;transition:opacity .25s');
+      document.body.appendChild(t);}
+    t.textContent='✨ Rates just updated';
+    requestAnimationFrame(function(){t.style.opacity='1';});
+    clearTimeout(t._h);t._h=setTimeout(function(){t.style.opacity='0';},2800);
+  }
+  function refreshBoard(){
+    fetch('/board.json?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        if(!d||!d.epoch||!d.brands||!d.brands.length||d.epoch<=BOARD_EPOCH)return;
+        BOARD_EPOCH=d.epoch;BRANDS=d.brands;            // swap in the fresh board
+        var el=document.getElementById('ratesStamp');
+        if(el){el.setAttribute('data-rates-epoch',String(d.epoch));
+          var b=el.getElementsByTagName('b')[0];if(b&&d.when)b.textContent=d.when;}
+        try{renderAll();}catch(e){}
+        boardToast();
+      }).catch(function(){});
+  }
+  setInterval(function(){if(!document.hidden)refreshBoard();},90000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)refreshBoard();});
+
   fetchNews();
   setInterval(fetchNews,15*60*1000);
   // Dealer rates + economic calendar via mygoldrates-market-api worker.

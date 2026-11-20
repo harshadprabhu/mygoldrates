@@ -76,6 +76,15 @@ PURITY_FRACTION = {"24K": 24 / 24, "22K": 22 / 24, "18K": 18 / 24, "14K": 14 / 2
 # DB schema change is needed.
 NEEDS_PROXY = set()
 
+# Jewellers whose site sits behind a CDN that can hand our fetch a page
+# cached from yesterday, freezing their rate on our board while their own
+# site shows today's (Indriya, 20 Nov 2026: their AEM/CDN served the cron a
+# stale copy - 24K stuck at yesterday's 13,066 while indriya.com showed
+# 12,553). A unique query string per run makes the edge miss its cache and
+# serve fresh HTML. Only for brands that actually need it, since a stray
+# query param can change routing on some sites.
+BUST_CACHE = {"indriya"}
+
 # Jewellers whose site refuses GitHub Actions' address: their one rate page
 # is fetched by the JD Worker (cf-worker-jd GET /page/<slug>, a fixed URL per
 # slug) and read here as usual, date check included.
@@ -1359,6 +1368,9 @@ def collect_brand(b, session):
             tried.append("budget")
             break
 
+        if slug in BUST_CACHE:                 # dodge a stale CDN edge
+            url = f"{url}{'&' if '?' in url else '?'}_mgr={int(time.time())}"
+
         if proxied:
             zhtml, zreason = fetch_via_proxy_waterfall(url, session,
                                                     ZYTE_ACTIONS.get(slug), ws)
@@ -1562,6 +1574,8 @@ def main():
         "Sec-Fetch-Mode": "navigate",
         "Sec-Fetch-Site": "none",
         "Sec-Fetch-User": "?1",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
     })
 
     brands = sb.table("brands").select("*").eq("active", True).execute().data
