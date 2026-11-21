@@ -122,8 +122,14 @@ def extract_caratlane(url, html_raw):
     (JSON-LD price + labelled specs in the rendered text) because the markup
     varies by template."""
     h = _html.unescape(html_raw)
-    if "caratlane us" in h.lower() or "$" in (re.search(r'("priceCurrency"\s*:\s*"[^"]+")', h) or [""])[0].lower():
-        return None                                     # still the US page - skip
+    # India only. The proxy sometimes still serves the US site (USD); mixing
+    # currencies would corrupt the comparison, so keep a row ONLY when the
+    # page is unambiguously the India experience (INR) and never the US one.
+    cur = (re.search(r'"priceCurrency"\s*:\s*"([A-Z]{3})"', h) or ["", ""])[1]
+    is_in = ("₹" in h or cur == "INR" or "en_IN" in h or "caratlane.com/jewellery" in h and "USD" not in h)
+    is_us = ("caratlane us" in h.lower() or "/en_us" in h.lower() or cur == "USD" or "$" in h[:20000])
+    if is_us or not is_in:
+        return None
     def g(pat):
         m = re.search(pat, h, re.I)
         return m.group(1).strip() if m else None
