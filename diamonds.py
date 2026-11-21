@@ -169,38 +169,48 @@ BRANDS = {
     # CaratLane: discover from the product sitemap (works from any IP), fetch
     # each PDP through the India proxy, extract. Market leader.
     "CaratLane": {
-        "extract": extract_caratlane, "mode": "proxy",
+        "extract": extract_caratlane, "mode": "proxy", "geo": "IN",
         "sitemap": "https://www.caratlane.com/caratlane-sitemap/product-sitemap.xml",
         "slug_re": r"(diamond-ring|solitaire|diamond-pendant|diamond-earring|diamond-bracelet)",
     },
 }
 
 
-_PROXY = None
+ZYTE_ENDPOINT = "https://api.zyte.com/v1/extract"
 
 
-def proxy_fetch(url):
-    """Fetch through the gold scraper's proven India proxy waterfall (5
-    providers incl. Zyte), which already reaches CaratLane for making
-    charges. Imported lazily so a missing dep degrades to '' rather than
-    crashing the whole run; the diamonds workflow step installs bs4."""
-    global _PROXY
-    if _PROXY is None:
-        try:
-            import collect
-            _PROXY = collect.fetch_via_proxy_waterfall
-        except Exception as e:
-            print(f"  proxy unavailable ({type(e).__name__}: {str(e)[:60]})")
-            _PROXY = False
-    if not _PROXY:
+def zyte_fetch(url, geo="IN"):
+    """Zyte browser render pinned to a country (geolocation), so a
+    geo-redirecting site serves that country's page - CaratLane in INR with
+    geo='IN'. Self-contained (ZYTE_API_KEY), returns '' without a key."""
+    global _ZYTE_DIAG
+    key = os.environ.get("ZYTE_API_KEY")
+    if not key:
+        if not _ZYTE_DIAG:
+            print("  zyte: no ZYTE_API_KEY in env"); _ZYTE_DIAG = True
         return ""
     try:
-        s = requests.Session()
-        s.headers.update({"User-Agent": UA})
-        html_, _note = _PROXY(url, s)
-        return html_ or ""
-    except Exception:
-        return ""
+        r = requests.post(ZYTE_ENDPOINT, json={"url": url, "browserHtml": True, "geolocation": geo},
+                          auth=(key, ""), timeout=90)
+        if r.status_code == 200:
+            return r.json().get("browserHtml") or ""
+        if not _ZYTE_DIAG:
+            print(f"  zyte: HTTP {r.status_code} {str(r.text)[:140]}"); _ZYTE_DIAG = True
+    except requests.RequestException as e:
+        if not _ZYTE_DIAG:
+            print(f"  zyte: {type(e).__name__}: {str(e)[:80]}"); _ZYTE_DIAG = True
+    return ""
+
+
+_ZYTE_DIAG = False
+
+
+def proxy_fetch(url, geo=None):
+    """India-geo fetch for a geo-redirecting site. Uses Zyte pinned to the
+    country when a geo is given (CaratLane); that is the only reliable way to
+    get the India page - ScraperAPI's country_code was still served the US
+    site. Returns '' without a key."""
+    return zyte_fetch(url, geo or "IN")
 
 
 def discover(b, limit=60):
@@ -225,7 +235,7 @@ def discover(b, limit=60):
 
 
 def grab(b, url):
-    html_ = proxy_fetch(url) if BRANDS[b].get("mode") == "proxy" else fetch(url)
+    html_ = proxy_fetch(url, BRANDS[b].get("geo")) if BRANDS[b].get("mode") == "proxy" else fetch(url)
     return BRANDS[b]["extract"](url, html_) if html_ else None
 
 
@@ -304,10 +314,13 @@ def collect(limit=120):
     import private_store
     rows = []
     for b in BRANDS:
-        urls = discover(b)[:limit]
+        # Proxy brands (Zyte renders) cost money per fetch, so cap them;
+        # direct brands (Candere) are free, so sample widely.
+        cap = BRANDS[b].get("sample", 25) if BRANDS[b].get("mode") == "proxy" else limit
+        urls = discover(b)[:cap]
         got = 0
         for i, u in enumerate(urls):
-            html_ = proxy_fetch(u) if BRANDS[b].get("mode") == "proxy" else fetch(u)
+            html_ = proxy_fetch(u, BRANDS[b].get("geo")) if BRANDS[b].get("mode") == "proxy" else fetch(u)
             if BRANDS[b].get("mode") == "proxy" and i == 0:
                 tag = ("US-page" if "caratlane us" in html_.lower() or "/en_us" in html_.lower()
                        else ("india" if "₹" in html_ or "en_IN" in html_ else "unknown"))
