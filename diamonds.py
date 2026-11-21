@@ -115,22 +115,106 @@ def extract_candere(url, html_raw):
     }
 
 
+def extract_caratlane(url, html_raw):
+    """CaratLane geo-redirects non-India IPs to its US site, so these pages
+    are fetched through the India proxy (render=true, country=in) - the
+    rendered India PDP then shows INR and the 4Cs. Extraction is defensive
+    (JSON-LD price + labelled specs in the rendered text) because the markup
+    varies by template."""
+    h = _html.unescape(html_raw)
+    # India only. The proxy sometimes still serves the US site (USD); mixing
+    # currencies would corrupt the comparison, so keep a row ONLY when the
+    # page is unambiguously the India experience (INR) and never the US one.
+    cur = (re.search(r'"priceCurrency"\s*:\s*"([A-Z]{3})"', h) or ["", ""])[1]
+    is_in = ("₹" in h or cur == "INR" or "en_IN" in h or "caratlane.com/jewellery" in h and "USD" not in h)
+    is_us = ("caratlane us" in h.lower() or "/en_us" in h.lower() or cur == "USD" or "$" in h[:20000])
+    if is_us or not is_in:
+        return None
+    def g(pat):
+        m = re.search(pat, h, re.I)
+        return m.group(1).strip() if m else None
+    carat = _num(g(r'([\d.]+)\s*(?:ct|carat)\b'))
+    total = _num(g(r'"price"\s*:\s*"?([0-9][0-9,]*\.?\d*)') or g(r'₹\s?([\d,]{4,})'))
+    clarity = g(r'Clarity[\s:<>/"]{1,8}([A-Z]{1,3}\d?(?:[-/][A-Z]{1,3}\d?)?)')
+    color = g(r'Colou?r[\s:<>/"]{1,8}([D-K]{1,2}(?:[-/][D-K]{1,2})?)')
+    lab = bool(re.search(r"lab[\s-]?grown", h, re.I))
+    cert = next((c for c in ("IGI", "GIA", "SGL") if re.search(rf"\b{c}\b", h)), None)
+    stone = _num(g(r'"(?:diamondPrice|stonePrice|diamondValue)"\s*:\s*"?([0-9][0-9,]*\.?\d*)'))
+    metal = _num(g(r'"(?:metalValue|goldValue|metalPrice)"\s*:\s*"?([0-9][0-9,]*\.?\d*)'))
+    if not (carat and (stone or total)):
+        return None
+    pc = round(stone / carat) if (stone and carat) else None
+    return {
+        "brand": "CaratLane", "url": url, "carat": carat, "n_diamonds": None,
+        "clarity": (clarity or "").upper() or None, "color": (color or "").upper() or None,
+        "type": "lab-grown" if lab else "natural", "cert": cert,
+        "diamond_price": stone, "metal_value": metal, "making": None, "total": total,
+        "band": carat_band(carat), "per_carat": pc,
+    }
+
+
 BRANDS = {
+    # Candere (static, India data, full breakup) - the reference source.
     "Candere": {
-        "extract": extract_candere,
+        "extract": extract_candere, "mode": "direct",
         "prod_re": r'href="(https://www\.candere\.com/[a-z0-9][a-z0-9-]*(?:ring|pendant|earring|bracelet|necklace|mangalsutra)[a-z0-9-]*\.html)"',
         "listings": {
-            "natural": ["https://www.candere.com/catalogsearch/result/?q=diamond+ring",
-                        "https://www.candere.com/catalogsearch/result/?q=solitaire+ring"],
-            "lab-grown": ["https://www.candere.com/catalogsearch/result/?q=lab+grown+diamond"],
+            "diamond ring": ["https://www.candere.com/catalogsearch/result/?q=diamond+ring",
+                             "https://www.candere.com/catalogsearch/result/?q=solitaire+ring"],
+            "pendant": ["https://www.candere.com/catalogsearch/result/?q=diamond+pendant"],
+            "earring": ["https://www.candere.com/catalogsearch/result/?q=diamond+earring"],
+            "bracelet": ["https://www.candere.com/catalogsearch/result/?q=diamond+bracelet"],
         },
+    },
+    # CaratLane: discover from the product sitemap (works from any IP), fetch
+    # each PDP through the India proxy, extract. Market leader.
+    "CaratLane": {
+        "extract": extract_caratlane, "mode": "proxy",
+        "sitemap": "https://www.caratlane.com/caratlane-sitemap/product-sitemap.xml",
+        "slug_re": r"(diamond-ring|solitaire|diamond-pendant|diamond-earring|diamond-bracelet)",
     },
 }
 
 
-def discover(b):
+_PROXY = None
+
+
+def proxy_fetch(url):
+    """Fetch through the gold scraper's proven India proxy waterfall (5
+    providers incl. Zyte), which already reaches CaratLane for making
+    charges. Imported lazily so a missing dep degrades to '' rather than
+    crashing the whole run; the diamonds workflow step installs bs4."""
+    global _PROXY
+    if _PROXY is None:
+        try:
+            import collect
+            _PROXY = collect.fetch_via_proxy_waterfall
+        except Exception as e:
+            print(f"  proxy unavailable ({type(e).__name__}: {str(e)[:60]})")
+            _PROXY = False
+    if not _PROXY:
+        return ""
+    try:
+        s = requests.Session()
+        s.headers.update({"User-Agent": UA})
+        html_, _note = _PROXY(url, s)
+        return html_ or ""
+    except Exception:
+        return ""
+
+
+def discover(b, limit=60):
     cfg = BRANDS[b]
     urls = []
+    if cfg.get("sitemap"):
+        xml = fetch(cfg["sitemap"])
+        for m in re.finditer(r"<loc>([^<]+)</loc>", xml):
+            u = m.group(1)
+            if re.search(cfg["slug_re"], u) and u not in urls:
+                urls.append(u)
+            if len(urls) >= limit:
+                break
+        return urls
     for group in cfg["listings"].values():
         for lu in group:
             for m in re.finditer(cfg["prod_re"], fetch(lu)):
@@ -140,13 +224,18 @@ def discover(b):
     return urls
 
 
+def grab(b, url):
+    html_ = proxy_fetch(url) if BRANDS[b].get("mode") == "proxy" else fetch(url)
+    return BRANDS[b]["extract"](url, html_) if html_ else None
+
+
 def probe(limit=24):
     rows = []
     for b in BRANDS:
         urls = discover(b)[:limit]
         print(f"{b}: {len(urls)} diamond products discovered")
         for u in urls:
-            r = BRANDS[b]["extract"](u, fetch(u))
+            r = grab(b, u)
             if r:
                 rows.append(r)
     print(f"\nextracted {len(rows)} products with specs + price breakup\n")
@@ -215,10 +304,19 @@ def collect(limit=120):
     import private_store
     rows = []
     for b in BRANDS:
-        for u in discover(b)[:limit]:
-            r = BRANDS[b]["extract"](u, fetch(u))
+        urls = discover(b)[:limit]
+        got = 0
+        for i, u in enumerate(urls):
+            html_ = proxy_fetch(u) if BRANDS[b].get("mode") == "proxy" else fetch(u)
+            if BRANDS[b].get("mode") == "proxy" and i == 0:
+                tag = ("US-page" if "caratlane us" in html_.lower() or "/en_us" in html_.lower()
+                       else ("india" if "₹" in html_ or "en_IN" in html_ else "unknown"))
+                print(f"  {b}: proxy sample {len(html_)} bytes, looks={tag}, "
+                      f"carat?={'ct' in html_.lower()} clarity?={'clarity' in html_.lower()}")
+            r = BRANDS[b]["extract"](u, html_) if html_ else None
             if r:
-                rows.append(r)
+                rows.append(r); got += 1
+        print(f"  {b}: {len(urls)} discovered, {got} extracted")
     print(f"collected {len(rows)} diamond products across {len(BRANDS)} jeweller(s)")
     # Raw rows to the `diamonds` table (run sql/diamonds.sql once first), and
     # the summary the page reads to collector_cache.
