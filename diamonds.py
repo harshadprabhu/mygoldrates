@@ -284,10 +284,19 @@ def collect(limit=120):
     import private_store
     rows = []
     for b in BRANDS:
-        for u in discover(b)[:limit]:
-            r = grab(b, u)
+        urls = discover(b)[:limit]
+        got = 0
+        for i, u in enumerate(urls):
+            html_ = proxy_fetch(u) if BRANDS[b].get("mode") == "proxy" else fetch(u)
+            if BRANDS[b].get("mode") == "proxy" and i == 0:
+                tag = ("US-page" if "caratlane us" in html_.lower() or "/en_us" in html_.lower()
+                       else ("india" if "₹" in html_ or "en_IN" in html_ else "unknown"))
+                print(f"  {b}: proxy sample {len(html_)} bytes, looks={tag}, "
+                      f"carat?={'ct' in html_.lower()} clarity?={'clarity' in html_.lower()}")
+            r = BRANDS[b]["extract"](u, html_) if html_ else None
             if r:
-                rows.append(r)
+                rows.append(r); got += 1
+        print(f"  {b}: {len(urls)} discovered, {got} extracted")
     print(f"collected {len(rows)} diamond products across {len(BRANDS)} jeweller(s)")
     # Raw rows to the `diamonds` table (run sql/diamonds.sql once first), and
     # the summary the page reads to collector_cache.
