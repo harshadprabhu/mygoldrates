@@ -171,12 +171,89 @@ def probe(limit=24):
     return rows
 
 
+def aggregate(rows):
+    """Quality-normalised, like-for-like summary for the customer page.
+
+    Price per carat of the DIAMOND alone, grouped by natural/lab and carat
+    band (and, where we have enough, clarity). Also a per-jeweller profile.
+    Never a raw "cheapest diamond" number - that would compare different
+    stones and mislead.
+    """
+    from collections import defaultdict
+    band = defaultdict(list)       # (type, band) -> [per_carat]
+    byclar = defaultdict(list)     # (type, clarity) -> [per_carat]
+    jeweller = defaultdict(lambda: {"n": 0, "types": set(), "certs": set(), "per_carat": []})
+    for r in rows:
+        if not r.get("per_carat"):
+            continue
+        band[(r["type"], r["band"])].append(r["per_carat"])
+        if r.get("clarity"):
+            byclar[(r["type"], r["clarity"])].append(r["per_carat"])
+        j = jeweller[r["brand"]]
+        j["n"] += 1
+        j["types"].add(r["type"])
+        if r.get("cert"):
+            j["certs"].add(r["cert"])
+        j["per_carat"].append(r["per_carat"])
+
+    def band_stat(d):
+        return {f"{t}|{b}": {"n": len(v), "low": min(v), "median": round(median(v)), "high": max(v)}
+                for (t, b), v in d.items() if len(v) >= 2}
+    return {
+        "by_band": band_stat(band),
+        "by_clarity": band_stat(byclar),
+        "jewellers": {b: {"n": j["n"], "types": sorted(j["types"]), "certs": sorted(j["certs"]),
+                          "median_per_carat": round(median(j["per_carat"])) if j["per_carat"] else None}
+                      for b, j in jeweller.items()},
+        "updated": __import__("datetime").datetime.now(
+            __import__("datetime").timezone(__import__("datetime").timedelta(hours=5, minutes=30))
+        ).strftime("%d %b %Y"),
+    }
+
+
+def collect(limit=120):
+    import private_store
+    rows = []
+    for b in BRANDS:
+        for u in discover(b)[:limit]:
+            r = BRANDS[b]["extract"](u, fetch(u))
+            if r:
+                rows.append(r)
+    print(f"collected {len(rows)} diamond products across {len(BRANDS)} jeweller(s)")
+    # Raw rows to the `diamonds` table (run sql/diamonds.sql once first), and
+    # the summary the page reads to collector_cache.
+    try:
+        from supabase import create_client
+        sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
+        day = __import__("datetime").date.today().isoformat()
+        sb.table("diamonds").delete().eq("captured_on", day).execute()
+        for i in range(0, len(rows), 200):
+            sb.table("diamonds").insert([
+                {"captured_on": day, "brand": r["brand"], "url": r["url"], "carat": r["carat"],
+                 "band": r["band"], "clarity": r.get("clarity"), "color": r.get("color"),
+                 "type": r["type"], "cert": r.get("cert"), "diamond_price": r.get("diamond_price"),
+                 "metal_value": r.get("metal_value"), "making": r.get("making"), "total": r.get("total"),
+                 "per_carat": r.get("per_carat")}
+                for r in rows[i:i + 200]], returning="minimal").execute()
+        print(f"  stored {len(rows)} rows in `diamonds`")
+    except Exception as e:
+        print(f"  DB store skipped/failed: {type(e).__name__}: {str(e)[:120]}")
+    summary = aggregate(rows)
+    try:
+        private_store.cache_put("diamonds_summary", summary)
+        print("  summary cached for the site (diamonds_summary)")
+    except Exception as e:
+        print(f"  summary cache failed: {type(e).__name__}")
+    print(json.dumps(summary, indent=1, default=list)[:1200])
+    return rows
+
+
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "probe"
-    if mode == "probe":
-        probe()
+    if mode == "collect":
+        collect()
     else:
-        print("collect mode not wired to Supabase yet - run `probe` to see the data")
+        probe()
     return 0
 
 
