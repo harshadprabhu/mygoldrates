@@ -115,22 +115,86 @@ def extract_candere(url, html_raw):
     }
 
 
+def extract_caratlane(url, html_raw):
+    """CaratLane geo-redirects non-India IPs to its US site, so these pages
+    are fetched through the India proxy (render=true, country=in) - the
+    rendered India PDP then shows INR and the 4Cs. Extraction is defensive
+    (JSON-LD price + labelled specs in the rendered text) because the markup
+    varies by template."""
+    h = _html.unescape(html_raw)
+    if "caratlane us" in h.lower() or "$" in (re.search(r'("priceCurrency"\s*:\s*"[^"]+")', h) or [""])[0].lower():
+        return None                                     # still the US page - skip
+    def g(pat):
+        m = re.search(pat, h, re.I)
+        return m.group(1).strip() if m else None
+    carat = _num(g(r'([\d.]+)\s*(?:ct|carat)\b'))
+    total = _num(g(r'"price"\s*:\s*"?([0-9][0-9,]*\.?\d*)') or g(r'₹\s?([\d,]{4,})'))
+    clarity = g(r'Clarity[\s:<>/"]{1,8}([A-Z]{1,3}\d?(?:[-/][A-Z]{1,3}\d?)?)')
+    color = g(r'Colou?r[\s:<>/"]{1,8}([D-K]{1,2}(?:[-/][D-K]{1,2})?)')
+    lab = bool(re.search(r"lab[\s-]?grown", h, re.I))
+    cert = next((c for c in ("IGI", "GIA", "SGL") if re.search(rf"\b{c}\b", h)), None)
+    stone = _num(g(r'"(?:diamondPrice|stonePrice|diamondValue)"\s*:\s*"?([0-9][0-9,]*\.?\d*)'))
+    metal = _num(g(r'"(?:metalValue|goldValue|metalPrice)"\s*:\s*"?([0-9][0-9,]*\.?\d*)'))
+    if not (carat and (stone or total)):
+        return None
+    pc = round(stone / carat) if (stone and carat) else None
+    return {
+        "brand": "CaratLane", "url": url, "carat": carat, "n_diamonds": None,
+        "clarity": (clarity or "").upper() or None, "color": (color or "").upper() or None,
+        "type": "lab-grown" if lab else "natural", "cert": cert,
+        "diamond_price": stone, "metal_value": metal, "making": None, "total": total,
+        "band": carat_band(carat), "per_carat": pc,
+    }
+
+
 BRANDS = {
+    # Candere (static, India data, full breakup) - the reference source.
     "Candere": {
-        "extract": extract_candere,
+        "extract": extract_candere, "mode": "direct",
         "prod_re": r'href="(https://www\.candere\.com/[a-z0-9][a-z0-9-]*(?:ring|pendant|earring|bracelet|necklace|mangalsutra)[a-z0-9-]*\.html)"',
         "listings": {
-            "natural": ["https://www.candere.com/catalogsearch/result/?q=diamond+ring",
-                        "https://www.candere.com/catalogsearch/result/?q=solitaire+ring"],
-            "lab-grown": ["https://www.candere.com/catalogsearch/result/?q=lab+grown+diamond"],
+            "diamond ring": ["https://www.candere.com/catalogsearch/result/?q=diamond+ring",
+                             "https://www.candere.com/catalogsearch/result/?q=solitaire+ring"],
+            "pendant": ["https://www.candere.com/catalogsearch/result/?q=diamond+pendant"],
+            "earring": ["https://www.candere.com/catalogsearch/result/?q=diamond+earring"],
+            "bracelet": ["https://www.candere.com/catalogsearch/result/?q=diamond+bracelet"],
         },
+    },
+    # CaratLane: discover from the product sitemap (works from any IP), fetch
+    # each PDP through the India proxy, extract. Market leader.
+    "CaratLane": {
+        "extract": extract_caratlane, "mode": "proxy",
+        "sitemap": "https://www.caratlane.com/caratlane-sitemap/product-sitemap.xml",
+        "slug_re": r"(diamond-ring|solitaire|diamond-pendant|diamond-earring|diamond-bracelet)",
     },
 }
 
 
-def discover(b):
+def proxy_fetch(url):
+    """Fetch through the gold scraper's India proxy waterfall (render=true,
+    country=in). Needs a proxy key in the environment; returns '' without one."""
+    try:
+        import collect
+        s = requests.Session()
+        s.headers.update({"User-Agent": UA})
+        html_, _ = collect.fetch_via_proxy_waterfall(url, s)
+        return html_ or ""
+    except Exception:
+        return ""
+
+
+def discover(b, limit=60):
     cfg = BRANDS[b]
     urls = []
+    if cfg.get("sitemap"):
+        xml = fetch(cfg["sitemap"])
+        for m in re.finditer(r"<loc>([^<]+)</loc>", xml):
+            u = m.group(1)
+            if re.search(cfg["slug_re"], u) and u not in urls:
+                urls.append(u)
+            if len(urls) >= limit:
+                break
+        return urls
     for group in cfg["listings"].values():
         for lu in group:
             for m in re.finditer(cfg["prod_re"], fetch(lu)):
@@ -140,13 +204,18 @@ def discover(b):
     return urls
 
 
+def grab(b, url):
+    html_ = proxy_fetch(url) if BRANDS[b].get("mode") == "proxy" else fetch(url)
+    return BRANDS[b]["extract"](url, html_) if html_ else None
+
+
 def probe(limit=24):
     rows = []
     for b in BRANDS:
         urls = discover(b)[:limit]
         print(f"{b}: {len(urls)} diamond products discovered")
         for u in urls:
-            r = BRANDS[b]["extract"](u, fetch(u))
+            r = grab(b, u)
             if r:
                 rows.append(r)
     print(f"\nextracted {len(rows)} products with specs + price breakup\n")
@@ -216,7 +285,7 @@ def collect(limit=120):
     rows = []
     for b in BRANDS:
         for u in discover(b)[:limit]:
-            r = BRANDS[b]["extract"](u, fetch(u))
+            r = grab(b, u)
             if r:
                 rows.append(r)
     print(f"collected {len(rows)} diamond products across {len(BRANDS)} jeweller(s)")
