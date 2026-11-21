@@ -39,8 +39,11 @@ PER_CAT_LARGE = 150    # pool of 500+ candidates (sitemap-scale) - once a
                        # 20-item sample is one unusual design away from
                        # skewing the whole category median; sample hundreds
                        # instead so the median reflects the actual catalogue
-TOTAL_CAP = 600        # hard cap on product fetches per brand (4 categories
-                       # at PER_CAT_LARGE, with headroom)
+TOTAL_CAP = 1000       # hard cap on product fetches per brand. Raised from
+                       # 600 (21 Nov 2026) now that there are ~10 categories,
+                       # not 4; the round-robin interleave below gives each
+                       # category a fair slice before this cap truncates, so
+                       # the new categories are not starved by the big ones.
 FETCH_WORKERS = 6      # concurrent product-page fetches per brand. Product
                        # pages were fetched one at a time - fine at
                        # PER_CAT=20, but a serial killer once samples run into
@@ -91,13 +94,24 @@ def sample_size(pool_size):
     # good discovery got).
     return max(PER_CAT, min(pool_size, PER_CAT_MED))
 
-# slug keyword -> category. v1 categories only (Bangles, Rings, Earrings,
-# Mangalsutra) - user explicitly deferred Chain, Necklace, Bracelet, Pendant,
-# Coin to v2. Order matters (earring must come before ring). 24K gold coins
-# (owner, 3 Nov 2026) are recognised in categorize() itself, not here.
+# slug keyword -> category. Extended to the common jewellery categories
+# (owner, 21 Nov 2026): the original 4 (Mangalsutra, Earrings, Bangle, Ring)
+# plus Chain, Necklace, Bracelet, Pendant, Nose Pin and Anklet. 24K gold
+# coins (owner, 3 Nov 2026) are recognised in categorize() itself, not here.
+# ORDER MATTERS - most specific first, so a compound slug lands in the right
+# bucket: "mangalsutra" (which is itself a chain) before "chain"; "nose"/
+# "nath" before "ring" (a nose-ring is a Nose Pin, not a Ring); "earring"
+# before "ring"; "pendant"/"necklace"/"bracelet"/"chain" before the generic
+# "bangle"/"ring".
 CAT_RULES = [
     ("mangalsutra", "Mangalsutra"),
+    ("nose", "Nose Pin"), ("nath", "Nose Pin"),
+    ("anklet", "Anklet"), ("payal", "Anklet"),
     ("earring", "Earrings"), ("jhumk", "Earrings"), ("stud", "Earrings"),
+    ("pendant", "Pendant"),
+    ("haram", "Necklace"), ("necklace", "Necklace"), ("choker", "Necklace"),
+    ("bracelet", "Bracelet"),
+    ("chain", "Chain"),
     ("bangle", "Bangle"), ("kada", "Bangle"),
     ("ring", "Ring"),
 ]
@@ -258,7 +272,11 @@ DISCOVER = [
                   "Bangle": "https://www.candere.com/catalogsearch/result/?q=bangle",
                   "Ring": "https://www.candere.com/catalogsearch/result/?q=ring",
                   "Earrings": "https://www.candere.com/catalogsearch/result/?q=earrings",
-                  "Mangalsutra": "https://www.candere.com/catalogsearch/result/?q=mangalsutra"}},
+                  "Mangalsutra": "https://www.candere.com/catalogsearch/result/?q=mangalsutra",
+                  "Chain": "https://www.candere.com/catalogsearch/result/?q=gold+chain",
+                  "Necklace": "https://www.candere.com/catalogsearch/result/?q=necklace",
+                  "Bracelet": "https://www.candere.com/catalogsearch/result/?q=bracelet",
+                  "Pendant": "https://www.candere.com/catalogsearch/result/?q=pendant"}},
     # Product pages carry the full price breakup as a JSON object
     # re-serialized as an escaped string (see escaped_json_block in
     # mc_engine.py) - verified across ring/earring products, 15.7-21.1%,
@@ -283,7 +301,11 @@ DISCOVER = [
                   "Bangle": ["https://www.grtjewels.com/jewellery/gold-jewellery/bangles-and-bracelets.html",
                             "https://www.grtjewels.com/all-jewellery/bangles-bracelets.html"],
                   "Mangalsutra": ["https://www.grtjewels.com/jewellery/gold-jewellery/mangalsutras.html",
-                                 "https://www.grtjewels.com/all-jewellery/mangalsutra.html"]}},
+                                 "https://www.grtjewels.com/all-jewellery/mangalsutra.html"],
+                  "Chain": "https://www.grtjewels.com/catalogsearch/result/?q=gold+chain",
+                  "Necklace": "https://www.grtjewels.com/catalogsearch/result/?q=gold+necklace",
+                  "Bracelet": "https://www.grtjewels.com/catalogsearch/result/?q=gold+bracelet",
+                  "Pendant": "https://www.grtjewels.com/catalogsearch/result/?q=gold+pendant"}},
 
     # Ranka Jewellers investigated and NOT added: extraction works fine on
     # a single product (verified 18.9% via dom_breakup_section), but there
@@ -313,7 +335,11 @@ DISCOVER = [
      "listings": {"Bangle": "https://www.ckcjewellers.com/en_IN/search?q=gold+bangle",
                   "Ring": "https://www.ckcjewellers.com/en_IN/search?q=gold+ring",
                   "Earrings": "https://www.ckcjewellers.com/en_IN/search?q=gold+earrings",
-                  "Mangalsutra": "https://www.ckcjewellers.com/en_IN/search?q=gold+mangalsutra"}},
+                  "Mangalsutra": "https://www.ckcjewellers.com/en_IN/search?q=gold+mangalsutra",
+                  "Chain": "https://www.ckcjewellers.com/en_IN/search?q=gold+chain",
+                  "Necklace": "https://www.ckcjewellers.com/en_IN/search?q=gold+necklace",
+                  "Bracelet": "https://www.ckcjewellers.com/en_IN/search?q=gold+bracelet",
+                  "Pendant": "https://www.ckcjewellers.com/en_IN/search?q=gold+pendant"}},
 
     # Khazana Jewellery: the product page carries a real price-breakup table
     # (gold value, making charges, subtotal; read by mc_engine's
