@@ -171,16 +171,30 @@ BRANDS = {
 
 
 def proxy_fetch(url):
-    """Fetch through the gold scraper's India proxy waterfall (render=true,
-    country=in). Needs a proxy key in the environment; returns '' without one."""
-    try:
-        import collect
-        s = requests.Session()
-        s.headers.update({"User-Agent": UA})
-        html_, _ = collect.fetch_via_proxy_waterfall(url, s)
-        return html_ or ""
-    except Exception:
-        return ""
+    """Fetch through an India-geo rendering proxy (render=true, country=in),
+    so a geo-redirecting site serves its real India page. Self-contained (the
+    same keys the gold scraper uses) - does NOT import collect.py, whose
+    module-level deps are not installed in the diamonds step. Returns '' with
+    no key configured."""
+    key = os.environ.get("SCRAPERAPI_KEY")
+    if key:
+        try:
+            r = requests.get("http://api.scraperapi.com", timeout=70, params={
+                "api_key": key, "url": url, "render": "true", "country_code": "in"})
+            if r.status_code == 200 and len(r.text) > 500:
+                return r.text
+        except requests.RequestException:
+            pass
+    key = os.environ.get("SCRAPINGBEE_KEY")
+    if key:
+        try:
+            r = requests.get("https://app.scrapingbee.com/api/v1/", timeout=70, params={
+                "api_key": key, "url": url, "render_js": "true", "country_code": "in"})
+            if r.status_code == 200 and len(r.text) > 500:
+                return r.text
+        except requests.RequestException:
+            pass
+    return ""
 
 
 def discover(b, limit=60):
