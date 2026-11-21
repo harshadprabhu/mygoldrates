@@ -183,17 +183,26 @@ def zyte_fetch(url, geo="IN"):
     """Zyte browser render pinned to a country (geolocation), so a
     geo-redirecting site serves that country's page - CaratLane in INR with
     geo='IN'. Self-contained (ZYTE_API_KEY), returns '' without a key."""
+    global _ZYTE_DIAG
     key = os.environ.get("ZYTE_API_KEY")
     if not key:
+        if not _ZYTE_DIAG:
+            print("  zyte: no ZYTE_API_KEY in env"); _ZYTE_DIAG = True
         return ""
     try:
         r = requests.post(ZYTE_ENDPOINT, json={"url": url, "browserHtml": True, "geolocation": geo},
                           auth=(key, ""), timeout=90)
         if r.status_code == 200:
             return r.json().get("browserHtml") or ""
-    except requests.RequestException:
-        pass
+        if not _ZYTE_DIAG:
+            print(f"  zyte: HTTP {r.status_code} {str(r.text)[:140]}"); _ZYTE_DIAG = True
+    except requests.RequestException as e:
+        if not _ZYTE_DIAG:
+            print(f"  zyte: {type(e).__name__}: {str(e)[:80]}"); _ZYTE_DIAG = True
     return ""
+
+
+_ZYTE_DIAG = False
 
 
 def proxy_fetch(url, geo=None):
