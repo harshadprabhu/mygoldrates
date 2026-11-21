@@ -90,6 +90,13 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          # CaratLane and other geo-redirecting sites are fetched through the
+          # India proxy waterfall (same keys the gold scraper uses).
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          SCRAPINGBEE_KEY: ${{ secrets.SCRAPINGBEE_KEY }}
+          ZENROWS_KEY: ${{ secrets.ZENROWS_KEY }}
+          CRAWLBASE_KEY: ${{ secrets.CRAWLBASE_KEY }}
+          ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
         run: python diamonds.py collect
       - name: Merge the jewellers' own making charges
         if: inputs.probe != 'true' && inputs.probe != 'tanishq' && inputs.probe != 'price' && inputs.probe != 'migrate' && inputs.probe != 'diamonds'
