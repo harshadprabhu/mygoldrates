@@ -170,31 +170,31 @@ BRANDS = {
 }
 
 
+_PROXY = None
+
+
 def proxy_fetch(url):
-    """Fetch through an India-geo rendering proxy (render=true, country=in),
-    so a geo-redirecting site serves its real India page. Self-contained (the
-    same keys the gold scraper uses) - does NOT import collect.py, whose
-    module-level deps are not installed in the diamonds step. Returns '' with
-    no key configured."""
-    key = os.environ.get("SCRAPERAPI_KEY")
-    if key:
+    """Fetch through the gold scraper's proven India proxy waterfall (5
+    providers incl. Zyte), which already reaches CaratLane for making
+    charges. Imported lazily so a missing dep degrades to '' rather than
+    crashing the whole run; the diamonds workflow step installs bs4."""
+    global _PROXY
+    if _PROXY is None:
         try:
-            r = requests.get("http://api.scraperapi.com", timeout=70, params={
-                "api_key": key, "url": url, "render": "true", "country_code": "in"})
-            if r.status_code == 200 and len(r.text) > 500:
-                return r.text
-        except requests.RequestException:
-            pass
-    key = os.environ.get("SCRAPINGBEE_KEY")
-    if key:
-        try:
-            r = requests.get("https://app.scrapingbee.com/api/v1/", timeout=70, params={
-                "api_key": key, "url": url, "render_js": "true", "country_code": "in"})
-            if r.status_code == 200 and len(r.text) > 500:
-                return r.text
-        except requests.RequestException:
-            pass
-    return ""
+            import collect
+            _PROXY = collect.fetch_via_proxy_waterfall
+        except Exception as e:
+            print(f"  proxy unavailable ({type(e).__name__}: {str(e)[:60]})")
+            _PROXY = False
+    if not _PROXY:
+        return ""
+    try:
+        s = requests.Session()
+        s.headers.update({"User-Agent": UA})
+        html_, _note = _PROXY(url, s)
+        return html_ or ""
+    except Exception:
+        return ""
 
 
 def discover(b, limit=60):
