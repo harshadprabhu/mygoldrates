@@ -305,7 +305,10 @@ def collect(limit=120):
     import private_store
     rows = []
     for b in BRANDS:
-        urls = discover(b)[:limit]
+        # Proxy brands (Zyte renders) cost money per fetch, so cap them;
+        # direct brands (Candere) are free, so sample widely.
+        cap = BRANDS[b].get("sample", 25) if BRANDS[b].get("mode") == "proxy" else limit
+        urls = discover(b)[:cap]
         got = 0
         for i, u in enumerate(urls):
             html_ = proxy_fetch(u, BRANDS[b].get("geo")) if BRANDS[b].get("mode") == "proxy" else fetch(u)
