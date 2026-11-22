@@ -433,7 +433,8 @@ async function handleSonaUnderstand(request, env) {
   const CATS = ['Ring', 'Chain', 'Necklace', 'Bangle', 'Bracelet', 'Earrings',
                 'Mangalsutra', 'Pendant', 'Coin', 'Nose Pin', 'Anklet'];
   const category = (CATS.indexOf(p.category) > -1) ? p.category : null;
-  return json({ ok: true, intent, brand, city, karat, weight, category });
+  const dbg = (new URL(request.url)).searchParams.get('debug') ? { raw: String(out).slice(0, 300) } : {};
+  return json({ ok: true, intent, brand, city, karat, weight, category, ...dbg });
 }
 
 // is never returned. Only the site's own pages can read it (CORS).
