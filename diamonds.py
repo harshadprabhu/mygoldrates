@@ -153,6 +153,34 @@ def extract_caratlane(url, html_raw):
     }
 
 
+def extract_senco(url, html_raw):
+    """Senco publishes a full price breakup in page JSON - diamond_value_inr,
+    diamond_weight (carat), gold_value, making_charge_value - and the total in
+    JSON-LD (INR). Direct fetch, no proxy. Clarity/colour are not exposed
+    per-stone, so they stay null; carat + diamond value still give a clean
+    price-per-carat."""
+    h = _html.unescape(html_raw)
+
+    def g(pat):
+        m = re.search(pat, h, re.I)
+        return _num(m.group(1)) if m else None
+    carat = g(r'"diamond_weight"\s*:\s*"?([0-9][0-9.,]*)')
+    stone = g(r'"diamond_value_inr"\s*:\s*"?([0-9][0-9.,]*)') or g(r'"diamond_value"\s*:\s*"?([0-9][0-9.,]*)')
+    metal = g(r'"gold_value"\s*:\s*"?([0-9][0-9.,]*)')
+    making = g(r'"making_charge_value"\s*:\s*"?([0-9][0-9.,]*)')
+    total = g(r'"price"\s*:\s*"?([0-9][0-9.,]*)')
+    if not (carat and carat > 0 and stone and stone > 0):   # a real diamond piece, not plain gold
+        return None
+    lab = bool(re.search(r"lab[\s-]?grown", h, re.I))
+    return {
+        "brand": "Senco Gold", "url": url, "carat": carat, "n_diamonds": None,
+        "clarity": None, "color": None,
+        "type": "lab-grown" if lab else "natural", "cert": None,
+        "diamond_price": stone, "metal_value": metal, "making": making, "total": total,
+        "band": carat_band(carat), "per_carat": round(stone / carat),
+    }
+
+
 BRANDS = {
     # Candere (static, India data, full breakup) - the reference source.
     "Candere": {
@@ -166,8 +194,17 @@ BRANDS = {
             "bracelet": ["https://www.candere.com/catalogsearch/result/?q=diamond+bracelet"],
         },
     },
+    # Senco Gold (static, India, full breakup) - a second DIRECT source, no
+    # proxy. Discover diamond products from its product sitemap.
+    "Senco Gold": {
+        "extract": extract_senco, "mode": "direct",
+        "sitemap": "https://sencogoldanddiamonds.com/sitemap-product.xml",
+        "slug_re": r"(diamond|solitaire)",
+    },
     # CaratLane: discover from the product sitemap (works from any IP), fetch
-    # each PDP through the India proxy, extract. Market leader.
+    # each PDP through the India proxy, extract. Market leader - but needs a
+    # working India-geo proxy (see proxy_fetch), so it yields only when one is
+    # funded; the direct sources above never depend on that.
     "CaratLane": {
         "extract": extract_caratlane, "mode": "proxy", "geo": "IN",
         "sitemap": "https://www.caratlane.com/caratlane-sitemap/product-sitemap.xml",
