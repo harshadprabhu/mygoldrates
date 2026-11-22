@@ -2,20 +2,27 @@ name: fetch-rates
 
 on:
   schedule:
-    # Every 30 minutes. Collection volume is no longer the constraint, so the
-    # board tracks intraday revisions continuously instead of catching six
-    # fixed windows - a jeweller who revises at 12:40 IST now shows within
-    # the half hour rather than waiting for the old 14:47 slot.
+    # 4 times a day, ~10:30 to ~18:00 IST (owner, 22 Nov 2026). Every run
+    # falls back to the shared proxy pool for any jeweller that fails a direct
+    # fetch; at every-30-min (48 runs/day) that quietly exhausted the
+    # providers' monthly free credits, which broke the proxy-only work
+    # (Tanishq making charges, the diamond collector). Four spread runs keep
+    # the board fresh through the trading day while staying well inside the
+    # free tiers - jewellers mostly set the day's rate once each morning, so
+    # four reads catch the opening rate and any intraday revision.
     #
-    # Offset to :07/:37 rather than :00/:30 deliberately: GitHub delays
-    # scheduled runs on private repos and the on-the-hour and on-the-half
-    # minutes are the most congested, so odd minutes get picked up sooner.
-    # A dropped tick is harmless - the next is 30 minutes out and every run
-    # re-runs all brands from scratch, so nothing accumulates.
+    # Times are IST (UTC+5:30), offset off the congested :00/:30 minutes
+    # (GitHub delays private-repo scheduled runs most on those):
+    #   05:07 UTC = 10:37 IST   07:37 UTC = 13:07 IST
+    #   10:07 UTC = 15:37 IST   12:37 UTC = 18:07 IST
+    # A dropped tick is harmless - every run re-reads all brands from scratch.
     #
-    # `concurrency` below (group without cancel-in-progress) already keeps
-    # two runs from overlapping if one is slow.
-    - cron: "7,37 * * * *"
+    # `concurrency` below (group without cancel-in-progress) keeps two runs
+    # from overlapping if one is slow.
+    - cron: "7 5 * * *"
+    - cron: "37 7 * * *"
+    - cron: "7 10 * * *"
+    - cron: "37 12 * * *"
   workflow_dispatch:        # manual runs + the Cloudflare Worker cron
     inputs:
       alerts:
