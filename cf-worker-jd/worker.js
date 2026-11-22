@@ -407,24 +407,25 @@ async function handleSonaUnderstand(request, env) {
   // fallback; names change as Cloudflare deprecates them.
   const MODELS = ['@cf/meta/llama-3.3-70b-instruct-fp8-fast', '@cf/meta/llama-3.1-8b-instruct-fast',
                   '@cf/meta/llama-3.2-3b-instruct', '@cf/meta/llama-3-8b-instruct'];
-  let out = '', lastErr = '';
+  let resp = null, lastErr = '';
   for (const model of MODELS) {
     try {
       const r = await env.AI.run(model, {
         messages: [{ role: 'system', content: sys }, { role: 'user', content: 'Q: ' + q }],
         max_tokens: 120, temperature: 0,
       });
-      out = (r && (r.response || r.result || '')) || '';
-      if (out) break;
+      resp = r && (r.response !== undefined ? r.response : r.result);
+      if (resp) break;
     } catch (e) {
       lastErr = String(e && e.message || e);
       if (!/deprecated|not found|No such model|5028|invalid model/i.test(lastErr)) break;
     }
   }
-  if (!out) return json({ ok: false, error: 'ai failed', detail: lastErr.slice(0, 180) }, 502);
-  let p = {};
-  const m = String(out).match(/\{[\s\S]*\}/);
-  if (m) { try { p = JSON.parse(m[0]); } catch { p = {}; } }
+  if (!resp) return json({ ok: false, error: 'ai failed', detail: lastErr.slice(0, 180) }, 502);
+  // response may already be a parsed object, or a string holding JSON.
+  let p = {}, out = resp;
+  if (resp && typeof resp === 'object') { p = resp; out = JSON.stringify(resp); }
+  else { const m = String(resp).match(/\{[\s\S]*\}/); if (m) { try { p = JSON.parse(m[0]); } catch { p = {}; } } }
   const intent = SONA_INTENTS.indexOf(p.intent) > -1 ? p.intent : 'other';
   const brand = resolveBrand(p.jeweller, brands);
   const city = resolveCity(p.city, cities);
