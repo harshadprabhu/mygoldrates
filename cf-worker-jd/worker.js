@@ -351,14 +351,13 @@ function resolveBrand(text, brands) {
   const qt = qn.split(' ').filter((w) => w.length >= 3);
   let best = null, bestScore = 0;
   for (const [slug, name] of Object.entries(brands)) {
-    const nn = _norm(name), nt = nn.split(' ').filter(Boolean);
+    // compare only on significant tokens (>=3 chars) on BOTH sides, so
+    // initials like "P C" in "P.C. Chandra" don't dilute the score.
+    const nt = _norm(name).split(' ').filter((w) => w.length >= 3);
     if (!nt.length) continue;
-    const overlap = nt.filter((w) => w.length >= 3 && qt.indexOf(w) > -1).length;
+    const overlap = nt.filter((w) => qt.indexOf(w) > -1).length;
     const score = overlap / nt.length;
-    // every significant word of a short brand name present, or a strong match
-    if ((overlap >= nt.length && nt.length) || score >= 0.6) {
-      if (score > bestScore) { bestScore = score; best = slug; }
-    }
+    if (score >= 0.6 && score > bestScore) { bestScore = score; best = slug; }
   }
   return best;
 }
