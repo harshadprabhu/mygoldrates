@@ -538,7 +538,11 @@ def test_a_named_jeweller_gets_its_own_figures_not_the_rates_faq():
     FAQ on why jewellers' rates differ: "rates" + "jewellers" scored over
     the bar before the jeweller was looked at (owner, 10 Nov 2026)."""
     for q in ("What are the gold rates and details for Manubhai Jewellers?",
-              "What are the rates for Kalyan Jewellers", "gold rates for Manubhai Jewellers"):
+              "What are the rates for Kalyan Jewellers", "gold rates for Manubhai Jewellers",
+              # "where" is a cheap keyword, but a NAMED jeweller must win over
+              # the generic cheapest list (owner, 22 Nov 2026)
+              "Where can I find today's gold rate for P.C. Chandra Jewellers?",
+              "where to see Tanishq gold rate"):
         r = _sona([{"lang": "en", "q": q}])[0]
         assert r["intent"] == "rate_brand", (q, r["intent"])
     # the FAQ still answers the general question
