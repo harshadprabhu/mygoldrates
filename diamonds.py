@@ -239,17 +239,26 @@ def india_fetch(url):
          {"token": env("CRAWLBASE_KEY"), "url": url, "country": "IN"}),
     ]
     global _PROXY_DIAG
+    diag = not _PROXY_DIAG
     for name, ep, params in attempts:
         if not (params.get("api_key") or params.get("apikey") or params.get("token")):
+            if diag:
+                print(f"  india proxy: {name} - no key")
             continue
         try:
             r = requests.get(ep, params=params, timeout=70)
-            if r.status_code == 200 and _looks_india(r.text):
-                if not _PROXY_DIAG:
-                    print(f"  india proxy: {name} served the India page"); _PROXY_DIAG = True
+            india = _looks_india(r.text)
+            if diag:
+                low = r.text.lower()
+                tag = ("US" if ("caratlane us" in low or "/en_us" in low) else
+                       "INR" if india else "?")
+                print(f"  india proxy: {name} HTTP {r.status_code} {len(r.text)}b looks={tag}")
+            if r.status_code == 200 and india:
+                _PROXY_DIAG = True
                 return r.text
-        except requests.RequestException:
-            pass
+        except requests.RequestException as e:
+            if diag:
+                print(f"  india proxy: {name} {type(e).__name__}")
     # Zyte with India geolocation, last (paid; may be suspended).
     h = zyte_fetch(url, "IN")
     if _looks_india(h):
