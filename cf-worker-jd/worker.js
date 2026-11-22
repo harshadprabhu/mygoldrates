@@ -336,6 +336,40 @@ const SONA_INTENTS = [
   "other",
 ];
 
+// Resolve the jeweller text the model extracted to a known slug. Normalise
+// both sides (drop dots, "jewellers/gold/&", spaces) and require a solid
+// token overlap, so "P.C. Chandra Jewellers" -> pcchandra but a stray word
+// does not match the wrong shop.
+function _norm(s) {
+  return String(s || '').toLowerCase().replace(/[.&]/g, ' ')
+    .replace(/\b(jewell?ers?|jewell?ery|jewels|gold|diamonds?|and|sons|the|store|shop)\b/g, ' ')
+    .replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function resolveBrand(text, brands) {
+  const qn = _norm(text);
+  if (!qn) return null;
+  const qt = qn.split(' ').filter((w) => w.length >= 3);
+  let best = null, bestScore = 0;
+  for (const [slug, name] of Object.entries(brands)) {
+    const nn = _norm(name), nt = nn.split(' ').filter(Boolean);
+    if (!nt.length) continue;
+    const overlap = nt.filter((w) => w.length >= 3 && qt.indexOf(w) > -1).length;
+    const score = overlap / nt.length;
+    // every significant word of a short brand name present, or a strong match
+    if ((overlap >= nt.length && nt.length) || score >= 0.6) {
+      if (score > bestScore) { bestScore = score; best = slug; }
+    }
+  }
+  return best;
+}
+function resolveCity(text, cities) {
+  const qn = _norm(text);
+  if (!qn) return null;
+  for (const c of cities) if (_norm(c) === qn) return c;
+  for (const c of cities) { const cn = _norm(c); if (cn && (qn.indexOf(cn) > -1 || cn.indexOf(qn) > -1)) return c; }
+  return null;
+}
+
 async function handleSonaUnderstand(request, env) {
   let body;
   try { body = await request.json(); } catch { return json({ ok: false, error: 'bad json' }, 400); }
@@ -346,30 +380,38 @@ async function handleSonaUnderstand(request, env) {
   // can only pick a jeweller/city that actually exists. {slug: name} maps.
   const brands = (body.brands && typeof body.brands === 'object') ? body.brands : {};
   const cities = Array.isArray(body.cities) ? body.cities.slice(0, 400) : [];
-  const brandList = Object.entries(brands).slice(0, 120)
-    .map(([s, n]) => `${s}=${n}`).join('; ');
+  // The model extracts the jeweller and city as PLAIN TEXT (reliable), and we
+  // resolve that to a known slug/name here - far better than making a small
+  // model pick from 120 slugs in the prompt.
   const sys =
-    "You label an Indian gold-jewellery question for a rate-comparison site. " +
-    "You NEVER answer it and NEVER output any price or number as an answer - " +
-    "another system builds the answer from real data. Output ONLY one JSON " +
-    "object, no prose, with keys: intent, brand, city, karat, weight, category. " +
-    "intent is EXACTLY one of: " + SONA_INTENTS.join(", ") + ". " +
-    "brand is the jeweller's slug from this list or null (slug=name): " + brandList + ". " +
-    "city is one of these exact names or null: " + cities.join(", ") + ". " +
-    "karat is one of 24K, 22K, 18K, 14K or null. weight is a number of grams or null. " +
-    "category is one of Ring, Chain, Necklace, Bangle, Bracelet, Earrings, " +
-    "Mangalsutra, Pendant, Coin, Nose Pin, Anklet or null. " +
-    "If a specific jeweller is named, intent is rate_brand unless the question " +
-    "is clearly about making charges, offers, coins or a comparison.";
-  // Model names change as Cloudflare deprecates them; try current small
-  // instruct models in order and use the first that answers.
-  const MODELS = ['@cf/meta/llama-3.2-3b-instruct', '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
-                  '@cf/meta/llama-3.1-8b-instruct-fast', '@cf/meta/llama-3-8b-instruct'];
+    "You label an Indian gold-jewellery question for a rate-comparison website. " +
+    "You NEVER answer it and NEVER output a price - another system builds the " +
+    "answer from real data. Output ONLY one JSON object (no prose) with keys: " +
+    "intent, jeweller, city, karat, weight, category.\n" +
+    "intent is EXACTLY one of: " + SONA_INTENTS.join(", ") + ".\n" +
+    "- rate_brand: a named jeweller's rate (e.g. 'where is Tanishq's rate', 'PC Chandra gold price').\n" +
+    "- rate_city: a named city's rate. cheapest: which jeweller is cheapest. compare: two jewellers.\n" +
+    "- making: making/wastage charges. offer: offers/best deal/final bill. coin: gold coin price.\n" +
+    "- trend: price trend/history. silver/world/alerts as named. faq: a general how/what question.\n" +
+    "jeweller = the shop's name exactly as written, or null. city = the city name, or null. " +
+    "karat = 24K/22K/18K/14K or null. weight = grams as a number or null. " +
+    "category = Ring/Chain/Necklace/Bangle/Bracelet/Earrings/Mangalsutra/Pendant/Coin/Nose Pin/Anklet or null.\n" +
+    "Examples:\n" +
+    "Q: Where can I find today's gold rate for P.C. Chandra Jewellers?\n" +
+    '{"intent":"rate_brand","jeweller":"P.C. Chandra Jewellers","city":null,"karat":null,"weight":null,"category":null}\n' +
+    "Q: making charge on a gold chain at Malabar\n" +
+    '{"intent":"making","jeweller":"Malabar","city":null,"karat":null,"weight":null,"category":"Chain"}\n' +
+    "Q: 10 gram 22k gold price in Chennai\n" +
+    '{"intent":"rate_city","jeweller":null,"city":"Chennai","karat":"22K","weight":10,"category":null}';
+  // Stronger model first (better at following the schema), small ones as
+  // fallback; names change as Cloudflare deprecates them.
+  const MODELS = ['@cf/meta/llama-3.3-70b-instruct-fp8-fast', '@cf/meta/llama-3.1-8b-instruct-fast',
+                  '@cf/meta/llama-3.2-3b-instruct', '@cf/meta/llama-3-8b-instruct'];
   let out = '', lastErr = '';
   for (const model of MODELS) {
     try {
       const r = await env.AI.run(model, {
-        messages: [{ role: 'system', content: sys }, { role: 'user', content: q }],
+        messages: [{ role: 'system', content: sys }, { role: 'user', content: 'Q: ' + q }],
         max_tokens: 120, temperature: 0,
       });
       out = (r && (r.response || r.result || '')) || '';
@@ -380,15 +422,12 @@ async function handleSonaUnderstand(request, env) {
     }
   }
   if (!out) return json({ ok: false, error: 'ai failed', detail: lastErr.slice(0, 180) }, 502);
-  // Pull the first JSON object out of the model text and validate every field
-  // against the known vocab - anything unrecognised becomes null, so the
-  // page's deterministic code is never handed a made-up value.
   let p = {};
   const m = String(out).match(/\{[\s\S]*\}/);
   if (m) { try { p = JSON.parse(m[0]); } catch { p = {}; } }
   const intent = SONA_INTENTS.indexOf(p.intent) > -1 ? p.intent : 'other';
-  const brand = (p.brand && brands[p.brand]) ? p.brand : null;
-  const city = (p.city && cities.indexOf(p.city) > -1) ? p.city : null;
+  const brand = resolveBrand(p.jeweller, brands);
+  const city = resolveCity(p.city, cities);
   const karat = (['24K', '22K', '18K', '14K'].indexOf(p.karat) > -1) ? p.karat : null;
   const weight = (typeof p.weight === 'number' && p.weight > 0 && p.weight <= 1000) ? p.weight : null;
   const CATS = ['Ring', 'Chain', 'Necklace', 'Bangle', 'Bracelet', 'Earrings',
