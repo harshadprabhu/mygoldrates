@@ -205,12 +205,67 @@ def zyte_fetch(url, geo="IN"):
 _ZYTE_DIAG = False
 
 
+def _looks_india(h):
+    """A fetched page is the India experience (INR), not the US one. CaratLane
+    geo-redirects, and we must keep only the India page or prices would be in
+    USD. Cheap signals, no parsing."""
+    if not h or len(h) < 1000:
+        return False
+    low = h.lower()
+    if "caratlane us" in low or "/en_us" in low or '"pricecurrency":"usd"' in low:
+        return False
+    return ("₹" in h or "en_IN" in h or '"priceCurrency":"INR"' in h
+            or ("INR" in h and "USD" not in h[:20000]))
+
+
+def india_fetch(url):
+    """Fetch a geo-redirecting page as INDIA, trying EVERY proxy we have with
+    its own India-geotargeting parameter and keeping the first response that
+    is actually the India (INR) page. The gold waterfall returns the first
+    200 of any geo (so CaratLane came back as the US site); this validates
+    the country and falls through to the next provider otherwise. Does not
+    depend on any single provider (e.g. Zyte being up)."""
+    env = os.environ.get
+    # (name, endpoint, params, success_status) - each with India geotargeting.
+    attempts = [
+        ("scraperapi", "http://api.scraperapi.com",
+         {"api_key": env("SCRAPERAPI_KEY"), "url": url, "render": "true",
+          "country_code": "in", "premium": "true"}),               # premium = residential India IPs
+        ("scrapingbee", "https://app.scrapingbee.com/api/v1/",
+         {"api_key": env("SCRAPINGBEE_KEY"), "url": url, "render_js": "true", "country_code": "in"}),
+        ("zenrows", "https://api.zenrows.com/v1/",
+         {"apikey": env("ZENROWS_KEY"), "url": url, "js_render": "true", "proxy_country": "in"}),
+        ("crawlbase", "https://api.crawlbase.com/",
+         {"token": env("CRAWLBASE_KEY"), "url": url, "country": "IN"}),
+    ]
+    global _PROXY_DIAG
+    for name, ep, params in attempts:
+        if not (params.get("api_key") or params.get("apikey") or params.get("token")):
+            continue
+        try:
+            r = requests.get(ep, params=params, timeout=70)
+            if r.status_code == 200 and _looks_india(r.text):
+                if not _PROXY_DIAG:
+                    print(f"  india proxy: {name} served the India page"); _PROXY_DIAG = True
+                return r.text
+        except requests.RequestException:
+            pass
+    # Zyte with India geolocation, last (paid; may be suspended).
+    h = zyte_fetch(url, "IN")
+    if _looks_india(h):
+        if not _PROXY_DIAG:
+            print("  india proxy: zyte served the India page"); _PROXY_DIAG = True
+        return h
+    return ""
+
+
+_PROXY_DIAG = False
+
+
 def proxy_fetch(url, geo=None):
-    """India-geo fetch for a geo-redirecting site. Uses Zyte pinned to the
-    country when a geo is given (CaratLane); that is the only reliable way to
-    get the India page - ScraperAPI's country_code was still served the US
-    site. Returns '' without a key."""
-    return zyte_fetch(url, geo or "IN")
+    """India-geo fetch for a geo-redirecting site (CaratLane): the full
+    multi-proxy India waterfall, not one provider."""
+    return india_fetch(url)
 
 
 def discover(b, limit=60):
