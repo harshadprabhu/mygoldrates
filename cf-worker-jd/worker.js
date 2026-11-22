@@ -361,16 +361,25 @@ async function handleSonaUnderstand(request, env) {
     "Mangalsutra, Pendant, Coin, Nose Pin, Anklet or null. " +
     "If a specific jeweller is named, intent is rate_brand unless the question " +
     "is clearly about making charges, offers, coins or a comparison.";
-  let out;
-  try {
-    const r = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
-      messages: [{ role: 'system', content: sys }, { role: 'user', content: q }],
-      max_tokens: 120, temperature: 0,
-    });
-    out = (r && (r.response || r.result || '')) || '';
-  } catch (e) {
-    return json({ ok: false, error: 'ai failed', detail: String(e && e.message || e).slice(0, 180) }, 502);
+  // Model names change as Cloudflare deprecates them; try current small
+  // instruct models in order and use the first that answers.
+  const MODELS = ['@cf/meta/llama-3.2-3b-instruct', '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+                  '@cf/meta/llama-3.1-8b-instruct-fast', '@cf/meta/llama-3-8b-instruct'];
+  let out = '', lastErr = '';
+  for (const model of MODELS) {
+    try {
+      const r = await env.AI.run(model, {
+        messages: [{ role: 'system', content: sys }, { role: 'user', content: q }],
+        max_tokens: 120, temperature: 0,
+      });
+      out = (r && (r.response || r.result || '')) || '';
+      if (out) break;
+    } catch (e) {
+      lastErr = String(e && e.message || e);
+      if (!/deprecated|not found|No such model|5028|invalid model/i.test(lastErr)) break;
+    }
   }
+  if (!out) return json({ ok: false, error: 'ai failed', detail: lastErr.slice(0, 180) }, 502);
   // Pull the first JSON object out of the model text and validate every field
   // against the known vocab - anything unrecognised becomes null, so the
   // page's deterministic code is never handed a made-up value.
