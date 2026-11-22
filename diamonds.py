@@ -181,6 +181,71 @@ def extract_senco(url, html_raw):
     }
 
 
+def _parse_4c(*opts):
+    """From a jeweller's variant option like 'GH-SI' or 'EF VVS' pull the
+    diamond colour (D-K range) and clarity (FL/IF/VVS/VS/SI/I). Returns
+    (color, clarity), either may be None."""
+    color = clarity = None
+    for opt in opts:
+        if not opt:
+            continue
+        for tok in re.split(r"[-/ ]+", str(opt).upper()):
+            if not color and re.fullmatch(r"[D-K]{1,2}", tok):
+                color = tok
+            elif not clarity and re.fullmatch(r"(FL|IF|VVS[12]?|VS[12]?|SI[12]?|I[123]?)", tok):
+                clarity = tok
+    return color, clarity
+
+
+def extract_png(url, html_raw):
+    """PN Gadgil (pngjewellers.com, Shopify) publishes a full breakup DIRECT -
+    no proxy. A per-variant object carries metal_price, diamond_stone (the
+    diamond value) and making_charges; a `data` map carries dia_weight_N (the
+    diamond carat per stone group) so the total diamond weight is their sum;
+    and the variant option (e.g. 'GH-SI') carries colour + clarity. That makes
+    PNG the most complete direct source - carat, the 4Cs AND the value split."""
+    h = _html.unescape(html_raw)
+    # First variant's value breakup (the object is keyed by variant id).
+    # PNG's keys are UNQUOTED JS (metal_price: 12871.0), so match either form.
+    def jf(key):
+        m = re.search(rf'"?{key}"?\s*:\s*"?([0-9][0-9,]*\.?[0-9]*)', h)
+        return _num(m.group(1)) if m else None
+    metal = jf("metal_price")
+    stone = jf("diamond_stone")
+    making = jf("making_charges")
+    # Total: the breakup `price` is in paise (e.g. 2723800 -> 27238.00).
+    pm = re.search(r'"?price"?\s*:\s*([0-9]{4,})', h)
+    total = round(int(pm.group(1)) / 100) if pm else None
+    # Total diamond carat = sum of the diamond-group weights. The page repeats
+    # the same dia_weight_N block once per variant, so take each group index
+    # (_1, _2, _3...) ONCE - its FIRST occurrence - then sum the distinct ones.
+    groups = {}
+    for m in re.finditer(r'dia_weight_([0-9]+)["\':\s]+([0-9]*\.?[0-9]+)', h):
+        idx = m.group(1)
+        if idx not in groups:
+            groups[idx] = _num(m.group(2)) or 0.0
+    carat = round(sum(groups.values()), 3) or None
+    # Colour + clarity from any variant option value.
+    color = clarity = None
+    for m in re.finditer(r'"option[123]"\s*:\s*"([^"]{1,16})"', h):
+        c, cl = _parse_4c(m.group(1))
+        color = color or c
+        clarity = clarity or cl
+        if color and clarity:
+            break
+    lab = bool(re.search(r"lab[\s-]?grown", h, re.I))
+    cert = next((c for c in ("IGI", "GIA", "SGL") if re.search(rf"\b{c}\b", h)), None)
+    if not (carat and stone and stone > 0):     # a real diamond piece
+        return None
+    return {
+        "brand": "PN Gadgil", "url": url, "carat": carat, "n_diamonds": None,
+        "clarity": clarity, "color": color,
+        "type": "lab-grown" if lab else "natural", "cert": cert,
+        "diamond_price": stone, "metal_value": metal, "making": making, "total": total,
+        "band": carat_band(carat), "per_carat": round(stone / carat),
+    }
+
+
 BRANDS = {
     # Candere (static, India data, full breakup) - the reference source.
     "Candere": {
@@ -200,6 +265,15 @@ BRANDS = {
         "extract": extract_senco, "mode": "direct",
         "sitemap": "https://sencogoldanddiamonds.com/sitemap-product.xml",
         "slug_re": r"(diamond|solitaire)",
+    },
+    # PN Gadgil (pngjewellers.com, Shopify) - a third DIRECT source and the
+    # most complete: carat, colour + clarity AND the value split, no proxy.
+    # Its top sitemap is an INDEX pointing to sitemap_products_N.xml children.
+    "PN Gadgil": {
+        "extract": extract_png, "mode": "direct",
+        "sitemap": "https://www.pngjewellers.com/sitemap.xml",
+        "sitemap_index": True, "child_re": r"product",
+        "slug_re": r"diamond|solitaire",
     },
     # CaratLane: discover from the product sitemap (works from any IP), fetch
     # each PDP through the India proxy, extract. Market leader - but needs a
@@ -318,13 +392,23 @@ def discover(b, limit=60):
     cfg = BRANDS[b]
     urls = []
     if cfg.get("sitemap"):
-        xml = fetch(cfg["sitemap"])
-        for m in re.finditer(r"<loc>([^<]+)</loc>", xml):
-            u = m.group(1)
-            if re.search(cfg["slug_re"], u) and u not in urls:
-                urls.append(u)
-            if len(urls) >= limit:
-                break
+        # A sitemap index points to child sitemaps (PNG); a plain sitemap
+        # lists product URLs directly (Senco, CaratLane). For an index, walk
+        # the product-bearing children and collect product URLs from each.
+        sitemaps = [cfg["sitemap"]]
+        if cfg.get("sitemap_index"):
+            idx = _html.unescape(fetch(cfg["sitemap"]))
+            child_re = cfg.get("child_re", r"product")
+            sitemaps = [m.group(1) for m in re.finditer(r"<loc>([^<]+)</loc>", idx)
+                        if re.search(child_re, m.group(1), re.I)] or sitemaps
+        for sm in sitemaps:
+            xml = _html.unescape(fetch(sm))
+            for m in re.finditer(r"<loc>([^<]+)</loc>", xml):
+                u = m.group(1)
+                if re.search(cfg["slug_re"], u, re.I) and u not in urls:
+                    urls.append(u)
+                if len(urls) >= limit:
+                    return urls
         return urls
     for group in cfg["listings"].values():
         for lu in group:
