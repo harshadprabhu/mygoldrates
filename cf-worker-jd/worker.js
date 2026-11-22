@@ -369,7 +369,7 @@ async function handleSonaUnderstand(request, env) {
     });
     out = (r && (r.response || r.result || '')) || '';
   } catch (e) {
-    return json({ ok: false, error: 'ai failed' }, 502);
+    return json({ ok: false, error: 'ai failed', detail: String(e && e.message || e).slice(0, 180) }, 502);
   }
   // Pull the first JSON object out of the model text and validate every field
   // against the known vocab - anything unrecognised becomes null, so the
