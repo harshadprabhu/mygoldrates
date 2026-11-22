@@ -289,6 +289,7 @@ export default {
         case 'POST /sub/confirm': return wrap(await handleSubConfirm(request, env));
         case 'POST /sub/google':  return wrap(await handleSubGoogle(request, env));
         case 'GET /page/manubhai': return wrap(await handlePage('manubhai', env));
+        case 'POST /sona/understand': return wrap(await handleSonaUnderstand(request, env));
         case 'GET /geo':          return wrap(handleGeo(request));
         case 'POST /push/subscribe':   return wrap(await handlePush(request, env, true));
         case 'POST /push/unsubscribe': return wrap(await handlePush(request, env, false));
@@ -309,6 +310,84 @@ export default {
 // country and that place's coordinates. Used when the browser's own
 // location is refused or unavailable, so "stores near me" can still pick
 // the visitor's state. Nothing is stored or logged; the IP address itself
+// ─── POST /sona/understand ──────────────────────────────────────────────
+// The AI "understanding" layer for Sona (owner, 22 Nov 2026). It does NOT
+// write the answer and never sees or invents a rate - its ONLY job is to
+// read a question and say what it is about, choosing from a fixed intent
+// list and the site's own list of jewellers/cities. The page then builds
+// the real answer from its data with the existing deterministic code, so a
+// number is never hallucinated. Runs on Cloudflare Workers AI (free tier,
+// at the edge); the page uses it only when its own keyword router is
+// unsure, and falls back to that router if this is slow or fails.
+const SONA_INTENTS = [
+  "rate",            // today's gold rate (overall / by karat)
+  "rate_brand",     // a named jeweller's rate
+  "rate_city",      // a city's rate
+  "cheapest",       // which jeweller is cheapest
+  "compare",        // compare two+ jewellers
+  "making",         // making charges
+  "offer",          // offers / best deal / final bill
+  "coin",           // gold coin price
+  "trend",          // price trend / history
+  "silver",         // silver
+  "world",          // gold rate in another country
+  "alerts",         // price alerts / subscribe
+  "faq",            // a general question (purity, 916, buy timing, how rates work...)
+  "other",
+];
+
+async function handleSonaUnderstand(request, env) {
+  let body;
+  try { body = await request.json(); } catch { return json({ ok: false, error: 'bad json' }, 400); }
+  const q = String(body.q || '').slice(0, 300).trim();
+  if (!q) return json({ ok: false, error: 'empty' }, 400);
+  if (!env.AI) return json({ ok: false, error: 'ai not enabled' }, 503);
+  // Vocabularies the page passes from the LIVE knowledge file, so the model
+  // can only pick a jeweller/city that actually exists. {slug: name} maps.
+  const brands = (body.brands && typeof body.brands === 'object') ? body.brands : {};
+  const cities = Array.isArray(body.cities) ? body.cities.slice(0, 400) : [];
+  const brandList = Object.entries(brands).slice(0, 120)
+    .map(([s, n]) => `${s}=${n}`).join('; ');
+  const sys =
+    "You label an Indian gold-jewellery question for a rate-comparison site. " +
+    "You NEVER answer it and NEVER output any price or number as an answer - " +
+    "another system builds the answer from real data. Output ONLY one JSON " +
+    "object, no prose, with keys: intent, brand, city, karat, weight, category. " +
+    "intent is EXACTLY one of: " + SONA_INTENTS.join(", ") + ". " +
+    "brand is the jeweller's slug from this list or null (slug=name): " + brandList + ". " +
+    "city is one of these exact names or null: " + cities.join(", ") + ". " +
+    "karat is one of 24K, 22K, 18K, 14K or null. weight is a number of grams or null. " +
+    "category is one of Ring, Chain, Necklace, Bangle, Bracelet, Earrings, " +
+    "Mangalsutra, Pendant, Coin, Nose Pin, Anklet or null. " +
+    "If a specific jeweller is named, intent is rate_brand unless the question " +
+    "is clearly about making charges, offers, coins or a comparison.";
+  let out;
+  try {
+    const r = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+      messages: [{ role: 'system', content: sys }, { role: 'user', content: q }],
+      max_tokens: 120, temperature: 0,
+    });
+    out = (r && (r.response || r.result || '')) || '';
+  } catch (e) {
+    return json({ ok: false, error: 'ai failed' }, 502);
+  }
+  // Pull the first JSON object out of the model text and validate every field
+  // against the known vocab - anything unrecognised becomes null, so the
+  // page's deterministic code is never handed a made-up value.
+  let p = {};
+  const m = String(out).match(/\{[\s\S]*\}/);
+  if (m) { try { p = JSON.parse(m[0]); } catch { p = {}; } }
+  const intent = SONA_INTENTS.indexOf(p.intent) > -1 ? p.intent : 'other';
+  const brand = (p.brand && brands[p.brand]) ? p.brand : null;
+  const city = (p.city && cities.indexOf(p.city) > -1) ? p.city : null;
+  const karat = (['24K', '22K', '18K', '14K'].indexOf(p.karat) > -1) ? p.karat : null;
+  const weight = (typeof p.weight === 'number' && p.weight > 0 && p.weight <= 1000) ? p.weight : null;
+  const CATS = ['Ring', 'Chain', 'Necklace', 'Bangle', 'Bracelet', 'Earrings',
+                'Mangalsutra', 'Pendant', 'Coin', 'Nose Pin', 'Anklet'];
+  const category = (CATS.indexOf(p.category) > -1) ? p.category : null;
+  return json({ ok: true, intent, brand, city, karat, weight, category });
+}
+
 // is never returned. Only the site's own pages can read it (CORS).
 function handleGeo(request) {
   const cf = request.cf || {};

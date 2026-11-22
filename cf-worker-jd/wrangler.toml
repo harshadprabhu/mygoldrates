@@ -26,3 +26,10 @@ enabled = true
 #                             are different values and signature verification
 #                             fails silently-looking if they are swapped
 #   RAZORPAY_PLAN_ID          plan_… created once for the monthly price
+
+# Workers AI: the "understanding" layer for Sona (POST /sona/understand).
+# It only classifies a question's intent + entities; it never writes the
+# answer or sees a rate. Free-tier edge inference. Enable Workers AI on the
+# Cloudflare account once (dashboard - AI - Workers AI) for this to bind.
+[ai]
+binding = "AI"

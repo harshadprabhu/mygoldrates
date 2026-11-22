@@ -849,6 +849,45 @@
     return q;
   }
   // The answer to a question as typed; a bare "in Marathi" gets a hello in it.
+  // ---- AI understanding layer (Workers AI via the JD Worker) -----------
+  // Only reads a question and says what it is ABOUT (intent + jeweller/city/
+  // karat/weight); it never writes the answer or sees a rate, so a number is
+  // never hallucinated. Used as a second opinion when the keyword router
+  // landed on a weak/generic answer; the deterministic builders below turn
+  // its reading into the real, data-backed answer (owner, 22 Nov 2026).
+  var JD = 'https://mygoldrates-jd-api.harshads-priority.workers.dev';
+  function sonaAI(q) {
+    try {
+      var brands = {}; KB.brands.forEach(function (b) { brands[b.s] = b.n; });
+      var cities = KB.cities.map(function (c) { return c.n; });
+      var ctl = ('AbortController' in window) ? new AbortController() : null;
+      var tm = ctl ? setTimeout(function () { ctl.abort(); }, 2600) : null;
+      return fetch(JD + '/sona/understand', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q: q, brands: brands, cities: cities }), signal: ctl ? ctl.signal : undefined })
+        .then(function (r) { if (tm) clearTimeout(tm); return r.ok ? r.json() : null; })
+        .then(function (d) { return (d && d.ok) ? d : null; }).catch(function () { return null; });
+    } catch (e) { return Promise.resolve(null); }
+  }
+  function fromAI(ai, k) {
+    if (!ai) return null;
+    var kk = ai.karat || k;
+    var b = ai.brand ? KB.brands.filter(function (x) { return x.s === ai.brand; })[0] : null;
+    var c = ai.city ? KB.cities.filter(function (x) { return x.n === ai.city; })[0] : null;
+    switch (ai.intent) {
+      case 'rate_brand': return b ? aBrand(b, kk) : null;
+      case 'rate_city':  return c ? aCity(c, kk) : null;
+      case 'making':     return aMaking(b ? [b] : [], ai.category);
+      case 'coin':       return aCoin(ai.weight, b ? [b] : [], c || homeCity(), kk);
+      case 'trend':      return aTrend(kk);
+      case 'silver':     return { intent: 'silver', html: '<p>' + t('silver') + '</p>', say: t('silver'), chips: chips(['rate', 'cheap22']) };
+      case 'offer':      return ai.category && ai.category !== 'Coin' ? aBestOffer(ai.category, ai.weight, c || homeCity())
+                                                                      : aOffers(b ? [b] : [], c || homeCity());
+      case 'alerts':     return aAlerts();
+      case 'cheapest':   return aCheapest(kk, c);
+      default:           return null;        // rate/compare/world/faq/other: keep the rule answer
+    }
+  }
+
   function reply(q, chip, spoken) {
     rawQ = q;
     var tx = understand(q, chip, spoken);
@@ -1362,10 +1401,18 @@
     var typing = bubble('<span class="sn-typing"><span></span><span></span><span></span></span>', false, true);
     talking(true);
     loadKB().then(function () {
-      var a = null;
-      try { a = reply(q, !!label, spoken).a; } catch (e) { a = null; }
-      var ok = !!a, rl = RL;
+      var r0 = null;
+      try { r0 = reply(q, !!label, spoken); } catch (e) { r0 = null; }
+      var a = r0 && r0.a, tx0 = r0 && r0.tx, ok = !!a, rl = RL;
       if (!a) a = { intent: 'unknown', html: '<p>' + t('unknown') + '</p>' + gLink(q), say: t('unknown'), chips: suggest() };
+      // Second opinion from the AI layer only when the keyword router landed
+      // on a weak/generic answer - this is where the "havoc" came from. If it
+      // reads the question more specifically, rebuild the answer from data.
+      var WEAK = { unknown: 1, cheapest: 1, rate: 1, faq: 1, outside: 1 };
+      var aiStep = (!chip && WEAK[a.intent]) ? sonaAI(q) : Promise.resolve(null);
+      aiStep.then(function (ai) {
+      var better = null; try { better = fromAI(ai, tx0); } catch (e) {}
+      if (better) { a = better; ok = true; }
       var tr = a.en && rl !== 'en' ? translateTo(a.en, rl) : Promise.resolve(null);
       tr.then(function (txt) {
         RL = rl;
@@ -1386,6 +1433,7 @@
           if (spoken || ttsOn) speak(a.say, m._sl, m, spoken ? resume : null);
           if (ok) setTimeout(function () { alertCard(a.intent, q); }, 900);
         }, 350 + Math.min(600, a.html.length / 6));
+      });
       });
     }).catch(function () { typing.remove(); talking(false); RL = LANG; bubble('<p>' + t('nodata') + '</p>'); });
   }
