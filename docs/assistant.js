@@ -3304,7 +3304,12 @@
     // (owner, 10 Nov 2026)
     if (search && search.score > 0.9 && !bs.length) return search;
     if (search && /\b(dubai|uae|abroad|singapore|overseas|foreign)\b/.test(tx)) return search;   // not "cheapest here"
-    if (has(tx, W.cheap)) return aCheapest(k, c);
+    // A NAMED jeweller takes priority over the generic cheapest list: "where
+    // can I find P.C. Chandra's rate" must show that jeweller, not every
+    // jeweller. "where" lives in the cheap keywords (for "where is gold
+    // cheapest"), so without this guard a named-jeweller "where" question
+    // wrongly returned the whole board (owner, 22 Nov 2026).
+    if (has(tx, W.cheap) && !bs.length) return aCheapest(k, c);
     if (bs.length) return aBrand(bs[0], k);
     if (c) return aCity(c, k);
     if (search) return search;
