@@ -859,7 +859,7 @@
   "2026-11-23": {
    "date": "2026-11-23",
    "paragraphs": [
-    "International gold is at $3,666 an ounce (+3.58% since 22 Nov), the rupee at ₹92.75 to the dollar (stronger by 0.15%), and the Indian jeweller board median at ₹12,655/g for 24K (+1.18%). In rupee terms the move came mostly from the world gold price (+3.58% gold, -0.15% USD/INR).",
+    "International gold is at $3,674 an ounce (+3.80% since 22 Nov), the rupee at ₹92.75 to the dollar (stronger by 0.15%), and the Indian jeweller board median at ₹12,655/g for 24K (+1.18%). In rupee terms the move came mostly from the world gold price (+3.80% gold, -0.15% USD/INR).",
     "What the world's gold news is about today: Records and profit-taking (5 headlines), Inflation (4 headlines), US interest rates (3 headlines), Indian demand (2 headlines).",
     "<strong>Records and profit-taking.</strong> Big moves feed on themselves for a while, and sharp rallies attract profit-taking. In the news: <a href=\"https://news.google.com/rss/articles/CBMiowFBVV95cUxPdlFtYzVnU3lHTHdPczhWbUpxMVJPRkpjTkdfOXgydlA1T2N3UE54WmFuQ05FREJVazVVWjBQMkREclM1czlSSlUzTk1KMkVzakYtNFhrVG1iMVp5WDVoeHRjWldVVmozWTBxLWhHNTAyMHlBa1NIUFQzeDg0RXJ1Zjc5cjNIX0o0VzdsLVdUbDhUekI0NGhIbGR1NXZEN0xBOEMw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">October’s Silver Slump Creates an Opportunity to Buy the Dip</a> (ETF Database); <a href=\"https://news.google.com/rss/articles/CBMiqAFBVV95cUxNZlJINWQ5bEllUEVkTzYzVFB6bFZFQ01LY0NKR0tvZktNVXFDNWR4OFl4Y1lCS3JnS25sY3cyRDdUbjBQR25XVDR2Wmo5RXpMMnVHTFFFWXozanRxaVZZM0lKV1R0Xzk3MzVMUlU4Q1BTRlRNYmVJN2dWNFpTM2pqRXBDeThVWmVXRnhPV2s5emtOSm9wcUZhQ1hBcU40MW9qM21qRGtOZnY?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Prediction: XAU/USD Reclaims $3,600, But Is This Just a Relief Rally?</a> (CoinGape).",
     "<strong>Inflation.</strong> Gold is held as an inflation hedge, though hot inflation can also mean higher rates, which cuts the other way. In the news: <a href=\"https://news.google.com/rss/articles/CBMifkFVX3lxTE1iTThONGVKM1BONnMzNkJLRE9kUlNCWjNsNXdic0l2ekhUa1lOX2VwU1BOUnptWkx3VXBISkphX2RZbG92enE0YjZldzBwbFFNdlBWcFZnNGRUOVJLakFna2Iyc1NlVFoyVHVHWE84VzZndzBoNTlBdkl1MXdFdw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold prices rally as investors await key U.S. inflation data</a> (Traders Union); <a href=\"https://news.google.com/rss/articles/CBMi4wFBVV95cUxOendOdzVsaWY1WGdMOGpsYkJmSW5MUGt5ZmN3SGpnQTZfNDBvMng0Q1I4Uy14aG9TRkhKNjlSWEpnWUljaG11UlREWWo4WFFQa1dLdWxCeEgwMVYzNVFvYWZ3d04xdGJoWGFCX0F5VjlxSHFKa3lwQ3pNdElUTmJpU2hwRkVzckNWcXNCYU00YUZBQWxKc194NkNzOEJIVXNNQlpzUjdMLUJpRUVMbUdNdUhFZW5XVUVhODlKdmpNbXp5RXd2WGktSllSazdUUUhWdWRwWmdIcE00cTJIM0RyVHlkNNIB6AFBVV95cUxPZ0hBTmx0MWZ3Ym5pVzhnMkJUOUhnSHd1T2gxcmVLSThXOU5lXzMwZDdsVFYycDJqOUJGTzhhZElfSUlfOTBBeHBzenQ0REhiSnNTSWgwSzViUDdFSkdFaUJLQUUtcTQ4bXpOTXk2WWV3d3dZQTZFV1g0ZXNucUJqQVAzbVJ3aVZDel9STW95SmVkUXZ6eG1rODZEVjJ0alBnNWIwSGNXUkNKMXhaejRlc0dON0pOVVphS0JUeGhwcVJOd3ZTQ3VReHU5c1UzWjNQT25sb1JiZVlCekdXMng5ZWFTcEdUS0Ny?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold recovers from 14-month low; focus turns to US inflation data</a> (ET Retail).",
@@ -869,10 +869,10 @@
    ],
    "snap": {
     "board24": 12654.55,
-    "gold_usd": 3665.649902,
+    "gold_usd": 3673.600098,
     "usdinr": 92.753491
    },
-   "summary": "gold +3.6%, news led by records and profit-taking",
+   "summary": "gold +3.8%, news led by records and profit-taking",
    "themes": {
     "india_demand": 2,
     "inflation": 4,
