@@ -3,7 +3,7 @@
   "source_url": "https://mygoldrates.com",
   "description": "Daily gold rate today in India, compared across major jewellers. Per gram, Indian Rupees, pre-GST.",
   "date": "2026-11-23",
-  "last_updated": "2026-11-24T01:10:06.898811+05:30",
+  "last_updated": "2026-11-24T03:40:11.042214+05:30",
   "currency": "INR",
   "unit": "per gram",
   "gst": "excluded (pre-GST); add 3% for billed price",
@@ -14,7 +14,7 @@
   },
   "lowest_24k": {
     "jeweller": "Kalyan Jewellers",
-    "rate_per_gram_inr": 12507.27
+    "rate_per_gram_inr": 12580.91
   },
   "ibja_reference_24k_999_per_gram_inr": 12495.0,
   "akgsma_south_india_22k_per_gram_inr": 11600.0,
