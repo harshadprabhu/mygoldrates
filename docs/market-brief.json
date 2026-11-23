@@ -859,7 +859,7 @@
   "2026-11-23": {
    "date": "2026-11-23",
    "paragraphs": [
-    "International gold is at $3,614 an ounce (+2.12% since 22 Nov), the rupee at ₹92.75 to the dollar (stronger by 0.15%), and the Indian jeweller board median at ₹12,655/g for 24K (+1.18%). In rupee terms the move came mostly from the world gold price (+2.12% gold, -0.15% USD/INR).",
+    "International gold is at $3,621 an ounce (+2.33% since 22 Nov), the rupee at ₹92.75 to the dollar (stronger by 0.15%), and the Indian jeweller board median at ₹12,655/g for 24K (+1.18%). In rupee terms the move came mostly from the world gold price (+2.33% gold, -0.15% USD/INR).",
     "What the world's gold news is about today: Inflation (4 headlines), US interest rates (2 headlines), Records and profit-taking (2 headlines), Geopolitics and safe-haven buying (1 headline).",
     "<strong>Inflation.</strong> Gold is held as an inflation hedge, though hot inflation can also mean higher rates, which cuts the other way. In the news: <a href=\"https://news.google.com/rss/articles/CBMivAFBVV95cUxOVWVlczNQeExCQ3Q3cGt0ODhzc0lTQmtqZDlYRUNiQjB3ZzRNYUtmU2JUUGMwNWNxVVhHXzZ3WEJnTTF6bFE4cU4yQTYtTGxRcDJfTEY3SVRQS21DS00xVzFOeGlDZGNKR2VQYkk1NkVEY3hSMGJuTHhPUXdyU0F2cWg3VXQ0ZGRpM3FpZFVJTTNLclNyVXZIMDFxZW8zQy1Dclh4NHA2SnVGdThxdUxpLW5jZV9WYVktYXVYX9IBwgFBVV95cUxPUmZnaV9WbWN3UG5fbHdlRjdManVTdG1QdnF6cjEwamp4Sk41dXRURzRDQlk0NllPNlU5SHJnRE16dEJDamRmOVVrZXJOU1U3Q2EwWE1ES1hRUVI4RXVWdzdyOFNNQmJhbGoyTGxZUHFfZzBXWklXYkpJY0JWRVUzdDBUUk5uQUpwbnB5TEZMZ05lOU9Ib3VHaEpOcE93RUtDdU1wYUMxckJfUDdWdVB0TFYtM2RITDlISDlEU2RKb1BLZw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold recovers from 14-month low; focus turns to US inflation data</a> (cfo.economictimes.indiatimes.com); <a href=\"https://news.google.com/rss/articles/CBMirAFBVV95cUxOTmx3cGgwODJ0dXI0MC1VZHFBWGxYMU81WlVMcTNNelBpcDVhZnhsMVF0TkNDU0wzWmJhWlVwLXpEd21xTmNCVWF4MHdOdGthUlBsQkZFNkJkcGxJTGJZbVhoMWRHSF9HUnJGbFMybzU2Mnl1c0tSWDNxY0Y0VGFPa09jN0tpakVjcVhKbWE3ak9NcHVYc2gzWFhJZkV5S09uUG1NU0tfczFjeXpS?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Rebounds From 14-Month Low Ahead Of Key US Inflation Data</a> (Forbes Middle East).",
     "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMiswFBVV95cUxNeldGOUZfc0ZTLUtjTkpuLUN3c2lpYnB1SEIwRS1aVnZ2bGNQQndUblBPdG5yZ0NIZDZLMGNxWFRYSDdEaWNXZGVLUmhMWnRWWVoxYVJJck9qZkFaRVB0VzRMajA4Slk1Z2lsVWdOQTZfWmlFbFRFXzY0NndkVUJfaHIxeERYT0IxaDJGRmI4M20zdWRyQXZxcUxsS0w0MGJzYzE2UzF6U096eUROM1ZJRjl1MA?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: Selloff Echoes 2022 as Fed Hike Fears Grow</a> (FXEmpire); <a href=\"https://news.google.com/rss/articles/CBMiswFBVV95cUxPbld0dXkwWFp6VkFSalptZFpuZk4yV1M1SGtTbDZJejFKcFI2RU9faXUyclZGRExjaGFoUkw1cTVReGpTT3hYX0VDM1hpSnNMOTRhODZyZHgxTFNBTjVYa1lyU0xQMmp6bGQ2U3p6NllSdGR2ZVUyUGJ0aHluamtKQ1I1N0NZQkN1OU9oWkk5ekljeTZsOHJYOWhpc3NwY1cyR0lyTzZLTlU0a0dpajVBZTF2Zw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: XAU/USD Rebounds Above $3,600 as Yields Drop Below 5%</a> (FXLeaders).",
@@ -869,10 +869,10 @@
    ],
    "snap": {
     "board24": 12654.55,
-    "gold_usd": 3614.050049,
+    "gold_usd": 3621.300049,
     "usdinr": 92.753491
    },
-   "summary": "gold +2.1%, news led by inflation",
+   "summary": "gold +2.3%, news led by inflation",
    "themes": {
     "india_demand": 1,
     "inflation": 4,
