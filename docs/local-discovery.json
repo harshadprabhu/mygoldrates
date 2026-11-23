@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-16T10:55:51.204326+00:00",
+ "generated_at": "2026-11-23T11:55:22.176260+00:00",
  "candidates": 66,
  "verified": 4,
  "promoted_inactive": 0,
@@ -37,7 +37,6 @@
    "rate_url": "https://khannajeweller.com",
    "method": "ratejson",
    "purities": [
-    "14K",
     "18K",
     "22K",
     "24K"
@@ -469,7 +468,7 @@
    "purities": [
     "18K"
    ],
-   "canonical_24k": 23745.2,
+   "canonical_24k": 22500.27,
    "slug": "anjali-jewellers",
    "verdict": "verified",
    "note": "read 1 purity/purities via proximity"
@@ -498,36 +497,33 @@
    "city": "Kolkata",
    "name": "Shyam Sundar Co Jewellers",
    "domain": "www.shyamsundarco.com",
-   "verdict": "no-rate",
-   "note": "responded but no purity-labelled rate found",
-   "tried": [
-    "/: no values",
-    "/in/pan-india/en/live-gold-rate.html: 404",
-    "/gold-rate-today/: 404",
-    "/gold-rate-today: 404",
-    "/gold-rate: 404",
-    "/goldrate: 404",
-    "/goldprice: 404",
-    "/gold-rate.html: 404"
+   "rate_url": "https://www.shyamsundarco.com",
+   "method": "proximity",
+   "purities": [
+    "18K",
+    "22K"
    ],
-   "may_work_with_render": true
+   "canonical_24k": 17203.64,
+   "slug": "shyam-sundar-co-jewellers",
+   "verdict": "suspect",
+   "note": "purity ratios inconsistent (22K/18K ratio off) - looks like retail or making-inclusive pricing, not a per-gram metal rate"
   },
   {
    "state": "Maharashtra",
    "city": "Mumbai",
    "name": "Popley",
    "domain": "www.popley.com",
-   "verdict": "blocked",
-   "note": "blocked or unreachable on every path tried",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
    "tried": [
-    "/: blocked 403",
-    "/in/pan-india/en/live-gold-rate.html: 404",
-    "/gold-rate-today/: 404",
-    "/gold-rate-today: 404",
-    "/gold-rate: 404",
-    "/goldrate: 404",
-    "/goldprice: blocked 503",
-    "/gold-rate.html: blocked 503"
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: ConnectionError",
+    "/gold-rate-today/: ConnectionError",
+    "/gold-rate-today: ConnectionError",
+    "/gold-rate: ConnectionError",
+    "/goldrate: ConnectionError",
+    "/goldprice: ConnectionError",
+    "/gold-rate.html: ConnectionError"
    ],
    "may_work_with_render": true
   },
@@ -726,17 +722,17 @@
    "city": "Margao",
    "name": "Damodar Jewellers",
    "domain": "www.damodarjewellers.com",
-   "verdict": "blocked",
-   "note": "blocked or unreachable on every path tried",
+   "verdict": "no-rate",
+   "note": "responded but no purity-labelled rate found",
    "tried": [
     "/: no values",
-    "/in/pan-india/en/live-gold-rate.html: blocked 503",
-    "/gold-rate-today/: blocked 503",
-    "/gold-rate-today: blocked 503",
-    "/gold-rate: blocked 503",
-    "/goldrate: blocked 503",
-    "/goldprice: blocked 503",
-    "/gold-rate.html: blocked 503"
+    "/in/pan-india/en/live-gold-rate.html: 404",
+    "/gold-rate-today/: 404",
+    "/gold-rate-today: 404",
+    "/gold-rate: 404",
+    "/goldrate: 404",
+    "/goldprice: 404",
+    "/gold-rate.html: 404"
    ],
    "may_work_with_render": true
   },
@@ -862,12 +858,12 @@
    "verdict": "no-rate",
    "note": "responded but no purity-labelled rate found",
    "tried": [
-    "/: soft-404",
-    "/in/pan-india/en/live-gold-rate.html: no values",
-    "/gold-rate-today/: soft-404",
+    "/: no values",
+    "/in/pan-india/en/live-gold-rate.html: SSLError",
+    "/gold-rate-today/: SSLError",
     "/gold-rate-today: no values",
     "/gold-rate: no values",
-    "/goldrate: soft-404",
+    "/goldrate: SSLError",
     "/goldprice: no values",
     "/gold-rate.html: no values"
    ],
@@ -1092,7 +1088,7 @@
    "purities": [
     "22K"
    ],
-   "canonical_24k": 14072.73,
+   "canonical_24k": 12741.82,
    "slug": "swarn-jewellers",
    "verdict": "verified",
    "note": "read 1 purity/purities via karatunit"
