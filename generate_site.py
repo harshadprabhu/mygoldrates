@@ -6683,30 +6683,30 @@ ALERTS_POP_JS = r"""(function(){
       '<ul class="mz"><li>Which jeweller is cheapest in your city each morning</li><li>An email the day gold drops to your price</li><li>Today’s market rate, without searching for it</li></ul>'+
       '<button class="go" id="spSureYes" type="button">Okay, send me the free alerts</button>'+
       '<button class="no" id="spSureNo" type="button">No thanks, close</button></div>'+
-      '<div class="gpd" hidden><div class="tk">&#10003;</div><div class="bg">You’re in! One last step</div>'+
-      '<p class="sb" id="grPopDone">Your first email arrives tomorrow morning.</p>'+
-      // The mobile number is now the primary ask of this step (hero box).
-      '<div class="op" id="grPopPhBox" style="border-color:rgba(240,208,128,.55);background:rgba(240,208,128,.09)">'+
-      '<div class="ot" style="font-size:14.5px">&#128241; Add your mobile number to finish</div>'+
-      '<div class="od">So we can send the cheapest rate by WhatsApp/SMS the moment it drops — faster than email. We never call or share your number.</div>'+
+      // Focused mobile-number step: the number is the ONLY ask here, and the
+      // step is sticky (x/Escape nudge first, the intent taps appear only
+      // after the number is saved - see savePhone).
+      '<div class="gpd" hidden><div class="tk">&#10003;</div><div class="bg">One last step — add your mobile</div>'+
+      '<p class="sb" id="grPopDone">We’ll text you the cheapest rate the day it drops.</p>'+
+      '<div class="op" id="grPopPhBox" style="border-color:rgba(240,208,128,.6);background:rgba(240,208,128,.1)">'+
+      '<div class="ot" style="font-size:14.5px">Your mobile number</div>'+
+      '<div class="od">Get the cheapest rate by WhatsApp/SMS the moment it drops — faster than email. We never call or share your number.</div>'+
       '<input id="spPhone" type="tel" placeholder="+91 mobile number" inputmode="tel" autocomplete="tel" maxlength="18">'+
       '<button class="go" id="spPhoneSave" type="button">Save my number &amp; finish</button>'+
       '<div class="st" id="grPopPhSt"></div></div>'+
-      // two optional taps: what they are buying for and when (save_intent)
-      '<div class="op iq"><div class="ot">Buying gold for? <span>(optional)</span></div>'+
+      // the "buying for / when" taps, revealed only after the number is saved
+      '<div class="op iq" id="grPopIntent" hidden><div class="ot">Buying gold for? <span>(optional)</span></div>'+
       '<div class="iqc" data-k="p_buy_for"><button type="button" data-v="wedding">Wedding</button><button type="button" data-v="festival">Festival</button>'+
       '<button type="button" data-v="investment">Investment</button><button type="button" data-v="gift">Gift</button><button type="button" data-v="self">Myself</button></div>'+
       '<div class="ot" style="margin-top:10px">When?</div>'+
       '<div class="iqc" data-k="p_buy_when"><button type="button" data-v="this_month">This month</button><button type="button" data-v="3_months">In 3 months</button>'+
-      '<button type="button" data-v="tracking">Just tracking</button></div></div>'+
-      '<button class="l" id="spDoneClose" type="button">Skip for now</button></div></div>';
+      '<button type="button" data-v="tracking">Just tracking</button></div></div></div>';
     document.body.appendChild(el);
     $q('.x').onclick=tryClose;
     // Subscribed on another phone or browser: remember it on this one.
     $q('#spHave').onclick=function(){s('gr_sub','1');close();};
     $q('#spSureYes').onclick=function(){show('main');try{document.getElementById('grPopE').focus()}catch(_){}};
     $q('#spSureNo').onclick=close;
-    $q('#spDoneClose').onclick=doneClose;
     $q('#spPhoneSave').onclick=savePhone;
     [].forEach.call(el.querySelectorAll('.iqc'),function(g){g.onclick=function(e){
       var b=e.target.closest('button');if(!b||!doneEmail)return;
