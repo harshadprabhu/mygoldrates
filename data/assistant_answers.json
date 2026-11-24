@@ -1,11 +1,4 @@
 {
  "note": "Answers the owner approved from real visitor questions to Sona, the site assistant. Exported daily from the private database by bot_learn.py; only approved questions and answers are kept here, never the raw questions.",
- "answers": [
-  {
-   "q": "Where can I find today's gold rate for P.C. Chandra Jewellers?",
-   "a": "You can view today's gold rates for P.C. Chandra Jewellers on our dedicated jeweller page. Rates are updated every morning based on their published prices.",
-   "u": "/pc-chandra-jewellers-gold-rate-today",
-   "d": "2026-11-21"
-  }
- ]
+ "answers": []
 }
