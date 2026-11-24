@@ -902,6 +902,30 @@
     "investment": 1,
     "rates": 3
    }
+  },
+  "2026-11-25": {
+   "date": "2026-11-25",
+   "paragraphs": [
+    "International gold is at $3,561 an ounce (-0.50% since 24 Nov), the rupee at ₹93.00 to the dollar, and the Indian jeweller board median at ₹12,798/g for 24K (+0.14%). In rupee terms the move came mostly from the world gold price (-0.50% gold, +0.00% USD/INR).",
+    "What the world's gold news is about today: US interest rates (4 headlines), Inflation (3 headlines), Investment flows (ETFs) (2 headlines), Records and profit-taking (1 headline).",
+    "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMidkFVX3lxTE5kbklkSWE4N3FCaEd5TGVNQUo2WEdxRDlhZFp0ejAya2g1YTJPMjY5VXVuQlN3MDYxNzRBcFpydVl3OGl2NUxEZ2VRQ3VaclRVTFQ3UmpTOEZCX1p3WWVRNngyd2NhSDFYbHhTeHF2UDE1eUFodHc?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Global Gold Prices Plunge 36% From Peak, Fed Interest Rates Blamed</a> (BigGo Finance); <a href=\"https://news.google.com/rss/articles/CBMipAFBVV95cUxNRGZxT3NPYWNCNDZDVGdvU2oycXdGMXlSSHN0UGFyTU95YkVvYW5SOHYyQ2FGaDAzeW9QdlcwNDJpRVpLcG53OWtYV2JwQUJiOS1Pb3lHM2VUUnVfcDJRTXJTdHpGOGJtMW9Bc1RYMzdCMGFPQkdYYUJGT2VOLXlEY2V6Y3FPWnk3a3NkdkcyWDEyOGJ6RGJIdzl5REJWdUVJQ1BfbQ?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Prices Edge Lower Following Sharp Recovery as Federal Reserve Rate Expectations Weigh on Demand</a> (Yahoo Finance).",
+    "<strong>Inflation.</strong> Gold is held as an inflation hedge, though hot inflation can also mean higher rates, which cuts the other way. In the news: <a href=\"https://news.google.com/rss/articles/CBMimwFBVV95cUxONFoyQkFQYlRvOGJRODN5cFRyV0dBSGE3OHVaVjRvX1hjM092aGotbXNMcGVOTUNKVkNzamdXNzlyTTRydk1oXzJvcXhNOGFQNVpSeWFUenNITW4tNExfdU1EaTdMLVNfVXhsX0x2Q0tSVERPVDJPNlRfZlZRTHdRYkh0RlhjVmhVYUhqcFNrc0ZCVDUwb19XUjk2UQ?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: Could US Inflation Data Trigger Another Selloff?</a> (Coinpaper); <a href=\"https://news.google.com/rss/articles/CBMiiwFBVV95cUxOZVNENXJTQktBbFcxM1JYamRQQUQteHN1NGhRTHdCMEJHNmFyVEtVQWpDdDl6N2pOWnZWSU43S3NHZms0V05uNkRINWtRNUpaNnFKdVVkMW1BTzVMOC16X3BlczdhZUlBWllTYUZXc0lUenV3U3I0ZHNKNlR0RzJXNlNONDlGR3liSHp3?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold price slips after sharp rebound as inflation data looms</a> (Mining.com.au).",
+    "<strong>Investment flows (ETFs).</strong> Money moving into or out of gold funds shows what investors are doing with their own cash. In the news: <a href=\"https://news.google.com/rss/articles/CBMiswFBVV95cUxOclpvNDNQTXNRLVpXWlB1ZDFXZ0lLNnVEQUJQMXltYzN0UF9UQV9weTJkZDZDYjVlWWZwczlGZ3ZjaHpwa05ES0FhV1BNRDVZVmhZbDNnVjhCcG1qTFdIZTA2VnZ6dXhabGU3dmtZd29zUVdGNi10SWh1R3NmZU9QVVZpQ29CeEs4WEFWRUxLVVlfV2xnbjUzTkcwXzE0cHdfYVhjYnREVDlsTEZlZjczUWNwdw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Price Forecast: ETF Outflows Threaten Gold’s Sharp Recovery</a> (FXEmpire); <a href=\"https://news.google.com/rss/articles/CBMilgFBVV95cUxPNkN0aGozSzFzRVNxYW11XzAyZEU5QXNIN1FVcXAwZEVSRnBDaC13YkpLWHg1akh3Q0RORTRCRkZaZGd2UmlqM1VHbExRU3VJZmJEbHR2b0J1S0NuTkpGc3FlU2RBNl9VU3JtbkRWNXNSc29XblF5WXNWQUtfQ1dnZXotZjJ2aHZxZHhHNlJLbDFPS1pmV1E?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">How inheritance tax rules differ for gold IRAs, ETFs and physical bullion</a> (USA Today).",
+    "High-impact US data due this week: Core PCE Price Index m/m, Prelim GDP q/q. Gold often moves sharply around these releases; which way is not knowable in advance.",
+    "For buyers: the gap between the cheapest and dearest jeweller on our board is ₹821/g today, and making charges usually differ by more than a day's price move. Compare the <a href=\"https://mygoldrates.com/\">live rates</a> and the <a href=\"https://mygoldrates.com/making-charges-comparison\">making charges</a> before you buy."
+   ],
+   "snap": {
+    "board24": 12797.5,
+    "gold_usd": 3561.350098,
+    "usdinr": 92.995018
+   },
+   "summary": "gold -0.5%, news led by us interest rates",
+   "themes": {
+    "inflation": 3,
+    "investment": 2,
+    "momentum": 1,
+    "rates": 4
+   }
   }
  }
 }
