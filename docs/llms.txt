@@ -12,7 +12,7 @@
 - Lowest 24K today: ₹12,717 per gram at Kalyan Jewellers
 - IBJA 24K (999) reference: ₹12,495 per gram (pre-GST)
 - MCX gold futures (04DEC2026): ₹1,22,250 per 10g (995), -0.06%
-- Last updated: 2026-11-25T02:16:43.214773+05:30
+- Last updated: 2026-11-25T04:22:48.954242+05:30
 
 ## Key pages
 - Home: today's gold rate in India, live 24K/22K/18K per-gram rates from 36 jewellers lowest-first, with a GST toggle, MCX futures, the IBJA reference, spot gold and silver and this week's economic calendar: https://mygoldrates.com/
