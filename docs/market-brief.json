@@ -883,21 +883,18 @@
   "2026-11-24": {
    "date": "2026-11-24",
    "paragraphs": [
-    "International gold is at $3,618 an ounce (-1.38% since 23 Nov), the rupee at ₹93.00 to the dollar (weaker by 0.26%), and the Indian jeweller board median at ₹12,780/g for 24K (+0.99%). In rupee terms the move came mostly from the world gold price (-1.38% gold, +0.26% USD/INR).",
-    "What the world's gold news is about today: Indian demand (1 headline).",
-    "<strong>Indian demand.</strong> Festival and wedding buying, and import costs, move local premiums and the price on the jeweller board. In the news: <a href=\"https://news.google.com/rss/articles/CBMi-wFBVV95cUxOV3p6dUFtQ2xCMGM4QW1NTzdJOE1TNWNsVnp0YzV5Y1ZpdHJoYktERThrT1g1UUpYZV8tanRxMXpqYy16c1k0V3Nmb1lkOHlqNzlNMVM1M2N0SzlyR0oxRVhwNFhYcmZUZE1KTDV4ZXZ5Vm5qY3o1OWZuTHJrZDVpaERRRzB3bDBMeUhzMTJxZWtYYkQtZldpQVhRUEJQQzlORVFLanZiSmVaMXZaTHdJVFd0d2xFTmE0WVVzNk8wZm9LTHYwa2NmaFh4WTdQU2hqQ1ZhdzlwWGZCODhtbXU2QzRZaUdRZW1TUHZTal9fV0VwU3cxY05rRFcwTQ?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold Prices Today, November 23, 2026: 24K Rate Rises ₹990 per 10 gm from Friday; Kalyan Jewellers Jumps 4.33%</a> (HDFC Sky).",
+    "International gold is at $3,620 an ounce (-1.33% since 23 Nov), the rupee at ₹93.00 to the dollar (weaker by 0.26%), and the Indian jeweller board median at ₹12,780/g for 24K (+0.99%). In rupee terms the move came mostly from the world gold price (-1.33% gold, +0.26% USD/INR).",
+    "No clear theme in today's gold headlines.",
     "High-impact US data due this week: Core PCE Price Index m/m, Prelim GDP q/q. Gold often moves sharply around these releases; which way is not knowable in advance.",
     "For buyers: the gap between the cheapest and dearest jeweller on our board is ₹821/g today, and making charges usually differ by more than a day's price move. Compare the <a href=\"https://mygoldrates.com/\">live rates</a> and the <a href=\"https://mygoldrates.com/making-charges-comparison\">making charges</a> before you buy."
    ],
    "snap": {
     "board24": 12780.0,
-    "gold_usd": 3618.350098,
+    "gold_usd": 3620.199951,
     "usdinr": 92.995018
    },
-   "summary": "gold -1.4%, news led by indian demand",
-   "themes": {
-    "india_demand": 1
-   }
+   "summary": "gold -1.3%",
+   "themes": {}
   }
  }
 }
