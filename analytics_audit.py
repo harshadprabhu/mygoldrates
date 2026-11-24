@@ -103,33 +103,6 @@ def main():
                              "unsub_token": "not.is.null"},
                      headers={**H, "Prefer": "count=exact", "Range": "0-0"}, timeout=60)
     print("SUBSCRIBED NOW:", r.headers.get("content-range", "?").split("/")[-1])
-    # Recent sign-ups, newest first. This repo is PUBLIC and these logs are
-    # public, so emails are MASKED - the owner resolves the full row by id in
-    # Supabase. Helps locate a sign-up a dashboard view seems to be hiding.
-    def _mask(e):
-        e = (e or "").strip()
-        if "@" not in e:
-            return "?"
-        lp, dom = e.split("@", 1)
-        tld = dom.rsplit(".", 1)[-1]
-        return (lp[:2] + "***") + "@***." + tld
-    since4 = (date.today() - timedelta(days=4)).isoformat()
-    rr = requests.get(f"{URL}/rest/v1/inquiries",
-                      params={"select": "id,created_at,email,signup_method,confirmed_at",
-                              "created_at": f"gte.{since4}", "order": "created_at.desc"},
-                      headers=H, timeout=60)
-    recent = rr.json() if rr.ok else []
-    print(f"\nRECENT SIGN-UPS since {since4} UTC ({len(recent)}), newest first [emails masked]:")
-    for x in recent:
-        print(f"  id={x['id']:<7} {x['created_at'][:19]}Z  "
-              f"{'confirmed' if x.get('confirmed_at') else 'PENDING  '}  "
-              f"{(x.get('signup_method') or '?'):8} {_mask(x.get('email'))}")
-    # One-off cleanup: remove the Claude diagnostic test rows (claude-diag*).
-    dr = requests.delete(f"{URL}/rest/v1/inquiries",
-                         params={"email": "like.claude-diag*@example.com"},
-                         headers={**H, "Prefer": "return=representation"}, timeout=60)
-    print("TEST-ROW CLEANUP:", dr.status_code,
-          "removed", len(dr.json()) if dr.ok else str(dr.text)[:150])
     r = requests.get(f"{URL}/rest/v1/page_views",
                      params={"select": "created_at,page,referrer,host",
                              "page": "like./dW5z*", "order": "created_at.asc"},
