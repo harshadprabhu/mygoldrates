@@ -6634,9 +6634,25 @@ ALERTS_POP_JS = r"""(function(){
   // First press of x (or Escape) shows what they would miss; the second,
   // or "No thanks", closes. After signing up, x just closes.
   function tryClose(){
-    if(step==='done'){remove();return;}
+    if(step==='done'){doneClose();return;}
     if(sureShown){close();return;}
     sureShown=true;ev('sure_shown');show('sure');
+  }
+  // After signing up we ask for the mobile number and make it sticky: the
+  // first attempt to leave nudges them to add it; only the second closes. Once
+  // a number is saved, closing is immediate.
+  var phoneSaved=false,doneNudged=false;
+  function doneClose(){
+    if(phoneSaved){remove();return;}
+    if(!doneNudged){
+      doneNudged=true;ev('phone_nudge');
+      var st=$q('#grPopPhSt');
+      if(st){st.style.color='#f0d080';st.textContent='Add your number to get instant WhatsApp/SMS alerts — it only takes a moment.';}
+      try{$q('#spPhone').focus();}catch(_){}
+      var box=$q('#grPopPhBox');if(box){box.style.boxShadow='0 0 0 2px rgba(240,208,128,.55)';}
+      return;
+    }
+    remove();
   }
   function build(){
     var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
@@ -6667,8 +6683,15 @@ ALERTS_POP_JS = r"""(function(){
       '<ul class="mz"><li>Which jeweller is cheapest in your city each morning</li><li>An email the day gold drops to your price</li><li>Today’s market rate, without searching for it</li></ul>'+
       '<button class="go" id="spSureYes" type="button">Okay, send me the free alerts</button>'+
       '<button class="no" id="spSureNo" type="button">No thanks, close</button></div>'+
-      '<div class="gpd" hidden><div class="tk">&#10003;</div><div class="bg">You’re in!</div>'+
+      '<div class="gpd" hidden><div class="tk">&#10003;</div><div class="bg">You’re in! One last step</div>'+
       '<p class="sb" id="grPopDone">Your first email arrives tomorrow morning.</p>'+
+      // The mobile number is now the primary ask of this step (hero box).
+      '<div class="op" id="grPopPhBox" style="border-color:rgba(240,208,128,.55);background:rgba(240,208,128,.09)">'+
+      '<div class="ot" style="font-size:14.5px">&#128241; Add your mobile number to finish</div>'+
+      '<div class="od">So we can send the cheapest rate by WhatsApp/SMS the moment it drops — faster than email. We never call or share your number.</div>'+
+      '<input id="spPhone" type="tel" placeholder="+91 mobile number" inputmode="tel" autocomplete="tel" maxlength="18">'+
+      '<button class="go" id="spPhoneSave" type="button">Save my number &amp; finish</button>'+
+      '<div class="st" id="grPopPhSt"></div></div>'+
       // two optional taps: what they are buying for and when (save_intent)
       '<div class="op iq"><div class="ot">Buying gold for? <span>(optional)</span></div>'+
       '<div class="iqc" data-k="p_buy_for"><button type="button" data-v="wedding">Wedding</button><button type="button" data-v="festival">Festival</button>'+
@@ -6676,19 +6699,14 @@ ALERTS_POP_JS = r"""(function(){
       '<div class="ot" style="margin-top:10px">When?</div>'+
       '<div class="iqc" data-k="p_buy_when"><button type="button" data-v="this_month">This month</button><button type="button" data-v="3_months">In 3 months</button>'+
       '<button type="button" data-v="tracking">Just tracking</button></div></div>'+
-      '<div class="op"><div class="ot">Add your mobile number <span>(optional)</span></div>'+
-      '<div class="od">For rate alerts by SMS or WhatsApp when we launch them. We never call or share it.</div>'+
-      '<input id="spPhone" type="tel" placeholder="+91 mobile number" inputmode="tel" autocomplete="tel" maxlength="18">'+
-      '<button class="go" id="spPhoneSave" type="button">Save my number</button>'+
-      '<div class="st" id="grPopPhSt"></div></div>'+
-      '<button class="no" id="spDoneClose" type="button">Done</button></div></div>';
+      '<button class="l" id="spDoneClose" type="button">Skip for now</button></div></div>';
     document.body.appendChild(el);
     $q('.x').onclick=tryClose;
     // Subscribed on another phone or browser: remember it on this one.
     $q('#spHave').onclick=function(){s('gr_sub','1');close();};
     $q('#spSureYes').onclick=function(){show('main');try{document.getElementById('grPopE').focus()}catch(_){}};
     $q('#spSureNo').onclick=close;
-    $q('#spDoneClose').onclick=remove;
+    $q('#spDoneClose').onclick=doneClose;
     $q('#spPhoneSave').onclick=savePhone;
     [].forEach.call(el.querySelectorAll('.iqc'),function(g){g.onclick=function(e){
       var b=e.target.closest('button');if(!b||!doneEmail)return;
@@ -6802,7 +6820,8 @@ ALERTS_POP_JS = r"""(function(){
     if(!d){st.style.color='#f0909e';st.textContent='Enter a valid 10-digit mobile number';return;}
     b.disabled=true;
     save({email:doneEmail,phone:'+91'+d,signup_method:'popup'}).then(function(){
-      ev('mobile_added');st.style.color='#7fd1a3';st.textContent='✓ Saved';setTimeout(remove,1200);
+      phoneSaved=true;ev('mobile_added');st.style.color='#7fd1a3';
+      st.textContent='✓ Saved — you’re all set';setTimeout(remove,1200);
     }).catch(function(){b.disabled=false;st.style.color='#f0909e';st.textContent='Couldn’t save that — try again.';});
   }
   // After 10 seconds on the page (and only while the tab is in view), so a

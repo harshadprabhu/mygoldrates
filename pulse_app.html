@@ -1104,8 +1104,16 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
     <!-- After signing up: confirmation, then the optional mobile number. -->
     <div class="sp-done" id="spDone" hidden>
       <div class="sp-tick">&#10003;</div>
-      <div class="sp-big">You&rsquo;re in!</div>
+      <div class="sp-big">You&rsquo;re in! One last step</div>
       <p class="sp-sub" id="spDoneTxt">Your first email arrives tomorrow morning.</p>
+      <!-- The mobile number is now the primary ask of this step (hero box). -->
+      <div class="sp-opt" id="spPhoneBox" style="border-color:rgba(240,208,128,.55);background:rgba(240,208,128,.09)">
+        <div class="sp-opt-t" style="font-size:14.5px">&#128241; Add your mobile number to finish</div>
+        <div class="sp-opt-d">So we can send the cheapest rate by WhatsApp/SMS the moment it drops &mdash; faster than email. We never call or share your number.</div>
+        <input class="al-inp" id="spPhone" type="tel" placeholder="+91 mobile number" inputmode="tel" autocomplete="tel" maxlength="18">
+        <button class="al-btn al-btn-full" id="spPhoneSave" type="button">Save my number &amp; finish</button>
+        <div id="spPhoneStatus" style="font-size:12px;margin-top:6px;min-height:14px;text-align:center"></div>
+      </div>
       <!-- two optional taps: what they are buying for and when (save_intent) -->
       <div class="sp-opt sp-iq">
         <div class="sp-opt-t">Buying gold for? <span>(optional)</span></div>
@@ -1113,14 +1121,7 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
         <div class="sp-opt-t" style="margin-top:10px">When?</div>
         <div class="sp-iqc" data-k="p_buy_when"><button type="button" data-v="this_month">This month</button><button type="button" data-v="3_months">In 3 months</button><button type="button" data-v="tracking">Just tracking</button></div>
       </div>
-      <div class="sp-opt">
-        <div class="sp-opt-t">Add your mobile number <span>(optional)</span></div>
-        <div class="sp-opt-d">For rate alerts by SMS or WhatsApp when we launch them. We never call or share it.</div>
-        <input class="al-inp" id="spPhone" type="tel" placeholder="+91 mobile number" inputmode="tel" autocomplete="tel" maxlength="18">
-        <button class="al-btn al-btn-full" id="spPhoneSave" type="button">Save my number</button>
-        <div id="spPhoneStatus" style="font-size:12px;margin-top:6px;min-height:14px;text-align:center"></div>
-      </div>
-      <button class="sp-no" id="spDoneClose" type="button">Done</button>
+      <button class="sp-have" id="spDoneClose" type="button">Skip for now</button>
     </div>
   </div>
 </div>
@@ -3506,8 +3507,23 @@ function handleCredentialResponse(resp){
   }
   // The first press of x (or Escape) shows what the visitor would miss,
   // with today's real price gap; the second, or "No thanks", closes.
+  // After signing up we ask for the mobile number and make it sticky: the
+  // first attempt to leave nudges them to add it; only the second closes.
+  var spPhoneSaved=false,spDoneNudged=false;
+  function doneClose(){
+    if(spPhoneSaved){closeSubPop(true);return;}
+    if(!spDoneNudged){
+      spDoneNudged=true;ev('phone_nudge');
+      var st=document.getElementById('spPhoneStatus');
+      if(st){st.style.color='#f0d080';st.textContent='Add your number to get instant WhatsApp/SMS alerts — it only takes a moment.';}
+      try{document.getElementById('spPhone').focus();}catch(_){}
+      var box=document.getElementById('spPhoneBox');if(box)box.style.boxShadow='0 0 0 2px rgba(240,208,128,.55)';
+      return;
+    }
+    closeSubPop(true);
+  }
   function tryClose(){
-    if(spStep==='done'){closeSubPop(true);return;}
+    if(spStep==='done'){doneClose();return;}
     if(spSureShown||!document.getElementById('spSure')){closeSubPop(false);return;}
     spSureShown=true;ev('sure_shown');
     if(SP_GAP22>=50){
@@ -3656,14 +3672,14 @@ function handleCredentialResponse(resp){
       if(!d){if(phSt){phSt.style.color='var(--rose)';phSt.textContent='Enter a valid 10-digit mobile number';}return;}
       phSave.disabled=true;
       saveSubscriber({email:spDoneEmail,phone:'+91'+d,signup_method:'popup'}).then(function(){
-        ev('mobile_added');
-        if(phSt){phSt.style.color='var(--mint)';phSt.textContent='✓ Saved';}
+        spPhoneSaved=true;ev('mobile_added');
+        if(phSt){phSt.style.color='var(--mint)';phSt.textContent='✓ Saved — you’re all set';}
         setTimeout(function(){closeSubPop(true)},1200);
       }).catch(function(){phSave.disabled=false;
         if(phSt){phSt.style.color='var(--rose)';phSt.textContent="Couldn't save that — try again.";}});
     });
     var dc=document.getElementById('spDoneClose');
-    if(dc)dc.addEventListener('click',function(){closeSubPop(true)});
+    if(dc)dc.addEventListener('click',doneClose);
     // buying for / when: saved to the subscriber's row as they tap
     [].forEach.call(document.querySelectorAll('.sp-iqc'),function(g){
       g.addEventListener('click',function(e){
