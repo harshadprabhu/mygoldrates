@@ -932,7 +932,7 @@
   window.GR_SONA_AVATAR = avatar;
 
   // --------------------------------------------------------------- UI
-  var SUGGEST = ['cheap22', 'mycity', 'tvk', 'bestoff', 'p10chain', 'k22v24'];      // chip keys (sona_i18n.js ch_*)
+  var SUGGEST = ['cheap22', 'mkcmp', 'tvk', 'bestoff', 'mycity', 'p10chain', 'k22v24'];   // chip keys (sona_i18n.js ch_*)
   var CSS = '' +
     '.sn-fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:8500;display:flex;align-items:center;gap:9px;height:52px;padding:0 18px 0 7px;border:0;border-radius:999px;cursor:pointer;color:#1a1405;font:700 14.5px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:linear-gradient(135deg,#ffe9a8,#e7bf5a 45%,#b98a24);box-shadow:0 10px 30px rgba(185,138,36,.45),0 0 0 1px rgba(255,255,255,.25) inset;transition:transform .2s}' +
     '.sn-fab:hover{transform:translateY(-2px)}.sn-fab .sn-orb{width:42px;height:42px;flex:none;margin:-2px 0;filter:drop-shadow(0 2px 4px rgba(90,60,0,.35))}' +
@@ -1427,7 +1427,8 @@
           m._say = a.say; m._sl = a.sayLang || rl;
           setChips(a.chips || suggest());
           var tag = (rl !== 'en' ? rl : '') + (spoken ? (rl !== 'en' ? ' ' : '') + 'voice' : '');
-          rpc('log_bot_question', { p_q: (tag ? '[' + tag + '] ' : '') + redact(q), p_intent: a.intent, p_answered: ok, p_page: location.pathname, p_sid: window.GR_SID || '' })
+          rpc('log_bot_question', { p_q: (tag ? '[' + tag + '] ' : '') + redact(q), p_intent: a.intent, p_answered: ok, p_page: location.pathname, p_sid: window.GR_SID || '',
+            p_answer: (a.say || String(a.html || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim().slice(0, 600) })
             .then(function (id) { if (id) $('.sn-fb', m).setAttribute('data-id', id); });
           track(ok ? 'answered' : 'unanswered');
           if (spoken || ttsOn) speak(a.say, m._sl, m, spoken ? resume : null);

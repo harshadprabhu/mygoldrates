@@ -8971,6 +8971,9 @@ td.path .tx{color:var(--accent)}
       <div class="kpis small" id="botKpis"></div>
       <h3>What Sona couldn&rsquo;t answer (or got a thumbs-down)</h3>
       <div id="botUn"></div>
+      <h3>All questions &amp; answers <span class="note" style="display:inline">(the full log)</span></h3>
+      <div class="note">Every question visitors asked Sona in this range, with the answer it gave &mdash; not only the rated ones. &#128077;/&#128078; shows how the visitor rated it, when they did.</div>
+      <div id="botLog"></div>
       <h3>Rated answers, day by day</h3>
       <div class="note">Every question a visitor rated &#128077; or &#128078;, with the answer Sona gave. Push what works; for a &#128078;, write the right answer with <b>Correct it</b>.</div>
       <div class="seg" id="fbSeg" style="margin:8px 0"><button class="btn" data-fb="all">All</button> <button class="btn" data-fb="no">&#128078; Not helpful</button> <button class="btn" data-fb="yes">&#128077; Helpful</button></div>
@@ -9478,6 +9481,23 @@ td.path .tx{color:var(--accent)}
   // the owner approves (bot_approve, gated by the same secret token).
   // Rated answers by day (sql/bot_feedback_report.sql): what visitors
   // marked helpful or not, with Sona's answer, and a box to correct it.
+  // The FULL Sona log (sql/bot_qa_log.sql): every question in the range with
+  // the answer Sona gave, newest first - not just the rated ones.
+  function loadQaLog(){
+    var box=$('botLog');box.innerHTML='<div class="msg">Loading…</div>';
+    post('bot_qa_log',{p_secret:TOKEN,p_from:ST.from,p_to:ST.to}).then(function(r){
+      if(!r.ok||!r.j||r.j.error){box.innerHTML='<div class="msg">'+(r.status===404?'Run sql/bot_qa_log.sql in Supabase once to see this.':'Could not load ('+esc(String((r.j&&r.j.error)||r.status))+').')+'</div>';return;}
+      var rows=r.j||[];
+      if(!rows.length){box.innerHTML='<div class="msg">No questions in this range.</div>';return;}
+      box.innerHTML='<div class="note" style="display:block;margin-bottom:6px">'+nfmt(rows.length)+' questions, newest first</div>'+
+        '<table><tr><th>Time</th><th>Question</th><th>Sona answered</th></tr>'+rows.map(function(x){
+          var rate=x.helpful===true?'👍 ':(x.helpful===false?'👎 ':'');
+          return '<tr><td style="white-space:nowrap">'+esc(x.at||'')+'</td>'+
+            '<td>'+rate+esc(x.q)+'<div class="note" style="display:block">'+esc(x.intent||'?')+(x.answered?'':' &middot; no answer')+(x.page?' &middot; '+esc(x.page):'')+'</div></td>'+
+            '<td style="max-width:460px;font-size:13px;opacity:.85">'+esc(x.answer||(x.answered?'(logged from today onward)':'—'))+'</td></tr>';
+        }).join('')+'</table>';
+    });
+  }
   var FB=null,FB_V='all';
   function loadFeedback(){
     var box=$('botFb');box.innerHTML='<div class="msg">Loading\u2026</div>';
@@ -9550,6 +9570,7 @@ td.path .tx{color:var(--accent)}
       post('bot_unapprove',{p_secret:TOKEN,p_id:+id}).then(function(){load();});
     };
     loadFeedback();
+    loadQaLog();
     var rf=d.referrals;
     if(rf){$('refKpis').innerHTML=tiles([['Friends joined',rf.joined],['Referrers emailed',rf.notified]]);
       plainTable($('refTop'),rf.top||[],[{h:'Referrer',k:'who'},{h:'Friends',k:'n',num:true}]);}
