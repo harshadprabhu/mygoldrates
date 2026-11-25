@@ -1,4 +1,17 @@
 {
  "note": "Answers the owner approved from real visitor questions to Sona, the site assistant. Exported daily from the private database by bot_learn.py; only approved questions and answers are kept here, never the raw questions.",
- "answers": []
+ "answers": [
+  {
+   "q": "What is the gold rate in Tamil Nadu today?",
+   "a": "You can find today's gold rates across various jewellers in Tamil Nadu on our Tamil Nadu gold rate page. The rates are updated every morning.",
+   "u": "/gold-rate-today-in-tamil-nadu",
+   "d": "2026-11-25"
+  },
+  {
+   "q": "How can I check past gold rates from previous years?",
+   "a": "You can view past gold rates and track historical price trends on our gold rate history page.",
+   "u": "/gold-rate-history",
+   "d": "2026-11-25"
+  }
+ ]
 }
