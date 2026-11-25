@@ -20,7 +20,7 @@
   if(!eligible())return;
   // Filled in by the build: today's 22K gap between the cheapest and the
   // dearest jeweller, today's lowest 22K, and the Google client id.
-  var GAP=Number('358')||0,LOW=Number('11300')||0,GCID='459957139537-m6fl4clp90lua3ad2baupf20utkof6fl.apps.googleusercontent.com';
+  var GAP=Number('208')||0,LOW=Number('11300')||0,GCID='459957139537-m6fl4clp90lua3ad2baupf20utkof6fl.apps.googleusercontent.com';
   if(GCID.indexOf('__')===0)GCID='';
   function inr(n){return '₹'+Math.round(n).toLocaleString('en-IN');}
   // Sign-up funnel events for the private analytics dashboard.
@@ -85,9 +85,25 @@
   // First press of x (or Escape) shows what they would miss; the second,
   // or "No thanks", closes. After signing up, x just closes.
   function tryClose(){
-    if(step==='done'){remove();return;}
+    if(step==='done'){doneClose();return;}
     if(sureShown){close();return;}
     sureShown=true;ev('sure_shown');show('sure');
+  }
+  // After signing up we ask for the mobile number and make it sticky: the
+  // first attempt to leave nudges them to add it; only the second closes. Once
+  // a number is saved, closing is immediate.
+  var phoneSaved=false,doneNudged=false;
+  function doneClose(){
+    if(phoneSaved){remove();return;}
+    if(!doneNudged){
+      doneNudged=true;ev('phone_nudge');
+      var st=$q('#grPopPhSt');
+      if(st){st.style.color='#f0d080';st.textContent='Add your number to get instant WhatsApp/SMS alerts — it only takes a moment.';}
+      try{$q('#spPhone').focus();}catch(_){}
+      var box=$q('#grPopPhBox');if(box){box.style.boxShadow='0 0 0 2px rgba(240,208,128,.55)';}
+      return;
+    }
+    remove();
   }
   function build(){
     var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
@@ -118,28 +134,30 @@
       '<ul class="mz"><li>Which jeweller is cheapest in your city each morning</li><li>An email the day gold drops to your price</li><li>Today’s market rate, without searching for it</li></ul>'+
       '<button class="go" id="spSureYes" type="button">Okay, send me the free alerts</button>'+
       '<button class="no" id="spSureNo" type="button">No thanks, close</button></div>'+
-      '<div class="gpd" hidden><div class="tk">&#10003;</div><div class="bg">You’re in!</div>'+
-      '<p class="sb" id="grPopDone">Your first email arrives tomorrow morning.</p>'+
-      // two optional taps: what they are buying for and when (save_intent)
-      '<div class="op iq"><div class="ot">Buying gold for? <span>(optional)</span></div>'+
+      // Focused mobile-number step: the number is the ONLY ask here, and the
+      // step is sticky (x/Escape nudge first, the intent taps appear only
+      // after the number is saved - see savePhone).
+      '<div class="gpd" hidden><div class="tk">&#10003;</div><div class="bg">One last step — add your mobile</div>'+
+      '<p class="sb" id="grPopDone">We’ll text you the cheapest rate the day it drops.</p>'+
+      '<div class="op" id="grPopPhBox" style="border-color:rgba(240,208,128,.6);background:rgba(240,208,128,.1)">'+
+      '<div class="ot" style="font-size:14.5px">Your mobile number</div>'+
+      '<div class="od">Get the cheapest rate by WhatsApp/SMS the moment it drops — faster than email. We never call or share your number.</div>'+
+      '<input id="spPhone" type="tel" placeholder="+91 mobile number" inputmode="tel" autocomplete="tel" maxlength="18">'+
+      '<button class="go" id="spPhoneSave" type="button">Save my number &amp; finish</button>'+
+      '<div class="st" id="grPopPhSt"></div></div>'+
+      // the "buying for / when" taps, revealed only after the number is saved
+      '<div class="op iq" id="grPopIntent" hidden><div class="ot">Buying gold for? <span>(optional)</span></div>'+
       '<div class="iqc" data-k="p_buy_for"><button type="button" data-v="wedding">Wedding</button><button type="button" data-v="festival">Festival</button>'+
       '<button type="button" data-v="investment">Investment</button><button type="button" data-v="gift">Gift</button><button type="button" data-v="self">Myself</button></div>'+
       '<div class="ot" style="margin-top:10px">When?</div>'+
       '<div class="iqc" data-k="p_buy_when"><button type="button" data-v="this_month">This month</button><button type="button" data-v="3_months">In 3 months</button>'+
-      '<button type="button" data-v="tracking">Just tracking</button></div></div>'+
-      '<div class="op"><div class="ot">Add your mobile number <span>(optional)</span></div>'+
-      '<div class="od">For rate alerts by SMS or WhatsApp when we launch them. We never call or share it.</div>'+
-      '<input id="spPhone" type="tel" placeholder="+91 mobile number" inputmode="tel" autocomplete="tel" maxlength="18">'+
-      '<button class="go" id="spPhoneSave" type="button">Save my number</button>'+
-      '<div class="st" id="grPopPhSt"></div></div>'+
-      '<button class="no" id="spDoneClose" type="button">Done</button></div></div>';
+      '<button type="button" data-v="tracking">Just tracking</button></div></div></div>';
     document.body.appendChild(el);
     $q('.x').onclick=tryClose;
     // Subscribed on another phone or browser: remember it on this one.
     $q('#spHave').onclick=function(){s('gr_sub','1');close();};
     $q('#spSureYes').onclick=function(){show('main');try{document.getElementById('grPopE').focus()}catch(_){}};
     $q('#spSureNo').onclick=close;
-    $q('#spDoneClose').onclick=remove;
     $q('#spPhoneSave').onclick=savePhone;
     [].forEach.call(el.querySelectorAll('.iqc'),function(g){g.onclick=function(e){
       var b=e.target.closest('button');if(!b||!doneEmail)return;
@@ -253,7 +271,8 @@
     if(!d){st.style.color='#f0909e';st.textContent='Enter a valid 10-digit mobile number';return;}
     b.disabled=true;
     save({email:doneEmail,phone:'+91'+d,signup_method:'popup'}).then(function(){
-      ev('mobile_added');st.style.color='#7fd1a3';st.textContent='✓ Saved';setTimeout(remove,1200);
+      phoneSaved=true;ev('mobile_added');st.style.color='#7fd1a3';
+      st.textContent='✓ Saved — you’re all set';setTimeout(remove,1200);
     }).catch(function(){b.disabled=false;st.style.color='#f0909e';st.textContent='Couldn’t save that — try again.';});
   }
   // After 10 seconds on the page (and only while the tab is in view), so a
