@@ -6295,6 +6295,11 @@ SIGNUP_JS = r"""(function(){
      RPC isn't deployed yet it falls back to a plain insert of base fields. */
   function saveSubscriber(payload){
     if(!SB||!KEY||!payload||!payload.email)return Promise.reject('cfg');
+    /* Fill the visitor's state/city from their network (GR_GDATA, set from the
+       Worker's /geo below) when the signup carries none - so Google and
+       homepage signups still capture a location. A typed/GPS value wins. */
+    try{var gd=window.GR_GDATA||{};['state','city'].forEach(function(k){
+      if(!payload[k]&&gd[k])payload[k]=gd[k];});}catch(e){}
     return fetch(SB+'/rest/v1/rpc/upsert_subscriber',{method:'POST',
       headers:{'Content-Type':'application/json','apikey':KEY,
                'Authorization':'Bearer '+KEY},
@@ -6316,6 +6321,20 @@ SIGNUP_JS = r"""(function(){
     });
   }
   window.GR_SAVE=saveSubscriber;
+
+  /* Network location for signups: Cloudflare already knows the state/city of
+     every request; the Worker's /geo returns just that (no IP stored). Set it
+     on window.GR_GDATA so saveSubscriber (and the subscribe form) can attach it
+     to a signup that has no city of its own. India only; silent on failure. */
+  (function(){try{
+    fetch('https://mygoldrates-jd-api.harshads-priority.workers.dev/geo')
+      .then(function(r){return r.json();}).then(function(g){
+        if(!g||g.country!=='IN')return;
+        var d=window.GR_GDATA=window.GR_GDATA||{};
+        if(g.region&&!d.state)d.state=g.region;
+        if(g.city&&!d.city)d.city=g.city;
+      }).catch(function(){});
+  }catch(e){}})();
 
   /* ---- form conveniences: +91 phone default, PIN -> area/city/state ---- */
   var zip=F('zip'),area=F('area');
