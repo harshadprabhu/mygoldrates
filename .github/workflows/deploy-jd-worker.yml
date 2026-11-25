@@ -55,11 +55,18 @@ jobs:
           RAZORPAY_WEBHOOK_SECRET: ${{ secrets.RAZORPAY_WEBHOOK_SECRET }}
           RAZORPAY_PLAN_ID: ${{ secrets.RAZORPAY_PLAN_ID }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          # Private Customer-Trends report: the analytics secret the Worker
+          # hands a verified owner, and the owner-email allowlist it checks
+          # against. OWNER_EMAILS (comma-separated Gmail addresses) is kept
+          # only as a repo secret, never in this public repo. If either is
+          # unset the report simply refuses everyone - a safe default.
+          ANALYTICS_TOKEN: ${{ secrets.ANALYTICS_TOKEN }}
+          OWNER_EMAILS: ${{ secrets.OWNER_EMAILS }}
         run: |
           set -eu
           for name in SUPABASE_URL SUPABASE_SERVICE_KEY BREVO_API_KEY ALERTS_FROM \
                       RAZORPAY_KEY_ID RAZORPAY_KEY_SECRET RAZORPAY_WEBHOOK_SECRET \
-                      RAZORPAY_PLAN_ID GOOGLE_CLIENT_ID; do
+                      RAZORPAY_PLAN_ID GOOGLE_CLIENT_ID ANALYTICS_TOKEN OWNER_EMAILS; do
             val=$(printenv "$name" || true)
             if [ -n "$val" ]; then
               printf '%s' "$val" | npx --yes wrangler@3 secret put "$name" >/dev/null
