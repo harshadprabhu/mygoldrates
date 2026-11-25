@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Customer Trends - MyGoldRates</title>
+<style>
+/* Bar charts use ONE gold hue (sequential - colour-blind safe by construction).
+   The weekly trend uses two hues validated against this card surface with the
+   dataviz palette check: intent #b08a2a and questions #5b8fd6 pass lightness,
+   chroma, CVD separation and contrast. Identity is never colour-alone: every
+   bar is labelled, and the two trend lines carry a legend + direct end labels. */
+:root{--bg:#0f1115;--card:#181b22;--card2:#1e222b;--line:#272b34;--grid:#232731;
+  --ink:#eef1f6;--ink2:#a7afbe;--ink3:#7d8697;--gold:#e3bf63;--emerald:#54c08a;
+  --warm:#e08a6a;--bar:#b08a2a;--s2:#5b8fd6}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);
+  font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 16px 70px}
+.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin-bottom:4px}
+h1{font-size:21px;margin:0;letter-spacing:.02em}
+h1 b{color:var(--gold)}
+.sub{color:var(--ink2);font-size:12.5px;margin:0 0 14px}
+.who{font-size:12px;color:var(--ink3);margin-left:auto}
+.err{color:var(--warm)}
+
+/* Sign-in gate overlay */
+#gate{position:fixed;inset:0;background:rgba(10,12,16,.96);display:flex;
+  align-items:center;justify-content:center;padding:20px;z-index:50}
+#gate .box{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:28px 26px;max-width:380px;text-align:center}
+#gate h2{margin:0 0 6px;font-size:18px}
+#gate h2 b{color:var(--gold)}
+#gate p{color:var(--ink2);font-size:13px;margin:0 0 18px}
+#gbtn{display:flex;justify-content:center;min-height:44px}
+#gmsg{font-size:12.5px;margin-top:14px;min-height:16px}
+.hide{display:none!important}
+
+/* Controls */
+.fbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--card);
+  border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{background:transparent;color:var(--ink2);border:0;border-right:1px solid var(--line);
+  padding:7px 12px;font-size:12.5px;cursor:pointer;font-weight:600}
+.seg button:last-child{border-right:0}
+.seg button:hover{color:var(--ink);background:var(--card2)}
+.seg button.on{background:var(--gold);color:#231a02}
+.btn{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;
+  padding:7px 13px;font-size:12.5px;cursor:pointer}
+.btn:hover{background:var(--card2)}
+.btn.pr{border-color:var(--gold);color:var(--gold)}
+.status{font-size:12px;color:var(--ink2);margin-left:auto}
+
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px}
+@media(max-width:560px){.kpis{grid-template-columns:1fr}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi .l{color:var(--ink2);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.kpi .n{font-size:28px;font-weight:700;margin:3px 0 1px;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:12px;color:var(--ink3)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:15px 16px;margin-bottom:14px;min-width:0}
+.grid2>.card{margin-bottom:0}
+.card h2{font-size:14px;margin:0 0 3px;letter-spacing:.02em}
+.card .hint{color:var(--ink3);font-size:11.5px;margin:0 0 12px}
+.empty{color:var(--ink3);font-size:12.5px;padding:8px 0}
+
+/* label + bar + value rows (each row is self-describing = table-equivalent) */
+.rows{display:flex;flex-direction:column;gap:9px}
+.r{display:grid;grid-template-columns:120px 1fr 46px;align-items:center;gap:10px}
+@media(max-width:420px){.r{grid-template-columns:96px 1fr 40px}}
+.r .lb{font-size:12.5px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r .bar{height:16px;background:var(--grid);border-radius:4px;overflow:hidden}
+.r .bar i{display:block;height:100%;background:var(--bar);border-radius:4px}
+.r .vl{font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+
+/* weekly trend */
+.legend{display:flex;gap:16px;font-size:12px;color:var(--ink2);margin:0 0 6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
+.plot{position:relative;width:100%}
+.plot svg{display:block;width:100%;overflow:visible}
+.plot text{fill:var(--ink3);font-size:11px;font-family:inherit}
+.foot{color:var(--ink3);font-size:11px;margin-top:22px;text-align:center}
+
+/* print / export to PDF */
+@media print{
+  @page{margin:12mm}
+  html,body{background:#fff;color:#111}
+  .wrap{max-width:none;padding:0}
+  #gate,.fbar,.no-print{display:none!important}
+  .card,.kpi{background:#fff;border:1px solid #d8dbe1;break-inside:avoid}
+  .kpi .n,h1,h1 b,.card h2{color:#111}
+  .r .lb,.r .vl,.sub,.kpi .l,.kpi .d,.card .hint{color:#333}
+  .r .bar{background:#eee}.r .bar i{background:#b08a2a}
+  .plot text{fill:#555}
+}
+</style>
+</head>
+<body>
+<!-- Owner sign-in gate -->
+<div id="gate">
+  <div class="box">
+    <h2>Customer <b>Trends</b></h2>
+    <p>This report is private. Sign in with the owner's Google account to view it.</p>
+    <div id="gbtn"></div>
+    <div id="gmsg"></div>
+  </div>
+</div>
+
+<div class="wrap" id="app" aria-hidden="true">
+  <div class="top">
+    <h1>Customer <b>Trends</b></h1>
+    <span class="who" id="who"></span>
+  </div>
+  <p class="sub">What subscribers tell us they want &mdash; to spot seasons, plan
+     campaigns, and show partners where demand is heading. As of 26 November 2026.</p>
+
+  <div class="fbar no-print">
+    <div class="seg" id="range">
+      <button data-d="30">30 days</button>
+      <button data-d="90" class="on">90 days</button>
+      <button data-d="180">6 months</button>
+      <button data-d="all">All</button>
+    </div>
+    <button class="btn pr" id="pdf">Save as PDF / image</button>
+    <span class="status" id="status"></span>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="card">
+    <h2>Buying momentum over time</h2>
+    <p class="hint">Weekly &mdash; subscribers who told us a buying plan, and
+       questions people asked Sona (interest &amp; reach).</p>
+    <div class="legend" id="wlegend"></div>
+    <div class="plot" id="weekly"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card"><h2>Why they're buying</h2>
+      <p class="hint">Occasion behind the purchase.</p><div class="rows" id="buy_for"></div></div>
+    <div class="card"><h2>When they plan to buy</h2>
+      <p class="hint">How soon &mdash; use it to time offers.</p><div class="rows" id="buy_when"></div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card"><h2>Categories of interest</h2>
+      <p class="hint">Jewellery types people ask about.</p><div class="rows" id="categories"></div></div>
+    <div class="card"><h2>Karat preference</h2>
+      <p class="hint">Purity they care about.</p><div class="rows" id="karat"></div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card"><h2>Brands people look up</h2>
+      <p class="hint">Jewellers subscribers compare.</p><div class="rows" id="top_brands"></div></div>
+    <div class="card"><h2>What they ask Sona</h2>
+      <p class="hint">Topics logged-in users raise.</p><div class="rows" id="topics_asked"></div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card"><h2>Where subscribers are</h2>
+      <p class="hint">By state (from sign-up location).</p><div class="rows" id="by_state"></div></div>
+    <div class="card"><h2>Cities people compare</h2>
+      <p class="hint">Markets with demand to court.</p><div class="rows" id="by_city"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>What the whole audience asks</h2>
+    <p class="hint">Every Sona question (anonymous), not just signed-in users &mdash;
+       the broadest read on what the market wants.</p>
+    <div class="rows" id="sona_intents"></div>
+  </div>
+
+  <p class="foot">Private owner report &middot; MyGoldRates &middot; aggregates only, no personal data shown.</p>
+</div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+(function(){
+  var SB="https://opwrfflzzowhobesysmr.supabase.co", KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wd3JmZmx6em93aG9iZXN5c21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MjE2NDIsImV4cCI6MjEwMDA5NzY0Mn0.KHe1m2M98a9xyXGKstZo_bj5Zobw06X8nXbzvIoQjTE", GCID="459957139537-m6fl4clp90lua3ad2baupf20utkof6fl.apps.googleusercontent.com",
+      WORKER="https://mygoldrates-jd-api.harshads-priority.workers.dev".replace(/\/$/,'');
+  var TOKEN="";            // obtained from /report/auth after owner sign-in
+  var $=function(id){return document.getElementById(id);};
+  function nfmt(n){try{return Number(n).toLocaleString('en-IN');}catch(e){return n;}}
+  function iso(d){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(d);}
+  function esc(s){return String(s==null?'':s).replace(/[<>&]/g,function(c){
+    return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+  var ST={d:'90',from:'',to:''};
+
+  // Pretty labels for the coded keys the RPC returns.
+  var LBL={this_month:'This month','3_months':'In 3 months','6_months':'In 6 months',
+    later:'Later',wedding:'Wedding',festival:'Festival',investment:'Investment',
+    gift:'Gift',self:'For self',unspecified:'Unspecified',
+    rate:'Today’s rate',rate_brand:'A jeweller’s rate',rate_city:'A city’s rate',
+    cheapest:'Cheapest',compare:'Compare',making:'Making charges',offer:'Offers',
+    coin:'Gold coins',trend:'Price trend',silver:'Silver',world:'World rates',
+    alerts:'Price alerts',faq:'General question',price:'Price',other:'Other'};
+  function pretty(k){return LBL[k]||String(k).replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});}
+
+  // ---- the bar rows (label + proportional bar + count) ----
+  function bars(el,obj,opt){
+    opt=opt||{};el.innerHTML='';
+    var entries=[];
+    if(Array.isArray(obj)){obj.forEach(function(o){entries.push([o[opt.k||'state']||o.city,+o.n]);});}
+    else{for(var k in obj)entries.push([k,+obj[k]]);}
+    entries=entries.filter(function(e){return e[0]!=null&&e[1]>0;})
+                   .sort(function(a,b){return b[1]-a[1];});
+    if(!entries.length){el.innerHTML='<div class="empty">No data yet for this range.</div>';return;}
+    var max=entries[0][1];
+    entries.forEach(function(e){
+      var pct=Math.max(3,Math.round(e[1]/max*100));
+      var lb=opt.pretty?pretty(e[0]):e[0];
+      el.insertAdjacentHTML('beforeend',
+        '<div class="r"><div class="lb" title="'+esc(lb)+'">'+esc(lb)+'</div>'+
+        '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
+        '<div class="vl">'+nfmt(e[1])+'</div></div>');
+    });
+  }
+
+  function kpis(t){
+    t=t||{};
+    $('kpis').innerHTML=[
+      ['Subscribers',t.subscribers,'joined in this range'],
+      ['Told us a buying plan',t.with_intent,'stated an intent'],
+      ['Questions asked',t.questions,'to Sona in this range']
+    ].map(function(r){return '<div class="kpi"><div class="l">'+r[0]+'</div>'+
+      '<div class="n">'+nfmt(r[1]||0)+'</div><div class="d">'+r[2]+'</div></div>';}).join('');
+  }
+
+  // ---- weekly two-line trend (intent subscribers + questions) ----
+  function weekly(intentRows,qRows){
+    var byWk={};
+    (intentRows||[]).forEach(function(r){var w=r.week;byWk[w]=byWk[w]||{i:0,q:0};byWk[w].i+=+r.n;});
+    (qRows||[]).forEach(function(r){var w=r.week;byWk[w]=byWk[w]||{i:0,q:0};byWk[w].q+=+r.n;});
+    var wks=Object.keys(byWk).sort();
+    var leg=$('wlegend');
+    if(wks.length<2){
+      $('weekly').innerHTML='<div class="empty">Not enough weeks of data yet &mdash; '+
+        'the trend line appears once there are two or more weeks in range.</div>';
+      leg.innerHTML='';return;}
+    leg.innerHTML='<span><i style="background:var(--bar)"></i>Intent subscribers</span>'+
+                  '<span><i style="background:var(--s2)"></i>Questions asked</span>';
+    var W=720,H=240,pl=34,pr=42,pt=12,pb=26, iw=W-pl-pr, ih=H-pt-pb;
+    var maxI=Math.max(1,Math.max.apply(null,wks.map(function(w){return byWk[w].i;})));
+    var maxQ=Math.max(1,Math.max.apply(null,wks.map(function(w){return byWk[w].q;})));
+    // one axis only: both series indexed to their own max as % of chart height,
+    // so this is a shape/relative-growth read (labelled as such), not a dual scale.
+    var x=function(i){return pl+(wks.length<2?0:i/(wks.length-1)*iw);};
+    var yI=function(v){return pt+ih-(v/maxI)*ih;};
+    var yQ=function(v){return pt+ih-(v/maxQ)*ih;};
+    function path(y,key){return wks.map(function(w,i){return (i?'L':'M')+x(i).toFixed(1)+' '+y(byWk[w][key]).toFixed(1);}).join(' ');}
+    var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Weekly trend">';
+    for(var g=0;g<=4;g++){var gy=pt+ih*g/4;s+='<line x1="'+pl+'" y1="'+gy.toFixed(1)+'" x2="'+(W-pr)+'" y2="'+gy.toFixed(1)+'" stroke="var(--grid)" stroke-width="1"/>';}
+    // x labels: first, middle, last week
+    [0,Math.floor((wks.length-1)/2),wks.length-1].filter(function(v,i,a){return a.indexOf(v)===i;}).forEach(function(i){
+      s+='<text x="'+x(i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+wks[i].slice(5)+'</text>';});
+    s+='<path d="'+path(yQ,'q')+'" fill="none" stroke="var(--s2)" stroke-width="2"/>';
+    s+='<path d="'+path(yI,'i')+'" fill="none" stroke="var(--bar)" stroke-width="2.5"/>';
+    // end dots + direct value labels
+    var li=wks.length-1;
+    s+='<circle cx="'+x(li).toFixed(1)+'" cy="'+yQ(byWk[wks[li]].q).toFixed(1)+'" r="3.5" fill="var(--s2)"/>';
+    s+='<circle cx="'+x(li).toFixed(1)+'" cy="'+yI(byWk[wks[li]].i).toFixed(1)+'" r="4" fill="var(--bar)"/>';
+    s+='<text x="'+(x(li)+6).toFixed(1)+'" y="'+yI(byWk[wks[li]].i).toFixed(1)+'" fill="var(--gold)" font-weight="700">'+byWk[wks[li]].i+'</text>';
+    s+='<text x="'+(x(li)+6).toFixed(1)+'" y="'+yQ(byWk[wks[li]].q).toFixed(1)+'" fill="var(--s2)" font-weight="700">'+byWk[wks[li]].q+'</text>';
+    s+='</svg>';
+    $('weekly').innerHTML=s;
+  }
+
+  function post(fn,body){
+    return fetch(SB+'/rest/v1/rpc/'+fn,{method:'POST',
+      headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},
+      body:JSON.stringify(body)}).then(function(r){return r.json();});
+  }
+
+  function load(){
+    var st=$('status');st.textContent='Loading…';st.className='status';
+    post('customer_trends',{p_secret:TOKEN,p_from:ST.from,p_to:ST.to}).then(function(d){
+      if(!d||d.error){st.textContent='Could not load ('+((d&&d.error)||'no data')+').';st.className='status err';return;}
+      kpis(d.totals);
+      weekly(d.weekly,d.questions_weekly);
+      bars($('buy_for'),d.buy_for,{pretty:true});
+      bars($('buy_when'),d.buy_when,{pretty:true});
+      bars($('categories'),d.categories,{});
+      bars($('karat'),d.karat,{});
+      bars($('top_brands'),d.top_brands,{});
+      bars($('topics_asked'),d.topics_asked,{pretty:true});
+      bars($('by_state'),d.by_state,{k:'state'});
+      bars($('by_city'),d.by_city,{k:'city'});
+      bars($('sona_intents'),d.sona_intents,{pretty:true});
+      st.textContent='Updated '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    }).catch(function(){st.textContent='Network error.';st.className='status err';});
+  }
+
+  function setRange(d){
+    ST.d=d;ST.to=iso(new Date());
+    if(d==='all'){ST.from='2026-01-01';}
+    else{var f=new Date();f.setDate(f.getDate()-(+d));ST.from=iso(f);}
+    [].forEach.call($('range').children,function(b){b.classList.toggle('on',b.getAttribute('data-d')===d);});
+  }
+
+  // ---- owner sign-in → token, then reveal the report ----
+  function onGoogle(resp){
+    var m=$('gmsg');m.textContent='Checking…';m.className='';
+    fetch(WORKER+'/report/auth',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({credential:resp.credential})})
+      .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+      .then(function(o){
+        if(o.ok&&o.j&&o.j.ok&&o.j.token){
+          TOKEN=o.j.token;
+          $('gate').classList.add('hide');
+          $('app').removeAttribute('aria-hidden');
+          if(o.j.email)$('who').textContent=o.j.email;
+          setRange('90');load();
+        }else{
+          m.textContent='That account is not allowed to view this report.';
+          m.className='err';
+        }
+      }).catch(function(){m.textContent='Sign-in check failed. Try again.';m.className='err';});
+  }
+  window.__trendsGoogle=onGoogle;
+
+  function initGsi(){
+    if(!window.google||!google.accounts||!google.accounts.id){return setTimeout(initGsi,300);}
+    if(!GCID){$('gmsg').textContent='Sign-in is not configured yet.';$('gmsg').className='err';return;}
+    google.accounts.id.initialize({client_id:GCID,callback:onGoogle});
+    google.accounts.id.renderButton($('gbtn'),{theme:'filled_black',size:'large',text:'signin_with',shape:'pill'});
+    google.accounts.id.prompt();
+  }
+  initGsi();
+
+  $('range').addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b||!TOKEN)return;setRange(b.getAttribute('data-d'));load();});
+  $('pdf').addEventListener('click',function(){window.print();});
+})();
+</script>
+</body>
+</html>
