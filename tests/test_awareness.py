@@ -28,9 +28,12 @@ def test_awareness_cards_state_no_rates_and_no_banned_words():
 
 def test_topics_rotate_by_how_many_have_been_posted():
     assert aw.next_topic({}) == "purity"
-    assert aw.next_topic({"awareness-2026-10-29": "1"}) == "hallmark"
-    assert aw.next_topic({"awareness-a": "1", "awareness-b": "2", "2026-10-27": "x", "news-2026-10-28": "y"}) == "huid"
-    assert aw.next_topic({"awareness-a": "1", "awareness-b": "2", "awareness-c": "3"}) == "purity"
+    assert aw.next_topic({"awareness-2026-10-29": "1"}) == "making"
+    assert aw.next_topic({"awareness-a": "1", "awareness-b": "2", "2026-10-27": "x", "news-2026-10-28": "y"}) == "hallmark"
+    # a full bank of nine awareness posts wraps back to the first topic
+    nine = {"awareness-%02d" % i: str(i) for i in range(9)}
+    assert aw.next_topic(nine) == "purity"
+    assert len(aw.TOPICS) == 9 and len(set(aw.TOPICS)) == 9
 
 
 def test_a_carousel_is_posted_as_children_then_parent_then_publish(monkeypatch):

@@ -932,7 +932,7 @@
   window.GR_SONA_AVATAR = avatar;
 
   // --------------------------------------------------------------- UI
-  var SUGGEST = ['cheap22', 'mycity', 'tvk', 'bestoff', 'p10chain', 'k22v24'];      // chip keys (sona_i18n.js ch_*)
+  var SUGGEST = ['cheap22', 'mkcmp', 'tvk', 'bestoff', 'mycity', 'p10chain', 'k22v24'];   // chip keys (sona_i18n.js ch_*)
   var CSS = '' +
     '.sn-fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:8500;display:flex;align-items:center;gap:9px;height:52px;padding:0 18px 0 7px;border:0;border-radius:999px;cursor:pointer;color:#1a1405;font:700 14.5px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:linear-gradient(135deg,#ffe9a8,#e7bf5a 45%,#b98a24);box-shadow:0 10px 30px rgba(185,138,36,.45),0 0 0 1px rgba(255,255,255,.25) inset;transition:transform .2s}' +
     '.sn-fab:hover{transform:translateY(-2px)}.sn-fab .sn-orb{width:42px;height:42px;flex:none;margin:-2px 0;filter:drop-shadow(0 2px 4px rgba(90,60,0,.35))}' +
@@ -1393,6 +1393,63 @@
     });
   }
 
+  // ---- intent capture for a signed-in visitor (for marketing segments) ----
+  // A logged-in subscriber's email lets us record, against their own row, what
+  // they keep asking about and what they are shopping for - so a campaign can
+  // reach, say, everyone buying for a wedding this month. All of it goes only
+  // to that subscriber's own row through save_intent (DPDP-safe); nothing is
+  // captured for a visitor who is not signed in.
+  function loggedEmail() {
+    try { var u = JSON.parse(localStorage.getItem('gr_user') || 'null');
+      return (u && u.email) ? String(u.email).toLowerCase() : null; } catch (_) { return null; }
+  }
+  var BUY_FOR_W = {
+    wedding: ['wedding', 'shaadi', 'shadi', 'marriage', 'married', 'bride', 'groom', 'vivah', 'lagna', 'dulhan', 'dulha', 'sagai', 'engagement'],
+    festival: ['festival', 'diwali', 'deepavali', 'dhanteras', 'akshaya', 'navratri', 'navaratri', 'pongal', 'onam', 'ugadi', 'gudi', 'raksha bandhan', 'rakhi', 'teej', 'karwa'],
+    investment: ['investment', 'invest', 'savings', 'saving', 'returns', 'portfolio', 'hedge', 'long term', 'long-term'],
+    gift: ['gift', 'gifting', 'present', 'anniversary', 'birthday', 'for my wife', 'for my mother', 'for my sister', 'for my daughter', 'for her'],
+    self: ['for myself', 'for me', 'my own', 'personal use', 'for self']
+  };
+  function buyForIn(tx) {
+    for (var k in BUY_FOR_W) for (var i = 0; i < BUY_FOR_W[k].length; i++)
+      if (tx.indexOf(BUY_FOR_W[k][i]) > -1) return k;
+    return null;
+  }
+  function buyWhenIn(tx) {
+    if (/\b(this month|right now|today|soon|urgent|immediately|next week|abhi|aaj)\b/.test(tx)) return 'this_month';
+    if (/\b(next month|few months|3 months|three months|couple of months|teen mahine)\b/.test(tx)) return '3_months';
+    if (/\b(just checking|just looking|browsing|tracking|watching|planning|later|someday|no hurry)\b/.test(tx)) return 'tracking';
+    return null;
+  }
+  // Called after every answer: records the signed-in visitor's interest
+  // (brand/city/karat, plus the categories and topics they ask about, which
+  // accumulate) and any buying reason/timing stated in plain words.
+  function captureIntent(q, a) {
+    var em = loggedEmail(); if (!em || !SB || !KEY) return;
+    var ctx = ctxOf(q), prof = {};
+    if (ctx.brand) prof.brand = ctx.brand;
+    if (ctx.city) prof.city = ctx.city;
+    if (ctx.karat) prof.karat = ctx.karat;
+    if (ctx.cat) prof['cat_' + ctx.cat] = 1;
+    if (a && a.intent) prof['ask_' + a.intent] = 1;
+    var arg = { p_email: em, p_interest: prof };
+    var tx = norm(q), bf = buyForIn(tx), bw = buyWhenIn(tx);
+    if (bf) arg.p_buy_for = bf;
+    if (bw) arg.p_buy_when = bw;
+    rpc('save_intent', arg).catch(function () {});
+  }
+  // A signed-in visitor who never set an alert is still asked, once a session,
+  // what they are shopping for (the same two taps as the alert flow).
+  var intentAsked = false;
+  function maybeAskIntent(intent) {
+    if (intentAsked || !ALERT_FOR[intent]) return;
+    var em = loggedEmail(); if (!em || !SB || !KEY) return;
+    try { if (sessionStorage.getItem('gr_iq') === '1') return; } catch (_) {}
+    intentAsked = true;
+    try { sessionStorage.setItem('gr_iq', '1'); } catch (_) {}
+    intentAsk(em);
+  }
+
   function ask(q, label) {
     q = String(q || '').trim(); if (!q) return;
     var spoken = voiceQ; voiceQ = false;
@@ -1427,11 +1484,15 @@
           m._say = a.say; m._sl = a.sayLang || rl;
           setChips(a.chips || suggest());
           var tag = (rl !== 'en' ? rl : '') + (spoken ? (rl !== 'en' ? ' ' : '') + 'voice' : '');
-          rpc('log_bot_question', { p_q: (tag ? '[' + tag + '] ' : '') + redact(q), p_intent: a.intent, p_answered: ok, p_page: location.pathname, p_sid: window.GR_SID || '' })
+          rpc('log_bot_question', { p_q: (tag ? '[' + tag + '] ' : '') + redact(q), p_intent: a.intent, p_answered: ok, p_page: location.pathname, p_sid: window.GR_SID || '',
+            p_answer: (a.say || String(a.html || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim().slice(0, 600) })
             .then(function (id) { if (id) $('.sn-fb', m).setAttribute('data-id', id); });
           track(ok ? 'answered' : 'unanswered');
+          if (ok) captureIntent(q, a);     // record a signed-in visitor's interest/intent
           if (spoken || ttsOn) speak(a.say, m._sl, m, spoken ? resume : null);
-          if (ok) setTimeout(function () { alertCard(a.intent, q); }, 900);
+          // a not-yet-subscribed visitor is offered an alert; a signed-in one
+          // (no alert to offer) is asked, once a session, what they shop for
+          if (ok) setTimeout(function () { if (!alertCard(a.intent, q)) maybeAskIntent(a.intent); }, 900);
         }, 350 + Math.min(600, a.html.length / 6));
       });
       });

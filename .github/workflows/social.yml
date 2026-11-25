@@ -7,8 +7,11 @@ name: social-post
 #   ~17:17 IST  deals  - best deals today: cheapest jeweller per jewel after making-charge offers,
 #               today's rates and offers, with each jeweller's logo (deals_post.py; 7 slides)
 #   ~18:37 IST  reel   - a short video made ahead (docs/social/reel-<date>.mp4 + .txt), only on days one is saved
-#   ~19:17 IST  Tue/Thu/Sat  awareness - a six-slide swipe post on gold purity, hallmarking or
-#               HUID, in turn (awareness.py)
+#   ~19:17 IST  Tue/Thu/Sat  awareness - a six-slide swipe post that rotates
+#               through a bank of NINE evergreen topics (purity, making charges,
+#               hallmarking, GST, HUID, buyback, reading the bill, when to buy,
+#               spotting fakes), so the same one comes round only ~monthly, not
+#               every three posts (owner, 25 Nov 2026) (awareness.py)
 # Each card is committed to the repo first (Instagram fetches the image from
 # a public URL), then posted with Meta's free API. The news and pulse posts
 # use the site's own headlines, summarised by Gemini's free text model and
@@ -19,7 +22,7 @@ on:
     - cron: "17 3 * * *"    # 03:17 UTC ~ 08:47 IST: news
     - cron: "47 5 * * *"    # 05:47 UTC ~ 11:17 IST: rates
     - cron: "17 9 * * *"    # 09:17 UTC ~ 14:47 IST: pulse
-    - cron: "47 13 * * 2,4,6"  # 13:47 UTC ~ 19:17 IST, Tue/Thu/Sat: awareness carousel
+    - cron: "47 13 * * 2,4,6"  # 13:47 UTC ~ 19:17 IST, Tue/Thu/Sat: awareness carousel (9-topic rotation)
     - cron: "47 11 * * *"   # 11:47 UTC ~ 17:17 IST: best deals carousel
     - cron: "7 13 * * *"    # 13:07 UTC ~ 18:37 IST: a Reel, only on days one is saved (docs/social/reel-<date>.mp4)
   workflow_dispatch:

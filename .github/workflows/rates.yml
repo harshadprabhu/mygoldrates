@@ -2,24 +2,32 @@ name: fetch-rates
 
 on:
   schedule:
-    # 4 times a day, ~10:30 to ~18:00 IST (owner, 22 Nov 2026). Every run
+    # 5 times a day, ~10:30 to ~18:00 IST (owner, 22-23 Nov 2026). Every run
     # falls back to the shared proxy pool for any jeweller that fails a direct
     # fetch; at every-30-min (48 runs/day) that quietly exhausted the
     # providers' monthly free credits, which broke the proxy-only work
-    # (Tanishq making charges, the diamond collector). Four spread runs keep
+    # (Tanishq making charges, the diamond collector). A few spread runs keep
     # the board fresh through the trading day while staying well inside the
-    # free tiers - jewellers mostly set the day's rate once each morning, so
-    # four reads catch the opening rate and any intraday revision.
+    # free tiers - jewellers mostly set the day's rate once each morning.
+    #
+    # 11:15 IST added 23 Nov 2026: the 10:37 run fires BEFORE most jewellers
+    # post the day's rate (Indian jewellers publish ~10:00-12:00), so on a
+    # morning the market has moved - e.g. a Monday after a weekend gap - the
+    # board's slower brands still show the previous session's rate and get
+    # dropped as stale (quarantine: "unchanged while the market moved"). An
+    # extra read at 11:15 lands in the middle of that update wave and recovers
+    # them without waiting for the 13:07 run.
     #
     # Times are IST (UTC+5:30), offset off the congested :00/:30 minutes
-    # (GitHub delays private-repo scheduled runs most on those):
-    #   05:07 UTC = 10:37 IST   07:37 UTC = 13:07 IST
+    # (GitHub delays scheduled runs most on those):
+    #   05:07 UTC = 10:37 IST   05:45 UTC = 11:15 IST   07:37 UTC = 13:07 IST
     #   10:07 UTC = 15:37 IST   12:37 UTC = 18:07 IST
     # A dropped tick is harmless - every run re-reads all brands from scratch.
     #
     # `concurrency` below (group without cancel-in-progress) keeps two runs
     # from overlapping if one is slow.
     - cron: "7 5 * * *"
+    - cron: "45 5 * * *"
     - cron: "37 7 * * *"
     - cron: "7 10 * * *"
     - cron: "37 12 * * *"

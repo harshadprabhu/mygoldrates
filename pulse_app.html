@@ -1102,25 +1102,26 @@ select.qci{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
       <button class="sp-no" id="spSureNo" type="button">No thanks, close</button>
     </div>
     <!-- After signing up: confirmation, then the optional mobile number. -->
+    <!-- Focused mobile-number step: the number is the only ask; sticky close
+         (x / Escape nudge first). The intent taps stay hidden here. -->
     <div class="sp-done" id="spDone" hidden>
       <div class="sp-tick">&#10003;</div>
-      <div class="sp-big">You&rsquo;re in!</div>
-      <p class="sp-sub" id="spDoneTxt">Your first email arrives tomorrow morning.</p>
+      <div class="sp-big">One last step &mdash; add your mobile</div>
+      <p class="sp-sub" id="spDoneTxt">We&rsquo;ll text you the cheapest rate the day it drops.</p>
+      <div class="sp-opt" id="spPhoneBox" style="border-color:rgba(240,208,128,.6);background:rgba(240,208,128,.1)">
+        <div class="sp-opt-t" style="font-size:14.5px">Your mobile number</div>
+        <div class="sp-opt-d">Get the cheapest rate by WhatsApp/SMS the moment it drops &mdash; faster than email. We never call or share your number.</div>
+        <input class="al-inp" id="spPhone" type="tel" placeholder="+91 mobile number" inputmode="tel" autocomplete="tel" maxlength="18">
+        <button class="al-btn al-btn-full" id="spPhoneSave" type="button">Save my number &amp; finish</button>
+        <div id="spPhoneStatus" style="font-size:12px;margin-top:6px;min-height:14px;text-align:center"></div>
+      </div>
       <!-- two optional taps: what they are buying for and when (save_intent) -->
-      <div class="sp-opt sp-iq">
+      <div class="sp-opt sp-iq" id="spIntent" hidden>
         <div class="sp-opt-t">Buying gold for? <span>(optional)</span></div>
         <div class="sp-iqc" data-k="p_buy_for"><button type="button" data-v="wedding">Wedding</button><button type="button" data-v="festival">Festival</button><button type="button" data-v="investment">Investment</button><button type="button" data-v="gift">Gift</button><button type="button" data-v="self">Myself</button></div>
         <div class="sp-opt-t" style="margin-top:10px">When?</div>
         <div class="sp-iqc" data-k="p_buy_when"><button type="button" data-v="this_month">This month</button><button type="button" data-v="3_months">In 3 months</button><button type="button" data-v="tracking">Just tracking</button></div>
       </div>
-      <div class="sp-opt">
-        <div class="sp-opt-t">Add your mobile number <span>(optional)</span></div>
-        <div class="sp-opt-d">For rate alerts by SMS or WhatsApp when we launch them. We never call or share it.</div>
-        <input class="al-inp" id="spPhone" type="tel" placeholder="+91 mobile number" inputmode="tel" autocomplete="tel" maxlength="18">
-        <button class="al-btn al-btn-full" id="spPhoneSave" type="button">Save my number</button>
-        <div id="spPhoneStatus" style="font-size:12px;margin-top:6px;min-height:14px;text-align:center"></div>
-      </div>
-      <button class="sp-no" id="spDoneClose" type="button">Done</button>
     </div>
   </div>
 </div>
@@ -3373,6 +3374,11 @@ function handleCredentialResponse(resp){
     if(!base||!key||!payload||!payload.email){
       return Promise.reject(new Error('subscribe not configured'));
     }
+    // Attach the visitor's network state/city (GR_GDATA, from /geo) when the
+    // signup carries none - so Google and homepage signups still get a
+    // location. A typed/GPS value already on the payload wins.
+    try{var gd=window.GR_GDATA||{};['state','city'].forEach(function(k){
+      if(!payload[k]&&gd[k])payload[k]=gd[k];});}catch(e){}
     return fetch(base+'/rest/v1/rpc/upsert_subscriber',{
       method:'POST',
       headers:{'Content-Type':'application/json',apikey:key,
@@ -3388,6 +3394,19 @@ function handleCredentialResponse(resp){
     });
   }
   window.GR_SAVE_SUBSCRIBER=saveSubscriber;
+
+  // Network state/city for signups (Cloudflare /geo; no IP stored). Fetched
+  // once on load into GR_GDATA so a Google or homepage signup that carries no
+  // city of its own still records the visitor's area for marketing. The
+  // device's own location, when given, still overrides it on the form.
+  (function(){try{
+    fetch(GEO_URL).then(function(r){return r.json();}).then(function(g){
+      if(!g||g.country!=='IN')return;
+      var d=window.GR_GDATA=window.GR_GDATA||{};
+      if(g.region&&!d.state)d.state=g.region;
+      if(g.city&&!d.city)d.city=g.city;
+    }).catch(function(){});
+  }catch(e){}})();
 
   // Sign-up funnel events, read by the private analytics dashboard. They
   // travel as click events with a "funnel:" target.
@@ -3506,8 +3525,23 @@ function handleCredentialResponse(resp){
   }
   // The first press of x (or Escape) shows what the visitor would miss,
   // with today's real price gap; the second, or "No thanks", closes.
+  // After signing up we ask for the mobile number and make it sticky: the
+  // first attempt to leave nudges them to add it; only the second closes.
+  var spPhoneSaved=false,spDoneNudged=false;
+  function doneClose(){
+    if(spPhoneSaved){closeSubPop(true);return;}
+    if(!spDoneNudged){
+      spDoneNudged=true;ev('phone_nudge');
+      var st=document.getElementById('spPhoneStatus');
+      if(st){st.style.color='#f0d080';st.textContent='Add your number to get instant WhatsApp/SMS alerts — it only takes a moment.';}
+      try{document.getElementById('spPhone').focus();}catch(_){}
+      var box=document.getElementById('spPhoneBox');if(box)box.style.boxShadow='0 0 0 2px rgba(240,208,128,.55)';
+      return;
+    }
+    closeSubPop(true);
+  }
   function tryClose(){
-    if(spStep==='done'){closeSubPop(true);return;}
+    if(spStep==='done'){doneClose();return;}
     if(spSureShown||!document.getElementById('spSure')){closeSubPop(false);return;}
     spSureShown=true;ev('sure_shown');
     if(SP_GAP22>=50){
@@ -3656,14 +3690,14 @@ function handleCredentialResponse(resp){
       if(!d){if(phSt){phSt.style.color='var(--rose)';phSt.textContent='Enter a valid 10-digit mobile number';}return;}
       phSave.disabled=true;
       saveSubscriber({email:spDoneEmail,phone:'+91'+d,signup_method:'popup'}).then(function(){
-        ev('mobile_added');
-        if(phSt){phSt.style.color='var(--mint)';phSt.textContent='✓ Saved';}
+        spPhoneSaved=true;ev('mobile_added');
+        if(phSt){phSt.style.color='var(--mint)';phSt.textContent='✓ Saved — you’re all set';}
         setTimeout(function(){closeSubPop(true)},1200);
       }).catch(function(){phSave.disabled=false;
         if(phSt){phSt.style.color='var(--rose)';phSt.textContent="Couldn't save that — try again.";}});
     });
     var dc=document.getElementById('spDoneClose');
-    if(dc)dc.addEventListener('click',function(){closeSubPop(true)});
+    if(dc)dc.addEventListener('click',doneClose);
     // buying for / when: saved to the subscriber's row as they tap
     [].forEach.call(document.querySelectorAll('.sp-iqc'),function(g){
       g.addEventListener('click',function(e){

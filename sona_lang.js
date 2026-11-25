@@ -383,6 +383,10 @@
       Object.keys(NAMES).forEach(function (k) { if (NAMES[k].indexOf(l) > -1) { c = k; at = i; } });
     });
     if (!c) return null;
+    // "Tamil Nadu" is the state, not a request to speak Tamil - let the answer
+    // engine match it as a place (other state names don't collide with a
+    // language name).
+    if (c === 'ta' && (ws[at + 1] || '').toLowerCase() === 'nadu') return null;
     // the name and the request words right around it ("in", "me batao", "speak")
     var rest = ws.filter(function (w, i) {
       return i !== at && !(Math.abs(i - at) <= 5 && FILL.indexOf(w.toLowerCase()) > -1);
