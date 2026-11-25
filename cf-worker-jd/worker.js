@@ -288,6 +288,7 @@ export default {
         case 'GET /jd/issue':     return wrap(await handleIssue(request, env));
         case 'POST /sub/confirm': return wrap(await handleSubConfirm(request, env));
         case 'POST /sub/google':  return wrap(await handleSubGoogle(request, env));
+        case 'POST /report/auth': return wrap(await handleReportAuth(request, env));
         case 'GET /page/manubhai': return wrap(await handlePage('manubhai', env));
         case 'POST /sona/understand': return wrap(await handleSonaUnderstand(request, env));
         case 'GET /geo':          return wrap(handleGeo(request));
@@ -1151,6 +1152,26 @@ async function handleSubGoogle(request, env) {
   const claimed = String(b.email || '').trim().toLowerCase();
   if (EMAIL_RE.test(claimed)) await sendConfirmation(env, claimed);
   return json({ ok: true, confirmed: false });
+}
+
+// ─── POST /report/auth ──────────────────────────────────────────────────
+// The private Customer-Trends report (owner, 25 Nov 2026). The /trends page
+// signs the owner in with Google and sends the credential here. We verify the
+// token the same way as sign-in, then check the address against an owner
+// allowlist kept in the Worker's own config (OWNER_EMAILS) - never in the
+// public repo. Only for an allowed owner do we hand back the analytics secret,
+// so the page can read the trends RPC without the secret ever sitting in a URL
+// or in the shipped code. Anyone else gets a flat refusal with no token.
+async function handleReportAuth(request, env) {
+  let b;
+  try { b = await request.json(); } catch { return json({ error: 'bad JSON' }, 400); }
+  const email = await googleEmail(env, String(b.credential || ''));
+  if (!email) return json({ ok: false }, 401);
+  const owners = String(env.OWNER_EMAILS || '').toLowerCase()
+    .split(/[,\s]+/).map((s) => s.trim()).filter(Boolean);
+  if (!owners.includes(email)) return json({ ok: false }, 403);
+  if (!env.ANALYTICS_TOKEN) return json({ ok: false, error: 'report not configured' }, 500);
+  return json({ ok: true, token: env.ANALYTICS_TOKEN, email });
 }
 
 // ─── jeweller rate pages ────────────────────────────────────────────────
