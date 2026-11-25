@@ -3374,6 +3374,11 @@ function handleCredentialResponse(resp){
     if(!base||!key||!payload||!payload.email){
       return Promise.reject(new Error('subscribe not configured'));
     }
+    // Attach the visitor's network state/city (GR_GDATA, from /geo) when the
+    // signup carries none - so Google and homepage signups still get a
+    // location. A typed/GPS value already on the payload wins.
+    try{var gd=window.GR_GDATA||{};['state','city'].forEach(function(k){
+      if(!payload[k]&&gd[k])payload[k]=gd[k];});}catch(e){}
     return fetch(base+'/rest/v1/rpc/upsert_subscriber',{
       method:'POST',
       headers:{'Content-Type':'application/json',apikey:key,
@@ -3389,6 +3394,19 @@ function handleCredentialResponse(resp){
     });
   }
   window.GR_SAVE_SUBSCRIBER=saveSubscriber;
+
+  // Network state/city for signups (Cloudflare /geo; no IP stored). Fetched
+  // once on load into GR_GDATA so a Google or homepage signup that carries no
+  // city of its own still records the visitor's area for marketing. The
+  // device's own location, when given, still overrides it on the form.
+  (function(){try{
+    fetch(GEO_URL).then(function(r){return r.json();}).then(function(g){
+      if(!g||g.country!=='IN')return;
+      var d=window.GR_GDATA=window.GR_GDATA||{};
+      if(g.region&&!d.state)d.state=g.region;
+      if(g.city&&!d.city)d.city=g.city;
+    }).catch(function(){});
+  }catch(e){}})();
 
   // Sign-up funnel events, read by the private analytics dashboard. They
   // travel as click events with a "funnel:" target.

@@ -1393,6 +1393,63 @@
     });
   }
 
+  // ---- intent capture for a signed-in visitor (for marketing segments) ----
+  // A logged-in subscriber's email lets us record, against their own row, what
+  // they keep asking about and what they are shopping for - so a campaign can
+  // reach, say, everyone buying for a wedding this month. All of it goes only
+  // to that subscriber's own row through save_intent (DPDP-safe); nothing is
+  // captured for a visitor who is not signed in.
+  function loggedEmail() {
+    try { var u = JSON.parse(localStorage.getItem('gr_user') || 'null');
+      return (u && u.email) ? String(u.email).toLowerCase() : null; } catch (_) { return null; }
+  }
+  var BUY_FOR_W = {
+    wedding: ['wedding', 'shaadi', 'shadi', 'marriage', 'married', 'bride', 'groom', 'vivah', 'lagna', 'dulhan', 'dulha', 'sagai', 'engagement'],
+    festival: ['festival', 'diwali', 'deepavali', 'dhanteras', 'akshaya', 'navratri', 'navaratri', 'pongal', 'onam', 'ugadi', 'gudi', 'raksha bandhan', 'rakhi', 'teej', 'karwa'],
+    investment: ['investment', 'invest', 'savings', 'saving', 'returns', 'portfolio', 'hedge', 'long term', 'long-term'],
+    gift: ['gift', 'gifting', 'present', 'anniversary', 'birthday', 'for my wife', 'for my mother', 'for my sister', 'for my daughter', 'for her'],
+    self: ['for myself', 'for me', 'my own', 'personal use', 'for self']
+  };
+  function buyForIn(tx) {
+    for (var k in BUY_FOR_W) for (var i = 0; i < BUY_FOR_W[k].length; i++)
+      if (tx.indexOf(BUY_FOR_W[k][i]) > -1) return k;
+    return null;
+  }
+  function buyWhenIn(tx) {
+    if (/\b(this month|right now|today|soon|urgent|immediately|next week|abhi|aaj)\b/.test(tx)) return 'this_month';
+    if (/\b(next month|few months|3 months|three months|couple of months|teen mahine)\b/.test(tx)) return '3_months';
+    if (/\b(just checking|just looking|browsing|tracking|watching|planning|later|someday|no hurry)\b/.test(tx)) return 'tracking';
+    return null;
+  }
+  // Called after every answer: records the signed-in visitor's interest
+  // (brand/city/karat, plus the categories and topics they ask about, which
+  // accumulate) and any buying reason/timing stated in plain words.
+  function captureIntent(q, a) {
+    var em = loggedEmail(); if (!em || !SB || !KEY) return;
+    var ctx = ctxOf(q), prof = {};
+    if (ctx.brand) prof.brand = ctx.brand;
+    if (ctx.city) prof.city = ctx.city;
+    if (ctx.karat) prof.karat = ctx.karat;
+    if (ctx.cat) prof['cat_' + ctx.cat] = 1;
+    if (a && a.intent) prof['ask_' + a.intent] = 1;
+    var arg = { p_email: em, p_interest: prof };
+    var tx = norm(q), bf = buyForIn(tx), bw = buyWhenIn(tx);
+    if (bf) arg.p_buy_for = bf;
+    if (bw) arg.p_buy_when = bw;
+    rpc('save_intent', arg).catch(function () {});
+  }
+  // A signed-in visitor who never set an alert is still asked, once a session,
+  // what they are shopping for (the same two taps as the alert flow).
+  var intentAsked = false;
+  function maybeAskIntent(intent) {
+    if (intentAsked || !ALERT_FOR[intent]) return;
+    var em = loggedEmail(); if (!em || !SB || !KEY) return;
+    try { if (sessionStorage.getItem('gr_iq') === '1') return; } catch (_) {}
+    intentAsked = true;
+    try { sessionStorage.setItem('gr_iq', '1'); } catch (_) {}
+    intentAsk(em);
+  }
+
   function ask(q, label) {
     q = String(q || '').trim(); if (!q) return;
     var spoken = voiceQ; voiceQ = false;
@@ -1431,8 +1488,11 @@
             p_answer: (a.say || String(a.html || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim().slice(0, 600) })
             .then(function (id) { if (id) $('.sn-fb', m).setAttribute('data-id', id); });
           track(ok ? 'answered' : 'unanswered');
+          if (ok) captureIntent(q, a);     // record a signed-in visitor's interest/intent
           if (spoken || ttsOn) speak(a.say, m._sl, m, spoken ? resume : null);
-          if (ok) setTimeout(function () { alertCard(a.intent, q); }, 900);
+          // a not-yet-subscribed visitor is offered an alert; a signed-in one
+          // (no alert to offer) is asked, once a session, what they shop for
+          if (ok) setTimeout(function () { if (!alertCard(a.intent, q)) maybeAskIntent(a.intent); }, 900);
         }, 350 + Math.min(600, a.html.length / 6));
       });
       });
