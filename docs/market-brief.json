@@ -931,14 +931,14 @@
   "2026-11-26": {
    "date": "2026-11-26",
    "paragraphs": [
-    "International gold is at $3,558 an ounce (+0.78% since 25 Nov), the rupee at ₹92.93 to the dollar, and the Indian jeweller board median at ₹12,480/g for 24K (+0.79%). In rupee terms the move came mostly from the world gold price (+0.78% gold, +0.00% USD/INR).",
+    "International gold is at $3,558 an ounce (+0.79% since 25 Nov), the rupee at ₹92.93 to the dollar, and the Indian jeweller board median at ₹12,480/g for 24K (+0.79%). In rupee terms the move came mostly from the world gold price (+0.79% gold, +0.00% USD/INR).",
     "No clear theme in today's gold headlines.",
     "High-impact US data due this week: Core PCE Price Index m/m, Prelim GDP q/q. Gold often moves sharply around these releases; which way is not knowable in advance.",
     "For buyers: the gap between the cheapest and dearest jeweller on our board is ₹655/g today, and making charges usually differ by more than a day's price move. Compare the <a href=\"https://mygoldrates.com/\">live rates</a> and the <a href=\"https://mygoldrates.com/making-charges-comparison\">making charges</a> before you buy."
    ],
    "snap": {
     "board24": 12480.0,
-    "gold_usd": 3557.800049,
+    "gold_usd": 3558.25,
     "usdinr": 92.925233
    },
    "summary": "gold +0.8%",
