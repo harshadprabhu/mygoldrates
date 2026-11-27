@@ -981,6 +981,33 @@
     "rates": 6,
     "safe_haven": 1
    }
+  },
+  "2026-11-28": {
+   "date": "2026-11-28",
+   "paragraphs": [
+    "International gold is at $3,642 an ounce (+0.31% since 27 Nov), the rupee at ₹92.52 to the dollar, and the Indian jeweller board median at ₹12,840/g for 24K (+0.00%). In rupee terms the move came mostly from the world gold price (+0.31% gold, +0.00% USD/INR).",
+    "What the world's gold news is about today: US interest rates (8 headlines), Indian demand (4 headlines), Investment flows (ETFs) (3 headlines), Records and profit-taking (2 headlines).",
+    "<strong>US interest rates.</strong> Gold pays no interest, so expectations of lower US rates tend to support it and higher rates tend to weigh on it. In the news: <a href=\"https://news.google.com/rss/articles/CBMiowFBVV95cUxOenl3bWdWdW1zR3dsZXFHTWhtaHhrRjNEZWhVemRHNi02THlSM1N0VzZ3VmJId29yRThqakZXNm5fSzYxVnNZVjFjSDRFcTlIS2FldHB6SkZGMWh6NlgzRHExc2p6Zy1ra1dTZi1CMi1uSm5pR0VaaDRkZ21qaUZwY2tKM3JoYWRZTUJ0aTJ6b05GSHdHMFpSa2hKWFNWSTVGWVMw?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold bulls finally catch their breath! Gold prices stage a strong 3% rebound from their lowest level in over a year, but the shadow of interest rate hikes has yet to dissipate.</a> (Moomoo); <a href=\"https://news.google.com/rss/articles/CBMilAFBVV95cUxOYW55b1BZTkM4emFaZmljMEIzZlBhd2duLWJnRlpMaVA1UnBMaXpEQTdYU0JQUF93QWRkMEV0ZHlaUFhJM3JwTkVLSFNQcDhJSW43VEJ3ME9uQmVvaXpaVkV6eG1CWnBISXFncTVTQjI0NElBcUZDTXlNZEw0S0RCSGxFa25EX29sYzJVZHJmREFnckNW?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Gold pares gains as Fed-hike risks linger, eyes first weekly rise in three weeks</a> (Reuters).",
+    "<strong>Indian demand.</strong> Festival and wedding buying, and import costs, move local premiums and the price on the jeweller board. In the news: <a href=\"https://news.google.com/rss/articles/CBMi0AFBVV95cUxQYktRYzEwNmxsejhFRFdKcWtQRTFZUF9URzFrcjlhTGdONG1aaDBPelNzekNXcVpwRXM4YlQ0LWoxY0RMcGFTbzE2STJybDZ4N200NWsxQXliNkJEaUkyWlZpdUJtZm04UnFsc1d1U2diQU5XdEdEN0NkNkQ2emhpVGxBcDVwaXJUMlZGcXp5R3I5cEpicnYxam9sTm1mcTNWT0E0SklrQkM3QjBDSXctMW03bmNxcVFmekpsSHp5TG1XVDYyN3VhSkh2akpvakJQ?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Soaring gold imports bolster Hong Kong’s push to become a global bullion hub</a> (South China Morning Post); <a href=\"https://news.google.com/rss/articles/CBMikwFBVV95cUxQeVpSdWt5VGhvcjhDMzFNS3VhdkZJY3ZuVlRQYlRXUVV4ZkQtLUNGbjB6UGdxbTM5Y1gtWktpbE1xck1UdXpWam9yQkVEU0lDdGJuT2p6VWZZbUszUmlPTjI4dmR1MGJjcFZWMnA5a3ZiWDlLbFJYSlotQkpTZllfQklKMnlUYW1BeGlBWkEzcTZqdG8?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Bangladesh jewellers raise gold prices again as local refined gold costs climb</a> (Traders Union).",
+    "<strong>Investment flows (ETFs).</strong> Money moving into or out of gold funds shows what investors are doing with their own cash. In the news: <a href=\"https://news.google.com/rss/articles/CBMiZEFVX3lxTE11ZlpvQ1lNU1ZlTVlrWnpDV2ktSjc2UUFBelhYSnpBbjZxMGhFdmpSenNvaGQ0bUd4bmlxUHctSXlGcEpqZXh1cGdWZ25rMUxCRjFNUWJOYkZ6WnpwNkcxQUc0RVg?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Betashares Gold Bullion Currency Hedged ETF (QAU.AX) Seasonal Returns Chart - Yahoo Finance</a> (Yahoo! Finance Canada); <a href=\"https://news.google.com/rss/articles/CBMiiAFBVV95cUxNLVZWbnk5cXZFVmphVXlXMUN0NWFac0ppeWhKYUNKaXBnV3Y1MW5JVTBJaVk0aHhsdk9vNUJWT1NHQlJLZDBJZ1kxdGJhX1labzJhNnpyaHA4SFFLM1RCMTB4WXpqZFIxMEkyWXpGRW1wblVxMFEtaFl1UFM0aFh2LW1UM0JYWTNC?oc=5\" rel=\"nofollow noopener\" target=\"_blank\">Investors buy the dip as gold price drop spurs ETF inflows</a> (Mining.com.au).",
+    "High-impact US data due this week: Core PCE Price Index m/m, Prelim GDP q/q. Gold often moves sharply around these releases; which way is not knowable in advance.",
+    "For buyers: the gap between the cheapest and dearest jeweller on our board is ₹742/g today, and making charges usually differ by more than a day's price move. Compare the <a href=\"https://mygoldrates.com/\">live rates</a> and the <a href=\"https://mygoldrates.com/making-charges-comparison\">making charges</a> before you buy."
+   ],
+   "snap": {
+    "board24": 12840.0,
+    "gold_usd": 3642.0,
+    "usdinr": 92.520426
+   },
+   "summary": "gold +0.3%, news led by us interest rates",
+   "themes": {
+    "central_banks": 1,
+    "dollar": 1,
+    "india_demand": 4,
+    "investment": 3,
+    "momentum": 2,
+    "rates": 8,
+    "safe_haven": 1
+   }
   }
  }
 }
