@@ -1373,6 +1373,40 @@
     });
     return m;
   }
+  // A plain sign-up offer in Sona, for a question where no price-drop alert
+  // fits (or no 22K low is known). Shown once a session to a visitor who is not
+  // already subscribed; saved through the site's own subscriber save, exactly
+  // like the pop-up (signup_method 'sona'), and then the shop-for question.
+  function signupCard(q) {
+    if (alertShown || subscribed() || !SB || !KEY) return null;
+    alertShown = true;
+    var ctx = ctxOf(q || '');
+    var m = bubble('<div class="sn-al"><p>' + t('su_h') + '</p>' +
+      '<form class="sn-alf"><input type="email" required autocomplete="email" placeholder="' + esc(t('al_ph')) + '" aria-label="' + esc(t('al_ph')) + '">' +
+      '<button type="submit">' + esc(t('su_btn')) + '</button></form>' +
+      '<p class="sn-dim">' + t('al_consent') + ' <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>' +
+      '<p class="sn-alm" role="status"></p></div>');
+    var f = $('.sn-alf', m), msg = $('.sn-alm', m);
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var em = $('input', f).value.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { msg.textContent = t('al_bad'); return; }
+      $('button', f).disabled = true; msg.textContent = '';
+      var c = ctx.city && KB.cities.filter(function (x) { return x.n === ctx.city; })[0];
+      var sub = { email: em, city: c ? c.n : null, signup_method: 'sona', offers_optin: true };
+      (window.GR_SAVE ? Promise.resolve(window.GR_SAVE(sub)).catch(function () { return null; })
+                      : rpc('upsert_subscriber', { payload: sub }))
+        .then(function () {
+          try { localStorage.setItem('gr_sub', '1'); localStorage.setItem('gr_user', JSON.stringify({ email: em })); } catch (_) {}
+          track('signup_sona');
+          f.remove(); msg.textContent = t('su_ok');
+          if (Object.keys(ctx).length) rpc('save_intent', { p_email: em, p_interest: ctx, p_consent: t('al_consent') }).catch(function () {});
+          intentAsk(em);
+        })
+        .catch(function () { $('button', f).disabled = false; msg.textContent = t('al_err'); });
+    });
+    return m;
+  }
   function intentAsk(em) {
     var step = function (title, opts, key, next) {
       var m = bubble('<p>' + t(title) + '</p><div class="sn-alc">' + opts.map(function (o) {
@@ -1490,9 +1524,11 @@
           track(ok ? 'answered' : 'unanswered');
           if (ok) captureIntent(q, a);     // record a signed-in visitor's interest/intent
           if (spoken || ttsOn) speak(a.say, m._sl, m, spoken ? resume : null);
-          // a not-yet-subscribed visitor is offered an alert; a signed-in one
-          // (no alert to offer) is asked, once a session, what they shop for
-          if (ok) setTimeout(function () { if (!alertCard(a.intent, q)) maybeAskIntent(a.intent); }, 900);
+          // After a helpful answer, a not-yet-subscribed visitor is invited to
+          // sign up once a session: the price-drop alert on a rate question, else
+          // a plain e-mail sign-up. A signed-in visitor is instead asked, once a
+          // session, what they shop for.
+          if (ok) setTimeout(function () { if (!alertCard(a.intent, q) && !signupCard(q)) maybeAskIntent(a.intent); }, 900);
         }, 350 + Math.min(600, a.html.length / 6));
       });
       });
