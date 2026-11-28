@@ -76,12 +76,12 @@
 "lm": "2026-11-28T11:11:48+05:30"
 },
 "gold-market-today": {
-"h": "41674751c1056e40",
-"lm": "2026-11-28T14:11:38+05:30"
+"h": "4ebe18fa7567f228",
+"lm": "2026-11-28T14:40:42+05:30"
 },
 "gold-offers-today": {
-"h": "0ff874504fa530a9",
-"lm": "2026-11-28T13:10:48+05:30"
+"h": "f690f39f59e06866",
+"lm": "2026-11-28T14:40:42+05:30"
 },
 "gold-price-gap-report": {
 "h": "b082d969917859f2",
@@ -424,8 +424,8 @@
 "lm": "2026-11-28T01:06:29+05:30"
 },
 "joyalukkas-vs-senco-gold-rate-today": {
-"h": "244d86a6084195e7",
-"lm": "2026-11-28T13:10:48+05:30"
+"h": "5e56bd7a0b52f407",
+"lm": "2026-11-28T14:40:42+05:30"
 },
 "kalyan-jewellers-gold-rate-today": {
 "h": "abca9a5c7fc8207b",
@@ -436,8 +436,8 @@
 "lm": "2026-11-28T01:06:29+05:30"
 },
 "kalyan-jewellers-vs-joyalukkas-gold-rate-today": {
-"h": "2a2e1ccf199cbbe7",
-"lm": "2026-11-28T10:40:59+05:30"
+"h": "a712863d6009a31d",
+"lm": "2026-11-28T14:40:42+05:30"
 },
 "kalyan-jewellers-vs-malabar-gold-rate-today": {
 "h": "f3b815c134abb83f",
@@ -504,8 +504,8 @@
 "lm": "2026-11-28T01:06:29+05:30"
 },
 "malabar-vs-joyalukkas-gold-rate-today": {
-"h": "496625d78f9389ff",
-"lm": "2026-11-28T10:40:59+05:30"
+"h": "aa8e2e4ab509163c",
+"lm": "2026-11-28T14:40:42+05:30"
 },
 "malabar-vs-senco-gold-rate-today": {
 "h": "24bd10a919c097ae",
@@ -532,8 +532,8 @@
 "lm": "2026-11-28T12:11:09+05:30"
 },
 "news": {
-"h": "486e710a536116c5",
-"lm": "2026-11-28T14:11:38+05:30"
+"h": "29ede1503b387974",
+"lm": "2026-11-28T14:40:42+05:30"
 },
 "orra-gold-rate-today": {
 "h": "37450a5b6e429305",
@@ -584,8 +584,8 @@
 "lm": "2026-11-28T01:06:29+05:30"
 },
 "tanishq-vs-joyalukkas-gold-rate-today": {
-"h": "63524266947c25be",
-"lm": "2026-11-28T11:41:47+05:30"
+"h": "3f60cdb45275b174",
+"lm": "2026-11-28T14:40:42+05:30"
 },
 "tanishq-vs-kalyan-jewellers-gold-rate-today": {
 "h": "f72edb0a4f7611c7",
